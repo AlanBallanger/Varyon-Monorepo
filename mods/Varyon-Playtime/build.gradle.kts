@@ -15,8 +15,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.jetbrains.annotations)
-    compileOnly(libs.jspecify)
+    compileOnly("org.jetbrains:annotations:24.1.0")
+    compileOnly("org.jspecify:jspecify:0.3.0")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
     implementation("com.google.code.gson:gson:2.10.1")
