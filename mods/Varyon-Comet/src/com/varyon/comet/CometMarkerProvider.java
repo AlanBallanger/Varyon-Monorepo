@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.worldmap.WorldMapManager;
 import com.hypixel.hytale.server.core.universe.world.worldmap.markers.MarkersCollector;
+import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
 
@@ -74,7 +75,7 @@ public class CometMarkerProvider implements WorldMapManager.MarkerProvider {
                 }
                 
                 // Convert block position to world position (center of block)
-                Vector3d markerPos = blockPos.toVector3d();
+                Vector3d markerPos = VecUtil.toJoml(blockPos.toVector3d());
                 
                 // Create marker ID (unique per comet position)
                 String markerId = "Comet-" + blockPos.x + "," + blockPos.y + "," + blockPos.z;

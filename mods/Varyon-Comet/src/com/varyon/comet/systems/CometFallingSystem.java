@@ -12,6 +12,7 @@ import com.varyon.comet.wave.*;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.query.Query;
+import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
@@ -174,7 +175,7 @@ public class CometFallingSystem {
                                 continue;
                             }
 
-                            Vector3d position = transform.getPosition();
+                            Vector3d position = VecUtil.toJoml(transform.getPosition());
                             Double spawnY = projectileSpawnY.get(entityUUID);
                             Long spawnTime = projectileSpawnTime.get(entityUUID);
 
@@ -375,7 +376,7 @@ public class CometFallingSystem {
             if (commandBuffer == null) return;
 
             Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
-                    .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, spawnPos, direction);
+                    .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, VecUtil.toHytale(spawnPos), VecUtil.toHytale(direction));
 
             if (projectileRef != null) {
                 trackProjectile(projectileUUID, targetBlockPos, spawnPos.y, tier, themeId, ownerUUID, zoneId);

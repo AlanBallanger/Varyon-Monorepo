@@ -13,6 +13,7 @@ import com.varyon.comet.wave.*;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import com.hypixel.hytale.math.vector.Vector3i;
@@ -507,7 +508,7 @@ public class CometWaveManager {
 
         try {
             Pair<Ref<EntityStore>, com.hypixel.hytale.server.core.universe.world.npc.INonPlayerCharacter> result = npcPlugin
-                    .spawnNPC(store, npcType, null, spawnPos, rotation);
+                    .spawnNPC(store, npcType, null, VecUtil.toHytale(spawnPos), VecUtil.toHytale(rotation));
 
             if (result != null && result.first() != null) {
                 // Optional per-mob/boss multipliers from cometMobs (MobEntry/BossEntry)

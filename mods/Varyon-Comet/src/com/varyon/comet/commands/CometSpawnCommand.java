@@ -12,6 +12,7 @@ import com.varyon.comet.wave.*;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.Message;
@@ -135,7 +136,7 @@ public class CometSpawnCommand extends AbstractWorldCommand {
                 context.sendMessage(Message.raw("Error: Could not get player position!"));
                 return;
             }
-            Vector3d playerPos = transform.getPosition();
+            Vector3d playerPos = VecUtil.toJoml(transform.getPosition());
             int varyonRing = VaryonZoneResolver.resolveVaryonRing(player);
             int ringForWave = varyonRing > 0 ? varyonRing : 1;
 
@@ -257,8 +258,8 @@ public class CometSpawnCommand extends AbstractWorldCommand {
             try {
                 com.hypixel.hytale.component.Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule
                         .get()
-                        .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, spawnPos,
-                                direction);
+                        .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, VecUtil.toHytale(spawnPos),
+                                VecUtil.toHytale(direction));
 
                 if (projectileRef != null) {
                     fallingSystem.trackProjectile(projectileUUID, targetBlockPos, spawnPos.y, finalTier, themeId,

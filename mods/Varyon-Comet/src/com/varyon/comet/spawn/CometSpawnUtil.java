@@ -9,6 +9,7 @@ import com.varyon.comet.wave.WaveThemeProvider;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.shape.Box;
 import com.hypixel.hytale.math.util.ChunkUtil;
+import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
@@ -146,7 +147,7 @@ public final class CometSpawnUtil {
             try {
                 String explosionSystemId = getExplosionParticleSystemForPlacedBlock(tier);
                 com.hypixel.hytale.server.core.universe.world.ParticleUtil.spawnParticleEffect(
-                        explosionSystemId, blockCenter, store);
+                        explosionSystemId, VecUtil.toHytale(blockCenter), store);
             } catch (Exception e) {
                 LOGGER.warning("Failed to spawn explosion particle system: " + e.getMessage());
             }
@@ -232,7 +233,7 @@ public final class CometSpawnUtil {
             CollisionModule cm = CollisionModule.get();
             if (cm == null || cm.isDisabled()) return true; // fallback: allow
             CollisionResult res = new CollisionResult();
-            int v = cm.validatePosition(world, DEFAULT_NPC_BOX, new Vector3d(x, y, z), res);
+            int v = cm.validatePosition(world, DEFAULT_NPC_BOX, new com.hypixel.hytale.math.vector.Vector3d(x, y, z), res);
             return v != -1;
         } catch (Exception e) {
             return false;
