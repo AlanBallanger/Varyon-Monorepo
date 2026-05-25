@@ -1,7 +1,7 @@
 package fr.varyon.playermarker;
 
 import com.hypixel.hytale.math.vector.Transform;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3f;
 import com.hypixel.hytale.protocol.FormattedMessage;
 import com.hypixel.hytale.protocol.packets.worldmap.MapMarker;
 import com.hypixel.hytale.protocol.packets.worldmap.PlayerMarkerComponent;

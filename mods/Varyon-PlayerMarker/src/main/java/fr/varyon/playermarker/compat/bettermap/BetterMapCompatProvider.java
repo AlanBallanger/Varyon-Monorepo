@@ -1,10 +1,9 @@
 package fr.varyon.playermarker;
 
 import com.hypixel.hytale.math.vector.Transform;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.protocol.packets.worldmap.MapMarker;
-import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -30,7 +29,7 @@ final class BetterMapCompatProvider implements WorldMapManager.MarkerProvider {
         }
 
         PlayerMarkerProviderContext context = PlayerMarkerProviderContext.resolve(viewer);
-        UUID viewerUuid = ((CommandSender) viewer).getUuid();
+        UUID viewerUuid = viewer.getUuid();
         if (!context.isSurfaceEnabled()) {
             return;
         }

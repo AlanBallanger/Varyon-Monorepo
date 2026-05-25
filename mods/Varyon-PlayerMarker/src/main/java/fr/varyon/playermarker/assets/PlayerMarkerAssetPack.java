@@ -22,7 +22,7 @@ final class PlayerMarkerAssetPack {
     private static final String PACK_GROUP = "Varyon";
     private static final String PACK_NAME = "Varyon-PlayerMarkerAssets";
     private static final String PACK_VERSION = "1.0.0";
-    private static final String TARGET_SERVER_VERSION = "2026.03.26-89796e57b";
+    private static final String TARGET_SERVER_VERSION = ">=0.5.0-pre.9 <0.6.0";
     private static final String FALLBACK_MARKER_IMAGE = "vpm-placeholder.png";
     private static final String MARKER_ASSET_PREFIX = "UI/WorldMap/MapMarkers/";
     private static final String WORLDMAP_ASSET_PREFIX = "UI/WorldMap/";
@@ -40,7 +40,7 @@ final class PlayerMarkerAssetPack {
                   "Name": "Varyon"
                 }
               ],
-              "ServerVersion": "2026.03.26-89796e57b",
+              "ServerVersion": ">=0.5.0-pre.9 <0.6.0",
               "Dependencies": {},
               "OptionalDependencies": {},
               "DisabledByDefault": false,

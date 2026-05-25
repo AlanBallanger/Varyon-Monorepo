@@ -1,8 +1,8 @@
 package fr.varyon.playermarker;
 
 import com.hypixel.hytale.math.vector.Transform;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.protocol.Direction;
 import com.hypixel.hytale.protocol.Position;
 import com.hypixel.hytale.protocol.packets.player.ClientMovement;

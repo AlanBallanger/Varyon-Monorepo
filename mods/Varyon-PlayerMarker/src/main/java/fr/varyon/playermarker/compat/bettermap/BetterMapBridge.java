@@ -1,7 +1,6 @@
 package fr.varyon.playermarker;
 
 import com.hypixel.hytale.protocol.packets.worldmap.MapMarker;
-import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 
 import java.lang.reflect.Method;
@@ -34,7 +33,7 @@ final class BetterMapBridge {
                 return ViewerSettings.disabled();
             }
 
-            UUID viewerUuid = ((CommandSender) viewer).getUuid();
+            UUID viewerUuid = viewer.getUuid();
             Object playerConfig = null;
             if (viewerUuid != null) {
                 Object playerConfigManager = state.playerConfigManagerGetInstance.invoke(null);

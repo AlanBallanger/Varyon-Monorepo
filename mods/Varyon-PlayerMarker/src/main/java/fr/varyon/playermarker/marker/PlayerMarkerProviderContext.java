@@ -1,6 +1,5 @@
 package fr.varyon.playermarker;
 
-import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
@@ -16,7 +15,7 @@ record PlayerMarkerProviderContext(VaryonPlayerMarkerPlugin plugin,
     static PlayerMarkerProviderContext resolve(Player viewer) {
         VaryonPlayerMarkerPlugin plugin = VaryonPlayerMarkerPlugin.getInstance();
         PlayerMarkerConfig config = VaryonPlayerMarkerPlugin.getConfig();
-        UUID viewerUuid = viewer != null ? ((CommandSender) viewer).getUuid() : null;
+        UUID viewerUuid = viewer != null ? viewer.getUuid() : null;
         PlayerRef viewerRef = plugin != null ? plugin.getActivePlayerRef(viewerUuid) : null;
         if (plugin != null && plugin.getAvatarService() != null && viewerRef != null) {
             plugin.getAvatarService().advanceViewerDeliveryPhase(viewerRef);
