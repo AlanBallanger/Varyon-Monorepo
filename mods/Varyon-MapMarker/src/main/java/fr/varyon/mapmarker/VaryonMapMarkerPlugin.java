@@ -3,7 +3,7 @@ package fr.varyon.mapmarker;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
+import org.joml.Vector3d;
 import com.hypixel.hytale.protocol.packets.setup.RequestCommonAssetsRebuild;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -269,7 +269,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             sender.sendMessage(Message.raw("Erreur : tu n'es dans aucun monde actif."));
             return;
         }
-        PlayerRef playerRef = findPlayerRef(world, sender.getDisplayName(), sender);
+        PlayerRef playerRef = findPlayerRef(world, sender.getUsername(), sender);
         if (playerRef == null) {
             debug(
                     "createSharedMarkerFromPlayer annulé : PlayerRef introuvable monde=%s image=%s nom=%s",
@@ -293,7 +293,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         }
         pushMapMarkerPngToAllOnlinePlayers(fileName);
         requestClientsRebuildCommonAssets();
-        debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), sender.getDisplayName(), fileName, markerName);
+        debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), sender.getUsername(), fileName, markerName);
         Vector3d position = playerRef.getTransform().getPosition();
         UUID playerUuid = playerRef.getUuid();
         String displayName = playerRef.getUsername();

@@ -2,8 +2,8 @@ package fr.varyon.mapmarker.commands;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
@@ -29,7 +29,6 @@ public final class TeleportMarkerSubCommand extends AbstractPlayerCommand {
 
     public TeleportMarkerSubCommand() {
         super("tp", "Te téléporter au X/Z d’un marqueur du monde courant (hauteur adaptée au terrain)");
-        setPermissionGroup(null);
     }
 
     @Override
