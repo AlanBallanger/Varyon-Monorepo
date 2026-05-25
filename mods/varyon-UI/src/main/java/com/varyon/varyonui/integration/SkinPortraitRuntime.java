@@ -2,6 +2,7 @@ package com.varyon.varyonui.integration;
 
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.server.core.asset.AssetModule;
+import com.hypixel.hytale.server.core.asset.PackSource;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetModule;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetRegistry;
 import com.hypixel.hytale.server.core.asset.common.asset.FileCommonAsset;
@@ -60,7 +61,7 @@ final class SkinPortraitRuntime {
                     return;
                 }
                 if (am.getAssetPack(id) == null) {
-                    am.registerPack(id, root, sub, true);
+                    am.registerPack(id, root, sub, PackSource.PLUGIN);
                     am.initPendingStores();
                 }
                 portraitPackId = id;

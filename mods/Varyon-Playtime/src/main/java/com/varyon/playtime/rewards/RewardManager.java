@@ -88,7 +88,7 @@ public class RewardManager {
 
                         CommandSender consoleSender = new CommandSender() {
                             @Override
-                            public String getDisplayName() {
+                            public String getUsername() {
                                 return "Console";
                             }
 

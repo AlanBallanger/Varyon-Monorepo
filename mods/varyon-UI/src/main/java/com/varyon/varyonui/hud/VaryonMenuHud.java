@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 
 public class VaryonMenuHud extends CustomUIHud {
 
+    public static final String HUD_KEY = "varyon_menu_hud";
+
     private static final Logger LOGGER = Logger.getLogger("VaryonMenuHud");
 
     private static final int PNG_W = 189;
@@ -53,18 +55,21 @@ public class VaryonMenuHud extends CustomUIHud {
         UUID uuid = playerRef.getUuid();
         if (uuid != null
                 && AccueilShortcutConfig.getInstance().getMode(uuid) == AccueilShortcutConfig.Mode.DISABLE) {
-            hudManager.setCustomHud(playerRef, null);
+            hudManager.removeCustomHud(playerRef, HUD_KEY);
             return;
         }
-        hudManager.setCustomHud(playerRef, new VaryonMenuHud(playerRef));
+        hudManager.addCustomHud(playerRef, new VaryonMenuHud(playerRef));
     }
 
     private final PlayerRef hudPlayer;
 
     public VaryonMenuHud(@Nonnull PlayerRef playerRef) {
-        super(playerRef);
+        super(playerRef, HUD_KEY);
         this.hudPlayer = playerRef;
     }
+
+    @Override
+    public void onRemove() {}
 
     @Override
     protected void build(@Nonnull UICommandBuilder builder) {

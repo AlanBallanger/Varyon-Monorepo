@@ -55,7 +55,6 @@ public class TestOresCommand extends AbstractAsyncCommand {
     
     public TestOresCommand() {
         super("jobstest", "Generate ore wall for testing (debug only)");
-        this.setPermissionGroup(null); // OP only
     }
     
     @NonNullDecl

@@ -39,8 +39,6 @@ public class EcoAdminCommand extends AbstractAsyncCommand {
     public EcoAdminCommand() {
         super("eco", "Economy administration commands");
         this.addAliases("economy", "ecoadmin");
-        this.setPermissionGroup(null); // Admin only - requires ecotale.ecotale.command.eco permission
-        
         this.addSubCommand(new EcoSetCommand());
         this.addSubCommand(new EcoGiveCommand());
         this.addSubCommand(new EcoTakeCommand());
