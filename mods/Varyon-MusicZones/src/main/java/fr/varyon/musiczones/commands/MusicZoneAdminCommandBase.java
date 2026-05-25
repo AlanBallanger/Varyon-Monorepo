@@ -8,7 +8,6 @@ public abstract class MusicZoneAdminCommandBase extends CommandBase {
 
     protected MusicZoneAdminCommandBase(String name, String description) {
         super(name, description);
-        setPermissionGroup(null);
     }
 
     protected static boolean isMusicZoneAdmin(CommandContext context) {

@@ -3,6 +3,7 @@ package fr.varyon.musiczones;
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.AssetModule;
+import com.hypixel.hytale.server.core.asset.PackSource;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 
 import java.io.IOException;
@@ -75,7 +76,7 @@ final class ZoneMusicAssetGenerator {
             if (pm != null && pm.getVersion() != null) {
                 m.setVersion(pm.getVersion());
             }
-            am.registerPack(PACK_ID, packRoot, m, true);
+            am.registerPack(PACK_ID, packRoot, m, PackSource.PLUGIN);
             am.initPendingStores();
             LOGGER.atInfo().log("[MusicZones] Pack enregistré, zones=" + zones.size());
         }
