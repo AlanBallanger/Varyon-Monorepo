@@ -12,6 +12,9 @@ repositories {
     maven("https://maven.hytale-modding.info/releases") {
         name = "HytaleModdingReleases"
     }
+    maven("https://maven.hytale-modding.info/pre-release") {
+        name = "HytaleModdingPreRelease"
+    }
     maven("https://oss.sonatype.org/content/repositories/snapshots/") {
         name = "SonatypeSnapshots"
     }
@@ -66,9 +69,7 @@ hytale {
     //
     // addAssetsDependency = true
 
-    // uncomment if you want to develop your mod against the pre-release version of the game.
-    //
-    // updateChannel = "pre-release"
+    updateChannel = "pre-release"
 }
 
 java {

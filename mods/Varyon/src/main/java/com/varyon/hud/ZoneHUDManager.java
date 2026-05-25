@@ -146,7 +146,7 @@ public class ZoneHUDManager {
         playerCache.put(playerId, player);
 
         try {
-            player.getHudManager().setCustomHud(playerRef, hud);
+            player.getHudManager().addCustomHud(playerRef, hud);
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("Failed to register HUD: " + e.getMessage());
         }
@@ -163,7 +163,7 @@ public class ZoneHUDManager {
         try {
             PlayerRef playerRef = Universe.get().getPlayer(player.getUuid());
             if (playerRef != null) {
-                player.getHudManager().setCustomHud(playerRef, null);
+                player.getHudManager().removeCustomHud(playerRef, ZoneHUD.HUD_KEY);
             }
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("Failed to remove HUD: " + e.getMessage());

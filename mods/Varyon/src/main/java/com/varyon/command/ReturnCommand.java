@@ -4,14 +4,13 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.protocol.BlockMaterial;
-import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -48,7 +47,7 @@ public class ReturnCommand extends AbstractPlayerCommand {
 
     public ReturnCommand() {
         super("return", "Ouvre la confirmation de retour près de votre point de mort");
-        this.setPermissionGroup(GameMode.Adventure);
+        this.setPermissionGroups("adventure");
         this.requirePermission(PERM_USE);
     }
 

@@ -5,6 +5,9 @@ pluginManagement {
         maven("https://maven.hytale-modding.info/releases") {
             name = "HytaleModdingReleases"
         }
+        maven("https://maven.hytale-modding.info/pre-release") {
+            name = "HytaleModdingPreRelease"
+        }
     }
 }
 

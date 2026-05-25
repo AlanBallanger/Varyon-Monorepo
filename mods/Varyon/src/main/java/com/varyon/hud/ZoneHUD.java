@@ -45,9 +45,15 @@ public class ZoneHUD extends CustomUIHud {
     private boolean lootSpecialActive = false;
     private int maxEssenceCap = 1000;
 
+    public static final String HUD_KEY = "varyon_zone_hud";
+
     public ZoneHUD(@Nonnull PlayerRef playerRef, @Nonnull MessagesConfig messagesConfig) {
-        super(playerRef);
+        super(playerRef, HUD_KEY);
         this.messagesConfig = messagesConfig;
+    }
+
+    @Override
+    public void onRemove() {
     }
 
     @Override
