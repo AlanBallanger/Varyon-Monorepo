@@ -1,7 +1,7 @@
 package com.varyon.bossarena.data;
 
 import com.varyon.bossarena.util.NotificationRadiusConstants;
-import com.hypixel.hytale.math.vector.Vector3d;
+import org.joml.Vector3d;
 
 public class Arena {
     public String arenaId;

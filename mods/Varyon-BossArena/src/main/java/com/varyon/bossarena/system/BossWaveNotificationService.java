@@ -4,7 +4,7 @@ import com.varyon.bossarena.config.BossArenaConfig;
 import com.varyon.bossarena.util.EntityComponents;
 import com.varyon.bossarena.BossArenaPlugin;
 import com.hypixel.hytale.math.vector.Transform;
-import com.hypixel.hytale.math.vector.Vector3d;
+import org.joml.Vector3d;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;

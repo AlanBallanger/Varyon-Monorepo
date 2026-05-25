@@ -1,6 +1,6 @@
 package com.varyon.bossarena.data;
 
-import com.hypixel.hytale.math.vector.Vector3d;
+import org.joml.Vector3d;
 
 import java.util.Collection;
 import java.util.Map;
