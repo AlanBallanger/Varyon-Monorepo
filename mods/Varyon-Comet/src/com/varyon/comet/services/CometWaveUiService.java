@@ -8,7 +8,7 @@ import com.varyon.comet.systems.*;
 import com.varyon.comet.wave.*;
 
 
-import com.hypixel.hytale.math.vector.Vector3d;
+import org.joml.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.Direction;
 import com.hypixel.hytale.protocol.FormattedMessage;
