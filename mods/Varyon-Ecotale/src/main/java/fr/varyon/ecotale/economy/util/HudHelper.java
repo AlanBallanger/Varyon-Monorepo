@@ -88,7 +88,7 @@ public final class HudHelper {
         }
         
         // Vanilla fallback
-        player.getHudManager().addCustomHud(playerRef, hud);
+        player.getHudManager().setCustomHud(playerRef, hud);
     }
     
     /**

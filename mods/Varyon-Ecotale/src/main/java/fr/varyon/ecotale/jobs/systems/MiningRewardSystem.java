@@ -139,7 +139,8 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         
         BlockType blockType = event.getBlockType();
         ItemStack itemInHand = event.getItemInHand();
-        Vector3i targetBlock = event.getTargetBlock();
+        com.hypixel.hytale.math.vector.Vector3i rawBlock = event.getTargetBlock();
+        Vector3i targetBlock = new Vector3i(rawBlock.x, rawBlock.y, rawBlock.z);
         
         if (blockType == null) {
             return;
@@ -262,7 +263,7 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         
         // Depth Bonus Multiplier
         DepthBonusConfig depthConfig = config.getDepthBonus();
-        float depthMultiplier = depthConfig.calculateMultiplier(targetBlock.getY());
+        float depthMultiplier = depthConfig.calculateMultiplier(targetBlock.y);
         
         // VIP Multiplier (player implements CommandSender which has hasPermission)
         float vipMultiplier = (player != null) 
@@ -299,9 +300,9 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         // Uses physical coins if addon is available, otherwise direct balance
         // ─────────────────────────────────────────────────────────────
         Vector3d dropPosition = new Vector3d(
-            targetBlock.getX() + 0.5,
-            targetBlock.getY() + 0.5,
-            targetBlock.getZ() + 0.5
+            targetBlock.x + 0.5,
+            targetBlock.y + 0.5,
+            targetBlock.z + 0.5
         );
         
         if (CoinsBridge.isAvailable()) {

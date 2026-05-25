@@ -43,8 +43,8 @@ public class CoinDropper {
         TransformComponent transformComponent = store.getComponent(entityRef, TransformComponent.getComponentType());
         if (transformComponent == null) return;
 
-        Vector3d position = transformComponent.getPosition().clone();
-        position.add(0, 0.5, 0);
+        com.hypixel.hytale.math.vector.Vector3d rawPos = transformComponent.getPosition();
+        Vector3d position = new Vector3d(rawPos.x, rawPos.y + 0.5, rawPos.z);
 
         dropCoins(store, commandBuffer, position, amount);
     }
@@ -105,8 +105,8 @@ public class CoinDropper {
         Holder<EntityStore> itemEntityHolder = ItemComponent.generateItemDrop(
             store,
             itemStack,
-            position,
-            Vector3f.ZERO,
+            new com.hypixel.hytale.math.vector.Vector3d(position.x, position.y, position.z),
+            new com.hypixel.hytale.math.vector.Vector3f(),
             velocityX,
             velocityY,
             velocityZ
