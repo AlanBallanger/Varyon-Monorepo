@@ -77,7 +77,8 @@ public final class FloatingDamageParticles {
         String iconSystem = (iconId != null && !iconId.isBlank()) ? iconId.trim() : null;
         font = resolveCriticalDigitFont(resolved, font, iconSystem, damage);
 
-        Vector3d base = transform.getPosition();
+        com.hypixel.hytale.math.vector.Vector3d rawBase = transform.getPosition();
+        Vector3d base = new Vector3d(rawBase.x, rawBase.y, rawBase.z);
         double y = base.y + HEIGHT_ABOVE_ENTITY;
 
         int digitCount = digits.length();
@@ -105,9 +106,10 @@ public final class FloatingDamageParticles {
                     continue;
                 }
                 double[] right = new double[2];
-                Vector3d vpos = vt.getPosition();
+                com.hypixel.hytale.math.vector.Vector3d rawVpos = vt.getPosition();
+                Vector3d vpos = new Vector3d(rawVpos.x, rawVpos.y, rawVpos.z);
                 resolveHorizontalRight(base, vpos, transform, right);
-                float distScale = distanceDisplayScale(vpos.getX(), vpos.getY(), vpos.getZ(), base.x, y, base.z);
+                float distScale = distanceDisplayScale(vpos.x, vpos.y, vpos.z, base.x, y, base.z);
                 if (!spawnDigitBurst(iconSystem, font, digits, base, y, digitCount,
                         iconSlots, iconToDigitGap, iconNudge,
                         groupAlong, accessor, List.of(viewerRef), right[0], right[1], distScale)) {
@@ -261,8 +263,8 @@ public final class FloatingDamageParticles {
                                                TransformComponent targetTransform,
                                                double[] outRightXZ) {
         if (viewerPosition != null) {
-            double fx = base.getX() - viewerPosition.getX();
-            double fz = base.getZ() - viewerPosition.getZ();
+            double fx = base.x - viewerPosition.x;
+            double fz = base.z - viewerPosition.z;
             double len = Math.hypot(fx, fz);
             if (len > 1e-4) {
                 fx /= len;
@@ -272,7 +274,7 @@ public final class FloatingDamageParticles {
                 return;
             }
         }
-        Vector3f rot = targetTransform.getRotation();
+        com.hypixel.hytale.math.vector.Vector3f rot = targetTransform.getRotation();
         double yawRad = Math.toRadians(rot.getYaw());
         outRightXZ[0] = -Math.cos(yawRad);
         outRightXZ[1] = -Math.sin(yawRad);
