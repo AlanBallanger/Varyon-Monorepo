@@ -1,0 +1,159 @@
+# VaryonUI Commands Configuration
+# Max 5 buttons per row, overflow wraps to next row
+# Première catégorie: bandeau + ligne rapide (5 cartes image)
+# Type: "execute" (runs command directly) or "chat" (opens chat with command)
+# icon_url (optionnel): chemin texture pack, ex. Icons/MonIcone.png — préfixe / ignoré. Emplacements UI avec icônes bouton: 1–35.
+# header_icon (optionnel): icône du bandeau de catégorie (à côté du titre), ex. Icons/Menu_Utils.png — préfixe / ignoré.
+
+[[category]]
+name = "Se déplacer"
+header_icon = "Icons/Movement_Category.png"
+
+[[category.buttons]]
+label = "Aller au spawn"
+command = "/spawn"
+type = "execute"
+
+[[category.buttons]]
+label = "tp random (haven)"
+command = "/rtp"
+type = "execute"
+
+[[category.buttons]]
+label = "TP capitale Novale"
+command = "/warp novale"
+type = "execute"
+
+[[category.buttons]]
+label = "TP capitale Fraktale"
+command = "/warp fraktale"
+type = "execute"
+
+[[category.buttons]]
+label = "Retour maison"
+command = "/home"
+type = "execute"
+
+[[category]]
+name = "Commandes utiles"
+header_icon = "Icons/Menu_Utils.png"
+
+[[category.buttons]]
+label = "Demande de TP (Haven)"
+icon_url = "Icons/Tp_Icon.png"
+command = "/tpa "
+type = "chat"
+
+[[category.buttons]]
+label = "Accepter la TP"
+icon_url = "Icons/Tp_Icon.png"
+command = "/tpaccept"
+type = "execute"
+
+[[category.buttons]]
+label = "Message privé"
+icon_url = "Icons/Message_Button.png"
+command = "/msg joueur message"
+type = "chat"
+
+[[category.buttons]]
+label = "Répondre"
+icon_url = "Icons/Message_Button.png"
+command = "/r message"
+type = "chat"
+
+[[category]]
+name = "Base & survie"
+header_icon = "Icons/Menu_Base.png"
+
+[[category.buttons]]
+label = "Protéger sa base"
+icon_url = "Icons/Claim_Icon.png"
+command = "/claims gui"
+type = "execute"
+
+[[category.buttons]]
+label = "Définir son Home"
+icon_url = "Icons/Home_Icon.png"
+command = "/sethome "
+type = "chat"
+
+[[category.buttons]]
+label = "Retour mort"
+icon_url = "Icons/Tp_Icon.png"
+command = "/back"
+type = "execute"
+
+[[category]]
+name = "Menus joueur"
+header_icon = "Icons/Menu_Category.png"
+
+[[category.buttons]]
+label = "Journal de quête"
+icon_url = "Icons/Quest_Icon.png"
+command = "/journal"
+type = "execute"
+
+[[category.buttons]]
+label = "Profil RPG"
+icon_url = "Icons/RPG_Icon.png"
+command = "/vrpg"
+type = "execute"
+
+[[category.buttons]]
+label = "Profil des métiers"
+icon_url = "Icons/Jobs_Icon.png"
+command = "/vp"
+type = "execute"
+
+[[category.buttons]]
+label = "Liste des objets"
+icon_url = "Icons/Items_Icon.png"
+command = "/biv"
+type = "execute"
+
+[[category.buttons]]
+label = "Détails des armes"
+icon_url = "Icons/Weapons_Icon.png"
+command = "/weapons"
+type = "execute"
+
+[[category.buttons]]
+label = "Partager un objet"
+icon_url = "Icons/Share_Icon.png"
+command = "/share"
+type = "chat"
+
+[[category.buttons]]
+label = "Kits"
+icon_url = "Icons/Kits_Icon.png"
+command = "/kit"
+type = "execute"
+
+[[category.buttons]]
+label = "Échange"
+icon_url = "Icons/Trade_Icon.png"
+command = "/trade <joueur>"
+type = "chat"
+
+[[category]]
+name = "Serveur"
+header_icon = "Icons/Menu_Server.png"
+
+[[category.buttons]]
+label = "Voter"
+icon_url = "Icons/Vote_Icon.png"
+command = "/vote"
+type = "execute"
+
+[[category.buttons]]
+label = "Top joueurs"
+icon_url = "Icons/Vote_Icon.png"
+command = "/votetop"
+type = "execute"
+
+[[category.buttons]]
+label = "Votes hors ligne"
+icon_url = "Icons/Vote_Icon.png"
+command = "/claimvotes"
+type = "execute"

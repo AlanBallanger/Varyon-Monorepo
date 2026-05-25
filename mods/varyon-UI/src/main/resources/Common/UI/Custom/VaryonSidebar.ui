@@ -1,0 +1,486 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+      Group #LeftMenuSidebar {
+        Anchor: (Width: 248);
+        LayoutMode: Left;
+        Group #LeftMenuSidebarInner {
+          Anchor: (Width: 247);
+          LayoutMode: Top;
+          Padding: (Top: 0, Left: 12, Right: 0, Bottom: 0);
+
+          Group #LeftMenuSidebarSkinRow {
+            Anchor: (Top: 70, Left: 0, Right: 5);
+            LayoutMode: Top;
+            Background: (Color: #232d42);
+            Padding: (Top: 15, Bottom: 15);
+
+            Group {
+              LayoutMode: Left;
+
+              Group #PlayerSkinPreviewWrap {
+              Anchor: (Width: 137, Height: 182, Left: -16);
+              LayoutMode: Top;
+
+              Group #PlayerSkinPreview {
+                Anchor: (Width: 137, Height: 182);
+                Background: (Color: #1e2838);
+              }
+            }
+
+            Group #SidebarStatsColumn {
+              Anchor: (Width: 95);
+              LayoutMode: Top;
+              Padding: (Top: 0);
+
+              Group #SidebarStatHP {
+                LayoutMode: Left;
+                Anchor: (Height: 24);
+
+                Group #SidebarStatHPIcon {
+                  Anchor: (Width: 22, Height: 22);
+                  Background: (Color: #00000000);
+                }
+
+                Group { Anchor: (Width: 6); }
+
+                Label #SidebarStatHPValueMain {
+                  Text: "";
+                  Anchor: (Height: 22);
+                  Style: (FontSize: 14, TextColor: #dceeff, VerticalAlignment: Center);
+                }
+              }
+
+              Group { Anchor: (Height: 4); }
+
+              Group #SidebarStatArmor {
+                LayoutMode: Left;
+                Anchor: (Height: 24);
+
+                Group #SidebarStatArmorIcon {
+                  Anchor: (Width: 22, Height: 22);
+                  Background: (Color: #00000000);
+                }
+
+                Group { Anchor: (Width: 6); }
+
+                Label #SidebarStatArmorValueMain {
+                  Text: "";
+                  Anchor: (Height: 22);
+                  Style: (FontSize: 14, TextColor: #dceeff, VerticalAlignment: Center);
+                }
+              }
+
+              Group { Anchor: (Height: 4); }
+
+              Group #SidebarStatStamina {
+                LayoutMode: Left;
+                Anchor: (Height: 24);
+
+                Group #SidebarStatStaminaIcon {
+                  Anchor: (Width: 22, Height: 22);
+                  Background: (Color: #00000000);
+                }
+
+                Group { Anchor: (Width: 6); }
+
+                Label #SidebarStatStaminaValueMain {
+                  Text: "";
+                  Anchor: (Height: 22);
+                  Style: (FontSize: 14, TextColor: #dceeff, VerticalAlignment: Center);
+                }
+              }
+
+              Group { Anchor: (Height: 4); }
+
+              Group #SidebarStatATK {
+                LayoutMode: Left;
+                Anchor: (Height: 24);
+
+                Group #SidebarStatATKIcon {
+                  Anchor: (Width: 22, Height: 22);
+                  Background: (Color: #00000000);
+                }
+
+                Group { Anchor: (Width: 6); }
+
+                Label #SidebarStatATKValueMain {
+                  Text: "";
+                  Anchor: (Height: 22);
+                  Style: (FontSize: 14, TextColor: #dceeff, VerticalAlignment: Center);
+                }
+              }
+
+              Group { Anchor: (Height: 4); }
+
+              Group #SidebarStatCritChance {
+                LayoutMode: Left;
+                Anchor: (Height: 24);
+
+                Group #SidebarStatCritChanceIcon {
+                  Anchor: (Width: 22, Height: 22);
+                  Background: (Color: #00000000);
+                }
+
+                Group { Anchor: (Width: 6); }
+
+                Label #SidebarStatCritChanceValueMain {
+                  Text: "";
+                  Anchor: (Height: 22);
+                  Style: (FontSize: 14, TextColor: #dceeff, VerticalAlignment: Center);
+                }
+              }
+
+              Group { Anchor: (Height: 4); }
+
+              Group #SidebarStatCritDamage {
+                LayoutMode: Left;
+                Anchor: (Height: 24);
+
+                Group #SidebarStatCritDamageIcon {
+                  Anchor: (Width: 22, Height: 22);
+                  Background: (Color: #00000000);
+                }
+
+                Group { Anchor: (Width: 6); }
+
+                Label #SidebarStatCritDamageValueMain {
+                  Text: "";
+                  Anchor: (Height: 22);
+                  Style: (FontSize: 14, TextColor: #dceeff, VerticalAlignment: Center);
+                }
+              }
+
+
+            }
+            }
+          }
+
+          Group { LayoutMode: Top; Anchor: (Height: 5, Left: 0, Right: 5); }
+          Group #LeftMenuSidebarXpSection {
+            Anchor: (Left: 0, Right: 5);
+            LayoutMode: Top;
+            Background: (Color: #232d42);
+            Padding: (Top: 7, Bottom: 7);
+
+            Group #MenuGenXPPanel {
+              LayoutMode: Top;
+              Anchor: (Left: 0, Right: 0);
+              Padding: (Bottom: 3);
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 18);
+
+                Group #MenuGenLevelBg {
+                  Anchor: (Width: 52, Height: 18);
+                  Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+                  Background: PatchStyle(Color: #2a1a00e0);
+                  LayoutMode: Middle;
+                  Label #MenuGenLevel {
+                    Text: "";
+                    Style: (FontSize: 11, TextColor: #FFD866, RenderBold: true, VerticalAlignment: Center);
+                  }
+                }
+
+                Label #MenuGenLevelLabel {
+                  Text: "";
+                  Anchor: (Height: 18);
+                  FlexWeight: 1;
+                  Style: (FontSize: 11, TextColor: #b8c8d8, VerticalAlignment: Center);
+                }
+
+                Label #MenuGenXPText {
+                  Text: "";
+                  Anchor: (Height: 18);
+                  Style: (FontSize: 10, TextColor: #8899aa, VerticalAlignment: Center);
+                }
+              }
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 12, Left: 0, Right: 0);
+
+                Group #MenuGenXPTrack {
+                  FlexWeight: 1;
+                  Anchor: (Height: 12);
+                  Background: PatchStyle(TexturePath: "Common/ProgressBarEmpty.png", Border: 4);
+                  ProgressBar #MenuGenXP {
+                    Anchor: (Top: 1, Left: 2, Right: 2, Bottom: 1);
+                    Value: 0.0;
+                    BarTexturePath: "Common/ProgressBarFill.png";
+                  }
+                }
+
+                Group { Anchor: (Width: 4); }
+
+                Button #MenuGenDetailBtn {
+                  Anchor: (Width: 54, Height: 14);
+                  Style: ButtonStyle(
+                    Default: (Background: (Color: #2a3545)),
+                    Hovered: (Background: (Color: #4a6ea8)),
+                    Pressed: (Background: (Color: #2a3545)),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                  Group {
+                    LayoutMode: Middle;
+                    Label { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                      Text: "Details";
+                      Style: (FontSize: 11, TextColor: #dceeff, VerticalAlignment: Center, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              }
+            }
+
+            Group #MenuJob1Panel {
+              LayoutMode: Top;
+              Anchor: (Left: 0, Right: 0);
+              Padding: (Bottom: 2);
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 18);
+
+                Group #MenuJob1LevelBg {
+                  Anchor: (Width: 52, Height: 18);
+                  Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+                  Background: PatchStyle(Color: #1a150ae0);
+                  LayoutMode: Middle;
+                  Label #MenuJob1Level {
+                    Text: "";
+                    Style: (FontSize: 11, TextColor: #FFD866, RenderBold: true, VerticalAlignment: Center);
+                  }
+                }
+
+                Label #MenuJob1Name {
+                  Text: "";
+                  Anchor: (Height: 18);
+                  FlexWeight: 1;
+                  Style: (FontSize: 11, TextColor: #dceeff, RenderBold: true, VerticalAlignment: Center);
+                }
+
+                Label #MenuJob1XPText {
+                  Text: "";
+                  Anchor: (Height: 18);
+                  Style: (FontSize: 9, TextColor: #8899aa, VerticalAlignment: Center);
+                }
+              }
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 11, Left: 0, Right: 0);
+
+                Group #MenuJob1XPTrack {
+                  FlexWeight: 1;
+                  Anchor: (Height: 11);
+                  Background: PatchStyle(TexturePath: "Common/ProgressBarEmpty.png", Border: 4);
+                  ProgressBar #MenuJob1XP {
+                    Anchor: (Top: 1, Left: 2, Right: 2, Bottom: 1);
+                    Value: 0.0;
+                    BarTexturePath: "Common/ProgressBarFill.png";
+                  }
+                }
+
+                Group { Anchor: (Width: 4); }
+
+                Button #MenuJob1DetailBtn {
+                  Anchor: (Width: 54, Height: 13);
+                  Style: ButtonStyle(
+                    Default: (Background: (Color: #2a3545)),
+                    Hovered: (Background: (Color: #4a6ea8)),
+                    Pressed: (Background: (Color: #2a3545)),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                  Group {
+                    LayoutMode: Middle;
+                    Label { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                      Text: "Details";
+                      Style: (FontSize: 11, TextColor: #dceeff, VerticalAlignment: Center, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              }
+            }
+
+            Group #MenuJob2Panel {
+              LayoutMode: Top;
+              Anchor: (Left: 0, Right: 0);
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 18);
+
+                Group #MenuJob2LevelBg {
+                  Anchor: (Width: 52, Height: 18);
+                  Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+                  Background: PatchStyle(Color: #1a150ae0);
+                  LayoutMode: Middle;
+                  Label #MenuJob2Level {
+                    Text: "";
+                    Style: (FontSize: 11, TextColor: #FFD866, RenderBold: true, VerticalAlignment: Center);
+                  }
+                }
+
+                Label #MenuJob2Name {
+                  Text: "";
+                  Anchor: (Height: 18);
+                  FlexWeight: 1;
+                  Style: (FontSize: 11, TextColor: #dceeff, RenderBold: true, VerticalAlignment: Center);
+                }
+
+                Label #MenuJob2XPText {
+                  Text: "";
+                  Anchor: (Height: 18);
+                  Style: (FontSize: 9, TextColor: #8899aa, VerticalAlignment: Center);
+                }
+              }
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 11, Left: 0, Right: 0);
+
+                Group #MenuJob2XPTrack {
+                  FlexWeight: 1;
+                  Anchor: (Height: 11);
+                  Background: PatchStyle(TexturePath: "Common/ProgressBarEmpty.png", Border: 4);
+                  ProgressBar #MenuJob2XP {
+                    Anchor: (Top: 1, Left: 2, Right: 2, Bottom: 1);
+                    Value: 0.0;
+                    BarTexturePath: "Common/ProgressBarFill.png";
+                  }
+                }
+
+                Group { Anchor: (Width: 4); }
+
+                Button #MenuJob2DetailBtn {
+                  Anchor: (Width: 54, Height: 13);
+                  Style: ButtonStyle(
+                    Default: (Background: (Color: #2a3545)),
+                    Hovered: (Background: (Color: #4a6ea8)),
+                    Pressed: (Background: (Color: #2a3545)),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                  Group {
+                    LayoutMode: Middle;
+                    Label { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                      Text: "Details";
+                      Style: (FontSize: 11, TextColor: #dceeff, VerticalAlignment: Center, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              }
+            }
+          }
+          Group { LayoutMode: Top; Anchor: (Height: 5, Left: 0, Right: 5); }
+          Group #SidebarFooterSection {
+            LayoutMode: Top;
+            Anchor: (Left: 0, Right: 5);
+            Background: (Color: #232d42);
+            Padding: (Top: 15, Bottom: 15);
+
+          Group #SidebarBalanceRow {
+            LayoutMode: Left;
+            Anchor: (Left: 0, Right: 0, Height: 70);
+            Background: "HUD/CoinSection.png";
+            Padding: (Top: 6, Bottom: 6);
+
+            Group { Anchor: (Width: 64); }
+
+            Group {
+              LayoutMode: Top;
+              FlexWeight: 1;
+
+              Label {
+                Text: "MONNAIE";
+                Anchor: (Height: 22);
+                Style: (FontSize: 10, RenderBold: true, TextColor: #9a8030, VerticalAlignment: Center);
+              }
+
+              Label #SidebarStatBalanceValueMain {
+                Text: "";
+                Anchor: (Height: 30);
+                Style: (FontSize: 18, RenderBold: true, TextColor: #b89820, VerticalAlignment: Center);
+              }
+            }
+          }
+          Group #SidebarLocationBlock {
+            LayoutMode: Left;
+            Anchor: (Left: 0, Right: 0, Height: 89);
+            Background: "HUD/WorldSection.png";
+            Padding: (Top: 4, Bottom: 4);
+
+            Group { Anchor: (Width: 54); }
+
+            Group {
+              LayoutMode: Top;
+              FlexWeight: 1;
+
+              Label {
+                Text: "MONDE";
+                Anchor: (Height: 11);
+                Style: (FontSize: 9, RenderBold: true, TextColor: #9a8030, VerticalAlignment: Center);
+              }
+
+              Label #SidebarWorldName {
+                Text: "";
+                Anchor: (Height: 22);
+                Style: (FontSize: 14, RenderBold: true, TextColor: #c8b860, VerticalAlignment: Center, Wrap: false);
+              }
+
+              Group {
+                Anchor: (Height: 6, Left: 0, Right: 0);
+                Group {
+                  LayoutMode: Left;
+                  Anchor: (Height: 1, Top: 3, Left: 0, Right: 0);
+                  Group { Background: (Color: #3a4050); FlexWeight: 1; }
+                  Group { FlexWeight: 1; }
+                }
+              }
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 37, Left: 0, Right: 0);
+
+                Group {
+                  LayoutMode: Top;
+                  FlexWeight: 1;
+
+                  Label {
+                    Text: "COORDONNEES";
+                    Anchor: (Height: 15);
+                    Style: (FontSize: 8, RenderBold: true, TextColor: #9a8030, VerticalAlignment: Center);
+                  }
+
+                  Label #SidebarPlayerCoords {
+                    Text: "";
+                    Anchor: (Height: 22);
+                    Style: (FontSize: 9, TextColor: #b89820, VerticalAlignment: Center, Wrap: false);
+                  }
+                }
+
+                Group {
+                  LayoutMode: Top;
+                  FlexWeight: 1;
+
+                  Label {
+                    Text: "HEURE";
+                    Anchor: (Height: 15);
+                    Style: (FontSize: 8, RenderBold: true, TextColor: #9a8030, VerticalAlignment: Center);
+                  }
+
+                  Label #SidebarGameTime {
+                    Text: "";
+                    Anchor: (Height: 22);
+                    Style: (FontSize: 9, TextColor: #b89820, VerticalAlignment: Center);
+                  }
+                }
+              }
+            }
+          }
+          }
+        }
+        Group #LeftMenuSidebarRightSeparator {
+          Anchor: (Width: 1, Top: 10, Bottom: 10);
+          Background: (Color: #545B63);
+        }
+      }

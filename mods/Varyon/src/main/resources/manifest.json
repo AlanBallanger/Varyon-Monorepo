@@ -1,0 +1,94 @@
+{
+  "Group": "${plugin_group}",
+  "Name": "${plugin_name}",
+  "Version": "${plugin_version}",
+  "Description": "${plugin_description}",
+  "Authors": [
+    {
+      "Name": "${plugin_author}"
+    }
+  ],
+  "Website": "${plugin_website}",
+  "ServerVersion": "${server_version}",
+  "Dependencies": {},
+  "OptionalDependencies": {
+    "Frotty27:Elite Mobs": "*",
+    "LuckPerms:LuckPerms": "*",
+    "Frotty27:NameplateBuilder": "*"
+  },
+  "DisabledByDefault": false,
+  "IncludesAssetPack": true,
+  "Main": "${plugin_main_entrypoint}",
+  "Permissions": [
+    {
+      "Permission": "varyon.rtp",
+      "Description": "Allow access to /rtpv and /rtpz commands",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.1",
+      "Description": "Access to zone 1 (and all lower zones)",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.2",
+      "Description": "Access to zones 1-2",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.3",
+      "Description": "Access to zones 1-3",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.4",
+      "Description": "Access to zones 1-4",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.5",
+      "Description": "Access to zones 1-5",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.6",
+      "Description": "Access to zones 1-6",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.7",
+      "Description": "Access to zones 1-7",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.8",
+      "Description": "Access to zones 1-8",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.9",
+      "Description": "Access to zones 1-9",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.zone.10",
+      "Description": "Access to all zones (1-10)",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.admin",
+      "Description": "Access to admin commands",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.deposit",
+      "Description": "Allow depositing faction points (points de faction)",
+      "Default": false
+    },
+    {
+      "Permission": "varyon.rtps",
+      "Description": "Allow /rtps command (random teleport on map side)",
+      "Default": false
+    }
+  ]
+}

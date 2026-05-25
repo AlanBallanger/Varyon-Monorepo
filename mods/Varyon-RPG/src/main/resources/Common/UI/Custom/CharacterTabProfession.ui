@@ -1,0 +1,1294 @@
+$C = "Common.ui";
+
+@ProfessionTabViewTalentsButton = (
+  Default: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 8)
+  ),
+  Hovered: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Hovered.png", Border: 8)
+  ),
+  Pressed: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8)
+  ),
+  Disabled: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Disabled.png", Border: 8)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@ProfessionTabSecondaryButton = (
+  Default: (
+    Background: (TexturePath: "Common/Buttons/Tertiary.png", Border: 8)
+  ),
+  Hovered: (
+    Background: (TexturePath: "Common/Buttons/Tertiary_Hovered.png", Border: 8)
+  ),
+  Pressed: (
+    Background: (TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8)
+  ),
+  Disabled: (
+    Background: (TexturePath: "Common/Buttons/Disabled.png", Border: 8)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+  LayoutMode: Top;
+
+  Group {
+    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+    LayoutMode: Left;
+
+    Group {
+      Anchor: (Width: 320, Top: 0, Bottom: 0);
+      LayoutMode: Top;
+
+      Group {
+        Anchor: (Height: 24);
+        LayoutMode: Left;
+        Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Crown.png", Border: 0); }
+        Group { Anchor: (Width: 6); }
+        Label {
+          Style: (FontSize: 21, TextColor: #C8A96E, RenderBold: true, HorizontalAlignment: Start, RenderUppercase: true);
+          Text: "Métier principal";
+        }
+        Group { Anchor: (Width: 10); }
+        Label {
+          Style: (FontSize: 14, TextColor: #6BCB7A, RenderBold: true, VerticalAlignment: Center);
+          Text: "(100% XP)";
+        }
+      }
+
+      Group #ProfessionActiveCard0 {
+        Anchor: (Top: 8, Height: 150);
+        LayoutMode: Full;
+        Padding: (Full: 10);
+        Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+        Group {
+          LayoutMode: Full;
+          Anchor: (Left: 0, Right: 0, Top: 0, Height: 70);
+
+          Group {
+            Anchor: (Left: 0, Top: 0, Width: 60, Height: 60);
+            LayoutMode: Full;
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 6, Color: #31C677FF);
+            Padding: (Full: 3);
+
+            Group {
+              LayoutMode: Middle;
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Background: #141820(0.82);
+
+              ItemIcon #ProfessionActiveCard0Icon {
+                Anchor: (Width: 48, Height: 48);
+              }
+            }
+          }
+
+          Label #ProfessionActiveCard0Name {
+            Anchor: (Left: 70, Right: 0, Top: 0, Height: 36);
+            Style: (FontSize: 22, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+            Text: "";
+          }
+
+          Group {
+            Anchor: (Left: 70, Right: 0, Top: 36, Height: 22);
+            LayoutMode: Left;
+
+            Group {
+              Background: #25793C(1.0);
+              Padding: (Horizontal: 6, Vertical: 2);
+
+              Label #ProfessionActiveCard0LevelBadge {
+                Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+
+            Group { Anchor: (Width: 8); }
+
+            Label #ProfessionActiveCard0LevelXp {
+              Anchor: (Height: 22);
+              Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Start);
+              Text: "";
+            }
+          }
+        }
+
+        Group #ProfessionActiveCard0ProgBar {
+          Anchor: (Left: 0, Right: 0, Top: 72, Bottom: 32);
+          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+          ProgressBar #ProfessionActiveCard0ProgBarFill {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Value: 0.0;
+            BarTexturePath: "Elements/Gauge_Fill.png";
+          }
+        }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 28);
+          LayoutMode: Left;
+
+          Button #ProfessionActiveCard0Reconvert {
+            FlexWeight: 1;
+            Style: @ProfessionTabSecondaryButton;
+            LayoutMode: Middle;
+            Label {
+              Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true,
+                HorizontalAlignment: Center, VerticalAlignment: Center);
+              Text: "Reconversion";
+            }
+          }
+
+          Group { Anchor: (Width: 4); }
+
+          Button #ProfessionActiveCard0ViewTalents {
+            FlexWeight: 1;
+            Style: @ProfessionTabViewTalentsButton;
+            LayoutMode: Middle;
+            Label {
+              Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true,
+                HorizontalAlignment: Center, VerticalAlignment: Center);
+              Text: "Voir talents";
+            }
+          }
+        }
+      }
+
+      Group {
+        Anchor: (Top: 14, Height: 24);
+        LayoutMode: Left;
+        Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Star.png", Border: 0); }
+        Group { Anchor: (Width: 6); }
+        Label {
+          Style: (FontSize: 21, TextColor: #C8A96E, RenderBold: true, HorizontalAlignment: Start, RenderUppercase: true);
+          Text: "Métier secondaire";
+        }
+        Group { Anchor: (Width: 10); }
+        Label {
+          Style: (FontSize: 14, TextColor: #C8A96E, RenderBold: true, VerticalAlignment: Center);
+          Text: "(70% XP)";
+        }
+      }
+
+      Group #ProfessionActiveCard1 {
+        Anchor: (Top: 8, Height: 150);
+        LayoutMode: Full;
+        Padding: (Full: 10);
+        Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+        Group {
+          LayoutMode: Full;
+          Anchor: (Left: 0, Right: 0, Top: 0, Height: 70);
+
+          Group {
+            Anchor: (Left: 0, Top: 0, Width: 60, Height: 60);
+            LayoutMode: Full;
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 6, Color: #31C677FF);
+            Padding: (Full: 3);
+
+            Group {
+              LayoutMode: Middle;
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Background: #141820(0.82);
+
+              ItemIcon #ProfessionActiveCard1Icon {
+                Anchor: (Width: 48, Height: 48);
+              }
+            }
+          }
+
+          Label #ProfessionActiveCard1Name {
+            Anchor: (Left: 70, Right: 0, Top: 0, Height: 36);
+            Style: (FontSize: 22, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+            Text: "";
+          }
+
+          Group {
+            Anchor: (Left: 70, Right: 0, Top: 36, Height: 22);
+            LayoutMode: Left;
+
+            Group {
+              Background: #25793C(1.0);
+              Padding: (Horizontal: 6, Vertical: 2);
+
+              Label #ProfessionActiveCard1LevelBadge {
+                Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+
+            Group { Anchor: (Width: 8); }
+
+            Label #ProfessionActiveCard1LevelXp {
+              Anchor: (Height: 22);
+              Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Start);
+              Text: "";
+            }
+          }
+        }
+
+        Group #ProfessionActiveCard1ProgBar {
+          Anchor: (Left: 0, Right: 0, Top: 72, Bottom: 32);
+          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+          ProgressBar #ProfessionActiveCard1ProgBarFill {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Value: 0.0;
+            BarTexturePath: "Elements/Gauge_Fill.png";
+          }
+        }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 28);
+          LayoutMode: Left;
+
+          Button #ProfessionActiveCard1Reconvert {
+            FlexWeight: 1;
+            Style: @ProfessionTabSecondaryButton;
+            LayoutMode: Middle;
+            Label {
+              Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true,
+                HorizontalAlignment: Center, VerticalAlignment: Center);
+              Text: "Reconversion";
+            }
+          }
+
+          Group { Anchor: (Width: 4); }
+
+          Button #ProfessionActiveCard1ViewTalents {
+            FlexWeight: 1;
+            Style: @ProfessionTabViewTalentsButton;
+            LayoutMode: Middle;
+            Label {
+              Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true,
+                HorizontalAlignment: Center, VerticalAlignment: Center);
+              Text: "Voir talents";
+            }
+          }
+        }
+      }
+
+
+      Group #BoostsBox {
+        Anchor: (Top: 14, Height: 208);
+        LayoutMode: Full;
+        Padding: (Full: 12);
+        Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+        Label {
+          Anchor: (Left: 0, Right: 0, Top: 0, Height: 24);
+          Style: (FontSize: 14, TextColor: #C8A96E, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+          Text: "BOOSTS ACTIFS";
+        }
+
+        Group #BoostCard0 {
+          Anchor: (Left: 0, Right: 0, Top: 32, Height: 28);
+          LayoutMode: Left;
+
+          ItemIcon #BoostCard0Icon { Anchor: (Width: 24, Height: 24); }
+          Group { Anchor: (Width: 6); }
+          Label #BoostCard0Name {
+            FlexWeight: 1;
+            Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+            Text: "";
+          }
+          Group #BoostCard0Info {
+            LayoutMode: Left;
+            Visible: false;
+            Label #BoostCard0Multiplier {
+              Anchor: (Width: 66, Height: 28);
+              Style: (FontSize: 12, TextColor: #5BFF7F, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+              Text: "";
+            }
+            Group { Anchor: (Width: 4); }
+            Label #BoostCard0Timer {
+              Anchor: (Width: 68, Height: 28);
+              Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: End, VerticalAlignment: Center);
+              Text: "";
+            }
+          }
+        }
+
+        Group { Anchor: (Left: 0, Right: 0, Top: 61, Height: 1); Background: #E8DCC8(0.22); }
+
+        Group #BoostCard1 {
+          Anchor: (Left: 0, Right: 0, Top: 64, Height: 28);
+          LayoutMode: Left;
+
+          ItemIcon #BoostCard1Icon { Anchor: (Width: 24, Height: 24); }
+          Group { Anchor: (Width: 6); }
+          Label #BoostCard1Name {
+            FlexWeight: 1;
+            Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+            Text: "";
+          }
+          Group #BoostCard1Info {
+            LayoutMode: Left;
+            Visible: false;
+            Label #BoostCard1Multiplier {
+              Anchor: (Width: 66, Height: 28);
+              Style: (FontSize: 12, TextColor: #5BFF7F, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+              Text: "";
+            }
+            Group { Anchor: (Width: 4); }
+            Label #BoostCard1Timer {
+              Anchor: (Width: 68, Height: 28);
+              Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: End, VerticalAlignment: Center);
+              Text: "";
+            }
+          }
+        }
+
+        Group { Anchor: (Left: 0, Right: 0, Top: 93, Height: 1); Background: #E8DCC8(0.22); }
+
+        Group #BoostCard2 {
+          Anchor: (Left: 0, Right: 0, Top: 96, Height: 28);
+          LayoutMode: Left;
+
+          ItemIcon #BoostCard2Icon { Anchor: (Width: 24, Height: 24); }
+          Group { Anchor: (Width: 6); }
+          Label #BoostCard2Name {
+            FlexWeight: 1;
+            Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+            Text: "";
+          }
+          Group #BoostCard2Info {
+            LayoutMode: Left;
+            Visible: false;
+            Label #BoostCard2Multiplier {
+              Anchor: (Width: 66, Height: 28);
+              Style: (FontSize: 12, TextColor: #5BFF7F, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+              Text: "";
+            }
+            Group { Anchor: (Width: 4); }
+            Label #BoostCard2Timer {
+              Anchor: (Width: 68, Height: 28);
+              Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: End, VerticalAlignment: Center);
+              Text: "";
+            }
+          }
+        }
+
+        Group { Anchor: (Left: 0, Right: 0, Top: 125, Height: 1); Background: #E8DCC8(0.22); }
+
+        Group #BoostCard3 {
+          Anchor: (Left: 0, Right: 0, Top: 128, Height: 28);
+          LayoutMode: Left;
+
+          ItemIcon #BoostCard3Icon { Anchor: (Width: 24, Height: 24); }
+          Group { Anchor: (Width: 6); }
+          Label #BoostCard3Name {
+            FlexWeight: 1;
+            Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+            Text: "";
+          }
+          Group #BoostCard3Info {
+            LayoutMode: Left;
+            Visible: false;
+            Label #BoostCard3Multiplier {
+              Anchor: (Width: 66, Height: 28);
+              Style: (FontSize: 12, TextColor: #5BFF7F, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+              Text: "";
+            }
+            Group { Anchor: (Width: 4); }
+            Label #BoostCard3Timer {
+              Anchor: (Width: 68, Height: 28);
+              Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: End, VerticalAlignment: Center);
+              Text: "";
+            }
+          }
+        }
+      }
+
+    }
+
+    Group { Anchor: (Width: 16, Top: 0, Bottom: 0); }
+
+    Group {
+      FlexWeight: 1;
+      LayoutMode: Top;
+
+      Label #ProfessionCatalogBaseTitle {
+        Anchor: (Top: 0);
+        Style: (FontSize: 21, TextColor: #C8A96E, RenderUppercase: true, RenderBold: true);
+        Text: "MÉTIERS DE RÉCOLTE";
+      }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Top: 8, Height: 188);
+        LayoutMode: Left;
+
+        Group #ProfessionCatalogCard0 {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Top;
+            Padding: (Full: 10);
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 40);
+              LayoutMode: Full;
+
+              ItemIcon #ProfessionCatalogCard0Icon {
+                Anchor: (Left: 0, Top: 0, Width: 40, Height: 40);
+              }
+
+              Label #ProfessionCatalogCard0Name {
+                Anchor: (Left: 48, Right: 0, Top: 2, Height: 18);
+                Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true,
+                  RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "";
+              }
+
+              Label #ProfessionCatalogCard0Active {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #31C677, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "ACTIF";
+                Visible: false;
+              }
+
+              Label #ProfessionCatalogCard0Inactive {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #787060, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "INACTIF";
+                Visible: true;
+              }
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              LayoutMode: Middle;
+              Group {
+                LayoutMode: Left;
+                Group { Anchor: (Width: 12, Height: 12); Background: PatchStyle(TexturePath: "Icons/Jobs_Harvesting.png", Border: 0); }
+                Group { Anchor: (Width: 3); }
+                Label { Style: (FontSize: 9, TextColor: #A09080, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "RÉCOLTE"; }
+              }
+            }
+
+            Label #ProfessionCatalogCard0Desc {
+              Anchor: (Left: 0, Right: 0, Height: 28);
+              Style: (FontSize: 10, TextColor: #A09080, VerticalAlignment: Center, HorizontalAlignment: Start, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Group #ProfessionCatalogCard0Prereq {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              LayoutMode: Full;
+              Background: #000000(0.52);
+              Visible: false;
+
+              Label #ProfessionCatalogCard0PrereqText {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Style: (FontSize: 10, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center, Wrap: true);
+                Text: "";
+              }
+            }
+
+            Group { FlexWeight: 1; }
+
+            Label #ProfessionCatalogCard0Level {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center);
+              Text: "";
+            }
+
+            Group #ProfessionCatalogCard0ProgBar {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+              ProgressBar #ProfessionCatalogCard0ProgBarFill {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Value: 0.0;
+                BarTexturePath: "Elements/Gauge_Fill.png";
+              }
+            }
+
+            Button #ProfessionCatalogCard0Select {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Style: @ProfessionTabSecondaryButton;
+              Visible: false;
+              Label {
+                Style: (FontSize: 13, TextColor: #D4AF37, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                Text: "SELECTIONNER";
+              }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10, Top: 0, Bottom: 0); }
+
+        Group #ProfessionCatalogCard1 {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Top;
+            Padding: (Full: 10);
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 40);
+              LayoutMode: Full;
+              ItemIcon #ProfessionCatalogCard1Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); }
+              Label #ProfessionCatalogCard1Name {
+                Anchor: (Left: 48, Right: 0, Top: 2, Height: 18);
+                Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "";
+              }
+
+              Label #ProfessionCatalogCard1Active {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #31C677, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "ACTIF";
+                Visible: false;
+              }
+
+              Label #ProfessionCatalogCard1Inactive {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #787060, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "INACTIF";
+                Visible: true;
+              }
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              LayoutMode: Middle;
+              Group {
+                LayoutMode: Left;
+                Group { Anchor: (Width: 12, Height: 12); Background: PatchStyle(TexturePath: "Icons/Jobs_Harvesting.png", Border: 0); }
+                Group { Anchor: (Width: 3); }
+                Label { Style: (FontSize: 9, TextColor: #A09080, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "RÉCOLTE"; }
+              }
+            }
+
+            Label #ProfessionCatalogCard1Desc {
+              Anchor: (Left: 0, Right: 0, Height: 26);
+              Style: (FontSize: 10, TextColor: #A09080, VerticalAlignment: Center, HorizontalAlignment: Start, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Group #ProfessionCatalogCard1Prereq {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              LayoutMode: Full;
+              Background: #000000(0.52);
+              Visible: false;
+
+              Label #ProfessionCatalogCard1PrereqText {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Style: (FontSize: 10, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center, Wrap: true);
+                Text: "";
+              }
+            }
+
+            Group { FlexWeight: 1; }
+
+            Label #ProfessionCatalogCard1Level {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center);
+              Text: "";
+            }
+
+            Group #ProfessionCatalogCard1ProgBar {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+              ProgressBar #ProfessionCatalogCard1ProgBarFill {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Value: 0.0;
+                BarTexturePath: "Elements/Gauge_Fill.png";
+              }
+            }
+
+            Button #ProfessionCatalogCard1Select {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Style: @ProfessionTabSecondaryButton;
+              Visible: false;
+              Label {
+                Style: (FontSize: 13, TextColor: #D4AF37, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                Text: "SELECTIONNER";
+              }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10, Top: 0, Bottom: 0); }
+
+        Group #ProfessionCatalogCard2 {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Top;
+            Padding: (Full: 10);
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 40);
+              LayoutMode: Full;
+              ItemIcon #ProfessionCatalogCard2Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); }
+              Label #ProfessionCatalogCard2Name {
+                Anchor: (Left: 48, Right: 0, Top: 2, Height: 18);
+                Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "";
+              }
+
+              Label #ProfessionCatalogCard2Active {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #31C677, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "ACTIF";
+                Visible: false;
+              }
+
+              Label #ProfessionCatalogCard2Inactive {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #787060, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "INACTIF";
+                Visible: true;
+              }
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              LayoutMode: Middle;
+              Group {
+                LayoutMode: Left;
+                Group { Anchor: (Width: 12, Height: 12); Background: PatchStyle(TexturePath: "Icons/Jobs_Harvesting.png", Border: 0); }
+                Group { Anchor: (Width: 3); }
+                Label { Style: (FontSize: 9, TextColor: #A09080, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "RÉCOLTE"; }
+              }
+            }
+
+            Label #ProfessionCatalogCard2Desc {
+              Anchor: (Left: 0, Right: 0, Height: 26);
+              Style: (FontSize: 10, TextColor: #A09080, VerticalAlignment: Center, HorizontalAlignment: Start, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Group #ProfessionCatalogCard2Prereq {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              LayoutMode: Full;
+              Background: #000000(0.52);
+              Visible: false;
+
+              Label #ProfessionCatalogCard2PrereqText {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Style: (FontSize: 10, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center, Wrap: true);
+                Text: "";
+              }
+            }
+
+            Group { FlexWeight: 1; }
+
+            Label #ProfessionCatalogCard2Level {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center);
+              Text: "";
+            }
+
+            Group #ProfessionCatalogCard2ProgBar {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+              ProgressBar #ProfessionCatalogCard2ProgBarFill {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Value: 0.0;
+                BarTexturePath: "Elements/Gauge_Fill.png";
+              }
+            }
+
+            Button #ProfessionCatalogCard2Select {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Style: @ProfessionTabSecondaryButton;
+              Visible: false;
+              Label { Style: (FontSize: 13, TextColor: #D4AF37, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "SELECTIONNER"; }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10, Top: 0, Bottom: 0); }
+
+        Group #ProfessionCatalogCard3 {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Top;
+            Padding: (Full: 10);
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 40);
+              LayoutMode: Full;
+              ItemIcon #ProfessionCatalogCard3Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); }
+              Label #ProfessionCatalogCard3Name {
+                Anchor: (Left: 48, Right: 0, Top: 2, Height: 18);
+                Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "";
+              }
+
+              Label #ProfessionCatalogCard3Active {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #31C677, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "ACTIF";
+                Visible: false;
+              }
+
+              Label #ProfessionCatalogCard3Inactive {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #787060, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "INACTIF";
+                Visible: true;
+              }
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              LayoutMode: Middle;
+              Group {
+                LayoutMode: Left;
+                Group { Anchor: (Width: 12, Height: 12); Background: PatchStyle(TexturePath: "Icons/Jobs_Harvesting.png", Border: 0); }
+                Group { Anchor: (Width: 3); }
+                Label { Style: (FontSize: 9, TextColor: #A09080, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "RÉCOLTE"; }
+              }
+            }
+
+            Label #ProfessionCatalogCard3Desc {
+              Anchor: (Left: 0, Right: 0, Height: 26);
+              Style: (FontSize: 10, TextColor: #A09080, VerticalAlignment: Center, HorizontalAlignment: Start, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Group #ProfessionCatalogCard3Prereq {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              LayoutMode: Full;
+              Background: #000000(0.52);
+              Visible: false;
+
+              Label #ProfessionCatalogCard3PrereqText {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Style: (FontSize: 10, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center, Wrap: true);
+                Text: "";
+              }
+            }
+
+            Group { FlexWeight: 1; }
+
+            Label #ProfessionCatalogCard3Level {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center);
+              Text: "";
+            }
+
+            Group #ProfessionCatalogCard3ProgBar {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+              ProgressBar #ProfessionCatalogCard3ProgBarFill {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Value: 0.0;
+                BarTexturePath: "Elements/Gauge_Fill.png";
+              }
+            }
+
+            Button #ProfessionCatalogCard3Select {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Style: @ProfessionTabSecondaryButton;
+              Visible: false;
+              Label { Style: (FontSize: 13, TextColor: #D4AF37, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "SELECTIONNER"; }
+            }
+          }
+        }
+
+      }
+
+      Label #ProfessionCatalogSpecTitle {
+        Anchor: (Top: 14);
+        Style: (FontSize: 21, TextColor: #C8A96E, RenderUppercase: true, RenderBold: true);
+        Text: "MÉTIERS DE CRAFT";
+      }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Top: 8, Height: 208);
+        LayoutMode: Left;
+
+        Group #ProfessionCatalogCard4 {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Top;
+            Padding: (Full: 10);
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 40);
+              LayoutMode: Full;
+              ItemIcon #ProfessionCatalogCard4Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); }
+              Label #ProfessionCatalogCard4Name {
+                Anchor: (Left: 48, Right: 0, Top: 2, Height: 18);
+                Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "";
+              }
+
+              Label #ProfessionCatalogCard4Active {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #31C677, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "ACTIF";
+                Visible: false;
+              }
+
+              Label #ProfessionCatalogCard4Inactive {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #787060, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "INACTIF";
+                Visible: true;
+              }
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              LayoutMode: Middle;
+              Group {
+                LayoutMode: Left;
+                Group { Anchor: (Width: 12, Height: 12); Background: PatchStyle(TexturePath: "Icons/Jobs_Craft.png", Border: 0); }
+                Group { Anchor: (Width: 3); }
+                Label { Style: (FontSize: 9, TextColor: #A09080, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "CRAFT"; }
+              }
+            }
+
+            Label #ProfessionCatalogCard4Desc {
+              Anchor: (Left: 0, Right: 0, Height: 26);
+              Style: (FontSize: 10, TextColor: #A09080, VerticalAlignment: Center, HorizontalAlignment: Start, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Label #ProfessionCatalogCard4PrereqText {
+              Anchor: (Left: 0, Right: 0, Height: 28);
+              Style: (FontSize: 10, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Group { FlexWeight: 1; }
+
+            Label #ProfessionCatalogCard4Level {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center);
+              Text: "";
+            }
+
+            Group #ProfessionCatalogCard4ProgBar {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+              ProgressBar #ProfessionCatalogCard4ProgBarFill {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Value: 0.0;
+                BarTexturePath: "Elements/Gauge_Fill.png";
+              }
+            }
+
+            Button #ProfessionCatalogCard4Select {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Style: @ProfessionTabSecondaryButton;
+              Visible: false;
+              Label { Style: (FontSize: 13, TextColor: #D4AF37, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "SELECTIONNER"; }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10, Top: 0, Bottom: 0); }
+
+        Group #ProfessionCatalogCard5 {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Top;
+            Padding: (Full: 10);
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 40);
+              LayoutMode: Full;
+              ItemIcon #ProfessionCatalogCard5Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); }
+              Label #ProfessionCatalogCard5Name {
+                Anchor: (Left: 48, Right: 0, Top: 2, Height: 18);
+                Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "";
+              }
+
+              Label #ProfessionCatalogCard5Active {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #31C677, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "ACTIF";
+                Visible: false;
+              }
+
+              Label #ProfessionCatalogCard5Inactive {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #787060, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "INACTIF";
+                Visible: true;
+              }
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              LayoutMode: Middle;
+              Group {
+                LayoutMode: Left;
+                Group { Anchor: (Width: 12, Height: 12); Background: PatchStyle(TexturePath: "Icons/Jobs_Craft.png", Border: 0); }
+                Group { Anchor: (Width: 3); }
+                Label { Style: (FontSize: 9, TextColor: #A09080, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "CRAFT"; }
+              }
+            }
+
+            Label #ProfessionCatalogCard5Desc {
+              Anchor: (Left: 0, Right: 0, Height: 26);
+              Style: (FontSize: 10, TextColor: #A09080, VerticalAlignment: Center, HorizontalAlignment: Start, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Label #ProfessionCatalogCard5PrereqText {
+              Anchor: (Left: 0, Right: 0, Height: 28);
+              Style: (FontSize: 10, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Group { FlexWeight: 1; }
+
+            Label #ProfessionCatalogCard5Level {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center);
+              Text: "";
+            }
+
+            Group #ProfessionCatalogCard5ProgBar {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+              ProgressBar #ProfessionCatalogCard5ProgBarFill {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Value: 0.0;
+                BarTexturePath: "Elements/Gauge_Fill.png";
+              }
+            }
+
+            Button #ProfessionCatalogCard5Select {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Style: @ProfessionTabSecondaryButton;
+              Visible: false;
+              Label { Style: (FontSize: 13, TextColor: #D4AF37, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "SELECTIONNER"; }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10, Top: 0, Bottom: 0); }
+
+        Group #ProfessionCatalogCard6 {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Top;
+            Padding: (Full: 10);
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 40);
+              LayoutMode: Full;
+              ItemIcon #ProfessionCatalogCard6Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); }
+              Label #ProfessionCatalogCard6Name {
+                Anchor: (Left: 48, Right: 0, Top: 2, Height: 18);
+                Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "";
+              }
+
+              Label #ProfessionCatalogCard6Active {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #31C677, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "ACTIF";
+                Visible: false;
+              }
+
+              Label #ProfessionCatalogCard6Inactive {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #787060, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "INACTIF";
+                Visible: true;
+              }
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              LayoutMode: Middle;
+              Group {
+                LayoutMode: Left;
+                Group { Anchor: (Width: 12, Height: 12); Background: PatchStyle(TexturePath: "Icons/Jobs_Craft.png", Border: 0); }
+                Group { Anchor: (Width: 3); }
+                Label { Style: (FontSize: 9, TextColor: #A09080, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "CRAFT"; }
+              }
+            }
+
+            Label #ProfessionCatalogCard6Desc {
+              Anchor: (Left: 0, Right: 0, Height: 26);
+              Style: (FontSize: 10, TextColor: #A09080, VerticalAlignment: Center, HorizontalAlignment: Start, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Label #ProfessionCatalogCard6PrereqText {
+              Anchor: (Left: 0, Right: 0, Height: 28);
+              Style: (FontSize: 10, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Group { FlexWeight: 1; }
+
+            Label #ProfessionCatalogCard6Level {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center);
+              Text: "";
+            }
+
+            Group #ProfessionCatalogCard6ProgBar {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+              ProgressBar #ProfessionCatalogCard6ProgBarFill {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Value: 0.0;
+                BarTexturePath: "Elements/Gauge_Fill.png";
+              }
+            }
+
+            Button #ProfessionCatalogCard6Select {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Style: @ProfessionTabSecondaryButton;
+              Visible: false;
+              Label { Style: (FontSize: 13, TextColor: #D4AF37, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "SELECTIONNER"; }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10, Top: 0, Bottom: 0); }
+
+        Group #ProfessionCatalogCard7 {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Top;
+            Padding: (Full: 10);
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 40);
+              LayoutMode: Full;
+              ItemIcon #ProfessionCatalogCard7Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); }
+              Label #ProfessionCatalogCard7Name {
+                Anchor: (Left: 48, Right: 0, Top: 2, Height: 18);
+                Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "";
+              }
+
+              Label #ProfessionCatalogCard7Active {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #31C677, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "ACTIF";
+                Visible: false;
+              }
+
+              Label #ProfessionCatalogCard7Inactive {
+                Anchor: (Left: 48, Right: 0, Top: 22, Height: 16);
+                Style: (FontSize: 11, TextColor: #787060, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+                Text: "INACTIF";
+                Visible: true;
+              }
+            }
+
+            Group { Anchor: (Height: 4); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              LayoutMode: Middle;
+              Group {
+                LayoutMode: Left;
+                Group { Anchor: (Width: 12, Height: 12); Background: PatchStyle(TexturePath: "Icons/Jobs_Craft.png", Border: 0); }
+                Group { Anchor: (Width: 3); }
+                Label { Style: (FontSize: 9, TextColor: #A09080, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "CRAFT"; }
+              }
+            }
+
+            Label #ProfessionCatalogCard7Desc {
+              Anchor: (Left: 0, Right: 0, Height: 26);
+              Style: (FontSize: 10, TextColor: #A09080, VerticalAlignment: Center, HorizontalAlignment: Start, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Label #ProfessionCatalogCard7PrereqText {
+              Anchor: (Left: 0, Right: 0, Height: 28);
+              Style: (FontSize: 10, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center, Wrap: true);
+              Text: "";
+              Visible: false;
+            }
+
+            Group { FlexWeight: 1; }
+
+            Label #ProfessionCatalogCard7Level {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Center);
+              Text: "";
+            }
+
+            Group #ProfessionCatalogCard7ProgBar {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+              ProgressBar #ProfessionCatalogCard7ProgBarFill {
+                Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                Value: 0.0;
+                BarTexturePath: "Elements/Gauge_Fill.png";
+              }
+            }
+
+            Button #ProfessionCatalogCard7Select {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Style: @ProfessionTabSecondaryButton;
+              Visible: false;
+              Label { Style: (FontSize: 13, TextColor: #D4AF37, RenderUppercase: true, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "SELECTIONNER"; }
+            }
+          }
+        }
+
+      }
+
+      Group #ProfessionAboutBox {
+        Anchor: (Top: 18, Left: 0, Right: 0);
+        LayoutMode: Top;
+        Padding: (Full: 12);
+        Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Height: 20);
+          LayoutMode: Left;
+          Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Info.png", Border: 0); }
+          Group { Anchor: (Width: 8); }
+          Label #ProfessionAboutTitle {
+            Anchor: (Height: 20);
+            Style: (FontSize: 13, TextColor: #C8A96E, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+            Text: "À PROPOS DES MÉTIERS";
+          }
+        }
+
+        Group { Anchor: (Height: 10); }
+
+        Group {
+          Anchor: (Left: 0, Right: 0);
+          LayoutMode: Left;
+
+          Group {
+            FlexWeight: 1;
+            LayoutMode: Top;
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 36);
+              LayoutMode: Left;
+              Group { Anchor: (Width: 24, Height: 24); Background: PatchStyle(TexturePath: "Elements/People.png", Border: 0); }
+              Group { Anchor: (Width: 8); }
+              Label {
+                FlexWeight: 1;
+                Anchor: (Height: 36);
+                Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Start, VerticalAlignment: Center, Wrap: true);
+                Text: "Sélectionnez 2 métiers actifs parmi les 8 disponibles.";
+              }
+            }
+
+            Group { Anchor: (Height: 6); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 36);
+              LayoutMode: Left;
+              Group { Anchor: (Width: 24, Height: 24); Background: PatchStyle(TexturePath: "Icons/XP.png", Border: 0); }
+              Group { Anchor: (Width: 8); }
+              Label {
+                FlexWeight: 1;
+                Anchor: (Height: 36);
+                Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Start, VerticalAlignment: Center, Wrap: true);
+                Text: "Gagnez de l'XP en réalisant des actions liées à vos métiers.";
+              }
+            }
+          }
+
+          Group { Anchor: (Width: 24); }
+
+          Group {
+            FlexWeight: 1;
+            LayoutMode: Top;
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 36);
+              LayoutMode: Left;
+              Group { Anchor: (Width: 24, Height: 24); Background: PatchStyle(TexturePath: "Icons/Talent.png", Border: 0); }
+              Group { Anchor: (Width: 8); }
+              Label {
+                FlexWeight: 1;
+                Anchor: (Height: 36);
+                Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Start, VerticalAlignment: Center, Wrap: true);
+                Text: "Montez de niveau pour obtenir des points de talents dans l'arbre dédié à chaque métier.";
+              }
+            }
+
+            Group { Anchor: (Height: 6); }
+
+            Group {
+              Anchor: (Left: 0, Right: 0, Height: 36);
+              LayoutMode: Left;
+              Group { Anchor: (Width: 24, Height: 24); Background: PatchStyle(TexturePath: "Icons/Hourglass.png", Border: 0); }
+              Group { Anchor: (Width: 8); }
+              Label {
+                FlexWeight: 1;
+                Anchor: (Height: 36);
+                Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Start, VerticalAlignment: Center, Wrap: true);
+                Text: "Changez de métier avec un temps de recharge de 12 heures.";
+              }
+            }
+          }
+        }
+      }
+
+      Group { FlexWeight: 1; }
+    }
+  }
+}

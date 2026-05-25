@@ -1,0 +1,42 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+        Group #ContentArea {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Background: (Color: #182230);
+          Padding: (Top: 16, Bottom: 16, Left: 16, Right: 16);
+          Group #VaryonPageHomeMount {
+            FlexWeight: 1;
+            LayoutMode: Top;
+          }
+          Group #VaryonPageTutorielMount {
+            FlexWeight: 1;
+            LayoutMode: Top;
+          }
+          Group #VaryonPageCommandesMount {
+            FlexWeight: 1;
+            LayoutMode: Top;
+          }
+          Group #VaryonPageMisesAJourMount {
+            FlexWeight: 1;
+            LayoutMode: Top;
+          }
+          Group #VaryonPageVaryonMount {
+            FlexWeight: 1;
+            LayoutMode: Top;
+          }
+          Group #VaryonPageParametresMount {
+            FlexWeight: 1;
+            LayoutMode: Top;
+          }
+          Group #VaryonPagePlaytimeMount {
+            FlexWeight: 1;
+            LayoutMode: Top;
+          }
+          Group #VaryonPageAdminMount {
+            FlexWeight: 1;
+            LayoutMode: Top;
+          }
+        }
+

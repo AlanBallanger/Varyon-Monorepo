@@ -1,0 +1,17 @@
+{
+  "Group": "com.varyon",
+  "Name": "Varyon-BossArena",
+  "Version": "3.5.0",
+  "Description": "Boss arena fights with per-player loot chests",
+  "Authors": [
+    { "Name": "Project42" }
+  ],
+  "Website": "",
+  "Main": "com.varyon.bossarena.BossArenaPlugin",
+  "Dependencies": {},
+  "LoadBefore": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": true,
+  "OptionalDependencies": {},
+  "ServerVersion": "2026.02.19-1a311a592"
+}

@@ -1,0 +1,55 @@
+Group {
+  LayoutMode: Top;
+  Anchor: (Height: 64, Left: 0, Right: 0);
+  Padding: (Bottom: 6);
+
+  Group {
+    LayoutMode: Left;
+    Anchor: (Height: 54);
+    Padding: (Left: 8, Right: 10, Top: 6, Bottom: 6);
+    Background: #1a2535;
+
+    Group #RankBadge {
+      Anchor: (Width: 32, Height: 32);
+      LayoutMode: Middle;
+      Background: (Color: #E8A587);
+      Padding: (Full: 2);
+
+      Group {
+        LayoutMode: Middle;
+        Anchor: (Width: 28, Height: 28);
+        Background: (Color: #C67800);
+
+        Label #Rank {
+          Text: "";
+          Style: (
+            FontSize: 12,
+            TextColor: #FFFFFF,
+            RenderBold: true,
+            VerticalAlignment: Center,
+            HorizontalAlignment: Center,
+          );
+        }
+      }
+    }
+
+    Group { Anchor: (Width: 10); }
+
+    Group {
+      LayoutMode: Top;
+      FlexWeight: 1;
+
+      Label #Time {
+        Anchor: (Height: 22);
+        Text: "";
+        Style: (FontSize: 15, TextColor: #E8A93B, RenderBold: true, VerticalAlignment: Center);
+      }
+
+      Label #Name {
+        Anchor: (Height: 20);
+        Text: "";
+        Style: (FontSize: 14, TextColor: #ffffff, VerticalAlignment: Center);
+      }
+    }
+  }
+}

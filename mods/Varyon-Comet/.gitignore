@@ -1,0 +1,20 @@
+# Build files
+build.bat
+build/
+dist/
+target/
+libs/
+/com/
+!src/com/
+!src/com/**
+server/
+workspace/
+
+# Tools
+tools/
+
+# Agent
+.agent/
+
+# Local project docs
+PROJECT_INDEX.md

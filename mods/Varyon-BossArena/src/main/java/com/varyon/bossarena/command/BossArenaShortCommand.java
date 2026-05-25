@@ -1,0 +1,32 @@
+package com.varyon.bossarena.command;
+
+import com.varyon.bossarena.BossArenaPlugin;
+import com.hypixel.hytale.server.core.command.system.AbstractCommand;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+
+import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
+
+public final class BossArenaShortCommand extends AbstractCommand {
+
+    public BossArenaShortCommand(BossArenaPlugin plugin) {
+        super("ba", "Shortcut for /bossarena");
+        requirePermission(BossArenaCommand.ADMIN_PERMISSION);
+
+        // Register all the same subcommands as BossArenaCommand
+        addSubCommand(new BossArenaCommand.ArenaRoot(plugin));
+        addSubCommand(new BossArenaCommand.SpawnBoss(plugin));
+        addSubCommand(new BossArenaCommand.Reload(plugin));
+        addSubCommand(new BossArenaCommand.Config(plugin));
+        addSubCommand(new BossArenaCommand.ShopRoot(plugin));
+        addSubCommand(new BossArenaCommand.Cleanup(plugin));
+    }
+
+    @Override
+    protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
+        ctx.sendMessage(com.hypixel.hytale.server.core.Message.raw(
+                "Use: /ba arena <create|delete|list> OR /ba spawn <bossId> <arenaId|here> OR /ba reload OR /ba config OR /ba shop <open|place|delete> OR /ba cleanup"
+        ));
+        return CompletableFuture.completedFuture(null);
+    }
+}

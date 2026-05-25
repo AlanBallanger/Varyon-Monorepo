@@ -1,0 +1,46 @@
+# VaryonUI Varyon Section Configuration
+# Format: [COLOR:#hexcode] pour les titres, [/COLOR] pour revenir au texte normal
+# [SEPARATOR] pour une ligne de séparation
+
+content = """
+[COLOR:#4fc3f7]Fonctionnement[/COLOR]
+
+Le monde Varyon est différent d'une survie classique. Ici, pas de téléportations à sa guise ou de retour à un home.
+Il y a une difficulté croissante, représentée par des zones allant de 1 à 10. Chaque zone est peuplée de créatures du niveau 1 à 100. Plus tu avanceras dans les zones, meilleures seront les récompenses en minerais uniques que sont le mithril, l'onyxium et le prisma.
+
+[SEPARATOR]
+
+[COLOR:#66bb6a]Expéditions[/COLOR]
+
+Pour te lancer dans une expédition, tu peux te déplacer à pied depuis la sortie, ou te téléporter aléatoirement dans la zone débloquée de ton choix via la stelle de téléportation. Une fois dehors, explore à ta guise... mais surtout survis. Car pour sortir de là, tu vas pouvoir utiliser /extract qui va créer un portail de retour personnel dans une zone autour de toi. Pas d'autre choix que de le trouver.
+Si jamais tu meurs, et ça arrivera... Les pénalités sont plus importantes qu'en vanilla, tu perdras tout ton équipement, et 20% de durabilité sur tous tes objets. Pour retrouver ton cadavre, tu peux faire /return, ce qui te ramènera relativement proche de ton point de mort, mais pas à l'emplacement exact. Ca se mérite !
+
+[SEPARATOR]
+
+[COLOR:#ffa726]Loots[/COLOR]
+
+Zones de plus en plus dures d'accord, mais pourquoi ?
+A l'intérieur de chaque zone, tu vas pouvoir récupérer lors de tes actions des fragments de clés, qui sont échangeables contre des clés, 100 fragments la clé. Les clés permettent d'ouvrir des coffres de loot qui contiennent tout le précieux butin. Et des objets non obtenables autrement.
+Attention, tu ne peux looter des fragments de clés uniquement dans les zones que tu as déjà débloqué. Même si tu te rends à pied ou rejoins un ami dans une zone de plus haut rang tu ne pourras pas drop de fragments.
+
+[SEPARATOR]
+
+[COLOR:#42a5f5]Jauge d'essence[/COLOR]
+
+Comme tu l'auras sûrement remarqué, il y a une jauge en haut de ton écran. Tu peux faire avancer cette jauge pour ta faction en récoltant de l'essence durant tes expéditions et en la déposant au spawn de Varyon dans la base de ta faction dans le coffre prévu à cet effet.
+Faire monter la jauge pour ta faction va te donner des fragments de clé aux 3 paliers : 33%, 66%, 100%. Les fragments seront de la plus haute zone que tu as débloqué. Il y a un temps pendant lequel tu ne pourras pas ré-obtenir la même récompense pour éviter les abus.
+Si tu meurs tu perdras 80% de ta jauge d'essence, et si tu quittes Varyon, tu perdras également toute ton essence.
+
+[SEPARATOR]
+
+[COLOR:#ab47bc]Progression[/COLOR]
+
+Pour progresser sur Varyon, tu vas devoir réunir un bon nombre de ressources, de plus en plus rares. Tu pourras trouver tous les prérequis en parlant au PNJ correspondant dans l'ambassade de ta faction.
+Ca va te permettre d'accéder à la zone suivante, et rencontrer de nouveaux défis...
+
+[SEPARATOR]
+
+[COLOR:#ef5350]PvP[/COLOR]
+
+Le PvP est actif par défaut sur toute la map, mourir en plus des pénalités te fera perdre 80% de ton essence. La divinité Gaïa protège un quart de la map par alternance si tu souhaites aller en zone non PvP, mais tu gagneras moins d'essence qu'en zone à risque.
+"""

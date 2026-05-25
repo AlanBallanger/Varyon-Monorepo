@@ -1,0 +1,17 @@
+{
+  "Parent": "Ingredient_Fire_Essence",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Orbe_Ambassade_Fraktale.name",
+    "Description": "server.items.Varyon_Orbe_Ambassade_Fraktale.description"
+  },
+  "Quality": "Epic",
+  "Tags": {
+    "Type": [ "Ingredient" ],
+    "Varyon": [ "Ambassade", "Orbe" ]
+  },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [ { "Type": "varyon_ambassade_orb" } ]
+    }
+  }
+}

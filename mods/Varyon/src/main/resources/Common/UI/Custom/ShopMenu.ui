@@ -1,0 +1,375 @@
+﻿$C = "Common.ui";
+
+$C.@PageOverlay {
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 1100, Height: 720);
+
+    #Title {
+      Group {
+        LayoutMode: Left;
+
+        Label #MenuTitle {
+          FlexWeight: 1;
+          Text: "Boutique de clé varyon";
+          Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center);
+        }
+
+        TextButton #CloseButton {
+          Text: "X";
+          Anchor: (Width: 36, Height: 36, Top: 2, Right: 12);
+          Style: TextButtonStyle(
+            Default: (LabelStyle: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+          );
+        }
+      }
+    }
+
+    #Content {
+      Padding: (Top: 16, Bottom: 16, Left: 16, Right: 16);
+      LayoutMode: Top;
+
+      Group #Row1 {
+        LayoutMode: Left;
+        Anchor: (Height: 150, Bottom: 10);
+        Group #Item1 {
+          FlexWeight: 1;
+          Anchor: (Right: 10);
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item1Label { Text: "Clé Zone 1"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item1Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item1FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            Label #Item1Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item1Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item1KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton1 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+        Group #Item2 {
+          FlexWeight: 1;
+          Anchor: (Right: 10);
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item2Label { Text: "Clé Zone 2"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item2Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item2FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item2Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item2Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item2KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton2 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+        Group #Item3 {
+          FlexWeight: 1;
+          Anchor: (Right: 10);
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item3Label { Text: "Clé Zone 3"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item3Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item3FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item3Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item3Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item3KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton3 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+      }
+
+      Group #Row2 {
+        LayoutMode: Left;
+        Anchor: (Height: 150, Bottom: 10);
+        Group #Item4 {
+          FlexWeight: 1;
+          
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item4Label { Text: "Clé Zone 4"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item4Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item4FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item4Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item4Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item4KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton4 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+        Group #Item5 {
+          FlexWeight: 1;
+          
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item5Label { Text: "Clé Zone 5"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item5Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item5FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item5Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item5Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item5KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton5 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+        Group #Item6 {
+          FlexWeight: 1;
+          
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item6Label { Text: "Clé Zone 6"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item6Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item6FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item6Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item6Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item6KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton6 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+      }
+
+      Group #Row3 {
+        LayoutMode: Left;
+        Anchor: (Height: 150, Bottom: 10);
+        Group #Item7 {
+          FlexWeight: 1;
+          
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item7Label { Text: "Clé Zone 7"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item7Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item7FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item7Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item7Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item7KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton7 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+        Group #Item8 {
+          FlexWeight: 1;
+          
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item8Label { Text: "Clé Zone 8"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item8Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item8FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item8Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item8Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item8KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton8 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+        Group #Item9 {
+          FlexWeight: 1;
+          
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item9Label { Text: "Clé Zone 9"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item9Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item9FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item9Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item9Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item9KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton9 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+      }
+
+      Group #Row4 {
+        LayoutMode: Left;
+        Anchor: (Height: 150);
+        Group #Item10 {
+          FlexWeight: 1;
+          
+          Background: (Color: #0b1624);
+          OutlineColor: #2a3a4a;
+          OutlineSize: 2;
+          LayoutMode: Top;
+          Padding: (Top: 8, Left: 8, Right: 8, Bottom: 8);
+          Label #Item10Label { Text: "Clé Zone 10"; Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); Anchor: (Height: 24, Bottom: 4, Left: 0, Right: 0); }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 20, Bottom: 2);
+            Label { Text: "Coût"; Style: (FontSize: 16, RenderBold: true, TextColor: #ff4444); Anchor: (Width: 90, Left: 24); }
+            Group { FlexWeight: 1; }
+            Label { Text: "Obtient"; Style: (FontSize: 16, RenderBold: true, TextColor: #44ff44); Anchor: (Width: 90, Right: 16); }
+          }
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 48, Left: 0, Right: 0);
+            Label #Item10Cost { Text: "100x"; Style: (FontSize: 14, TextColor: #aacc88, VerticalAlignment: Center); Anchor: (Width: 44, Left: 24, Right: 2); }
+            ItemIcon #Item10FragmentIcon { Anchor: (Width: 40, Height: 40, Right: 40); }
+            
+            Label #Item10Arrow { Text: "->"; Style: (FontSize: 16, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center); Anchor: (Width: 24, Right: 40); }
+            Label #Item10Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
+            ItemIcon #Item10KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
+          }
+          Button #BuyButton10 {
+            Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+          }
+        }
+        Group { FlexWeight: 1; }
+        Group { FlexWeight: 1; }
+      }
+    }
+  }
+}

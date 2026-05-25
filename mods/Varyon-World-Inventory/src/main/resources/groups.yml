@@ -1,0 +1,13 @@
+# Chaque clé sous groups est le nom de catégorie : inventaire dans <data>/<uuid>/<nom>.json
+# Liste les noms de mondes Hytale qui partagent ce fichier (comparaison insensible à la casse).
+# Mondes absents de la config → groupe "default" → default.json
+# Mettre TOUS les noms internes utilisés par le serveur (ex. varyon hub + VaryonS1) dans le même groupe.
+
+groups:
+  adventurers:
+    - Varyon
+    - Haven
+
+  creative:
+    - Creative
+    - Flat

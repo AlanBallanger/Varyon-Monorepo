@@ -1,0 +1,17 @@
+{
+  "Parent": "Ingredient_Water_Essence",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Orbe_Ambassade_Novale.name",
+    "Description": "server.items.Varyon_Orbe_Ambassade_Novale.description"
+  },
+  "Quality": "Epic",
+  "Tags": {
+    "Type": [ "Ingredient" ],
+    "Varyon": [ "Ambassade", "Orbe" ]
+  },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [ { "Type": "varyon_ambassade_orb" } ]
+    }
+  }
+}

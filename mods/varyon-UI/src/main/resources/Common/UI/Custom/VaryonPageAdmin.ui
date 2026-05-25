@@ -1,0 +1,14 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+          Group #AdminContent {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Visible: false;
+            Padding: (Top: 0, Bottom: 0, Left: 0, Right: 0);
+          
+            Group #AdminCommandesList {
+              LayoutMode: Top;
+            }
+          }

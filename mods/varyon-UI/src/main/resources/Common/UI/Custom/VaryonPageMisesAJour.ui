@@ -1,0 +1,251 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+          Group #MisesAJourContent {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Visible: false;
+            Padding: (Top: 0, Bottom: 0, Left: 0, Right: 0);
+          
+            Group #NewsEntry1 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate1 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle1 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent1 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator1 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry2 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate2 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle2 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent2 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator2 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry3 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate3 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle3 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent3 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator3 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry4 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate4 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle4 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent4 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator4 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry5 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate5 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle5 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent5 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator5 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry6 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate6 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle6 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent6 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator6 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry7 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate7 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle7 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent7 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator7 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry8 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate8 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle8 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent8 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator8 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry9 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate9 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle9 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent9 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator9 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+            Group #NewsEntry10 {
+              LayoutMode: Top;
+              Anchor: (Bottom: 12);
+              Visible: false;
+            
+              Label #NewsDate10 {
+                Text: "Date";
+                Style: (FontSize: 11, TextColor: #6699bb);
+                Anchor: (Bottom: 2);
+              }
+            
+              Label #NewsTitle10 {
+                Text: "Title";
+                Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff);
+                Anchor: (Bottom: 4);
+              }
+            
+              Label #NewsContent10 { Text: "Content"; Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }
+            
+              Group #NewsSeparator10 {
+                Anchor: (Height: 1);
+                Background: (Color: #2a3a4a);
+              }
+            }
+          }

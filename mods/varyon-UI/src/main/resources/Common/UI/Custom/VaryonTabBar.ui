@@ -1,0 +1,294 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+@VaryonTabBarSounds = (
+  Activate: (
+    SoundPath: "Sounds/TopBarActivate.ogg",
+    Volume: 11
+  ),
+  MouseHover: (
+    SoundPath: "Sounds/ButtonsMainHover.ogg",
+    MinPitch: -0.15,
+    MaxPitch: 0.15,
+    Volume: 14
+  )
+);
+
+        Group #TabBar {
+          LayoutMode: Left;
+          Anchor: (Height: 70);
+
+          Padding: (Top: 14, Left: 8, Right: 8, Bottom: 0);
+
+          Group #HomeTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Padding: (Right: 2);
+
+            Button #HomeTab {
+              TooltipText: "Accueil";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #HomeIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Accueil.png";
+                }
+              }
+            }
+
+            Group #HomeTabUnderline {
+              Anchor: (Height: 2, Left: 0, Right: 0, Bottom: 0);
+              Background: (Color: #F3F5F6);
+              Visible: false;
+            }
+          }
+
+
+          Group #TutorielTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Padding: (Right: 2);
+
+            Button #TutorielTab {
+              TooltipText: "Tutoriel";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #TutorielIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Tutoriel.png";
+                }
+              }
+            }
+
+            Group #TutorielTabUnderline {
+              Anchor: (Height: 2, Left: 0, Right: 0, Bottom: 0);
+              Background: (Color: #F3F5F6);
+              Visible: false;
+            }
+          }
+          Group #CommandesTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Padding: (Right: 2);
+
+            Button #CommandesTab {
+              TooltipText: "Commandes";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #CommandesIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Commandes.png";
+                }
+              }
+            }
+
+            Group #CommandesTabUnderline {
+              Anchor: (Height: 2, Left: 0, Right: 0, Bottom: 0);
+              Background: (Color: #F3F5F6);
+              Visible: false;
+            }
+          }
+          Group #MisesAJourTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Padding: (Right: 2);
+
+            Button #MisesAJourTab {
+              TooltipText: "Mises à jour";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #MisesAJourIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Mises_a_jour.png";
+                }
+              }
+            }
+
+            Group #MisesAJourTabUnderline {
+              Anchor: (Height: 2, Left: 0, Right: 0, Bottom: 0);
+              Background: (Color: #F3F5F6);
+              Visible: false;
+            }
+          }
+          Group #VaryonTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Padding: (Right: 2);
+
+            Button #VaryonTab {
+              TooltipText: "Varyon";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #VaryonIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Varyon.png";
+                }
+              }
+            }
+
+            Group #VaryonTabUnderline {
+              Anchor: (Height: 2, Left: 0, Right: 0, Bottom: 0);
+              Background: (Color: #F3F5F6);
+              Visible: false;
+            }
+          }
+
+          Group #PlaytimeTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Padding: (Right: 2);
+
+            Button #PlaytimeTab {
+              TooltipText: "Temps de jeu";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #PlaytimeIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Temps.png";
+                }
+              }
+            }
+
+            Group #PlaytimeTabUnderline {
+              Anchor: (Height: 2, Left: 0, Right: 0, Bottom: 0);
+              Background: (Color: #F3F5F6);
+              Visible: false;
+            }
+          }
+          Group #JournalTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Padding: (Right: 2);
+
+            Button #JournalTab {
+              TooltipText: "Journal de quêtes";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #JournalIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Quetes.png";
+                }
+              }
+            }
+          }
+          Group #ParametresTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Padding: (Right: 2);
+
+            Button #ParametresTab {
+              TooltipText: "Paramètres";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #ParametresIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Parametres.png";
+                }
+              }
+            }
+
+            Group #ParametresTabUnderline {
+              Anchor: (Height: 2, Left: 0, Right: 0, Bottom: 0);
+              Background: (Color: #F3F5F6);
+              Visible: false;
+            }
+          }
+
+          Label { FlexWeight: 1; }
+
+          Group #AdminTabContainer {
+            Anchor: (Top: 0, Bottom: 0, Width: 70);
+            Visible: false;
+            Padding: (Right: 2);
+
+            Button #AdminTab {
+              TooltipText: "Admin";
+              TextTooltipShowDelay: 0.001;
+              Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
+              Style: ButtonStyle(
+                Default: (Background: (Color: #00000000)),
+                Hovered: (Background: (Color: #ffffff18)),
+                Pressed: (Background: (Color: #00000030)),
+                Sounds: @VaryonTabBarSounds
+              );
+
+              Group {
+                LayoutMode: Middle;
+                Group #AdminIcon {
+                  Anchor: (Width: 44, Height: 44);
+                  Background: "Icons/Commandes.png";
+                }
+              }
+            }
+
+            Group #AdminTabUnderline {
+              Anchor: (Height: 2, Left: 0, Right: 0, Bottom: 0);
+              Background: (Color: #F3F5F6);
+              Visible: false;
+            }
+          }
+        }

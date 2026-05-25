@@ -1,0 +1,34 @@
+﻿Group #VaryonMenuHud {
+  LayoutMode: Top;
+
+  Label #VaryonMenuTitle {
+    Text: "Menu Varyon";
+    Anchor: (Width: 128, Height: 24, Top: 0);
+    Style: (
+      FontSize: 12,
+      RenderBold: true,
+      TextColor: #FFFFFF,
+      VerticalAlignment: Center,
+      HorizontalAlignment: Center
+    );
+  }
+
+  Group #VaryonMenuStack {
+    Group #VaryonButtonBase {
+      Background: "button_background.png";
+    }
+    Group #VaryonMenuBook {
+      Background: "book.png";
+    }
+    Label #VaryonMenuKey {
+      Text: "O";
+      Style: (
+        FontSize: 12,
+        RenderBold: true,
+        TextColor: #FFF8E0,
+        VerticalAlignment: Center,
+        HorizontalAlignment: Center
+      );
+    }
+  }
+}

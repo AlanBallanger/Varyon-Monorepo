@@ -1,0 +1,48 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+@VaryonTabBarSounds = (
+  Activate: (
+    SoundPath: "Sounds/TopBarActivate.ogg",
+    Volume: 11
+  ),
+  MouseHover: (
+    SoundPath: "Sounds/ButtonsMainHover.ogg",
+    MinPitch: -0.15,
+    MaxPitch: 0.15,
+    Volume: 14
+  )
+);
+
+
+
+$C.@PageOverlay {
+  
+  Group {
+    Anchor: (Width: 1125, Height: 759);
+    Background: (PatchStyle(TexturePath: "Common/ContainerFullPatch.png", Border: 20));
+
+    Group #Content {
+      LayoutMode: Left;
+
+      Group #VaryonSidebarMount {
+        LayoutMode: Left;
+      }
+
+      Group #VaryonBodyMount {
+        FlexWeight: 1;
+        LayoutMode: Top;
+      }
+    }
+
+
+    TextButton #CloseButton {
+      Text: "X";
+      Anchor: (Width: 30, Height: 30, Top: 8, Right: 12);
+      Style: TextButtonStyle(
+        Default: (LabelStyle: (FontSize: 18, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 18, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Sounds: $Sounds.@ButtonsLight
+      );
+    }
+  }
+}

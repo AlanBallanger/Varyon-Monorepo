@@ -1,0 +1,1967 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+          Group #CommandesContent {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Visible: false;
+            Padding: (Top: 0, Bottom: 0, Left: 0, Right: 0);
+          
+            Group #CommandesList {
+              LayoutMode: Top;
+            
+              Group #CategoryHeader1 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader1Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle1 {
+                  Text: "Se dÃƒÂ©placer";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow1 {
+                LayoutMode: Left;
+                Anchor: (Height: 110, Bottom: 8);
+                Visible: false;
+              
+                Button #CommandButton1 {
+                  Anchor: (Width: 152, Height: 110, Right: 10);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Yelow_Button_small.png"),
+                    Hovered: (Background: "Icons/Yelow_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Yelow_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 8, Bottom: 2, Left: 8, Right: 8);
+                  
+                    Group {
+                      LayoutMode: Middle;
+                      Anchor: (Height: 68, Left: 0, Right: 0);
+                      Group #CommandButton1Icon {
+                        Anchor: (Width: 68, Height: 68);
+                        Background: "Icons/Spawn_Icon.png";
+                      }
+                    }
+                  
+                    Label #CommandButton1Label {
+                      Text: "Button 1";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
+                    }
+                  
+                    Label #CommandButton1Cmd {
+                      Anchor: (Top: -5);
+                      Text: "/command";
+                      Style: (FontSize: 12, TextColor: #e8e8e8, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton2 {
+                  Anchor: (Width: 152, Height: 110, Right: 10);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Yelow_Button_small.png"),
+                    Hovered: (Background: "Icons/Yelow_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Yelow_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 8, Bottom: 2, Left: 8, Right: 8);
+                  
+                    Group {
+                      LayoutMode: Middle;
+                      Anchor: (Height: 68, Left: 0, Right: 0);
+                      Group #CommandButton2Icon {
+                        Anchor: (Width: 68, Height: 68);
+                        Background: "Icons/RTP_Icon.png";
+                      }
+                    }
+                  
+                    Label #CommandButton2Label {
+                      Text: "Button 2";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
+                    }
+                  
+                    Label #CommandButton2Cmd {
+                      Anchor: (Top: -5);
+                      Text: "/command";
+                      Style: (FontSize: 12, TextColor: #e8e8e8, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton3 {
+                  Anchor: (Width: 152, Height: 110, Right: 10);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button.png"),
+                    Hovered: (Background: "Icons/Blue_Button_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 8, Bottom: 2, Left: 8, Right: 8);
+                  
+                    Group {
+                      LayoutMode: Middle;
+                      Anchor: (Height: 68, Left: 0, Right: 0);
+                      Group #CommandButton3Icon {
+                        Anchor: (Width: 68, Height: 68);
+                        Background: "Icons/Novale_Icon.png";
+                      }
+                    }
+                  
+                    Label #CommandButton3Label {
+                      Text: "Button 3";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
+                    }
+                  
+                    Label #CommandButton3Cmd {
+                      Anchor: (Top: -5);
+                      Text: "/command";
+                      Style: (FontSize: 12, TextColor: #e8e8e8, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton4 {
+                  Anchor: (Width: 152, Height: 110, Right: 10);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Orange_Button.png"),
+                    Hovered: (Background: "Icons/Orange_Button_Hovered.png"),
+                    Pressed: (Background: "Icons/Orange_Button_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 8, Bottom: 2, Left: 8, Right: 8);
+                  
+                    Group {
+                      LayoutMode: Middle;
+                      Anchor: (Height: 68, Left: 0, Right: 0);
+                      Group #CommandButton4Icon {
+                        Anchor: (Width: 68, Height: 68);
+                        Background: "Icons/Fraktale_Icon.png";
+                      }
+                    }
+                  
+                    Label #CommandButton4Label {
+                      Text: "Button 4";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
+                    }
+                  
+                    Label #CommandButton4Cmd {
+                      Anchor: (Top: -5);
+                      Text: "/command";
+                      Style: (FontSize: 12, TextColor: #e8e8e8, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton5 {
+                  Anchor: (Width: 152, Height: 110);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Green_Button.png"),
+                    Hovered: (Background: "Icons/Green_Button_Hovered.png"),
+                    Pressed: (Background: "Icons/Green_Button_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 8, Bottom: 2, Left: 8, Right: 8);
+                  
+                    Group {
+                      LayoutMode: Middle;
+                      Anchor: (Height: 68, Left: 0, Right: 0);
+                      Group #CommandButton5Icon {
+                        Anchor: (Width: 68, Height: 68);
+                        Background: "Icons/Home_Icon.png";
+                      }
+                    }
+                  
+                    Label #CommandButton5Label {
+                      Text: "Button 5";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, Wrap: true);
+                    }
+                  
+                    Label #CommandButton5Cmd {
+                      Anchor: (Top: -5);
+                      Text: "/command";
+                      Style: (FontSize: 12, TextColor: #e8e8e8, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              }
+
+            
+              Group #CategoryHeader2 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader2Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle2 {
+                  Text: "CATEGORY 2";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow2 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton6 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton6Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton6Label {
+                        Text: "Button 6";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton6Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton7 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton7Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton7Label {
+                        Text: "Button 7";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton7Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton8 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton8Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton8Label {
+                        Text: "Button 8";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton8Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton9 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton9Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton9Label {
+                        Text: "Button 9";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton9Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton10 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton10Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton10Label {
+                        Text: "Button 10";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton10Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              }
+
+            
+              Group #CategoryHeader3 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader3Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle3 {
+                  Text: "Base & claims";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow3 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton11 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton11Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton11Label {
+                        Text: "Button 11";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton11Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton12 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton12Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton12Label {
+                        Text: "Button 12";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton12Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton13 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton13Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton13Label {
+                        Text: "Button 13";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton13Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton14 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton14Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton14Label {
+                        Text: "Button 14";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton14Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton15 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton15Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton15Label {
+                        Text: "Button 15";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton15Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              }
+
+            
+              Group #CategoryHeader4 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader4Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle4 {
+                  Text: "Menus joueur";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow4 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton16 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 8);
+                  
+                    Group #CommandButton16Icon {
+                      Anchor: (Width: 40, Height: 40, Top: -1);
+                      Background: "Icons/Quest_Icon.png";
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Top: 4, Left: 4);
+                    
+                      Label #CommandButton16Label {
+                        Text: "Button 16";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton16Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 11, TextColor: #d0d0d0, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton17 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 8);
+                  
+                    Group #CommandButton17Icon {
+                      Anchor: (Width: 40, Height: 40, Top: -1);
+                      Background: "Icons/Quest_Icon.png";
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Top: 4, Left: 4);
+                    
+                      Label #CommandButton17Label {
+                        Text: "Button 17";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton17Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 11, TextColor: #d0d0d0, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton18 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 8);
+                  
+                    Group #CommandButton18Icon {
+                      Anchor: (Width: 40, Height: 40, Top: -1);
+                      Background: "Icons/Quest_Icon.png";
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Top: 4, Left: 4);
+                    
+                      Label #CommandButton18Label {
+                        Text: "Button 18";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton18Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 11, TextColor: #d0d0d0, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton19 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 8);
+                  
+                    Group #CommandButton19Icon {
+                      Anchor: (Width: 40, Height: 40, Top: -1);
+                      Background: "Icons/Quest_Icon.png";
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Top: 4, Left: 4);
+                    
+                      Label #CommandButton19Label {
+                        Text: "Button 19";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton19Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 11, TextColor: #d0d0d0, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton20 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 8);
+                  
+                    Group #CommandButton20Icon {
+                      Anchor: (Width: 40, Height: 40, Top: -1);
+                      Background: "Icons/Quest_Icon.png";
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Top: 4, Left: 4);
+                    
+                      Label #CommandButton20Label {
+                        Text: "Button 20";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton20Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 11, TextColor: #d0d0d0, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              }
+
+              Group #CategoryHeader5 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader5Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle5 {
+                  Text: "CATEGORY 5";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow5 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton21 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton21Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton21Label {
+                        Text: "Button 21";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton21Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton22 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton22Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton22Label {
+                        Text: "Button 22";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton22Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton23 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton23Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton23Label {
+                        Text: "Button 23";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton23Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton24 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton24Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton24Label {
+                        Text: "Button 24";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton24Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton25 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton25Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton25Label {
+                        Text: "Button 25";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton25Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              }
+
+            
+              Group #CategoryHeader6 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader6Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle6 {
+                  Text: "CATEGORY 6";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow6 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton26 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton26Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton26Label {
+                        Text: "Button 26";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton26Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton27 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton27Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton27Label {
+                        Text: "Button 27";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton27Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton28 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton28Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton28Label {
+                        Text: "Button 28";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton28Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton29 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton29Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton29Label {
+                        Text: "Button 29";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton29Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton30 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton30Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton30Label {
+                        Text: "Button 30";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton30Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              }
+
+            
+              Group #CategoryHeader7 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader7Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle7 {
+                  Text: "CATEGORY 7";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow7 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton31 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton31Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton31Label {
+                        Text: "Button 31";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton31Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton32 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton32Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton32Label {
+                        Text: "Button 32";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton32Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton33 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton33Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton33Label {
+                        Text: "Button 33";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton33Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton34 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton34Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton34Label {
+                        Text: "Button 34";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton34Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              
+                Button #CommandButton35 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Left;
+                    Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  
+                    Group #CommandButton35Icon {
+                      Anchor: (Width: 30, Height: 30, Top: -1);
+                      Background: (Color: #00000000);
+                    }
+                  
+                    Group {
+                      LayoutMode: Top;
+                      Anchor: (Left: 0, Right: 0);
+                      Padding: (Left: 4);
+                    
+                      Label #CommandButton35Label {
+                        Text: "Button 35";
+                        Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    
+                      Label #CommandButton35Cmd {
+                        Text: "/command";
+                        Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                      }
+                    }
+                  }
+                }
+              }
+
+            
+              Group #CategoryHeader8 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader8Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle8 {
+                  Text: "CATEGORY 8";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow8 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton36 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton36Label {
+                      Text: "Button 36";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton36Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton37 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton37Label {
+                      Text: "Button 37";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton37Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton38 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton38Label {
+                      Text: "Button 38";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton38Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton39 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton39Label {
+                      Text: "Button 39";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton39Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton40 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton40Label {
+                      Text: "Button 40";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton40Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              }
+
+            
+              Group #CategoryHeader9 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader9Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle9 {
+                  Text: "CATEGORY 9";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow9 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton41 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton41Label {
+                      Text: "Button 41";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton41Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton42 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton42Label {
+                      Text: "Button 42";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton42Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton43 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton43Label {
+                      Text: "Button 43";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton43Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton44 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton44Label {
+                      Text: "Button 44";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton44Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton45 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton45Label {
+                      Text: "Button 45";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton45Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              }
+
+            
+              Group #CategoryHeader10 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+                Visible: false;
+                Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+                Background: "Icons/BgCategory.png";
+
+                Group #CategoryHeader10Icon {
+                  Anchor: (Width: 30, Height: 30, Right: 10);
+                  Background: (Color: #00000000);
+                }
+
+                Label #CategoryTitle10 {
+                  Text: "CATEGORY 10";
+                  Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                  FlexWeight: 1;
+                }
+              }
+            
+              Group #ButtonRow10 {
+                LayoutMode: Left;
+                Anchor: (Height: 53, Bottom: 4);
+                Visible: false;
+              
+                Button #CommandButton46 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton46Label {
+                      Text: "Button 46";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton46Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton47 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton47Label {
+                      Text: "Button 47";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton47Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton48 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton48Label {
+                      Text: "Button 48";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton48Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton49 {
+                  Anchor: (Width: 152, Height: 53, Right: 12);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton49Label {
+                      Text: "Button 49";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton49Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              
+                Button #CommandButton50 {
+                  Anchor: (Width: 152, Height: 53);
+                  Visible: false;
+                  Style: ButtonStyle(
+                    Default: (Background: "Icons/Blue_Button_small.png"),
+                    Hovered: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Pressed: (Background: "Icons/Blue_Button_small_Hovered.png"),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                
+                  Group {
+                    LayoutMode: Top;
+                    Padding: (Top: 10, Bottom: 4, Left: 6, Right: 6);
+                  
+                    Label #CommandButton50Label {
+                      Text: "Button 50";
+                      Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center);
+                      Anchor: (Bottom: 2);
+                    }
+                  
+                    Label #CommandButton50Cmd {
+                      Text: "/command";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              }
+            }
+          }

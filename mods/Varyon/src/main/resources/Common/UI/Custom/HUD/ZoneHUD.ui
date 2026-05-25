@@ -1,0 +1,280 @@
+Group {
+  LayoutMode: Center;
+
+  Group #ZoneHudRoot {
+    Anchor: (Width: 770, Top: 36);
+    LayoutMode: Top;
+
+    Group #ZoneBarRow {
+      LayoutMode: Center;
+      Anchor: (Width: 770, Height: 26, Left: 0, Top: 0);
+
+      Group #ZoneBar {
+        Anchor: (Width: 770, Height: 26);
+        Background: (Color: #202C3C);
+        LayoutMode: Left;
+        Padding: (Vertical: 0, Horizontal: 41);
+
+        Group #InfoRow {
+          Anchor: (Height: 22, Left: 0, Top: 0);
+          LayoutMode: Left;
+
+          Label #ZoneName {
+            Text: "Zone Info - 0m";
+            Style: (
+              FontSize: 12,
+              RenderBold: true,
+              TextColor: #FFFFFF,
+              VerticalAlignment: Center,
+              HorizontalAlignment: Center
+            );
+            Anchor: (Width: 225, Height: 20, Top: 2);
+          }
+
+          Label #Separator1 {
+            Text: "|";
+            Style: (
+              FontSize: 12,
+              TextColor: #FFFFFF,
+              VerticalAlignment: Center,
+              HorizontalAlignment: Center
+            );
+            Anchor: (Width: 10, Height: 22);
+          }
+
+          Group #PointGroup {
+            LayoutMode: Center;
+            Anchor: (Width: 249, Height: 22);
+            Group {
+              LayoutMode: Left;
+              Anchor: (Height: 22);
+              Group #PointsIcon {
+                Anchor: (Width: 16, Height: 16, Top: 3);
+                Background: "Faction_Point.png";
+              }
+              Group {
+                Anchor: (Width: 233, Height: 20, Top: 1);
+                Label #Essence {
+                  Text: "Points : 0/1000";
+                  Style: (
+                    FontSize: 12,
+                    RenderBold: true,
+                    TextColor: #FFFF55,
+                    VerticalAlignment: Center,
+                    HorizontalAlignment: Center
+                  );
+                  Anchor: (Width: 233, Height: 20, Top: 0);
+                }
+              }
+            }
+          }
+
+          Label #Separator2 {
+            Text: "|";
+            Style: (
+              FontSize: 12,
+              TextColor: #FFFFFF,
+              VerticalAlignment: Center,
+              HorizontalAlignment: Center
+            );
+            Anchor: (Width: 10, Height: 22);
+          }
+
+          Group #HPCell {
+            LayoutMode: Center;
+            Anchor: (Width: 58, Height: 22);
+            Group {
+              LayoutMode: Left;
+              Anchor: (Height: 22);
+              Group {
+                LayoutMode: Center;
+                Anchor: (Width: 20, Height: 22, Right: 1);
+                Group {
+                  Anchor: (Width: 16, Height: 16, Top: 5);
+                  Group #HPIconPng {
+                    Anchor: (Width: 16, Height: 16);
+                    Background: "Health.png";
+                  }
+                  Group #HPIconPngPvp {
+                    Anchor: (Width: 16, Height: 16);
+                    Background: "PvP.png";
+                    Visible: false;
+                  }
+                }
+                ItemIcon #HPIconItem {
+                  Anchor: (Width: 18, Height: 18, Top: 4);
+                  Visible: false;
+                }
+              }
+              Group {
+                Anchor: (Width: 35, Height: 20, Top: 2, Left: 3);
+                Label #HPMult {
+                  Text: "";
+                  Style: (
+                    FontSize: 12,
+                    TextColor: #FF5555,
+                    VerticalAlignment: Center,
+                    HorizontalAlignment: Center
+                  );
+                  Anchor: (Width: 35, Height: 20, Top: 0);
+                }
+              }
+            }
+          }
+
+          Label #Separator3 {
+            Text: "|";
+            Style: (
+              FontSize: 12,
+              TextColor: #FFFFFF,
+              VerticalAlignment: Center,
+              HorizontalAlignment: Center
+            );
+            Anchor: (Width: 10, Height: 22);
+          }
+
+          Group #DMGCell {
+            LayoutMode: Center;
+            Anchor: (Width: 58, Height: 22);
+            Group {
+              LayoutMode: Left;
+              Anchor: (Height: 22);
+              Group {
+                LayoutMode: Center;
+                Anchor: (Width: 20, Height: 22, Right: 1);
+                Group #DMGIconPng {
+                  Anchor: (Width: 16, Height: 16, Top: 5);
+                  Background: "Damage.png";
+                }
+                ItemIcon #DMGIconItem {
+                  Anchor: (Width: 18, Height: 18, Top: 4);
+                  Visible: false;
+                }
+              }
+              Group {
+                Anchor: (Width: 35, Height: 20, Top: 2, Left: 3);
+                Label #DMGMult {
+                  Text: "";
+                  Style: (
+                    FontSize: 12,
+                    TextColor: #FFAA55,
+                    VerticalAlignment: Center,
+                    HorizontalAlignment: Center
+                  );
+                  Anchor: (Width: 35, Height: 20, Top: 0);
+                }
+              }
+            }
+          }
+
+          Label #Separator4 {
+            Text: "|";
+            Style: (
+              FontSize: 12,
+              TextColor: #FFFFFF,
+              VerticalAlignment: Center,
+              HorizontalAlignment: Center
+            );
+            Anchor: (Width: 10, Height: 22);
+          }
+
+          Group #LootColumn {
+            LayoutMode: Center;
+            Anchor: (Width: 58, Height: 22);
+            Group #LootCell {
+              Anchor: (Width: 58, Height: 22);
+              Group #LootCellContent {
+                Anchor: (Width: 58, Height: 22, Left: 0, Top: 0);
+                Group {
+                  LayoutMode: Left;
+                  Anchor: (Height: 22);
+                  Group {
+                    LayoutMode: Center;
+                    Anchor: (Width: 20, Height: 22, Right: 1);
+                    Group #LootIconPng {
+                      Anchor: (Width: 16, Height: 16, Top: 5);
+                      Background: "Damage.png";
+                      Visible: false;
+                    }
+                    ItemIcon #LootItemIcon {
+                      Anchor: (Width: 18, Height: 18, Top: 4);
+                    }
+                  }
+                  Group {
+                    Anchor: (Width: 35, Height: 20, Top: 2);
+                    Label #LootMult {
+                      Text: "";
+                      Style: (
+                        FontSize: 12,
+                        TextColor: #55FF55,
+                        VerticalAlignment: Center,
+                        HorizontalAlignment: Center
+                      );
+                      Anchor: (Width: 35, Height: 20, Top: 0);
+                    }
+                  }
+                }
+              }
+              Group #LootCellSpacer {
+                Anchor: (Width: 58, Height: 22, Left: 0, Top: 0);
+                Visible: false;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    Group #EssenceBarHost {
+      Anchor: (Width: 770, Height: 56, Left: 0, Top: 5);
+      LayoutMode: Center;
+
+      Group #EssenceBarWrapper {
+        Anchor: (Width: 470, Height: 56);
+        LayoutMode: Top;
+
+        Group #EssenceBarGroup {
+          Anchor: (Width: 470, Height: 39, Left: 0, Top: 0);
+
+          Group #EssenceBarBackground {
+            Anchor: (Width: 470, Height: 39, Left: 0, Top: 0);
+            Background: "EssenceBarBackground.png";
+          }
+
+          Group #EssenceBarFillTrack {
+            Anchor: (Width: 397, Height: 11, Left: 36, Top: 15);
+
+            Group #EssenceBarNoyau {
+              Anchor: (Width: 0, Height: 11, Left: 199, Top: 0);
+              Background: "EssenceBarFillNoyau.png";
+            }
+            Group #EssenceBarFracture {
+              Anchor: (Width: 0, Height: 11, Left: 199, Top: 0);
+              Background: "EssenceBarFillFracture.png";
+            }
+          }
+
+          Group #EssenceBarEffect {
+            Anchor: (Width: 400, Height: 16, Left: 35, Top: 12);
+            Background: "EssenceBarEffect.png";
+          }
+        }
+
+        Group #EssenceValueRow {
+          Anchor: (Width: 470, Height: 13, Left: 0, Top: -6);
+          Label #EssenceValue {
+            Text: "0";
+            Style: (
+              FontSize: 12,
+              RenderBold: true,
+              TextColor: #FFFFFF,
+              VerticalAlignment: Center,
+              HorizontalAlignment: Center
+            );
+            Anchor: (Width: 56, Height: 12, Top: 0);
+          }
+        }
+      }
+    }
+  }
+}

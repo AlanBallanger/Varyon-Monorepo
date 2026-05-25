@@ -1,0 +1,28 @@
+package com.varyon.bossarena.system;
+
+import com.varyon.bossarena.loot.BossLootHandler;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.system.tick.TickingSystem;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+import javax.annotation.Nonnull;
+import java.util.logging.Logger;
+
+public class LootSpawnSystem extends TickingSystem<EntityStore> {
+    private static final Logger LOGGER = Logger.getLogger("BossArena");
+
+    @Override
+    public void tick(float dt, int index, @Nonnull Store<EntityStore> store) {
+        // If worlds finish loading after plugin setup, restore any pending expiry tasks.
+        BossLootHandler.restorePendingExpiryTasks();
+
+        // Process all pending loot spawns
+        while (!BossLootHandler.PENDING_SPAWNS.isEmpty()) {
+            var spawn = BossLootHandler.PENDING_SPAWNS.poll();
+            if (spawn != null) {
+                LOGGER.info("Processing queued loot spawn for: " + spawn.bossName);
+                BossLootHandler.handleBossDeath(spawn.world, spawn.location, spawn.bossName, spawn.eventId, store);
+            }
+        }
+    }
+}

@@ -1,0 +1,450 @@
+﻿--- 
+name: Varyon-BossArena
+description: Configurable boss arenas with timed spawns, NPC shop, and per-player loot chests.
+author: Project42
+---
+
+# Varyon-BossArena
+
+Varyon-BossArena is a Hytale server mod that adds configurable boss arenas, an NPC-based contract shop, timed boss events, and per-player loot chests.
+
+**Version:** 3.0.1
+
+**Group:** `com.varyon`
+
+**Name:** `Varyon-BossArena`
+
+---
+
+## Quick Start
+
+Follow these steps to get from a fresh install to your first working boss fight.
+
+1. **Create an arena**
+   - Stand where you want the boss anchor to be.
+   - Run: `/ba arena create <arenaId>`
+   - Open `/ba config` > **Arenas** > tab:
+     - Adjust the `Arena`, `X`, `Y`, `Z` values if needed.
+     - Optionally set **Loot Radius** (arena size, in blocks) — used for loot eligibility and for the event banner visibility; leave blank to use the boss loot table default for loot and the default banner radius.
+
+2. **Create or edit a boss**
+   - Open `/ba config` > **Bosses** > tab.
+   - Add a new boss or edit an existing one:
+     - Set `BossID`, `NPC ID`, `Tier`, and basic stats.
+     - Optionally configure waves/adds and per-player scaling.
+   - Bosses are saved into `mods/Varyon-BossArena/bosses.json`.
+
+3. **Define loot**
+   - Option A (recommended): use `/ba config` > **Bosses** > loot editor
+     - Open a boss in the editor and configure its loot rows directly in the UI.
+     - Changes are written to `mods/Varyon-BossArena/loot_tables.json` for you.
+   - Option B: edit `mods/Varyon-BossArena/loot_tables.json` by hand
+     - Add `items[]` for your boss (and optionally `lootRadius` in JSON for legacy; effective radius is per-arena Loot Radius or **50 blocks** when spawned at a location with no arena, e.g. `/ba spawn <bossId> here`).
+     - Each item has `itemId`, `dropChance`, `minAmount`, `maxAmount`.
+
+4. **(Optional) Set up a timed spawn**
+   - Edit `mods/Varyon-BossArena/config.json` > `timedBossSpawns[]`:
+     - Set `bossId` to your boss name.
+     - Set `arenaId` to your arena.
+     - Configure `spawnIntervalHours` / `spawnIntervalMinutes`.
+     - Enable `preventDuplicateWhileAlive` and sensible `despawnAfterMinutes`.
+
+5. **Test the encounter**
+   - Use `/ba spawn <bossId> <arenaId>` to manually spawn the boss.
+   - Verify:
+     - Banner shows inside the arena’s Loot Radius (or default banner radius when Loot Radius is unset).
+     - Loot chests appear and give the correct items.
+     - Timed rule (if configured) behaves as expected.
+
+---
+
+## Core Concepts
+
+### Arenas
+
+- Arenas are simple anchor points where bosses spawn and loot chests drop.  
+- Each arena has:
+  - `arenaId`
+  - `worldName`
+  - `x`, `y`, `z` (boss spawn / event center)
+  - `lootRadius` (optional; **arena size** in blocks — used for loot eligibility and for event banner visibility; see below)
+  - `notificationRadius` (fallback for banner when `lootRadius` is unset; not shown in the GUI)
+- Arenas are stored in `mods/Varyon-BossArena/arenas.json` and editable in-game via `/ba config` > **Arenas** tab.
+
+### Bosses
+
+- Boss definitions live in `mods/Varyon-BossArena/bosses.json`.
+- Each boss has:
+  - `bossName` (ID)
+  - `npcId` (NPC to spawn)
+  - `tier` (common, uncommon, rare, epic, legendary)
+  - Stat modifiers, per-player scaling, and optional waves/adds.
+- Bosses can be spawned:
+  - Manually with `/bossarena spawn <bossId> <arenaId|here>`
+  - Automatically via **timed boss spawns**.
+
+### Loot
+
+- When a boss event ends, Varyon-BossArena creates **per-player loot chests** at the arena position.
+- Loot is defined in `mods/Varyon-BossArena/loot_tables.json`.
+- Loot chest state is persisted in `mods/Varyon-BossArena/loot_chests_state.json` so unclaimed loot survives restarts.
+
+### Shop NPC
+
+- An in-world guard NPC opens the Varyon-BossArena shop when used.
+- Contracts in the shop let players trigger specific bosses in specific arenas for a currency cost.
+- Currency sources:
+  - `HyMarketPlus`
+  - `EconomySystem`
+  - Fallback item currency when no economy mod is present.
+- Shop configuration lives in `mods/Varyon-BossArena/shop.json`.
+
+---
+
+## Commands
+
+All commands require you to be an operator or have the `bossarena.admin` permission.
+
+Primary namespaces:
+
+- `/bossarena`
+- `/ba` (alias)
+
+### Arena Management
+
+- `/bossarena arena create <arenaId>`  
+  Creates an arena at your current position.
+
+- `/bossarena arena delete <arenaId>`  
+  Deletes the arena and removes it from `arenas.json`.
+
+- `/bossarena arena list`  
+  Lists known arenas and their coordinates.
+
+### Boss Spawning
+
+- `/bossarena spawn <bossId> <arenaId>`  
+  Spawns the boss at the specified arena.
+
+- `/bossarena spawn <bossId> here`  
+  Spawns the boss at your current position without using a saved arena point.
+
+### Config UI
+
+- `/bossarena config` or `/ba config`  
+  Opens the Varyon-BossArena configuration UI with three tabs:
+  - **Bosses** — edit boss stats, waves, and loot.
+  - **Shop** — configure shop locations and contracts.
+  - **Arenas** — edit arena ids, positions, and **Loot Radius** (arena size; also used for event banner visibility).
+
+### Shop
+
+- `/bossarena shop open`  
+  Opens the Varyon-BossArena shop UI directly.
+
+- `/bossarena shop place`  
+  Places a shop NPC at your position and registers it in `shop.json`.
+
+- `/bossarena shop delete`  
+  Deletes the nearest registered shop NPC and cleans up its entry.
+
+### Reload
+
+- `/bossarena reload`  
+  Reloads the following files:
+  - `config.json`
+  - `shop.json`
+  - `bosses.json`
+  - `arenas.json`
+  - `loot_tables.json`
+
+### Cleanup
+
+- `/bossarena cleanup` or `/ba cleanup`  
+  Removes all Varyon-BossArena-tracked boss and add entities in the current world, and optionally cleans up orphaned loot chest blocks. Use when entities are stuck or after testing.
+
+---
+
+## Timed Boss Spawns
+
+Timed boss rules live in `mods/Varyon-BossArena/config.json` under `timedBossSpawns[]`.
+
+Each entry:
+
+- `id` — optional label for logs.
+- `enabled` — enable/disable this rule.
+- `bossId` — boss name from `bosses.json`.
+- `arenaId` — arena id from `arenas.json`.
+- `spawnIntervalHours` / `spawnIntervalMinutes` — how often to spawn.
+- `preventDuplicateWhileAlive` — skip the rule while a matching boss event is still alive.
+- `despawnAfterHours` / `despawnAfterMinutes` — optional forced despawn window for timed bosses.
+- `announceWorldWide` / `announceCurrentWorld` — announce behavior.
+- `worldAnnouncementText` — customizable world announcement with placeholders.
+
+### Player-Online Spawn Gating (2.0.2+)
+
+- Timed spawns only **fire when at least one player is online in the target world**.
+- If the timer elapses while no players are online:
+  - The rule is **deferred** and retried in short intervals until a player joins.
+  - Once a player is online, the next retry spawns **one** boss for that rule.
+- This prevents timed bosses from piling up while the server is empty, while still honoring:
+  - `preventDuplicateWhileAlive`
+  - `despawnAfterHours` / `despawnAfterMinutes`
+
+### Per-Boss Proximity Spawn (3.0.0+)
+
+- Each boss can optionally require players to be within a **proximity radius** before it is allowed to spawn.
+- Configure this in `/ba config` → **Bosses** tab → open a boss → **Waves/Spawn** overlay:
+  - `Timed Proximity Enabled` — `true|false` toggle.
+  - `Proximity ArenaID` — arena id to use as the proximity center (blank = use the rule’s `arenaId`).
+  - `Proximity Radius` — distance in blocks from that arena center.
+- When enabled and radius > 0:
+  - For **all boss spawns** (timed rules, `/ba spawn`, shop contracts), Varyon-BossArena checks whether at least one player is within the configured radius of the chosen arena at the time the spawn is attempted.
+  - For **timed boss rules**, the timer still controls *how often* a spawn is attempted, but the boss only actually spawns once a player is inside the configured radius.
+  - If the arena id is invalid or missing, proximity is ignored and a warning is logged.
+
+---
+
+## Event banner radius
+
+Varyon-BossArena uses an on-screen event banner to notify players about active boss encounters.
+
+- The banner is shown to players **within the arena’s banner radius**.
+- **Banner radius** is the same as **Loot Radius** (arena size) when set: set **Loot Radius** in `/ba config` > **Arenas** tab to control both loot eligibility and who sees the event banner.
+- When an arena has no Loot Radius set (or it is 0), Varyon-BossArena uses the per-arena `notificationRadius` from `arenas.json` if present, otherwise `config.json.notificationRadius` (default 100 blocks). The separate Notify radius is no longer shown in the GUI.
+
+Players who leave the radius have the banner cleared; re-entering the radius restores it while the event is active.
+
+### Arena Loot Radius (Arena Size)
+
+- **Loot radius** is the **arena size** for loot: the distance in blocks from the arena center within which players are eligible for loot when the boss event ends.
+- When a boss event ends, Varyon-BossArena checks players near the loot chest (arena center) to decide who is eligible for loot.
+- The **effective loot radius** is resolved as:
+  1. If the nearest arena in the same world has `lootRadius` > 0, that value is used (timed and shop spawns are always at an arena).
+  2. Otherwise, a default of **50 blocks** is used (e.g. when the boss was spawned with `/ba spawn <bossId> here` rather than at an arena).
+- There is no per-boss loot radius in the Boss editor; timed and bought bosses are always tied to an arena, so arena **Loot Radius** applies. Only manual “here” spawns use the 50-block default.
+- `lootRadius` is stored per arena in `arenas.json` and is editable in-game via `/ba config` > **Arenas** tab (Loot Radius column).
+
+---
+
+## Event Banner Customization
+
+You can customize the **text shown in the boss event banner** through `mods/Varyon-BossArena/config.json` under the `eventBanner` section.
+
+### Fields
+
+- `activeTitle`  
+  Title text while the encounter is active.
+
+- `activeSubtitle`  
+  Subtitle text while the encounter is active.
+
+- `victoryTitle`  
+  Title shown when the encounter is complete (victory).
+
+- `victorySubtitle`  
+  Subtitle shown when the encounter is complete.
+
+If any field is missing or blank, Varyon-BossArena falls back to sensible defaults.
+
+### Placeholders
+
+All event banner strings support case-insensitive placeholders using either `$Name` or `{Name}`:
+
+- `$Boss` / `{Boss}` — boss display name.  
+- `$BossUpper` / `{BossUpper}` — boss name uppercased.  
+- `$BossAlive` / `{BossAlive}` — number of alive tracked bosses.  
+- `$AddsAlive` / `{AddsAlive}` — number of alive tracked adds.  
+- `$Context` / `{Context}` — extra context text (for example, wave messages).  
+- `$ContextLine` / `{ContextLine}` — context plus `" | "` when context is present, otherwise empty.  
+- `$Countdown` / `{Countdown}` — remaining timer as `MM:SS` (blank when no timer).  
+- `$CountdownLabel` / `{CountdownLabel}` — `"Time left: MM:SS"` (blank when no timer).  
+- `$CountdownLine` / `{CountdownLine}` — countdown label plus `" | "` when a timer is present, otherwise empty.  
+- `$State` / `{State}` — `"active"` or `"victory"` depending on encounter state.
+
+Legacy aliases still work (`$ContextPrefix`, `$CountdownPrefix`) but `ContextLine` / `CountdownLine` are preferred.
+
+### Color codes in templates
+
+The event banner is a fixed UI element and may not support colored text. Any `§` or `&` format codes (e.g. `§7`, `&e`) in your templates are **stripped before display**, so the banner shows plain text only and you won’t see literal codes. You can still use codes in config for structure or future compatibility; they are removed when the title is shown.
+
+### Example
+
+```json
+"eventBanner": {
+  "activeTitle": "The Shadows Stir: $BossUpper",
+  "activeSubtitle": "$ContextLine$CountdownLineBoss: $BossAlive | Adds: $AddsAlive",
+  "victoryTitle": "Victory Over $Boss",
+  "victorySubtitle": "All clear in this arena."
+}
+```
+
+Placeholders are replaced with live values; any `§`/`&` codes in templates are stripped so the banner shows plain text.
+
+---
+
+## Configuration Files
+
+All runtime configuration lives under `mods/Varyon-BossArena/`:
+
+- `config.json`
+  - Global settings, event banner templates, timed boss spawns, timed map marker settings, default notification radius.
+
+- `bosses.json`
+  - Boss definitions, stat modifiers, wave/add schedules, per-player scaling.
+
+- `loot_tables.json`
+  - Per-boss loot tables and drop chances.
+
+- `arenas.json`
+  - Arena list: id, world, position, per-arena `lootRadius` (arena size; used for loot eligibility and event banner), and optional `notificationRadius` (fallback for banner when `lootRadius` is unset).
+
+- `shop.json`
+  - Currency provider, shop NPC id, shop locations, and boss contracts.
+
+- `loot_chests_state.json`
+  - Persistent loot chest state (do not edit manually).
+
+---
+
+## Tips for Server Owners
+
+- Use `/ba config` for most day-to-day edits instead of hand-editing JSON.
+- Set a **reasonable Loot Radius** per arena so players near the fight see the event banner (and get loot) without spamming distant players.
+- For timed bosses:
+  - Keep `preventDuplicateWhileAlive` enabled.
+  - Use `despawnAfterMinutes` to ensure old timed bosses are eventually cleaned up.
+  - Adjust `spawnIntervalMinutes` so events feel special, not constant.
+- Avoid placing arenas or boss loot chests directly on top of snow blocks; snow is not treated as stable ground for chest placement, so prefer solid terrain (stone, dirt, wood, etc.).
+
+---
+
+## Permissions
+
+Varyon-BossArena is primarily an admin tool; regular players interact with bosses through events, loot chests, and the shop.
+
+- **Permission:** `bossarena.admin`
+  - Required for all `/bossarena` / `/ba` admin commands.
+  - Recommended for server staff only.
+- Players **without** this permission can:
+  - Use the **shop NPC** to buy contracts (if you allow it).
+  - Fight bosses that have been spawned by admins or timed rules.
+  - Loot their own **per-player loot chests**.
+
+---
+
+## Integrations
+
+### RPGLeveling (optional)
+
+If `RPGLeveling` (`Zuxaw:RPGLeveling`) is installed:
+
+- Varyon-BossArena auto-detects it at runtime.
+- Boss HP scaling is made compatible for tracked bosses.
+- `levelOverride` in `bosses.json` / Boss editor UI:
+  - `0` or blank > default RPGLeveling behavior.
+  - `>= 1` > force that level while the boss event is active.
+- Level overrides are automatically cleaned up when the boss/event ends.
+
+### Economy Mods (optional)
+
+Varyon-BossArena can use external economies for shop contracts:
+
+- `HyMarketPlus` > `currencyProvider: "hymarket"`
+- `Ecotale` > `currencyProvider: "ecotale"`
+- `EconomySystem` > `currencyProvider: "economysystem"`
+- Fallback item currency when no supported economy is present.
+
+Behavior:
+
+- `shop.json.currencyProvider`:
+- `"auto"` (default): try HyMarketPlus > Ecotale > EconomySystem > item currency.
+  - `"hymarket"`: use HyMarketPlus only.
+  - `"ecotale"`: use Ecotale only.
+  - `"economysystem"`: use EconomySystem only.
+  - `"item"`: use item currency only.
+- Item currency uses:
+  - `shop.json.currencyItemId`
+  - Fallbacks in `config.json` if not set.
+
+---
+
+## Boss event damage chart
+
+When a boss event **ends** and the **loot chest spawns**, every player who was **within the loot radius** receives a **chat summary** of the encounter — a simple list of the top 10 players by damage dealt to the boss and adds.
+
+- **Title line:** e.g. "Damage Dealt" or "Damage Dealt — <Boss name>".
+- **Rows:** Rank (1–10), player name, and total damage (e.g. 1.2K, 500).
+- If more than 10 players participated, an extra line indicates how many more there were.
+
+No custom UI or HUD is opened for the chart; players can keep moving and fighting while the summary is shown in chat.
+
+---
+
+## Troubleshooting
+
+### Multiple Bosses in One Arena
+
+If you see several bosses in the same arena:
+
+- Check `config.json.timedBossSpawns[]` for that boss:
+  - `preventDuplicateWhileAlive` should be `true`.
+  - `despawnAfterMinutes` should be set to a reasonable value so timed bosses are eventually removed.
+- Remember that from **2.0.2** onward:
+  - Timed bosses only spawn while at least one player is online in the target world.
+  - If a boss was supposed to spawn while offline, it will spawn shortly after players return, but only **once** per interval.
+
+If other plugins or commands directly delete NPCs, Varyon-BossArena may not see a proper death. Use in-game tools (`/ba` commands) where possible so tracking stays in sync.
+
+### Boss Not Spawning
+
+- Verify the IDs:
+  - `bossId` in `timedBossSpawns[]` matches a boss in `bosses.json`.
+  - `arenaId` matches an existing arena in `arenas.json`.
+- Check the world:
+  - `arenas.json.worldName` must be correct.
+  - The world must actually be loaded by the server.
+- For timed rules:
+  - Confirm `enabled: true`.
+  - Make sure at least one player is online in the arena world when the spawn interval comes due.
+
+### Loot Chest Issues
+
+- Players only get loot chests if they are part of the tracked event:
+  - Make sure they are present and participating when the boss dies.
+- Loot is per-player:
+  - Each player must open their own chest.
+- Do not edit `loot_chests_state.json` by hand:
+  - Use normal gameplay and let Varyon-BossArena clean it up.
+
+### "Timed spawn skipped — already pending"
+
+If the log says a matching spawn is already pending even though the boss and crate are long gone:
+
+- Varyon-BossArena now clears **stale** pending state when no matching boss is alive and the pending state is older than a couple of minutes, so the next spawn can run.
+- If it still happens, use `/ba cleanup` in that world to remove any stuck entities, or restart the server so timed spawn state can reset.
+
+---
+
+## Safe Editing & Reload Flow
+
+Recommended workflow for changing Varyon-BossArena configuration:
+
+- Prefer `/ba config` for:
+  - Boss stats, waves, and loot.
+  - Arenas and loot radius (arena size; also used for event banner).
+  - Shop locations and contracts.
+- When editing JSON files manually:
+  - Back up `mods/Varyon-BossArena/` first.
+  - After changes, use `/bossarena reload` to reload:
+    - `config.json`
+    - `shop.json`
+    - `bosses.json`
+    - `arenas.json`
+    - `loot_tables.json`
+- Avoid touching persistence/state files:
+  - `boss_fights_state.json`
+  - `loot_chests_state.json`
+  - `timed_spawn_state.json`
+  - These are managed by Varyon-BossArena and should not be hand-edited.
+

@@ -1,0 +1,20 @@
+{
+  "Group": "Varyon",
+  "Name": "Varyon-Damage-Number",
+  "Version": "1.0.0",
+  "Description": "Fork DFF: floating damage numbers (DamageNumberEST + assets).",
+  "Main": "fr.varyon.damagenumber.VaryonDamageNumberPlugin",
+  "Authors": [
+    {
+      "Name": "Varyon",
+      "Url": ""
+    }
+  ],
+  "Website": "",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "LoadBefore": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": true,
+  "SubPlugins": []
+}

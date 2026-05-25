@@ -1,0 +1,18 @@
+{
+  "Group": "Varyon",
+  "Name": "Varyon Comet",
+  "Version": "4.0.0",
+  "Description": "Comet events, spawning, and loot for Varyon servers.",
+  "Authors": [
+    {
+      "Name": "Varyon"
+    }
+  ],
+  "Website": "",
+  "ServerVersion": "2026.03.26-89796e57b",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "Main": "com.varyon.comet.CometModPlugin",
+  "IncludesAssetPack": true
+}

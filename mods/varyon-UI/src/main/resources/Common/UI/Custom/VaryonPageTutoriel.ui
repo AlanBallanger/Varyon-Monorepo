@@ -1,0 +1,14 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+          Group #TutorielContent {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Visible: false;
+            Padding: (Top: 0, Bottom: 0, Left: 0, Right: 0);
+          
+            Group #TutorielTextContainer {
+              LayoutMode: Top;
+            }
+          }

@@ -1,0 +1,217 @@
+{
+  "spawnSettings": {
+    "naturalSpawnsEnabled": true,
+    "minDelaySeconds": 270,
+    "maxDelaySeconds": 330,
+    "spawnChance": 0.4,
+    "despawnTimeMinutes": 2.0,
+    "minSpawnDistance": 30,
+    "maxSpawnDistance": 50,
+    "enabledWorlds": ["VaryonS1"],
+    "globalComets": false,
+    "injectUseForCleanSlateBlocks": false,
+    "disableWaveMobLoot": true,
+    "waveTimeoutSeconds": 120,
+    "waveSpawnMinRadius": 2.0,
+    "waveSpawnMaxRadius": 8.0,
+    "combatMusicAmbienceId": "Mus_Zone1_Dungeon_Boss",
+    "cometLandSoundEventId": "SFX_Bomb_Fire_Goblin_Death",
+    "cometDestroySoundEventId": "SFX_Bomb_Fire_Goblin_Death",
+    "cometFallingNotifySoundEventId": "SFX_Player_Pickup_Item",
+    "waveSpeedRewardEnabled": true,
+    "waveSpeedRewardMaxPercent": 100.0,
+    "waveSpeedRewardMinPercent": 50.0,
+    "varyonZoneDelayScalingEnabled": true,
+    "zoneDelayReferenceZone": 1,
+    "zoneDelayFastestZone": 10,
+    "zoneDelaySpeedMultiplierAtFastest": 3.0,
+    "cometVaryonRingRewards": {
+      "1": { "min": 1, "max": 1 },
+      "2": { "min": 2, "max": 3 },
+      "3": { "min": 4, "max": 5 },
+      "4": { "min": 6, "max": 7, "mineralBonus": { "itemId": "Ingredient_Bar_Mithril", "chance": 0.3 } },
+      "5": { "min": 8, "max": 9, "mineralBonus": { "itemId": "Ingredient_Bar_Mithril", "chance": 0.4 } },
+      "6": { "min": 10, "max": 11, "mineralBonus": { "itemId": "Ingredient_Bar_Mithril", "chance": 0.5 } },
+      "7": { "min": 12, "max": 13, "mineralBonus": { "itemId": "Ingredient_Bar_Onyxium", "chance": 0.3 } },
+      "8": { "min": 14, "max": 15, "mineralBonus": { "itemId": "Ingredient_Bar_Onyxium", "chance": 0.4 } },
+      "9": { "min": 16, "max": 17, "mineralBonus": { "itemId": "Ingredient_Bar_Onyxium", "chance": 0.5 } },
+      "10": { "min": 18, "max": 19, "mineralBonus": { "itemId": "Ingredient_Bar_Prisma", "chance": 0.25 } }
+    }
+  },
+
+  "worldProtectSpawnRules": {
+    "enabled": false,
+    "defaultInWorldProtectRegion": true,
+    "regionOverrides": {
+    }
+  },
+
+  "claimProtect": {
+    "enabled": false,
+    "autoDetectProviders": false,
+    "providers": []
+  },
+
+  "messages": {
+    "msgCometFallingTitle": "Comète %tier% en chute !",
+    "msgCometFallingSubtitle": "Regarde le ciel !",
+    "msgCometFallingChatCoords": "[Comète] Une comète %tier% est tombée en %x% ; %y% ; %z%",
+    "msgWaveBossTitle": "Vague de boss %currentWave%/%totalWaves%",
+    "msgWaveBossTitleNoCount": "Vague de boss !",
+    "msgWaveBossSubtitle": "Boss : %bossStatus% | Temps : %time%",
+    "msgWaveTitle": "Vague %currentWave%/%totalWaves% - %theme%",
+    "msgWaveTitleNoCount": "%theme% en approche !",
+    "msgWaveSubtitle": "Mobs : %killed%/%total% | Temps : %time%",
+    "msgWaveFailedTitle": "Vague échouée !",
+    "msgWaveFailedSubtitle": "Temps écoulé !",
+    "msgWaveCompleteTitle": "Vagues vaincues !",
+    "msgWaveCompleteSubtitle": "Butin obtenu !",
+    "msgWaveCompleteChatHeaderPrefix": "[Comète] ",
+    "msgWaveCompleteChatHeader": "Vagues vaincues ! Récompenses :",
+    "msgWaveCompleteChatItemPrefix": " - "
+  },
+
+  "hytaleZoneSpawnChances": {
+    "1": { "tier1": 0.7, "tier2": 0.2, "tier3": 0.1, "tier4": 0.0, "tier5": 0.0 },
+    "2": { "tier1": 0.55, "tier2": 0.25, "tier3": 0.15, "tier4": 0.05, "tier5": 0.0 },
+    "3": { "tier1": 0.45, "tier2": 0.25, "tier3": 0.2, "tier4": 0.1, "tier5": 0.0 },
+    "4": { "tier1": 0.3, "tier2": 0.3, "tier3": 0.25, "tier4": 0.15, "tier5": 0.0 }
+  },
+
+  "lootByTier": {
+    "1": {
+      "drops": [
+        { "id": "Ingredient_Bar_Copper", "minCount": 5, "maxCount": 7, "chance": 100.0, "displayName": "Lingots de cuivre" },
+        { "id": "Ingredient_Bar_Iron", "minCount": 5, "maxCount": 7, "chance": 100.0, "displayName": "Lingots de fer" },
+        { "id": "Ingredient_Bar_Silver", "minCount": 3, "maxCount": 6, "chance": 100.0, "displayName": "Lingots d'argent" },
+        { "id": "Ingredient_Life_Essence", "minCount": 2, "maxCount": 4, "chance": 100.0, "displayName": "Essence de vie" },
+        { "id": "Ingredient_Leather_Light", "minCount": 2, "maxCount": 4, "chance": 100.0, "displayName": "Cuir léger" },
+        { "id": "Potion_Health_Lesser", "minCount": 1, "maxCount": 2, "chance": 5.0, "displayName": "Potion de santé inférieure" }
+      ],
+      "bonusDrops": [
+        { "id": "Rock_Gem_Emerald", "minCount": 1, "maxCount": 1, "chance": 30.0, "displayName": "Émeraude" },
+        { "id": "Rock_Gem_Topaz", "minCount": 1, "maxCount": 1, "chance": 20.0, "displayName": "Topaze" }
+      ]
+    },
+    "2": {
+      "drops": [
+        { "id": "Ingredient_Bar_Thorium", "minCount": 5, "maxCount": 7, "chance": 50.0, "displayName": "Lingots de thorium" },
+        { "id": "Ingredient_Bar_Gold", "minCount": 3, "maxCount": 6, "chance": 100.0, "displayName": "Lingots d'or" },
+        { "id": "Ingredient_Leather_Light", "minCount": 2, "maxCount": 3, "chance": 50.0, "displayName": "Cuir léger" },
+        { "id": "Ingredient_Leather_Medium", "minCount": 2, "maxCount": 3, "chance": 50.0, "displayName": "Cuir moyen" },
+        { "id": "Ingredient_Fire_Essence", "minCount": 3, "maxCount": 4, "chance": 100.0, "displayName": "Essence de feu" },
+        { "id": "Ingredient_Fabric_Scrap_Shadoweave", "minCount": 5, "maxCount": 5, "chance": 100.0, "displayName": "Chutes de tisseombre" },
+        { "id": "Potion_Health", "minCount": 1, "maxCount": 2, "chance": 5.0, "displayName": "Potion de santé" }
+      ],
+      "bonusDrops": [
+        { "id": "Ingredient_Bar_Copper", "minCount": 2, "maxCount": 4, "chance": 35.0, "displayName": "Lingots de cuivre" },
+        { "id": "Potion_Health_Lesser", "minCount": 1, "maxCount": 1, "chance": 5.0, "displayName": "Potion de santé inférieure" },
+        { "id": "Rock_Gem_Topaz", "minCount": 1, "maxCount": 1, "chance": 30.0, "displayName": "Topaze" },
+        { "id": "Rock_Gem_Sapphire", "minCount": 1, "maxCount": 1, "chance": 20.0, "displayName": "Saphir" }
+      ]
+    },
+    "3": {
+      "drops": [
+        { "id": "Ingredient_Bar_Cobalt", "minCount": 5, "maxCount": 7, "chance": 50.0, "displayName": "Lingots de cobalt" },
+        { "id": "Ingredient_Bar_Thorium", "minCount": 5, "maxCount": 7, "chance": 50.0, "displayName": "Lingots de thorium" },
+        { "id": "Ingredient_Bar_Gold", "minCount": 3, "maxCount": 6, "chance": 100.0, "displayName": "Lingots d'or" },
+        { "id": "Ingredient_Leather_Medium", "minCount": 2, "maxCount": 3, "chance": 50.0, "displayName": "Cuir moyen" },
+        { "id": "Ingredient_Leather_Heavy", "minCount": 2, "maxCount": 3, "chance": 50.0, "displayName": "Cuir lourd" },
+        { "id": "Ingredient_Ice_Essence", "minCount": 3, "maxCount": 4, "chance": 100.0, "displayName": "Essence de glace" },
+        { "id": "Potion_Health_Greater", "minCount": 1, "maxCount": 2, "chance": 5.0, "displayName": "Potion de santé supérieure" },
+        { "id": "Ingredient_Fabric_Scrap_Shadoweave", "minCount": 5, "maxCount": 5, "chance": 100.0, "displayName": "Chutes de tisseombre" }
+      ],
+      "bonusDrops": [
+        { "id": "Ingredient_Bar_Copper", "minCount": 2, "maxCount": 4, "chance": 30.0, "displayName": "Lingots de cuivre" },
+        { "id": "Ingredient_Bar_Iron", "minCount": 2, "maxCount": 4, "chance": 30.0, "displayName": "Lingots de fer" },
+        { "id": "Potion_Health_Lesser", "minCount": 1, "maxCount": 1, "chance": 5.0, "displayName": "Potion de santé inférieure" },
+        { "id": "Potion_Health", "minCount": 1, "maxCount": 1, "chance": 5.0, "displayName": "Potion de santé" },
+        { "id": "Rock_Gem_Sapphire", "minCount": 1, "maxCount": 1, "chance": 30.0, "displayName": "Saphir" },
+        { "id": "Rock_Gem_Ruby", "minCount": 1, "maxCount": 1, "chance": 20.0, "displayName": "Rubis" }
+      ]
+    },
+    "4": {
+      "drops": [
+        { "id": "Ingredient_Bar_Adamantite", "minCount": 5, "maxCount": 8, "chance": 100.0, "displayName": "Lingots d'adamantite" },
+        { "id": "Ingredient_Leather_Heavy", "minCount": 3, "maxCount": 4, "chance": 100.0, "displayName": "Cuir lourd" },
+        { "id": "Ingredient_Fire_Essence", "minCount": 4, "maxCount": 6, "chance": 100.0, "displayName": "Essence de feu" },
+        { "id": "Ingredient_Fabric_Scrap_Shadoweave", "minCount": 8, "maxCount": 10, "chance": 100.0, "displayName": "Chutes de tisseombre" },
+        { "id": "Potion_Health_Greater", "minCount": 2, "maxCount": 3, "chance": 5.0, "displayName": "Potion de santé supérieure" }
+      ],
+      "bonusDrops": [
+        { "id": "Ingredient_Bar_Copper", "minCount": 3, "maxCount": 5, "chance": 25.0, "displayName": "Lingots de cuivre" },
+        { "id": "Ingredient_Bar_Iron", "minCount": 3, "maxCount": 5, "chance": 25.0, "displayName": "Lingots de fer" },
+        { "id": "Ingredient_Bar_Cobalt", "minCount": 2, "maxCount": 4, "chance": 25.0, "displayName": "Lingots de cobalt" },
+        { "id": "Ingredient_Bar_Thorium", "minCount": 2, "maxCount": 4, "chance": 25.0, "displayName": "Lingots de thorium" },
+        { "id": "Potion_Health_Lesser", "minCount": 1, "maxCount": 2, "chance": 5.0, "displayName": "Potion de santé inférieure" },
+        { "id": "Potion_Health", "minCount": 1, "maxCount": 2, "chance": 5.0, "displayName": "Potion de santé" },
+        { "id": "Rock_Gem_Ruby", "minCount": 1, "maxCount": 1, "chance": 30.0, "displayName": "Rubis" },
+        { "id": "Rock_Gem_Zephyr", "minCount": 1, "maxCount": 1, "chance": 20.0, "displayName": "Zéphyr" },
+        { "id": "Rock_Gem_Diamond", "minCount": 1, "maxCount": 1, "chance": 20.0, "displayName": "Diamant" }
+      ]
+    },
+    "5": {
+      "drops": [
+        { "id": "Ingredient_Bar_Prisma", "minCount": 6, "maxCount": 9, "chance": 100.0, "displayName": "Lingots de prisma" },
+        { "id": "Ingredient_Bar_Onyxium", "minCount": 6, "maxCount": 9, "chance": 100.0, "displayName": "Lingots d'onyxium" },
+        { "id": "Ingredient_Hide_Prismic", "minCount": 4, "maxCount": 6, "chance": 100.0, "displayName": "Peau prismique" },
+        { "id": "Ingredient_Hide_Storm", "minCount": 4, "maxCount": 6, "chance": 100.0, "displayName": "Peau de tempête" },
+        { "id": "Ingredient_Fabric_Scrap_Cindercloth", "minCount": 8, "maxCount": 12, "chance": 100.0, "displayName": "Chutes de toile de cendres" },
+        { "id": "Ingredient_Fabric_Scrap_Shadoweave", "minCount": 8, "maxCount": 12, "chance": 100.0, "displayName": "Chutes de tisseombre" },
+        { "id": "Potion_Health_Greater", "minCount": 2, "maxCount": 3, "chance": 5.0, "displayName": "Potion de santé supérieure" }
+      ],
+      "bonusDrops": [
+        { "id": "Ingredient_Bar_Adamantite", "minCount": 2, "maxCount": 4, "chance": 30.0, "displayName": "Lingots d'adamantite" },
+        { "id": "Ingredient_Hide_Prismic", "minCount": 2, "maxCount": 3, "chance": 30.0, "displayName": "Peau prismique" },
+        { "id": "Ingredient_Hide_Storm", "minCount": 2, "maxCount": 3, "chance": 30.0, "displayName": "Peau de tempête" },
+        { "id": "Rock_Gem_Zephyr", "minCount": 1, "maxCount": 1, "chance": 35.0, "displayName": "Zéphyr" },
+        { "id": "Rock_Gem_Diamond", "minCount": 1, "maxCount": 1, "chance": 35.0, "displayName": "Diamant" }
+      ]
+    }
+  },
+
+  "themePool": {
+    "1": {
+      "skeleton": 1,
+      "goblin": 1,
+      "spider": 1,
+      "void": 1,
+      "undead_rare": 1
+    },
+    "2": {
+      "skeleton": 1,
+      "goblin": 1,
+      "spider": 1,
+      "trork": 1,
+      "skeleton_sand": 1,
+      "sabertooth": 1,
+      "void": 1,
+      "undead_rare": 1
+    },
+    "3": {
+      "trork": 1,
+      "outlander": 1,
+      "skeleton_sand": 1,
+      "frostbound_pack": 1,
+      "void": 1,
+      "void_reavers": 1
+    },
+    "4": {
+      "outlander": 1,
+      "ice": 1,
+      "lava": 1,
+      "earth": 1,
+      "zombie": 1,
+      "skeleton_burnt": 1,
+      "ashen_vanguard": 1
+    },
+    "5": {
+      "outlander": 1,
+      "ice": 1,
+      "lava": 1,
+      "earth": 1,
+      "undead_legendary": 1,
+      "wraithborn_legion": 1
+    }
+  }
+}

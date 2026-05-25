@@ -1,0 +1,7 @@
+items.Varyon_Orbe_Ambassade_Fraktale.name = Ambassador Orb (Fraktale)
+items.Varyon_Orbe_Ambassade_Fraktale.description = Warps you to Fraktale embassy (like /warp ambassade_fraktale).
+items.Varyon_Orbe_Ambassade_Novale.name = Ambassador Orb (Novale)
+items.Varyon_Orbe_Ambassade_Novale.description = Warps you to Novale embassy (like /warp ambassade_novale).
+
+items.Varyon_Orbe_Ambassade_Varyon.name = Ambassador Orb (Varyon)
+items.Varyon_Orbe_Ambassade_Varyon.description = Warps you to Varyon (like /warp varyon).

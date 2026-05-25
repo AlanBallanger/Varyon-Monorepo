@@ -1,0 +1,26 @@
+# Expected fragment weight per ore/block id.
+ore_adamantite = 2
+ore_cobalt = 2
+ore_copper = 1
+ore_gold = 1
+ore_iron = 1
+ore_mithril = 3
+ore_onyxium = 3
+ore_prisma = 3
+ore_silver = 1
+ore_thorium = 1
+rock_crystal_blue = 0.3
+rock_crystal_cyan = 0.3
+rock_crystal_green = 0.3
+rock_crystal_pink = 0.3
+rock_crystal_purple = 0.3
+rock_crystal_red = 0.3
+rock_crystal_white = 0.3
+rock_crystal_yellow = 0.3
+rock_gem_diamond = 25
+rock_gem_emerald = 8
+rock_gem_ruby = 12
+rock_gem_sapphire = 12
+rock_gem_topaz = 12
+rock_gem_voidstone = 25
+rock_gem_zephyr = 25

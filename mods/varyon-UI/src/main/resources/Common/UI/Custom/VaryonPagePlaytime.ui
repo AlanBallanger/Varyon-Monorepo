@@ -1,0 +1,193 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+          Group #PlaytimeContent {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Visible: false;
+            Padding: (Top: 0, Bottom: 0, Left: 0, Right: 0);
+
+            Group #PtPlayerCardOuter {
+              LayoutMode: Top;
+              Anchor: (Bottom: 16);
+              Background: (Color: #3d4d62);
+              Padding: (Left: 2, Right: 2, Top: 2, Bottom: 2);
+
+              Group #PtPlayerCard {
+                LayoutMode: Left;
+                Anchor: (Height: 104);
+                Background: (Color: #1e2a3a);
+                Padding: (Left: 14, Right: 14, Top: 12, Bottom: 12);
+
+                Group #PtHeadWrap {
+                  Anchor: (Width: 76, Height: 76);
+                  Background: (Color: #0e1620);
+                  Padding: (Left: 6, Right: 6, Top: 6, Bottom: 6);
+
+                  Group #PlaytimeHeadPreview {
+                    Anchor: (Width: 64, Height: 64);
+                    Background: (Color: #1a2030);
+                  }
+                }
+
+                Group { Anchor: (Width: 12); }
+
+                Group #PtPlayerInfo {
+                  LayoutMode: Top;
+                  FlexWeight: 1;
+
+                  Label #PtPlayerName {
+                    Text: "";
+                    Anchor: (Height: 26, Bottom: 2);
+                    Style: (FontSize: 18, TextColor: #dceeff, RenderBold: true);
+                  }
+
+                  Label #PtTotalTime {
+                    Text: "";
+                    Anchor: (Height: 22, Bottom: 2);
+                    Style: (FontSize: 15, TextColor: #ffa94d, RenderBold: true);
+                  }
+
+                  Label #PtSessionTime {
+                    Text: "";
+                    Anchor: (Height: 18);
+                    Style: (FontSize: 13, TextColor: #8899aa);
+                  }
+                }
+
+                Group { Anchor: (Width: 12); }
+
+                Group #PtVSepLast {
+                  Anchor: (Width: 1, Top: 10, Bottom: 10);
+                  Background: (Color: #5a6a7e);
+                }
+
+                Group { Anchor: (Width: 14); }
+
+                Group #PtLastLoginColumn {
+                  LayoutMode: Middle;
+                  FlexWeight: 1;
+
+                  Group #PtLastLoginBlock {
+                    LayoutMode: Top;
+                    Anchor: (Left: 0, Right: 0);
+
+                    Label #PtLastLoginTitle {
+                      Text: "";
+                      Anchor: (Height: 20, Bottom: 6);
+                      Style: (FontSize: 13, TextColor: #5a9fd4, RenderBold: true, HorizontalAlignment: Center);
+                    }
+
+                    Label #PtLastLoginDate {
+                      Text: "";
+                      Anchor: (Height: 22);
+                      Style: (FontSize: 14, TextColor: #dceeff, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+
+                Group { Anchor: (Width: 14); }
+
+                Group #PtVSepFirst {
+                  Anchor: (Width: 1, Top: 10, Bottom: 10);
+                  Background: (Color: #5a6a7e);
+                }
+
+                Group { Anchor: (Width: 14); }
+
+                Group #PtFirstLoginColumn {
+                  LayoutMode: Middle;
+                  FlexWeight: 1;
+
+                  Group #PtFirstLoginBlock {
+                    LayoutMode: Top;
+                    Anchor: (Left: 0, Right: 0);
+
+                    Label #PtFirstLoginTitle {
+                      Text: "";
+                      Anchor: (Height: 20, Bottom: 6);
+                      Style: (FontSize: 13, TextColor: #5a9fd4, RenderBold: true, HorizontalAlignment: Center);
+                    }
+
+                    Label #PtFirstLoginDate {
+                      Text: "";
+                      Anchor: (Height: 22);
+                      Style: (FontSize: 14, TextColor: #dceeff, HorizontalAlignment: Center);
+                    }
+                  }
+                }
+              }
+            }
+
+            Group #PtRewardsSectionOuter {
+              LayoutMode: Top;
+              Background: (Color: #3d4d62);
+              Padding: (Left: 2, Right: 2, Top: 2, Bottom: 2);
+
+              Group #PtRewardsSection {
+              LayoutMode: Top;
+              Background: (Color: #1e2a3a);
+              Padding: (Left: 16, Right: 16, Top: 12, Bottom: 16);
+
+              Label #PtRewardsTitle {
+                Text: "Recompenses de temps de jeu";
+                Anchor: (Height: 24, Bottom: 4);
+                Style: (FontSize: 16, TextColor: #dceeff, RenderBold: true, HorizontalAlignment: Center);
+              }
+
+              Label #PtRewardsSubtitle {
+                Text: "";
+                Anchor: (Height: 20, Bottom: 12);
+                Style: (FontSize: 13, TextColor: #8899aa, HorizontalAlignment: Center);
+              }
+
+              Group #PtProgressBarOuter {
+                LayoutMode: Top;
+                Anchor: (Height: 20, Bottom: 4, Left: 0, Right: 0);
+                Background: (Color: #111927);
+
+                Group #PtProgressBarRow {
+                  LayoutMode: Left;
+                  Anchor: (Height: 20, Left: 0, Right: 0);
+                }
+              }
+
+              Label #PtProgressText {
+                Text: "";
+                Anchor: (Height: 18, Bottom: 4);
+                Style: (FontSize: 12, TextColor: #8899aa, HorizontalAlignment: Center);
+              }
+
+              Label #PtNextRewardLabel {
+                Text: "";
+                Anchor: (Height: 18, Bottom: 16);
+                Style: (FontSize: 12, TextColor: #8899aa, HorizontalAlignment: Center);
+              }
+
+              Group #PtChestsRow {
+                LayoutMode: Left;
+                Anchor: (Bottom: 8);
+              }
+
+              Group #PtChestActionsRow {
+                LayoutMode: Left;
+                Anchor: (Height: 40, Bottom: 12);
+              }
+
+              Group #PtClaimAllRow {
+                LayoutMode: Middle;
+                Anchor: (Height: 40);
+
+                TextButton #PtClaimAllBtn {
+                  Text: "";
+                  Anchor: (Width: 220, Height: 36);
+                  Style: (
+                    ...$C.@SmallSecondaryTextButtonStyle,
+                    Sounds: (...$Sounds.@ButtonsLight)
+                  );
+                }
+              }
+            }
+            }
+          }

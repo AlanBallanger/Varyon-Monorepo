@@ -1,0 +1,23 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+
+      Group #MainColumn {
+        FlexWeight: 1;
+        LayoutMode: Top;
+
+        Group #VaryonTabBarMount {
+          LayoutMode: Left;
+          Anchor: (Height: 70);
+        }
+
+        Group #MainColumnTopSeparator {
+          Anchor: (Height: 1, Left: 0, Right: 10);
+          Background: (Color: #545B63);
+        }
+
+        Group #VaryonBodyContentMount {
+          FlexWeight: 1;
+          LayoutMode: Top;
+        }
+      }

@@ -1,0 +1,26 @@
+# Gradle
+build/
+.gradle/
+out/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+run/
+
+# Libs locales (HytaleServer.jar dépasse la limite GitHub)
+libs/
+
+# Claude Code config (machine-specific)
+.claude/
+.agents/

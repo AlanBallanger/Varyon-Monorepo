@@ -1,0 +1,36 @@
+{
+  "configVersion": 11,
+  "baseXpPerLevel": 300,
+  "levelScaleMultiplier": 200.0,
+  "debugStartingLevel": 0,
+  "setXpRequiredGameMode": "OP",
+  "disableXpInCreative": true,
+  "enableSkillPermissions": false,
+  "enableCommandPermissions": false,
+  "trackPlacedBlocks": true,
+  "placedBlockExpireMinutes": 0,
+  "placedItemExpireMinutes": 5,
+  "maxBoostMultiplier": 5.0,
+  "maxPersonalBoosts": 3,
+  "maxGlobalBoosts": 3,
+  "boostStackMode": "additive",
+  "allowSkillReset": true,
+  "enableQuests": true,
+  "maxActiveQuests": 10,
+  "enableLeaderboard": true,
+  "combatXpMode": "damage_plus_kill",
+  "combatXpOnKillOnly": false,
+  "defaultLanguage": "en",
+  "enableMilestoneAnnouncements": false,
+  "milestoneAnnouncementLevels": [
+    10,
+    25,
+    50,
+    75,
+    100
+  ],
+  "milestoneAnnouncementCommand": "say {player} has reached level {level} in {skill}!",
+  "combatXpEntityBlacklist": [
+    "Deployable"
+  ]
+}

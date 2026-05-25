@@ -1,0 +1,527 @@
+package com.varyon.comet.loot;
+
+import com.hypixel.hytale.assetstore.map.BlockTypeAssetMap;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.protocol.packets.interface_.Page;
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.entity.InteractionContext;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.entities.player.windows.ContainerBlockWindow;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
+import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+import com.varyon.comet.audio.CometWorldSounds;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+
+/**
+ * Manages shared comet reward chests.
+ *
+ * Behavior:
+ * - Chest is spawned with generated rewards.
+ * - Timer is cancelled whenever the chest is opened.
+ * - Timer starts when the last viewer closes the chest window.
+ * - If not reopened within 20 seconds after close, chest is removed.
+ */
+public final class CometLootChestService {
+
+    private static final Logger LOGGER = Logger.getLogger(CometLootChestService.class.getName());
+    private static final String CUSTOM_CHEST_ID = "Comet_Reward_Chest";
+    private static final String[] CHEST_TYPE_CANDIDATE_IDS = {
+            "Furniture_Dungeon_Chest_Legendary_Large",
+            "furniture_dungeon_chest_legendary_large",
+            CUSTOM_CHEST_ID,
+    };
+    private static final int CONTAINER_SIZE = 27;
+    private static final long CHEST_EXPIRY_SECONDS = 20L;
+    private static final CometLootChestService INSTANCE = new CometLootChestService();
+
+    private final Set<String> managedChests = ConcurrentHashMap.newKeySet();
+    private final Map<String, ScheduledFuture<?>> expiryTasks = new ConcurrentHashMap<>();
+    /** When chest is placed in front of a custom asset (non-Comet_Stone_*), chest key -> comet block position to remove when chest expires or is broken. */
+    private final Map<String, Vector3i> cometBlockByChestKey = new ConcurrentHashMap<>();
+
+    private CometLootChestService() {
+    }
+
+    public static CometLootChestService getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Spawns a reward container at the given position. Uses default chest block type.
+     */
+    public boolean spawnRewardChest(World world, Vector3i blockPos, List<ItemStack> rewards) {
+        return spawnRewardChest(world, blockPos, rewards, null);
+    }
+
+    /**
+     * Spawn the reward chest after the wave completes.
+     * If the block at blockPos is a Comet_Stone_*, break it and place the chest there.
+     * Otherwise place the chest in front and link the original block for cleanup when the chest expires.
+     */
+    public boolean spawnChestOnlyAfterWaveComplete(World world, Vector3i blockPos, List<ItemStack> rewards, String themeId) {
+        if (world == null || blockPos == null || rewards == null) return false;
+        BlockType atBlock = null;
+        try {
+            atBlock = world.getBlockType(blockPos.x, blockPos.y, blockPos.z);
+        } catch (Throwable ignored) {
+        }
+        boolean isStoneBlock = atBlock != null && atBlock.getId() != null && atBlock.getId().startsWith("Comet_Stone_");
+
+        if (isStoneBlock) {
+            CometWorldSounds.playCometDestroy(world, blockPos);
+            world.breakBlock(blockPos.x, blockPos.y, blockPos.z, 0);
+            return placeChestAt(world, blockPos, rewards);
+        }
+
+        Vector3i chestPos = findChestPositionInFront(world, blockPos);
+        if (chestPos == null) {
+            CometWorldSounds.playCometDestroy(world, blockPos);
+            world.breakBlock(blockPos.x, blockPos.y, blockPos.z, 0);
+            return placeChestAt(world, blockPos, rewards);
+        }
+        boolean placed = placeChestAt(world, chestPos, rewards);
+        if (placed) {
+            cometBlockByChestKey.put(keyOf(chestPos), copyKey(blockPos));
+        }
+        return placed;
+    }
+
+    public boolean spawnRewardChest(World world, Vector3i blockPos, List<ItemStack> rewards, String themeId) {
+        if (world == null || blockPos == null || rewards == null) {
+            return false;
+        }
+        return placeChestAt(world, blockPos, rewards);
+    }
+
+    private boolean placeChestAt(World world, Vector3i blockPos, List<ItemStack> rewards) {
+        Vector3i pos = copyKey(blockPos);
+        String key = keyOf(pos);
+        ContainerBuildResult buildResult = buildContainer(rewards);
+        if (buildResult.addedCount <= 0) {
+            LOGGER.warning("No valid reward items could be inserted into chest container at " + pos + ".");
+            return false;
+        }
+        for (BlockType chestBlockType : resolveChestBlockTypes()) {
+            if (chestBlockType == null) {
+                continue;
+            }
+            if (tryPlaceChestWithType(world, pos, key, buildResult, chestBlockType)) {
+                return true;
+            }
+        }
+        LOGGER.warning("No chest block type accepted container init at " + pos + " (tried dungeon legendary + mod chest).");
+        return false;
+    }
+
+    private boolean tryPlaceChestWithType(World world, Vector3i pos, String key, ContainerBuildResult buildResult,
+            BlockType chestBlockType) {
+        try {
+            WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
+            if (chunk == null) {
+                LOGGER.warning("Chunk not loaded for reward chest at " + pos + ".");
+                return false;
+            }
+
+            BlockTypeAssetMap<String, BlockType> blockTypeMap = BlockType.getAssetMap();
+            int blockTypeIndex = blockTypeMap.getIndex(chestBlockType.getId());
+            if (blockTypeIndex < 0) {
+                LOGGER.warning("Unable to resolve block type index for chest id: " + chestBlockType.getId());
+                return false;
+            }
+
+            int localX = pos.x & 31;
+            int localZ = pos.z & 31;
+            boolean placed = chunk.setBlock(localX, pos.y, localZ, blockTypeIndex, chestBlockType, 0, 0, 157);
+            if (!placed) {
+                world.breakBlock(pos.x, pos.y, pos.z, 0);
+                chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
+                if (chunk == null) {
+                    LOGGER.warning("Chunk unavailable after retry for reward chest at " + pos + ".");
+                    return false;
+                }
+                placed = chunk.setBlock(localX, pos.y, localZ, blockTypeIndex, chestBlockType, 0, 0, 157);
+            }
+            if (!placed) {
+                LOGGER.warning("Failed to place reward chest block at " + pos + " (type " + chestBlockType.getId() + ").");
+                return false;
+            }
+
+            ClassLoader serverLoader = world.getClass().getClassLoader();
+            Object containerState = CometLootBlockStateUtil.newItemContainerState(serverLoader);
+            if (containerState == null) {
+                LOGGER.warning("Could not create ItemContainerState for reward chest at " + pos + ".");
+                world.breakBlock(pos.x, pos.y, pos.z, 0);
+                return false;
+            }
+            if (!CometLootBlockStateUtil.initializeContainer(containerState, chestBlockType)) {
+                LOGGER.info("Chest block " + chestBlockType.getId() + " rejected container init; trying next type.");
+                world.breakBlock(pos.x, pos.y, pos.z, 0);
+                return false;
+            }
+            CometLootBlockStateUtil.setPositionOnChunk(containerState, chunk, pos);
+            CometLootBlockStateUtil.setChunkState(chunk, localX, pos.y, localZ, containerState, true);
+            CometLootBlockStateUtil.setCustom(containerState, true);
+            CometLootBlockStateUtil.setAllowViewing(containerState, true);
+            CometLootBlockStateUtil.setDroplist(containerState, null);
+            CometLootBlockStateUtil.setItemContainer(containerState, buildResult.container);
+
+            managedChests.add(key);
+            cancelExpiryTask(key);
+            LOGGER.info("Spawned reward chest (" + chestBlockType.getId() + ") at " + pos + " with " + buildResult.addedCount
+                    + " item stacks.");
+            return true;
+        } catch (Exception e) {
+            LOGGER.warning("Failed to spawn reward chest at " + pos + ": " + e.getMessage());
+            try {
+                world.breakBlock(pos.x, pos.y, pos.z, 0);
+            } catch (Exception ignored) {
+            }
+            return false;
+        }
+    }
+
+    private BlockType[] resolveChestBlockTypes() {
+        BlockTypeAssetMap<String, BlockType> map = BlockType.getAssetMap();
+        java.util.List<BlockType> list = new java.util.ArrayList<>();
+        for (String id : CHEST_TYPE_CANDIDATE_IDS) {
+            BlockType t = findBlockType(map, id);
+            if (t == null) {
+                continue;
+            }
+            String resolvedId = t.getId();
+            if (resolvedId != null && list.stream().noneMatch(x -> resolvedId.equals(x.getId()))) {
+                list.add(t);
+            }
+        }
+        return list.toArray(new BlockType[0]);
+    }
+
+    public boolean openManagedChest(World world,
+            CommandBuffer<EntityStore> commandBuffer,
+            InteractionContext context,
+            Vector3i blockPos) {
+        if (world == null || commandBuffer == null || context == null || blockPos == null) {
+            return false;
+        }
+
+        Vector3i pos = copyKey(blockPos);
+        String key = keyOf(pos);
+        if (!managedChests.contains(key)) {
+            return false;
+        }
+
+        Ref<EntityStore> playerRef = context.getEntity();
+        if (playerRef == null || !playerRef.isValid()) {
+            return false;
+        }
+
+        Store<EntityStore> store = playerRef.getStore();
+        if (store == null) {
+            return false;
+        }
+
+        Player player = commandBuffer.getComponent(playerRef, Player.getComponentType());
+        if (player == null) {
+            return false;
+        }
+
+        try {
+            Object state = CometLootBlockStateUtil.getState(world, pos.x, pos.y, pos.z, true);
+            if (!CometLootBlockStateUtil.isItemContainerState(state)) {
+                return false;
+            }
+            if (!CometLootBlockStateUtil.isAllowViewing(state)
+                    || !CometLootBlockStateUtil.canOpen(state, playerRef, commandBuffer)) {
+                return false;
+            }
+
+            UUIDComponent uuidComponent = commandBuffer.getComponent(playerRef, UUIDComponent.getComponentType());
+            if (uuidComponent == null) {
+                return false;
+            }
+            UUID playerUuid = uuidComponent.getUuid();
+
+            Map<UUID, ContainerBlockWindow> windows = CometLootBlockStateUtil.getWindows(state);
+            ItemContainer itemContainer =
+                    (ItemContainer) CometLootBlockStateUtil.getItemContainer(state);
+            if (windows == null || itemContainer == null) {
+                return false;
+            }
+
+            if (windows.containsKey(playerUuid)) {
+                pauseChestExpiry(pos);
+                return true;
+            }
+
+            WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
+            if (chunk == null) {
+                return false;
+            }
+
+            BlockType blockType = world.getBlockType(pos.x, pos.y, pos.z);
+            if (blockType == null) {
+                return false;
+            }
+
+            ContainerBlockWindow window = new ContainerBlockWindow(
+                    pos.x,
+                    pos.y,
+                    pos.z,
+                    chunk.getRotationIndex(pos.x, pos.y, pos.z),
+                    blockType,
+                    itemContainer);
+
+            if (windows.putIfAbsent(playerUuid, window) != null) {
+                pauseChestExpiry(pos);
+                return true;
+            }
+
+            boolean opened = player.getPageManager().setPageWithWindows(playerRef, store, Page.Bench, true, window);
+            if (!opened) {
+                windows.remove(playerUuid, window);
+                return false;
+            }
+
+            if (windows.size() == 1) {
+                world.setBlockInteractionState(pos, blockType, "OpenWindow");
+            }
+
+            window.registerCloseEvent(event -> {
+                windows.remove(playerUuid, window);
+                BlockType currentType = world.getBlockType(pos);
+                if (windows.isEmpty()) {
+                    if (currentType != null) {
+                        world.setBlockInteractionState(pos, currentType, "CloseWindow");
+                    }
+                    startChestExpiry(world, pos);
+                }
+            });
+
+            CometLootBlockStateUtil.onOpen(state, playerRef, world, store);
+            pauseChestExpiry(pos);
+            return true;
+        } catch (Throwable t) {
+            LOGGER.warning("openManagedChest failed at " + pos + ": " + t);
+            return false;
+        }
+    }
+
+    public boolean isManagedChest(Vector3i blockPos) {
+        if (blockPos == null) {
+            return false;
+        }
+        return managedChests.contains(keyOf(blockPos));
+    }
+
+    public void handleChestBroken(Vector3i blockPos) {
+        handleChestBroken(null, blockPos);
+    }
+
+    public void handleChestBroken(World world, Vector3i blockPos) {
+        if (blockPos == null) return;
+        String key = keyOf(blockPos);
+        Vector3i cometPos = cometBlockByChestKey.remove(key);
+        if (cometPos != null && world != null) {
+            try {
+                world.breakBlock(cometPos.x, cometPos.y, cometPos.z, 0);
+            } catch (Exception e) {
+                LOGGER.warning("Failed to remove linked comet block at " + cometPos + " when chest broken: " + e.getMessage());
+            }
+        }
+        managedChests.remove(key);
+        cancelExpiryTask(key);
+    }
+
+    public void clear() {
+        for (ScheduledFuture<?> task : expiryTasks.values()) {
+            if (task != null) {
+                task.cancel(false);
+            }
+        }
+        expiryTasks.clear();
+        managedChests.clear();
+        cometBlockByChestKey.clear();
+    }
+
+    private void pauseChestExpiry(Vector3i blockPos) {
+        if (blockPos == null) {
+            return;
+        }
+        String key = keyOf(blockPos);
+        if (!managedChests.contains(key)) {
+            return;
+        }
+        cancelExpiryTask(key);
+    }
+
+    private void startChestExpiry(World world, Vector3i blockPos) {
+        if (world == null || blockPos == null) {
+            return;
+        }
+        Vector3i pos = copyKey(blockPos);
+        String key = keyOf(pos);
+        if (!managedChests.contains(key)) {
+            return;
+        }
+        scheduleExpiry(world, key, pos);
+    }
+
+    private void scheduleExpiry(World world, String key, Vector3i pos) {
+        cancelExpiryTask(key);
+        ScheduledFuture<?> expiryTask = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+            try {
+                world.execute(() -> expireChest(world, key, pos));
+            } catch (Exception e) {
+                LOGGER.warning("Failed to execute chest expiry for " + pos + ": " + e.getMessage());
+            }
+        }, CHEST_EXPIRY_SECONDS, TimeUnit.SECONDS);
+        expiryTasks.put(key, expiryTask);
+    }
+
+    private void expireChest(World world, String key, Vector3i pos) {
+        if (!managedChests.contains(key)) {
+            expiryTasks.remove(key);
+            return;
+        }
+
+        try {
+            Object state = CometLootBlockStateUtil.getState(world, pos.x, pos.y, pos.z, true);
+            CometLootBlockStateUtil.clearContainerContents(state);
+        } catch (Throwable t) {
+            LOGGER.warning("Failed to clear chest state before expiry at " + pos + ": " + t);
+        }
+
+        boolean removed = false;
+        try {
+            removed = world.breakBlock(pos.x, pos.y, pos.z, 0);
+            if (!removed) {
+                removed = forceRemoveBlock(world, pos);
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Failed to remove chest block at " + pos + ": " + e.getMessage());
+            removed = forceRemoveBlock(world, pos);
+        }
+
+        if (!removed) {
+            LOGGER.warning("Could not remove reward chest at " + pos + ", retrying expiry.");
+            scheduleExpiry(world, key, pos);
+            return;
+        }
+
+        Vector3i cometPos = cometBlockByChestKey.remove(key);
+        if (cometPos != null) {
+            try {
+                world.breakBlock(cometPos.x, cometPos.y, cometPos.z, 0);
+            } catch (Exception e) {
+                LOGGER.warning("Failed to remove linked comet block at " + cometPos + " on chest expiry: " + e.getMessage());
+            }
+        }
+        managedChests.remove(key);
+        expiryTasks.remove(key);
+        LOGGER.info("Expired reward chest after close timer at " + pos + ".");
+    }
+
+    /**
+     * Returns an adjacent position in front of the block (prefer +Z, then -Z, +X, -X) where the chunk is loaded, or null.
+     */
+    private Vector3i findChestPositionInFront(World world, Vector3i blockPos) {
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dz = { 1, -1, 0, 0 };
+        for (int i = 0; i < 4; i++) {
+            int nx = blockPos.x + dx[i];
+            int nz = blockPos.z + dz[i];
+            if (world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(nx, nz)) != null) {
+                return new Vector3i(nx, blockPos.y, nz);
+            }
+        }
+        return null;
+    }
+
+    private boolean forceRemoveBlock(World world, Vector3i pos) {
+        try {
+            WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
+            if (chunk == null) {
+                return false;
+            }
+            int localX = pos.x & 31;
+            int localZ = pos.z & 31;
+            return chunk.setBlock(localX, pos.y, localZ, BlockType.EMPTY_ID, BlockType.EMPTY, 0, 0, 157);
+        } catch (Exception e) {
+            LOGGER.warning("Force remove failed for chest at " + pos + ": " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void cancelExpiryTask(String key) {
+        ScheduledFuture<?> existingTask = expiryTasks.remove(key);
+        if (existingTask != null) {
+            existingTask.cancel(false);
+        }
+    }
+
+    private ContainerBuildResult buildContainer(List<ItemStack> rewards) {
+        SimpleItemContainer container = new SimpleItemContainer((short) CONTAINER_SIZE);
+        int limit = Math.min(CONTAINER_SIZE, rewards.size());
+        int added = 0;
+        for (int i = 0; i < limit; i++) {
+            ItemStack stack = rewards.get(i);
+            if (stack != null) {
+                try {
+                    container.setItemStackForSlot((short) i, stack);
+                    added++;
+                } catch (Exception e) {
+                    LOGGER.warning("Skipping invalid reward stack in chest slot " + i + ": " + e.getMessage());
+                }
+            }
+        }
+        return new ContainerBuildResult(container, added);
+    }
+
+    private BlockType findBlockType(BlockTypeAssetMap<String, BlockType> blockTypeAssetMap, String blockTypeId) {
+        if (blockTypeAssetMap == null || blockTypeId == null) {
+            return null;
+        }
+        BlockType blockType = blockTypeAssetMap.getAsset(blockTypeId);
+        if (blockType != null) {
+            return blockType;
+        }
+        return blockTypeAssetMap.getAsset(blockTypeId + ".json");
+    }
+
+    private Vector3i copyKey(Vector3i blockPos) {
+        return new Vector3i(blockPos.x, blockPos.y, blockPos.z);
+    }
+
+    private String keyOf(Vector3i blockPos) {
+        return blockPos.x + ":" + blockPos.y + ":" + blockPos.z;
+    }
+
+    private static final class ContainerBuildResult {
+        private final SimpleItemContainer container;
+        private final int addedCount;
+
+        private ContainerBuildResult(SimpleItemContainer container, int addedCount) {
+            this.container = container;
+            this.addedCount = addedCount;
+        }
+    }
+}

@@ -1,0 +1,83 @@
+{
+  "database": {
+    "type": "sqlite",
+    "host": "localhost",
+    "port": 3306,
+    "databaseName": "playtime_db",
+    "username": "root",
+    "password": "password",
+    "useSSL": false
+  },
+  "command": {
+    "name": "playtime",
+    "description": "Afficher votre temps de jeu et les classements",
+    "aliases": ["pt", "play", "time"],
+    "topStyle": "text"
+  },
+  "periods": {
+    "daily": "jour",
+    "weekly": "semaine",
+    "monthly": "mois",
+    "all": "total",
+    "reload": "recharger"
+  },
+  "messages": {
+    "selfCheck": "&dTemps de jeu total : &e%time%",
+    "otherCheck": "&dTemps de jeu de &f%player%&d : &e%time%",
+    "leaderboardHeader": "&6--- Classement temps de jeu (&e%period_name%&6) ---",
+    "leaderboardEntry": "&6#%rank% &e%player% &7: &f%time%",
+    "leaderboardEmpty": "&7Aucune donnée pour l’instant.",
+    "reloadSuccess": "&aConfiguration rechargée.",
+    "reloadNoPermission": "&cVous n’avez pas la permission de recharger.",
+    "reloadFailed": "&cÉchec du rechargement. Voir la console.",
+    "errorInvalidPeriod": "&cPériode invalide. Utilisez : %valid_periods%",
+    "errorConsole": "&cRéservé aux joueurs.",
+    "noPermission": "&cVous n’avez pas la permission.",
+    "rewardAdded": "&aRécompense « %id% » ajoutée.",
+    "rewardRemoved": "&aRécompense « %id% » supprimée.",
+    "rewardNotFound": "&cRécompense « %id% » introuvable.",
+    "rewardBroadcast": "&6%player% &ea joué &6%time% &eet a reçu la récompense &6%reward%&e !",
+    "rewardListHeader": "&6--- Récompenses du serveur ---",
+    "rewardListEntry": "&e%id% &7(%period%) : &f%status%",
+    "statusClaimed": "&a[REÇUE]",
+    "statusAvailable": "&e[DISPONIBLE]",
+    "statusLocked": "&c[VERROUILLÉE]"
+  },
+  "rewardSettings": {
+    "autoGrant": false
+  },
+  "gui": {
+    "title": "CLASSEMENT",
+    "buttonAll": "TOTAL",
+    "buttonDaily": "QUOTIDIEN",
+    "buttonWeekly": "HEBDO",
+    "buttonMonthly": "MENSUEL",
+    "footerTitle": "VOS STATISTIQUES :",
+    "footerRankCaption": "Rang :",
+    "footerTimeCaption": "Temps : ",
+    "rankPrefix": "Rang : n°",
+    "timePrefix": "Temps : ",
+    "rankIfNone": "—"
+  },
+  "rewards": [],
+  "milestoneSettings": {
+    "enabled": true,
+    "tierBronzeMax": "10h",
+    "tierSilverMax": "50h",
+    "tierGoldMax": "100h",
+    "broadcastBronze":  "&8[&6Bronze&8] &f%player% &7vient d'atteindre &e%time% &7de jeu !",
+    "broadcastSilver":  "&8[&7Argent&8] &f%player% &7vient d'atteindre &f%time% &7de jeu !",
+    "broadcastGold":    "&8[&eOr&8] &f%player% &6a atteint &e%time% &6de jeu !",
+    "broadcastDiamond": "&8[&bDiamant&8] &f%player% &ba atteint &3%time% &bde jeu !"
+  },
+  "milestones": [
+    { "time": "1h"   },
+    { "time": "5h"   },
+    { "time": "10h"  },
+    { "time": "25h"  },
+    { "time": "50h"  },
+    { "time": "100h" },
+    { "time": "200h" },
+    { "time": "500h" }
+  ]
+}

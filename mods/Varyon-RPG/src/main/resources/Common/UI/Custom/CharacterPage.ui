@@ -1,0 +1,508 @@
+$C = "Common.ui";
+
+@Ink = #E8DCC8;
+@InkStrong = #F2E8D8;
+@InkMuted = #C8BEB0;
+@InkFaint = #A89E90;
+@LeatherBg = #000000(0.22);
+@PanelShade = #000000(0.32);
+@CardShade = #000000(0.26);
+@Gold = #D4AF37(0.92);
+@GoldSoft = #D4AF37(0.74);
+@GoldHighlight = #F7E6A5(0.62);
+@GoldShadow = #1A1612(0.55);
+@ActiveGreen = #6BCB7A(0.95);
+@Aging = #8A7A5A(0.22);
+@ParchmentMottle = #FFFFFF(0.03);
+@GrainLight = #FFFFFF(0.02);
+@GrainDark = #000000(0.12);
+@Edge1 = #FFFFFF(0.05);
+@Edge2 = #FFFFFF(0.03);
+@Edge3 = #000000(0.20);
+@Divider = #E8DCC8(0.16);
+@DividerSoft = #E8DCC8(0.10);
+@Backdrop = #000000(0.34);
+@SelectedButtonFill = #D4AF37(0.38);
+@StatusPillBg = #000000(0.40);
+@StatusPillEdge = #D4AF37(0.35);
+@SkillTreeEdgeGlow = #D4AF37(0.62);
+@SkillTreeNodeGlow = #D4AF37(0.18);
+
+@HeadingStyle = (
+  FontSize: 24,
+  TextColor: @Ink,
+  RenderBold: true
+);
+
+@SubHeadingStyle = (
+  FontSize: 18,
+  TextColor: @InkStrong,
+  RenderBold: true
+);
+
+@MetaStyle = (
+  FontSize: 16,
+  TextColor: @InkMuted
+);
+
+@SectionTitleStyle = (
+  FontSize: 16,
+  TextColor: #C8A96E,
+  RenderUppercase: true,
+  RenderBold: true
+);
+
+@StatLabelStyle = (
+  FontSize: 16,
+  TextColor: #B8A88C,
+  RenderUppercase: true
+);
+
+@ReadableStatLabelStyle = (
+  ...@StatLabelStyle,
+  RenderUppercase: false
+);
+
+@StatValueStyle = (
+  FontSize: 18,
+  TextColor: @InkStrong,
+  RenderBold: true
+);
+
+@PlusButtonStyle = (
+  Default: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 8)
+  ),
+  Hovered: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Hovered.png", Border: 8)
+  ),
+  Pressed: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8)
+  ),
+  Disabled: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Disabled.png", Border: 8)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@BlockedButtonStyle = (
+  Default: (
+    Background: #6B4E2E(0.06)
+  ),
+  Hovered: (
+    Background: #6B4E2E(0.06)
+  ),
+  Pressed: (
+    Background: #6B4E2E(0.06)
+  ),
+  Disabled: (
+    Background: #6B4E2E(0.06)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@TabButtonStyle = (
+  Default: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 8)
+  ),
+  Hovered: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Hovered.png", Border: 8)
+  ),
+  Pressed: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8)
+  ),
+  Disabled: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Disabled.png", Border: 8)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@TabLabelStyle = (
+  FontSize: 14,
+  TextColor: @InkStrong,
+  RenderUppercase: true,
+  RenderBold: true,
+  HorizontalAlignment: Center,
+  VerticalAlignment: Center
+);
+
+@CycleCardTitleStyle = (
+  FontSize: 12,
+  TextColor: @InkMuted,
+  RenderUppercase: true,
+  RenderBold: true
+);
+
+@CycleActiveTagStyle = (
+  FontSize: 12,
+  TextColor: @ActiveGreen,
+  RenderUppercase: true,
+  RenderBold: true
+);
+
+@CycleSlotKeyStyle = (
+  FontSize: 10,
+  TextColor: @InkMuted,
+  RenderUppercase: true,
+  RenderBold: true,
+  VerticalAlignment: Center
+);
+
+@CycleSlotValueStyle = (
+  FontSize: 12,
+  TextColor: @InkStrong,
+  RenderBold: true,
+  VerticalAlignment: Center
+);
+
+@CycleSlotButtonStyle = (
+  Default: (
+    Background: @PanelShade
+  ),
+  Hovered: (
+    Background: #6B4E2E(0.12)
+  ),
+  Pressed: (
+    Background: #6B4E2E(0.16)
+  ),
+  Disabled: (
+    Background: #6B4E2E(0.06)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@SkillNodeButtonStyle = (
+  Default: (
+    Background: #000000(0.0)
+  ),
+  Hovered: (
+    Background: #000000(0.0)
+  ),
+  Pressed: (
+    Background: #000000(0.0)
+  ),
+  Disabled: (
+    Background: #000000(0.0)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+
+@SkillNodeSlotStyle = (
+  Default: (
+    Background: #000000(0.0)
+  ),
+  Hovered: (
+    Background: #000000(0.0)
+  ),
+  Pressed: (
+    Background: #000000(0.0)
+  ),
+  Disabled: (
+    Background: #000000(0.0)
+  )
+);
+
+@PageWidth = 1170;
+@PageHeight = 768;
+@PagePadding = 31;
+
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+  Background: @Backdrop;
+  LayoutMode: Middle;
+
+  Group {
+    Anchor: (Width: @PageWidth, Height: @PageHeight);
+    Background: PatchStyle(TexturePath: "Common/ContainerFullPatch.png", Border: 20, Color: #FFFFFFE6);
+    LayoutMode: Full;
+
+    Group #FiligreeBorder {
+      Visible: false;
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      Background: #000000(0.0);
+
+      AssetImage #FrameRail {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      }
+
+      AssetImage #CornerFlourishShadowTL { Anchor: (Left: -10, Top: -13, Width: 128, Height: 128); }
+      AssetImage #CornerFlourishShadowTR { Anchor: (Right: -10, Top: -13, Width: 128, Height: 128); }
+      AssetImage #CornerFlourishShadowBL { Anchor: (Left: -10, Bottom: -19, Width: 128, Height: 128); }
+      AssetImage #CornerFlourishShadowBR { Anchor: (Right: -10, Bottom: -19, Width: 128, Height: 128); }
+
+      AssetImage #CornerFlourishTL { Anchor: (Left: -8, Top: -16, Width: 128, Height: 128); }
+      AssetImage #CornerFlourishTR { Anchor: (Right: -8, Top: -16, Width: 128, Height: 128); }
+      AssetImage #CornerFlourishBL { Anchor: (Left: -8, Bottom: -16, Width: 128, Height: 128); }
+      AssetImage #CornerFlourishBR { Anchor: (Right: -8, Bottom: -16, Width: 128, Height: 128); }
+    }
+    Group #PageContent {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      Padding: (Full: @PagePadding);
+      LayoutMode: Top;
+
+
+    Group {
+      FlexWeight: 1;
+      Anchor: (Top: 2);
+      LayoutMode: Top;
+
+      Group #Tabs {
+        LayoutMode: Left;
+        Anchor: (Height: 46);
+
+        Button #TabCharacterButton {
+          Anchor: (Width: 144, Height: 43);
+          Style: @TabButtonStyle;
+
+          Group #TabCharacterUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: true;
+          }
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Middle;
+            Padding: (Left: 10);
+            Group {
+              LayoutMode: Left;
+              Group {
+                Anchor: (Width: 16, Height: 16);
+                Background: PatchStyle(TexturePath: "Elements/Tools.png", Border: 0);
+              }
+              Group { Anchor: (Width: 6); }
+              Label {
+                Style: @TabLabelStyle;
+                Text: "Métiers";
+              }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10); }
+
+        Button #TabArtisansButton {
+          Anchor: (Width: 144, Height: 43);
+          Style: @TabButtonStyle;
+
+          Group #TabArtisansUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Middle;
+            Padding: (Left: 10);
+            Group {
+              LayoutMode: Left;
+              Group {
+                Anchor: (Width: 16, Height: 16);
+                Background: PatchStyle(TexturePath: "Elements/People.png", Border: 0);
+              }
+              Group { Anchor: (Width: 6); }
+              Label {
+                Style: @TabLabelStyle;
+                Text: "Artisans";
+              }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10); }
+
+        Button #TabClassementButton {
+          Anchor: (Width: 144, Height: 43);
+          Style: @TabButtonStyle;
+
+          Group #TabClassementUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Middle;
+            Padding: (Left: 10);
+            Group {
+              LayoutMode: Left;
+              Group {
+                Anchor: (Width: 16, Height: 16);
+                Background: PatchStyle(TexturePath: "Elements/Leaderboard.png", Border: 0);
+              }
+              Group { Anchor: (Width: 6); }
+              Label {
+                Style: @TabLabelStyle;
+                Text: "Classement";
+              }
+            }
+          }
+        }
+
+        Group { Anchor: (Width: 10); }
+
+        Button #TabAdminButton {
+          Anchor: (Width: 144, Height: 43);
+          Style: @TabButtonStyle;
+          Visible: false;
+
+          Group #TabAdminUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Middle;
+            Padding: (Left: 10);
+            Label {
+              Style: @TabLabelStyle;
+              Text: "Admin";
+            }
+          }
+        }
+
+
+      }
+
+      Group #CharacterTabContent {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Visible: true;
+        Anchor: (Top: 4);
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Padding: (Full: 12);
+
+          Group #CharacterTabMount {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Full;
+          }
+        }
+      }
+
+      Group #SkillsTabContent {
+        LayoutMode: Left;
+        FlexWeight: 1;
+        Visible: false;
+        Anchor: (Top: 4);
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Padding: (Full: 12);
+
+          Group #SkillsTabMount {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Full;
+          }
+        }
+      }
+
+      Group #ArtisansTabContent {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Visible: false;
+        Anchor: (Top: 4);
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Padding: (Full: 12);
+
+          Group #ArtisansTabMount {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Full;
+          }
+        }
+      }
+
+      Group #ClassementTabContent {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Visible: false;
+        Anchor: (Top: 4);
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Padding: (Full: 12);
+
+          Group #ClassementTabMount {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Full;
+          }
+        }
+      }
+
+      Group #AdminTabContent {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Visible: false;
+        Anchor: (Top: 4);
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Padding: (Full: 12);
+
+          Group #AdminTabMount {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Full;
+          }
+        }
+      }
+
+    }
+    }
+
+    Group #GlobalSkillStatusRow {
+      Anchor: (Left: 0, Right: 0, Bottom: 22, Height: 36);
+      LayoutMode: Left;
+      Visible: false;
+
+      Group { FlexWeight: 1; }
+
+      Group #GlobalSkillStatusStrong {
+        Anchor: (Width: 620, Height: 34);
+        LayoutMode: Full;
+        Background: @StatusPillBg;
+        Padding: (Left: 14, Right: 14, Top: 7, Bottom: 7);
+        Visible: false;
+
+        Group { Anchor: (Left: 0, Right: 0, Top: 0, Height: 1); Background: @StatusPillEdge; }
+        Label #SkillCastStatusStrong { Style: (...@MetaStyle, FontSize: 13, TextColor: @GoldHighlight, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: ""; }
+      }
+
+      Group #GlobalSkillStatusMedium {
+        Anchor: (Width: 620, Height: 34);
+        LayoutMode: Full;
+        Background: #2B241A(0.26);
+        Padding: (Left: 14, Right: 14, Top: 7, Bottom: 7);
+        Visible: false;
+
+        Group { Anchor: (Left: 0, Right: 0, Top: 0, Height: 1); Background: #D4AF37(0.16); }
+        Label #SkillCastStatusMedium { Style: (...@MetaStyle, FontSize: 13, TextColor: #F7E6A5(0.75), RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: ""; }
+      }
+
+      Group #GlobalSkillStatusWeak {
+        Anchor: (Width: 620, Height: 34);
+        LayoutMode: Full;
+        Background: #2B241A(0.14);
+        Padding: (Left: 14, Right: 14, Top: 7, Bottom: 7);
+        Visible: false;
+
+        Group { Anchor: (Left: 0, Right: 0, Top: 0, Height: 1); Background: #D4AF37(0.08); }
+        Label #SkillCastStatusWeak { Style: (...@MetaStyle, FontSize: 13, TextColor: #F7E6A5(0.48), RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: ""; }
+      }
+
+      Group { FlexWeight: 1; }
+    }
+  }
+}

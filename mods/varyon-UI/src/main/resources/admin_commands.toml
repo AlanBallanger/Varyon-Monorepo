@@ -1,0 +1,291 @@
+# VaryonUI Admin Commands Configuration
+# Accessible uniquement aux joueurs avec la permission varyonui.admin (ou OP)
+# Max 5 buttons per row, overflow wraps to next row
+# Type: "execute" (runs command directly) or "chat" (opens chat with command)
+
+##################################################
+# ANNONCE
+##################################################
+[[category]]
+name = "Annonce"
+
+[[category.buttons]]
+label = "Restart 1 min"
+command = "/eventtitle --title \"Je restart le serveur dans 1 min\" --secondary Annonce"
+type = "execute"
+
+[[category.buttons]]
+label = "Restart 10 sec"
+command = "/eventtitle --title \"Je restart le serveur dans 10 secondes\" --secondary Annonce"
+type = "execute"
+
+##################################################
+# HEAL
+##################################################
+[[category]]
+name = "Heal"
+
+[[category.buttons]]
+label = "Heal"
+command = "/damage nom --amount -100"
+type = "chat"
+
+##################################################
+# HOLOGRAMME
+##################################################
+[[category]]
+name = "Hologramme"
+
+[[category.buttons]]
+label = "Créer"
+command = "/holo create nom"
+type = "chat"
+
+[[category.buttons]]
+label = "GUI"
+command = "/holo gui"
+type = "execute"
+
+##################################################
+# CLAIMS
+##################################################
+[[category]]
+name = "Claims"
+
+[[category.buttons]]
+label = "Ajouter claims"
+command = "/scp add-chunk-amount nom 1"
+type = "chat"
+
+##################################################
+# UI ADMIN
+##################################################
+[[category]]
+name = "UI Admin"
+
+[[category.buttons]]
+label = "Liste parties"
+command = "/scp admin-party-list"
+type = "execute"
+
+[[category.buttons]]
+label = "Fixer claims max"
+command = "/scp admin-modify-chunk 1"
+type = "chat"
+
+##################################################
+# CHUNK
+##################################################
+[[category]]
+name = "Chunk"
+
+[[category.buttons]]
+label = "Sélectionner"
+command = "/selectchunk"
+type = "execute"
+
+[[category.buttons]]
+label = "Régénérer"
+command = "/chunk regenerate ~ ~ --confirm"
+type = "execute"
+
+##################################################
+# PORTAILS
+##################################################
+[[category]]
+name = "Portails"
+
+[[category.buttons]]
+label = "Toggle config"
+command = "/adminportals configmode toggle"
+type = "execute"
+
+##################################################
+# MMOXP
+##################################################
+[[category]]
+name = "MMOXP"
+
+[[category.buttons]]
+label = "Set XP"
+command = "/setmmoxp skill|all 1000 --target=player"
+type = "chat"
+
+##################################################
+# ORBISGUARD
+##################################################
+[[category]]
+name = "OrbisGuard"
+
+[[category.buttons]]
+label = "Selection"
+command = "/rg wand"
+type = "execute"
+
+[[category.buttons]]
+label = "Ajouter un flag"
+command = "/rg flag zone pvp allow"
+type = "chat"
+
+[[category.buttons]]
+label = "Flag conditionnel"
+command = "/rg flag spawn build [{player_rank}==vip]allow"
+type = "chat"
+
+[[category.buttons]]
+label = "Condition give"
+command = "[(player_vip)==true]CONSOLE:give %player% diamond 1"
+type = "chat"
+
+[[category.buttons]]
+label = "Mode selection"
+command = "/rg selmode cuboid|poly"
+type = "chat"
+
+[[category.buttons]]
+label = "Ajouter un membre"
+command = "/rg addmember region player"
+type = "chat"
+
+[[category.buttons]]
+label = "Etendre chunk"
+command = "/rg expand"
+type = "execute"
+
+##################################################
+# EFFECT
+##################################################
+[[category]]
+name = "Effect"
+
+[[category.buttons]]
+label = "Erosion"
+command = "/entity effect erosion_test"
+type = "execute"
+
+[[category.buttons]]
+label = "Drop Épique"
+command = "/entity effect drop_epic"
+type = "execute"
+
+[[category.buttons]]
+label = "Gel"
+command = "/entity effect freeze"
+type = "execute"
+
+[[category.buttons]]
+label = "Gravats Manqués"
+command = "/entity effect rubble_miss"
+type = "execute"
+
+[[category.buttons]]
+label = "Signature Masse"
+command = "/entity effect mace_signature"
+type = "execute"
+
+[[category.buttons]]
+label = "Créatif"
+command = "/entity effect creative"
+type = "execute"
+
+[[category.buttons]]
+label = "Étourdissement"
+command = "/entity effect stick_stun"
+type = "execute"
+
+##################################################
+# MOD
+##################################################
+[[category]]
+name = "Mod"
+
+[[category.buttons]]
+label = "Liste mods"
+command = "/modlist"
+type = "execute"
+
+##################################################
+# COINS
+##################################################
+[[category]]
+name = "Coins"
+
+[[category.buttons]]
+label = "Payer"
+command = "/pay nom 1000"
+type = "chat"
+
+[[category.buttons]]
+label = "Gérer"
+command = "/economy add/set joueur 1000"
+type = "chat"
+
+##################################################
+# ESSENTIALS
+##################################################
+[[category]]
+name = "Essentials"
+
+[[category.buttons]]
+label = "Annonce"
+command = "/shout message"
+type = "chat"
+
+##################################################
+# TELEPORTERS
+##################################################
+[[category]]
+name = "Teleporters"
+
+[[category.buttons]]
+label = "GUI"
+command = "/teleporter"
+type = "execute"
+
+[[category.buttons]]
+label = "Se rendre"
+command = "/teleporter go nom"
+type = "chat"
+
+[[category.buttons]]
+label = "Transformation serveur"
+command = "/teleporter server nom"
+type = "chat"
+
+##################################################
+# ITEM MANAGER
+##################################################
+[[category]]
+name = "Item Manager"
+
+[[category.buttons]]
+label = "GUI"
+command = "/itemmanage"
+type = "execute"
+
+##################################################
+# PERMISSIONS
+##################################################
+[[category]]
+name = "Permissions"
+
+[[category.buttons]]
+label = "Editeur"
+command = "/lp editor"
+type = "execute"
+
+##################################################
+# NPC
+##################################################
+[[category]]
+name = "NPC"
+
+[[category.buttons]]
+label = "Dialog"
+command = "/npcdialog"
+type = "execute"
+
+[[category.buttons]]
+label = "Quest"
+command = "/npcquest"
+type = "execute"

@@ -1,0 +1,174 @@
+$C = "Common.ui";
+$Sounds = "Sounds.ui";
+
+          Group #VaryonContent {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Visible: false;
+            Padding: (Top: 0, Bottom: 0, Left: 0, Right: 0);
+
+            Group #VaryonQuickRow {
+              LayoutMode: Left;
+              Anchor: (Height: 53, Bottom: 8);
+
+              Button #VaryonQuickButton1 {
+                Anchor: (Width: 152, Height: 53, Right: 12);
+                Style: ButtonStyle(
+                  Default: (Background: (Color: #2a4a6a)),
+                  Hovered: (Background: (Color: #3a5a7a)),
+                  Pressed: (Background: (Color: #3a5a7a)),
+                  Sounds: $Sounds.@ButtonsLight
+                );
+                Group {
+                  LayoutMode: Left;
+                  Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  Group #VaryonQuickButton1Icon {
+                    Anchor: (Width: 30, Height: 30, Top: -1);
+                    Background: "Icons/Varyon_Icon.png";
+                  }
+                  Group {
+                    LayoutMode: Top;
+                    Anchor: (Left: 0, Right: 0);
+                    Padding: (Left: 4);
+                    Label #VaryonQuickButton1Label {
+                      Text: "";
+                      Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                    }
+                    Label #VaryonQuickButton1Cmd {
+                      Text: "";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                    }
+                  }
+                }
+              }
+
+              Button #VaryonQuickButton2 {
+                Anchor: (Width: 152, Height: 53, Right: 12);
+                Style: ButtonStyle(
+                  Default: (Background: (Color: #2a4a6a)),
+                  Hovered: (Background: (Color: #3a5a7a)),
+                  Pressed: (Background: (Color: #3a5a7a)),
+                  Sounds: $Sounds.@ButtonsLight
+                );
+                Group {
+                  LayoutMode: Left;
+                  Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  Group #VaryonQuickButton2Icon {
+                    Anchor: (Width: 30, Height: 30, Top: -1);
+                    Background: "Icons/Varyon_Icon.png";
+                  }
+                  Group {
+                    LayoutMode: Top;
+                    Anchor: (Left: 0, Right: 0);
+                    Padding: (Left: 4);
+                    Label #VaryonQuickButton2Label {
+                      Text: "";
+                      Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                    }
+                    Label #VaryonQuickButton2Cmd {
+                      Text: "";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                    }
+                  }
+                }
+              }
+
+              Button #VaryonQuickButton3 {
+                Anchor: (Width: 152, Height: 53, Right: 12);
+                Style: ButtonStyle(
+                  Default: (Background: (Color: #2a4a6a)),
+                  Hovered: (Background: (Color: #3a5a7a)),
+                  Pressed: (Background: (Color: #3a5a7a)),
+                  Sounds: $Sounds.@ButtonsLight
+                );
+                Group {
+                  LayoutMode: Left;
+                  Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  Group #VaryonQuickButton3Icon {
+                    Anchor: (Width: 30, Height: 30, Top: -1);
+                    Background: "Icons/Varyon_Icon.png";
+                  }
+                  Group {
+                    LayoutMode: Top;
+                    Anchor: (Left: 0, Right: 0);
+                    Padding: (Left: 4);
+                    Label #VaryonQuickButton3Label {
+                      Text: "";
+                      Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                    }
+                    Label #VaryonQuickButton3Cmd {
+                      Text: "";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                    }
+                  }
+                }
+              }
+
+              Button #VaryonQuickButton4 {
+                Anchor: (Width: 152, Height: 53, Right: 12);
+                Style: ButtonStyle(
+                  Default: (Background: (Color: #2a4a6a)),
+                  Hovered: (Background: (Color: #3a5a7a)),
+                  Pressed: (Background: (Color: #3a5a7a)),
+                  Sounds: $Sounds.@ButtonsLight
+                );
+                Group {
+                  LayoutMode: Left;
+                  Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  Group #VaryonQuickButton4Icon {
+                    Anchor: (Width: 30, Height: 30, Top: -1);
+                    Background: "Icons/Varyon_Icon.png";
+                  }
+                  Group {
+                    LayoutMode: Top;
+                    Anchor: (Left: 0, Right: 0);
+                    Padding: (Left: 4);
+                    Label #VaryonQuickButton4Label {
+                      Text: "";
+                      Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                    }
+                    Label #VaryonQuickButton4Cmd {
+                      Text: "";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                    }
+                  }
+                }
+              }
+
+              Button #VaryonQuickButton5 {
+                Anchor: (Width: 152, Height: 53);
+                Style: ButtonStyle(
+                  Default: (Background: (Color: #2a4a6a)),
+                  Hovered: (Background: (Color: #3a5a7a)),
+                  Pressed: (Background: (Color: #3a5a7a)),
+                  Sounds: $Sounds.@ButtonsLight
+                );
+                Group {
+                  LayoutMode: Left;
+                  Padding: (Top: 8, Bottom: 2, Left: 6, Right: 6);
+                  Group #VaryonQuickButton5Icon {
+                    Anchor: (Width: 30, Height: 30, Top: -1);
+                    Background: "Icons/Varyon_Icon.png";
+                  }
+                  Group {
+                    LayoutMode: Top;
+                    Anchor: (Left: 0, Right: 0);
+                    Padding: (Left: 4);
+                    Label #VaryonQuickButton5Label {
+                      Text: "";
+                      Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Start, Wrap: true);
+                    }
+                    Label #VaryonQuickButton5Cmd {
+                      Text: "";
+                      Style: (FontSize: 10, TextColor: #aaaaaa, HorizontalAlignment: Start, Wrap: true);
+                    }
+                  }
+                }
+              }
+            }
+
+            Group #VaryonTextContainer {
+              LayoutMode: Top;
+            }
+          }

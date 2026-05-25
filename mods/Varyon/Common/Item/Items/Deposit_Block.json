@@ -1,0 +1,41 @@
+{
+  "TranslationProperties": {
+    "Name": "server.Deposit_Block.name"
+  },
+  "Categories": [
+    "Blocks.Decoration"
+  ],
+  "MaxStack": 1,
+  "BlockType": {
+    "DrawType": "Cube",
+    "Material": "Solid",
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Unbreakable"
+      }
+    },
+    "BlockSoundSetId": "Stone",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "ChangeState",
+            "Changes": {
+              "default": "default"
+            }
+          }
+        ]
+      }
+    },
+    "State": {
+      "Definitions": {
+        "default": {
+          "InteractionHint": "interactionHints.deposit_essence"
+        }
+      }
+    }
+  },
+  "PlayerAnimationsId": "Block",
+  "Quality": "Developer",
+  "ItemSoundSetId": "ISS_Blocks_Stone"
+}
