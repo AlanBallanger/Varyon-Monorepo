@@ -16,5 +16,6 @@
   "LoadBefore": {},
   "DisabledByDefault": false,
   "IncludesAssetPack": true,
-  "SubPlugins": []
+  "SubPlugins": [],
+  "ServerVersion": ">=0.5.0-pre.9 <0.6.0"
 }
