@@ -70,11 +70,12 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
                 if (tc == null) {
                     continue;
                 }
-                Vector3d playerPos = tc.getPosition();
-                if (playerPos == null) {
+                com.hypixel.hytale.math.vector.Vector3d rawPlayerPos = tc.getPosition();
+                if (rawPlayerPos == null) {
                     continue;
                 }
-                if (playerPos.distanceSquaredTo(anchor) <= (MISSING_RECONCILE_PLAYER_RADIUS * MISSING_RECONCILE_PLAYER_RADIUS)) {
+                Vector3d playerPos = new Vector3d(rawPlayerPos.x, rawPlayerPos.y, rawPlayerPos.z);
+                if (playerPos.distanceSquared(anchor) <= (MISSING_RECONCILE_PLAYER_RADIUS * MISSING_RECONCILE_PLAYER_RADIUS)) {
                     return true;
                 }
             }

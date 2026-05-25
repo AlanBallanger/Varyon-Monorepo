@@ -1,5 +1,6 @@
 package com.varyon.bossarena.boss;
 
+import com.varyon.bossarena.util.VecUtil;
 import org.joml.Vector3d;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -23,8 +24,10 @@ public final class PlayerFinder {
 
         return world.getPlayerRefs().stream()
                 .filter(ref -> {
-                    Vector3d pPos = ref.getTransform().getPosition();
-                    return pPos != null && getDistanceSq(pPos, center) <= radiusSq;
+                    com.hypixel.hytale.math.vector.Vector3d raw = ref.getTransform().getPosition();
+                    if (raw == null) return false;
+                    Vector3d pPos = VecUtil.toJoml(raw);
+                    return getDistanceSq(pPos, center) <= radiusSq;
                 })
                 .map(PlayerFinder::resolvePlayerFromRef)
                 .filter(player -> player != null)
@@ -40,7 +43,8 @@ public final class PlayerFinder {
         int count = 0;
 
         for (PlayerRef ref : world.getPlayerRefs()) {
-            Vector3d pos = ref.getTransform().getPosition();
+            com.hypixel.hytale.math.vector.Vector3d raw = ref.getTransform().getPosition();
+            Vector3d pos = raw != null ? VecUtil.toJoml(raw) : null;
             if (pos != null && getDistanceSq(pos, center) <= radiusSq) {
                 count++;
             }

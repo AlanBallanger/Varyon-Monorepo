@@ -3,6 +3,7 @@ package com.varyon.bossarena.command;
 import com.varyon.bossarena.BossArenaPlugin;
 import com.varyon.bossarena.config.BossArenaConfigPage;
 import com.varyon.bossarena.util.BossArenaCleanup;
+import com.varyon.bossarena.util.VecUtil;
 import com.varyon.bossarena.data.Arena;
 import com.varyon.bossarena.data.ArenaRegistry;
 import com.varyon.bossarena.data.BossDefinition;
@@ -12,6 +13,7 @@ import com.varyon.bossarena.system.BossTrackingSystem;
 import com.varyon.bossarena.shop.BossArenaShopPage;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
@@ -111,8 +113,8 @@ public final class BossArenaCommand extends AbstractCommand {
             if (playerRef != null) {
                 Transform transform = playerRef.getTransform();
                 if (transform != null) {
-                    Vector3d position = transform.getPosition();
-                    return new Vector3d(position.x, position.y, position.z);
+                    com.hypixel.hytale.math.vector.Vector3d position = transform.getPosition();
+                    return VecUtil.toJoml(position);
                 }
             }
         } catch (Throwable t) {
@@ -125,8 +127,8 @@ public final class BossArenaCommand extends AbstractCommand {
 
     /** Uses reflection to resolve PlayerRef and transform for rotation; fallback (0,0,0) on API mismatch. */
     @SuppressWarnings("SpellCheckingInspection")
-    private static Vector3f getPlayerRotation(Player player) {
-        if (player == null) return new Vector3f(0, 0, 0);
+    private static com.hypixel.hytale.math.vector.Vector3f getPlayerRotation(Player player) {
+        if (player == null) return new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0);
 
         try {
             Method getPlayerRef = player.getClass().getMethod("getPlayerRef");
@@ -135,8 +137,7 @@ public final class BossArenaCommand extends AbstractCommand {
             if (playerRef != null) {
                 Transform transform = playerRef.getTransform();
                 if (transform != null && transform.getRotation() != null) {
-                    Vector3f rotation = transform.getRotation();
-                    return new Vector3f(rotation.x, rotation.y, rotation.z);
+                    return transform.getRotation();
                 }
             }
         } catch (Throwable t) {
@@ -144,7 +145,7 @@ public final class BossArenaCommand extends AbstractCommand {
         }
 
         LOGGER.fine("Falling back to default rotation (0,0,0)");
-        return new Vector3f(0, 0, 0);
+        return new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0);
     }
 
     private static CompletableFuture<Void> spawnShopNpc(@Nonnull CommandContext ctx, BossArenaPlugin plugin) {
@@ -161,15 +162,15 @@ public final class BossArenaCommand extends AbstractCommand {
         }
 
         Vector3d playerPosition = getPlayerPosition(player);
-        Vector3f playerRotation = getPlayerRotation(player);
+        com.hypixel.hytale.math.vector.Vector3f playerRotation = getPlayerRotation(player);
         float playerYaw = playerRotation.getYaw();
         if (Float.isNaN(playerYaw)) {
             playerYaw = 0f;
         }
 
         // Spawn exactly 2 blocks forward from the player's facing direction (horizontal plane).
-        Vector3d forward = Transform.getDirection(0f, playerYaw);
-        Vector3d spawnPosition = new Vector3d(
+        com.hypixel.hytale.math.vector.Vector3d forward = Transform.getDirection(0f, playerYaw);
+        com.hypixel.hytale.math.vector.Vector3d spawnPosition = new com.hypixel.hytale.math.vector.Vector3d(
                 playerPosition.x + (forward.x * 2.0d),
                 playerPosition.y,
                 playerPosition.z + (forward.z * 2.0d)
@@ -177,7 +178,7 @@ public final class BossArenaCommand extends AbstractCommand {
 
         // Make the guard face back toward the player.
         float npcYaw = playerYaw + (float) Math.PI;
-        Vector3f npcRotation = new Vector3f(0f, npcYaw, 0f);
+        com.hypixel.hytale.math.vector.Vector3f npcRotation = new com.hypixel.hytale.math.vector.Vector3f(0f, npcYaw, 0f);
         String shopNpcId = plugin.getShopConfig() != null
                 && plugin.getShopConfig().shopNpcId != null
                 && !plugin.getShopConfig().shopNpcId.isBlank()
@@ -212,7 +213,7 @@ public final class BossArenaCommand extends AbstractCommand {
             int z = (int) Math.floor(spawnPosition.z);
             plugin.recordShopLocation(
                     world.getName(),
-                    new com.hypixel.hytale.math.vector.Vector3i(x, y, z),
+                    new Vector3i(x, y, z),
                     spawnedUuid
             );
             ctx.sendMessage(Message.raw(
@@ -259,10 +260,10 @@ public final class BossArenaCommand extends AbstractCommand {
                 continue;
             }
 
-            Vector3d pos = transform.getPosition();
-            double dx = pos.x - origin.x;
-            double dy = pos.y - origin.y;
-            double dz = pos.z - origin.z;
+            com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+            double dx = rawPos.x - origin.x;
+            double dy = rawPos.y - origin.y;
+            double dz = rawPos.z - origin.z;
             double distSq = (dx * dx) + (dy * dy) + (dz * dz);
             if (distSq < bestDistSq) {
                 bestDistSq = distSq;
@@ -730,7 +731,7 @@ public final class BossArenaCommand extends AbstractCommand {
                 if (plugin.getShopConfig() != null) {
                     changed |= plugin.getShopConfig().removeShopNpcUuid(nearest.toString());
                     if (entity != null && entity.getTransformComponent() != null) {
-                        Vector3d position = entity.getTransformComponent().getPosition();
+                        com.hypixel.hytale.math.vector.Vector3d position = entity.getTransformComponent().getPosition();
                         int x = (int) Math.floor(position.x);
                         int y = (int) Math.floor(position.y);
                         int z = (int) Math.floor(position.z);

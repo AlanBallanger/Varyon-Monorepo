@@ -7,6 +7,7 @@ import com.varyon.bossarena.data.ArenaRegistry;
 import com.varyon.bossarena.data.BossDefinition;
 import com.varyon.bossarena.data.BossRegistry;
 import com.varyon.bossarena.util.BossScaler;
+import com.varyon.bossarena.util.VecUtil;
 import com.varyon.bossarena.boss.BossModifiers;
 import com.varyon.bossarena.boss.PlayerFinder;
 import com.varyon.bossarena.system.BossTrackingSystem;
@@ -175,13 +176,13 @@ public final class BossSpawnService {
                 if (transform == null) {
                     continue;
                 }
-                Vector3d pos = transform.getPosition();
-                if (pos == null) {
+                com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+                if (rawPos == null) {
                     continue;
                 }
-                double dx = pos.x - center.x;
-                double dy = pos.y - center.y;
-                double dz = pos.z - center.z;
+                double dx = rawPos.x - center.x;
+                double dy = rawPos.y - center.y;
+                double dz = rawPos.z - center.z;
                 double distSq = (dx * dx) + (dy * dy) + (dz * dz);
                 if (distSq <= radiusSq) {
                     return true;
@@ -421,8 +422,8 @@ public final class BossSpawnService {
                     world.getEntityStore().getStore(),
                     def.npcId,
                     null,
-                    spreadPos,
-                    new Vector3f(0, 0, 0)
+                    VecUtil.toHytale(spreadPos),
+                    new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0)
             );
 
             if (result != null) {
@@ -1190,8 +1191,8 @@ public final class BossSpawnService {
                         world.getEntityStore().getStore(),
                         add.npcId,
                         null,
-                        mobPos,
-                        new Vector3f(0, 0, 0)
+                        VecUtil.toHytale(mobPos),
+                        new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0)
                 );
                 if (result == null) {
                     LOGGER.warning("Failed to spawn add '" + add.npcId + "' for wave " + waveNumber + ".");

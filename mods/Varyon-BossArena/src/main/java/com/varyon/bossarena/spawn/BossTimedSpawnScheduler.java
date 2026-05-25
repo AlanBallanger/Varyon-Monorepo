@@ -521,13 +521,13 @@ public final class BossTimedSpawnScheduler {
                 if (transform == null) {
                     continue;
                 }
-                Vector3d pos = transform.getPosition();
-                if (pos == null) {
+                com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+                if (rawPos == null) {
                     continue;
                 }
-                double dx = pos.x - center.x;
-                double dy = pos.y - center.y;
-                double dz = pos.z - center.z;
+                double dx = rawPos.x - center.x;
+                double dy = rawPos.y - center.y;
+                double dz = rawPos.z - center.z;
                 double distSq = (dx * dx) + (dy * dy) + (dz * dz);
                 if (distSq < minDistSq) {
                     minDistSq = distSq;
@@ -552,13 +552,13 @@ public final class BossTimedSpawnScheduler {
                 if (transform == null) {
                     continue;
                 }
-                Vector3d pos = transform.getPosition();
-                if (pos == null) {
+                com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+                if (rawPos == null) {
                     continue;
                 }
-                double dx = pos.x - center.x;
-                double dy = pos.y - center.y;
-                double dz = pos.z - center.z;
+                double dx = rawPos.x - center.x;
+                double dy = rawPos.y - center.y;
+                double dz = rawPos.z - center.z;
                 double distSq = (dx * dx) + (dy * dy) + (dz * dz);
                 if (distSq <= radiusSq) {
                     return true;

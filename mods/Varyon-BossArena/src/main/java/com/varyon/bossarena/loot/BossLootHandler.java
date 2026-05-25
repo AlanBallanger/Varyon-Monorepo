@@ -12,7 +12,7 @@ import com.hypixel.hytale.assetstore.map.BlockTypeAssetMap;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Transform;
 import org.joml.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -170,10 +170,11 @@ public class BossLootHandler {
             if (playerTransform == null) {
                 continue;
             }
-            Vector3d playerPos = playerTransform.getPosition();
-            if (playerPos == null) {
+            com.hypixel.hytale.math.vector.Vector3d rawPlayerPos = playerTransform.getPosition();
+            if (rawPlayerPos == null) {
                 continue;
             }
+            Vector3d playerPos = new Vector3d(rawPlayerPos.x, rawPlayerPos.y, rawPlayerPos.z);
             double distance = calculateDistance(playerPos, chestLocation);
 
             LOGGER.info("Player " + playerUuid + " at " + playerPos + ", distance: " + distance);
@@ -318,7 +319,7 @@ public class BossLootHandler {
             return true;
         }
         for (Vector3d chestLoc : CHEST_LOOT.keySet()) {
-            double dist = chestLoc.distanceTo(location);
+            double dist = chestLoc.distance(location);
             if (dist < 2.0 && isWorldMatch(world, chestLoc)) {
                 return true;
             }
@@ -337,7 +338,7 @@ public class BossLootHandler {
             return key;
         }
         for (Vector3d chestLoc : CHEST_LOOT.keySet()) {
-            double dist = chestLoc.distanceTo(location);
+            double dist = chestLoc.distance(location);
             if (dist < 2.0 && isWorldMatch(world, chestLoc)) {
                 return chestLoc;
             }
@@ -463,7 +464,7 @@ public class BossLootHandler {
             chestLoot = null;
             // Try to find nearby chest (in case of floating point precision issues)
             for (Vector3d chestLoc : CHEST_LOOT.keySet()) {
-                if (chestLoc.distanceTo(location) < 2.0 && isWorldMatch(world, chestLoc)) {
+                if (chestLoc.distance(location) < 2.0 && isWorldMatch(world, chestLoc)) {
                     chestLoot = CHEST_LOOT.get(chestLoc);
                     break;
                 }

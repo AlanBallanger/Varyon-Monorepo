@@ -58,7 +58,7 @@ public class OpenBossShopNpcInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        Vector3d npcPosition = transform.getPosition();
+        com.hypixel.hytale.math.vector.Vector3d npcPosition = transform.getPosition();
         String worldName = player.getWorld() != null ? player.getWorld().getName() : null;
         if (worldName == null || worldName.isBlank()) {
             BossArenaShopPage.open(playerRef, store, player, plugin);
@@ -77,7 +77,7 @@ public class OpenBossShopNpcInteraction extends SimpleInstantInteraction {
             }
         }
 
-        plugin.recordShopLocation(worldName, new com.hypixel.hytale.math.vector.Vector3i(x, y, z), npcUuid);
+        plugin.recordShopLocation(worldName, new org.joml.Vector3i(x, y, z), npcUuid);
         BossArenaShopPage.openAtTable(playerRef, store, player, plugin, worldName, x, y, z);
     }
 }

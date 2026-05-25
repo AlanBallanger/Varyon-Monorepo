@@ -303,12 +303,13 @@ public final class BossWaveNotificationService {
             }
 
             Transform transform = playerRef.getTransform();
-            Vector3d playerPosition = transform != null ? transform.getPosition() : null;
-            if (playerPosition == null) {
+            com.hypixel.hytale.math.vector.Vector3d rawPlayerPos = transform != null ? transform.getPosition() : null;
+            if (rawPlayerPos == null) {
                 continue;
             }
+            Vector3d playerPosition = new Vector3d(rawPlayerPos.x, rawPlayerPos.y, rawPlayerPos.z);
 
-            if (playerPosition.distanceTo(center) > radius) {
+            if (playerPosition.distance(center) > radius) {
                 try {
                     // Clear any previously shown BossArena title once the player leaves range.
                     EventTitleUtil.hideEventTitleFromPlayer(playerRef, 0f);

@@ -21,6 +21,7 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.varyon.bossarena.util.VecUtil;
 import org.joml.Vector3d;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
@@ -1142,7 +1143,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private List<ShopLocationView> snapshotShopLocations(Ref<EntityStore> ref, Store<EntityStore> store) {
         Player player = store.getComponent(ref, Player.getComponentType());
         String currentWorld = null;
-        Vector3d playerPosition = null;
+        com.hypixel.hytale.math.vector.Vector3d playerPosition = null;
 
         if (player != null) {
             World world = player.getWorld();
@@ -1685,12 +1686,13 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         World world = player.getWorld();
         var transformComponent = player.getTransformComponent();
-        Vector3d position = transformComponent != null ? transformComponent.getPosition() : null;
-        if (world == null || position == null) {
+        com.hypixel.hytale.math.vector.Vector3d rawPosition = transformComponent != null ? transformComponent.getPosition() : null;
+        if (world == null || rawPosition == null) {
             arenaStatusText = "Could not resolve world/position; arena not added.";
             rebuild();
             return;
         }
+        Vector3d position = VecUtil.toJoml(rawPosition);
 
         String arenaId = nextArenaId();
         Arena arena = new Arena(arenaId, world.getName(), position);

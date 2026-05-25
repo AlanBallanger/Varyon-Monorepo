@@ -6,7 +6,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import org.joml.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
@@ -48,7 +48,7 @@ public class OpenBossChestInteraction extends SimpleBlockInteraction {
                                      @Nonnull InteractionType type,
                                      @Nonnull InteractionContext context,
                                      @Nullable ItemStack itemInHand,
-                                     @Nonnull Vector3i pos,
+                                     @Nonnull com.hypixel.hytale.math.vector.Vector3i pos,
                                      @Nonnull CooldownHandler cooldownHandler) {
 
         Ref<EntityStore> ref = context.getEntity();
@@ -61,7 +61,7 @@ public class OpenBossChestInteraction extends SimpleBlockInteraction {
 
         LOGGER.info("Player opening boss chest at " + pos);
 
-        BossLootChestBlock chestState = BossLootChestBlock.getAt(world, pos);
+        BossLootChestBlock chestState = BossLootChestBlock.getAt(world, pos.x, pos.y, pos.z);
         if (chestState == null) {
             LOGGER.warning("No BossLootChestBlock at block position");
             return;
@@ -132,11 +132,11 @@ public class OpenBossChestInteraction extends SimpleBlockInteraction {
                                              @Nonnull InteractionContext context,
                                              @Nullable ItemStack itemInHand,
                                              @Nonnull World world,
-                                             @Nonnull Vector3i targetBlock) {
+                                             @Nonnull com.hypixel.hytale.math.vector.Vector3i targetBlock) {
         // Nothing to simulate
     }
 
-    private void playSound(World world, Vector3i pos, BlockType blockType, String stateName,
+    private void playSound(World world, com.hypixel.hytale.math.vector.Vector3i pos, BlockType blockType, String stateName,
                            WorldChunk chunk, BlockType originalBlockType,
                            Ref<EntityStore> ref, CommandBuffer<EntityStore> commandBuffer) {
         BlockType interactionState = blockType.getBlockForState(stateName);
@@ -144,10 +144,10 @@ public class OpenBossChestInteraction extends SimpleBlockInteraction {
             int soundEventIndex = interactionState.getInteractionSoundEventIndex();
             if (soundEventIndex != 0) {
                 int rotationIndex = chunk.getRotationIndex(pos.x, pos.y, pos.z);
-                Vector3d soundPos = new Vector3d();
+                com.hypixel.hytale.math.vector.Vector3d soundPos = new com.hypixel.hytale.math.vector.Vector3d();
                 originalBlockType.getBlockCenter(rotationIndex, soundPos);
                 soundPos.add(pos);
-                SoundUtil.playSoundEvent3d(ref, soundEventIndex, soundPos, commandBuffer);
+                SoundUtil.playSoundEvent3d(soundEventIndex, com.hypixel.hytale.protocol.SoundCategory.SFX, soundPos, commandBuffer);
             }
         }
     }
