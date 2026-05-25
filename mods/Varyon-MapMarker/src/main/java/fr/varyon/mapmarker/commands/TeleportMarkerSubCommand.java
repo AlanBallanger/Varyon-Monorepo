@@ -67,22 +67,22 @@ public final class TeleportMarkerSubCommand extends AbstractPlayerCommand {
             context.sendMessage(Message.raw("Erreur : impossible de lire ta position."));
             return;
         }
-        Vector3d prev = tc.getPosition();
+        com.hypixel.hytale.math.vector.Vector3d prev = tc.getPosition();
         double tx = target.x() + 0.5;
         double tz = target.z() + 0.5;
         double fx;
         double fz;
         double fy;
         try {
-            fx = Coord.parse(Double.toString(tx)).resolveXZ(prev.getX());
-            fz = Coord.parse(Double.toString(tz)).resolveXZ(prev.getZ());
-            fy = Coord.parse("~").resolveYAtWorldCoords(prev.getY(), world, fx, fz);
+            fx = Coord.parse(Double.toString(tx)).resolveXZ(prev.x);
+            fz = Coord.parse(Double.toString(tz)).resolveXZ(prev.z);
+            fy = Coord.parse("~").resolveYAtWorldCoords(prev.y, world, fx, fz);
         } catch (GeneralCommandException e) {
             fx = tx;
             fz = tz;
-            fy = prev.getY();
+            fy = prev.y;
         }
-        Teleport teleport = Teleport.createForPlayer(world, new Vector3d(fx, fy, fz), new Vector3f(0, 0, 0));
+        Teleport teleport = Teleport.createForPlayer(world, new com.hypixel.hytale.math.vector.Vector3d(fx, fy, fz), new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0));
         store.addComponent(ref, Teleport.getComponentType(), teleport);
         context.sendMessage(Message.raw(
                 "Téléportation vers « "

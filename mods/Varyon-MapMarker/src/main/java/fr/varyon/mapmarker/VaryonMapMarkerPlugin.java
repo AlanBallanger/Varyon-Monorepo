@@ -269,7 +269,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             sender.sendMessage(Message.raw("Erreur : tu n'es dans aucun monde actif."));
             return;
         }
-        PlayerRef playerRef = findPlayerRef(world, sender.getUsername(), sender);
+        PlayerRef playerRef = findPlayerRef(world, sender.getDisplayName(), sender);
         if (playerRef == null) {
             debug(
                     "createSharedMarkerFromPlayer annulé : PlayerRef introuvable monde=%s image=%s nom=%s",
@@ -293,8 +293,8 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         }
         pushMapMarkerPngToAllOnlinePlayers(fileName);
         requestClientsRebuildCommonAssets();
-        debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), sender.getUsername(), fileName, markerName);
-        Vector3d position = playerRef.getTransform().getPosition();
+        debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), sender.getDisplayName(), fileName, markerName);
+        com.hypixel.hytale.math.vector.Vector3d position = playerRef.getTransform().getPosition();
         UUID playerUuid = playerRef.getUuid();
         String displayName = playerRef.getUsername();
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -308,7 +308,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                 UserMapMarker marker = new UserMapMarker();
                 String markerId = SHARED_MARKER_ID_PREFIX + UUID.randomUUID();
                 marker.setId(markerId);
-                marker.setPosition((float) position.getX(), (float) position.getZ());
+                marker.setPosition((float) position.x, (float) position.z);
                 marker.setName(markerName);
                 marker.setIcon(fileName);
                 marker.withCreatedByName(displayName);
@@ -318,8 +318,8 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                         world.getName(),
                         fileName,
                         markerName,
-                        (float) position.getX(),
-                        (float) position.getZ(),
+                        (float) position.x,
+                        (float) position.z,
                         playerUuid,
                         displayName));
                 rebuildManagedMarkersForWorld(world);
@@ -330,8 +330,8 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                         markerId,
                         fileName,
                         markerName,
-                        position.getX(),
-                        position.getZ());
+                        position.x,
+                        position.z);
                 future.complete(true);
             } catch (Exception e) {
                 ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
