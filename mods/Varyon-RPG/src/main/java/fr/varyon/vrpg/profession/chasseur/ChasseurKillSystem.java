@@ -9,10 +9,10 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.SystemGroup;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
@@ -86,7 +86,8 @@ public final class ChasseurKillSystem {
             Ref<EntityStore> victimRef = chunk.getReferenceTo(index);
             lastAttackerByVictim.put(System.identityHashCode(victimRef), attackerRef);
 
-            PlayerRef playerRef = player.getPlayerRef();
+            PlayerRef playerRef = store.getComponent(attackerRef, PlayerRef.getComponentType());
+            if (playerRef == null) playerRef = commandBuffer.getComponent(attackerRef, PlayerRef.getComponentType());
             if (playerRef == null) return;
             UUID uuid = playerRef.getUuid();
 
@@ -97,25 +98,25 @@ public final class ChasseurKillSystem {
             if (kitRank <= 0) return;
 
             try {
-                Inventory inventory = player.getInventory();
-                if (inventory == null) return;
-                byte slot = inventory.getActiveHotbarSlot();
-                ItemStack held = inventory.getHotbar().getItemStack((short) slot);
+                InventoryComponent.Hotbar hotbar = playerRef.getComponent(InventoryComponent.Hotbar.getComponentType());
+                if (hotbar == null) return;
+                byte slot = hotbar.getActiveSlot();
+                ItemStack held = hotbar.getInventory().getItemStack((short) slot);
                 if (held == null || held.getMaxDurability() <= 0) return;
                 String heldId = held.getItemId();
                 if (!ChasseurXpTable.isHuntingWeapon(heldId)) return;
                 boolean proc = RANDOM.nextDouble() < kitRank * 0.15;
                 boolean dbg = VrpgConfig.isDebugTalents();
                 if (proc) {
-                    if (dbg) LOGGER.atInfo().log("[ChasseurN3] KitRenforce PROC (annulé) rank=" + kitRank
+                    if (dbg) LOGGER.atInfo().log("[ChasseurN3] KitRenforce PROC (annulÃ©) rank=" + kitRank
                         + " item=" + heldId + " dura=" + held.getDurability() + "/" + held.getMaxDurability());
                 } else {
                     double duraBefore = held.getDurability();
                     ItemStack after = held.withIncreasedDurability(-1.0);
-                    inventory.getHotbar().setItemStackForSlot((short) slot, after);
+                    hotbar.getInventory().setItemStackForSlot((short) slot, after);
                     if (dbg) LOGGER.atInfo().log("[ChasseurN3] KitRenforce dura normale (-1) rank=" + kitRank
                         + " item=" + heldId + " dura=" + duraBefore + "/" + held.getMaxDurability()
-                        + " → " + after.getDurability() + "/" + after.getMaxDurability());
+                        + " â†' " + after.getDurability() + "/" + after.getMaxDurability());
                 }
             } catch (Exception ignored) {}
         }
@@ -141,7 +142,9 @@ public final class ChasseurKillSystem {
                 Player killer = resolveKiller(store, commandBuffer, attackerRef, death);
                 if (killer == null) return;
 
-                PlayerRef playerRef = killer.getPlayerRef();
+                Ref<EntityStore> killerRef2 = resolveKillerRef(store, commandBuffer, attackerRef, death);
+                PlayerRef playerRef = killerRef2 != null ? (PlayerRef) store.getComponent(killerRef2, PlayerRef.getComponentType()) : null;
+                if (playerRef == null && killerRef2 != null) playerRef = (PlayerRef) commandBuffer.getComponent(killerRef2, PlayerRef.getComponentType());
                 if (playerRef == null) return;
                 UUID uuid = playerRef.getUuid();
 
@@ -149,9 +152,9 @@ public final class ChasseurKillSystem {
                 if (acc == null || !acc.isActive(Profession.CHASSEUR)) return;
 
                 TransformComponent transform = (TransformComponent) store.getComponent(ref, TransformComponent.getComponentType());
-                Vector3d pos = transform != null ? transform.getPosition().clone().add(0.0, 0.5, 0.0) : null;
+                Vector3d pos = transform != null ? new Vector3d(transform.getPosition()).add(0.0, 0.5, 0.0) : null;
                 HeadRotation headRot = pos != null ? (HeadRotation) store.getComponent(ref, HeadRotation.getComponentType()) : null;
-                Vector3f rot = headRot != null ? headRot.getRotation().clone() : new Vector3f(0f, 0f, 0f);
+                com.hypixel.hytale.math.vector.Rotation3fc rot = headRot != null ? headRot.getRotation() : com.hypixel.hytale.math.vector.Rotation3f.ZERO;
 
                 int comboRank = acc.getTalentRank(Profession.CHASSEUR, "5");
                 int comboCount = comboTracker.onKill(uuid);
@@ -176,7 +179,7 @@ public final class ChasseurKillSystem {
                 double xpMult = 1.0 + xpRank * 0.05 + comboBonus + professionManager.getXpBoostMultiplier(uuid, Profession.CHASSEUR);
                 double finalXp = baseXp * xpMult;
                 if (dbg) LOGGER.atInfo().log("[ChasseurKill] XP +" + finalXp
-                    + " (role=" + roleName + " base=" + baseXp + " × " + String.format("%.3f", xpMult) + ")"
+                    + " (role=" + roleName + " base=" + baseXp + " Ã— " + String.format("%.3f", xpMult) + ")"
                     + (xpRank > 0 ? " [N1 InstinctSauvage rank=" + xpRank + "]" : ""));
                 professionManager.addXp(uuid, Profession.CHASSEUR, finalXp, playerRef);
 
@@ -202,7 +205,7 @@ public final class ChasseurKillSystem {
                 if (alphaRank > 0 && pos != null) {
                     double alphaChance = alphaRank * 0.05;
                     if (RANDOM.nextDouble() < alphaChance) {
-                        if (dbg) LOGGER.atInfo().log("[ChasseurKill] N11 PredateurAlpha PROC — spawning Rex_Caven");
+                        if (dbg) LOGGER.atInfo().log("[ChasseurKill] N11 PredateurAlpha PROC -- spawning Rex_Caven");
                         try {
                             World world = killer.getWorld();
                             if (world != null) {

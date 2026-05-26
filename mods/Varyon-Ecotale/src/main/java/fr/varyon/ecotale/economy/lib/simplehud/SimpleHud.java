@@ -44,8 +44,10 @@ public abstract class SimpleHud extends CustomUIHud {
      * @param playerRef The player to show this HUD to.
      * @param uiPath The path to the .ui file (e.g., "Pages/MyPlugin_Hud.ui"). 
      */
+    public static final String HUD_KEY = "ecotale_simplehud";
+
     public SimpleHud(@Nonnull PlayerRef playerRef, @Nonnull String uiPath) {
-        super(playerRef);
+        super(playerRef, HUD_KEY);
         
         if (uiPath == null || uiPath.trim().isEmpty()) {
             throw new IllegalArgumentException("UI Path cannot be null or empty");

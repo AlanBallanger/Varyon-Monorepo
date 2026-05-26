@@ -43,10 +43,12 @@ public class BalanceCommand extends AbstractAsyncCommand {
 
         Store<EntityStore> store = ref.getStore();
 
+        var world = store.getExternalData().getWorld();
+
         return CompletableFuture.runAsync(() -> {
             PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
             if (playerRef == null) {
-                player.sendMessage(Message.raw("Error: Could not get player data.").color(Color.RED));
+                commandContext.sendMessage(Message.raw("Error: Could not get player data.").color(Color.RED));
                 return;
             }
 
@@ -54,7 +56,7 @@ public class BalanceCommand extends AbstractAsyncCommand {
             PlayerBalance balance = VaryonEcotalePlugin.getInstance().getEconomyManager().getPlayerBalance(playerRef.getUuid());
 
             if (balance == null) {
-                player.sendMessage(Message.raw("Error: Could not load balance.").color(Color.RED));
+                playerRef.sendMessage(Message.raw("Error: Could not load balance.").color(Color.RED));
                 return;
             }
 
@@ -62,12 +64,12 @@ public class BalanceCommand extends AbstractAsyncCommand {
             String earnedStr = VaryonEcotalePlugin.getInstance().getEconomyConfig().formatShort(balance.getTotalEarned());
             String spentStr = VaryonEcotalePlugin.getInstance().getEconomyConfig().formatShort(balance.getTotalSpent());
 
-            player.sendMessage(Message.raw("----- Your Balance -----").color(new Color(255, 215, 0)));
-            player.sendMessage(Message.join(
+            playerRef.sendMessage(Message.raw("----- Your Balance -----").color(new Color(255, 215, 0)));
+            playerRef.sendMessage(Message.join(
                 Message.raw("  Balance: ").color(Color.GRAY),
                 Message.raw(formattedBalance).color(new Color(50, 205, 50)).bold(true)
             ));
 
-        }, player.getWorld());
+        }, world);
     }
 }

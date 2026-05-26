@@ -9,9 +9,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
@@ -81,17 +79,13 @@ public class MiningFragmentDropSystem extends EntityEventSystem<EntityStore, Bre
             Vector3i blockPos = event.getTargetBlock();
             DifficultyZone zone;
             if (blockPos != null) {
-                zone = ZoneCalculator.getZoneAtPosition(blockPos.getX(), blockPos.getZ(), world, configManager.getZoneConfig());
+                zone = ZoneCalculator.getZoneAtPosition(blockPos.x, blockPos.z, world, configManager.getZoneConfig());
             } else {
                 zone = ZoneCalculator.getCurrentZone(store, ref, world, configManager.getZoneConfig());
             }
             int zoneId = zone != null ? zone.getZoneId() : 1;
 
-            Player player = (Player) store.getComponent(ref, Player.getComponentType());
-            int lootZoneId = zoneId;
-            if (player != null) {
-                lootZoneId = Math.min(zoneId, configManager.getZonePermissionsConfig().getMaxAccessibleZone(player));
-            }
+            int lootZoneId = Math.min(zoneId, configManager.getZonePermissionsConfig().getMaxAccessibleZone(playerRef));
 
             String itemId = configManager.getZoneLootConfig().getItemForZone(lootZoneId);
             if (itemId == null || itemId.isBlank()) {
@@ -102,9 +96,9 @@ public class MiningFragmentDropSystem extends EntityEventSystem<EntityStore, Bre
             TransformComponent transform = (TransformComponent) store.getComponent(ref, TransformComponent.getComponentType());
             if (transform == null) return;
 
-            Vector3d pos = transform.getPosition().clone().add(0.0, 1.0, 0.0);
+            org.joml.Vector3d pos = new org.joml.Vector3d(transform.getPosition()).add(0.0, 1.0, 0.0);
             HeadRotation headRotation = (HeadRotation) store.getComponent(ref, HeadRotation.getComponentType());
-            Vector3f rot = headRotation != null ? headRotation.getRotation().clone() : new Vector3f(0f, 0f, 0f);
+            com.hypixel.hytale.math.vector.Rotation3fc rot = headRotation != null ? headRotation.getRotation() : com.hypixel.hytale.math.vector.Rotation3f.ZERO;
 
             Holder[] drops = ItemComponent.generateItemDrops(store, List.of(new ItemStack(itemId, fragments)), pos, rot);
             commandBuffer.addEntities(drops, AddReason.SPAWN);

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -73,7 +73,7 @@ public class DepositBlockManager {
     }
     
     public boolean addDepositBlock(@Nonnull String world, @Nonnull Vector3i pos) {
-        BlockLocation location = new BlockLocation(world, pos.getX(), pos.getY(), pos.getZ());
+        BlockLocation location = new BlockLocation(world, pos.x, pos.y, pos.z);
         Set<BlockLocation> worldBlocks = depositBlocks.computeIfAbsent(world, k -> ConcurrentHashMap.newKeySet());
         
         if (worldBlocks.add(location)) {
@@ -85,7 +85,7 @@ public class DepositBlockManager {
     }
     
     public boolean removeDepositBlock(@Nonnull String world, @Nonnull Vector3i pos) {
-        BlockLocation location = new BlockLocation(world, pos.getX(), pos.getY(), pos.getZ());
+        BlockLocation location = new BlockLocation(world, pos.x, pos.y, pos.z);
         Set<BlockLocation> worldBlocks = depositBlocks.get(world);
         
         if (worldBlocks != null && worldBlocks.remove(location)) {
@@ -104,7 +104,7 @@ public class DepositBlockManager {
         if (worldBlocks == null) {
             return false;
         }
-        BlockLocation location = new BlockLocation(world, pos.getX(), pos.getY(), pos.getZ());
+        BlockLocation location = new BlockLocation(world, pos.x, pos.y, pos.z);
         return worldBlocks.contains(location);
     }
     

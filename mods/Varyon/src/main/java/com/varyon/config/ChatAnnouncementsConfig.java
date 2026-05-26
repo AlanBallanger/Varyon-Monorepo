@@ -86,7 +86,7 @@ public class ChatAnnouncementsConfig {
                     }
                 }
             }
-            LOGGER.at(Level.INFO).log("Loaded {0}: enabled={1}, intervalMinutes={2}, messages={3}",
+            LOGGER.at(Level.INFO).log("Loaded %s: enabled=%s, intervalMinutes=%s, messages=%s",
                     FILENAME, en, interval, msgs.size());
             return new ChatAnnouncementsConfig(en, interval, msgs);
         } catch (Exception e) {

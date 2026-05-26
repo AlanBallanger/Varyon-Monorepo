@@ -521,7 +521,7 @@ public final class BossTimedSpawnScheduler {
                 if (transform == null) {
                     continue;
                 }
-                com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+                org.joml.Vector3d rawPos = transform.getPosition();
                 if (rawPos == null) {
                     continue;
                 }
@@ -552,7 +552,7 @@ public final class BossTimedSpawnScheduler {
                 if (transform == null) {
                     continue;
                 }
-                com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+                org.joml.Vector3d rawPos = transform.getPosition();
                 if (rawPos == null) {
                     continue;
                 }

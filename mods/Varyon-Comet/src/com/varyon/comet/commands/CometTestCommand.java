@@ -52,7 +52,8 @@ public class CometTestCommand extends AbstractWorldCommand {
         }
         
         try {
-            Player player = context.senderAs(Player.class);
+            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> _senderRef = context.senderAsPlayerRef();
+            Player player = (_senderRef != null && _senderRef.isValid()) ? _senderRef.getStore().getComponent(_senderRef, Player.getComponentType()) : null;
             
             // Get player's zone
             WorldMapTracker tracker = player.getWorldMapTracker();
@@ -68,7 +69,7 @@ public class CometTestCommand extends AbstractWorldCommand {
             
             // Simulate spawn for this player
             context.sendMessage(Message.raw("Simulating comet spawn for zone: " + zoneName));
-            LOGGER.info("Test command: Simulating spawn for player " + player.getDisplayName() + " in zone " + zoneName);
+            LOGGER.info("Test command: Simulating spawn for player " + player.toString() + " in zone " + zoneName);
             
             // Trigger spawn immediately (spawnForPlayer handles world.execute internally)
             spawnTask.spawnForPlayerForTest(player, result -> {

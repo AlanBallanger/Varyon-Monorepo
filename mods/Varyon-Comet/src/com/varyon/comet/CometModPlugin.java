@@ -294,7 +294,7 @@ public class CometModPlugin extends JavaPlugin {
 
                     if (uuidComponent != null) {
                         java.util.UUID entityUUID = uuidComponent.getUuid();
-                        com.hypixel.hytale.math.vector.Vector3i targetPos = this.fallingSystem.getTrackedTarget(entityUUID);
+                        org.joml.Vector3i targetPos = this.fallingSystem.getTrackedTarget(entityUUID);
 
                         if (targetPos != null) {
                             com.hypixel.hytale.server.core.modules.entity.component.TransformComponent transform = store
@@ -305,7 +305,7 @@ public class CometModPlugin extends JavaPlugin {
                                     .getExternalData()).getWorld();
 
                             if (world != null && transform != null) {
-                                com.hypixel.hytale.math.vector.Vector3d landingPos = transform.getPosition();
+                                org.joml.Vector3d landingPos = transform.getPosition();
 
                                 world.execute(() -> {
                                     int blockX = (int) Math.round(landingPos.x);
@@ -314,7 +314,7 @@ public class CometModPlugin extends JavaPlugin {
                                     int solidGroundY = this.fallingSystem.findGroundLevelAtPosition(world, blockX, blockZ, landingBlockY);
                                     int blockY = (solidGroundY != -1) ? solidGroundY + 1 : landingBlockY + 1;
 
-                                    com.hypixel.hytale.math.vector.Vector3i actualBlockPos = new com.hypixel.hytale.math.vector.Vector3i(blockX, blockY, blockZ);
+                                    org.joml.Vector3i actualBlockPos = new org.joml.Vector3i(blockX, blockY, blockZ);
                                     CometTier tier = this.fallingSystem.getProjectileTier(entityUUID);
                                     String themeId = this.fallingSystem.getProjectileThemeId(entityUUID);
                                     java.util.UUID ownerUUID = this.fallingSystem.getProjectileOwner(entityUUID);

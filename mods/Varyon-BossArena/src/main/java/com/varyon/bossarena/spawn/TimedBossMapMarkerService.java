@@ -199,11 +199,10 @@ public final class TimedBossMapMarkerService {
         return new MapMarker(
                 markerId,
                 nameMsg,
-                null,       // customName
                 markerImage,
                 transform,
-                null,       // no context menu items
-                null        // no components
+                null,
+                null
         );
     }
 

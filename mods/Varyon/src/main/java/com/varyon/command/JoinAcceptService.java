@@ -3,8 +3,6 @@ package com.varyon.command;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
@@ -104,14 +102,8 @@ public final class JoinAcceptService {
                 return;
             }
 
-            Player joinerPlayerEntity = joinerStoreProbe.getComponent(joinerEntityRef, Player.getComponentType());
-            if (joinerPlayerEntity == null) {
-                toAccepter.accept(Message.raw("Joueur demandeur introuvable.").color(Color.RED));
-                return;
-            }
-
             ZonePermissionsConfig zonePerms = VaryonPlugin.getStaticConfigManager().getZonePermissionsConfig();
-            if (!zonePerms.canAccessZone(joinerPlayerEntity, entry.zoneId())) {
+            if (!zonePerms.canAccessZone(joinerRef, entry.zoneId())) {
                 joinMgr.removePendingJoin(accepterRef.getUuid(), joinerRef.getUuid());
                 String required = zonePerms.getPermissionForZone(entry.zoneId());
                 toAccepter.accept(Message.raw(
@@ -152,8 +144,8 @@ public final class JoinAcceptService {
                 }
             }
 
-            Vector3d pos = new Vector3d(entry.rtpX(), entry.rtpY(), entry.rtpZ());
-            Vector3f rot = new Vector3f(entry.rotYaw(), entry.rotPitch(), entry.rotRoll());
+            org.joml.Vector3d pos = new org.joml.Vector3d(entry.rtpX(), entry.rtpY(), entry.rtpZ());
+            com.hypixel.hytale.math.vector.Rotation3f rot = new com.hypixel.hytale.math.vector.Rotation3f(entry.rotYaw(), entry.rotPitch(), entry.rotRoll());
             Teleport teleport = Teleport.createForPlayer(accepterWorldFromStore, pos, rot);
             joinerStoreProbe.addComponent(joinerEntityRef, Teleport.getComponentType(), teleport);
             FirstSpawnStyleParticleFx.playAt(accepterWorldFromStore, pos, joinerEntityRef, joinerStoreProbe,

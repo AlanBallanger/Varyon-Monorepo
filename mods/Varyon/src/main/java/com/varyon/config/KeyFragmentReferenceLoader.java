@@ -38,7 +38,7 @@ final class KeyFragmentReferenceLoader {
                 Map<String, Integer> mobW = parseMobCategories(mc, tierWeights);
                 Map<String, Double> mining = parseMineralWeights(mw);
                 LOGGER.at(Level.INFO).log(
-                        "Loaded economy reference TOMLs from plugin folder: {0} mob ids, {1} mining ids",
+                        "Loaded economy reference TOMLs from plugin folder: %s mob ids, %s mining ids",
                         mobW.size(),
                         mining.size());
                 return new FragmentReferenceData(Map.copyOf(mobW), Map.copyOf(mining));
@@ -101,7 +101,7 @@ final class KeyFragmentReferenceLoader {
             tierStr = tierStr.toLowerCase(Locale.ROOT).trim();
             Integer w = tierWeights.get(tierStr);
             if (w == null) {
-                LOGGER.at(Level.WARNING).log("mob_categories.toml: unknown tier \"{0}\" for `{1}`", tierStr, k);
+                LOGGER.at(Level.WARNING).log("mob_categories.toml: unknown tier \"%s\" for `%s`", tierStr, k);
                 continue;
             }
             out.put(k, w);

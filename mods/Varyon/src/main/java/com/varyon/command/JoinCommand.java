@@ -111,7 +111,7 @@ public class JoinCommand extends AbstractAsyncCommand {
         }
 
         ZonePermissionsConfig zonePerms = VaryonPlugin.getStaticConfigManager().getZonePermissionsConfig();
-        if (!zonePerms.canAccessZone(joinerPlayer, entry.zoneId())) {
+        if (!zonePerms.canAccessZone(joinerRef, entry.zoneId())) {
             String required = zonePerms.getPermissionForZone(entry.zoneId());
             context.sendMessage(Message.raw("Tu n'as pas accès à la zone " + entry.zoneId() + ". Permission : " + required).color(Color.RED));
             return CompletableFuture.completedFuture(null);

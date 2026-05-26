@@ -176,7 +176,7 @@ public final class BossSpawnService {
                 if (transform == null) {
                     continue;
                 }
-                com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+                org.joml.Vector3d rawPos = transform.getPosition();
                 if (rawPos == null) {
                     continue;
                 }
@@ -423,7 +423,7 @@ public final class BossSpawnService {
                     def.npcId,
                     null,
                     VecUtil.toHytale(spreadPos),
-                    new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0)
+                    com.hypixel.hytale.math.vector.Rotation3f.ZERO
             );
 
             if (result != null) {
@@ -1192,7 +1192,7 @@ public final class BossSpawnService {
                         add.npcId,
                         null,
                         VecUtil.toHytale(mobPos),
-                        new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0)
+                        com.hypixel.hytale.math.vector.Rotation3f.ZERO
                 );
                 if (result == null) {
                     LOGGER.warning("Failed to spawn add '" + add.npcId + "' for wave " + waveNumber + ".");

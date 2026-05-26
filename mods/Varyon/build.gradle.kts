@@ -1,5 +1,6 @@
 plugins {
     `maven-publish`
+    idea
     id("hytale-mod") version "0.+"
 }
 
@@ -24,8 +25,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.jetbrains.annotations)
-    compileOnly(libs.jspecify)
+    compileOnly("org.jetbrains:annotations:24.1.0")
+    compileOnly("org.jspecify:jspecify:0.3.0")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("net.cfh.vault:VaultUnlocked:2.18.3")
     compileOnly(files("libs/NameplateBuilder-API-1.0.0.jar"))
@@ -64,12 +65,6 @@ tasks.named("build") {
 }
 
 hytale {
-    // uncomment if you want to add the Assets.zip file to your external libraries;
-    // ⚠️ CAUTION, this file is very big and might make your IDE unresponsive for some time!
-    //
-    // addAssetsDependency = true
-
-    updateChannel = "pre-release"
 }
 
 java {

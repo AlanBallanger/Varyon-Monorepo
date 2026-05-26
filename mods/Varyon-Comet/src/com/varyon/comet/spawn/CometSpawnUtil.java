@@ -11,7 +11,7 @@ import com.hypixel.hytale.math.shape.Box;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.modules.collision.CollisionModule;
 import com.hypixel.hytale.server.core.modules.collision.CollisionResult;
@@ -233,7 +233,7 @@ public final class CometSpawnUtil {
             CollisionModule cm = CollisionModule.get();
             if (cm == null || cm.isDisabled()) return true; // fallback: allow
             CollisionResult res = new CollisionResult();
-            int v = cm.validatePosition(world, DEFAULT_NPC_BOX, new com.hypixel.hytale.math.vector.Vector3d(x, y, z), res);
+            int v = cm.validatePosition(world, DEFAULT_NPC_BOX, new org.joml.Vector3d(x, y, z), res);
             return v != -1;
         } catch (Exception e) {
             return false;

@@ -82,8 +82,11 @@ final class BetterMapCompatProvider implements WorldMapManager.MarkerProvider {
                     continue;
                 }
 
+                org.joml.Vector3d rawPos = playerTransform.getPosition();
+                Vector3d playerJomlPos = new Vector3d(rawPos.x, rawPos.y, rawPos.z);
+
                 if (!isViewer && viewerPosition != null && maxDistanceSquared != Long.MAX_VALUE) {
-                    if (squaredDistance(viewerPosition, playerTransform.getPosition()) > maxDistanceSquared) {
+                    if (squaredDistance(viewerPosition, playerJomlPos) > maxDistanceSquared) {
                         continue;
                     }
                 }
@@ -91,7 +94,7 @@ final class BetterMapCompatProvider implements WorldMapManager.MarkerProvider {
                 String playerName = PlayerMarkerPlayerNames.resolve(ref);
                 int distance = 0;
                 if (!isViewer && viewerPosition != null) {
-                    distance = (int) Math.sqrt(squaredDistance(viewerPosition, playerTransform.getPosition()));
+                    distance = (int) Math.sqrt(squaredDistance(viewerPosition, playerJomlPos));
                 }
 
                 String markerLabel = null;
@@ -101,10 +104,11 @@ final class BetterMapCompatProvider implements WorldMapManager.MarkerProvider {
 
                 PlayerMarkerVisuals.AvatarVisual avatarVisual =
                         PlayerMarkerVisuals.resolveAvatarVisual(context.viewerRef(), playerUuid, playerName, visibilityState, null);
-                Vector3f markerRotation = PlayerMarkerFactory.resolveMarkerRotation(
+                Vector3f markerRotJoml = PlayerMarkerFactory.resolveMarkerRotation(
                         context.config(),
                         PlayerMarkerLiveTracker.resolveRotation(ref));
-                Transform markerTransform = new Transform(playerTransform.getPosition(), markerRotation);
+                com.hypixel.hytale.math.vector.Rotation3f markerRotation = new com.hypixel.hytale.math.vector.Rotation3f(markerRotJoml.x, markerRotJoml.y, markerRotJoml.z);
+                Transform markerTransform = new Transform(rawPos, markerRotation);
 
                 MapMarker marker = PlayerMarkerFactory.createPlainPlayerMarker(
                     PlayerMarkerFactory.buildDynamicMarkerId(

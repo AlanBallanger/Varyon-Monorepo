@@ -1,5 +1,6 @@
 plugins {
     `maven-publish`
+    idea
     id("hytale-mod") version "0.+"
 }
 
@@ -15,8 +16,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.jetbrains.annotations)
-    compileOnly(libs.jspecify)
+    compileOnly("org.jetbrains:annotations:24.1.0")
+    compileOnly("org.jspecify:jspecify:0.3.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.yaml:snakeyaml:1.33")
     implementation("org.mongodb:bson:4.11.1")

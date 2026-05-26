@@ -63,9 +63,9 @@ public class VaryonCommand extends AbstractAsyncCommand {
             boolean isAdmin = false;
             boolean hasRtp = false;
 
-            if (sender instanceof Player player) {
-                isAdmin = player.hasPermission("varyon.admin");
-                hasRtp = player.hasPermission("varyon.rtp");
+            if (sender instanceof PlayerRef pr) {
+                isAdmin = pr.hasPermission("varyon.admin");
+                hasRtp = pr.hasPermission("varyon.rtp");
             } else {
                 isAdmin = true;
                 hasRtp = true;
@@ -113,17 +113,16 @@ public class VaryonCommand extends AbstractAsyncCommand {
         @Override
         protected CompletableFuture<Void> executeAsync(CommandContext context) {
             CommandSender sender = context.sender();
-            if (!(sender instanceof Player player)) {
+            if (!(sender instanceof PlayerRef playerRef)) {
                 context.sendMessage(Message.raw("Commande joueur uniquement.").color(Color.RED));
                 return CompletableFuture.completedFuture(null);
             }
-            PlayerRef playerRef = Universe.get().getPlayer(player.getUuid());
 
             context.sendMessage(Message.raw("=== Faction Debug ===").color(Color.YELLOW));
-            context.sendMessage(Message.raw("PlayerRef: " + (playerRef != null ? playerRef.getUsername() + " / " + playerRef.getUuid() : "NULL"))
-                .color(playerRef != null ? Color.GREEN : Color.RED));
-            context.sendMessage(Message.raw("hasPermission(group.fracture) = " + player.hasPermission("group.fracture")).color(Color.WHITE));
-            context.sendMessage(Message.raw("hasPermission(group.noyau)    = " + player.hasPermission("group.noyau")).color(Color.WHITE));
+            context.sendMessage(Message.raw("PlayerRef: " + playerRef.getUsername() + " / " + playerRef.getUuid())
+                .color(Color.GREEN));
+            context.sendMessage(Message.raw("hasPermission(group.fracture) = " + playerRef.hasPermission("group.fracture")).color(Color.WHITE));
+            context.sendMessage(Message.raw("hasPermission(group.noyau)    = " + playerRef.hasPermission("group.noyau")).color(Color.WHITE));
 
             FactionManager.Faction faction = factionManager.getFactionVerbose(playerRef);
             context.sendMessage(Message.raw("Faction LP : " + (faction != null ? faction.getDisplayName() : "aucune"))

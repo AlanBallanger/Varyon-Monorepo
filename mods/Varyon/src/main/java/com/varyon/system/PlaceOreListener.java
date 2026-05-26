@@ -8,7 +8,7 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
 import com.hypixel.hytale.server.core.event.events.ecs.PlaceBlockEvent;
@@ -58,7 +58,7 @@ public class PlaceOreListener extends EntityEventSystem<EntityStore, PlaceBlockE
             String world = resolveWorld(store);
 
             tracker.add(world, pos);
-            LOGGER.at(Level.INFO).log("Tracked placed ore " + itemId + " at " + world + ":" + pos.getX() + "," + pos.getY() + "," + pos.getZ());
+            LOGGER.at(Level.INFO).log("Tracked placed ore " + itemId + " at " + world + ":" + pos.x + "," + pos.y + "," + pos.z);
 
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("Error in PlaceOreListener: " + e.getMessage());

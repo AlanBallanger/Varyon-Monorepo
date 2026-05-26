@@ -4,7 +4,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.logger.HytaleLogger;
-import org.joml.Vector3d;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.asset.type.gameplay.GameplayConfig;
 import com.hypixel.hytale.server.core.asset.type.gameplay.SpawnConfig;
@@ -29,7 +28,7 @@ public final class FirstSpawnStyleParticleFx {
 
     private FirstSpawnStyleParticleFx() {}
 
-    public static void playAt(@Nonnull World world, @Nonnull Vector3d at,
+    public static void playAt(@Nonnull World world, @Nonnull org.joml.Vector3d at,
                               @Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store,
                               int effectDurationSeconds) {
         try {
@@ -90,7 +89,7 @@ public final class FirstSpawnStyleParticleFx {
             if (useStore == null) {
                 useStore = world.getEntityStore().getStore();
             }
-            Vector3d position = new Vector3d(px, py, pz);
+            org.joml.Vector3d position = new org.joml.Vector3d(px, py, pz);
             SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource =
                 useStore.getResource(EntityModule.get().getPlayerSpatialResourceType());
             List<Ref<EntityStore>> results = SpatialResource.getThreadLocalReferenceList();

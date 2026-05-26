@@ -6,8 +6,6 @@ import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.asset.type.gameplay.DeathConfig;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
@@ -102,9 +100,8 @@ public class MobLootScalingSystem extends DeathSystems.OnDeathSystem {
             return;
         }
 
-        Vector3d position = transformComponent.getPosition();
-        Vector3f headRotation = headRotationComponent.getRotation();
-        Vector3d dropPosition = position.clone().add(0.0, 1.0, 0.0);
+        org.joml.Vector3d dropPosition = new org.joml.Vector3d(transformComponent.getPosition()).add(0.0, 1.0, 0.0);
+        com.hypixel.hytale.math.vector.Rotation3fc headRotation = headRotationComponent.getRotation();
 
         // Calculate how many extra sets of items to spawn
         // If lootMultiplier is 5.0, we spawn 4 extra sets (vanilla already spawned 1)
@@ -121,17 +118,17 @@ public class MobLootScalingSystem extends DeathSystems.OnDeathSystem {
             List<ItemStack> randomItems = itemModule.getRandomItemDrops(dropListId);
             if (!randomItems.isEmpty()) {
                 // Add slight position offset for each set to avoid stacking
-                Vector3d offsetPosition = dropPosition.clone().add(
-                        (Math.random() - 0.5) * 0.5,
-                        0.1 * i,
-                        (Math.random() - 0.5) * 0.5
+                org.joml.Vector3d offsetPosition = new org.joml.Vector3d(
+                        dropPosition.x + (Math.random() - 0.5) * 0.5,
+                        dropPosition.y + 0.1 * i,
+                        dropPosition.z + (Math.random() - 0.5) * 0.5
                 );
 
                 Holder<EntityStore>[] drops = ItemComponent.generateItemDrops(
                         store,
                         new ObjectArrayList<>(randomItems),
                         offsetPosition,
-                        headRotation.clone()
+                        headRotation
                 );
                 commandBuffer.addEntities(drops, AddReason.SPAWN);
             }

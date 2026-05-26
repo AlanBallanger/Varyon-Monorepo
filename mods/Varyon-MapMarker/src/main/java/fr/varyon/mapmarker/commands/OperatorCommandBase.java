@@ -22,7 +22,7 @@ public abstract class OperatorCommandBase extends CommandBase {
                 plugin.debug(
                         "Permission accordée commande=%s expéditeur=%s",
                         context.getCalledCommand().getFullyQualifiedName(),
-                        context.sender().getDisplayName());
+                        context.sender().getUsername());
             }
             return true;
         }
@@ -31,7 +31,7 @@ public abstract class OperatorCommandBase extends CommandBase {
             plugin.debug(
                     "Permission refusée commande=%s expéditeur=%s",
                     context.getCalledCommand().getFullyQualifiedName(),
-                    context.sender().getDisplayName());
+                    context.sender().getUsername());
         }
         context.sendMessage(Message.raw("Tu dois être opérateur ou avoir la permission varyon.mapmarker.admin."));
         return false;

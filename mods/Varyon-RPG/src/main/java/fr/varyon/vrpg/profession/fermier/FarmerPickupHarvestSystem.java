@@ -10,13 +10,13 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
 import com.hypixel.hytale.server.core.console.ConsoleSender;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.InteractivelyPickupItemEvent;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
@@ -102,7 +102,7 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
         double baseXp = FarmerXpTable.getXp(itemId);
         double finalXp = baseXp * xpMult;
         if (dbg) LOGGER.atInfo().log(dbgId + "XP +" + finalXp
-            + " (base=" + baseXp + " × " + String.format("%.3f", xpMult) + ")");
+            + " (base=" + baseXp + " Ã— " + String.format("%.3f", xpMult) + ")");
         professionManager.addXp(uuid, Profession.FERMIER, finalXp, playerRef);
 
         TransformComponent tcmp = store.getComponent(ref, TransformComponent.getComponentType());
@@ -120,14 +120,14 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
 
         int lootRank = acc.getTalentRank(Profession.FERMIER, "0");
         if (lootRank > 0 && RANDOM.nextDouble() < lootRank * 0.05) {
-            if (dbg) LOGGER.atInfo().log(dbgId + "N0 PaniersTropPleins PROC — item=" + itemId);
+            if (dbg) LOGGER.atInfo().log(dbgId + "N0 PaniersTropPleins PROC -- item=" + itemId);
             TalentProcSounds.playLootDouble(acc, Profession.FERMIER, playerRef, ref, commandBuffer, dropPos);
             try { dropItemNearPlayer(commandBuffer, itemId, dropPos); }
             catch (Exception e) { LOGGER.atWarning().withCause(e).log(dbgId + "N0 drop ERREUR"); }
         }
 
         if (comboRank > 0 && comboCount > 0 && RANDOM.nextDouble() < comboBonus) {
-            if (dbg) LOGGER.atInfo().log(dbgId + "N6 CCombo loot PROC — item=" + itemId);
+            if (dbg) LOGGER.atInfo().log(dbgId + "N6 CCombo loot PROC -- item=" + itemId);
             try { dropItemNearPlayer(commandBuffer, itemId, dropPos); }
             catch (Exception e) { LOGGER.atWarning().withCause(e).log(dbgId + "N6 loot ERREUR"); }
         }
@@ -148,7 +148,7 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
             double chance = ETERNAL_SEED_CHANCES[Math.min(grainRank, ETERNAL_SEED_CHANCES.length) - 1];
             if (RANDOM.nextDouble() < chance) {
                 String eternalSeedId = FarmerXpTable.resolveEternalSeedFromItem(itemId);
-                if (dbg) LOGGER.atInfo().log(dbgId + "N5 GrainsSansFin PROC — seed=" + eternalSeedId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N5 GrainsSansFin PROC -- seed=" + eternalSeedId);
                 if (eternalSeedId != null) {
                     TalentProcSounds.playTalent(acc, Profession.FERMIER, "5", TalentProcSounds.IMMORTEL_SOUND_ID,
                         playerRef, ref, commandBuffer, dropPos);
@@ -162,7 +162,7 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
         if (guardianRank > 0) {
             double guardianChance = guardianRank * 0.05;
             if (RANDOM.nextDouble() < guardianChance) {
-                if (dbg) LOGGER.atInfo().log(dbgId + "N11 GardienDesChamps PROC — pos=" + dropPos
+                if (dbg) LOGGER.atInfo().log(dbgId + "N11 GardienDesChamps PROC -- pos=" + dropPos
                     + " chance=" + String.format("%.1f%%", guardianChance * 100));
                 try {
                     Player player = playerRef.getComponent(Player.getComponentType());
@@ -184,7 +184,7 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
                 String username = playerRef.getUsername();
                 if (username != null) {
                     String cmd = RANDOM.nextBoolean() ? "hset " + username + " 100" : "wset " + username + " 100";
-                    if (dbg) LOGGER.atInfo().log(dbgId + "N9 CasseCroute PROC — cmd=" + cmd);
+                    if (dbg) LOGGER.atInfo().log(dbgId + "N9 CasseCroute PROC -- cmd=" + cmd);
                     TalentProcSounds.playTalent(acc, Profession.FERMIER, "9", TalentProcSounds.REFEED_SOUND_ID,
                         playerRef, ref, commandBuffer, dropPos);
                     try { CommandManager.get().handleCommand(ConsoleSender.INSTANCE, cmd); }
@@ -197,15 +197,14 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
         boolean firstSickleCheck = (lastSickleMs == null || now - lastSickleMs > SICKLE_DEBOUNCE_MS);
         if (firstSickleCheck) {
             lastSickleCheckMillis.put(uuid, now);
-            Inventory inventory = null;
+            InventoryComponent.Hotbar hotbar = null;
             try {
-                Player player = playerRef.getComponent(Player.getComponentType());
-                if (player != null) inventory = player.getInventory();
+                hotbar = playerRef.getComponent(InventoryComponent.Hotbar.getComponentType());
             } catch (Exception ignored) {}
-            if (inventory != null) {
+            if (hotbar != null) {
                 try {
-                    byte slot = inventory.getActiveHotbarSlot();
-                    ItemStack held = inventory.getHotbar().getItemStack((short) slot);
+                    byte slot = hotbar.getActiveSlot();
+                    ItemStack held = hotbar.getInventory().getItemStack((short) slot);
                     String heldId = held != null ? held.getItemId() : null;
                     if (dbg) LOGGER.atInfo().log(dbgId + "N8 item tenu=" + heldId
                         + " maxDura=" + (held != null ? held.getMaxDurability() : "null"));
@@ -217,23 +216,23 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
                         if (dbg) {
                             double duraBefore = held.getDurability();
                             double duraMax = held.getMaxDurability();
-                            String action = proc ? "N8 FaucilleEternelle PROC (annulé)" : "dura normale (-1)";
+                            String action = proc ? "N8 FaucilleEternelle PROC (annulÃ©)" : "dura normale (-1)";
                             if (delta != 0.0) {
                                 ItemStack after = held.withIncreasedDurability(delta);
                                 LOGGER.atInfo().log(dbgId + action + " rank=" + faucilleRank
                                     + " dura=" + duraBefore + "/" + duraMax
-                                    + " → " + after.getDurability() + "/" + after.getMaxDurability());
-                                inventory.getHotbar().setItemStackForSlot((short) slot, after);
+                                    + " â†' " + after.getDurability() + "/" + after.getMaxDurability());
+                                hotbar.getInventory().setItemStackForSlot((short) slot, after);
                             } else {
                                 LOGGER.atInfo().log(dbgId + action + " rank=" + faucilleRank
-                                    + " dura=" + duraBefore + "/" + duraMax + " (inchangé)");
+                                    + " dura=" + duraBefore + "/" + duraMax + " (inchangÃ©)");
                             }
                         } else if (delta != 0.0) {
-                            inventory.getHotbar().setItemStackForSlot((short) slot,
+                            hotbar.getInventory().setItemStackForSlot((short) slot,
                                 held.withIncreasedDurability(delta));
                         }
                     } else if (dbg && held != null && held.getMaxDurability() > 0) {
-                        LOGGER.atInfo().log(dbgId + "N8 ignoré — item=" + heldId + " ne contient pas 'sickle'");
+                        LOGGER.atInfo().log(dbgId + "N8 ignorÃ© -- item=" + heldId + " ne contient pas 'sickle'");
                     }
                 } catch (Exception ignored) {}
             }
@@ -251,7 +250,7 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
         if (stack.isEmpty() || !stack.isValid()) return;
         float vx = (RANDOM.nextFloat() - 0.5f) * 2.5f;
         float vz = (RANDOM.nextFloat() - 0.5f) * 2.5f;
-        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, new Vector3f(0f, 0f, 0f), vx, 3.25f, vz);
+        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, 3.25f, vz);
         if (holder == null) return;
         accessor.addEntity(holder, AddReason.SPAWN);
     }

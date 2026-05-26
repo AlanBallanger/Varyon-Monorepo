@@ -9,7 +9,6 @@ import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.system.RefSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import org.joml.Vector3d;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
@@ -75,8 +74,8 @@ public class MobScalingRefSystem extends RefSystem<EntityStore> {
             return;
         }
 
-        Vector3d pos = transform.getPosition();
-        DifficultyZone zone = ZoneCalculator.getZoneAtPosition(pos.getX(), pos.getZ(), worldName, configManager.getZoneConfig());
+        org.joml.Vector3d pos = transform.getPosition();
+        DifficultyZone zone = ZoneCalculator.getZoneAtPosition(pos.x, pos.z, worldName, configManager.getZoneConfig());
 
         if (zone == null) {
             return;

@@ -1,9 +1,7 @@
 package com.varyon.config;
 
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.Universe;
 import com.moandjiezana.toml.Toml;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -58,57 +56,41 @@ public class ZonePermissionsConfig {
      * Returns the highest zone ID the player can access.
      * Having varyon.zone.5 grants access to zones 1–5.
      */
-    public int getMaxAccessibleZone(@Nonnull Player player) {
+    public int getMaxAccessibleZone(@Nonnull PlayerRef playerRef) {
         int best = 1;
         try {
-            PlayerRef playerRef = Universe.get().getPlayer(player.getUuid());
-            if (playerRef != null) {
-                LuckPerms lp = LuckPermsProvider.get();
-                User user = lp.getPlayerAdapter(PlayerRef.class).getUser(playerRef);
-                if (user != null) {
-                    CachedPermissionData nonCtx = user.getCachedData().getPermissionData(QueryOptions.nonContextual());
-                    best = Math.max(best, highestZoneGranted(nonCtx));
-                    CachedPermissionData active = user.getCachedData().getPermissionData();
-                    best = Math.max(best, highestZoneGranted(active));
-                }
+            LuckPerms lp = LuckPermsProvider.get();
+            User user = lp.getPlayerAdapter(PlayerRef.class).getUser(playerRef);
+            if (user != null) {
+                CachedPermissionData nonCtx = user.getCachedData().getPermissionData(QueryOptions.nonContextual());
+                best = Math.max(best, highestZoneGranted(nonCtx));
+                CachedPermissionData active = user.getCachedData().getPermissionData();
+                best = Math.max(best, highestZoneGranted(active));
             }
         } catch (Throwable t) {
-            LOGGER.at(Level.FINE).log("getMaxAccessibleZone: LuckPerms path failed ({0})", t.toString());
+            LOGGER.at(Level.FINE).log("getMaxAccessibleZone: LuckPerms path failed (%s)", t.toString());
         }
         for (int z = maxZone; z >= 1; z--) {
-            if (player.hasPermission(getPermissionForZone(z))) {
+            if (playerRef.hasPermission(getPermissionForZone(z))) {
                 return Math.max(best, z);
             }
         }
         return best;
     }
 
-    /**
-     * Returns true if the player may access the given zone.
-     */
-    public boolean canAccessZone(@Nonnull Player player, int zoneId) {
-        return getMaxAccessibleZone(player) >= zoneId;
+    public boolean canAccessZone(@Nonnull PlayerRef playerRef, int zoneId) {
+        return getMaxAccessibleZone(playerRef) >= zoneId;
     }
 
-    /**
-     * Returns the configured max essence cap for the given zone level.
-     */
     public int getMaxEssenceForZone(int zone) {
         return maxEssenceByZone.getOrDefault(zone, 1000);
     }
 
-    /**
-     * Returns the effective max essence cap for this player.
-     * <ul>
-     *   <li>Admins (varyon.admin): max(adminBase, currentEssence) — soft cap that grows with admin-given essence</li>
-     *   <li>Others: hard cap from their highest zone permission</li>
-     * </ul>
-     */
-    public int getEffectiveCap(@Nonnull Player player, double currentEssence) {
-        if (player.hasPermission("varyon.admin")) {
+    public int getEffectiveCap(@Nonnull PlayerRef playerRef, double currentEssence) {
+        if (playerRef.hasPermission("varyon.admin")) {
             return (int) Math.max(adminBase, currentEssence);
         }
-        int zone = getMaxAccessibleZone(player);
+        int zone = getMaxAccessibleZone(playerRef);
         return maxEssenceByZone.getOrDefault(zone, 1000);
     }
 
@@ -153,7 +135,7 @@ public class ZonePermissionsConfig {
             }
             if (caps.isEmpty()) caps = defaultMaxEssenceCaps();
 
-            LOGGER.at(Level.INFO).log("Loaded {0}: {1} zones, {2} caps", FILENAME, perms.size(), caps.size());
+            LOGGER.at(Level.INFO).log("Loaded %s: %s zones, %s caps", FILENAME, perms.size(), caps.size());
             return new ZonePermissionsConfig(perms, caps, adminBase);
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("Failed to load " + FILENAME + ", using defaults", e);

@@ -14,7 +14,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
@@ -120,7 +120,8 @@ public class CometSpawnCommand extends AbstractWorldCommand {
 
         try {
             // Get player
-            Player player = context.senderAs(Player.class);
+            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> _senderRef = context.senderAsPlayerRef();
+            Player player = (_senderRef != null && _senderRef.isValid()) ? _senderRef.getStore().getComponent(_senderRef, Player.getComponentType()) : null;
             Ref<EntityStore> playerRef = player.getReference();
 
             if (playerRef == null || !playerRef.isValid()) {
@@ -258,7 +259,7 @@ public class CometSpawnCommand extends AbstractWorldCommand {
             try {
                 com.hypixel.hytale.component.Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule
                         .get()
-                        .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, VecUtil.toHytale(spawnPos),
+                        .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, spawnPos,
                                 VecUtil.toHytale(direction));
 
                 if (projectileRef != null) {

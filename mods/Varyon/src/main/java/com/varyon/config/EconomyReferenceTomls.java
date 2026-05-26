@@ -30,11 +30,11 @@ final class EconomyReferenceTomls {
                 }
                 try (InputStream in = cl.getResourceAsStream(name)) {
                     if (in == null) {
-                        LOGGER.at(Level.WARNING).log("Bundled resource missing: {0}", name);
+                        LOGGER.at(Level.WARNING).log("Bundled resource missing: %s", name);
                         continue;
                     }
                     Files.copy(in, dest);
-                    LOGGER.at(Level.INFO).log("Installed reference config: {0}", dest);
+                    LOGGER.at(Level.INFO).log("Installed reference config: %s", dest);
                 }
             }
         } catch (Exception e) {

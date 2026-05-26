@@ -139,8 +139,7 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         
         BlockType blockType = event.getBlockType();
         ItemStack itemInHand = event.getItemInHand();
-        com.hypixel.hytale.math.vector.Vector3i rawBlock = event.getTargetBlock();
-        Vector3i targetBlock = new Vector3i(rawBlock.x, rawBlock.y, rawBlock.z);
+        Vector3i targetBlock = event.getTargetBlock();
         
         if (blockType == null) {
             return;
@@ -212,31 +211,23 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         // ─────────────────────────────────────────────────────────────
         // LAYER 6: DROP CHANCE (with VIP bonus)
         // ─────────────────────────────────────────────────────────────
-        // Get Player entity first (needed for VIP permission checks)
-        Player player = archetypeChunk.getComponent(index, Player.getComponentType());
-        
+        PlayerRef playerRef = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return;
+        }
+
+        UUID playerUuid = playerRef.getUuid();
+
         int baseDropChance = tier.getDropChance();
-        int vipChanceBonus = (player != null) 
-            ? VaryonEcotalePlugin.getInstance().getJobsModule().getConfig().getVipMultipliers().calculateChanceBonus(player) 
-            : 0;
+        int vipChanceBonus = VaryonEcotalePlugin.getInstance().getJobsModule().getConfig().getVipMultipliers().calculateChanceBonus(playerRef);
         int effectiveDropChance = Math.min(baseDropChance + vipChanceBonus, 100);
-        
+
         if (effectiveDropChance < 100) {
             int roll = ThreadLocalRandom.current().nextInt(100);
             if (roll >= effectiveDropChance) {
                 return;
             }
         }
-        
-        // ─────────────────────────────────────────────────────────────
-        // GET PLAYER
-        // ─────────────────────────────────────────────────────────────
-        PlayerRef playerRef = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
-        if (playerRef == null) {
-            return;
-        }
-        
-        UUID playerUuid = playerRef.getUuid();
         
         // ─────────────────────────────────────────────────────────────
         // LAYER 7: RATE LIMIT + ANTI-FARM
@@ -266,9 +257,7 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         float depthMultiplier = depthConfig.calculateMultiplier(targetBlock.y);
         
         // VIP Multiplier (player implements CommandSender which has hasPermission)
-        float vipMultiplier = (player != null) 
-            ? VaryonEcotalePlugin.getInstance().getJobsModule().getConfig().getVipMultipliers().calculateMultiplier(player) 
-            : 1.0f;
+        float vipMultiplier = VaryonEcotalePlugin.getInstance().getJobsModule().getConfig().getVipMultipliers().calculateMultiplier(playerRef);
 
         // Apply all multipliers
         float totalMultiplier = antiFarmMultiplier * toolMultiplier * depthMultiplier * vipMultiplier;

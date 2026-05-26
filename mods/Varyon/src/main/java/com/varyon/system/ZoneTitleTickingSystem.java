@@ -60,8 +60,8 @@ public class ZoneTitleTickingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        double x = playerRef.getTransform().getPosition().getX();
-        double z = playerRef.getTransform().getPosition().getZ();
+        double x = playerRef.getTransform().getPosition().x;
+        double z = playerRef.getTransform().getPosition().z;
 
         DifficultyZone currentZone = ZoneCalculator.getZoneAtPosition(x, z, worldName, config);
         int currentZoneId = currentZone != null ? currentZone.getZoneId() : 0;

@@ -2,8 +2,8 @@ package fr.varyon.vrpg.profession.fermier;
 
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
@@ -47,11 +47,11 @@ public final class FarmerGuardianSpawner {
     }
 
     public static void spawnCowUndead(@Nonnull Store<EntityStore> store, @Nonnull Vector3d pos) {
-        LOGGER.atInfo().log("[GardienChamps] spawnNPC Cow_Undead — pos=" + pos);
+        LOGGER.atInfo().log("[GardienChamps] spawnNPC Cow_Undead â€” pos=" + pos);
         try {
-            var pair = NPCPlugin.get().spawnNPC(store, "Cow_Undead", null, pos, new Vector3f(0f, 0f, 0f));
+            var pair = NPCPlugin.get().spawnNPC(store, "Cow_Undead", null, pos, com.hypixel.hytale.math.vector.Rotation3f.ZERO);
             if (pair == null) {
-                LOGGER.atWarning().log("[GardienChamps] spawnNPC retourné null — vérifier le role name 'Cow_Undead'");
+                LOGGER.atWarning().log("[GardienChamps] spawnNPC retournÃ© null â€” vÃ©rifier le role name 'Cow_Undead'");
                 return;
             }
             var cowRef = pair.left();

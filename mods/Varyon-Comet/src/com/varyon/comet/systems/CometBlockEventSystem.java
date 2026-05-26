@@ -41,7 +41,7 @@ public class CometBlockEventSystem extends EntityEventSystem<EntityStore, UseBlo
                       @Nonnull Store<EntityStore> store, 
                       @Nonnull CommandBuffer<EntityStore> commandBuffer, 
                       @Nonnull UseBlockEvent.Pre event) {
-        com.hypixel.hytale.math.vector.Vector3i targetBlock = event.getTargetBlock();
+        org.joml.Vector3i targetBlock = event.getTargetBlock();
         if (targetBlock == null) return;
 
         String idAtTarget = blockTypeIdFromUseEvent(event);
@@ -55,7 +55,7 @@ public class CometBlockEventSystem extends EntityEventSystem<EntityStore, UseBlo
         }
 
         // Position-based: any block at a registered comet position (or within radius for multi-block assets) activates
-        com.hypixel.hytale.math.vector.Vector3i registeredPos = waveManager.getRegisteredBlockPos(targetBlock.x, targetBlock.y, targetBlock.z);
+        org.joml.Vector3i registeredPos = waveManager.getRegisteredBlockPos(targetBlock.x, targetBlock.y, targetBlock.z);
         boolean exactMatch = (registeredPos != null);
         if (registeredPos == null) {
             registeredPos = waveManager.getRegisteredBlockPosNear(targetBlock.x, targetBlock.y, targetBlock.z, CometConfig.COMET_USE_NEAR_RADIUS);
@@ -66,7 +66,7 @@ public class CometBlockEventSystem extends EntityEventSystem<EntityStore, UseBlo
             }
             return;
         }
-        com.hypixel.hytale.math.vector.Vector3i blockPos = registeredPos;
+        org.joml.Vector3i blockPos = registeredPos;
         // Cancel immediately so vanilla block Use (e.g. OpenContainer) never runs, even if we later return early
         event.setCancelled(true);
         if (CometConfig.DEBUG) {

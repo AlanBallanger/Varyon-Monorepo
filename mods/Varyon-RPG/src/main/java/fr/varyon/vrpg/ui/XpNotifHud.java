@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 public final class XpNotifHud extends CustomUIHud {
 
+    public static final String HUD_KEY = "vrpg_xp_notif_hud";
+
     private static final int MAX_SLOTS = 4;
     private static final long SLOT_DURATION_MS = 4000L;
 
@@ -20,7 +22,7 @@ public final class XpNotifHud extends CustomUIHud {
     private final ScheduledExecutorService scheduler;
 
     public XpNotifHud(@Nonnull PlayerRef playerRef, @Nonnull ScheduledExecutorService scheduler) {
-        super(playerRef);
+        super(playerRef, HUD_KEY);
         this.scheduler = scheduler;
     }
 

@@ -57,13 +57,13 @@ public class RtpzCommand extends AbstractPlayerCommand {
 
     private class NoArgVariant extends CommandBase {
         public NoArgVariant() {
-            super("Téléportation aléatoire vers une zone random");
+            super("TÃ©lÃ©portation alÃ©atoire vers une zone random");
         }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
             if (!context.isPlayer()) {
-                context.sendMessage(Message.raw("Cette commande doit être exécutée par un joueur.").color(Color.RED));
+                context.sendMessage(Message.raw("Cette commande doit Ãªtre exÃ©cutÃ©e par un joueur.").color(Color.RED));
                 return;
             }
             Ref<EntityStore> ref = context.senderAsPlayerRef();
@@ -121,13 +121,13 @@ public class RtpzCommand extends AbstractPlayerCommand {
 
             zoneForTeleport = matchingZones.get(random.nextInt(matchingZones.size()));
             String zoneDisplay = formatHytaleZoneLabel(zoneForTeleport.name());
-            LOGGER.at(Level.INFO).log("RTPZ vanilla: " + zoneForTeleport.name() + " (" + zoneDisplay + ") — "
+            LOGGER.at(Level.INFO).log("RTPZ vanilla: " + zoneForTeleport.name() + " (" + zoneDisplay + ") â€” "
                 + matchingZones.size() + " match(es) for prefix: " + prefix);
         } else {
             List<Zone> z1to4 = listHytaleZonesWithIndexInRange(zones, 1, 4);
             if (z1to4.isEmpty()) {
                 context.sendMessage(Message.raw(
-                    "Aucune zone Hytale (zone1 à zone4) détectée pour ce monde."
+                    "Aucune zone Hytale (zone1 Ã  zone4) dÃ©tectÃ©e pour ce monde."
                 ).color(Color.RED));
                 return;
             }
@@ -137,17 +137,13 @@ public class RtpzCommand extends AbstractPlayerCommand {
 
         final Integer extractedZoneNumber = parseZoneIndexFromHytaleName(zoneForTeleport.name());
 
-        // Vérifier la permission (numéro dérivé du nom de zone Hytale, pas des zones Varyon)
+        // VÃ©rifier la permission (numÃ©ro dÃ©rivÃ© du nom de zone Hytale, pas des zones Varyon)
         if (extractedZoneNumber != null) {
-            com.hypixel.hytale.server.core.entity.entities.Player player = 
-                (com.hypixel.hytale.server.core.entity.entities.Player) store.getComponent(ref, 
-                    com.hypixel.hytale.server.core.entity.entities.Player.getComponentType());
-            
-            if (player != null && !player.hasPermission("varyon.rtp")) {
-                // Pas de permission globale, vérifier les permissions granulaires
+            PlayerRef pr = context.sender() instanceof PlayerRef _pr ? _pr : null;
+            if (pr != null && !pr.hasPermission("varyon.rtp")) {
                 boolean hasAccess = false;
                 for (int i = extractedZoneNumber; i <= 10; i++) {
-                    if (player.hasPermission("varyon.rtp." + i)) {
+                    if (pr.hasPermission("varyon.rtp." + i)) {
                         hasAccess = true;
                         break;
                     }
@@ -181,7 +177,7 @@ public class RtpzCommand extends AbstractPlayerCommand {
                         .replace("{attempts}", String.valueOf(RtpService.DEFAULT_RTP_MAX_ATTEMPTS))).color(Color.RED));
                 }
             } catch (Exception e) {
-                LOGGER.at(Level.SEVERE).log("Erreur lors de la téléportation RTP: " + e.getMessage(), e);
+                LOGGER.at(Level.SEVERE).log("Erreur lors de la tÃ©lÃ©portation RTP: " + e.getMessage(), e);
                 context.sendMessage(Message.raw(msg.error).color(Color.RED));
             }
         });
@@ -238,8 +234,8 @@ public class RtpzCommand extends AbstractPlayerCommand {
     private void teleportPlayer(Store<EntityStore> store, Ref<EntityStore> ref, World world, Vector3d position) {
         Teleport teleport = Teleport.createForPlayer(
             world,
-            position,
-            new Vector3f(0, 0, 0)
+            new org.joml.Vector3d(position.x, position.y, position.z),
+            com.hypixel.hytale.math.vector.Rotation3f.ZERO
         );
         store.addComponent(ref, Teleport.getComponentType(), teleport);
     }

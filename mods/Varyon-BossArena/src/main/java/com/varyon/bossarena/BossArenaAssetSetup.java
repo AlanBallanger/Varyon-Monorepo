@@ -1,7 +1,8 @@
 package com.varyon.bossarena;
 
-import com.hypixel.hytale.server.core.asset.AssetModule;
+import com.hypixel.hytale.assetstore.AssetPack;
 import com.hypixel.hytale.assetstore.map.BlockTypeAssetMap;
+import com.hypixel.hytale.server.core.asset.AssetModule;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
@@ -44,7 +45,7 @@ public final class BossArenaAssetSetup {
                     && assetModule.getAssetPack(BossArenaPlugin.ASSET_PACK_ID) == null
                     && assetModule.getAssetPack("BossArena") == null
                     && assetModule.getAssetPack("com.bossarena:BossArena") == null) {
-                assetModule.registerPack(BossArenaPlugin.ASSET_PACK_ID, assetsRoot, plugin.getManifest(), true);
+                assetModule.registerPack(BossArenaPlugin.ASSET_PACK_ID, assetsRoot, plugin.getManifest(), AssetPack.PackSource.MODS);
                 assetModule.initPendingStores();
                 plugin.getLogger().atInfo().log("Registered BossArena asset pack from temp dir: " + assetsRoot);
             }

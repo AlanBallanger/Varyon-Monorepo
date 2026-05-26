@@ -10,7 +10,7 @@ import com.varyon.comet.wave.*;
 
 import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.Direction;
 import com.hypixel.hytale.protocol.FormattedMessage;
 import com.hypixel.hytale.protocol.Position;
@@ -39,7 +39,7 @@ public class CometWaveUiService {
             String markerName = "Comète (" + tier.getDisplayName() + ")";
             String iconPath = "Comet_Stone_" + tier.getAssetToken() + ".png";
 
-            Vector3d markerPos = VecUtil.toJoml(blockPos.toVector3d());
+            Vector3d markerPos = new org.joml.Vector3d(blockPos.x, blockPos.y, blockPos.z);
             Position position = new Position(markerPos.x, markerPos.y, markerPos.z);
             Direction direction = new Direction();
             Transform transform = new Transform(position, direction);

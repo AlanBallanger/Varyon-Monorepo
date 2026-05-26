@@ -9,8 +9,8 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.SystemGroup;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
@@ -77,7 +77,8 @@ public final class FarmerAnimalDropSystem {
             if (player == null) player = commandBuffer.getComponent(attackerRef, Player.getComponentType());
             if (player == null) return;
 
-            PlayerRef playerRef = player.getPlayerRef();
+            PlayerRef playerRef = store.getComponent(attackerRef, PlayerRef.getComponentType());
+            if (playerRef == null) playerRef = commandBuffer.getComponent(attackerRef, PlayerRef.getComponentType());
             if (playerRef == null) return;
             PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
             if (acc == null || !acc.isActive(Profession.FERMIER)) return;
@@ -88,10 +89,10 @@ public final class FarmerAnimalDropSystem {
             String roleLower = role != null ? role.toLowerCase(Locale.ROOT) : null;
             boolean dbg = VrpgConfig.isDebugTalents();
             if (roleLower == null || FarmerAnimalTable.resolveDropItemContains(roleLower) == null) {
-                if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] AttackTagger — ignored npc role=" + role);
+                if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] AttackTagger -- ignored npc role=" + role);
                 return;
             }
-            if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] AttackTagger — tagged animal role=" + role);
+            if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] AttackTagger -- tagged animal role=" + role);
 
             Ref<EntityStore> victimRef = chunk.getReferenceTo(index);
             lastAttackerByVictim.put(System.identityHashCode(victimRef), attackerRef);
@@ -118,11 +119,19 @@ public final class FarmerAnimalDropSystem {
                 Player killer = resolveKiller(store, commandBuffer, attackerRef, death);
                 if (killer == null) return;
 
-                PlayerRef playerRef = killer.getPlayerRef();
+                Ref<EntityStore> killerEntityRef = null;
+                Damage deathInfo2 = death.getDeathInfo();
+                if (deathInfo2 != null && deathInfo2.getSource() instanceof Damage.EntitySource es2) {
+                    Ref<EntityStore> r = es2.getRef();
+                    if (r != null && r.isValid()) killerEntityRef = r;
+                }
+                if (killerEntityRef == null && attackerRef != null && attackerRef.isValid()) killerEntityRef = attackerRef;
+                PlayerRef playerRef = killerEntityRef != null ? (PlayerRef) store.getComponent(killerEntityRef, PlayerRef.getComponentType()) : null;
+                if (playerRef == null && killerEntityRef != null) playerRef = (PlayerRef) commandBuffer.getComponent(killerEntityRef, PlayerRef.getComponentType());
                 if (playerRef == null) return;
                 PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
                 if (acc == null || !acc.isActive(Profession.FERMIER)) {
-                    if (dbg) LOGGER.atInfo().log("[Fermier-DBG] SeigneurEtable — joueur non actif fermier"
+                    if (dbg) LOGGER.atInfo().log("[Fermier-DBG] SeigneurEtable -- joueur non actif fermier"
                         + " active0=" + (acc == null ? "null" : acc.getActiveSlot0())
                         + " active1=" + (acc == null ? "null" : acc.getActiveSlot1()));
                     return;
@@ -135,28 +144,28 @@ public final class FarmerAnimalDropSystem {
                 String roleLower = role.toLowerCase(Locale.ROOT);
                 String dropItem = FarmerAnimalTable.resolveDropItemContains(roleLower);
                 if (dropItem == null) {
-                    if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] DropOnDeath — no match role=" + role);
+                    if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] DropOnDeath -- no match role=" + role);
                     return;
                 }
 
                 professionManager.addXp(playerRef.getUuid(), Profession.FERMIER, FarmerAnimalTable.BASE_ANIMAL_KILL_XP, playerRef);
-                if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] DropOnDeath — XP +" + FarmerAnimalTable.BASE_ANIMAL_KILL_XP + " role=" + role);
+                if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] DropOnDeath -- XP +" + FarmerAnimalTable.BASE_ANIMAL_KILL_XP + " role=" + role);
 
                 boolean isGuardian = FarmerAnimalTable.GUARDIAN_CROP_ROLE.equals(roleLower);
                 if (!isGuardian) {
                     int rank = acc.getTalentRank(Profession.FERMIER, "7");
                     if (rank <= 0) return;
                     if (RANDOM.nextDouble() >= rank * 0.05) return;
-                    if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] N7 SeigneurEtable PROC — mob=" + role + " item=" + dropItem + " rank=" + rank);
+                    if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] N7 SeigneurEtable PROC -- mob=" + role + " item=" + dropItem + " rank=" + rank);
                 } else {
-                    if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] N11 GardienChamps tué — drop garanti item=" + dropItem);
+                    if (dbg) LOGGER.atInfo().log("[FarmerAnimalDrop] N11 GardienChamps tue -- drop garanti item=" + dropItem);
                 }
 
                 TransformComponent transform = (TransformComponent) store.getComponent(ref, TransformComponent.getComponentType());
                 if (transform == null) return;
-                Vector3d pos = transform.getPosition().clone().add(0.0, 0.5, 0.0);
+                Vector3d pos = new Vector3d(transform.getPosition()).add(0.0, 0.5, 0.0);
                 HeadRotation headRot = (HeadRotation) store.getComponent(ref, HeadRotation.getComponentType());
-                Vector3f rot = headRot != null ? headRot.getRotation().clone() : new Vector3f(0f, 0f, 0f);
+                com.hypixel.hytale.math.vector.Rotation3fc rot = headRot != null ? headRot.getRotation() : com.hypixel.hytale.math.vector.Rotation3f.ZERO;
 
                 Holder[] drops = ItemComponent.generateItemDrops(store, List.of(new ItemStack(dropItem, 1)), pos, rot);
                 commandBuffer.addEntities(drops, AddReason.SPAWN);

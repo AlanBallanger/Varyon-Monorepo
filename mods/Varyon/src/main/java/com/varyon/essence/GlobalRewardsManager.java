@@ -6,8 +6,6 @@ import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
@@ -184,9 +182,9 @@ public class GlobalRewardsManager {
             return false;
         }
         try {
-            Vector3d pos = transform.getPosition().clone().add(0.0, 1.0, 0.0);
+            org.joml.Vector3d pos = new org.joml.Vector3d(transform.getPosition()).add(0.0, 1.0, 0.0);
             HeadRotation headRotation = (HeadRotation) store.getComponent(ref, HeadRotation.getComponentType());
-            Vector3f rot = headRotation != null ? headRotation.getRotation().clone() : new Vector3f(0f, 0f, 0f);
+            com.hypixel.hytale.math.vector.Rotation3fc rot = headRotation != null ? headRotation.getRotation() : com.hypixel.hytale.math.vector.Rotation3f.ZERO;
             Holder[] drops = ItemComponent.generateItemDrops(store, stacks, pos, rot);
             cb.addEntities(drops, AddReason.SPAWN);
             return true;
@@ -255,7 +253,7 @@ public class GlobalRewardsManager {
             Player playerComponent = (Player) store.getComponent(ref, Player.getComponentType());
             if (playerComponent == null || playerComponent.getInventory() == null) return;
 
-            int maxZone = zonePermsConfig.getMaxAccessibleZone(playerComponent);
+            int maxZone = zonePermsConfig.getMaxAccessibleZone(playerRef);
             if (maxZone <= 0) maxZone = 1;
             String itemId = "Key_Fragment" + maxZone;
 
@@ -310,7 +308,7 @@ public class GlobalRewardsManager {
                 return;
             }
 
-            int maxZone = zonePermsConfig.getMaxAccessibleZone(playerComponent);
+            int maxZone = zonePermsConfig.getMaxAccessibleZone(playerRef);
             if (maxZone <= 0) maxZone = 1;
             String itemId = "Key_Fragment" + maxZone;
 

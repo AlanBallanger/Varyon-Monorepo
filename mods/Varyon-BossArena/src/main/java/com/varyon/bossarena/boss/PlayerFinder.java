@@ -24,7 +24,7 @@ public final class PlayerFinder {
 
         return world.getPlayerRefs().stream()
                 .filter(ref -> {
-                    com.hypixel.hytale.math.vector.Vector3d raw = ref.getTransform().getPosition();
+                    org.joml.Vector3d raw = ref.getTransform().getPosition();
                     if (raw == null) return false;
                     Vector3d pPos = VecUtil.toJoml(raw);
                     return getDistanceSq(pPos, center) <= radiusSq;
@@ -43,7 +43,7 @@ public final class PlayerFinder {
         int count = 0;
 
         for (PlayerRef ref : world.getPlayerRefs()) {
-            com.hypixel.hytale.math.vector.Vector3d raw = ref.getTransform().getPosition();
+            org.joml.Vector3d raw = ref.getTransform().getPosition();
             Vector3d pos = raw != null ? VecUtil.toJoml(raw) : null;
             if (pos != null && getDistanceSq(pos, center) <= radiusSq) {
                 count++;

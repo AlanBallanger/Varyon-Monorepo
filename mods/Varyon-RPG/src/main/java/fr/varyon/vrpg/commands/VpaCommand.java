@@ -2,7 +2,6 @@ package fr.varyon.vrpg.commands;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.ParseResult;
 import com.hypixel.hytale.server.core.command.system.ParserContext;
@@ -22,7 +21,7 @@ public final class VpaCommand extends AbstractCommandCollection {
     @SuppressWarnings("unused")
     public VpaCommand(@Nonnull VaryonRpgPlugin plugin) {
         super("vpp", "Varyon RPG — Panneau principal");
-        setPermissionGroup(GameMode.Creative);
+        setPermissionGroups("hytale:WorldEditor");
     }
 
     @Override
@@ -30,18 +29,17 @@ public final class VpaCommand extends AbstractCommandCollection {
     public CompletableFuture<Void> acceptCall(@Nonnull CommandSender sender,
                                               @Nonnull ParserContext parserContext,
                                               @Nonnull ParseResult parseResult) {
-        if (sender instanceof Player player && hasPermission(sender)) {
-            openPanel(player);
+        if (sender instanceof PlayerRef playerRef && hasPermission(sender)) {
+            Player player = playerRef.getComponent(Player.getComponentType());
+            if (player != null) {
+                openPanel(playerRef, player);
+            }
             return CompletableFuture.completedFuture(null);
         }
         return super.acceptCall(sender, parserContext, parseResult);
     }
 
-    public static void openPanel(@Nonnull Player player) {
-        PlayerRef playerRef = player.getPlayerRef();
-        if (playerRef == null) {
-            return;
-        }
+    public static void openPanel(@Nonnull PlayerRef playerRef, @Nonnull Player player) {
         Ref<EntityStore> ref = playerRef.getReference();
         Store<EntityStore> store = ref.getStore();
         player.getPageManager().openCustomPage(ref, store, new RpgMainUI(playerRef));

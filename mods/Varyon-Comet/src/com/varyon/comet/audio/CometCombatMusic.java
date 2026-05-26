@@ -1,8 +1,7 @@
 package com.varyon.comet.audio;
 
-import com.hypixel.hytale.builtin.ambience.AmbiencePlugin;
-import com.hypixel.hytale.builtin.ambience.resources.AmbienceResource;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.asset.type.ambiencefx.config.AmbienceFX;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.comet.CometConfig;
 
@@ -34,28 +33,21 @@ public final class CometCombatMusic {
             return;
         }
         try {
-            AmbiencePlugin plugin = AmbiencePlugin.get();
-            if (plugin == null) {
-                LOGGER.warning("[CometCombatMusic] beginEncounter skipped: AmbiencePlugin null (is the built-in Ambience plugin enabled?)");
-                return;
-            }
             AtomicInteger c = REFS.computeIfAbsent(store, s -> new AtomicInteger(0));
             if (c.incrementAndGet() != 1) {
                 c.decrementAndGet();
-                LOGGER.info("[CometCombatMusic] beginEncounter skipped: encounter already active for this world (ref not reset; another comet?)");
+                LOGGER.info("[CometCombatMusic] beginEncounter skipped: encounter already active");
                 return;
             }
             try {
-                AmbienceResource res = store.getResource(AmbienceResource.getResourceType());
-                res.setForcedMusicAmbience(id.trim());
-                int idx = res.getForcedMusicIndex();
+                int idx = AmbienceFX.getAssetMap().getIndex(id.trim());
                 if (idx < 0) {
                     LOGGER.warning("[CometCombatMusic] combatMusicAmbienceId '" + id
                             + "' not in AmbienceFX map (index < 0). Check Server/Audio/AmbienceFX.");
                     undoBeginEncounterRef(store);
                     return;
                 }
-                CometAmbienceSync.pushForcedMusicToAllPlayers(store, id.trim());
+                CometAmbienceSync.pushForcedMusicToAllPlayers(store, idx, id.trim());
             } catch (Throwable t) {
                 undoBeginEncounterRef(store);
                 throw t;
@@ -86,13 +78,7 @@ public final class CometCombatMusic {
                 return;
             }
             REFS.remove(store);
-            AmbiencePlugin plugin = AmbiencePlugin.get();
-            if (plugin == null) {
-                return;
-            }
-            AmbienceResource res = store.getResource(AmbienceResource.getResourceType());
-            res.setForcedMusicAmbience(null);
-            CometAmbienceSync.pushForcedMusicToAllPlayers(store, null);
+            CometAmbienceSync.pushForcedMusicToAllPlayers(store, 0, null);
         } catch (Throwable t) {
             LOGGER.warning("Combat music clear failed: " + t.getMessage());
         }

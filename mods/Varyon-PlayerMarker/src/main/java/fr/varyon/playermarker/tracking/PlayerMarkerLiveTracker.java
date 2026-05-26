@@ -84,7 +84,8 @@ final class PlayerMarkerLiveTracker {
             return null;
         }
 
-        return new Vector3d(transform.getPosition());
+        org.joml.Vector3d raw = transform.getPosition();
+        return new Vector3d(raw.x, raw.y, raw.z);
     }
 
     static Vector3f resolveRotation(PlayerRef ref) {
@@ -97,8 +98,8 @@ final class PlayerMarkerLiveTracker {
             return new Vector3f(snapshot.rotation());
         }
 
-        Vector3f headRotation = ref.getHeadRotation();
-        return headRotation != null ? new Vector3f(headRotation) : null;
+        com.hypixel.hytale.math.vector.Rotation3f headRotation = ref.getHeadRotation();
+        return headRotation != null ? new Vector3f(headRotation.x, headRotation.y, headRotation.z) : null;
     }
 
     static Transform resolveTransform(PlayerRef ref) {
@@ -108,7 +109,10 @@ final class PlayerMarkerLiveTracker {
         }
 
         Vector3f rotation = resolveRotation(ref);
-        return new Transform(position, rotation != null ? rotation : Vector3f.ZERO);
+        com.hypixel.hytale.math.vector.Rotation3f hRot = rotation != null
+                ? new com.hypixel.hytale.math.vector.Rotation3f(rotation.x, rotation.y, rotation.z)
+                : new com.hypixel.hytale.math.vector.Rotation3f();
+        return new Transform(new org.joml.Vector3d(position.x, position.y, position.z), hRot);
     }
 
     private static LiveSnapshot snapshot(UUID playerUuid) {
@@ -133,12 +137,7 @@ final class PlayerMarkerLiveTracker {
         if (direction == null) {
             return null;
         }
-
-        Vector3f rotation = new Vector3f();
-        rotation.setYaw(direction.yaw);
-        rotation.setPitch(direction.pitch);
-        rotation.setRoll(direction.roll);
-        return rotation;
+        return new Vector3f(direction.yaw, direction.pitch, direction.roll);
     }
 
     private record LiveSnapshot(Vector3d position, Vector3f rotation) {}

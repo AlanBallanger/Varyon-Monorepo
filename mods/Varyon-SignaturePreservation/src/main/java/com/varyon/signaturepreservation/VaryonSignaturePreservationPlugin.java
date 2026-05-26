@@ -35,7 +35,7 @@ public final class VaryonSignaturePreservationPlugin extends JavaPlugin {
 
         LOGGER.at(Level.INFO)
                 .log(
-                        "Varyon-SignaturePreservation | enabled={0} debug={1} restoreDelayMs={2}",
+                        "Varyon-SignaturePreservation | enabled=%s debug=%s restoreDelayMs=%s",
                         cfg.isEnabled(),
                         cfg.isDebug(),
                         cfg.getRestoreDelayMs());

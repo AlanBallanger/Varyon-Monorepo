@@ -303,7 +303,7 @@ public final class BossWaveNotificationService {
             }
 
             Transform transform = playerRef.getTransform();
-            com.hypixel.hytale.math.vector.Vector3d rawPlayerPos = transform != null ? transform.getPosition() : null;
+            org.joml.Vector3d rawPlayerPos = transform != null ? transform.getPosition() : null;
             if (rawPlayerPos == null) {
                 continue;
             }

@@ -10,8 +10,8 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.event.events.ecs.InteractivelyPickupItemEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
@@ -92,7 +92,7 @@ public final class ChasseurPickupSystem extends EntityEventSystem<EntityStore, I
             int mhfRank = acc.getTalentRank(Profession.CHASSEUR, "0");
             double mhfChance = mhfRank * 0.05 + comboBonus;
             if (mhfRank > 0 && RANDOM.nextDouble() < mhfChance) {
-                if (dbg) LOGGER.atInfo().log(dbgId + "N0 MainsBoucher PROC — item=" + itemId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N0 MainsBoucher PROC â€” item=" + itemId);
                 try { dropItemNearPlayer(commandBuffer, itemId, dropPos); }
                 catch (Exception e) { LOGGER.atWarning().withCause(e).log(dbgId + "N0 drop ERREUR"); }
             }
@@ -101,7 +101,7 @@ public final class ChasseurPickupSystem extends EntityEventSystem<EntityStore, I
         int lootRank = acc.getTalentRank(Profession.CHASSEUR, "4");
         double lootChance = lootRank * 0.05 + comboBonus;
         if (lootRank > 0 && RANDOM.nextDouble() < lootChance) {
-            if (dbg) LOGGER.atInfo().log(dbgId + "N4 Depouillleur PROC — item=" + itemId);
+            if (dbg) LOGGER.atInfo().log(dbgId + "N4 Depouillleur PROC â€” item=" + itemId);
             TalentProcSounds.playLootDouble(acc, Profession.CHASSEUR, playerRef, ref, commandBuffer, dropPos);
             try { dropItemNearPlayer(commandBuffer, itemId, dropPos); }
             catch (Exception e) { LOGGER.atWarning().withCause(e).log(dbgId + "N4 drop ERREUR"); }
@@ -110,7 +110,7 @@ public final class ChasseurPickupSystem extends EntityEventSystem<EntityStore, I
         if (ChasseurXpTable.isExoticDrop(itemId)) {
             int exoRank = acc.getTalentRank(Profession.CHASSEUR, "7");
             if (exoRank > 0 && RANDOM.nextDouble() < exoRank * 0.05) {
-                if (dbg) LOGGER.atInfo().log(dbgId + "N7 MateriauxExotiques PROC — item=" + itemId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N7 MateriauxExotiques PROC â€” item=" + itemId);
                 try { dropItemNearPlayer(commandBuffer, itemId, dropPos); }
                 catch (Exception e) { LOGGER.atWarning().withCause(e).log(dbgId + "N7 drop ERREUR"); }
             }
@@ -124,7 +124,7 @@ public final class ChasseurPickupSystem extends EntityEventSystem<EntityStore, I
         if (stack.isEmpty() || !stack.isValid()) return;
         float vx = (RANDOM.nextFloat() - 0.5f) * 2.5f;
         float vz = (RANDOM.nextFloat() - 0.5f) * 2.5f;
-        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, new Vector3f(0f, 0f, 0f), vx, 3.25f, vz);
+        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, 3.25f, vz);
         if (holder == null) return;
         accessor.addEntity(holder, AddReason.SPAWN);
     }

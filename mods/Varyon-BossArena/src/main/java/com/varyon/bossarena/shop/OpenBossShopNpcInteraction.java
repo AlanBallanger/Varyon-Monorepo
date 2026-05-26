@@ -58,7 +58,7 @@ public class OpenBossShopNpcInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        com.hypixel.hytale.math.vector.Vector3d npcPosition = transform.getPosition();
+        org.joml.Vector3d npcPosition = transform.getPosition();
         String worldName = player.getWorld() != null ? player.getWorld().getName() : null;
         if (worldName == null || worldName.isBlank()) {
             BossArenaShopPage.open(playerRef, store, player, plugin);

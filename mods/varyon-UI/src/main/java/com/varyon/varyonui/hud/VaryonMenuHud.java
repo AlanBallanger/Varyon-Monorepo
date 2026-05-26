@@ -69,9 +69,6 @@ public class VaryonMenuHud extends CustomUIHud {
     }
 
     @Override
-    public void onRemove() {}
-
-    @Override
     protected void build(@Nonnull UICommandBuilder builder) {
         try {
             builder.append("HUD/VaryonMenuHud.ui");

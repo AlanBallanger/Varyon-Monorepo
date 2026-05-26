@@ -2,10 +2,13 @@ package fr.varyon.ecotale.jobs.commands;
 
 import fr.varyon.ecotale.VaryonEcotalePlugin;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -64,75 +67,90 @@ public class TestOresCommand extends AbstractAsyncCommand {
             return CompletableFuture.completedFuture(null);
         }
         
-        // Check debug mode
-        if (!VaryonEcotalePlugin.getInstance().getEconomyConfig().isDebugMode()) {
-            player.sendMessage(Message.raw("Debug mode is disabled in earnings_config.yml.").color(Color.RED));
-            return CompletableFuture.completedFuture(null);
-        }
-        
         Ref<EntityStore> ref = player.getReference();
         if (ref == null || !ref.isValid()) {
             return CompletableFuture.completedFuture(null);
         }
-        
+
+        Store<EntityStore> store = ref.getStore();
+        World world = store.getExternalData().getWorld();
+        if (world == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        // Check debug mode
+        if (!VaryonEcotalePlugin.getInstance().getEconomyConfig().isDebugMode()) {
+            playerRef.sendMessage(Message.raw("Debug mode is disabled in earnings_config.yml.").color(Color.RED));
+            return CompletableFuture.completedFuture(null);
+        }
+
         return CompletableFuture.runAsync(() -> {
-            spawnOreWall(player);
-        }, player.getWorld());
+            spawnOreWall(player, store, ref, playerRef, world);
+        }, world);
     }
-    
-    private void spawnOreWall(Player player) {
-        World world = player.getWorld();
-        
+
+    private void spawnOreWall(Player player, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef playerRef, World world) {
+        TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
+        if (transform == null) {
+            return;
+        }
+
         // Get player position
-        double px = player.getTransformComponent().getPosition().getX();
-        double py = player.getTransformComponent().getPosition().getY();
-        double pz = player.getTransformComponent().getPosition().getZ();
-        
+        org.joml.Vector3d pos = transform.getPosition();
+        double px = pos.x;
+        double py = pos.y;
+        double pz = pos.z;
+
         // Spawn 3 blocks in front
         int startX = (int) px + 3;
         int startY = (int) py;
         int startZ = (int) pz;
-        
-        player.sendMessage(Message.raw("Generating ore museum with " + countTotalOres() + " ores...").color(Color.GREEN));
-        
+
+        playerRef.sendMessage(Message.raw("Generating ore museum with " + countTotalOres() + " ores...").color(Color.GREEN));
+
         // Block operations on world thread
         world.execute(() -> {
-            int zOffset = 0; // Each group gets its own Z column
-            
+            int zOffset = 0;
+
             for (int groupIdx = 0; groupIdx < ORE_GROUPS.length; groupIdx++) {
                 String[] ores = ORE_GROUPS[groupIdx];
-                
+
                 int xOffset = 0;
                 int yOffset = 0;
-                
+
                 for (String oreId : ores) {
                     int x = startX + xOffset;
                     int y = startY + yOffset + 1;
                     int z = startZ + zOffset;
-                    
+
                     try {
                         world.setBlock(x, y, z, oreId);
                     } catch (Exception e) {
                         // Ore doesn't exist, skip
                     }
-                    
+
                     // Stack vertically up to MAX_HEIGHT
                     yOffset++;
                     if (yOffset >= MAX_HEIGHT) {
                         yOffset = 0;
-                        xOffset++; // Move to next column
+                        xOffset++;
                     }
                 }
-                
+
                 // Gap between groups
                 zOffset += 2;
             }
-            
-            player.sendMessage(Message.raw("Ore museum generated! Groups:").color(Color.GREEN));
+
+            playerRef.sendMessage(Message.raw("Ore museum generated! Groups:").color(Color.GREEN));
             for (int i = 0; i < GROUP_NAMES.length; i++) {
-                player.sendMessage(Message.raw("  " + (i+1) + ". " + GROUP_NAMES[i]).color(Color.YELLOW));
+                playerRef.sendMessage(Message.raw("  " + (i+1) + ". " + GROUP_NAMES[i]).color(Color.YELLOW));
             }
-            player.sendMessage(Message.raw("Mine them to test reward tiers!").color(Color.GREEN));
+            playerRef.sendMessage(Message.raw("Mine them to test reward tiers!").color(Color.GREEN));
         });
     }
     

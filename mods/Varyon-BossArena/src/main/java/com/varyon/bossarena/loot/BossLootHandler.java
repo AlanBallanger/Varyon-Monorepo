@@ -170,7 +170,7 @@ public class BossLootHandler {
             if (playerTransform == null) {
                 continue;
             }
-            com.hypixel.hytale.math.vector.Vector3d rawPlayerPos = playerTransform.getPosition();
+            org.joml.Vector3d rawPlayerPos = playerTransform.getPosition();
             if (rawPlayerPos == null) {
                 continue;
             }

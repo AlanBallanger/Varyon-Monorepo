@@ -5,6 +5,7 @@ import fr.varyon.ecotale.coins.config.CoinConfig;
 import fr.varyon.ecotale.coins.currency.CoinAssetManager;
 import fr.varyon.ecotale.shared.ModuleInitializer;
 import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.ShutdownReason;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 
@@ -59,7 +60,7 @@ public class CoinsModule implements ModuleInitializer {
                 Thread.sleep(2000);
                 plugin.getLogger().at(Level.INFO).log("[Varyon-Ecotale] Coins first-time setup, restarting in 5s...");
                 Thread.sleep(5000);
-                s.shutdownServer(ShutdownReason.SHUTDOWN.withMessage("Varyon-Ecotale Coins first-time setup."));
+                s.shutdownServer(ShutdownReason.SHUTDOWN.withMessage(Message.raw("Varyon-Ecotale Coins first-time setup.")));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

@@ -283,7 +283,7 @@ public class InventoryManager {
                     }
 
                     if (hasItems) {
-                        data.applyToInventory(holder);
+                        data.applyToInventory(holder, world.getEntityStore().getStore());
                         PlayerInventoryData synced = PlayerInventoryData.fromHolder(holder);
                         playerMap.put(key, synced);
                         int sz = synced.getItems() != null ? synced.getItems().size() : 0;

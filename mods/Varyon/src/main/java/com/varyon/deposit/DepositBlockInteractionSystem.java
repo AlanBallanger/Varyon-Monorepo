@@ -4,7 +4,7 @@ import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.entity.InteractionChain;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.InteractionManager;
 import com.hypixel.hytale.server.core.event.events.ecs.UseBlockEvent;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.VaryonPlugin;
 import com.varyon.command.CreateDepositSubCommand;
@@ -50,7 +51,8 @@ public class DepositBlockInteractionSystem extends EntityEventSystem<EntityStore
         }
         
         Player player = (Player) store.getComponent(ref, Player.getComponentType());
-        if (player == null) {
+        PlayerRef playerRef = (PlayerRef) store.getComponent(ref, PlayerRef.getComponentType());
+        if (player == null || playerRef == null) {
             return;
         }
         
@@ -81,10 +83,10 @@ public class DepositBlockInteractionSystem extends EntityEventSystem<EntityStore
                 if (pending.isCreation()) {
                     boolean added = depositBlockManager.addDepositBlock(world, pos);
                     if (added) {
-                        player.sendMessage(Message.raw("Bloc de dépôt créé avec succès! (Position: " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ")").color(Color.GREEN));
-                        LOGGER.at(Level.INFO).log("Created deposit block at " + world + ":" + pos.getX() + "," + pos.getY() + "," + pos.getZ());
+                        playerRef.sendMessage(Message.raw("Bloc de dépôt créé avec succès! (Position: " + pos.x + ", " + pos.y + ", " + pos.z + ")").color(Color.GREEN));
+                        LOGGER.at(Level.INFO).log("Created deposit block at " + world + ":" + pos.x + "," + pos.y + "," + pos.z);
                     } else {
-                        player.sendMessage(Message.raw("Ce bloc est déjà un bloc de dépôt.").color(Color.YELLOW));
+                        playerRef.sendMessage(Message.raw("Ce bloc est déjà un bloc de dépôt.").color(Color.YELLOW));
                     }
                     CreateDepositSubCommand.clearPendingBind(player.getUuid());
                 }
@@ -109,7 +111,7 @@ public class DepositBlockInteractionSystem extends EntityEventSystem<EntityStore
         
         cancelInteractionChain(event.getContext());
         depositUIManager.openDepositUI(player);
-        LOGGER.at(Level.INFO).log("Opened deposit UI for player at " + world + ":" + pos.getX() + "," + pos.getY() + "," + pos.getZ());
+        LOGGER.at(Level.INFO).log("Opened deposit UI for player at " + world + ":" + pos.x + "," + pos.y + "," + pos.z);
     }
     
     private void cancelInteractionChain(InteractionContext context) {

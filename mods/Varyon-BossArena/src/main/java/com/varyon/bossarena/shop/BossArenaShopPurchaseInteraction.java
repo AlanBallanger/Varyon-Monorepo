@@ -44,60 +44,55 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
             return;
         }
 
-        Object playerObj = store.getComponent(ref, Player.getComponentType());
-        if (!(playerObj instanceof Player player)) {
-            return;
-        }
-
         if (bossId == null || bossId.isBlank()) {
-            player.sendMessage(Message.raw("Shop entry missing bossId."));
+            playerRef.sendMessage(Message.raw("Shop entry missing bossId."));
             return;
         }
         if (arenaId == null || arenaId.isBlank()) {
-            player.sendMessage(Message.raw("Shop entry missing arenaId."));
+            playerRef.sendMessage(Message.raw("Shop entry missing arenaId."));
             return;
         }
 
         BossDefinition def = BossRegistry.get(bossId);
         if (def == null) {
-            player.sendMessage(Message.raw("Boss not found: " + bossId));
+            playerRef.sendMessage(Message.raw("Boss not found: " + bossId));
             return;
         }
 
         Arena arena = ArenaRegistry.get(arenaId);
         if (arena == null) {
-            player.sendMessage(Message.raw("Arena not found: " + arenaId));
+            playerRef.sendMessage(Message.raw("Arena not found: " + arenaId));
             return;
         }
 
-        World world = player.getWorld();
+        World world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(playerRef.getWorldUuid());
         if (world == null) {
-            player.sendMessage(Message.raw("Could not resolve world."));
+            playerRef.sendMessage(Message.raw("Could not resolve world."));
             return;
         }
 
         world.execute(() -> {
             BossSpawnService spawnService = plugin.getBossSpawnService();
             if (spawnService == null) {
-                player.sendMessage(Message.raw("Boss spawn service is unavailable."));
+                playerRef.sendMessage(Message.raw("Boss spawn service is unavailable."));
                 return;
             }
 
             if (spawnService.hasAnyEventInProgress()) {
-                player.sendMessage(Message.raw("A boss event is already in progress. Wait for all bosses and waves to be cleared."));
+                playerRef.sendMessage(Message.raw("A boss event is already in progress. Wait for all bosses and waves to be cleared."));
                 return;
             }
 
             if (cost > 0) {
-                ChargeResult result = chargeCost(plugin, player, playerRef, cost);
+                ChargeResult result = chargeCost(plugin, store, ref, playerRef, cost);
                 if (!result.success()) {
-                    player.sendMessage(Message.raw(result.message()));
+                    playerRef.sendMessage(Message.raw(result.message()));
                     return;
                 }
             }
 
             var uuid = spawnService.spawnBossFromJson(
-                    player,
+                    playerRef,
                     bossId,
                     world,
                     arena.getPosition(),
@@ -105,18 +100,18 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
             );
 
             if (uuid == null) {
-                player.sendMessage(Message.raw("Failed to spawn boss: " + bossId));
+                playerRef.sendMessage(Message.raw("Failed to spawn boss: " + bossId));
             } else if (BossSpawnService.DEFERRED_SPAWN_UUID.equals(uuid)) {
-                player.sendMessage(Message.raw("Spawn sequence started for boss: " + bossId + ". Boss will spawn after pre-boss waves."));
+                playerRef.sendMessage(Message.raw("Spawn sequence started for boss: " + bossId + ". Boss will spawn after pre-boss waves."));
             } else {
-                player.sendMessage(Message.raw("Spawned boss: " + bossId));
+                playerRef.sendMessage(Message.raw("Spawned boss: " + bossId));
             }
         });
 
         LOGGER.info("Shop purchase: " + playerRef + " -> " + bossId + " @ " + arenaId + ", cost=" + cost);
     }
 
-    private static ChargeResult chargeCost(BossArenaPlugin plugin, Player player, PlayerRef playerRef, int amount) {
+    private static ChargeResult chargeCost(BossArenaPlugin plugin, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef playerRef, int amount) {
         CurrencySettings currency = resolveCurrencySettings(plugin);
         String provider = ShopCurrencySupport.sanitizeProvider(currency.provider);
 
@@ -133,7 +128,7 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
         }
 
         if (ShopCurrencySupport.PROVIDER_ITEM.equals(provider)) {
-            return tryChargeItemCurrency(player, currency.itemId, amount);
+            return tryChargeItemCurrency(store, ref, currency.itemId, amount);
         }
 
         // Auto mode: prefer HyMarket, then Ecotale, then EconomySystem, then item currency.
@@ -148,7 +143,7 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
             return tryChargeHyMarket(EntityComponents.uuid(playerRef), amount);
         }
         if (currency.itemId != null && !currency.itemId.isBlank()) {
-            return tryChargeItemCurrency(player, currency.itemId, amount);
+            return tryChargeItemCurrency(store, ref, currency.itemId, amount);
         }
         return ChargeResult.fail("No currency provider is available. Configure item currency or enable Ecotale/EconomySystem/HyMarketPlus.");
     }
@@ -176,11 +171,11 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
         return new CurrencySettings(provider, "Ingredient_Bar_Iron");
     }
 
-    private static ChargeResult tryChargeItemCurrency(Player player, String currencyItemId, int amount) {
+    private static ChargeResult tryChargeItemCurrency(Store<EntityStore> store, Ref<EntityStore> ref, String currencyItemId, int amount) {
         if (currencyItemId == null || currencyItemId.isBlank()) {
             return ChargeResult.fail("Shop currency is not configured.");
         }
-        if (!consumeCurrency(player, currencyItemId, amount)) {
+        if (!consumeCurrency(store, ref, currencyItemId, amount)) {
             return ChargeResult.fail("Not enough currency. Need "
                     + amount + " " + ItemNameResolver.resolveCommonName(currencyItemId) + ".");
         }
@@ -219,13 +214,14 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
         return ChargeResult.ok();
     }
 
-    private static boolean consumeCurrency(Player player, String currencyItemId, int amount) {
-        Inventory inventory = player.getInventory();
-        if (inventory == null) {
-            return false;
-        }
-
-        ItemContainer container = inventory.getCombinedBackpackStorageHotbar();
+    private static boolean consumeCurrency(Store<EntityStore> store, Ref<EntityStore> ref, String currencyItemId, int amount) {
+        com.hypixel.hytale.server.core.inventory.container.CombinedItemContainer container = com.hypixel.hytale.server.core.inventory.InventoryComponent.getCombined(
+                store,
+                ref,
+                com.hypixel.hytale.server.core.inventory.InventoryComponent.Storage.getComponentType(),
+                com.hypixel.hytale.server.core.inventory.InventoryComponent.Hotbar.getComponentType(),
+                com.hypixel.hytale.server.core.inventory.InventoryComponent.Backpack.getComponentType()
+        );
         if (container == null) {
             return false;
         }
@@ -251,7 +247,6 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
             remaining -= removeAmount;
         }
 
-        player.sendInventory();
         return remaining == 0;
     }
 

@@ -73,9 +73,9 @@ public final class EnvironmentUtil {
                     BlockChunk blockChunk = chunkStore.getComponent(chunkRef, BlockChunk.getComponentType());
                     if (blockChunk != null) {
                         var pos = transform.getPosition();
-                        int x = MathUtil.floor(pos.getX());
-                        int y = MathUtil.clamp(MathUtil.floor(pos.getY()), 0, 319);
-                        int z = MathUtil.floor(pos.getZ());
+                        int x = MathUtil.floor(pos.x);
+                        int y = MathUtil.clamp(MathUtil.floor(pos.y), 0, 319);
+                        int z = MathUtil.floor(pos.z);
                         int id = blockChunk.getEnvironment(x, y, z);
                         if (id > 0) return id;
                     }

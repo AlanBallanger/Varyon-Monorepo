@@ -65,8 +65,10 @@ public class BankCommand extends AbstractAsyncCommand {
             return CompletableFuture.completedFuture(null);
         }
 
+        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+
         // Strict permission check
-        if (!player.hasPermission("ecotale.ecotalecoins.command.bank")) {
+        if (playerRef == null || !playerRef.hasPermission("ecotale.ecotalecoins.command.bank")) {
             CompletableFuture<Void> denied = new CompletableFuture<>();
             world.execute(() -> {
                 ctx.sendMessage(Message.raw("You don't have permission to use the bank.").color(Color.RED));
@@ -77,7 +79,6 @@ public class BankCommand extends AbstractAsyncCommand {
 
         // No subcommand = open Bank GUI
         return CompletableFuture.runAsync(() -> {
-            PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
             if (playerRef != null) {
                 player.getPageManager().openCustomPage(ref, store, new fr.varyon.ecotale.coins.gui.BankGui(playerRef));
             }
@@ -115,8 +116,10 @@ public class BankCommand extends AbstractAsyncCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
+            PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+
             // Permission check
-            if (!player.hasPermission("ecotale.ecotalecoins.command.bank")) {
+            if (playerRef == null || !playerRef.hasPermission("ecotale.ecotalecoins.command.bank")) {
                 CompletableFuture<Void> denied = new CompletableFuture<>();
                 world.execute(() -> {
                     ctx.sendMessage(Message.raw("You don't have permission to use the bank.").color(Color.RED));
@@ -126,13 +129,10 @@ public class BankCommand extends AbstractAsyncCommand {
             }
 
             String amountStr = ctx.get(amountArg);
-            
+
             return CompletableFuture.runAsync(() -> {
-                PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
-                if (playerRef == null) return;
-                
                 UUID playerUuid = playerRef.getUuid();
-                
+
                 long amount;
                 if (amountStr.equalsIgnoreCase("all")) {
                     amount = CoinManager.countCoins(player);
@@ -207,8 +207,10 @@ public class BankCommand extends AbstractAsyncCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
+            PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+
             // Permission check
-            if (!player.hasPermission("ecotale.ecotalecoins.command.bank")) {
+            if (playerRef == null || !playerRef.hasPermission("ecotale.ecotalecoins.command.bank")) {
                 CompletableFuture<Void> denied = new CompletableFuture<>();
                 world.execute(() -> {
                     ctx.sendMessage(Message.raw("You don't have permission to use the bank.").color(Color.RED));
@@ -218,13 +220,10 @@ public class BankCommand extends AbstractAsyncCommand {
             }
 
             String amountStr = ctx.get(amountArg);
-            
+
             return CompletableFuture.runAsync(() -> {
-                PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
-                if (playerRef == null) return;
-                
                 UUID playerUuid = playerRef.getUuid();
-                
+
                 long amount;
                 if (amountStr.equalsIgnoreCase("all")) {
                     amount = BankManager.getBankBalance(playerUuid);

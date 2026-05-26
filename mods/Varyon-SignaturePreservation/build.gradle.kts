@@ -1,75 +1,31 @@
 plugins {
-    `maven-publish`
-    id("hytale-mod") version "0.+"
+    java
 }
 
-group = "com.varyon"
-version = "1.0.0"
-val javaVersion = 25
+group = properties["plugin_group"] as String
+version = properties["plugin_version"] as String
 
 repositories {
     mavenCentral()
-    maven("https://maven.hytale-modding.info/releases") {
-        name = "HytaleModdingReleases"
-    }
 }
 
 dependencies {
-    compileOnly(libs.jetbrains.annotations)
-    compileOnly(libs.jspecify)
+    compileOnly("org.jetbrains:annotations:24.1.0")
+    compileOnly("org.jspecify:jspecify:0.3.0")
+    compileOnly(files("../../libs/HytaleServer.jar"))
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.named<ProcessResources>("processResources") {
+    filesMatching("manifest.json") { expand(project.properties) }
 }
 
 tasks.named<Jar>("jar") {
     archiveBaseName.set("Varyon-SignaturePreservation")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes["Specification-Title"] = rootProject.name
-        attributes["Specification-Version"] = version
-        attributes["Implementation-Title"] = project.name
-        attributes["Implementation-Version"] = version.toString()
-    }
-}
-
-hytale {
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(javaVersion)
-    }
-    withSourcesJar()
-}
-
-tasks.named<ProcessResources>("processResources") {
-    val replaceProperties = mapOf(
-        "plugin_group" to findProperty("plugin_group"),
-        "plugin_maven_group" to project.group,
-        "plugin_name" to project.name,
-        "plugin_version" to project.version,
-        "server_version" to findProperty("server_version"),
-        "plugin_description" to findProperty("plugin_description"),
-        "plugin_website" to findProperty("plugin_website"),
-        "plugin_main_entrypoint" to findProperty("plugin_main_entrypoint"),
-        "plugin_author" to findProperty("plugin_author")
-    )
-    filesMatching("manifest.json") {
-        expand(replaceProperties)
-    }
-    inputs.properties(replaceProperties)
-}
-
-publishing {
-    repositories {}
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-    }
-}
-
-idea {
-    module {
-        isDownloadSources = true
-        isDownloadJavadoc = true
-    }
 }

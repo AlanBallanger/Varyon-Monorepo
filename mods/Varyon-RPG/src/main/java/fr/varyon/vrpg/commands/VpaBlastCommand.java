@@ -3,14 +3,14 @@ package fr.varyon.vrpg.commands;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
@@ -36,7 +36,7 @@ public final class VpaBlastCommand extends AbstractAsyncCommand {
     private final Map<UUID, Long> lastUse = new ConcurrentHashMap<>();
 
     public VpaBlastCommand(ExplosionTalentSystem explosionSystem) {
-        super("blast", "Diplomatie Minière — explosion contrôlée");
+        super("blast", "Diplomatie Miniere -- explosion controlee");
         this.addAliases("vpb");
         this.explosionSystem = explosionSystem;
     }
@@ -45,7 +45,7 @@ public final class VpaBlastCommand extends AbstractAsyncCommand {
     @Override
     protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
         CommandSender sender = ctx.sender();
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof PlayerRef playerRef)) {
             sender.sendMessage(Message.raw("Commande joueur uniquement.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
@@ -53,22 +53,20 @@ public final class VpaBlastCommand extends AbstractAsyncCommand {
         ProfessionManager mgr = VaryonRpgPlugin.getInstance().getProfessionManager();
         if (mgr == null) { LOGGER.atWarning().log("[Blast] mgr null"); return CompletableFuture.completedFuture(null); }
 
-        PlayerRef playerRef = player.getPlayerRef();
-        if (playerRef == null) { LOGGER.atWarning().log("[Blast] playerRef null"); return CompletableFuture.completedFuture(null); }
         UUID uuid = playerRef.getUuid();
 
         PlayerAccount acc = mgr.getAccount(uuid);
         if (acc == null || !acc.isActive(Profession.MINEUR)) {
-            sender.sendMessage(Message.raw("Vous devez être Mineur actif pour utiliser Diplomatie Minière.").color(Color.RED));
+            sender.sendMessage(Message.raw("Vous devez etre Mineur actif pour utiliser Diplomatie Miniere.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
         if (acc.getTalentRank(Profession.MINEUR, "15") <= 0) {
-            sender.sendMessage(Message.raw("Talent non débloqué.").color(Color.RED));
+            sender.sendMessage(Message.raw("Talent non debloque.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
-        boolean isOp = player.hasPermission("*");
+        boolean isOp = playerRef.hasPermission("*");
         long now = System.currentTimeMillis();
         if (!isOp) {
             Long lastUsed = lastUse.get(uuid);
@@ -78,14 +76,14 @@ public final class VpaBlastCommand extends AbstractAsyncCommand {
                     long minutes = remaining / 60_000;
                     long seconds = (remaining % 60_000) / 1_000;
                     sender.sendMessage(Message.raw(
-                        "Diplomatie Minière en rechargement — disponible dans " + minutes + "m " + seconds + "s.")
+                        "Diplomatie Miniere en rechargement -- disponible dans " + minutes + "m " + seconds + "s.")
                         .color(new Color(255, 165, 0)));
                     return CompletableFuture.completedFuture(null);
                 }
             }
         }
 
-        World world = player.getWorld();
+        World world = Universe.get().getWorld(playerRef.getWorldUuid());
         if (world == null) {
             LOGGER.atWarning().log("[Blast] world null");
             sender.sendMessage(Message.raw("Monde invalide.").color(Color.RED));
@@ -106,14 +104,14 @@ public final class VpaBlastCommand extends AbstractAsyncCommand {
 
                 Vector3i targetBlock = TargetUtil.getTargetBlock(ref, 10.0, store);
                 if (targetBlock == null) {
-                    sender.sendMessage(Message.raw("Aucune cible — visez un bloc.").color(Color.RED));
+                    sender.sendMessage(Message.raw("Aucune cible -- visez un bloc.").color(Color.RED));
                     done.complete(null);
                     return;
                 }
                 Vector3d pos = new Vector3d(targetBlock.x + 0.5, targetBlock.y + 0.5, targetBlock.z + 0.5);
                 lastUse.put(uuid, now);
                 explosionSystem.queueExplosion(uuid, pos);
-                sender.sendMessage(Message.raw("Diplomatie Minière !").color(new Color(255, 80, 0)));
+                sender.sendMessage(Message.raw("Diplomatie Miniere !").color(new Color(255, 80, 0)));
                 done.complete(null);
             } catch (Exception e) {
                 LOGGER.atSevere().withCause(e).log("[Blast] erreur explosion");

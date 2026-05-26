@@ -267,13 +267,13 @@ public final class VaryonPlayerMarkerPlugin extends JavaPlugin {
             return java.util.List.of();
         }
 
-        java.util.List<PlayerRef> players = universe.getPlayers();
-        if (players == null || players.isEmpty()) {
+        java.util.Collection<PlayerRef> playersCol = universe.getPlayers();
+        if (playersCol == null || playersCol.isEmpty()) {
             return java.util.List.of();
         }
 
-        java.util.ArrayList<PlayerRef> livePlayers = new java.util.ArrayList<>(players.size());
-        for (PlayerRef ref : players) {
+        java.util.ArrayList<PlayerRef> livePlayers = new java.util.ArrayList<>(playersCol.size());
+        for (PlayerRef ref : playersCol) {
             if (ref == null) {
                 continue;
             }
@@ -297,7 +297,7 @@ public final class VaryonPlayerMarkerPlugin extends JavaPlugin {
             return null;
         }
 
-        java.util.List<PlayerRef> players = universe.getPlayers();
+        java.util.Collection<PlayerRef> players = universe.getPlayers();
         if (players == null || players.isEmpty()) {
             return null;
         }

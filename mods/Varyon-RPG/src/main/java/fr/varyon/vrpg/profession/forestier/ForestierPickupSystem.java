@@ -10,8 +10,8 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.event.events.ecs.InteractivelyPickupItemEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
@@ -70,10 +70,10 @@ public final class ForestierPickupSystem extends EntityEventSystem<EntityStore, 
         boolean dbg = VrpgConfig.isDebugTalents();
         String dbgId = dbg ? "[" + uuid.toString().substring(0, 8) + "|Fish|" + itemId + "] " : null;
 
-        // Node 7 ÔÇö P├¬che Miraculeuse : chance de doubler le poisson (5% par rang, max 25%)
+        // Node 7 Ã”Ã‡Ã¶ Pâ”œÂ¬che Miraculeuse : chance de doubler le poisson (5% par rang, max 25%)
         int fishRank = acc.getTalentRank(Profession.FORESTIER, "7");
         if (fishRank > 0 && RANDOM.nextDouble() < fishRank * 0.05) {
-            if (dbg) LOGGER.atInfo().log(dbgId + "N7 PecheMiraculeuse PROC ÔÇö item=" + itemId);
+            if (dbg) LOGGER.atInfo().log(dbgId + "N7 PecheMiraculeuse PROC Ã”Ã‡Ã¶ item=" + itemId);
             TransformComponent tcmp = store.getComponent(ref, TransformComponent.getComponentType());
             if (tcmp != null) {
                 Vector3d dropPos = new Vector3d(
@@ -94,7 +94,7 @@ public final class ForestierPickupSystem extends EntityEventSystem<EntityStore, 
         if (stack.isEmpty() || !stack.isValid()) return;
         float vx = (RANDOM.nextFloat() - 0.5f) * 2.5f;
         float vz = (RANDOM.nextFloat() - 0.5f) * 2.5f;
-        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, new Vector3f(0f, 0f, 0f), vx, 3.25f, vz);
+        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, 3.25f, vz);
         if (holder == null) return;
         accessor.addEntity(holder, AddReason.SPAWN);
     }

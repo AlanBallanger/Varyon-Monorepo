@@ -11,12 +11,12 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -130,7 +130,7 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
         Ref<EntityStore> entityRef = null;
 
         if (isLog) {
-            // Node 5 ÔÇö C-C-Combo : XP et loot bonus par combo (1%/combo au rang 1, +0.5% par rang)
+            // Node 5 " C-C-Combo : XP et loot bonus par combo (1%/combo au rang 1, +0.5% par rang)
             int comboRank = acc.getTalentRank(Profession.FORESTIER, "5");
             int comboCount = comboTracker.onLogChopped(uuid);
             double comboPercent = comboRank > 0 ? (0.01 + (comboRank - 1) * 0.005) : 0.0;
@@ -148,21 +148,21 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                 } catch (Exception ignored) {}
             }
 
-            // Node 1 ÔÇö Mains ├ëcorch├®es : +5% XP par rang
+            // Node 1 " Mains "corch"es : +5% XP par rang
             int xpRank = acc.getTalentRank(Profession.FORESTIER, "1");
             double xpMult = 1.0 + xpRank * 0.05 + comboBonus + professionManager.getXpBoostMultiplier(uuid, Profession.FORESTIER);
             double baseLogXp = ForestierXpTable.getLogXp(rawId);
             double finalXp = baseLogXp * xpMult;
             if (dbg) LOGGER.atInfo().log(dbgId + "XP +" + finalXp
-                + " (base=" + baseLogXp + " × " + String.format("%.3f", xpMult) + ")"
+                + " (base=" + baseLogXp + "  " + String.format("%.3f", xpMult) + ")"
                 + (xpRank > 0 ? " [N1 MainsEcorchees rank=" + xpRank + "]" : ""));
             professionManager.addXp(uuid, Profession.FORESTIER, finalXp, playerRef);
 
-            // Node 0 ÔÇö B├╗ches Bien Lourdes : chance de doubler les b├╗ches (5% par rang, max 25%)
+            // Node 0 " B"ches Bien Lourdes : chance de doubler les b"ches (5% par rang, max 25%)
             int lootRank = acc.getTalentRank(Profession.FORESTIER, "0");
             if (lootRank > 0 && blockCenter != null && RANDOM.nextDouble() < lootRank * 0.05) {
                 String logItemId = ForestierXpTable.resolveLogItemId(rawId);
-                if (dbg) LOGGER.atInfo().log(dbgId + "N0 BuchesBienLourdes PROC ÔÇö item=" + logItemId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N0 BuchesBienLourdes PROC item=" + logItemId);
                 if (logItemId != null) {
                     try {
                         if (entityRef == null) entityRef = archetypeChunk.getReferenceTo(index);
@@ -176,10 +176,10 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                 }
             }
 
-            // Node 5 ÔÇö C-C-Combo loot : drop bonus proportionnel au combo
+            // Node 5 " C-C-Combo loot : drop bonus proportionnel au combo
             if (comboRank > 0 && comboCount > 0 && blockCenter != null && RANDOM.nextDouble() < comboBonus) {
                 String logItemId = ForestierXpTable.resolveLogItemId(rawId);
-                if (dbg) LOGGER.atInfo().log(dbgId + "N5 CCombo loot PROC ÔÇö item=" + logItemId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N5 CCombo loot PROC item=" + logItemId);
                 if (logItemId != null) {
                     try {
                         if (entityRef == null) entityRef = archetypeChunk.getReferenceTo(index);
@@ -192,7 +192,7 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                 }
             }
 
-            // Node 2 ÔÇö S├¿ve Primordiale : chance d'obtenir une Essence de Forestier (1% + 0.5%/rang)
+            // Node 2 " S"ve Primordiale : chance d'obtenir une Essence de Forestier (1% + 0.5%/rang)
             int essenceRank = acc.getTalentRank(Profession.FORESTIER, "2");
             if (essenceRank > 0 && blockCenter != null) {
                 double essenceChance = 0.01 + (essenceRank - 1) * 0.005;
@@ -210,22 +210,21 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                 }
             }
 
-            // Node 3 ÔÇö Hache du Survivant : annule la durabilit├® (15% par rang, max 75%)
+            // Node 3 " Hache du Survivant : annule la durabilit" (15% par rang, max 75%)
             int hacheRank = acc.getTalentRank(Profession.FORESTIER, "3");
             if (hacheRank > 0) {
                 try {
-                    Player player = playerRef.getComponent(Player.getComponentType());
-                    Inventory inventory = player != null ? player.getInventory() : null;
-                    if (inventory != null) {
-                        byte slot = inventory.getActiveHotbarSlot();
-                        ItemStack held = inventory.getHotbar().getItemStack((short) slot);
+                    InventoryComponent.Hotbar hotbar = playerRef.getComponent(InventoryComponent.Hotbar.getComponentType());
+                    if (hotbar != null) {
+                        byte slot = hotbar.getActiveSlot();
+                        ItemStack held = hotbar.getInventory().getItemStack((short) slot);
                         String heldId = held != null ? held.getItemId() : null;
                         boolean isHatchet = heldId != null && heldId.toLowerCase().contains("hatchet");
                         if (isHatchet && held.getMaxDurability() > 0) {
                             boolean proc = RANDOM.nextDouble() < hacheRank * 0.15;
                             if (dbg) LOGGER.atInfo().log(dbgId + "N3 HacheDuSurvivant rank=" + hacheRank + " proc=" + proc);
                             if (!proc) {
-                                inventory.getHotbar().setItemStackForSlot((short) slot,
+                                hotbar.getInventory().setItemStackForSlot((short) slot,
                                     held.withIncreasedDurability(-1.0));
                             }
                         }
@@ -233,13 +232,13 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                 } catch (Exception ignored) {}
             }
 
-            // Node 10 — Gardien Sylvestre : chance d'invoquer un Wolf_Black (5% par rang)
+            // Node 10 -- Gardien Sylvestre : chance d'invoquer un Wolf_Black (5% par rang)
             int gardienRank = acc.getTalentRank(Profession.FORESTIER, "10");
             if (gardienRank > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < gardienRank * 0.05) {
                 int bx = event.getTargetBlock().x;
                 int by = event.getTargetBlock().y;
                 int bz = event.getTargetBlock().z;
-                if (dbg) LOGGER.atInfo().log(dbgId + "N10 GardienSylvestre PROC — pos(" + bx + "," + by + "," + bz + ")");
+                if (dbg) LOGGER.atInfo().log(dbgId + "N10 GardienSylvestre PROC -- pos(" + bx + "," + by + "," + bz + ")");
                 try {
                     Player player = playerRef.getComponent(Player.getComponentType());
                     World world = player != null ? player.getWorld() : null;
@@ -253,7 +252,7 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                 }
             }
 
-            // Node 12 — Retour aux Racines : abat l'arbre quand la coupe sectionne le tronc du sol
+            // Node 12 -- Retour aux Racines : abat l'arbre quand la coupe sectionne le tronc du sol
             int racinRank = acc.getTalentRank(Profession.FORESTIER, "12");
             if (racinRank > 0 && event.getTargetBlock() != null) {
                 try {
@@ -267,7 +266,7 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                         if (treeType != null) {
                             long brokenKey = packTreePos(bx, by, bz);
                             Map<Long, String> treeBlocks = findTreeBlocks(world, bx, by, bz, treeType);
-                            // Trouver les blocs ancrés au sol (log/trunk avec sol solide directement en dessous)
+                            // Trouver les blocs ancrs au sol (log/trunk avec sol solide directement en dessous)
                             Set<Long> baseAnchors = new HashSet<>();
                             for (Map.Entry<Long, String> entry : treeBlocks.entrySet()) {
                                 long key = entry.getKey();
@@ -290,9 +289,9 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                             // Depuis les ancrages, peut-on atteindre un bloc au-dessus de by sans passer par brokenKey ?
                             boolean stillConnected = isUpperReachableFromAnchors(treeBlocks, baseAnchors, brokenKey, by);
                             if (stillConnected) {
-                                if (dbg) LOGGER.atInfo().log(dbgId + "N12 ignoré — arbre encore relié au sol");
+                                if (dbg) LOGGER.atInfo().log(dbgId + "N12 ignor -- arbre encore reli au sol");
                             } else {
-                                if (dbg) LOGGER.atInfo().log(dbgId + "N12 arbre sectionné — abattage de " + treeBlocks.size() + " blocs");
+                                if (dbg) LOGGER.atInfo().log(dbgId + "N12 arbre sectionn -- abattage de " + treeBlocks.size() + " blocs");
                                 try {
                                     if (entityRef == null) entityRef = archetypeChunk.getReferenceTo(index);
                                     if (entityRef != null && entityRef.isValid()) {
@@ -335,7 +334,7 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
                                 if (!lowestByXZ.isEmpty()) {
                                     final Collection<int[]> finalLowest = new ArrayList<>(lowestByXZ.values());
                                     final String finalSaplingId = "Plant_Sapling_" + treeType;
-                                    if (dbg) LOGGER.atInfo().log(dbgId + "N12 replant sapling=" + finalSaplingId + " (délai 500ms)");
+                                    if (dbg) LOGGER.atInfo().log(dbgId + "N12 replant sapling=" + finalSaplingId + " (dlai 500ms)");
                                     REPLANT_SCHEDULER.schedule(
                                         () -> world.execute(() -> fillAndReplant(world, finalLowest, finalSaplingId)),
                                         500, TimeUnit.MILLISECONDS
@@ -351,20 +350,20 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
         }
 
         if (isForage) {
-            // Node 1 ÔÇö Mains ├ëcorch├®es : +5% XP par rang (s'applique aussi aux r├®coltes en nature)
+            // Node 1 " Mains "corch"es : +5% XP par rang (s'applique aussi aux r"coltes en nature)
             int xpRank = acc.getTalentRank(Profession.FORESTIER, "1");
             double xpMult = 1.0 + xpRank * 0.05 + professionManager.getXpBoostMultiplier(uuid, Profession.FORESTIER);
             double baseForageXp = ForestierXpTable.getForageXp(rawId);
             double finalXp = baseForageXp * xpMult;
             if (dbg) LOGGER.atInfo().log(dbgId + "XP forage +" + finalXp
-                + " (base=" + baseForageXp + " × " + String.format("%.3f", xpMult) + ")");
+                + " (base=" + baseForageXp + "  " + String.format("%.3f", xpMult) + ")");
             professionManager.addXp(uuid, Profession.FORESTIER, finalXp, playerRef);
 
-            // Node 4 ÔÇö Cueilleur des Sous-Bois : chance de doubler la r├®colte (5% par rang, max 25%)
+            // Node 4 " Cueilleur des Sous-Bois : chance de doubler la r"colte (5% par rang, max 25%)
             int forageRank = acc.getTalentRank(Profession.FORESTIER, "4");
             if (forageRank > 0 && blockCenter != null && RANDOM.nextDouble() < forageRank * 0.05) {
                 String forageItemId = ForestierXpTable.resolveForageItemId(rawId);
-                if (dbg) LOGGER.atInfo().log(dbgId + "N4 CueilleurSousBois PROC ÔÇö item=" + forageItemId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N4 CueilleurSousBois PROC item=" + forageItemId);
                 if (forageItemId != null) {
                     try {
                         if (entityRef == null) entityRef = archetypeChunk.getReferenceTo(index);
@@ -386,15 +385,15 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
         if (stack.isEmpty() || !stack.isValid()) return;
         float vx = (RANDOM.nextFloat() - 0.5f) * 2.5f;
         float vz = (RANDOM.nextFloat() - 0.5f) * 2.5f;
-        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, new Vector3f(0f, 0f, 0f), vx, 3.25f, vz);
+        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, 3.25f, vz);
         if (holder == null) return;
         accessor.addEntity(holder, AddReason.SPAWN);
     }
 
     /**
-     * Depuis les blocs ancrés au sol (baseAnchors), vérifie si on peut atteindre
-     * un bloc à y > cutY en traversant treeBlocks sans passer par brokenKey.
-     * Retourne true si l'arbre est encore relié au sol depuis la canopée.
+     * Depuis les blocs ancrs au sol (baseAnchors), vrifie si on peut atteindre
+     * un bloc  y > cutY en traversant treeBlocks sans passer par brokenKey.
+     * Retourne true si l'arbre est encore reli au sol depuis la canope.
      */
     private static boolean isUpperReachableFromAnchors(Map<Long, String> treeBlocks,
                                                         Set<Long> baseAnchors,

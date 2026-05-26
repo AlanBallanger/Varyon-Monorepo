@@ -3,8 +3,8 @@ package fr.varyon.vrpg.profession.forestier;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
@@ -49,11 +49,11 @@ public final class ForestierGuardianSpawner {
     }
 
     public static void spawnWolfBlack(@Nonnull Store<EntityStore> store, @Nonnull Vector3d pos) {
-        LOGGER.atInfo().log("[GardienSylvestre] spawnNPC Wolf_Black — pos=" + pos);
+        LOGGER.atInfo().log("[GardienSylvestre] spawnNPC Wolf_Black â€” pos=" + pos);
         try {
-            var pair = NPCPlugin.get().spawnNPC(store, GUARDIAN_NPC_ID, null, pos, new Vector3f(0f, 0f, 0f));
+            var pair = NPCPlugin.get().spawnNPC(store, GUARDIAN_NPC_ID, null, pos, com.hypixel.hytale.math.vector.Rotation3f.ZERO);
             if (pair == null) {
-                LOGGER.atWarning().log("[GardienSylvestre] spawnNPC retourné null — vérifier le role name 'Wolf_Black'");
+                LOGGER.atWarning().log("[GardienSylvestre] spawnNPC retournÃ© null â€” vÃ©rifier le role name 'Wolf_Black'");
                 return;
             }
             Ref<EntityStore> wolfRef = pair.left();

@@ -1,5 +1,6 @@
 plugins {
     `maven-publish`
+    idea
     id("hytale-mod") version "0.+"
 }
 

@@ -8,8 +8,6 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.vector.Transform;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
@@ -56,9 +54,9 @@ public class ExtractionPortalTickSystem extends EntityTickingSystem<EntityStore>
         }
 
         UUID playerId = playerRef.getUuid();
-        double px = playerRef.getTransform().getPosition().getX();
-        double py = playerRef.getTransform().getPosition().getY();
-        double pz = playerRef.getTransform().getPosition().getZ();
+        double px = playerRef.getTransform().getPosition().x;
+        double py = playerRef.getTransform().getPosition().y;
+        double pz = playerRef.getTransform().getPosition().z;
 
         for (Map.Entry<UUID, ExtractionPortalManager.PortalData> entry : manager.getActivePortals().entrySet()) {
             ExtractionPortalManager.PortalData portal = entry.getValue();
@@ -79,7 +77,7 @@ public class ExtractionPortalTickSystem extends EntityTickingSystem<EntityStore>
                 if (lastDeny == null || now - lastDeny > DENY_MESSAGE_COOLDOWN_MS) {
                     lastDenyMessage.put(playerId, now);
                     MessagesConfig.ExtractionMessages msg = VaryonPlugin.getStaticConfigManager().getMessagesConfig().getExtraction();
-                    player.sendMessage(Message.raw(msg.notYourPortal).color(Color.RED));
+                    playerRef.sendMessage(Message.raw(msg.notYourPortal).color(Color.RED));
                 }
                 return;
             }
@@ -92,16 +90,16 @@ public class ExtractionPortalTickSystem extends EntityTickingSystem<EntityStore>
             }
 
             Transform spawnPoint = spawnProvider.getSpawnPoint(world, playerId);
-            Vector3d spawnPos = spawnPoint.getPosition();
+            org.joml.Vector3d spawnPos = spawnPoint.getPosition();
 
-            // Jouer le son de téléportation
+            // Jouer le son de tÃ©lÃ©portation
             try {
                 com.hypixel.hytale.protocol.SoundCategory soundCategory = com.hypixel.hytale.protocol.SoundCategory.UI;
                 com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent soundEvent = 
                     com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent.class.cast(null);
                 
-                // Utiliser le son du téléporteur vanilla ou un son de portail
-                String soundId = "SFX_Teleporter_Arrival"; // Son de téléportation
+                // Utiliser le son du tÃ©lÃ©porteur vanilla ou un son de portail
+                String soundId = "SFX_Teleporter_Arrival"; // Son de tÃ©lÃ©portation
                 int soundIndex = com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent.getAssetMap().getIndex(soundId);
                 
                 if (soundIndex != 0) {
@@ -109,14 +107,14 @@ public class ExtractionPortalTickSystem extends EntityTickingSystem<EntityStore>
                         playerRef, soundIndex, soundCategory, 1.0f, 1.0f);
                 }
             } catch (Exception e) {
-                // Si le son échoue, on continue quand même
+                // Si le son Ã©choue, on continue quand mÃªme
             }
 
-            Teleport teleport = Teleport.createForPlayer(world, spawnPos, new Vector3f(0, 0, 0));
+            Teleport teleport = Teleport.createForPlayer(world, spawnPos, com.hypixel.hytale.math.vector.Rotation3f.ZERO);
             commandBuffer.addComponent(ref, Teleport.getComponentType(), teleport);
 
             MessagesConfig.ExtractionMessages msg = VaryonPlugin.getStaticConfigManager().getMessagesConfig().getExtraction();
-            player.sendMessage(Message.raw(msg.teleporting).color(Color.GREEN));
+            playerRef.sendMessage(Message.raw(msg.teleporting).color(Color.GREEN));
 
             manager.consumePortal(ownerId);
 

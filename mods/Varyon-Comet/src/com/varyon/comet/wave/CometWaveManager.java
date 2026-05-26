@@ -16,7 +16,7 @@ import com.hypixel.hytale.component.Store;
 import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.event.events.ecs.UseBlockEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -508,7 +508,7 @@ public class CometWaveManager {
 
         try {
             Pair<Ref<EntityStore>, com.hypixel.hytale.server.core.universe.world.npc.INonPlayerCharacter> result = npcPlugin
-                    .spawnNPC(store, npcType, null, VecUtil.toHytale(spawnPos), VecUtil.toHytale(rotation));
+                    .spawnNPC(store, npcType, null, spawnPos, new com.hypixel.hytale.math.vector.Rotation3f(rotation.x, rotation.y, rotation.z));
 
             if (result != null && result.first() != null) {
                 // Optional per-mob/boss multipliers from cometMobs (MobEntry/BossEntry)
@@ -1690,7 +1690,7 @@ public class CometWaveManager {
                         " with " + allItems.size() + " item stacks (expires 20s after close).");
             } else {
                 // Fallback path: drop entities directly and break the block.
-                com.hypixel.hytale.math.vector.Vector3d dropPosition = new com.hypixel.hytale.math.vector.Vector3d(
+                org.joml.Vector3d dropPosition = new org.joml.Vector3d(
                         blockPos.x + 0.5D, blockPos.y + 0.5D, blockPos.z + 0.5D);
 
                 LOGGER.info("[CometWaveManager] Chest spawn failed; generating direct item drops for " + allItems.size()
@@ -1700,7 +1700,7 @@ public class CometWaveManager {
                                 store,
                                 allItems,
                                 dropPosition,
-                                com.hypixel.hytale.math.vector.Vector3f.ZERO);
+                                com.hypixel.hytale.math.vector.Rotation3f.ZERO);
 
                 if (itemEntityHolders != null && itemEntityHolders.length > 0) {
                     for (com.hypixel.hytale.component.Holder<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> holder : itemEntityHolders) {
@@ -1872,7 +1872,7 @@ public class CometWaveManager {
         java.util.UUID deadMobUuid = getEntityUuid(eventStore, mobRef);
 
         // Check all active waves to see if this mob belongs to any of them
-        for (Map.Entry<com.hypixel.hytale.math.vector.Vector3i, WaveData> entry : activeWaves.entrySet()) {
+        for (Map.Entry<org.joml.Vector3i, WaveData> entry : activeWaves.entrySet()) {
             WaveData waveData = entry.getValue();
             LOGGER.info("[CometWaveManager] Checking wave at " + entry.getKey() + " with " + waveData.spawnedMobs.size()
                     + " mobs in list");

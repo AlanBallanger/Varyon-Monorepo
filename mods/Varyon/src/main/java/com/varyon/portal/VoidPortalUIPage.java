@@ -37,8 +37,11 @@ public class VoidPortalUIPage extends InteractiveCustomUIPage<VoidPortalUIPage.E
     private static final String ECON_PRICE_PREFIX = "\u00A4 ";
     private static final String RANDOM_LABEL = "Al\u00e9atoire";
 
+    private final PlayerRef ownerRef;
+
     public VoidPortalUIPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss, EventDataClass.CODEC);
+        this.ownerRef = playerRef;
     }
 
     @Nonnull
@@ -87,11 +90,10 @@ public class VoidPortalUIPage extends InteractiveCustomUIPage<VoidPortalUIPage.E
             }
         } catch (Exception ignored) {}
 
-        Player player = store.getComponent(ref, Player.getComponentType());
         int maxAccessibleZone = 1;
-        if (player != null && zonePermissionsConfig != null) {
-            maxAccessibleZone = zonePermissionsConfig.getMaxAccessibleZone(player);
-        } else if (player != null) {
+        if (zonePermissionsConfig != null) {
+            maxAccessibleZone = zonePermissionsConfig.getMaxAccessibleZone(ownerRef);
+        } else {
             maxAccessibleZone = zones != null ? zones.size() : 10;
         }
 
@@ -172,7 +174,7 @@ public class VoidPortalUIPage extends InteractiveCustomUIPage<VoidPortalUIPage.E
                     int requestedZone = Integer.parseInt(data.zoneId);
                     ZonePermissionsConfig zonePerms = VaryonPlugin.getStaticConfigManager() != null
                         ? VaryonPlugin.getStaticConfigManager().getZonePermissionsConfig() : null;
-                    if (zonePerms != null && !zonePerms.canAccessZone(player, requestedZone)) {
+                    if (zonePerms != null && !zonePerms.canAccessZone(playerRefComp, requestedZone)) {
                         return;
                     }
                 } catch (NumberFormatException ignored) {}

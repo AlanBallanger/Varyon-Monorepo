@@ -71,8 +71,8 @@ public class SafeZoneNotificationSystem extends EntityTickingSystem<EntityStore>
             return;
         }
 
-        double x = playerRef.getTransform().getPosition().getX();
-        double z = playerRef.getTransform().getPosition().getZ();
+        double x = playerRef.getTransform().getPosition().x;
+        double z = playerRef.getTransform().getPosition().z;
         boolean isInSafeZone = safeZoneManager.isInSafeZone(x, z);
         UUID playerId = playerRef.getUuid();
 

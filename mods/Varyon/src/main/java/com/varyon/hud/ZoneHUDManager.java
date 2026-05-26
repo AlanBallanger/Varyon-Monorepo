@@ -100,12 +100,10 @@ public class ZoneHUDManager {
 
                 boolean lootActive = false;
                 int maxEssenceCap = 1000;
-                if (player != null) {
-                    if (zone != null) lootActive = zonePermsConfig.canAccessZone(player, zone.getZoneId());
-                    EssenceManager em = VaryonPlugin.getStaticEssenceManager();
-                    double current = em != null ? em.getEssence(playerId) : 0.0;
-                    maxEssenceCap = zonePermsConfig.getEffectiveCap(player, current);
-                }
+                if (zone != null) lootActive = zonePermsConfig.canAccessZone(playerRef, zone.getZoneId());
+                EssenceManager em = VaryonPlugin.getStaticEssenceManager();
+                double current = em != null ? em.getEssence(playerId) : 0.0;
+                maxEssenceCap = zonePermsConfig.getEffectiveCap(playerRef, current);
 
                 if (switchPage) hud.nextPage();
                 hud.updateZoneInfo(zone, distance, inSafe, quadrantName, timeRemaining, switchPage, lootActive, maxEssenceCap);

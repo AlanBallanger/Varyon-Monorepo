@@ -1,8 +1,7 @@
 package fr.varyon.musiczones;
 
-import com.hypixel.hytale.builtin.ambience.components.AmbienceTracker;
-import com.hypixel.hytale.builtin.ambience.resources.AmbienceResource;
-import com.hypixel.hytale.builtin.ambience.systems.ForcedMusicSystems;
+import com.hypixel.hytale.builtin.audio.components.ForcedMusicTracker;
+import com.hypixel.hytale.builtin.audio.systems.ForcedMusicSystems;
 import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -14,7 +13,7 @@ import com.hypixel.hytale.component.dependency.SystemDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.protocol.ToClientPacket;
-import com.hypixel.hytale.protocol.packets.world.UpdateEnvironmentMusic;
+import com.hypixel.hytale.protocol.packets.world.UpdateForcedMusic;
 import com.hypixel.hytale.server.core.asset.type.ambiencefx.config.AmbienceFX;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
@@ -24,6 +23,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +42,7 @@ public final class MusicZoneApplySystem extends EntityTickingSystem<EntityStore>
         this.query = Archetype.of(
                 Player.getComponentType(),
                 PlayerRef.getComponentType(),
-                AmbienceTracker.getComponentType(),
+                ForcedMusicTracker.getComponentType(),
                 TRANSFORM);
     }
 
@@ -61,21 +61,25 @@ public final class MusicZoneApplySystem extends EntityTickingSystem<EntityStore>
             @Nonnull CommandBuffer<EntityStore> commandBuffer) {
         PlayerRef playerRef = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
         Player player = archetypeChunk.getComponent(index, Player.getComponentType());
-        AmbienceTracker tracker = archetypeChunk.getComponent(index, AmbienceTracker.getComponentType());
+        ForcedMusicTracker tracker = archetypeChunk.getComponent(index, ForcedMusicTracker.getComponentType());
         TransformComponent transform = archetypeChunk.getComponent(index, TRANSFORM);
-        if (playerRef == null || player == null || player.getWorld() == null || tracker == null || transform == null) {
+        if (playerRef == null || tracker == null || transform == null) {
             return;
         }
-        AmbienceResource ambienceResource = store.getResource(AmbienceResource.getResourceType());
-        int baseline = ambienceResource != null ? ambienceResource.getForcedMusicIndex() : 0;
-        List<MusicZone> zones = plugin.getRepository().zonesForWorld(player.getWorld().getName());
+        com.hypixel.hytale.server.core.universe.world.World _w =
+                com.hypixel.hytale.server.core.universe.Universe.get().getWorld(playerRef.getWorldUuid());
+        if (_w == null) {
+            return;
+        }
+        int baseline = 0;
+        List<MusicZone> zones = plugin.getRepository().zonesForWorld(_w.getName());
         if (zones.isEmpty()) {
             sendIfChanged(playerRef, tracker, baseline, lastSentIndex);
             return;
         }
-        double x = transform.getPosition().getX();
-        double y = transform.getPosition().getY();
-        double z = transform.getPosition().getZ();
+        double x = transform.getPosition().x;
+        double y = transform.getPosition().y;
+        double z = transform.getPosition().z;
         MusicZone best = null;
         double bestVol = Double.MAX_VALUE;
         for (MusicZone zt : zones) {
@@ -102,19 +106,19 @@ public final class MusicZoneApplySystem extends EntityTickingSystem<EntityStore>
 
     private static void sendIfChanged(
             PlayerRef playerRef,
-            AmbienceTracker tracker,
+            ForcedMusicTracker tracker,
             int desired,
             Map<UUID, Integer> lastSent) {
         UUID uuid = playerRef.getUuid();
         Integer prev = lastSent.get(uuid);
         if (prev != null
                 && prev == desired
-                && tracker.getForcedMusicIndex() == desired) {
+                && tracker.getCurrentContainerIndex() == desired) {
             return;
         }
-        tracker.setForcedMusicIndex(desired);
-        UpdateEnvironmentMusic pkt = tracker.getMusicPacket();
-        pkt.environmentIndex = desired;
+        tracker.setCurrentContainerIndex(desired);
+        UpdateForcedMusic pkt = tracker.getMusicPacket();
+        pkt.containerIndex = desired;
         playerRef.getPacketHandler().write((ToClientPacket) pkt);
         lastSent.put(uuid, desired);
     }

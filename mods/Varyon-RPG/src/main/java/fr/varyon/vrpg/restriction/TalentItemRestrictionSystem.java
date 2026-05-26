@@ -123,9 +123,7 @@ public final class TalentItemRestrictionSystem extends EntityEventSystem<EntityS
         }
 
         String playerName = playerRef.getUsername() != null ? playerRef.getUsername() : playerRef.getUuid().toString().substring(0, 8);
-        Player player = null;
-        try { player = playerRef.getComponent(Player.getComponentType()); } catch (Exception ignored) {}
-        boolean hasPermStar = player != null && player.hasPermission("*");
+        boolean hasPermStar = playerRef.hasPermission("*");
 
         PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
         boolean allowed = isAllowed(outputId, acc);
@@ -140,9 +138,7 @@ public final class TalentItemRestrictionSystem extends EntityEventSystem<EntityS
         if (!allowed) {
             event.setCancelled(true);
             try {
-                if (player != null) {
-                    player.sendMessage(Message.raw(getMessage(outputId, "crafter")).color(new Color(200, 50, 50)));
-                }
+                playerRef.sendMessage(Message.raw(getMessage(outputId, "crafter")).color(new Color(200, 50, 50)));
             } catch (Exception ignored) {}
         }
     }

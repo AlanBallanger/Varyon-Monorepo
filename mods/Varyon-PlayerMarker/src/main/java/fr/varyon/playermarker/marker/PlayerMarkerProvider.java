@@ -66,13 +66,14 @@ public class PlayerMarkerProvider implements WorldMapManager.MarkerProvider {
                 }
                 Transform t = PlayerMarkerLiveTracker.resolveTransform(ref);
                 if (t == null) continue;
-                Vector3d position = t.getPosition();
+                org.joml.Vector3d position = t.getPosition();
                 if (position == null) continue;
                 String playerName = PlayerMarkerPlayerNames.resolve(ref);
                 PlayerMarkerVisuals.AvatarVisual avatarVisual =
                         PlayerMarkerVisuals.resolveAvatarVisual(context.viewerRef(), playerUuid, playerName, visibilityState, null);
                 Vector3f headRotation = PlayerMarkerLiveTracker.resolveRotation(ref);
-                Vector3f markerRotation = PlayerMarkerFactory.resolveMarkerRotation(context.config(), headRotation);
+                Vector3f markerRotationJoml = PlayerMarkerFactory.resolveMarkerRotation(context.config(), headRotation);
+                com.hypixel.hytale.math.vector.Rotation3f markerRotation = new com.hypixel.hytale.math.vector.Rotation3f(markerRotationJoml.x, markerRotationJoml.y, markerRotationJoml.z);
                 Transform transform = new Transform(position, markerRotation);
                 if (context.surface() == PlayerMarkerSurface.MAP && isViewer && !PlayerMarkerWorldMapState.shouldShowSelfMarker(viewer)) {
                     continue;

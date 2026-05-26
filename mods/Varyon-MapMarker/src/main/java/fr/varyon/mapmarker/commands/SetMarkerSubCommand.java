@@ -5,7 +5,12 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgumentType;
-import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.mapmarker.VaryonMapMarkerPlugin;
 import javax.annotation.Nonnull;
 
@@ -34,11 +39,18 @@ public final class SetMarkerSubCommand extends OperatorCommandBase {
             context.sendMessage(Message.raw("Erreur : tu dois être un joueur pour exécuter cette commande."));
             return;
         }
-        Player sender = context.senderAs(Player.class);
-        if (sender == null) {
+        Ref<EntityStore> _ref = context.senderAsPlayerRef();
+        Store<EntityStore> _store = _ref != null ? _ref.getStore() : null;
+        PlayerRef _pr = _store != null ? _store.getComponent(_ref, PlayerRef.getComponentType()) : null;
+        if (_pr == null) {
             context.sendMessage(Message.raw("Erreur : impossible de résoudre le joueur."));
             return;
         }
-        plugin.createSharedMarkerFromPlayer(sender, imageArg.get(context), nameArg.get(context));
+        World _w = Universe.get().getWorld(_pr.getWorldUuid());
+        if (_w == null) {
+            context.sendMessage(Message.raw("Erreur : tu n'es dans aucun monde actif."));
+            return;
+        }
+        plugin.createSharedMarkerFromPlayer(_pr, _w, imageArg.get(context), nameArg.get(context));
     }
 }

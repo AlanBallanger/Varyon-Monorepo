@@ -78,7 +78,7 @@ public class ExtractCommand extends AbstractPlayerCommand {
             return;
         }
 
-        boolean bypass = player != null && player.hasPermission(PERM_BYPASS);
+        boolean bypass = playerRef.hasPermission(PERM_BYPASS);
 
         if (manager.hasActivePortal(playerId)) {
             manager.removePlayerPortal(playerId);

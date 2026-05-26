@@ -1,6 +1,7 @@
 package fr.varyon.pwi;
 
 import com.hypixel.hytale.component.Holder;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
@@ -88,16 +89,16 @@ public class PlayerInventoryData {
         return data;
     }
 
-    public void applyToInventory(Holder<EntityStore> holder) {
+    public void applyToInventory(Holder<EntityStore> holder, Store<EntityStore> store) {
         try {
-            applyToInventoryUnsafe(holder);
+            applyToInventoryUnsafe(holder, store);
         } catch (VirtualMachineError e) {
             throw e;
         } catch (Throwable ignored) {
         }
     }
 
-    private void applyToInventoryUnsafe(Holder<EntityStore> holder) {
+    private void applyToInventoryUnsafe(Holder<EntityStore> holder, Store<EntityStore> store) {
         List<ItemData> list = items;
         if (list == null) {
             list = List.of();
@@ -134,19 +135,19 @@ public class PlayerInventoryData {
 
         InventoryComponent.Hotbar hotbar = holder.getComponent(InventoryComponent.Hotbar.getComponentType());
         if (hotbar != null && slotInRange(activeHotbarSlot, InventoryComponent.HOTBAR_SECTION_ID, holder)) {
-            try { hotbar.setActiveSlot((byte) activeHotbarSlot); } catch (Exception ignored) {}
+            try { hotbar.setActiveSlot((byte) activeHotbarSlot, holder, store); } catch (Exception ignored) {}
         }
 
         InventoryComponent.Utility utility = holder.getComponent(InventoryComponent.Utility.getComponentType());
         if (utility != null && slotInRange(activeUtilitySlot, InventoryComponent.UTILITY_SECTION_ID, holder)) {
-            try { utility.setActiveSlot((byte) activeUtilitySlot); } catch (Exception ignored) {}
+            try { utility.setActiveSlot((byte) activeUtilitySlot, holder, store); } catch (Exception ignored) {}
         }
 
         InventoryComponent.Tool tool = holder.getComponent(InventoryComponent.Tool.getComponentType());
         if (tool != null) {
             try {
                 if (slotInRange(activeToolsSlot, InventoryComponent.TOOLS_SECTION_ID, holder)) {
-                    tool.setActiveSlot((byte) activeToolsSlot);
+                    tool.setActiveSlot((byte) activeToolsSlot, holder, store);
                 }
                 tool.setUsingToolsItem(usingToolsItem);
             } catch (Exception ignored) {}

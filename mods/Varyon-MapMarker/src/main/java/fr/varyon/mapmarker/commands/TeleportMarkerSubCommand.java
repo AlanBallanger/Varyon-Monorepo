@@ -67,7 +67,7 @@ public final class TeleportMarkerSubCommand extends AbstractPlayerCommand {
             context.sendMessage(Message.raw("Erreur : impossible de lire ta position."));
             return;
         }
-        com.hypixel.hytale.math.vector.Vector3d prev = tc.getPosition();
+        org.joml.Vector3d prev = tc.getPosition();
         double tx = target.x() + 0.5;
         double tz = target.z() + 0.5;
         double fx;
@@ -82,7 +82,7 @@ public final class TeleportMarkerSubCommand extends AbstractPlayerCommand {
             fz = tz;
             fy = prev.y;
         }
-        Teleport teleport = Teleport.createForPlayer(world, new com.hypixel.hytale.math.vector.Vector3d(fx, fy, fz), new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0));
+        Teleport teleport = Teleport.createForPlayer(world, new org.joml.Vector3d(fx, fy, fz), com.hypixel.hytale.math.vector.Rotation3f.ZERO);
         store.addComponent(ref, Teleport.getComponentType(), teleport);
         context.sendMessage(Message.raw(
                 "Téléportation vers « "

@@ -44,13 +44,13 @@ public class CometBlockDamageActivationSystem extends EntityEventSystem<EntitySt
                        @Nonnull CommandBuffer<EntityStore> commandBuffer,
                        @Nonnull DamageBlockEvent event) {
 
-        com.hypixel.hytale.math.vector.Vector3i blockPos = event.getTargetBlock();
+        org.joml.Vector3i blockPos = event.getTargetBlock();
         if (blockPos == null) {
             return;
         }
 
         // Position-based lookup: any block at or very near a registered comet can activate it
-        com.hypixel.hytale.math.vector.Vector3i registeredPos = waveManager.getRegisteredBlockPos(blockPos.x, blockPos.y, blockPos.z);
+        org.joml.Vector3i registeredPos = waveManager.getRegisteredBlockPos(blockPos.x, blockPos.y, blockPos.z);
         boolean exactMatch = (registeredPos != null);
         if (registeredPos == null) {
             registeredPos = waveManager.getRegisteredBlockPosNear(blockPos.x, blockPos.y, blockPos.z, CometConfig.COMET_USE_NEAR_RADIUS);

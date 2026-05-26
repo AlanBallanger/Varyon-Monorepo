@@ -49,7 +49,8 @@ public class CometZoneCommand extends AbstractWorldCommand {
         }
         
         try {
-            Player player = context.senderAs(Player.class);
+            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> _senderRef = context.senderAsPlayerRef();
+            Player player = (_senderRef != null && _senderRef.isValid()) ? _senderRef.getStore().getComponent(_senderRef, Player.getComponentType()) : null;
             
             // Get player's current zone
             WorldMapTracker tracker = player.getWorldMapTracker();
@@ -62,7 +63,7 @@ public class CometZoneCommand extends AbstractWorldCommand {
                 com.hypixel.hytale.server.core.modules.entity.component.TransformComponent transform = 
                     store.getComponent(playerRef, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
                 if (transform != null) {
-                    com.hypixel.hytale.math.vector.Vector3d pos = transform.getPosition();
+                    org.joml.Vector3d pos = transform.getPosition();
                     LOGGER.info("Player position: " + pos + " - checking zone info");
                 }
             }
@@ -72,7 +73,7 @@ public class CometZoneCommand extends AbstractWorldCommand {
             if (zoneInfo == null) {
                 context.sendMessage(Message.raw("You are not in any zone (or zone not detected yet)."));
                 context.sendMessage(Message.raw("Try moving around a bit - zone detection may take a moment."));
-                LOGGER.info("Player " + player.getDisplayName() + " has no zone info");
+                LOGGER.info("Player " + player.toString() + " has no zone info");
                 return;
             }
             
@@ -111,7 +112,7 @@ public class CometZoneCommand extends AbstractWorldCommand {
             }
             context.sendMessage(Message.raw("Comet Tier Distribution: " + tierInfo));
 
-            LOGGER.info("Player " + player.getDisplayName() + " hytaleZone=" + hytaleZone + " varyonRing=" + varyonRing);
+            LOGGER.info("Player " + player.toString() + " hytaleZone=" + hytaleZone + " varyonRing=" + varyonRing);
             
         } catch (Exception e) {
             LOGGER.warning("Error in zone command: " + e.getMessage());

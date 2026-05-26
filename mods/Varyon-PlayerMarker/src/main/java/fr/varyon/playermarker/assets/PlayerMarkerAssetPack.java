@@ -1,8 +1,10 @@
 package fr.varyon.playermarker;
 
+import com.hypixel.hytale.assetstore.AssetPack;
 import com.hypixel.hytale.common.plugin.AuthorInfo;
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.common.semver.Semver;
+import com.hypixel.hytale.common.semver.SemverRange;
 import com.hypixel.hytale.protocol.packets.setup.RequestCommonAssetsRebuild;
 import com.hypixel.hytale.server.core.asset.AssetModule;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetModule;
@@ -22,7 +24,7 @@ final class PlayerMarkerAssetPack {
     private static final String PACK_GROUP = "Varyon";
     private static final String PACK_NAME = "Varyon-PlayerMarkerAssets";
     private static final String PACK_VERSION = "1.0.0";
-    private static final String TARGET_SERVER_VERSION = ">=0.5.0-pre.9 <0.6.0";
+    private static final String TARGET_SERVER_VERSION = "0.5.0";
     private static final String FALLBACK_MARKER_IMAGE = "vpm-placeholder.png";
     private static final String MARKER_ASSET_PREFIX = "UI/WorldMap/MapMarkers/";
     private static final String WORLDMAP_ASSET_PREFIX = "UI/WorldMap/";
@@ -40,7 +42,7 @@ final class PlayerMarkerAssetPack {
                   "Name": "Varyon"
                 }
               ],
-              "ServerVersion": ">=0.5.0-pre.9 <0.6.0",
+              "ServerVersion": "0.5.0",
               "Dependencies": {},
               "OptionalDependencies": {},
               "DisabledByDefault": false,
@@ -147,7 +149,7 @@ final class PlayerMarkerAssetPack {
             return;
         }
 
-        assetModule.registerPack(PACK_ID, packRoot, buildRuntimeManifest(), true);
+        assetModule.registerPack(PACK_ID, packRoot, buildRuntimeManifest(), AssetPack.PackSource.MODS);
         registered = true;
     }
 
@@ -207,7 +209,7 @@ final class PlayerMarkerAssetPack {
         manifest.setVersion(Semver.fromString(PACK_VERSION));
         manifest.setDescription("Pack assets marqueurs joueurs (carte, minicarte, boussole)");
         manifest.setWebsite("");
-        manifest.setServerVersion(TARGET_SERVER_VERSION);
+        manifest.setServerVersion(SemverRange.fromString(TARGET_SERVER_VERSION));
 
         AuthorInfo author = new AuthorInfo();
         author.setName("Varyon");

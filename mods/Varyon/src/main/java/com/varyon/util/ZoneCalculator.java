@@ -53,8 +53,8 @@ public class ZoneCalculator {
         TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
         if (transform == null) return null;
 
-        double x = transform.getPosition().getX();
-        double z = transform.getPosition().getZ();
+        double x = transform.getPosition().x;
+        double z = transform.getPosition().z;
         if (worldName == null || worldName.isBlank()) {
             try {
                 Object ext = store.getExternalData();

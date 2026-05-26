@@ -36,7 +36,7 @@ public class CometLootChestBreakCleanupSystem extends EntityEventSystem<EntitySt
             @Nonnull CommandBuffer<EntityStore> commandBuffer,
             @Nonnull BreakBlockEvent event) {
 
-        com.hypixel.hytale.math.vector.Vector3i blockPos = event.getTargetBlock();
+        org.joml.Vector3i blockPos = event.getTargetBlock();
         CometLootChestService chestService = CometLootChestService.getInstance();
         if (!chestService.isManagedChest(blockPos)) {
             return;

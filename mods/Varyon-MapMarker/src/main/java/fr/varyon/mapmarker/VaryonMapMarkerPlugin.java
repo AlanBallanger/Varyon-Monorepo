@@ -262,39 +262,23 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         debug("Warm-up textures marqueur joueur uuid=%s fichiers_livrés=%s", playerRef.getUuid(), delivered);
     }
 
-    public void createSharedMarkerFromPlayer(@Nonnull Player sender, @Nonnull String imageName, @Nonnull String markerName) {
-        World world = sender.getWorld();
-        if (world == null) {
-            debug("createSharedMarkerFromPlayer annulé : pas de monde image=%s nom=%s", imageName, markerName);
-            sender.sendMessage(Message.raw("Erreur : tu n'es dans aucun monde actif."));
-            return;
-        }
-        PlayerRef playerRef = findPlayerRef(world, sender.getDisplayName(), sender);
-        if (playerRef == null) {
-            debug(
-                    "createSharedMarkerFromPlayer annulé : PlayerRef introuvable monde=%s image=%s nom=%s",
-                    world.getName(),
-                    imageName,
-                    markerName);
-            sender.sendMessage(Message.raw("Erreur : impossible de résoudre ta référence joueur."));
-            return;
-        }
+    public void createSharedMarkerFromPlayer(@Nonnull PlayerRef playerRef, @Nonnull World world, @Nonnull String imageName, @Nonnull String markerName) {
         Path sourceImage = resolvePngInImages(imageName);
         if (sourceImage == null) {
             debug("createSharedMarkerFromPlayer annulé : PNG introuvable image=%s", imageName);
-            sender.sendMessage(Message.raw("Erreur : image introuvable dans images/ : " + imageName));
+            playerRef.sendMessage(Message.raw("Erreur : image introuvable dans images/ : " + imageName));
             return;
         }
         String fileName = sourceImage.getFileName().toString();
         if (!copyImageToMapMarkers(sourceImage, fileName)) {
             debug("createSharedMarkerFromPlayer annulé : échec copie image=%s", fileName);
-            sender.sendMessage(Message.raw("Erreur : impossible de copier l'image vers la carte."));
+            playerRef.sendMessage(Message.raw("Erreur : impossible de copier l'image vers la carte."));
             return;
         }
         pushMapMarkerPngToAllOnlinePlayers(fileName);
         requestClientsRebuildCommonAssets();
-        debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), sender.getDisplayName(), fileName, markerName);
-        com.hypixel.hytale.math.vector.Vector3d position = playerRef.getTransform().getPosition();
+        debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), playerRef.getUsername(), fileName, markerName);
+        org.joml.Vector3d position = playerRef.getTransform().getPosition();
         UUID playerUuid = playerRef.getUuid();
         String displayName = playerRef.getUsername();
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -341,9 +325,9 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         });
         boolean created = future.join();
         if (created) {
-            sender.sendMessage(Message.raw("Marqueur créé sur la carte avec l'image : " + fileName + ", nom : " + markerName));
+            playerRef.sendMessage(Message.raw("Marqueur créé sur la carte avec l'image : " + fileName + ", nom : " + markerName));
         } else {
-            sender.sendMessage(Message.raw("Erreur : échec de la création du marqueur sur la carte."));
+            playerRef.sendMessage(Message.raw("Erreur : échec de la création du marqueur sur la carte."));
         }
     }
 

@@ -94,7 +94,11 @@ public final class BossArenaCommand extends AbstractCommand {
 
         try {
             if (ctx.isPlayer()) {
-                return ctx.senderAs(Player.class);
+                com.hypixel.hytale.component.Ref<EntityStore> ref = ctx.senderAsPlayerRef();
+                if (ref != null) {
+                    Object pr = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
+                    if (pr instanceof PlayerRef playerRef) return playerRef;
+                }
             }
         } catch (Throwable ignored) {
         }
@@ -113,7 +117,7 @@ public final class BossArenaCommand extends AbstractCommand {
             if (playerRef != null) {
                 Transform transform = playerRef.getTransform();
                 if (transform != null) {
-                    com.hypixel.hytale.math.vector.Vector3d position = transform.getPosition();
+                    org.joml.Vector3d position = transform.getPosition();
                     return VecUtil.toJoml(position);
                 }
             }
@@ -127,8 +131,8 @@ public final class BossArenaCommand extends AbstractCommand {
 
     /** Uses reflection to resolve PlayerRef and transform for rotation; fallback (0,0,0) on API mismatch. */
     @SuppressWarnings("SpellCheckingInspection")
-    private static com.hypixel.hytale.math.vector.Vector3f getPlayerRotation(Player player) {
-        if (player == null) return new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0);
+    private static com.hypixel.hytale.math.vector.Rotation3f getPlayerRotation(Player player) {
+        if (player == null) return new com.hypixel.hytale.math.vector.Rotation3f(0, 0, 0);
 
         try {
             Method getPlayerRef = player.getClass().getMethod("getPlayerRef");
@@ -145,7 +149,7 @@ public final class BossArenaCommand extends AbstractCommand {
         }
 
         LOGGER.fine("Falling back to default rotation (0,0,0)");
-        return new com.hypixel.hytale.math.vector.Vector3f(0, 0, 0);
+        return new com.hypixel.hytale.math.vector.Rotation3f(0, 0, 0);
     }
 
     private static CompletableFuture<Void> spawnShopNpc(@Nonnull CommandContext ctx, BossArenaPlugin plugin) {
@@ -154,23 +158,29 @@ public final class BossArenaCommand extends AbstractCommand {
             return CompletableFuture.completedFuture(null);
         }
 
-        Player player = ctx.senderAs(Player.class);
-        World world = player.getWorld();
+        com.hypixel.hytale.component.Ref<EntityStore> _shopPlayerRef = ctx.senderAsPlayerRef();
+        if (_shopPlayerRef == null) {
+            ctx.sendMessage(Message.raw("Could not resolve player"));
+            return CompletableFuture.completedFuture(null);
+        }
+        PlayerRef _shopPR = _shopPlayerRef.getStore().getComponent(_shopPlayerRef, PlayerRef.getComponentType());
+        World world = _shopPR != null ? Universe.get().getWorld(_shopPR.getWorldUuid()) : null;
+        Player player = _shopPlayerRef.getStore().getComponent(_shopPlayerRef, Player.getComponentType());
         if (world == null) {
             ctx.sendMessage(Message.raw("Could not resolve player world"));
             return CompletableFuture.completedFuture(null);
         }
 
         Vector3d playerPosition = getPlayerPosition(player);
-        com.hypixel.hytale.math.vector.Vector3f playerRotation = getPlayerRotation(player);
-        float playerYaw = playerRotation.getYaw();
+        com.hypixel.hytale.math.vector.Rotation3f playerRotation = getPlayerRotation(player);
+        float playerYaw = playerRotation.yaw();
         if (Float.isNaN(playerYaw)) {
             playerYaw = 0f;
         }
 
         // Spawn exactly 2 blocks forward from the player's facing direction (horizontal plane).
-        com.hypixel.hytale.math.vector.Vector3d forward = Transform.getDirection(0f, playerYaw);
-        com.hypixel.hytale.math.vector.Vector3d spawnPosition = new com.hypixel.hytale.math.vector.Vector3d(
+        org.joml.Vector3d forward = Transform.getDirection(0f, playerYaw);
+        org.joml.Vector3d spawnPosition = new org.joml.Vector3d(
                 playerPosition.x + (forward.x * 2.0d),
                 playerPosition.y,
                 playerPosition.z + (forward.z * 2.0d)
@@ -178,7 +188,7 @@ public final class BossArenaCommand extends AbstractCommand {
 
         // Make the guard face back toward the player.
         float npcYaw = playerYaw + (float) Math.PI;
-        com.hypixel.hytale.math.vector.Vector3f npcRotation = new com.hypixel.hytale.math.vector.Vector3f(0f, npcYaw, 0f);
+        com.hypixel.hytale.math.vector.Rotation3f npcRotation = new com.hypixel.hytale.math.vector.Rotation3f(0f, npcYaw, 0f);
         String shopNpcId = plugin.getShopConfig() != null
                 && plugin.getShopConfig().shopNpcId != null
                 && !plugin.getShopConfig().shopNpcId.isBlank()
@@ -250,17 +260,15 @@ public final class BossArenaCommand extends AbstractCommand {
 
             Ref<EntityStore> entityRef = world.getEntityRef(uuid);
             Store<EntityStore> wstore = world.getEntityStore().getStore();
-            Entity entity = EntityUtils.getEntity(entityRef, wstore);
-            if (entity == null) {
+            if (entityRef == null) {
+                continue;
+            }
+            Object transformObj = wstore.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+            if (!(transformObj instanceof com.hypixel.hytale.server.core.modules.entity.component.TransformComponent transform)) {
                 continue;
             }
 
-            var transform = entity.getTransformComponent();
-            if (transform == null) {
-                continue;
-            }
-
-            com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+            org.joml.Vector3d rawPos = transform.getPosition();
             double dx = rawPos.x - origin.x;
             double dy = rawPos.y - origin.y;
             double dz = rawPos.z - origin.z;
@@ -320,7 +328,9 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            Player player = ctx.senderAs(Player.class);
+            com.hypixel.hytale.component.Ref<EntityStore> _createRef = ctx.senderAsPlayerRef();
+            PlayerRef _createPR = _createRef != null ? _createRef.getStore().getComponent(_createRef, PlayerRef.getComponentType()) : null;
+            Player player = _createRef != null ? _createRef.getStore().getComponent(_createRef, Player.getComponentType()) : null;
             String arenaId = ctx.get(idArg);
 
             if (arenaId == null || arenaId.isBlank()) {
@@ -333,7 +343,7 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            World world = player.getWorld();
+            World world = _createPR != null ? Universe.get().getWorld(_createPR.getWorldUuid()) : null;
             if (world == null) {
                 ctx.sendMessage(Message.raw("Could not resolve player world"));
                 return CompletableFuture.completedFuture(null);
@@ -441,11 +451,13 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            Player player = ctx.senderAs(Player.class);
+            com.hypixel.hytale.component.Ref<EntityStore> _spawnRef = ctx.senderAsPlayerRef();
+            PlayerRef _spawnPR = _spawnRef != null ? _spawnRef.getStore().getComponent(_spawnRef, PlayerRef.getComponentType()) : null;
+            Player player = _spawnRef != null ? _spawnRef.getStore().getComponent(_spawnRef, Player.getComponentType()) : null;
             String bossId = ctx.get(bossIdArg);
             String location = ctx.get(locationArg);
 
-            World world = player.getWorld();
+            World world = _spawnPR != null ? Universe.get().getWorld(_spawnPR.getWorldUuid()) : null;
             Vector3d spawnPos = BossArenaCommand.getPlayerPosition(player);
             BossDefinition def = BossRegistry.get(bossId);
 
@@ -480,7 +492,7 @@ public final class BossArenaCommand extends AbstractCommand {
 
             world.execute(() -> {
                 UUID uuid = plugin.getBossSpawnService().spawnBossFromJson(
-                        player,
+                        _spawnPR,
                         bossId,
                         world,
                         finalSpawnPos,
@@ -579,21 +591,24 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            Player player = ctx.senderAs(Player.class);
-            World world = player.getWorld();
+            com.hypixel.hytale.component.Ref<EntityStore> _configRef = ctx.senderAsPlayerRef();
+            PlayerRef _configPR = _configRef != null ? _configRef.getStore().getComponent(_configRef, PlayerRef.getComponentType()) : null;
+            Player _configPlayer = _configRef != null ? _configRef.getStore().getComponent(_configRef, Player.getComponentType()) : null;
+            World world = _configPR != null ? Universe.get().getWorld(_configPR.getWorldUuid()) : null;
             if (world == null) {
                 ctx.sendMessage(Message.raw("Could not resolve player world"));
                 return CompletableFuture.completedFuture(null);
             }
 
+            final Ref<EntityStore> _configRefFinal = _configRef;
+            final Player _configPlayerFinal = _configPlayer;
             world.execute(() -> {
-                Ref<EntityStore> entityRef = player.getReference();
-                if (entityRef == null) {
+                if (_configRefFinal == null) {
                     return;
                 }
 
-                Store<EntityStore> store = entityRef.getStore();
-                BossArenaConfigPage.open(entityRef, store, player, plugin);
+                Store<EntityStore> store = _configRefFinal.getStore();
+                BossArenaConfigPage.open(_configRefFinal, store, _configPlayerFinal, plugin);
             });
 
             return CompletableFuture.completedFuture(null);
@@ -636,21 +651,24 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            Player player = ctx.senderAs(Player.class);
-            World world = player.getWorld();
+            com.hypixel.hytale.component.Ref<EntityStore> _shopOpenRef = ctx.senderAsPlayerRef();
+            PlayerRef _shopOpenPR = _shopOpenRef != null ? _shopOpenRef.getStore().getComponent(_shopOpenRef, PlayerRef.getComponentType()) : null;
+            Player _shopOpenPlayer = _shopOpenRef != null ? _shopOpenRef.getStore().getComponent(_shopOpenRef, Player.getComponentType()) : null;
+            World world = _shopOpenPR != null ? Universe.get().getWorld(_shopOpenPR.getWorldUuid()) : null;
             if (world == null) {
                 ctx.sendMessage(Message.raw("Could not resolve player world"));
                 return CompletableFuture.completedFuture(null);
             }
 
+            final Ref<EntityStore> _shopOpenRefFinal = _shopOpenRef;
+            final Player _shopOpenPlayerFinal = _shopOpenPlayer;
             world.execute(() -> {
-                Ref<EntityStore> entityRef = player.getReference();
-                if (entityRef == null) {
+                if (_shopOpenRefFinal == null) {
                     return;
                 }
 
-                Store<EntityStore> store = entityRef.getStore();
-                BossArenaShopPage.open(entityRef, store, player, plugin);
+                Store<EntityStore> store = _shopOpenRefFinal.getStore();
+                BossArenaShopPage.open(_shopOpenRefFinal, store, _shopOpenPlayerFinal, plugin);
             });
 
             return CompletableFuture.completedFuture(null);
@@ -687,8 +705,10 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            Player player = ctx.senderAs(Player.class);
-            World world = player.getWorld();
+            com.hypixel.hytale.component.Ref<EntityStore> _delRef = ctx.senderAsPlayerRef();
+            PlayerRef _delPR = _delRef != null ? _delRef.getStore().getComponent(_delRef, PlayerRef.getComponentType()) : null;
+            Player player = _delRef != null ? _delRef.getStore().getComponent(_delRef, Player.getComponentType()) : null;
+            World world = _delPR != null ? Universe.get().getWorld(_delPR.getWorldUuid()) : null;
             if (world == null) {
                 ctx.sendMessage(Message.raw("Could not resolve player world"));
                 return CompletableFuture.completedFuture(null);
@@ -730,8 +750,9 @@ public final class BossArenaCommand extends AbstractCommand {
                 Entity entity = EntityUtils.getEntity(ref, wstore);
                 if (plugin.getShopConfig() != null) {
                     changed |= plugin.getShopConfig().removeShopNpcUuid(nearest.toString());
-                    if (entity != null && entity.getTransformComponent() != null) {
-                        com.hypixel.hytale.math.vector.Vector3d position = entity.getTransformComponent().getPosition();
+                    Object _tc = wstore.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+                    if (_tc instanceof com.hypixel.hytale.server.core.modules.entity.component.TransformComponent _transform) {
+                        org.joml.Vector3d position = _transform.getPosition();
                         int x = (int) Math.floor(position.x);
                         int y = (int) Math.floor(position.y);
                         int z = (int) Math.floor(position.z);
@@ -818,13 +839,17 @@ public final class BossArenaCommand extends AbstractCommand {
                             continue;
                         }
                         Store<EntityStore> st = er.getStore();
-                        Player player = st.getComponent(er, Player.getComponentType());
-                        if (player == null) {
-                            continue;
-                        }
-                        var inv = player.getInventory();
-                        if (inv != null && inv.getCombinedEverything() != null) {
-                            ItemContainer container = inv.getCombinedEverything();
+                        for (var invType : new com.hypixel.hytale.component.ComponentType[]{
+                                com.hypixel.hytale.server.core.inventory.InventoryComponent.Storage.getComponentType(),
+                                com.hypixel.hytale.server.core.inventory.InventoryComponent.Hotbar.getComponentType()
+                        }) {
+                            @SuppressWarnings("unchecked")
+                            Object invObj = st.getComponent(er, invType);
+                            if (!(invObj instanceof com.hypixel.hytale.server.core.inventory.InventoryComponent inv)) {
+                                continue;
+                            }
+                            ItemContainer container = inv.getInventory();
+                            if (container == null) continue;
                             for (short i = 0; i < container.getCapacity(); i++) {
                                 var stack = container.getItemStack(i);
                                 if (stack != null && stack.getItem() != null) {

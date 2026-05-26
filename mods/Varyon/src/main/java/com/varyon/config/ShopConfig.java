@@ -52,7 +52,7 @@ public class ShopConfig {
                     }
                 }
             }
-            LOGGER.at(Level.INFO).log("Loaded shop.toml: {0} items", items.size());
+            LOGGER.at(Level.INFO).log("Loaded shop.toml: %s items", items.size());
             return new ShopConfig(items);
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("Failed to load " + FILENAME + ", using defaults", e);

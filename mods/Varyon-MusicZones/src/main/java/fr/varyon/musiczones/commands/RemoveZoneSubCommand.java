@@ -5,7 +5,12 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgumentType;
-import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.musiczones.VaryonMusicZonesPlugin;
 
 import javax.annotation.Nonnull;
@@ -28,14 +33,17 @@ public final class RemoveZoneSubCommand extends MusicZoneAdminCommandBase {
             context.sendMessage(Message.raw("Joueur uniquement."));
             return;
         }
-        Player p = context.senderAs(Player.class);
+        Ref<EntityStore> _ref = context.senderAsPlayerRef();
+        Store<EntityStore> _store = _ref != null ? _ref.getStore() : null;
+        PlayerRef _pr = _store != null ? _store.getComponent(_ref, PlayerRef.getComponentType()) : null;
         VaryonMusicZonesPlugin plugin = VaryonMusicZonesPlugin.getInstance();
         if (plugin == null) {
             context.sendMessage(Message.raw("Plugin non chargé."));
             return;
         }
         String zoneId = idArg.get(context).trim();
-        String worldName = p.getWorld().getName();
+        World _w = _pr != null ? Universe.get().getWorld(_pr.getWorldUuid()) : null;
+        String worldName = _w != null ? _w.getName() : "";
         if (plugin.getRepository().remove(worldName, zoneId)) {
             plugin.getRepository().save();
             try {

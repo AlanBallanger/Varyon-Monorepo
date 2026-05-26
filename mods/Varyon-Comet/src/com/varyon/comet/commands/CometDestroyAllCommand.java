@@ -8,7 +8,7 @@ import com.varyon.comet.systems.*;
 import com.varyon.comet.wave.*;
 
 
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractWorldCommand;
@@ -48,7 +48,8 @@ public class CometDestroyAllCommand extends AbstractWorldCommand {
         }
         
         try {
-            Player player = context.senderAs(Player.class);
+            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> _senderRef = context.senderAsPlayerRef();
+            Player player = (_senderRef != null && _senderRef.isValid()) ? _senderRef.getStore().getComponent(_senderRef, Player.getComponentType()) : null;
 
             CometWaveManager waveManager = CometModPlugin.getWaveManager();
             if (waveManager == null) {

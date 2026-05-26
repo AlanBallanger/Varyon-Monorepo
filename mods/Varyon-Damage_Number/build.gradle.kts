@@ -2,23 +2,28 @@ plugins {
     id("java")
 }
 
-group = "irai.mod.dynamicfloatingdamageformatter"
-version = "1.0.0"
+group = properties["plugin_group"] as String
+version = properties["plugin_version"] as String
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    // Provide the Hytale server jar locally in libs/ to compile.
     compileOnly(files("libs/HytaleServer.jar"))
 }
 
-tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from("manifest.json")
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
-tasks.build {
-    dependsOn(tasks.jar)
+tasks.named<ProcessResources>("processResources") {
+    filesMatching("manifest.json") { expand(project.properties) }
+}
+
+tasks.named<Jar>("jar") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveBaseName.set("Varyon-Damage_Number")
 }

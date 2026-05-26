@@ -7,9 +7,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockBreakingDropType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockGathering;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
@@ -96,7 +94,7 @@ public class MiningLootScalingSystem extends EntityEventSystem<EntityStore, Brea
         Ref<EntityStore> minerRef = archetypeChunk.getReferenceTo(index);
         DifficultyZone zone;
         if (blockPos != null) {
-            zone = ZoneCalculator.getZoneAtPosition(blockPos.getX(), blockPos.getZ(), world, configManager.getZoneConfig());
+            zone = ZoneCalculator.getZoneAtPosition(blockPos.x, blockPos.z, world, configManager.getZoneConfig());
         } else {
             zone = ZoneCalculator.getCurrentZone(store, minerRef, world, configManager.getZoneConfig());
         }
@@ -115,36 +113,36 @@ public class MiningLootScalingSystem extends EntityEventSystem<EntityStore, Brea
             return;
         }
 
-        Vector3d baseDrop;
+        org.joml.Vector3d baseDrop;
         if (blockPos != null) {
-            baseDrop = new Vector3d(blockPos.getX() + 0.5, blockPos.getY() + 1.0, blockPos.getZ() + 0.5);
+            baseDrop = new org.joml.Vector3d(blockPos.x + 0.5, blockPos.y + 1.0, blockPos.z + 0.5);
         } else {
             TransformComponent transform =
                 store.getComponent(minerRef, TransformComponent.getComponentType());
             if (transform == null) {
                 return;
             }
-            baseDrop = transform.getPosition().clone().add(0.0, 1.0, 0.0);
+            baseDrop = new org.joml.Vector3d(transform.getPosition()).add(0.0, 1.0, 0.0);
         }
 
         HeadRotation headRotation = store.getComponent(minerRef, HeadRotation.getComponentType());
-        Vector3f rot = headRotation != null ? headRotation.getRotation().clone() : new Vector3f(0f, 0f, 0f);
+        com.hypixel.hytale.math.vector.Rotation3fc rot = headRotation != null ? headRotation.getRotation() : com.hypixel.hytale.math.vector.Rotation3f.ZERO;
 
         for (int i = 0; i < extraDropSets; i++) {
             List<ItemStack> stacks = dropsForOneBlockBreak(blockType, breaking);
             if (stacks.isEmpty()) {
                 continue;
             }
-            Vector3d offsetPosition = baseDrop.clone().add(
-                (Math.random() - 0.5) * 0.5,
-                0.1 * i,
-                (Math.random() - 0.5) * 0.5
+            org.joml.Vector3d offsetPosition = new org.joml.Vector3d(
+                baseDrop.x + (Math.random() - 0.5) * 0.5,
+                baseDrop.y + 0.1 * i,
+                baseDrop.z + (Math.random() - 0.5) * 0.5
             );
             Holder<EntityStore>[] drops = ItemComponent.generateItemDrops(
                 store,
                 new ObjectArrayList<>(stacks),
                 offsetPosition,
-                rot.clone()
+                rot
             );
             commandBuffer.addEntities(drops, AddReason.SPAWN);
         }

@@ -231,7 +231,7 @@ public class CometSpawnTask {
             }
             World currentWorld = player.getWorld();
             if (currentWorld == null) {
-                LOGGER.warning("Player " + player.getDisplayName() + " is not in any world, cannot spawn comet");
+                LOGGER.warning("Player " + player.toString() + " is not in any world, cannot spawn comet");
                 finishSpawn(callback, SpawnResult.SKIPPED_NO_WORLD);
                 return;
             }
@@ -317,9 +317,9 @@ public class CometSpawnTask {
                     com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
             if (transform == null) return SpawnResult.ERROR;
 
-            com.hypixel.hytale.math.vector.Vector3d playerPos = transform.getPosition();
+            org.joml.Vector3d playerPos = transform.getPosition();
             Random random = new Random();
-            com.hypixel.hytale.math.vector.Vector3i targetBlockPos =
+            org.joml.Vector3i targetBlockPos =
                     findSpawnTargetWithRechecks(currentWorld, playerPos, config, random);
 
             if (targetBlockPos == null) return SpawnResult.NO_SAFE_LOCATION;
@@ -359,7 +359,9 @@ public class CometSpawnTask {
 
                 com.hypixel.hytale.server.core.Message coordMessage =
                     com.hypixel.hytale.server.core.Message.raw(text);
-                player.sendMessage(coordMessage);
+                if (playerRefComponent != null) {
+                    playerRefComponent.sendMessage(coordMessage);
+                }
             } catch (Exception e) {
                 // Ignore
             }
@@ -409,9 +411,9 @@ public class CometSpawnTask {
         }
     }
 
-    private com.hypixel.hytale.math.vector.Vector3i findSpawnTargetWithRechecks(
+    private org.joml.Vector3i findSpawnTargetWithRechecks(
             World currentWorld,
-            com.hypixel.hytale.math.vector.Vector3d playerPos,
+            org.joml.Vector3d playerPos,
             CometConfig config,
             Random random) {
 
@@ -420,7 +422,7 @@ public class CometSpawnTask {
         int startY = (int) playerPos.y;
 
         for (int recheck = 0; recheck <= EXTRA_LOCATION_RECHECKS; recheck++) {
-            com.hypixel.hytale.math.vector.Vector3i target =
+            org.joml.Vector3i target =
                     tryFindSpawnTargetNearCenter(currentWorld, centerX, centerZ, startY, config, random);
             if (target != null) {
                 return target;
@@ -437,7 +439,7 @@ public class CometSpawnTask {
         return null;
     }
 
-    private com.hypixel.hytale.math.vector.Vector3i tryFindSpawnTargetNearCenter(
+    private org.joml.Vector3i tryFindSpawnTargetNearCenter(
             World currentWorld,
             int centerX,
             int centerZ,
@@ -455,8 +457,8 @@ public class CometSpawnTask {
             if (spawnY == -1) continue;
             if (isInWater(currentWorld, spawnX, spawnY, spawnZ) || isInWater(currentWorld, spawnX, spawnY + 1, spawnZ)) continue;
 
-            com.hypixel.hytale.math.vector.Vector3i targetBlockPos =
-                    new com.hypixel.hytale.math.vector.Vector3i(spawnX, spawnY + 1, spawnZ);
+            org.joml.Vector3i targetBlockPos =
+                    new org.joml.Vector3i(spawnX, spawnY + 1, spawnZ);
             if (!ClaimProtectionGuard.canSpawnAt(currentWorld, targetBlockPos.x, targetBlockPos.y, targetBlockPos.z, config)) {
                 continue;
             }

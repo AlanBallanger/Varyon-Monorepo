@@ -274,7 +274,7 @@ public class VaryonPlugin extends JavaPlugin {
                     if (!world.getWorldConfig().isDeleteOnRemove()) {
                         world.getWorldConfig().setPvpEnabled(true);
                         world.getWorldConfig().markChanged();
-                        LOGGER.at(Level.INFO).log("PvP enabled for world: {0} (controlled by SafeZone system)", world.getName());
+                        LOGGER.at(Level.INFO).log("PvP enabled for world: %s (controlled by SafeZone system)", world.getName());
                     }
                 });
                 
@@ -283,7 +283,7 @@ public class VaryonPlugin extends JavaPlugin {
                     if (!world.getWorldConfig().isDeleteOnRemove()) {
                         world.getWorldConfig().setPvpEnabled(true);
                         world.getWorldConfig().markChanged();
-                        LOGGER.at(Level.INFO).log("PvP enabled for existing world: {0} (controlled by SafeZone system)", world.getName());
+                        LOGGER.at(Level.INFO).log("PvP enabled for existing world: %s (controlled by SafeZone system)", world.getName());
                     }
                 }
                 
@@ -428,7 +428,7 @@ public class VaryonPlugin extends JavaPlugin {
             RtpvConfirmManager.setInstance(new RtpvConfirmManager());
             LOGGER.at(Level.INFO).log("Commands registered");
 
-            LOGGER.at(Level.INFO).log("Varyon initialized with {0} zones",
+            LOGGER.at(Level.INFO).log("Varyon initialized with %s zones",
                     configManager.getZoneConfig().getZones().size());
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("Failed to initialize Varyon", e);
@@ -480,7 +480,7 @@ public class VaryonPlugin extends JavaPlugin {
 
         // Check if this world is in our enabled worlds list
         if (!configManager.getZoneConfig().isWorldEnabled(world.getName())) {
-            LOGGER.at(Level.INFO).log("Minimap not enabled for world: {0}", world.getName());
+            LOGGER.at(Level.INFO).log("Minimap not enabled for world: %s", world.getName());
             return;
         }
 
@@ -490,7 +490,7 @@ public class VaryonPlugin extends JavaPlugin {
         // Register extraction portal marker provider
         world.getWorldMapManager().addMarkerProvider("extraction_portal", new com.varyon.extraction.ExtractionPortalMarkerProvider());
         
-        LOGGER.at(Level.INFO).log("Set Varyon minimap for world: {0}", world.getName());
+        LOGGER.at(Level.INFO).log("Set Varyon minimap for world: %s", world.getName());
     }
 
     public void onConfigurationReloaded() {

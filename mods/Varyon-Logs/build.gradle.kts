@@ -2,7 +2,8 @@ plugins {
     java
 }
 
-version = "1.0.0"
+group = properties["plugin_group"] as String
+version = properties["plugin_version"] as String
 
 repositories {
     mavenCentral()
@@ -13,14 +14,13 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 tasks.named<ProcessResources>("processResources") {
-    from(projectDir) {
-        include("manifest.json")
-    }
+    filesMatching("manifest.json") { expand(project.properties) }
 }
 
 tasks.named<Jar>("jar") {

@@ -49,7 +49,7 @@ public class ConfigManager {
         File configFile = configPath.toFile();
 
         if (!configFile.exists()) {
-            LOGGER.at(Level.INFO).log("Configuration file not found, creating default config at: {0}", configPath);
+            LOGGER.at(Level.INFO).log("Configuration file not found, creating default config at: %s", configPath);
             zoneConfig = ZoneConfig.createDefault();
             safeZoneConfig = new SafeZoneConfig();
             extractionConfig = new ExtractionConfig();
@@ -96,7 +96,7 @@ public class ConfigManager {
             deathConfig = parseDeathConfig(toml);
             shopConfig = ShopConfig.load(pluginDataFolder);
             chatAnnouncementsConfig = ChatAnnouncementsConfig.load(pluginDataFolder);
-            LOGGER.at(Level.INFO).log("Loaded configuration with {0} zones", zoneConfig.getZones().size());
+            LOGGER.at(Level.INFO).log("Loaded configuration with %s zones", zoneConfig.getZones().size());
             save();
             ChatAnnouncementScheduler.onConfigReloaded();
         } catch (Exception e) {
@@ -130,7 +130,7 @@ public class ConfigManager {
             }
             try (FileWriter writer = new FileWriter(configFile)) {
                 writer.write(generateToml());
-                LOGGER.at(Level.INFO).log("Configuration saved to: {0}", configPath);
+                LOGGER.at(Level.INFO).log("Configuration saved to: %s", configPath);
             }
         } catch (IOException e) {
             LOGGER.at(Level.SEVERE).log("Failed to save configuration", e);

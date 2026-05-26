@@ -49,7 +49,7 @@ public class ZoneLootConfig {
                     } catch (NumberFormatException ignored) {}
                 }
             }
-            LOGGER.at(Level.INFO).log("Loaded zone_loot.toml: {0} zones", zones.size());
+            LOGGER.at(Level.INFO).log("Loaded zone_loot.toml: %s zones", zones.size());
             return new ZoneLootConfig(zones);
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("Failed to load " + FILENAME + ", using defaults", e);

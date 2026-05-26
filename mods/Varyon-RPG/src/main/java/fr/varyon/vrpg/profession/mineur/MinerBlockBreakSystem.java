@@ -10,12 +10,12 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
@@ -119,21 +119,21 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
         if (acc.getActiveSlot0() != Profession.MINEUR && acc.getActiveSlot1() != Profession.MINEUR) return;
 
         Player player = null;
-        Inventory inventory = null;
+        InventoryComponent.Hotbar hotbar = null;
         try {
             player = playerRef.getComponent(Player.getComponentType());
-            if (player != null) inventory = player.getInventory();
+            hotbar = playerRef.getComponent(InventoryComponent.Hotbar.getComponentType());
         } catch (Exception ignored) {}
 
         boolean dbg = VrpgConfig.isDebugTalents();
         String dbgId = dbg ? "[" + playerUuid.toString().substring(0, 8) + "|" + rawId + "] " : null;
 
         if (isOre) {
-            // Node 0 — Poches Pleines : chance de doubler les ressources (5% par rang, max 25%)
+            // Node 0 -- Poches Pleines : chance de doubler les ressources (5% par rang, max 25%)
             int lootRank = acc.getTalentRank(Profession.MINEUR, "0");
             if (lootRank > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < lootRank * 0.05) {
                 String extraItemId = MinerXpTable.resolveOreItemId(rawId);
-                if (dbg) LOGGER.atInfo().log(dbgId + "N0 PochesPleines PROC — item=" + extraItemId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N0 PochesPleines PROC -- item=" + extraItemId);
                 if (extraItemId != null) {
                     try {
                         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
@@ -180,7 +180,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
             double xpRankMult = 1.0 + xpRank * 0.05;
             double xpMult = xpRankMult;
 
-            // Node 5 — C-C-Combo : +rankPercent% XP et loot par combo (max 8)
+            // Node 5 -- C-C-Combo : +rankPercent% XP et loot par combo (max 8)
             int comboRank = acc.getTalentRank(Profession.MINEUR, "5");
             int comboCount = comboTracker.onOreMined(playerUuid);
             double comboPercent = comboRank > 0 ? (0.005 + (comboRank - 1) * 0.005) : 0.0;
@@ -207,14 +207,14 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
 
             double finalXp = baseXp * xpMult;
             if (dbg) LOGGER.atInfo().log(dbgId + "XP +" + finalXp
-                + " (base=" + baseXp + " × " + String.format("%.3f", xpMult) + ")"
+                + " (base=" + baseXp + " Ã— " + String.format("%.3f", xpMult) + ")"
                 + (xpRank > 0 ? " [N1 FrontPoussiereux rank=" + xpRank + "]" : ""));
             professionManager.addXp(playerUuid, Profession.MINEUR, finalXp, playerRef);
 
-            // Node 5 — loot bonus : chance supplémentaire de drop proportionnelle au combo
+            // Node 5 -- loot bonus : chance supplÃ©mentaire de drop proportionnelle au combo
             if (comboRank > 0 && comboCount > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < comboBonus) {
                 String extraItemId = MinerXpTable.resolveOreItemId(rawId);
-                if (dbg) LOGGER.atInfo().log(dbgId + "N5 CCombo loot PROC — item=" + extraItemId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N5 CCombo loot PROC -- item=" + extraItemId);
                 if (extraItemId != null) {
                     try {
                         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
@@ -234,7 +234,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                 }
             }
 
-            // Node 8 — Chant de la Veine : éclate toute la veine d'un coup (cooldown par rang)
+            // Node 8 -- Chant de la Veine : Ã©clate toute la veine d'un coup (cooldown par rang)
             int veinRank = acc.getTalentRank(Profession.MINEUR, "8");
             if (veinRank > 0 && player != null && event.getTargetBlock() != null
                     && veinCooldown.tryTrigger(playerUuid, veinRank)) {
@@ -245,7 +245,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                         int by = event.getTargetBlock().y;
                         int bz = event.getTargetBlock().z;
                         List<int[]> vein = findVein(world, bx, by, bz, rawId);
-                        if (dbg) LOGGER.atInfo().log(dbgId + "N8 ChantVeine PROC — " + vein.size() + " blocs");
+                        if (dbg) LOGGER.atInfo().log(dbgId + "N8 ChantVeine PROC -- " + vein.size() + " blocs");
                         if (vein.size() > 1) {
                             Ref<EntityStore> playerEntityRef = archetypeChunk.getReferenceTo(index);
                             Vector3d blockCenter = new Vector3d(bx + 0.5, by + 0.5, bz + 0.5);
@@ -267,13 +267,13 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                 } catch (Exception ignored) {}
             }
 
-            // Node 3 — Pioche de Vétéran : annule la consommation (7% par rang, max 35%)
-            // Node 6 — Incassable : gagne +1 dura (5% par rang, max 25%)
-            // On gère toute la consommation de durabilité nous-mêmes.
-            if (inventory != null) {
+            // Node 3 -- Pioche de VÃ©tÃ©ran : annule la consommation (7% par rang, max 35%)
+            // Node 6 -- Incassable : gagne +1 dura (5% par rang, max 25%)
+            // On gÃ¨re toute la consommation de durabilitÃ© nous-mÃªmes.
+            if (hotbar != null) {
                 try {
-                    byte slot = inventory.getActiveHotbarSlot();
-                    ItemStack held = inventory.getHotbar().getItemStack((short) slot);
+                    byte slot = hotbar.getActiveSlot();
+                    ItemStack held = hotbar.getInventory().getItemStack((short) slot);
                     if (held != null && held.getMaxDurability() > 0) {
                         int veranRank = acc.getTalentRank(Profession.MINEUR, "3");
                         int incassableRank = acc.getTalentRank(Profession.MINEUR, "6");
@@ -283,29 +283,29 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                         if (dbg) {
                             double duraBefore = held.getDurability();
                             double duraMax = held.getMaxDurability();
-                            String action = veranProc ? "N3 PiocheVeteran PROC (annulé)" : incassableProc ? "N6 Incassable PROC (+1)" : "dura normale (-1)";
+                            String action = veranProc ? "N3 PiocheVeteran PROC (annulÃ©)" : incassableProc ? "N6 Incassable PROC (+1)" : "dura normale (-1)";
                             if (delta != 0.0) {
                                 ItemStack after = held.withIncreasedDurability(delta);
                                 LOGGER.atInfo().log(dbgId + action + " item=" + held.getItemId()
                                     + " dura=" + duraBefore + "/" + duraMax
-                                    + " → " + after.getDurability() + "/" + after.getMaxDurability());
-                                inventory.getHotbar().setItemStackForSlot((short) slot, after);
+                                    + " â†' " + after.getDurability() + "/" + after.getMaxDurability());
+                                hotbar.getInventory().setItemStackForSlot((short) slot, after);
                             } else {
                                 LOGGER.atInfo().log(dbgId + action + " item=" + held.getItemId()
-                                    + " dura=" + duraBefore + "/" + duraMax + " (inchangé)");
+                                    + " dura=" + duraBefore + "/" + duraMax + " (inchangÃ©)");
                             }
                         } else if (delta != 0.0) {
-                            inventory.getHotbar().setItemStackForSlot((short) slot,
+                            hotbar.getInventory().setItemStackForSlot((short) slot,
                                 held.withIncreasedDurability(delta));
                         }
                     } else if (dbg && held != null) {
-                        LOGGER.atInfo().log(dbgId + "dura ignorée — item=" + held.getItemId()
-                            + " maxDura=" + held.getMaxDurability() + " (pas de durabilité)");
+                        LOGGER.atInfo().log(dbgId + "dura ignorÃ©e -- item=" + held.getItemId()
+                            + " maxDura=" + held.getMaxDurability() + " (pas de durabilitÃ©)");
                     }
                 } catch (Exception ignored) {}
             }
 
-            // Node 4 — Minerai Immortel : repop au même emplacement (4% par rang, max 20%)
+            // Node 4 -- Minerai Immortel : repop au mÃªme emplacement (4% par rang, max 20%)
             int repopRank = acc.getTalentRank(Profession.MINEUR, "4");
             if (repopRank > 0 && player != null && event.getTargetBlock() != null
                     && RANDOM.nextDouble() < repopRank * 0.04) {
@@ -315,7 +315,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                         int bx = event.getTargetBlock().x;
                         int by = event.getTargetBlock().y;
                         int bz = event.getTargetBlock().z;
-                        if (dbg) LOGGER.atInfo().log(dbgId + "N4 MineraiImmortel PROC — setBlock(" + bx + "," + by + "," + bz + ", \"" + rawId + "\") [+" + MINERAI_IMMORTEL_REPOP_DELAY_MS + "ms]");
+                        if (dbg) LOGGER.atInfo().log(dbgId + "N4 MineraiImmortel PROC -- setBlock(" + bx + "," + by + "," + bz + ", \"" + rawId + "\") [+" + MINERAI_IMMORTEL_REPOP_DELAY_MS + "ms]");
                         final World w = world;
                         final String id = rawId;
                         final double sx = bx + 0.5;
@@ -348,7 +348,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                         int bx = event.getTargetBlock().x;
                         int by = event.getTargetBlock().y;
                         int bz = event.getTargetBlock().z;
-                        if (dbg) LOGGER.atInfo().log(dbgId + "N9 GardienDePierre PROC — pos(" + bx + "," + by + "," + bz + ") [+" + GARDIEN_PIERRE_SPAWN_DELAY_MS + "ms]");
+                        if (dbg) LOGGER.atInfo().log(dbgId + "N9 GardienDePierre PROC -- pos(" + bx + "," + by + "," + bz + ") [+" + GARDIEN_PIERRE_SPAWN_DELAY_MS + "ms]");
                         final World w = world;
                         final double sx = bx + 0.5;
                         final double sy = by;
@@ -373,25 +373,25 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
         }
 
         if (isRock) {
-            // Node 7 — Briseur de Roche : annule la consommation (15% par rang, max 75%)
-            if (inventory != null) {
+            // Node 7 -- Briseur de Roche : annule la consommation (15% par rang, max 75%)
+            if (hotbar != null) {
                 try {
-                    byte slot = inventory.getActiveHotbarSlot();
-                    ItemStack held = inventory.getHotbar().getItemStack((short) slot);
+                    byte slot = hotbar.getActiveSlot();
+                    ItemStack held = hotbar.getInventory().getItemStack((short) slot);
                     if (held != null && held.getMaxDurability() > 0) {
                         int rocRank = acc.getTalentRank(Profession.MINEUR, "7");
                         boolean rocProc = rocRank > 0 && RANDOM.nextDouble() < rocRank * 0.15;
                         if (dbg && rocProc) LOGGER.atInfo().log(dbgId + "N7 BriseurDeRoche PROC");
                         double delta = rocProc ? 0.0 : -1.0;
                         if (delta != 0.0) {
-                            inventory.getHotbar().setItemStackForSlot((short) slot,
+                            hotbar.getInventory().setItemStackForSlot((short) slot,
                                 held.withIncreasedDurability(delta));
                         }
                     }
                 } catch (Exception ignored) {}
             }
 
-            // Node 14 — Deux pour le Prix d'un : casse aussi le bloc de roche en dessous
+            // Node 14 -- Deux pour le Prix d'un : casse aussi le bloc de roche en dessous
             int deuxRank = acc.getTalentRank(Profession.MINEUR, "14");
             if (deuxRank > 0 && player != null && event.getTargetBlock() != null) {
                 try {
@@ -521,7 +521,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                 World world = player.getWorld();
                 if (world != null) {
                     int bx = pos[0], by = pos[1], bz = pos[2];
-                    if (dbg) LOGGER.atInfo().log((dbgId != null ? dbgId : "") + "[ChantVeine] N4 MineraiImmortel PROC — setBlock(" + bx + "," + by + "," + bz + ")");
+                    if (dbg) LOGGER.atInfo().log((dbgId != null ? dbgId : "") + "[ChantVeine] N4 MineraiImmortel PROC -- setBlock(" + bx + "," + by + "," + bz + ")");
                     final World w = world;
                     final String id = rawId;
                     final double sx = bx + 0.5, sy = by + 0.5, sz = bz + 0.5;
@@ -551,7 +551,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
         float vx = (RANDOM.nextFloat() - 0.5f) * 2.5f;
         float vy = 0.5f + RANDOM.nextFloat() * 0.5f;
         float vz = (RANDOM.nextFloat() - 0.5f) * 2.5f;
-        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, Vector3f.ZERO, vx, vy, vz);
+        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, vy, vz);
         if (holder == null) return;
         accessor.addEntity(holder, AddReason.SPAWN);
     }
@@ -564,13 +564,13 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
             int idx = SoundEvent.getAssetMap().getIndex(MINERAI_IMMORTEL_SOUND_ID);
             if (idx <= 0) {
                 if (dbg) LOGGER.atWarning().log((dbgId != null ? dbgId : "")
-                        + "N4 MineraiImmortel son — SoundEvent introuvable: " + MINERAI_IMMORTEL_SOUND_ID);
+                        + "N4 MineraiImmortel son -- SoundEvent introuvable: " + MINERAI_IMMORTEL_SOUND_ID);
                 return;
             }
             Store<EntityStore> entityStore = world.getEntityStore().getStore();
             SoundUtil.playSoundEvent3d(idx, SoundCategory.SFX, x, y, z, entityStore);
             if (dbg) LOGGER.atInfo().log((dbgId != null ? dbgId : "")
-                    + "N4 MineraiImmortel son joué idx=" + idx);
+                    + "N4 MineraiImmortel son jouÃ© idx=" + idx);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log((dbgId != null ? dbgId : "") + "N4 MineraiImmortel son ERREUR");
         }
@@ -584,13 +584,13 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
             int idx = SoundEvent.getAssetMap().getIndex(GARDIEN_PIERRE_SOUND_ID);
             if (idx <= 0) {
                 if (dbg) LOGGER.atWarning().log((dbgId != null ? dbgId : "")
-                        + "N9 GardienDePierre son — SoundEvent introuvable: " + GARDIEN_PIERRE_SOUND_ID);
+                        + "N9 GardienDePierre son -- SoundEvent introuvable: " + GARDIEN_PIERRE_SOUND_ID);
                 return;
             }
             Store<EntityStore> entityStore = world.getEntityStore().getStore();
             SoundUtil.playSoundEvent3d(idx, SoundCategory.SFX, x, y, z, entityStore);
             if (dbg) LOGGER.atInfo().log((dbgId != null ? dbgId : "")
-                    + "N9 GardienDePierre son joué idx=" + idx);
+                    + "N9 GardienDePierre son jouÃ© idx=" + idx);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log((dbgId != null ? dbgId : "") + "N9 GardienDePierre son ERREUR");
         }
@@ -608,25 +608,25 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
             int idx = SoundEvent.getAssetMap().getIndex(soundEventId);
             if (idx <= 0) {
                 if (dbg) LOGGER.atWarning().log((dbgId != null ? dbgId : "")
-                        + dbgLabel + " son — SoundEvent introuvable: " + soundEventId);
+                        + dbgLabel + " son -- SoundEvent introuvable: " + soundEventId);
                 return;
             }
             playerRef.getPacketHandler().writeNoCache(
                     (ToClientPacket) new PlaySoundEvent2D(idx, SoundCategory.SFX, 1.0f, 1.0f));
             SoundUtil.playSoundEvent3d(idx, SoundCategory.SFX, at.x, at.y, at.z, commandBuffer);
             if (dbg) LOGGER.atInfo().log((dbgId != null ? dbgId : "")
-                    + dbgLabel + " son joué idx=" + idx);
+                    + dbgLabel + " son jouÃ© idx=" + idx);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log((dbgId != null ? dbgId : "") + dbgLabel + " son ERREUR");
         }
     }
 
     private void spawnGuardianGolem(@Nonnull Store<EntityStore> store, @Nonnull Vector3d pos) {
-        LOGGER.atInfo().log("[GardienPierre] spawnNPC Golem_Crystal_Earth — pos=" + pos);
+        LOGGER.atInfo().log("[GardienPierre] spawnNPC Golem_Crystal_Earth -- pos=" + pos);
         try {
-            var pair = NPCPlugin.get().spawnNPC(store, "Golem_Crystal_Earth", null, pos, new Vector3f(0f, 0f, 0f));
+            var pair = NPCPlugin.get().spawnNPC(store, "Golem_Crystal_Earth", null, pos, com.hypixel.hytale.math.vector.Rotation3f.ZERO);
             if (pair == null) {
-                LOGGER.atWarning().log("[GardienPierre] spawnNPC retourné null — vérifier le role name 'Golem_Crystal_Earth'");
+                LOGGER.atWarning().log("[GardienPierre] spawnNPC retournÃ© null -- vÃ©rifier le role name 'Golem_Crystal_Earth'");
                 return;
             }
             Ref<EntityStore> golemRef = pair.left();

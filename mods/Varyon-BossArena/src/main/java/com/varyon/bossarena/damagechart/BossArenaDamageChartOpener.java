@@ -32,11 +32,7 @@ public final class BossArenaDamageChartOpener implements DamageChartOpener {
                 if (ref == null || !ref.isValid()) {
                     continue;
                 }
-                var storeObj = store.getComponent(ref, com.hypixel.hytale.server.core.entity.entities.Player.getComponentType());
-                if (!(storeObj instanceof com.hypixel.hytale.server.core.entity.entities.Player player)) {
-                    continue;
-                }
-                player.sendMessage(com.hypixel.hytale.server.core.Message.raw(summary));
+                playerRef.sendMessage(com.hypixel.hytale.server.core.Message.raw(summary));
             } catch (Exception e) {
                 LOGGER.warning("Failed to send damage chart message to player: " + e.getMessage());
             }

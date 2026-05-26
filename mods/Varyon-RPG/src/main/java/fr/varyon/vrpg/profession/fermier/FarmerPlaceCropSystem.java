@@ -8,11 +8,11 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.PlaceBlockEvent;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -53,7 +53,7 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
             @Nonnull CommandBuffer<EntityStore> commandBuffer,
             @Nonnull PlaceBlockEvent event) {
 
-        // Node 4 — Bras Long : plante sur 5 blocs de long
+        // Node 4 -- Bras Long : plante sur 5 blocs de long
         ItemStack eventItem = event.getItemInHand();
         if (eventItem == null || eventItem.isEmpty() || !eventItem.isValid()) return;
 
@@ -71,7 +71,7 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
 
         PlayerAccount acc = professionManager.getAccount(uuid);
         if (acc == null || !acc.isActive(Profession.FERMIER)) {
-            if (dbg) LOGGER.atInfo().log("[Fermier-DBG] BrasLong — joueur non actif fermier seed=" + seedId
+            if (dbg) LOGGER.atInfo().log("[Fermier-DBG] BrasLong -- joueur non actif fermier seed=" + seedId
                 + " active0=" + (acc == null ? "null" : acc.getActiveSlot0())
                 + " active1=" + (acc == null ? "null" : acc.getActiveSlot1()));
             return;
@@ -79,12 +79,12 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
         if (acc.getTalentRank(Profession.FERMIER, "4") <= 0) return;
 
         Player player = null;
-        Inventory inventory = null;
+        InventoryComponent.Hotbar hotbar = null;
         try {
             player = playerRef.getComponent(Player.getComponentType());
-            if (player != null) inventory = player.getInventory();
+            hotbar = playerRef.getComponent(InventoryComponent.Hotbar.getComponentType());
         } catch (Exception ignored) {}
-        if (player == null || inventory == null) return;
+        if (player == null || hotbar == null) return;
 
         World world = player.getWorld();
         if (world == null) return;
@@ -93,7 +93,7 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
         if (target == null) return;
         int bx = target.x, by = target.y, bz = target.z;
 
-        // Direction cardinal depuis le joueur vers le bloc posé
+        // Direction cardinal depuis le joueur vers le bloc posÃ©
         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
         Vector3d playerPos = null;
         try {
@@ -133,7 +133,7 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
 
                 world.setBlock(ex, by, ez, cropBlockId);
                 consumed++;
-                if (dbg) LOGGER.atInfo().log(dbgId + "posé " + cropBlockId + " en (" + ex + "," + by + "," + ez + ")");
+                if (dbg) LOGGER.atInfo().log(dbgId + "posÃ© " + cropBlockId + " en (" + ex + "," + by + "," + ez + ")");
             } catch (Exception ignored) {}
         }
 
@@ -144,12 +144,12 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
                     playerRef, ref, commandBuffer, at);
             }
             try {
-                byte slot = inventory.getActiveHotbarSlot();
-                ItemStack held = inventory.getHotbar().getItemStack((short) slot);
+                byte slot = hotbar.getActiveSlot();
+                ItemStack held = hotbar.getInventory().getItemStack((short) slot);
                 if (held != null && held.isValid() && !held.isEmpty()) {
                     int remaining = held.getQuantity() - consumed;
                     ItemStack newStack = remaining <= 0 ? null : held.withQuantity(remaining);
-                    inventory.getHotbar().setItemStackForSlot((short) slot, newStack);
+                    hotbar.getInventory().setItemStackForSlot((short) slot, newStack);
                 }
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[BrasLong] erreur consommation graines");
@@ -158,8 +158,8 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
     }
 
     private static String deriveCropBlockId(String seedId) {
-        // "Plant_Seeds_Wheat"         → "Plant_Crop_Wheat_Block"
-        // "Plant_Seeds_Wheat_Eternal" → "Plant_Crop_Wheat_Block_Eternal"
+        // "Plant_Seeds_Wheat"         â†' "Plant_Crop_Wheat_Block"
+        // "Plant_Seeds_Wheat_Eternal" â†' "Plant_Crop_Wheat_Block_Eternal"
         String rest = seedId.substring("Plant_Seeds_".length());
         if (rest.isEmpty()) return null;
         if (rest.endsWith("_Eternal")) {

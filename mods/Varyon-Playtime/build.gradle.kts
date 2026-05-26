@@ -1,5 +1,6 @@
 plugins {
     `maven-publish`
+    idea
     id("hytale-mod") version "0.+"
 }
 
@@ -64,7 +65,7 @@ val fatJar = tasks.register<Jar>("fatJar") {
 
     val implementationJars = configurations.runtimeClasspath.get()
         .filter {
-            it.name.contains("hikari") ||
+            it.name.contains("hikari", ignoreCase = true) ||
                 it.name.contains("mysql-connector-j") ||
                 it.name.contains("gson") ||
                 it.name.contains("slf4j") ||

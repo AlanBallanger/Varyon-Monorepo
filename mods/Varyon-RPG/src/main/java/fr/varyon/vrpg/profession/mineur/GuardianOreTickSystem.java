@@ -8,8 +8,8 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
@@ -91,7 +91,7 @@ public final class GuardianOreTickSystem extends EntityTickingSystem<EntityStore
     private static void scheduleGuardianSpawn(@Nonnull Store<EntityStore> store, @Nonnull Vector3d pos) {
         World world = store.getExternalData().getWorld();
         if (world == null) {
-            LOGGER.atWarning().log("[GardienPierre] world null — spawn Golem_Crystal_Earth annulé x="
+            LOGGER.atWarning().log("[GardienPierre] world null â€” spawn Golem_Crystal_Earth annulÃ© x="
                     + pos.x + " y=" + pos.y + " z=" + pos.z);
             return;
         }
@@ -111,9 +111,9 @@ public final class GuardianOreTickSystem extends EntityTickingSystem<EntityStore
 
     private static void spawnGuardianGolem(@Nonnull Store<EntityStore> store, @Nonnull Vector3d pos) {
         try {
-            var pair = NPCPlugin.get().spawnNPC(store, "Golem_Crystal_Earth", null, pos, new Vector3f(0f, 0f, 0f));
+            var pair = NPCPlugin.get().spawnNPC(store, "Golem_Crystal_Earth", null, pos, com.hypixel.hytale.math.vector.Rotation3f.ZERO);
             if (pair == null) {
-                LOGGER.atWarning().log("[GardienPierre] spawnNPC null — role 'Golem_Crystal_Earth' introuvable x="
+                LOGGER.atWarning().log("[GardienPierre] spawnNPC null â€” role 'Golem_Crystal_Earth' introuvable x="
                         + pos.x + " y=" + pos.y + " z=" + pos.z);
                 return;
             }

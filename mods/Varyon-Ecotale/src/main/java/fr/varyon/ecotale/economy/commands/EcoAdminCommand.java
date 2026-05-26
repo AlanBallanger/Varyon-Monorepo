@@ -125,7 +125,7 @@ public class EcoAdminCommand extends AbstractAsyncCommand {
                 VaryonEcotalePlugin.getInstance().getEconomyManager().setBalance(playerRef.getUuid(), amount, "Admin set");
                 updateHud(playerRef.getUuid(), amount);
                 
-                player.sendMessage(Message.join(
+                playerRef.sendMessage(Message.join(
                     Message.raw("Balance set: ").color(Color.GREEN),
                     Message.raw(VaryonEcotalePlugin.getInstance().getEconomyConfig().format(oldBalance)).color(Color.GRAY),
                     Message.raw(" -> ").color(Color.WHITE),
@@ -177,7 +177,7 @@ public class EcoAdminCommand extends AbstractAsyncCommand {
                 double newBalance = VaryonEcotalePlugin.getInstance().getEconomyManager().getBalance(playerRef.getUuid());
                 updateHud(playerRef.getUuid(), newBalance);
                 
-                player.sendMessage(Message.join(
+                playerRef.sendMessage(Message.join(
                     Message.raw("Added ").color(Color.GREEN),
                     Message.raw("+" + VaryonEcotalePlugin.getInstance().getEconomyConfig().format(amount)).color(new Color(50, 205, 50)),
                     Message.raw(" | New balance: ").color(Color.GRAY),
@@ -227,14 +227,14 @@ public class EcoAdminCommand extends AbstractAsyncCommand {
                 updateHud(playerRef.getUuid(), newBalance);
                 
                 if (success) {
-                    player.sendMessage(Message.join(
+                    playerRef.sendMessage(Message.join(
                         Message.raw("Removed ").color(Color.YELLOW),
                         Message.raw("-" + VaryonEcotalePlugin.getInstance().getEconomyConfig().format(amount)).color(new Color(255, 99, 71)),
                         Message.raw(" | New balance: ").color(Color.GRAY),
                         Message.raw(VaryonEcotalePlugin.getInstance().getEconomyConfig().format(newBalance)).color(Color.WHITE)
                     ));
                 } else {
-                    player.sendMessage(Message.raw("Insufficient funds").color(Color.RED));
+                    playerRef.sendMessage(Message.raw("Insufficient funds").color(Color.RED));
                 }
             }, world);
         }
@@ -269,7 +269,7 @@ public class EcoAdminCommand extends AbstractAsyncCommand {
                 VaryonEcotalePlugin.getInstance().getEconomyManager().setBalance(playerRef.getUuid(), startingBalance, "Admin reset");
                 updateHud(playerRef.getUuid(), startingBalance);
                 
-                player.sendMessage(Message.join(
+                playerRef.sendMessage(Message.join(
                     Message.raw("Balance reset to ").color(Color.GREEN),
                     Message.raw(VaryonEcotalePlugin.getInstance().getEconomyConfig().format(startingBalance)).color(new Color(50, 205, 50))
                 ));

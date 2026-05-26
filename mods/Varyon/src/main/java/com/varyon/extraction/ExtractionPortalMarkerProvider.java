@@ -1,7 +1,6 @@
 package com.varyon.extraction;
 
 import com.hypixel.hytale.math.vector.Transform;
-import org.joml.Vector3d;
 import com.hypixel.hytale.protocol.FormattedMessage;
 import com.hypixel.hytale.protocol.packets.worldmap.MapMarker;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -39,7 +38,7 @@ public class ExtractionPortalMarkerProvider implements WorldMapManager.MarkerPro
             return;
         }
 
-        Vector3d position = new Vector3d(portalData.x() + 0.5, portalData.y(), portalData.z() + 0.5);
+        org.joml.Vector3d position = new org.joml.Vector3d(portalData.x() + 0.5, portalData.y(), portalData.z() + 0.5);
 
         FormattedMessage name = new FormattedMessage();
         name.rawText = "Extraction Portal";

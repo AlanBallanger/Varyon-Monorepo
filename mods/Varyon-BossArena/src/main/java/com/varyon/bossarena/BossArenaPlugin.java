@@ -211,8 +211,12 @@ public final class BossArenaPlugin extends JavaPlugin {
     }
 
     private static TransformComponent resolveTargetTransform(Entity targetEntity, Ref<EntityStore> targetRef, Store<EntityStore> store, NPCEntity npc) {
-        if (npc != null && npc.getTransformComponent() != null) {
-            return npc.getTransformComponent();
+        if (npc != null) {
+            Ref<EntityStore> npcRef = npc.getReference();
+            if (npcRef != null) {
+                Object t = store.getComponent(npcRef, TransformComponent.getComponentType());
+                if (t instanceof TransformComponent tc) return tc;
+            }
         }
         if (targetRef != null) {
             Object transformObj = store.getComponent(targetRef, TransformComponent.getComponentType());
@@ -221,7 +225,11 @@ public final class BossArenaPlugin extends JavaPlugin {
             }
         }
         if (targetEntity != null) {
-            return targetEntity.getTransformComponent();
+            Ref<EntityStore> entRef = targetEntity.getReference();
+            if (entRef != null) {
+                Object t = store.getComponent(entRef, TransformComponent.getComponentType());
+                if (t instanceof TransformComponent tc) return tc;
+            }
         }
         return null;
     }
@@ -538,7 +546,7 @@ public final class BossArenaPlugin extends JavaPlugin {
             return;
         }
 
-        com.hypixel.hytale.math.vector.Vector3d rawPlayerPos = ((TransformComponent) transformObj).getPosition();
+        org.joml.Vector3d rawPlayerPos = ((TransformComponent) transformObj).getPosition();
         Vector3d playerPos = VecUtil.toJoml(rawPlayerPos);
 
         // Find chest location near player (within 5 blocks)
@@ -618,7 +626,7 @@ public final class BossArenaPlugin extends JavaPlugin {
         if (targetUuid != null && targetTransform != null) {
             String worldName = player.getWorld() != null ? player.getWorld().getName() : null;
             if (worldName != null && !worldName.isBlank()) {
-                com.hypixel.hytale.math.vector.Vector3d rawTargetPos = targetTransform.getPosition();
+                org.joml.Vector3d rawTargetPos = targetTransform.getPosition();
                 recordShopLocation(
                         worldName,
                         new Vector3i(
@@ -782,7 +790,7 @@ public final class BossArenaPlugin extends JavaPlugin {
                         if (transform == null) {
                             continue;
                         }
-                        com.hypixel.hytale.math.vector.Vector3d rawPos = transform.getPosition();
+                        org.joml.Vector3d rawPos = transform.getPosition();
                         double dx = rawPos.x - location.x;
                         double dy = rawPos.y - location.y;
                         double dz = rawPos.z - location.z;
@@ -835,7 +843,7 @@ public final class BossArenaPlugin extends JavaPlugin {
             return;
         }
 
-        com.hypixel.hytale.math.vector.Vector3d npcPosition = targetTransform.getPosition();
+        org.joml.Vector3d npcPosition = targetTransform.getPosition();
         Vector3i shopAnchor = new Vector3i(
                 (int) Math.floor(npcPosition.x),
                 (int) Math.floor(npcPosition.y),
@@ -998,9 +1006,9 @@ public final class BossArenaPlugin extends JavaPlugin {
             // If anything goes wrong, fall back to the raw saved Y.
         }
 
-        com.hypixel.hytale.math.vector.Vector3d spawnPos = new com.hypixel.hytale.math.vector.Vector3d(baseX + 0.5d, spawnY, baseZ + 0.5d);
+        org.joml.Vector3d spawnPos = new org.joml.Vector3d(baseX + 0.5d, spawnY, baseZ + 0.5d);
         // Face south by default for respawn if we don't know the original rotation.
-        com.hypixel.hytale.math.vector.Vector3f rotation = new com.hypixel.hytale.math.vector.Vector3f(0, (float) Math.PI, 0);
+        com.hypixel.hytale.math.vector.Rotation3f rotation = new com.hypixel.hytale.math.vector.Rotation3f(0, (float) Math.PI, 0);
 
         world.execute(() -> {
             // Best-effort cleanup: remove any existing shop NPCs of this type very close to the saved location
@@ -1022,7 +1030,7 @@ public final class BossArenaPlugin extends JavaPlugin {
                                 if (transform == null) {
                                     continue;
                                 }
-                                com.hypixel.hytale.math.vector.Vector3d rawNpcPos = transform.getPosition();
+                                org.joml.Vector3d rawNpcPos = transform.getPosition();
                                 double dx = rawNpcPos.x - location.x;
                                 double dy = rawNpcPos.y - location.y;
                                 double dz = rawNpcPos.z - location.z;

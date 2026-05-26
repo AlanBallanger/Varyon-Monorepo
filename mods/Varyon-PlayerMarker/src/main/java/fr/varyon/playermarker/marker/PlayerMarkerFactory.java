@@ -24,7 +24,7 @@ final class PlayerMarkerFactory {
     static Vector3f resolveMarkerRotation(PlayerMarkerConfig config, Vector3f headRotation) {
         return config != null && config.enableRotation && headRotation != null
                 ? headRotation
-                : Vector3f.ZERO;
+                : new Vector3f();
     }
 
     static String buildDynamicMarkerId(String markerPrefix, UUID playerUuid, String markerVariant, Transform transform) {
@@ -45,7 +45,7 @@ final class PlayerMarkerFactory {
 
         if (transform.getRotation() != null) {
             builder.append(":r")
-                    .append(quantizeYaw(transform.getRotation().getYaw()));
+                    .append(quantizeYaw(transform.getRotation().yaw()));
         }
 
         return builder.toString();

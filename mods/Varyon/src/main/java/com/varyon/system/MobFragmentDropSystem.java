@@ -9,8 +9,6 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.SystemGroup;
 import com.hypixel.hytale.logger.HytaleLogger;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
@@ -21,6 +19,8 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.varyon.component.MobScalingComponent;
@@ -104,7 +104,7 @@ public class MobFragmentDropSystem {
     }
 
     // -------------------------------------------------------------------------
-    // Death — resolve contributing player like Ecotale mob coins (killer else last attacker).
+    // Death â€” resolve contributing player like Ecotale mob coins (killer else last attacker).
     // -------------------------------------------------------------------------
     public final class DropOnDeath extends DeathSystems.OnDeathSystem {
 
@@ -141,8 +141,11 @@ public class MobFragmentDropSystem {
                     return;
                 }
 
+                PlayerRef creditPlayerRef = Universe.get().getPlayer(creditPlayer.getUuid());
                 int zoneId = resolveZoneIdFromPosition(store, ref, worldName);
-                int maxUnlocked = configManager.getZonePermissionsConfig().getMaxAccessibleZone(creditPlayer);
+                int maxUnlocked = creditPlayerRef != null
+                    ? configManager.getZonePermissionsConfig().getMaxAccessibleZone(creditPlayerRef)
+                    : 1;
                 int lootZone = Math.min(zoneId, maxUnlocked);
 
                 if (lootZone < 1) {
@@ -164,9 +167,9 @@ public class MobFragmentDropSystem {
                 TransformComponent transform = (TransformComponent) store.getComponent(ref, TransformComponent.getComponentType());
                 if (transform == null) return;
 
-                Vector3d pos = transform.getPosition().clone().add(0.0, 1.0, 0.0);
+                org.joml.Vector3d pos = new org.joml.Vector3d(transform.getPosition()).add(0.0, 1.0, 0.0);
                 HeadRotation headRotation = (HeadRotation) store.getComponent(ref, HeadRotation.getComponentType());
-                Vector3f rot = headRotation != null ? headRotation.getRotation().clone() : new Vector3f(0f, 0f, 0f);
+                com.hypixel.hytale.math.vector.Rotation3fc rot = headRotation != null ? headRotation.getRotation() : com.hypixel.hytale.math.vector.Rotation3f.ZERO;
 
                 Holder[] itemEntities = ItemComponent.generateItemDrops(store, List.of(new ItemStack(itemId, fragments)), pos, rot);
                 commandBuffer.addEntities(itemEntities, AddReason.SPAWN);
@@ -219,8 +222,8 @@ public class MobFragmentDropSystem {
         TransformComponent transform = (TransformComponent) store.getComponent(ref, TransformComponent.getComponentType());
         if (transform != null) {
             DifficultyZone zone = ZoneCalculator.getZoneAtPosition(
-                    transform.getPosition().getX(),
-                    transform.getPosition().getZ(),
+                    transform.getPosition().x,
+                    transform.getPosition().z,
                     worldName,
                     configManager.getZoneConfig());
             if (zone != null) return zone.getZoneId();

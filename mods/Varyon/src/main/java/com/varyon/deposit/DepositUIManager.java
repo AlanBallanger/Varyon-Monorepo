@@ -26,28 +26,27 @@ public class DepositUIManager {
     }
 
     public void openDepositUI(@Nonnull Player player) {
+        PlayerRef playerRef = com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(player.getUuid());
+        if (playerRef == null) {
+            LOGGER.at(Level.WARNING).log("PlayerRef is null for player");
+            return;
+        }
         try {
-            PlayerRef playerRef = com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(player.getUuid());
-            if (playerRef == null) {
-                LOGGER.at(Level.WARNING).log("PlayerRef is null for player");
-                return;
-            }
-
             FactionManager.Faction faction = factionManager.getFaction(playerRef);
             if (faction == null) {
-                player.sendMessage(Message.raw("Vous n'appartenez à aucune faction.").color(Color.RED));
+                playerRef.sendMessage(Message.raw("Vous n'appartenez à aucune faction.").color(Color.RED));
                 return;
             }
 
             int amount = essenceManager.getEssenceDisplay(playerRef.getUuid());
             if (amount <= 0) {
-                player.sendMessage(Message.raw("Vous n'avez pas de points de faction à déposer.").color(Color.YELLOW));
+                playerRef.sendMessage(Message.raw("Vous n'avez pas de points de faction à déposer.").color(Color.YELLOW));
                 return;
             }
 
             int contribution = amount * faction.getBalanceMultiplier();
             if (!essenceManager.canApplyGuildContribution(contribution)) {
-                player.sendMessage(Message.raw("Impossible de déposer : la jauge est verrouillée à cet extrême (contribution de votre faction refusée).").color(Color.RED));
+                playerRef.sendMessage(Message.raw("Impossible de déposer : la jauge est verrouillée à cet extrême (contribution de votre faction refusée).").color(Color.RED));
                 return;
             }
 
@@ -64,8 +63,8 @@ public class DepositUIManager {
 
             int newBalance = essenceManager.getGlobalBalance();
             int gaugeMax = essenceManager.getGuildGaugeAbsMax();
-            player.sendMessage(Message.raw("Déposé " + amount + " points de faction dans " + faction.getDisplayName()).color(Color.GREEN));
-            player.sendMessage(Message.raw(FactionManager.factionPointsAfterDepositLine(newBalance, gaugeMax, faction)).color(Color.YELLOW));
+            playerRef.sendMessage(Message.raw("Déposé " + amount + " points de faction dans " + faction.getDisplayName()).color(Color.GREEN));
+            playerRef.sendMessage(Message.raw(FactionManager.factionPointsAfterDepositLine(newBalance, gaugeMax, faction)).color(Color.YELLOW));
 
             try {
                 EventTitleUtil.showEventTitleToPlayer(
@@ -83,7 +82,7 @@ public class DepositUIManager {
 
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("Failed to execute deposit: " + e.getMessage());
-            player.sendMessage(Message.raw("Erreur lors du dépôt.").color(Color.RED));
+            playerRef.sendMessage(Message.raw("Erreur lors du dépôt.").color(Color.RED));
         }
     }
 }

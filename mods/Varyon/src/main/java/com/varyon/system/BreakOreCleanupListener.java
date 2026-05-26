@@ -6,7 +6,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -53,7 +53,7 @@ public class BreakOreCleanupListener extends EntityEventSystem<EntityStore, Brea
             boolean wasTracked = tracker.isPlayerPlaced(world, pos);
             tracker.remove(world, pos);
             if (wasTracked) {
-                LOGGER.at(Level.INFO).log("AntiExploit cleanup: removed " + world + ":" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + " block=" + blockId);
+                LOGGER.at(Level.INFO).log("AntiExploit cleanup: removed " + world + ":" + pos.x + "," + pos.y + "," + pos.z + " block=" + blockId);
             }
 
         } catch (Exception e) {

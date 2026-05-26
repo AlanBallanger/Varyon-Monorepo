@@ -48,7 +48,7 @@ public class OpenBossChestInteraction extends SimpleBlockInteraction {
                                      @Nonnull InteractionType type,
                                      @Nonnull InteractionContext context,
                                      @Nullable ItemStack itemInHand,
-                                     @Nonnull com.hypixel.hytale.math.vector.Vector3i pos,
+                                     @Nonnull org.joml.Vector3i pos,
                                      @Nonnull CooldownHandler cooldownHandler) {
 
         Ref<EntityStore> ref = context.getEntity();
@@ -132,11 +132,11 @@ public class OpenBossChestInteraction extends SimpleBlockInteraction {
                                              @Nonnull InteractionContext context,
                                              @Nullable ItemStack itemInHand,
                                              @Nonnull World world,
-                                             @Nonnull com.hypixel.hytale.math.vector.Vector3i targetBlock) {
+                                             @Nonnull org.joml.Vector3i targetBlock) {
         // Nothing to simulate
     }
 
-    private void playSound(World world, com.hypixel.hytale.math.vector.Vector3i pos, BlockType blockType, String stateName,
+    private void playSound(World world, org.joml.Vector3i pos, BlockType blockType, String stateName,
                            WorldChunk chunk, BlockType originalBlockType,
                            Ref<EntityStore> ref, CommandBuffer<EntityStore> commandBuffer) {
         BlockType interactionState = blockType.getBlockForState(stateName);
@@ -144,9 +144,9 @@ public class OpenBossChestInteraction extends SimpleBlockInteraction {
             int soundEventIndex = interactionState.getInteractionSoundEventIndex();
             if (soundEventIndex != 0) {
                 int rotationIndex = chunk.getRotationIndex(pos.x, pos.y, pos.z);
-                com.hypixel.hytale.math.vector.Vector3d soundPos = new com.hypixel.hytale.math.vector.Vector3d();
+                org.joml.Vector3d soundPos = new org.joml.Vector3d();
                 originalBlockType.getBlockCenter(rotationIndex, soundPos);
-                soundPos.add(pos);
+                soundPos.add(pos.x, pos.y, pos.z);
                 SoundUtil.playSoundEvent3d(soundEventIndex, com.hypixel.hytale.protocol.SoundCategory.SFX, soundPos, commandBuffer);
             }
         }

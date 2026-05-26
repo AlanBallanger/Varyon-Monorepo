@@ -1143,14 +1143,18 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private List<ShopLocationView> snapshotShopLocations(Ref<EntityStore> ref, Store<EntityStore> store) {
         Player player = store.getComponent(ref, Player.getComponentType());
         String currentWorld = null;
-        com.hypixel.hytale.math.vector.Vector3d playerPosition = null;
+        org.joml.Vector3d playerPosition = null;
 
         if (player != null) {
-            World world = player.getWorld();
-            currentWorld = world != null ? world.getName() : null;
-
-            var transformComponent = player.getTransformComponent();
-            playerPosition = transformComponent != null ? transformComponent.getPosition() : null;
+            com.hypixel.hytale.server.core.universe.PlayerRef _pr = store.getComponent(ref, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType());
+            if (_pr != null) {
+                com.hypixel.hytale.server.core.universe.world.World _w = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(_pr.getWorldUuid());
+                currentWorld = _w != null ? _w.getName() : null;
+            }
+            Object _tc = store.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+            if (_tc instanceof com.hypixel.hytale.server.core.modules.entity.component.TransformComponent tc) {
+                playerPosition = tc.getPosition();
+            }
         }
 
         BossShopConfig shopConfig = plugin.getShopConfig();
@@ -1684,9 +1688,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
-        World world = player.getWorld();
-        var transformComponent = player.getTransformComponent();
-        com.hypixel.hytale.math.vector.Vector3d rawPosition = transformComponent != null ? transformComponent.getPosition() : null;
+        com.hypixel.hytale.server.core.universe.PlayerRef _aPR = store.getComponent(ref, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType());
+        World world = _aPR != null ? com.hypixel.hytale.server.core.universe.Universe.get().getWorld(_aPR.getWorldUuid()) : null;
+        Object _aTc = store.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+        org.joml.Vector3d rawPosition = _aTc instanceof com.hypixel.hytale.server.core.modules.entity.component.TransformComponent _atcr ? _atcr.getPosition() : null;
         if (world == null || rawPosition == null) {
             arenaStatusText = "Could not resolve world/position; arena not added.";
             rebuild();

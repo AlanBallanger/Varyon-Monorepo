@@ -194,16 +194,18 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 pendingProfessionHudInit.put(ref.getUuid(), ref);
             });
             getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
-                Player player = event.getPlayer();
-                if (player == null || professionManager == null) return;
-                UUID uid = player.getUuid();
-                PlayerRef connectRef = pendingProfessionHudInit.remove(uid);
-                if (connectRef == null) return;
-
+                if (professionManager == null) return;
                 @SuppressWarnings("rawtypes") Ref entityRef = event.getPlayerRef();
                 if (entityRef == null) return;
                 @SuppressWarnings("rawtypes") Store store = entityRef.getStore();
                 if (store == null) return;
+                @SuppressWarnings("unchecked") PlayerRef connectRefLookup = (PlayerRef) store.getComponent(entityRef, PlayerRef.getComponentType());
+                UUID uid = connectRefLookup != null ? connectRefLookup.getUuid() : null;
+                if (uid == null) return;
+                PlayerRef connectRef = pendingProfessionHudInit.remove(uid);
+                if (connectRef == null) return;
+                Player player = event.getPlayer();
+                if (player == null) return;
                 World world = ((EntityStore) store.getExternalData()).getWorld();
                 if (world == null) return;
 
@@ -229,7 +231,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 if (!isOreBag && !isCropBag && !isWoodBag) return;
                 Player player = event.getPlayer();
                 if (player == null) return;
-                PlayerRef ref = player.getPlayerRef();
+                Ref<EntityStore> playerEntityRef = event.getPlayerRef();
+                PlayerRef ref = playerEntityRef != null ? playerEntityRef.getStore().getComponent(playerEntityRef, PlayerRef.getComponentType()) : null;
                 if (ref == null || professionManager == null) { event.setCancelled(true); return; }
                 PlayerAccount acc = professionManager.getAccount(ref.getUuid());
                 boolean ok;
@@ -249,7 +252,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 }
                 if (!ok) {
                     event.setCancelled(true);
-                    player.sendMessage(com.hypixel.hytale.server.core.Message.raw(msg)
+                    ref.sendMessage(com.hypixel.hytale.server.core.Message.raw(msg)
                         .color(new java.awt.Color(200, 50, 50)));
                 }
             });
@@ -260,12 +263,13 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     if (restrictId != null && TalentItemRestrictionSystem.getMessage(restrictId) != null) {
                         Player restrictPlayer = event.getPlayer();
                         if (restrictPlayer != null) {
-                            PlayerRef restrictRef = restrictPlayer.getPlayerRef();
+                            Ref<EntityStore> restrictEntityRef = event.getPlayerRef();
+                            PlayerRef restrictRef = restrictEntityRef != null ? restrictEntityRef.getStore().getComponent(restrictEntityRef, PlayerRef.getComponentType()) : null;
                             PlayerAccount restrictAcc = restrictRef != null && professionManager != null
                                 ? professionManager.getAccount(restrictRef.getUuid()) : null;
                             if (!TalentItemRestrictionSystem.isAllowed(restrictId, restrictAcc)) {
                                 event.setCancelled(true);
-                                restrictPlayer.sendMessage(com.hypixel.hytale.server.core.Message.raw(
+                                restrictRef.sendMessage(com.hypixel.hytale.server.core.Message.raw(
                                     TalentItemRestrictionSystem.getMessage(restrictId))
                                     .color(new java.awt.Color(200, 50, 50)));
                                 return;
@@ -284,7 +288,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 String roleLower = role.toLowerCase(java.util.Locale.ROOT);
                 Player player = event.getPlayer();
                 if (player == null) return;
-                PlayerRef milkRef = player.getPlayerRef();
+                Ref<EntityStore> milkEntityRef = event.getPlayerRef();
+                PlayerRef milkRef = milkEntityRef != null ? milkEntityRef.getStore().getComponent(milkEntityRef, PlayerRef.getComponentType()) : null;
                 if (milkRef == null || farmerAnimalDropSystem == null) return;
                 farmerAnimalDropSystem.onMilkInteract(milkRef, roleLower);
             });

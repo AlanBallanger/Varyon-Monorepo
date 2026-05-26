@@ -44,9 +44,9 @@ public class VoidPortalTickSystem extends EntityTickingSystem<EntityStore> {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (playerRef == null || player == null) return;
 
-        double px = playerRef.getTransform().getPosition().getX();
-        double py = playerRef.getTransform().getPosition().getY();
-        double pz = playerRef.getTransform().getPosition().getZ();
+        double px = playerRef.getTransform().getPosition().x;
+        double py = playerRef.getTransform().getPosition().y;
+        double pz = playerRef.getTransform().getPosition().z;
 
         int bx = (int) Math.floor(px);
         int by = (int) Math.floor(py);

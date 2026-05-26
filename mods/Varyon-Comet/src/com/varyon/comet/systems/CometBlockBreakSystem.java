@@ -44,7 +44,7 @@ public class CometBlockBreakSystem extends EntityEventSystem<EntityStore, BreakB
             @Nonnull CommandBuffer<EntityStore> commandBuffer,
             @Nonnull BreakBlockEvent event) {
 
-        com.hypixel.hytale.math.vector.Vector3i blockPos = event.getTargetBlock();
+        org.joml.Vector3i blockPos = event.getTargetBlock();
         if (blockPos == null) return;
 
         // Position-based: only treat as comet if this position is registered

@@ -131,13 +131,15 @@ public class ShopUIPage extends InteractiveCustomUIPage<ShopUIPage.EventDataClas
 
             int fragmentCount = countItems(container, item.getCostItem());
             if (fragmentCount < item.getCostAmount()) {
-                player.sendMessage(Message.raw("Fragments insuffisants.").color(Color.RED));
+                PlayerRef playerRefMsg = store.getComponent(ref, PlayerRef.getComponentType());
+                if (playerRefMsg != null) playerRefMsg.sendMessage(Message.raw("Fragments insuffisants.").color(Color.RED));
                 return;
             }
 
             ItemStack toRemove = new ItemStack(item.getCostItem(), item.getCostAmount());
             if (!container.canRemoveItemStack(toRemove)) {
-                player.sendMessage(Message.raw("Fragments insuffisants.").color(Color.RED));
+                PlayerRef playerRefMsg = store.getComponent(ref, PlayerRef.getComponentType());
+                if (playerRefMsg != null) playerRefMsg.sendMessage(Message.raw("Fragments insuffisants.").color(Color.RED));
                 return;
             }
             container.removeItemStack(toRemove);
@@ -152,7 +154,7 @@ public class ShopUIPage extends InteractiveCustomUIPage<ShopUIPage.EventDataClas
             buildBuyButtonStates(ref, store, cb);
             sendUpdate(cb, new UIEventBuilder(), false);
 
-            player.sendMessage(Message.raw("Achat réussi: " + item.getLabel()).color(Color.GREEN));
+            if (playerRef != null) playerRef.sendMessage(Message.raw("Achat réussi: " + item.getLabel()).color(Color.GREEN));
         }
     }
 

@@ -70,11 +70,8 @@ public final class TalentItemPlaceRestrictionSystem extends EntityEventSystem<En
         if (!allowed) {
             event.setCancelled(true);
             try {
-                Player player = playerRef.getComponent(Player.getComponentType());
-                if (player != null) {
-                    player.sendMessage(Message.raw(TalentItemRestrictionSystem.getMessage(itemId, "poser"))
-                        .color(new Color(200, 50, 50)));
-                }
+                playerRef.sendMessage(Message.raw(TalentItemRestrictionSystem.getMessage(itemId, "poser"))
+                    .color(new Color(200, 50, 50)));
             } catch (Exception ignored) {}
         }
     }

@@ -77,7 +77,7 @@ public final class FloatingDamageParticles {
         String iconSystem = (iconId != null && !iconId.isBlank()) ? iconId.trim() : null;
         font = resolveCriticalDigitFont(resolved, font, iconSystem, damage);
 
-        com.hypixel.hytale.math.vector.Vector3d rawBase = transform.getPosition();
+        org.joml.Vector3d rawBase = transform.getPosition();
         Vector3d base = new Vector3d(rawBase.x, rawBase.y, rawBase.z);
         double y = base.y + HEIGHT_ABOVE_ENTITY;
 
@@ -106,7 +106,7 @@ public final class FloatingDamageParticles {
                     continue;
                 }
                 double[] right = new double[2];
-                com.hypixel.hytale.math.vector.Vector3d rawVpos = vt.getPosition();
+                org.joml.Vector3d rawVpos = vt.getPosition();
                 Vector3d vpos = new Vector3d(rawVpos.x, rawVpos.y, rawVpos.z);
                 resolveHorizontalRight(base, vpos, transform, right);
                 float distScale = distanceDisplayScale(vpos.x, vpos.y, vpos.z, base.x, y, base.z);
@@ -274,8 +274,8 @@ public final class FloatingDamageParticles {
                 return;
             }
         }
-        com.hypixel.hytale.math.vector.Vector3f rot = targetTransform.getRotation();
-        double yawRad = Math.toRadians(rot.getYaw());
+        com.hypixel.hytale.math.vector.Rotation3f rot = targetTransform.getRotation();
+        double yawRad = Math.toRadians(rot.yaw());
         outRightXZ[0] = -Math.cos(yawRad);
         outRightXZ[1] = -Math.sin(yawRad);
     }

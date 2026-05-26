@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -53,7 +53,7 @@ public class PlacedOreTracker {
     }
 
     private String key(@Nonnull String world, @Nonnull Vector3i pos) {
-        return world + ":" + pos.getX() + ":" + pos.getY() + ":" + pos.getZ();
+        return world + ":" + pos.x + ":" + pos.y + ":" + pos.z;
     }
 
     private void load() {

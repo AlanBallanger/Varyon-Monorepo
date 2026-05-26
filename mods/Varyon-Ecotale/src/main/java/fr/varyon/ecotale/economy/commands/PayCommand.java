@@ -104,7 +104,7 @@ public class PayCommand extends AbstractAsyncCommand {
             switch (result) {
                 case SUCCESS -> {
                     double fee = amount * VaryonEcotalePlugin.getInstance().getEconomyConfig().getTransferFee();
-                    player.sendMessage(Message.join(
+                    senderRef.sendMessage(Message.join(
                         Message.raw("Payment sent! ").color(Color.GREEN),
                         Message.raw(VaryonEcotalePlugin.getInstance().getEconomyConfig().format(amount)).color(new Color(50, 205, 50)).bold(true),
                         fee > 0 ? Message.raw(" (Fee: " + VaryonEcotalePlugin.getInstance().getEconomyConfig().format(fee) + ")").color(Color.GRAY) : Message.raw("")
@@ -112,19 +112,19 @@ public class PayCommand extends AbstractAsyncCommand {
                 }
                 case INSUFFICIENT_FUNDS -> {
                     double balance = VaryonEcotalePlugin.getInstance().getEconomyManager().getBalance(senderRef.getUuid());
-                    player.sendMessage(Message.join(
+                    senderRef.sendMessage(Message.join(
                         Message.raw("Insufficient funds. Your balance: ").color(Color.RED),
                         Message.raw(VaryonEcotalePlugin.getInstance().getEconomyConfig().format(balance)).color(Color.WHITE)
                     ));
                 }
                 case SELF_TRANSFER -> {
-                    player.sendMessage(Message.raw("You cannot send money to yourself").color(Color.RED));
+                    senderRef.sendMessage(Message.raw("You cannot send money to yourself").color(Color.RED));
                 }
                 case INVALID_AMOUNT -> {
-                    player.sendMessage(Message.raw("Invalid amount").color(Color.RED));
+                    senderRef.sendMessage(Message.raw("Invalid amount").color(Color.RED));
                 }
                 case RECIPIENT_MAX_BALANCE -> {
-                    player.sendMessage(Message.raw("Recipient has reached maximum balance").color(Color.RED));
+                    senderRef.sendMessage(Message.raw("Recipient has reached maximum balance").color(Color.RED));
                 }
             }
 

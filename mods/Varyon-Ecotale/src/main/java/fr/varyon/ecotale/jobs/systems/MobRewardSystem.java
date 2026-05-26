@@ -270,7 +270,7 @@ public class MobRewardSystem extends RefChangeSystem<EntityStore, DeathComponent
         // VIP players get bonus chance added to base drop chance
         // ─────────────────────────────────────────────────────────────
         int baseDropChance = tier.getDropChance();
-        int vipChanceBonus = VaryonEcotalePlugin.getInstance().getJobsModule().getConfig().getVipMultipliers().calculateChanceBonus(killer);
+        int vipChanceBonus = VaryonEcotalePlugin.getInstance().getJobsModule().getConfig().getVipMultipliers().calculateChanceBonus(killerPlayerRef);
         int effectiveDropChance = Math.min(baseDropChance + vipChanceBonus, 100);
         
         if (effectiveDropChance < 100) {
@@ -309,7 +309,7 @@ public class MobRewardSystem extends RefChangeSystem<EntityStore, DeathComponent
         }
         
         // VIP Multiplier (killer implements CommandSender which has hasPermission)
-        float vipMultiplier = VaryonEcotalePlugin.getInstance().getJobsModule().getConfig().getVipMultipliers().calculateMultiplier(killer);
+        float vipMultiplier = VaryonEcotalePlugin.getInstance().getJobsModule().getConfig().getVipMultipliers().calculateMultiplier(killerPlayerRef);
 
         // Apply anti-farm penalty & VIP
         float exactCoins = baseCoins * antiFarmMultiplier * vipMultiplier;

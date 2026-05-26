@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ProfessionXpHud extends CustomUIHud {
 
+    public static final String HUD_KEY = "vrpg_profession_xp_hud";
+
     private static final ConcurrentHashMap<UUID, ProfessionXpHud> INSTANCES = new ConcurrentHashMap<>();
 
     private static final PatchStyle TRANSPARENT = new PatchStyle().setColor(Value.of("#00000000"));
@@ -41,7 +43,7 @@ public final class ProfessionXpHud extends CustomUIHud {
     @Nullable private String lastJob2Id;
 
     public ProfessionXpHud(@Nonnull PlayerRef playerRef) {
-        super(playerRef);
+        super(playerRef, HUD_KEY);
     }
 
     @Nonnull
@@ -54,7 +56,7 @@ public final class ProfessionXpHud extends CustomUIHud {
         ProfessionXpHud race = INSTANCES.putIfAbsent(uuid, hud);
         if (race != null) return race;
 
-        player.getHudManager().setCustomHud(playerRef, hud);
+        player.getHudManager().addCustomHud(playerRef, hud);
         return hud;
     }
 

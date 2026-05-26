@@ -66,11 +66,12 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
                 if (player == null) {
                     continue;
                 }
-                TransformComponent tc = player.getTransformComponent();
+                Object _tcObj = st.getComponent(er, TransformComponent.getComponentType());
+                TransformComponent tc = _tcObj instanceof TransformComponent ? (TransformComponent) _tcObj : null;
                 if (tc == null) {
                     continue;
                 }
-                com.hypixel.hytale.math.vector.Vector3d rawPlayerPos = tc.getPosition();
+                org.joml.Vector3d rawPlayerPos = tc.getPosition();
                 if (rawPlayerPos == null) {
                     continue;
                 }

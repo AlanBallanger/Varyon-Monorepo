@@ -8,7 +8,7 @@ import com.varyon.comet.systems.*;
 import com.varyon.comet.wave.*;
 
 
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 

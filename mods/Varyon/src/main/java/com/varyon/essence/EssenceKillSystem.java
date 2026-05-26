@@ -107,22 +107,16 @@ public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEv
             SafeZoneManager szm = VaryonPlugin.getStaticSafeZoneManager();
             if (szm != null) {
                 TransformComponent transform = store.getComponent(killerRef, TransformComponent.getComponentType());
-                if (transform != null && !szm.isInSafeZone(transform.getPosition().getX(), transform.getPosition().getZ())) {
+                if (transform != null && !szm.isInSafeZone(transform.getPosition().x, transform.getPosition().z)) {
                     pvpMultiplier = rewardsConfig.getPvpEssenceMultiplier();
                 }
             }
 
             double essenceGained = baseReward * zoneMultiplier * lootMultiplier * pvpMultiplier;
             if (essenceGained <= 0) return;
-            Player player = null;
-            try { player = (Player) store.getComponent(killerRef, Player.getComponentType()); } catch (Exception ignored) {}
-            if (player != null) {
-                double current = essenceManager.getEssence(playerUuid);
-                int cap = configManager.getZonePermissionsConfig().getEffectiveCap(player, current);
-                essenceManager.addEssenceCapped(playerUuid, playerUuid.toString(), essenceGained, cap);
-            } else {
-                essenceManager.addEssence(playerUuid, playerUuid.toString(), essenceGained);
-            }
+            double current = essenceManager.getEssence(playerUuid);
+            int cap = configManager.getZonePermissionsConfig().getEffectiveCap(playerRef, current);
+            essenceManager.addEssenceCapped(playerUuid, playerUuid.toString(), essenceGained, cap);
 
             LOGGER.at(Level.INFO).log("Kill: mob=" + mobId + " +" + String.format("%.2f", essenceGained) + " faction points (base=" + baseReward + " loot=" + String.format("%.2f", lootMultiplier) + " zone=" + String.format("%.2f", zoneMultiplier) + " pvp=" + pvpMultiplier + ")");
         } catch (Exception e) {

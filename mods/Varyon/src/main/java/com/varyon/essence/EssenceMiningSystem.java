@@ -73,7 +73,7 @@ public class EssenceMiningSystem extends EntityEventSystem<EntityStore, BreakBlo
 
             if (event.getTargetBlock() != null) {
                 boolean placed = placedOreTracker.isPlayerPlaced(world, event.getTargetBlock());
-                LOGGER.at(Level.INFO).log("AntiExploit check: world=" + world + " pos=" + event.getTargetBlock().getX() + "," + event.getTargetBlock().getY() + "," + event.getTargetBlock().getZ() + " playerPlaced=" + placed);
+                LOGGER.at(Level.INFO).log("AntiExploit check: world=" + world + " pos=" + event.getTargetBlock().x + "," + event.getTargetBlock().y + "," + event.getTargetBlock().z + " playerPlaced=" + placed);
                 if (placed) {
                     return;
                 }
@@ -90,7 +90,7 @@ public class EssenceMiningSystem extends EntityEventSystem<EntityStore, BreakBlo
             SafeZoneManager szm = VaryonPlugin.getStaticSafeZoneManager();
             if (szm != null) {
                 TransformComponent transform = store.getComponent(minerRef, TransformComponent.getComponentType());
-                if (transform != null && !szm.isInSafeZone(transform.getPosition().getX(), transform.getPosition().getZ())) {
+                if (transform != null && !szm.isInSafeZone(transform.getPosition().x, transform.getPosition().z)) {
                     pvpMultiplier = rewardsConfig.getPvpEssenceMultiplier();
                 }
             }
@@ -98,15 +98,9 @@ public class EssenceMiningSystem extends EntityEventSystem<EntityStore, BreakBlo
             double essenceGained = baseReward * zoneMultiplier * lootMultiplier * pvpMultiplier;
             if (essenceGained <= 0) return;
 
-            Player player = null;
-            try { player = (Player) store.getComponent(minerRef, Player.getComponentType()); } catch (Exception ignored) {}
-            if (player != null) {
-                double current = essenceManager.getEssence(playerUuid);
-                int cap = configManager.getZonePermissionsConfig().getEffectiveCap(player, current);
-                essenceManager.addEssenceCapped(playerUuid, playerUuid.toString(), essenceGained, cap);
-            } else {
-                essenceManager.addEssence(playerUuid, playerUuid.toString(), essenceGained);
-            }
+            double current = essenceManager.getEssence(playerUuid);
+            int cap = configManager.getZonePermissionsConfig().getEffectiveCap(playerRef, current);
+            essenceManager.addEssenceCapped(playerUuid, playerUuid.toString(), essenceGained, cap);
 
             LOGGER.at(Level.INFO).log("Mine: block=" + blockId + " +" + String.format("%.2f", essenceGained) + " faction points (base=" + baseReward + " zone=" + zoneMultiplier + " loot=" + String.format("%.2f", lootMultiplier) + " pvp=" + pvpMultiplier + ")");
         } catch (Exception e) {

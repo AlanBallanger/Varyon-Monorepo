@@ -14,7 +14,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.query.Query;
 import com.varyon.comet.util.VecUtil;
 import org.joml.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.projectile.component.Projectile;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -197,7 +197,7 @@ public class CometFallingSystem {
                                 if (position.y <= targetY + 1.0 || timedOut) {
                                     LOGGER.fine("Fallback: Projectile " + entityUUID + " hit ground" + (timedOut ? " (timed out)" : ""));
 
-                                    com.hypixel.hytale.math.vector.Vector3i actualBlockPos;
+                                    org.joml.Vector3i actualBlockPos;
 
                                     if (timedOut) {
                                         // Use original target position when timed out (projectile stuck)
@@ -221,7 +221,7 @@ public class CometFallingSystem {
                                             blockY = landingBlockY + 1;
                                         }
 
-                                        actualBlockPos = new com.hypixel.hytale.math.vector.Vector3i(
+                                        actualBlockPos = new org.joml.Vector3i(
                                                 blockX, blockY, blockZ);
                                     }
 
@@ -376,7 +376,7 @@ public class CometFallingSystem {
             if (commandBuffer == null) return;
 
             Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
-                    .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, VecUtil.toHytale(spawnPos), VecUtil.toHytale(direction));
+                    .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, spawnPos, VecUtil.toHytale(direction));
 
             if (projectileRef != null) {
                 trackProjectile(projectileUUID, targetBlockPos, spawnPos.y, tier, themeId, ownerUUID, zoneId);

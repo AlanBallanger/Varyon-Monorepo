@@ -1,7 +1,6 @@
 package fr.varyon.vrpg.commands;
 
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import org.joml.Vector3d;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
@@ -9,9 +8,9 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -43,7 +42,7 @@ public final class VpaSurfaceCommand extends AbstractAsyncCommand {
     private final Map<UUID, Long> lastUse = new ConcurrentHashMap<>();
 
     public VpaSurfaceCommand() {
-        super("surface", "Wagon Express — retour à la surface");
+        super("surface", "Wagon Express -- retour a la surface");
         this.addAliases("vps");
     }
 
@@ -51,7 +50,7 @@ public final class VpaSurfaceCommand extends AbstractAsyncCommand {
     @Override
     protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
         CommandSender sender = ctx.sender();
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof PlayerRef playerRef)) {
             sender.sendMessage(Message.raw("Commande joueur uniquement.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
@@ -59,24 +58,22 @@ public final class VpaSurfaceCommand extends AbstractAsyncCommand {
         ProfessionManager mgr = VaryonRpgPlugin.getInstance().getProfessionManager();
         if (mgr == null) { LOGGER.atWarning().log("[Surface] mgr null"); return CompletableFuture.completedFuture(null); }
 
-        PlayerRef playerRef = player.getPlayerRef();
-        if (playerRef == null) { LOGGER.atWarning().log("[Surface] playerRef null"); return CompletableFuture.completedFuture(null); }
         UUID uuid = playerRef.getUuid();
 
         PlayerAccount acc = mgr.getAccount(uuid);
         if (acc == null || !acc.isActive(Profession.MINEUR)) {
-            sender.sendMessage(Message.raw("Vous devez être Mineur actif pour utiliser Wagon Express.").color(Color.RED));
+            sender.sendMessage(Message.raw("Vous devez etre Mineur actif pour utiliser Wagon Express.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
         int rank = acc.getTalentRank(Profession.MINEUR, "11");
         if (rank <= 0) {
-            sender.sendMessage(Message.raw("Talent non débloqué.").color(Color.RED));
+            sender.sendMessage(Message.raw("Talent non debloque.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
         long cooldownMs = COOLDOWN_MS[Math.min(rank, COOLDOWN_MS.length) - 1];
-        boolean isOp = player.hasPermission("*");
+        boolean isOp = playerRef.hasPermission("*");
         long now = System.currentTimeMillis();
         if (!isOp) {
             Long lastUsed = lastUse.get(uuid);
@@ -86,17 +83,17 @@ public final class VpaSurfaceCommand extends AbstractAsyncCommand {
                     long minutes = remaining / 60_000;
                     long seconds = (remaining % 60_000) / 1_000;
                     sender.sendMessage(Message.raw(
-                        "Wagon Express en rechargement — disponible dans " + minutes + "m " + seconds + "s.")
+                        "Wagon Express en rechargement -- disponible dans " + minutes + "m " + seconds + "s.")
                         .color(new Color(255, 165, 0)));
                     return CompletableFuture.completedFuture(null);
                 }
             }
         }
 
-        World world = player.getWorld();
+        World world = Universe.get().getWorld(playerRef.getWorldUuid());
         if (world == null) {
             LOGGER.atWarning().log("[Surface] world null");
-            sender.sendMessage(Message.raw("Erreur lors de la téléportation.").color(Color.RED));
+            sender.sendMessage(Message.raw("Erreur lors de la teleportation.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
@@ -106,7 +103,7 @@ public final class VpaSurfaceCommand extends AbstractAsyncCommand {
                 Ref<EntityStore> ref = playerRef.getReference();
                 if (ref == null || !ref.isValid()) {
                     LOGGER.atWarning().log("[Surface] ref null/invalid");
-                    sender.sendMessage(Message.raw("Erreur lors de la téléportation.").color(Color.RED));
+                    sender.sendMessage(Message.raw("Erreur lors de la teleportation.").color(Color.RED));
                     done.complete(null);
                     return;
                 }
@@ -114,7 +111,7 @@ public final class VpaSurfaceCommand extends AbstractAsyncCommand {
                 TransformComponent tc = store.getComponent(ref, TransformComponent.getComponentType());
                 if (tc == null) {
                     LOGGER.atWarning().log("[Surface] TransformComponent null");
-                    sender.sendMessage(Message.raw("Erreur lors de la téléportation.").color(Color.RED));
+                    sender.sendMessage(Message.raw("Erreur lors de la teleportation.").color(Color.RED));
                     done.complete(null);
                     return;
                 }
@@ -127,19 +124,19 @@ public final class VpaSurfaceCommand extends AbstractAsyncCommand {
 
                 int surfaceY = findSurface(world, px, py, pz);
                 if (surfaceY < 0) {
-                    sender.sendMessage(Message.raw("Aucune surface trouvée au-dessus de vous.").color(Color.RED));
+                    sender.sendMessage(Message.raw("Aucune surface trouvee au-dessus de vous.").color(Color.RED));
                     done.complete(null);
                     return;
                 }
 
-                Teleport teleport = Teleport.createForPlayer(world, new Vector3d(pos.x, surfaceY, pos.z), new Vector3f(0, 0, 0));
+                Teleport teleport = Teleport.createForPlayer(world, new Vector3d(pos.x, surfaceY, pos.z), com.hypixel.hytale.math.vector.Rotation3f.ZERO);
                 store.addComponent(ref, Teleport.getComponentType(), teleport);
                 lastUse.put(uuid, now);
-                sender.sendMessage(Message.raw("Wagon Express — arrivée en surface !").color(new Color(50, 205, 50)));
+                sender.sendMessage(Message.raw("Wagon Express -- arrivee en surface !").color(new Color(50, 205, 50)));
                 done.complete(null);
             } catch (Exception e) {
-                LOGGER.atSevere().withCause(e).log("[Surface] erreur téléportation");
-                sender.sendMessage(Message.raw("Erreur lors de la téléportation.").color(Color.RED));
+                LOGGER.atSevere().withCause(e).log("[Surface] erreur teleportation");
+                sender.sendMessage(Message.raw("Erreur lors de la teleportation.").color(Color.RED));
                 done.complete(null);
             }
         });
