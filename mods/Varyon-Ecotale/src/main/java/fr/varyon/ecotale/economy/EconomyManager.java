@@ -1,11 +1,13 @@
 package fr.varyon.ecotale.economy;
 
 import fr.varyon.ecotale.VaryonEcotalePlugin;
+import fr.varyon.ecotale.coins.currency.TokenType;
 import fr.varyon.ecotale.economy.events.BalanceChangeEvent;
 import fr.varyon.ecotale.economy.events.EcotaleEvents;
 import fr.varyon.ecotale.economy.events.TransactionEvent;
 import fr.varyon.ecotale.economy.storage.H2StorageProvider;
 import fr.varyon.ecotale.economy.storage.JsonStorageProvider;
+import fr.varyon.ecotale.economy.storage.LegacyEcotaleEconomyDataMigrator;
 import fr.varyon.ecotale.economy.storage.MySQLStorageProvider;
 import fr.varyon.ecotale.economy.storage.StorageProvider;
 import fr.varyon.ecotale.economy.systems.BalanceHudSystem;
@@ -17,6 +19,7 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -95,6 +98,8 @@ public class EconomyManager {
     public EconomyManager(@Nonnull Object plugin) {
         this.logger = HytaleLogger.getLogger().getSubLogger("Ecotale");
         
+        LegacyEcotaleEconomyDataMigrator.migrateIfNeeded(logger);
+
         // Initialize storage provider based on config
         String providerType = VaryonEcotalePlugin.getInstance().getEconomyConfig().getStorageProvider().toLowerCase();
         switch (providerType) {
@@ -185,6 +190,10 @@ public class EconomyManager {
         PlayerBalance balance = cache.get(playerUuid);
         return balance != null ? balance.getBalance() : 0.0;
     }
+
+    public double getBalanceLoadingStorage(@Nonnull UUID playerUuid) {
+        return getOrLoadAccount(playerUuid).getBalance();
+    }
     
     public PlayerBalance getPlayerBalance(@Nonnull UUID playerUuid) {
         return cache.get(playerUuid);
@@ -246,7 +255,14 @@ public class EconomyManager {
         lock.lock();
         try {
             PlayerBalance balance = cache.get(playerUuid);
-            if (balance == null) return false;
+            if (balance == null) {
+                Boolean exists = storage.playerExists(playerUuid).join();
+                if (!Boolean.TRUE.equals(exists)) {
+                    return false;
+                }
+                balance = storage.loadPlayer(playerUuid).join();
+                cache.put(playerUuid, balance);
+            }
             
             double oldBalance = balance.getBalance();
             double newBalance = oldBalance - amount;
@@ -695,6 +711,74 @@ public class EconomyManager {
         }
         return uuid.toString().substring(0, UUID_PREVIEW_LENGTH) + "...";
     }
+
+    public String resolveDisplayNameForAdmin(@Nonnull UUID uuid) {
+        PlayerRef online = Universe.get().getPlayer(uuid);
+        if (online != null) {
+            return online.getUsername();
+        }
+        String saved = storage.getSavedDisplayName(uuid).join();
+        if (saved != null && !saved.isBlank()) {
+            return saved;
+        }
+        return uuid.toString().substring(0, UUID_PREVIEW_LENGTH) + "...";
+    }
+
+    public static final class AdminTargetResolve {
+        public final boolean success;
+        public final UUID uuid;
+        public final String displayName;
+        public final String errorMessage;
+
+        private AdminTargetResolve(boolean success, UUID uuid, String displayName, String errorMessage) {
+            this.success = success;
+            this.uuid = uuid;
+            this.displayName = displayName;
+            this.errorMessage = errorMessage;
+        }
+
+        public static AdminTargetResolve ok(UUID uuid, String displayName) {
+            return new AdminTargetResolve(true, uuid, displayName, null);
+        }
+
+        public static AdminTargetResolve fail(String message) {
+            return new AdminTargetResolve(false, null, null, message);
+        }
+    }
+
+    public AdminTargetResolve resolveAdminTargetByName(@Nonnull String rawName) {
+        String name = rawName.trim();
+        if (name.isEmpty()) {
+            return AdminTargetResolve.fail("Player name required.");
+        }
+        String lower = name.toLowerCase(Locale.ROOT);
+        for (PlayerRef pr : Universe.get().getPlayers()) {
+            if (pr.getUsername().equalsIgnoreCase(name)) {
+                return AdminTargetResolve.ok(pr.getUuid(), pr.getUsername());
+            }
+        }
+        List<PlayerRef> onlinePrefix = Universe.get().getPlayers().stream()
+            .filter(pr -> pr.getUsername().toLowerCase(Locale.ROOT).startsWith(lower))
+            .toList();
+        if (onlinePrefix.size() == 1) {
+            PlayerRef pr = onlinePrefix.get(0);
+            return AdminTargetResolve.ok(pr.getUuid(), pr.getUsername());
+        }
+        if (onlinePrefix.size() > 1) {
+            String names = onlinePrefix.stream().map(PlayerRef::getUsername).collect(Collectors.joining(", "));
+            return AdminTargetResolve.fail("Several online players match: " + names);
+        }
+
+        List<UUID> fromDb = storage.findUuidsBySavedPlayerName(name).join();
+        if (fromDb.isEmpty()) {
+            return AdminTargetResolve.fail("Unknown player (offline lookup needs a saved name in the database).");
+        }
+        if (fromDb.size() > 1) {
+            return AdminTargetResolve.fail("Several accounts match that name; use the full exact name.");
+        }
+        UUID u = fromDb.get(0);
+        return AdminTargetResolve.ok(u, resolveDisplayNameForAdmin(u));
+    }
     
     // ========== Rate Limiter ==========
 
@@ -703,6 +787,83 @@ public class EconomyManager {
     public boolean tryAcquireRateLimit(java.util.UUID uuid) { return rateLimiter.tryAcquire(uuid); }
     public void resetRateLimit(java.util.UUID uuid) { rateLimiter.resetBucket(uuid); }
     public void cleanupRateLimiter() { rateLimiter.cleanup(); }
+
+    // ========== Token Bank Operations ==========
+
+    /**
+     * Get a player's bank balance for a specific token type (cache-only).
+     * Returns 0 if the player isn't in cache.
+     */
+    public long getTokenBalance(@Nonnull UUID playerUuid, @Nonnull TokenType type) {
+        PlayerBalance pb = cache.get(playerUuid);
+        return pb != null ? pb.getTokenBalance(type) : 0L;
+    }
+
+    /**
+     * Get a player's bank balance for a specific token, loading from storage if needed.
+     */
+    public long getTokenBalanceLoadingStorage(@Nonnull UUID playerUuid, @Nonnull TokenType type) {
+        return getOrLoadAccount(playerUuid).getTokenBalance(type);
+    }
+
+    /**
+     * Deposit a token amount into the bank atomically.
+     * Tokens are tracked separately from coins and from each other.
+     */
+    public boolean depositToken(@Nonnull UUID playerUuid, @Nonnull TokenType type, long amount, String reason) {
+        if (amount <= 0L) return false;
+        ReentrantLock lock = getLock(playerUuid);
+        lock.lock();
+        try {
+            PlayerBalance balance = getOrLoadAccount(playerUuid);
+            if (balance == null) return false;
+            if (!balance.depositToken(type, amount)) return false;
+            dirtyPlayers.add(playerUuid);
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Withdraw a token amount from the bank atomically.
+     */
+    public boolean withdrawToken(@Nonnull UUID playerUuid, @Nonnull TokenType type, long amount, String reason) {
+        if (amount <= 0L) return false;
+        ReentrantLock lock = getLock(playerUuid);
+        lock.lock();
+        try {
+            PlayerBalance balance = cache.get(playerUuid);
+            if (balance == null) {
+                Boolean exists = storage.playerExists(playerUuid).join();
+                if (!Boolean.TRUE.equals(exists)) return false;
+                balance = storage.loadPlayer(playerUuid).join();
+                cache.put(playerUuid, balance);
+            }
+            if (!balance.withdrawToken(type, amount)) return false;
+            dirtyPlayers.add(playerUuid);
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Set a player's token bank balance to a specific amount.
+     */
+    public void setTokenBalance(@Nonnull UUID playerUuid, @Nonnull TokenType type, long amount, String reason) {
+        ReentrantLock lock = getLock(playerUuid);
+        lock.lock();
+        try {
+            PlayerBalance balance = getOrLoadAccount(playerUuid);
+            if (balance != null) {
+                balance.setTokenBalance(type, Math.max(0L, amount));
+                dirtyPlayers.add(playerUuid);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
 
     // ========== Result Enums ==========
     

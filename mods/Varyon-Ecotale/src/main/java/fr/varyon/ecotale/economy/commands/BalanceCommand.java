@@ -6,36 +6,31 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Balance command - shows player's current balance
- */
 public class BalanceCommand extends AbstractAsyncCommand {
-    
+
     public BalanceCommand() {
         super("bal", "Check your balance");
         this.addAliases("balance", "money");
     }
-    
-    @NonNullDecl
+
+    @NotNull
     @Override
     protected CompletableFuture<Void> executeAsync(CommandContext commandContext) {
-        CommandSender sender = commandContext.sender();
-        if (!(sender instanceof Player player)) {
+        if (!commandContext.isPlayer()) {
             commandContext.sendMessage(Message.raw("This command can only be used by players.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
-        Ref<EntityStore> ref = player.getReference();
+        Ref<EntityStore> ref = commandContext.senderAsPlayerRef();
         if (ref == null || !ref.isValid()) {
             commandContext.sendMessage(Message.raw("Error: Could not get player data.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
@@ -44,9 +39,10 @@ public class BalanceCommand extends AbstractAsyncCommand {
         Store<EntityStore> store = ref.getStore();
 
         var world = store.getExternalData().getWorld();
+        final Ref<EntityStore> finalRef = ref;
 
         return CompletableFuture.runAsync(() -> {
-            PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+            PlayerRef playerRef = store.getComponent(finalRef, PlayerRef.getComponentType());
             if (playerRef == null) {
                 commandContext.sendMessage(Message.raw("Error: Could not get player data.").color(Color.RED));
                 return;

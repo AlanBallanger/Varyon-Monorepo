@@ -3,10 +3,12 @@ package fr.varyon.ecotale.coins;
 import fr.varyon.ecotale.coins.commands.BankCommand;
 import fr.varyon.ecotale.coins.config.CoinConfig;
 import fr.varyon.ecotale.coins.currency.CoinAssetManager;
+import fr.varyon.ecotale.coins.interaction.EcotaleDepositCoinInteraction;
 import fr.varyon.ecotale.shared.ModuleInitializer;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.ShutdownReason;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 
 import java.nio.file.Path;
@@ -38,6 +40,17 @@ public class CoinsModule implements ModuleInitializer {
         Path assetPackPath = plugin.getDataDirectory().getParent().resolve("Varyon_Varyon-Ecotale");
         this.coinAssetManager = new CoinAssetManager(assetPackPath, plugin.getLogger());
         this.coinAssetManager.initialize();
+
+        try {
+            plugin.getCodecRegistry(Interaction.CODEC).register(
+                EcotaleDepositCoinInteraction.INTERACTION_ID,
+                EcotaleDepositCoinInteraction.class,
+                EcotaleDepositCoinInteraction.CODEC
+            );
+            EcotaleDepositCoinInteraction.registerAssets("fr.varyon:Varyon-Ecotale");
+        } catch (Exception e) {
+            plugin.getLogger().at(Level.WARNING).withCause(e).log("[Varyon-Ecotale] Could not register coin deposit interaction");
+        }
 
         plugin.getCommandRegistry().registerCommand(new BankCommand());
 

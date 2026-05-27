@@ -1,4 +1,4 @@
-﻿$E = "Ecotale_Common.ui";
+$E = "Ecotale_Common.ui";
 
 Group #BankRoot {
   Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0);
@@ -51,7 +51,7 @@ Group #BankRoot {
         }
         
         Label #PocketBalance {
-          Text: "$0";
+          Text: "--";
           Style: (FontSize: 20, TextColor: #FFD700, RenderBold: true, HorizontalAlignment: Center);
         }
       }
@@ -74,7 +74,7 @@ Group #BankRoot {
         }
         
         Label #BankBalance {
-          Text: "$0";
+          Text: "--";
           Style: (FontSize: 20, TextColor: #32CD32, RenderBold: true, HorizontalAlignment: Center);
         }
       }
@@ -97,7 +97,7 @@ Group #BankRoot {
         }
         
         Label #TotalWealth {
-          Text: "$0";
+          Text: "--";
           Style: (FontSize: 20, TextColor: #FFD700, RenderBold: true, HorizontalAlignment: Center);
         }
       }
@@ -111,58 +111,70 @@ Group #BankRoot {
       OutlineColor: #2a3a5a;
       OutlineSize: 1;
       
-      // 4-tab version (full width)
+      // 5-tab version (Wallet / Deposit / Withdraw / Exchange / Special) - when Exchange is enabled
       Group #TabButtonsRow4Tabs {
         LayoutMode: Left;
-        Anchor: (Width: 460, Height: 38, Vertical: 0);
+        Anchor: (Width: 524, Height: 38, Vertical: 0);
         
         TextButton #Tab4Wallet {
           Text: "WALLET";
           Style: $E.@EcoButtonStyle;
-          Anchor: (Width: 110, Height: 36, Right: 8);
+          Anchor: (Width: 100, Height: 36, Right: 6);
         }
         
         TextButton #Tab4Deposit {
           Text: "DEPOSIT";
           Style: $E.@EcoButtonStyle;
-          Anchor: (Width: 110, Height: 36, Right: 8);
+          Anchor: (Width: 100, Height: 36, Right: 6);
         }
         
         TextButton #Tab4Withdraw {
           Text: "WITHDRAW";
           Style: $E.@EcoButtonStyle;
-          Anchor: (Width: 110, Height: 36, Right: 8);
+          Anchor: (Width: 100, Height: 36, Right: 6);
         }
         
         TextButton #Tab4Exchange {
           Text: "EXCHANGE";
           Style: $E.@EcoButtonStyle;
-          Anchor: (Width: 110, Height: 36);
+          Anchor: (Width: 100, Height: 36, Right: 6);
+        }
+
+        TextButton #Tab4Special {
+          Text: "SPECIAL";
+          Style: $E.@EcoButtonStyle;
+          Anchor: (Width: 100, Height: 36);
         }
       }
       
-      // 3-tab version (centered, no Exchange)
+      // 4-tab version (Wallet / Deposit / Withdraw / Special) - when Exchange is disabled
       Group #TabButtonsRow3Tabs {
         LayoutMode: Left;
-        Anchor: (Width: 354, Height: 38, Vertical: 0);
+        Anchor: (Width: 418, Height: 38, Vertical: 0);
         Visible: false;
         
         TextButton #Tab3Wallet {
           Text: "WALLET";
           Style: $E.@EcoButtonStyle;
-          Anchor: (Width: 110, Height: 36, Right: 8);
+          Anchor: (Width: 100, Height: 36, Right: 6);
         }
         
         TextButton #Tab3Deposit {
           Text: "DEPOSIT";
           Style: $E.@EcoButtonStyle;
-          Anchor: (Width: 110, Height: 36, Right: 8);
+          Anchor: (Width: 100, Height: 36, Right: 6);
         }
         
         TextButton #Tab3Withdraw {
           Text: "WITHDRAW";
           Style: $E.@EcoButtonStyle;
-          Anchor: (Width: 110, Height: 36);
+          Anchor: (Width: 100, Height: 36, Right: 6);
+        }
+
+        TextButton #Tab3Special {
+          Text: "SPECIAL";
+          Style: $E.@EcoButtonStyle;
+          Anchor: (Width: 100, Height: 36);
         }
       }
     }
@@ -265,7 +277,7 @@ Group #BankRoot {
           FlexWeight: 1;
           
           Label #DepositFromLabel { Text: "FROM POCKET"; Style: (FontSize: 10, TextColor: #888888, HorizontalAlignment: Center); }
-          Label #DepositFromValue { Text: "$0"; Style: (FontSize: 20, TextColor: #FFD700, RenderBold: true, HorizontalAlignment: Center); }
+          Label #DepositFromValue { Text: "--"; Style: (FontSize: 20, TextColor: #FFD700, RenderBold: true, HorizontalAlignment: Center); }
         }
         
         Label {
@@ -279,7 +291,7 @@ Group #BankRoot {
           FlexWeight: 1;
           
           Label #DepositToLabel { Text: "TO BANK"; Style: (FontSize: 10, TextColor: #888888, HorizontalAlignment: Center); }
-          Label #DepositToValue { Text: "$0"; Style: (FontSize: 20, TextColor: #32CD32, RenderBold: true, HorizontalAlignment: Center); }
+          Label #DepositToValue { Text: "--"; Style: (FontSize: 20, TextColor: #32CD32, RenderBold: true, HorizontalAlignment: Center); }
         }
       }
       
@@ -326,7 +338,7 @@ Group #BankRoot {
         Visible: false;
         
         Label #DepositPreviewText {
-          Text: "After deposit: Bank $X (+$Y)";
+          Text: "After deposit: Bank � (+�)";
           Style: (FontSize: 12, TextColor: #32CD32, HorizontalAlignment: Center);
         }
       }
@@ -390,7 +402,7 @@ Group #BankRoot {
           FlexWeight: 1;
           
           Label #WithdrawFromLabel { Text: "FROM BANK"; Style: (FontSize: 10, TextColor: #888888, HorizontalAlignment: Center); }
-          Label #WithdrawFromValue { Text: "$0"; Style: (FontSize: 20, TextColor: #32CD32, RenderBold: true, HorizontalAlignment: Center); }
+          Label #WithdrawFromValue { Text: "--"; Style: (FontSize: 20, TextColor: #32CD32, RenderBold: true, HorizontalAlignment: Center); }
         }
         
         Label {
@@ -404,7 +416,7 @@ Group #BankRoot {
           FlexWeight: 1;
           
           Label #WithdrawToLabel { Text: "TO POCKET"; Style: (FontSize: 10, TextColor: #888888, HorizontalAlignment: Center); }
-          Label #WithdrawToValue { Text: "$0"; Style: (FontSize: 20, TextColor: #FFD700, RenderBold: true, HorizontalAlignment: Center); }
+          Label #WithdrawToValue { Text: "--"; Style: (FontSize: 20, TextColor: #FFD700, RenderBold: true, HorizontalAlignment: Center); }
         }
       }
       
@@ -449,7 +461,7 @@ Group #BankRoot {
         Visible: false;
         
         Label #WithdrawPreviewText {
-          Text: "After withdraw: Pocket $X (+$Y)";
+          Text: "After withdraw: Pocket � (+�)";
           Style: (FontSize: 12, TextColor: #5599FF, HorizontalAlignment: Center);
         }
       }
@@ -669,6 +681,112 @@ Group #BankRoot {
         Text: "CONFIRM EXCHANGE";
         Style: $E.@EcoButtonAccentStyle;
         Anchor: (Height: 48);
+      }
+    }
+
+
+    Group #SpecialContent {
+      LayoutMode: Top;
+      Padding: (Top: 16, Left: 16, Right: 16, Bottom: 16);
+      FlexWeight: 1;
+      Visible: false;
+
+      Label #TokenCollectionLabel {
+        Text: "VOS JETONS";
+        Style: (FontSize: 11, TextColor: #888888, LetterSpacing: 1, HorizontalAlignment: Center);
+        Anchor: (Bottom: 12);
+      }
+
+      Group #TokenGridWrapper {
+        LayoutMode: Center;
+        Anchor: (Height: 130, Bottom: 14);
+
+        Group #TokenRow {
+          LayoutMode: Left;
+          Anchor: (Width: 450, Height: 125);
+        }
+      }
+
+      Group #SpecialActions {
+        LayoutMode: Top;
+        Background: (Color: #0f1525);
+        Padding: (Top: 12, Bottom: 12, Left: 16, Right: 16);
+        OutlineColor: #3a4a6a;
+        OutlineSize: 1;
+
+        Label #SpecialActionsLabel {
+          Text: "ACTIONS";
+          Style: (FontSize: 10, TextColor: #666666, LetterSpacing: 1);
+          Anchor: (Bottom: 8);
+        }
+
+        Group #SpecialSelectorRow {
+          LayoutMode: Left;
+          Anchor: (Height: 36, Bottom: 8);
+
+          TextButton #SpecialPrev {
+            Text: "<";
+            Style: $E.@EcoButtonStyle;
+            Anchor: (Width: 40, Height: 34, Right: 8);
+          }
+
+          Group #SpecialSelectedBox {
+            Background: (Color: #0a1015);
+            Padding: (Top: 4, Bottom: 4, Left: 8, Right: 8);
+            FlexWeight: 1;
+            Anchor: (Height: 34, Right: 8);
+            OutlineColor: #FFD700;
+            OutlineSize: 1;
+            LayoutMode: Center;
+
+            Label #SpecialSelectedLabel {
+              Text: "CoinCoin";
+              Style: (FontSize: 13, TextColor: #FFD700, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            }
+          }
+
+          TextButton #SpecialNext {
+            Text: ">";
+            Style: $E.@EcoButtonStyle;
+            Anchor: (Width: 40, Height: 34);
+          }
+        }
+
+        Group #SpecialInputRow {
+          LayoutMode: Left;
+          Anchor: (Height: 40, Bottom: 8);
+
+          Group #SpecialInputBox {
+            Background: (Color: #0a1015);
+            Padding: (Left: 12, Right: 12, Top: 6, Bottom: 6);
+            FlexWeight: 1;
+            Anchor: (Height: 38, Right: 8);
+            OutlineColor: #3a4a6a;
+            OutlineSize: 1;
+
+            TextField #SpecialAmountInput {
+              Style: (FontSize: 16, TextColor: #ffffff);
+              FlexWeight: 1;
+            }
+          }
+
+          TextButton #SpecialDeposit {
+            Text: "Déposer";
+            Style: $E.@EcoButtonGreenStyle;
+            Anchor: (Width: 110, Height: 36, Right: 6);
+          }
+
+          TextButton #SpecialWithdraw {
+            Text: "Retirer";
+            Style: $E.@EcoButtonStyle;
+            Anchor: (Width: 110, Height: 36);
+          }
+        }
+
+        Label #SpecialResultText {
+          Text: "Sélectionne un jeton et un montant";
+          Style: (FontSize: 11, TextColor: #888888, HorizontalAlignment: Center);
+        }
       }
     }
   }

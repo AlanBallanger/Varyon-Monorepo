@@ -479,6 +479,23 @@ public class EcotaleConfig {
         return currencySymbol + df.format(amount);
     }
     
+    public String formatAmountOnly(double amount) {
+        StringBuilder pattern = new StringBuilder("#,##0");
+        if (decimalPlaces > 0) {
+            pattern.append(".");
+            pattern.append("0".repeat(decimalPlaces));
+        }
+        return new DecimalFormat(pattern.toString()).format(amount);
+    }
+
+    public String formatGroupedLong(long amount) {
+        return new DecimalFormat("#,##0").format(amount);
+    }
+
+    public String formatTrailingSymbolLong(long amount) {
+        return formatGroupedLong(amount) + " " + currencySymbol;
+    }
+
     /**
      * Format amount in compact form (e.g., "$1.2M", "$500K")
      */

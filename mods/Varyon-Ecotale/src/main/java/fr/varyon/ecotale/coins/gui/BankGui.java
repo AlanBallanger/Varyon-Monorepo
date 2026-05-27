@@ -6,8 +6,12 @@ import fr.varyon.ecotale.coins.currency.BankManager;
 import fr.varyon.ecotale.coins.currency.CoinManager;
 import fr.varyon.ecotale.coins.currency.CoinType;
 import fr.varyon.ecotale.coins.currency.InventorySpaceCalculator;
+import fr.varyon.ecotale.coins.currency.TokenManager;
+import fr.varyon.ecotale.coins.currency.TokenType;
 import fr.varyon.ecotale.coins.transaction.SecureTransaction;
 import fr.varyon.ecotale.coins.util.TranslationHelper;
+import fr.varyon.ecotale.economy.EconomyManager;
+import fr.varyon.ecotale.economy.config.EcotaleConfig;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -24,9 +28,10 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import java.awt.Color;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+import org.jetbrains.annotations.NotNull;
 
 public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    private final PlayerRef playerRef;
@@ -34,10 +39,12 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    private String amountInput = "";
    private int fromCoinIndex = 0;
    private int toCoinIndex = 1;
+   private int specialTokenIndex = 0;
    private final CoinType[] enabledTypes;
+   private final TokenType[] tokenTypes = TokenType.values();
    private long lastClickTime = 0L;
 
-   public BankGui(@NonNullDecl PlayerRef playerRef) {
+   public BankGui(@NotNull PlayerRef playerRef) {
       super(playerRef, CustomPageLifetime.CanDismiss, BankGui.BankGuiData.CODEC);
       this.playerRef = playerRef;
       this.enabledTypes = CoinType.valuesAscending();
@@ -51,8 +58,22 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
       return TranslationHelper.t(this.playerRef, key, fallback, args);
    }
 
+   private boolean isFrenchLanguage() {
+      String lang = TranslationHelper.getLanguageFor(this.playerRef);
+      return lang != null && lang.toLowerCase(Locale.ROOT).startsWith("fr");
+   }
+
+   private String tFr(String french, String key, String englishFallback, Object... args) {
+      String template = this.isFrenchLanguage() ? french : this.t(key, englishFallback);
+      String result = template;
+      for (int i = 0; i < args.length && i < 10; i++) {
+         result = result.replace("{" + i + "}", String.valueOf(args[i]));
+      }
+      return result;
+   }
+
    public void build(
-      @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder cmd, @NonNullDecl UIEventBuilder events, @NonNullDecl Store<EntityStore> store
+      @NotNull Ref<EntityStore> ref, @NotNull UICommandBuilder cmd, @NotNull UIEventBuilder events, @NotNull Store<EntityStore> store
    ) {
       cmd.append("Pages/Ecotale_BankPage.ui");
       Player player = (Player)store.getComponent(ref, Player.getComponentType());
@@ -64,20 +85,23 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
          long totalWealth = bankBalance + pocketBalance;
          String symbol = EconomyBridge.getCurrencySymbol();
          events.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton", EventData.of("Action", "Close"), false);
-         cmd.set("#TotalWealth.Text", symbol + this.formatLong(totalWealth));
-         cmd.set("#BankBalance.Text", symbol + this.formatLong(bankBalance));
-         cmd.set("#PocketBalance.Text", symbol + this.formatLong(pocketBalance));
+         cmd.set("#TotalWealth.Text", this.formatWithCurrency(totalWealth, symbol));
+         cmd.set("#BankBalance.Text", this.formatWithCurrency(bankBalance, symbol));
+         cmd.set("#PocketBalance.Text", this.formatWithCurrency(pocketBalance, symbol));
          events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab4Wallet", EventData.of("Tab", "Wallet"), false);
          events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab4Deposit", EventData.of("Tab", "Deposit"), false);
          events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab4Withdraw", EventData.of("Tab", "Withdraw"), false);
          events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab4Exchange", EventData.of("Tab", "Exchange"), false);
+         events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab4Special", EventData.of("Tab", "Special"), false);
          events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab3Wallet", EventData.of("Tab", "Wallet"), false);
          events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab3Deposit", EventData.of("Tab", "Deposit"), false);
          events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab3Withdraw", EventData.of("Tab", "Withdraw"), false);
+         events.addEventBinding(CustomUIEventBindingType.Activating, "#Tab3Special", EventData.of("Tab", "Special"), false);
          cmd.set("#WalletContent.Visible", this.currentTab == BankGui.Tab.WALLET);
          cmd.set("#DepositContent.Visible", this.currentTab == BankGui.Tab.DEPOSIT);
          cmd.set("#WithdrawContent.Visible", this.currentTab == BankGui.Tab.WITHDRAW);
          cmd.set("#ExchangeContent.Visible", this.currentTab == BankGui.Tab.EXCHANGE);
+         cmd.set("#SpecialContent.Visible", this.currentTab == BankGui.Tab.SPECIAL);
          boolean showExchange = VaryonEcotalePlugin.getInstance().getCoinsModule().getCoinConfig() == null || VaryonEcotalePlugin.getInstance().getCoinsModule().getCoinConfig().showExchangeTab();
          boolean showConsolidate = VaryonEcotalePlugin.getInstance().getCoinsModule().getCoinConfig() == null || VaryonEcotalePlugin.getInstance().getCoinsModule().getCoinConfig().showConsolidateButton();
          cmd.set("#BtnConsolidate.Visible", showConsolidate);
@@ -96,6 +120,9 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
                break;
             case EXCHANGE:
                this.buildExchangeTab(cmd, events, player);
+               break;
+            case SPECIAL:
+               this.buildSpecialTab(cmd, events, player, playerUuid);
          }
 
          this.translateUI(cmd);
@@ -107,17 +134,21 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
       String depositName = this.getTabName(BankGui.Tab.DEPOSIT);
       String withdrawName = this.getTabName(BankGui.Tab.WITHDRAW);
       String exchangeName = this.getTabName(BankGui.Tab.EXCHANGE);
+      String specialName = this.getTabName(BankGui.Tab.SPECIAL);
       String walletText = this.currentTab == BankGui.Tab.WALLET ? "[ " + walletName + " ]" : walletName;
       String depositText = this.currentTab == BankGui.Tab.DEPOSIT ? "[ " + depositName + " ]" : depositName;
       String withdrawText = this.currentTab == BankGui.Tab.WITHDRAW ? "[ " + withdrawName + " ]" : withdrawName;
       String exchangeText = this.currentTab == BankGui.Tab.EXCHANGE ? "[ " + exchangeName + " ]" : exchangeName;
+      String specialText = this.currentTab == BankGui.Tab.SPECIAL ? "[ " + specialName + " ]" : specialName;
       cmd.set("#Tab4Wallet.Text", walletText);
       cmd.set("#Tab4Deposit.Text", depositText);
       cmd.set("#Tab4Withdraw.Text", withdrawText);
       cmd.set("#Tab4Exchange.Text", exchangeText);
+      cmd.set("#Tab4Special.Text", specialText);
       cmd.set("#Tab3Wallet.Text", walletText);
       cmd.set("#Tab3Deposit.Text", depositText);
       cmd.set("#Tab3Withdraw.Text", withdrawText);
+      cmd.set("#Tab3Special.Text", specialText);
    }
 
    private void updatePreviewLabels(UICommandBuilder cmd, Store<EntityStore> store, Ref<EntityStore> ref) {
@@ -137,7 +168,11 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
                   long afterBank = bankBalance + amountx;
                   cmd.set(
                      "#DepositPreviewText.Text",
-                     this.t("gui.bank.deposit.preview", "After: Bank {0} (+{1})", symbol + this.formatLong(afterBank), symbol + this.formatLong(amountx))
+                     this.t(
+                        "gui.bank.deposit.preview",
+                        "After: Bank {0} (+{1})",
+                        this.formatWithCurrency(afterBank, symbol),
+                        this.formatWithCurrency(amountx, symbol))
                   );
                   this.renderCoinPreview(cmd, "#DepositCoinRow", amountx, true);
                }
@@ -150,13 +185,20 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
                   long afterPocket = pocketBalance + amount;
                   cmd.set(
                      "#WithdrawPreviewText.Text",
-                     this.t("gui.bank.withdraw.preview", "After: Pocket {0} (+{1})", symbol + this.formatLong(afterPocket), symbol + this.formatLong(amount))
+                     this.t(
+                        "gui.bank.withdraw.preview",
+                        "After: Pocket {0} (+{1})",
+                        this.formatWithCurrency(afterPocket, symbol),
+                        this.formatWithCurrency(amount, symbol))
                   );
                   this.renderCoinPreview(cmd, "#WithdrawCoinRow", amount, false);
                }
                break;
             case EXCHANGE:
                this.updateExchangePreview(cmd, player);
+               break;
+            case SPECIAL:
+               this.updateSpecialResultLabel(cmd, player, playerUuid);
          }
       }
    }
@@ -251,7 +293,7 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
          cmd.set(targetRow + "[" + rowIndex + "] #CoinIcon.ItemId", type.getItemId());
          cmd.set(targetRow + "[" + rowIndex + "] #CoinName.Text", this.getCoinName(type));
          cmd.set(targetRow + "[" + rowIndex + "] #CoinCount.Text", "x" + count);
-         cmd.set(targetRow + "[" + rowIndex + "] #CoinValue.Text", symbol + this.formatLong(value));
+         cmd.set(targetRow + "[" + rowIndex + "] #CoinValue.Text", this.formatWithCurrency(value, symbol));
       }
 
       events.addEventBinding(CustomUIEventBindingType.Activating, "#BtnDepositAll", EventData.of("Action", "DepositAll"), false);
@@ -260,8 +302,8 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    }
 
    private void buildDepositTab(UICommandBuilder cmd, UIEventBuilder events, long pocketBalance, long bankBalance, String symbol) {
-      cmd.set("#DepositFromValue.Text", symbol + this.formatLong(pocketBalance));
-      cmd.set("#DepositToValue.Text", symbol + this.formatLong(bankBalance));
+      cmd.set("#DepositFromValue.Text", this.formatWithCurrency(pocketBalance, symbol));
+      cmd.set("#DepositToValue.Text", this.formatWithCurrency(bankBalance, symbol));
       cmd.set("#DepositAmountInput.Value", this.amountInput);
       events.addEventBinding(CustomUIEventBindingType.ValueChanged, "#DepositAmountInput", EventData.of("@AmountInput", "#DepositAmountInput.Value"), false);
       events.addEventBinding(CustomUIEventBindingType.Activating, "#DepositQuick25", EventData.of("Action", "Quick25"), false);
@@ -274,7 +316,11 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
          cmd.set("#DepositPreview.Visible", true);
          cmd.set(
             "#DepositPreviewText.Text",
-            this.t("gui.bank.deposit.preview", "After: Bank {0} (+{1})", symbol + this.formatLong(bankBalance + amount), symbol + this.formatLong(amount))
+            this.t(
+               "gui.bank.deposit.preview",
+               "After: Bank {0} (+{1})",
+               this.formatWithCurrency(bankBalance + amount, symbol),
+               this.formatWithCurrency(amount, symbol))
          );
          cmd.set("#DepositCoinPreview.Visible", true);
          this.renderCoinPreview(cmd, "#DepositCoinRow", amount, true);
@@ -285,8 +331,8 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    }
 
    private void buildWithdrawTab(UICommandBuilder cmd, UIEventBuilder events, long pocketBalance, long bankBalance, String symbol) {
-      cmd.set("#WithdrawFromValue.Text", symbol + this.formatLong(bankBalance));
-      cmd.set("#WithdrawToValue.Text", symbol + this.formatLong(pocketBalance));
+      cmd.set("#WithdrawFromValue.Text", this.formatWithCurrency(bankBalance, symbol));
+      cmd.set("#WithdrawToValue.Text", this.formatWithCurrency(pocketBalance, symbol));
       cmd.set("#WithdrawAmountInput.Value", this.amountInput);
       events.addEventBinding(CustomUIEventBindingType.ValueChanged, "#WithdrawAmountInput", EventData.of("@AmountInput", "#WithdrawAmountInput.Value"), false);
       events.addEventBinding(CustomUIEventBindingType.Activating, "#WithdrawQuick25", EventData.of("Action", "Quick25"), false);
@@ -299,7 +345,11 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
          cmd.set("#WithdrawPreview.Visible", true);
          cmd.set(
             "#WithdrawPreviewText.Text",
-            this.t("gui.bank.withdraw.preview", "After: Pocket {0} (+{1})", symbol + this.formatLong(pocketBalance + amount), symbol + this.formatLong(amount))
+            this.t(
+               "gui.bank.withdraw.preview",
+               "After: Pocket {0} (+{1})",
+               this.formatWithCurrency(pocketBalance + amount, symbol),
+               this.formatWithCurrency(amount, symbol))
          );
          cmd.set("#WithdrawCoinPreview.Visible", true);
          this.renderCoinPreview(cmd, "#WithdrawCoinRow", amount, false);
@@ -364,7 +414,63 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
       cmd.set("#ExchangeQuickMax.Text", this.t("gui.bank.exchange.max_possible", "MAX POSSIBLE"));
    }
 
-   public void handleDataEvent(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl Store<EntityStore> store, @NonNullDecl BankGui.BankGuiData data) {
+   private void buildSpecialTab(UICommandBuilder cmd, UIEventBuilder events, Player player, UUID playerUuid) {
+      this.specialTokenIndex = Math.max(0, Math.min(this.specialTokenIndex, this.tokenTypes.length - 1));
+
+      cmd.clear("#TokenRow");
+      EconomyManager economy = VaryonEcotalePlugin.getInstance() != null
+         ? VaryonEcotalePlugin.getInstance().getEconomyManager()
+         : null;
+
+      for (int i = 0; i < this.tokenTypes.length; i++) {
+         TokenType type = this.tokenTypes[i];
+         int pocket = TokenManager.countTokens(player, type);
+         long bank = economy != null ? economy.getTokenBalance(playerUuid, type) : 0L;
+         cmd.append("#TokenRow", "Pages/Ecotale_BankTokenCard.ui");
+         String sel = "#TokenRow[" + i + "]";
+         cmd.set(sel + " #TokenIcon.ItemId", type.getItemId());
+         cmd.set(sel + " #TokenName.Text", this.getTokenName(type));
+         cmd.set(sel + " #TokenPocket.Text", this.tFr("Poche : x{0}", "gui.bank.special.pocket", "Pocket: x{0}", pocket));
+         cmd.set(sel + " #TokenBank.Text", this.tFr("Banque : x{0}", "gui.bank.special.bank", "Bank: x{0}", bank));
+      }
+
+      TokenType selected = this.tokenTypes[this.specialTokenIndex];
+      cmd.set("#SpecialSelectedLabel.Text", this.getTokenName(selected));
+      cmd.set("#SpecialAmountInput.Value", this.amountInput);
+
+      events.addEventBinding(CustomUIEventBindingType.ValueChanged, "#SpecialAmountInput", EventData.of("@AmountInput", "#SpecialAmountInput.Value"), false);
+      events.addEventBinding(CustomUIEventBindingType.Activating, "#SpecialPrev", EventData.of("Action", "SpecialPrev"), false);
+      events.addEventBinding(CustomUIEventBindingType.Activating, "#SpecialNext", EventData.of("Action", "SpecialNext"), false);
+      events.addEventBinding(CustomUIEventBindingType.Activating, "#SpecialDeposit", EventData.of("Action", "SpecialDeposit"), false);
+      events.addEventBinding(CustomUIEventBindingType.Activating, "#SpecialWithdraw", EventData.of("Action", "SpecialWithdraw"), false);
+
+      this.updateSpecialResultLabel(cmd, player, playerUuid);
+   }
+
+   private void updateSpecialResultLabel(UICommandBuilder cmd, Player player, UUID playerUuid) {
+      TokenType selected = this.tokenTypes[this.specialTokenIndex];
+      EconomyManager economy = VaryonEcotalePlugin.getInstance() != null
+         ? VaryonEcotalePlugin.getInstance().getEconomyManager()
+         : null;
+      int pocket = TokenManager.countTokens(player, selected);
+      long bank = economy != null ? economy.getTokenBalance(playerUuid, selected) : 0L;
+      long amount = this.parseAmountSimple(this.amountInput);
+      if (amount <= 0L) {
+         cmd.set("#SpecialResultText.Text", this.tFr(
+            "{0} - Poche : x{1}, Banque : x{2}",
+            "gui.bank.special.summary",
+            "{0} - Pocket: x{1}, Bank: x{2}",
+            this.getTokenName(selected), pocket, bank));
+      } else {
+         cmd.set("#SpecialResultText.Text", this.tFr(
+            "{0} : x{1} | Poche : x{2}, Banque : x{3}",
+            "gui.bank.special.preview",
+            "{0}: x{1} | Pocket: x{2}, Bank: x{3}",
+            this.getTokenName(selected), amount, pocket, bank));
+      }
+   }
+
+   public void handleDataEvent(@NotNull Ref<EntityStore> ref, @NotNull Store<EntityStore> store, @NotNull BankGui.BankGuiData data) {
       super.handleDataEvent(ref, store, data);
       Player player = (Player)store.getComponent(ref, Player.getComponentType());
       PlayerRef playerRefComp = (PlayerRef)store.getComponent(ref, PlayerRef.getComponentType());
@@ -384,6 +490,9 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
                   break;
                case "Exchange":
                   this.currentTab = BankGui.Tab.EXCHANGE;
+                  break;
+               case "Special":
+                  this.currentTab = BankGui.Tab.SPECIAL;
             }
 
             this.amountInput = "";
@@ -451,6 +560,20 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
                      break;
                   case "ExchangeMax":
                      this.handleExchangeMax(player);
+                     break;
+                  case "SpecialPrev":
+                     this.specialTokenIndex = this.cycleTokenIndex(-1);
+                     this.amountInput = "";
+                     break;
+                  case "SpecialNext":
+                     this.specialTokenIndex = this.cycleTokenIndex(1);
+                     this.amountInput = "";
+                     break;
+                  case "SpecialDeposit":
+                     this.executeSpecialDeposit(player, playerUuid);
+                     break;
+                  case "SpecialWithdraw":
+                     this.executeSpecialWithdraw(player, playerUuid);
                }
 
                this.lastClickTime = System.currentTimeMillis();
@@ -458,6 +581,117 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
             }
          }
       }
+   }
+
+   private int cycleTokenIndex(int delta) {
+      int len = this.tokenTypes.length;
+      return (this.specialTokenIndex + delta + len) % len;
+   }
+
+   private void executeSpecialDeposit(Player player, UUID playerUuid) {
+      TokenType type = this.tokenTypes[this.specialTokenIndex];
+      int pocket = TokenManager.countTokens(player, type);
+      long amount = this.parseAmount(this.amountInput, pocket);
+      if (amount <= 0L) {
+         this.playerRef.sendMessage(Message.raw(this.tFr("Entre un montant valide", "gui.bank.error.invalid_amount", "Enter a valid amount")).color(Color.RED));
+         return;
+      }
+      if (amount > pocket) {
+         this.playerRef.sendMessage(Message.raw(this.tFr("Pas assez de {0} en poche", "gui.bank.special.not_enough_pocket", "Not enough {0} in pocket", this.getTokenName(type))).color(Color.RED));
+         return;
+      }
+      EconomyManager economy = VaryonEcotalePlugin.getInstance().getEconomyManager();
+      if (economy == null) {
+         this.playerRef.sendMessage(Message.raw(this.tFr("Service \u00e9conomique indisponible", "gui.bank.special.economy_unavailable", "Economy service unavailable")).color(Color.RED));
+         return;
+      }
+
+      var lock = BankManager.getPlayerLock(playerUuid);
+      lock.lock();
+      try {
+         if (!TokenManager.takeTokens(player, type, (int) amount)) {
+            this.playerRef.sendMessage(Message.raw(this.tFr("Pas assez de {0} en poche", "gui.bank.special.not_enough_pocket", "Not enough {0} in pocket", this.getTokenName(type))).color(Color.RED));
+            return;
+         }
+         if (!economy.depositToken(playerUuid, type, amount, "Bank deposit (Special tab)")) {
+            TokenManager.giveTokens(player, type, (int) amount);
+            this.playerRef.sendMessage(Message.raw(this.tFr("Impossible de d\u00e9poser ce jeton", "gui.bank.special.deposit_failed", "Could not deposit token")).color(Color.RED));
+            return;
+         }
+      } finally {
+         lock.unlock();
+      }
+
+      this.amountInput = "";
+      long totalBank = economy.getTokenBalance(playerUuid, type);
+      EcotaleConfig economyConfig = VaryonEcotalePlugin.getInstance() != null
+         ? VaryonEcotalePlugin.getInstance().getEconomyConfig()
+         : null;
+      String name = this.getTokenName(type);
+      String depStr = economyConfig != null
+         ? economyConfig.formatGroupedLong(amount) + " " + name
+         : amount + " " + name;
+      String bankStr = economyConfig != null
+         ? economyConfig.formatGroupedLong(totalBank) + " " + name
+         : totalBank + " " + name;
+      boolean fr = this.isFrenchLanguage();
+      Color greenBright = new Color(50, 205, 50);
+      this.playerRef.sendMessage(Message.join(
+         Message.raw(depStr).color(greenBright).bold(true),
+         Message.raw(fr ? " déposé, " : " deposited, ").color(Color.GREEN),
+         Message.raw(bankStr).color(greenBright).bold(true),
+         Message.raw(fr ? " au total en banque. " : " total in bank. ").color(Color.GREEN),
+         Message.raw(fr ? "Tape /bank pour ouvrir ta banque." : "Use /bank to open your bank.").color(Color.GRAY)
+      ));
+   }
+
+   private void executeSpecialWithdraw(Player player, UUID playerUuid) {
+      TokenType type = this.tokenTypes[this.specialTokenIndex];
+      EconomyManager economy = VaryonEcotalePlugin.getInstance().getEconomyManager();
+      if (economy == null) {
+         this.playerRef.sendMessage(Message.raw(this.tFr("Service \u00e9conomique indisponible", "gui.bank.special.economy_unavailable", "Economy service unavailable")).color(Color.RED));
+         return;
+      }
+      long bank = economy.getTokenBalance(playerUuid, type);
+      long amount = this.parseAmount(this.amountInput, bank);
+      if (amount <= 0L) {
+         this.playerRef.sendMessage(Message.raw(this.tFr("Entre un montant valide", "gui.bank.error.invalid_amount", "Enter a valid amount")).color(Color.RED));
+         return;
+      }
+      if (amount > bank) {
+         this.playerRef.sendMessage(Message.raw(this.tFr("Pas assez de {0} en banque", "gui.bank.special.not_enough_bank", "Not enough {0} in bank", this.getTokenName(type))).color(Color.RED));
+         return;
+      }
+      if (amount > Integer.MAX_VALUE) {
+         amount = Integer.MAX_VALUE;
+      }
+      if (!TokenManager.canFit(player, type, (int) amount)) {
+         this.playerRef.sendMessage(Message.raw(this.tFr("Pas assez de place dans l'inventaire", "gui.bank.special.not_enough_space", "Not enough space in inventory")).color(Color.RED));
+         return;
+      }
+
+      var lock = BankManager.getPlayerLock(playerUuid);
+      lock.lock();
+      try {
+         if (!economy.withdrawToken(playerUuid, type, amount, "Bank withdraw (Special tab)")) {
+            this.playerRef.sendMessage(Message.raw(this.tFr("Impossible de retirer ce jeton", "gui.bank.special.withdraw_failed", "Could not withdraw token")).color(Color.RED));
+            return;
+         }
+         if (!TokenManager.giveTokens(player, type, (int) amount)) {
+            economy.depositToken(playerUuid, type, amount, "Withdraw rollback (Special tab)");
+            this.playerRef.sendMessage(Message.raw(this.tFr("Pas assez de place dans l'inventaire", "gui.bank.special.not_enough_space", "Not enough space in inventory")).color(Color.RED));
+            return;
+         }
+      } finally {
+         lock.unlock();
+      }
+
+      this.amountInput = "";
+      this.playerRef.sendMessage(Message.raw(this.tFr(
+         "x{0} {1} retir\u00e9 de la banque",
+         "gui.bank.special.withdraw_success",
+         "Withdrew x{0} {1}",
+         amount, this.getTokenName(type))).color(Color.GREEN));
    }
 
    private void executeDeposit(Player player, UUID playerUuid) {
@@ -697,7 +931,10 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
       cmd.set("#QuickActionsLabel.Text", this.t("gui.bank.wallet.quick_actions", "QUICK ACTIONS"));
       cmd.set("#BtnDepositAll.Text", this.t("gui.bank.wallet.deposit_all", "DEPOSIT ALL"));
       cmd.set("#BtnWithdrawAll.Text", this.t("gui.bank.wallet.withdraw_all", "WITHDRAW ALL"));
-      cmd.set("#BtnConsolidate.Text", this.t("gui.bank.wallet.consolidate", "CONSOLIDATE"));
+      cmd.set(
+         "#BtnConsolidate.Text",
+         this.isFrenchLanguage() ? "Conversion auto" : this.t("gui.bank.wallet.consolidate", "CONSOLIDATE")
+      );
       cmd.set("#DepositFromLabel.Text", this.t("gui.bank.deposit.from", "FROM POCKET"));
       cmd.set("#DepositToLabel.Text", this.t("gui.bank.deposit.to", "TO BANK"));
       cmd.set("#DepositAmountLabel.Text", this.t("gui.bank.deposit.amount", "AMOUNT TO DEPOSIT"));
@@ -712,6 +949,10 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
       cmd.set("#ExchangeToLabel.Text", this.t("gui.bank.exchange.to", "EXCHANGE TO"));
       cmd.set("#ExchangeAmountLabel.Text", this.t("gui.bank.exchange.amount", "AMOUNT:"));
       cmd.set("#ConfirmExchange.Text", this.t("gui.bank.exchange.confirm", "CONFIRM EXCHANGE"));
+      cmd.set("#TokenCollectionLabel.Text", this.t("gui.bank.special.title", "VOS JETONS"));
+      cmd.set("#SpecialActionsLabel.Text", this.t("gui.bank.special.actions", "ACTIONS"));
+      cmd.set("#SpecialDeposit.Text", this.t("gui.bank.special.deposit", "Déposer"));
+      cmd.set("#SpecialWithdraw.Text", this.t("gui.bank.special.withdraw", "Retirer"));
    }
 
    private String getTabName(BankGui.Tab tab) {
@@ -719,7 +960,17 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
          case WALLET -> this.t("gui.bank.tab.wallet", "WALLET");
          case DEPOSIT -> this.t("gui.bank.tab.deposit", "DEPOSIT");
          case WITHDRAW -> this.t("gui.bank.tab.withdraw", "WITHDRAW");
-         case EXCHANGE -> this.t("gui.bank.tab.exchange", "EXCHANGE");
+         case EXCHANGE -> this.isFrenchLanguage() ? "Convertir" : this.t("gui.bank.tab.exchange", "EXCHANGE");
+         case SPECIAL -> this.isFrenchLanguage() ? "Spécial" : this.t("gui.bank.tab.special", "SPECIAL");
+      };
+   }
+
+   private String getTokenName(TokenType type) {
+      boolean fr = this.isFrenchLanguage();
+      return switch (type) {
+         case COINCOIN -> fr ? "Jeton CoinCoin" : this.t("tokens.coincoin", "CoinCoin Token");
+         case BUILDING -> fr ? "Jeton Construction" : this.t("tokens.building", "Building Token");
+         case FACTION -> fr ? "Jeton Faction" : this.t("tokens.faction", "Faction Token");
       };
    }
 
@@ -736,6 +987,15 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
             case ADAMANTITE -> this.t("coins.adamantite", "Adamantite");
          };
       }
+   }
+
+   private String formatWithCurrency(long value, String symbol) {
+      String trimmed = symbol == null ? "" : symbol.trim();
+      String amount = this.formatLong(value);
+      if (trimmed.isEmpty()) {
+         return amount;
+      }
+      return amount + " " + trimmed;
    }
 
    private String formatLong(long value) {
@@ -787,6 +1047,7 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
       WALLET,
       DEPOSIT,
       WITHDRAW,
-      EXCHANGE;
+      EXCHANGE,
+      SPECIAL;
    }
 }

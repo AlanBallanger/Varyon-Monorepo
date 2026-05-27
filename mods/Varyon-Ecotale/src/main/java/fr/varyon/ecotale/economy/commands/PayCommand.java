@@ -3,58 +3,53 @@ package fr.varyon.ecotale.economy.commands;
 import fr.varyon.ecotale.VaryonEcotalePlugin;
 import fr.varyon.ecotale.economy.EconomyManager;
 import fr.varyon.ecotale.economy.gui.PayGui;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Pay command - Transfer money to another player.
- * 
- * Usage: 
- * - /pay              → Opens PayGui (interactive interface)
- * - /pay <player> <amount> → Direct transfer
- */
 public class PayCommand extends AbstractAsyncCommand {
-    
+
     private final OptionalArg<PlayerRef> playerArg;
     private final OptionalArg<Double> amountArg;
-    
+
     public PayCommand() {
         super("pay", "Send money to another player");
-        
-        // Use OptionalArg to allow GUI mode when no args provided
         this.playerArg = this.withOptionalArg("player", "The player to send money to", ArgTypes.PLAYER_REF);
         this.amountArg = this.withOptionalArg("amount", "The amount to send", ArgTypes.DOUBLE);
     }
-    
-    @NonNullDecl
+
+    @NotNull
     @Override
     protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
-        CommandSender sender = ctx.sender();
-        
-        if (!(sender instanceof Player player)) {
+        if (!ctx.isPlayer()) {
             ctx.sendMessage(Message.raw("This command can only be used by players").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
-        
-        var senderEntity = player.getReference();
+
+        Ref<EntityStore> senderEntity = ctx.senderAsPlayerRef();
         if (senderEntity == null || !senderEntity.isValid()) {
             ctx.sendMessage(Message.raw("Error: Could not get your player data").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
-        var senderStore = senderEntity.getStore();
+        Store<EntityStore> senderStore = senderEntity.getStore();
         var world = senderStore.getExternalData().getWorld();
-        if (world == null) {
+        if (world == null) return CompletableFuture.completedFuture(null);
+
+        Player player = senderStore.getComponent(senderEntity, Player.getComponentType());
+        if (player == null) {
+            ctx.sendMessage(Message.raw("Error: Could not get your player data").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
@@ -117,15 +112,12 @@ public class PayCommand extends AbstractAsyncCommand {
                         Message.raw(VaryonEcotalePlugin.getInstance().getEconomyConfig().format(balance)).color(Color.WHITE)
                     ));
                 }
-                case SELF_TRANSFER -> {
+                case SELF_TRANSFER ->
                     senderRef.sendMessage(Message.raw("You cannot send money to yourself").color(Color.RED));
-                }
-                case INVALID_AMOUNT -> {
+                case INVALID_AMOUNT ->
                     senderRef.sendMessage(Message.raw("Invalid amount").color(Color.RED));
-                }
-                case RECIPIENT_MAX_BALANCE -> {
+                case RECIPIENT_MAX_BALANCE ->
                     senderRef.sendMessage(Message.raw("Recipient has reached maximum balance").color(Color.RED));
-                }
             }
 
             future.complete(null);
