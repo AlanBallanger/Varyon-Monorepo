@@ -1,0 +1,16 @@
+{
+  "Group": "${plugin_group}",
+  "Name": "Varyon-Progression",
+  "Version": "${plugin_version}",
+  "Description": "${plugin_description}",
+  "Authors": [
+    { "Name": "Varyon Team" }
+  ],
+  "Website": "",
+  "Main": "${plugin_main_entrypoint}",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": false,
+  "ServerVersion": "${server_version}"
+}
