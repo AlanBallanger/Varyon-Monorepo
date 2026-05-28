@@ -30,4 +30,5 @@ include(
     ":mods:Varyon-SignaturePreservation",
     ":mods:Varyon-World-Inventory",
     ":mods:varyon-UI",
+    ":mods:Varyon-Progression",
 )
