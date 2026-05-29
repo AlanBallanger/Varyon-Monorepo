@@ -1,0 +1,7 @@
+PLACEHOLDER — remplace ce fichier par un .ogg portant le même nom (sans .txt)
+
+Fichier attendu : hurt_1.ogg
+Format          : OGG Vorbis, 44100 Hz, Mono
+
+Description du son :
+  Craquement violent, comme une branche qui casse sous l'impact (0.5s)

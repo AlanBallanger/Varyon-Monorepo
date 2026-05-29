@@ -1,0 +1,7 @@
+PLACEHOLDER — remplace ce fichier par un .ogg portant le même nom (sans .txt)
+
+Fichier attendu : death_1.ogg
+Format          : OGG Vorbis, 44100 Hz, Mono
+
+Description du son :
+  Effondrement lourd d'un arbre + souffle éthéré de l'âme qui s'échappe (2s)

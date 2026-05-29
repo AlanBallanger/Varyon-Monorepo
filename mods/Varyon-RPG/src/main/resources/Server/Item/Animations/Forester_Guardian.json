@@ -1,0 +1,74 @@
+{
+  "Animations": {
+    "Blast": {
+      "Speed": 1.5,
+      "Looping": false,
+      "ThirdPerson": "NPC/Void/Eye_Void/Animations/Attacks/Blast.blockyanim"
+    },
+    "Summon": {
+      "Speed": 1,
+      "Looping": false,
+      "ThirdPerson": "NPC/Void/Eye_Void/Animations/Attacks/Summon.blockyanim"
+    },
+    "Idle": {
+      "ThirdPerson": "NPC/Forester_Guardian/Animations/Default/Idle.blockyanim"
+    },
+    "Walk": {
+      "ThirdPerson": "NPC/Forester_Guardian/Animations/Default/Walk.blockyanim"
+    },
+    "WalkBackward": {
+      "Animations": [
+        {
+          "Animation": "NPC/Forester_Guardian/Animations/Default/Walk_Backward.blockyanim"
+        }
+      ]
+    },
+    "Run": {
+      "ThirdPerson": "NPC/Forester_Guardian/Animations/Default/Run.blockyanim"
+    },
+    "Death": {
+      "ThirdPerson": "NPC/Forester_Guardian/Animations/Default/Death.blockyanim"
+    },
+    "Hurt": {
+      "ThirdPerson": "NPC/Forester_Guardian/Animations/Default/Hurt.blockyanim"
+    },
+    "Spawn": {
+      "ThirdPerson": "NPC/Forester_Guardian/Animations/Default/Spawn.blockyanim"
+    },
+    "Walk_Backward": {
+      "ThirdPerson": "NPC/Forester_Guardian/Animations/Default/Walk_Backward.blockyanim"
+    }
+  },
+  "Camera": {
+    "Pitch": {
+      "AngleRange": {
+        "Max": 60,
+        "Min": -45
+      },
+      "TargetNodes": [
+        "Belly"
+      ]
+    },
+    "Yaw": {
+      "AngleRange": {
+        "Max": 45,
+        "Min": -45
+      },
+      "TargetNodes": [
+        "Belly"
+      ]
+    }
+  },
+  "WiggleWeights": {
+    "Pitch": 2,
+    "PitchDeceleration": 0.1,
+    "Roll": 0.1,
+    "RollDeceleration": 0.1,
+    "X": 3,
+    "XDeceleration": 0.1,
+    "Y": 0.1,
+    "YDeceleration": 0.1,
+    "Z": 0.1,
+    "ZDeceleration": 0.1
+  }
+}

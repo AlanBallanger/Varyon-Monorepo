@@ -1,0 +1,7 @@
+PLACEHOLDER — remplace ce fichier par un .ogg portant le même nom (sans .txt)
+
+Fichier attendu : ambient_2.ogg
+Format          : OGG Vorbis, 44100 Hz, Mono
+
+Description du son :
+  Craquement de bois sourd avec écho, variation de ambient_1 (2-3s)

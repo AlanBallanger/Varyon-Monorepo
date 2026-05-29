@@ -23,7 +23,7 @@ public final class ForestierGuardianSpawner {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     public static final long SPAWN_DELAY_MS = 500L;
-    private static final String GUARDIAN_NPC_ID = "Wolf_Black";
+    private static final String GUARDIAN_NPC_ID = "Forester_Guardian";
 
     private ForestierGuardianSpawner() {}
 
@@ -41,32 +41,32 @@ public final class ForestierGuardianSpawner {
                     playSpawnSound(w, x, y, z);
                 }
                 Store<EntityStore> entityStore = w.getEntityStore().getStore();
-                spawnWolfBlack(entityStore, new Vector3d(x, y, z));
+                spawnForesterGuardian(entityStore, new Vector3d(x, y, z));
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[GardienSylvestre] spawn schedule ERREUR");
             }
         }), SPAWN_DELAY_MS);
     }
 
-    public static void spawnWolfBlack(@Nonnull Store<EntityStore> store, @Nonnull Vector3d pos) {
-        LOGGER.atInfo().log("[GardienSylvestre] spawnNPC Wolf_Black â€” pos=" + pos);
+    public static void spawnForesterGuardian(@Nonnull Store<EntityStore> store, @Nonnull Vector3d pos) {
+        LOGGER.atInfo().log("[GardienSylvestre] spawnNPC Forester_Guardian - pos=" + pos);
         try {
             var pair = NPCPlugin.get().spawnNPC(store, GUARDIAN_NPC_ID, null, pos, com.hypixel.hytale.math.vector.Rotation3f.ZERO);
             if (pair == null) {
-                LOGGER.atWarning().log("[GardienSylvestre] spawnNPC retournÃ© null â€” vÃ©rifier le role name 'Wolf_Black'");
+                LOGGER.atWarning().log("[GardienSylvestre] spawnNPC retourne null - verifier le role name 'Forester_Guardian'");
                 return;
             }
-            Ref<EntityStore> wolfRef = pair.left();
-            EntityStatMap statMap = store.getComponent(wolfRef, EntityStatMap.getComponentType());
+            Ref<EntityStore> guardianRef = pair.left();
+            EntityStatMap statMap = store.getComponent(guardianRef, EntityStatMap.getComponentType());
             if (statMap == null) {
-                LOGGER.atWarning().log("[GardienSylvestre] EntityStatMap null sur Wolf_Black");
+                LOGGER.atWarning().log("[GardienSylvestre] EntityStatMap null sur Forester_Guardian");
                 return;
             }
             int healthIdx = DefaultEntityStatTypes.getHealth();
             statMap.putModifier(healthIdx, "guardian_wood_hp",
                 new StaticModifier(Modifier.ModifierTarget.MAX, StaticModifier.CalculationType.MULTIPLICATIVE, 2.0f));
             statMap.maximizeStatValue(healthIdx);
-            LOGGER.atInfo().log("[GardienSylvestre] Wolf_Black spawned OK pos=" + pos);
+            LOGGER.atInfo().log("[GardienSylvestre] Forester_Guardian spawned OK pos=" + pos);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[GardienSylvestre] spawnNPC ERREUR pos=" + pos);
         }

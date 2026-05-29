@@ -1,0 +1,7 @@
+PLACEHOLDER — remplace ce fichier par un .ogg portant le même nom (sans .txt)
+
+Fichier attendu : ambient_1.ogg
+Format          : OGG Vorbis, 44100 Hz, Mono
+
+Description du son :
+  Gémissement lent d'arbre qui craque, grave et inquiétant (2-3s, en boucle)

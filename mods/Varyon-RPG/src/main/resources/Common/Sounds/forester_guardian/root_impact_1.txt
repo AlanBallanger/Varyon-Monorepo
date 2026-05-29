@@ -1,0 +1,7 @@
+PLACEHOLDER — remplace ce fichier par un .ogg portant le même nom (sans .txt)
+
+Fichier attendu : root_impact_1.ogg
+Format          : OGG Vorbis, 44100 Hz, Mono
+
+Description du son :
+  Impact de zone : craquements de sol + grondement sourd (0.8s)

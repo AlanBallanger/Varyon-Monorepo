@@ -1,0 +1,21 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Eye_Walk",
+  "Modify": {
+    "Appearance": "Forester_Guardian",
+    "DropList": "Drop_Forester_Guardian",
+    "AttackSequence": "Component_Instruction_Attack_Sequence_Eye_Void",
+    "MaxHealth": 61,
+    "IsMemory": true,
+    "MemoriesCategory": "Voidspawn",
+    "NameTranslationKey": {
+      "Compute": "NameTranslationKey"
+    }
+  },
+  "Parameters": {
+    "NameTranslationKey": {
+      "Value": "server.npcRoles.Eye_Void.name",
+      "Description": "Translation key for NPC name display"
+    }
+  }
+}

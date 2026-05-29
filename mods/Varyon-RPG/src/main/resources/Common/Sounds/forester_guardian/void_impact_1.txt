@@ -1,0 +1,7 @@
+PLACEHOLDER — remplace ce fichier par un .ogg portant le même nom (sans .txt)
+
+Fichier attendu : void_impact_1.ogg
+Format          : OGG Vorbis, 44100 Hz, Mono
+
+Description du son :
+  Impact de projectile : explosion sourde + résonance void (0.6s)
