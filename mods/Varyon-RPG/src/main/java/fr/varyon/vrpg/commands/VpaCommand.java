@@ -30,18 +30,22 @@ public final class VpaCommand extends AbstractCommandCollection {
                                               @Nonnull ParserContext parserContext,
                                               @Nonnull ParseResult parseResult) {
         if (sender instanceof PlayerRef playerRef && hasPermission(sender)) {
-            Player player = playerRef.getComponent(Player.getComponentType());
-            if (player != null) {
-                openPanel(playerRef, player);
+            Ref<EntityStore> ref = playerRef.getReference();
+            if (ref != null && ref.isValid()) {
+                Store<EntityStore> store = ref.getStore();
+                ((com.hypixel.hytale.server.core.universe.world.storage.EntityStore) store.getExternalData())
+                    .getWorld().execute(() -> {
+                        Player player = store.getComponent(ref, Player.getComponentType());
+                        if (player != null) openPanel(playerRef, player, ref, store);
+                    });
             }
             return CompletableFuture.completedFuture(null);
         }
         return super.acceptCall(sender, parserContext, parseResult);
     }
 
-    public static void openPanel(@Nonnull PlayerRef playerRef, @Nonnull Player player) {
-        Ref<EntityStore> ref = playerRef.getReference();
-        Store<EntityStore> store = ref.getStore();
+    public static void openPanel(@Nonnull PlayerRef playerRef, @Nonnull Player player,
+                                 @Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
         player.getPageManager().openCustomPage(ref, store, new RpgMainUI(playerRef));
     }
 }

@@ -7,6 +7,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.MathUtil;
 import com.hypixel.hytale.server.core.asset.type.environment.config.Environment;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.BlockChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
@@ -51,6 +52,35 @@ public final class EnvironmentUtil {
                                    @Nonnull TransformComponent transform,
                                    @Nonnull ComponentAccessor<EntityStore> accessor) {
         return isDesert(getEnvironmentId(ref, transform, accessor));
+    }
+
+    public static boolean isZone1(@Nullable String environmentId) {
+        if (environmentId == null) return false;
+        String id = environmentId.toLowerCase();
+        return id.contains("zone1") || id.contains("zone_1")
+            || id.contains("forest") || id.contains("meadow") || id.contains("grassland")
+            || id.contains("plains") || id.contains("river") || id.contains("swamp");
+    }
+
+    public static boolean isZone2(@Nullable String environmentId) {
+        if (environmentId == null) return false;
+        String id = environmentId.toLowerCase();
+        return id.contains("zone2") || id.contains("zone_2")
+            || id.contains("highlands") || id.contains("highland")
+            || id.contains("tundra") || id.contains("frozen") || id.contains("taiga");
+    }
+
+    public static boolean isDay(@Nonnull Store<EntityStore> store) {
+        try {
+            WorldTimeResource timeRes = store.getResource(WorldTimeResource.getResourceType());
+            return timeRes != null && timeRes.getSunlightFactor() > 0.2;
+        } catch (Exception ignored) {
+            return true;
+        }
+    }
+
+    public static boolean isNight(@Nonnull Store<EntityStore> store) {
+        return !isDay(store);
     }
 
     public static boolean isKnownNonForest(@Nullable String environmentId) {

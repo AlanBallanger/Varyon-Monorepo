@@ -76,6 +76,11 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
     private final ForestierComboTracker comboTracker;
     private final GuardianWoodManager guardianWoodManager;
     private final ComponentType<EntityStore, PlayerRef> playerRefType = PlayerRef.getComponentType();
+    private MaitriseForestierTracker maitriseTracker;
+
+    public void setMaitriseTracker(@Nonnull MaitriseForestierTracker maitriseTracker) {
+        this.maitriseTracker = maitriseTracker;
+    }
 
     public ForestierBlockBreakSystem(@Nonnull ProfessionManager professionManager,
                                      @Nonnull ForestierComboTracker comboTracker,
@@ -130,6 +135,8 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
         Ref<EntityStore> entityRef = null;
 
         if (isLog) {
+            if (maitriseTracker != null) maitriseTracker.onTreeChopped(uuid);
+
             // Node 5 " C-C-Combo : XP et loot bonus par combo (1%/combo au rang 1, +0.5% par rang)
             int comboRank = acc.getTalentRank(Profession.FORESTIER, "5");
             int comboCount = comboTracker.onLogChopped(uuid);

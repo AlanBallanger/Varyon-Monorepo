@@ -47,6 +47,11 @@ public final class ChasseurKillSystem {
     private final ChasseurComboTracker comboTracker;
     private final ChasseurGuardianManager guardianManager;
     private final ConcurrentHashMap<Integer, Ref<EntityStore>> lastAttackerByVictim = new ConcurrentHashMap<>();
+    private MaitriseChasseurTracker maitriseTracker;
+
+    public void setMaitriseTracker(@Nonnull MaitriseChasseurTracker maitriseTracker) {
+        this.maitriseTracker = maitriseTracker;
+    }
 
     public ChasseurKillSystem(@Nonnull ProfessionManager professionManager,
                                @Nonnull ChasseurComboTracker comboTracker,
@@ -150,6 +155,8 @@ public final class ChasseurKillSystem {
 
                 PlayerAccount acc = professionManager.getAccount(uuid);
                 if (acc == null || !acc.isActive(Profession.CHASSEUR)) return;
+
+                if (maitriseTracker != null) maitriseTracker.onKill(uuid);
 
                 TransformComponent transform = (TransformComponent) store.getComponent(ref, TransformComponent.getComponentType());
                 Vector3d pos = transform != null ? new Vector3d(transform.getPosition()).add(0.0, 0.5, 0.0) : null;

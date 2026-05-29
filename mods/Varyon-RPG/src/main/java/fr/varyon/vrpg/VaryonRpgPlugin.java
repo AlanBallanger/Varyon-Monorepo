@@ -52,6 +52,20 @@ import fr.varyon.vrpg.profession.forestier.GuardianWoodManager;
 import fr.varyon.vrpg.profession.forestier.GuardianWoodTickSystem;
 import fr.varyon.vrpg.profession.forestier.LitDeFortuneTickSystem;
 import fr.varyon.vrpg.profession.forestier.YeuxHibouTickSystem;
+import fr.varyon.vrpg.profession.chasseur.MaitriseChasseurDamageBoostSystem;
+import fr.varyon.vrpg.profession.chasseur.MaitriseChasseurDamageSystem;
+import fr.varyon.vrpg.profession.chasseur.MaitriseChasseurSpeedSystem;
+import fr.varyon.vrpg.profession.chasseur.MaitriseChasseurTracker;
+import fr.varyon.vrpg.profession.fermier.MaitriseFermierDamageSystem;
+import fr.varyon.vrpg.profession.fermier.MaitriseFermierRegenSystem;
+import fr.varyon.vrpg.profession.fermier.MaitriseFermierSpeedSystem;
+import fr.varyon.vrpg.profession.fermier.MaitriseFermierTracker;
+import fr.varyon.vrpg.profession.forestier.MaitriseForestierDamageSystem;
+import fr.varyon.vrpg.profession.forestier.MaitriseForestierSpeedSystem;
+import fr.varyon.vrpg.profession.forestier.MaitriseForestierStaminaSystem;
+import fr.varyon.vrpg.profession.forestier.MaitriseForestierTracker;
+import fr.varyon.vrpg.profession.mineur.MaitriseMineurDamageSystem;
+import fr.varyon.vrpg.profession.mineur.MaitriseMineurSpeedSystem;
 import fr.varyon.vrpg.profession.mineur.BagCraftRestrictionSystem;
 import fr.varyon.vrpg.profession.mineur.ExplosionTalentSystem;
 import fr.varyon.vrpg.profession.mineur.MinerComboTracker;
@@ -102,6 +116,16 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private YeuxLynxTickSystem yeuxLynxTickSystem;
     private YeuxHibouTickSystem yeuxHibouTickSystem;
     private LitDeFortuneTickSystem litDeFortuneTickSystem;
+    private MaitriseMineurSpeedSystem maitriseMineurSpeedSystem;
+    private MaitriseForestierTracker maitriseForestierTracker;
+    private MaitriseForestierSpeedSystem maitriseForestierSpeedSystem;
+    private MaitriseForestierStaminaSystem maitriseForestierStaminaSystem;
+    private MaitriseFermierTracker maitriseFermierTracker;
+    private MaitriseFermierSpeedSystem maitriseFermierSpeedSystem;
+    private MaitriseFermierRegenSystem maitriseFermierRegenSystem;
+    private MaitriseChasseurTracker maitriseChasseurTracker;
+    private MaitriseChasseurSpeedSystem maitriseChasseurSpeedSystem;
+    private ForestierBlockBreakSystem forestierBlockBreakSystem;
 
     private final ConcurrentHashMap<UUID, PlayerRef> pendingProfessionHudInit = new ConcurrentHashMap<>();
 
@@ -170,6 +194,19 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.yeuxLynxTickSystem = new YeuxLynxTickSystem(professionManager);
             this.yeuxHibouTickSystem = new YeuxHibouTickSystem(professionManager);
             this.litDeFortuneTickSystem = new LitDeFortuneTickSystem(professionManager);
+            this.maitriseMineurSpeedSystem = new MaitriseMineurSpeedSystem(professionManager);
+            this.maitriseForestierTracker = new MaitriseForestierTracker();
+            this.maitriseForestierSpeedSystem = new MaitriseForestierSpeedSystem(professionManager, maitriseForestierTracker);
+            this.maitriseForestierStaminaSystem = new MaitriseForestierStaminaSystem(professionManager);
+            this.maitriseFermierTracker = new MaitriseFermierTracker();
+            this.maitriseFermierSpeedSystem = new MaitriseFermierSpeedSystem(professionManager, maitriseFermierTracker);
+            this.maitriseFermierRegenSystem = new MaitriseFermierRegenSystem(professionManager);
+            this.maitriseChasseurTracker = new MaitriseChasseurTracker();
+            this.maitriseChasseurSpeedSystem = new MaitriseChasseurSpeedSystem(professionManager, maitriseChasseurTracker);
+            this.chasseurKillSystem.setMaitriseTracker(maitriseChasseurTracker);
+            this.farmerPickupHarvestSystem.setMaitriseTracker(maitriseFermierTracker);
+            this.forestierBlockBreakSystem = new ForestierBlockBreakSystem(professionManager, forestierComboTracker, guardianWoodManager);
+            this.forestierBlockBreakSystem.setMaitriseTracker(maitriseForestierTracker);
             this.surfaceCommand = new VpaSurfaceCommand();
             this.blastCommand = new VpaBlastCommand(explosionTalentSystem);
         } catch (Exception e) {
@@ -318,6 +355,15 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     if (miningHelmet != null) miningHelmet.removePlayer(ref.getUuid());
                     if (surfaceCommand != null) surfaceCommand.clearCooldown(ref.getUuid());
                     if (blastCommand != null) blastCommand.clearCooldown(ref.getUuid());
+                    if (maitriseMineurSpeedSystem != null) maitriseMineurSpeedSystem.removePlayer(ref.getUuid());
+                    if (maitriseForestierTracker != null) maitriseForestierTracker.remove(ref.getUuid());
+                    if (maitriseForestierSpeedSystem != null) maitriseForestierSpeedSystem.removePlayer(ref.getUuid());
+                    if (maitriseForestierStaminaSystem != null) maitriseForestierStaminaSystem.removePlayer(ref.getUuid());
+                    if (maitriseFermierTracker != null) maitriseFermierTracker.remove(ref.getUuid());
+                    if (maitriseFermierSpeedSystem != null) maitriseFermierSpeedSystem.removePlayer(ref.getUuid());
+                    if (maitriseFermierRegenSystem != null) maitriseFermierRegenSystem.removePlayer(ref.getUuid());
+                    if (maitriseChasseurTracker != null) maitriseChasseurTracker.remove(ref.getUuid());
+                    if (maitriseChasseurSpeedSystem != null) maitriseChasseurSpeedSystem.removePlayer(ref.getUuid());
                 }
             });
         } catch (Exception e) {
@@ -360,7 +406,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         }
 
         try {
-            getEntityStoreRegistry().registerSystem(new ForestierBlockBreakSystem(professionManager, forestierComboTracker, guardianWoodManager));
+            getEntityStoreRegistry().registerSystem(forestierBlockBreakSystem);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ForestierBlockBreakSystem");
         }
@@ -497,6 +543,72 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             getEntityStoreRegistry().registerSystem(secondSouffleTickSystem);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register SecondSouffleTickSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(new MaitriseMineurDamageSystem(professionManager));
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseMineurDamageSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(maitriseMineurSpeedSystem);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseMineurSpeedSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(maitriseForestierSpeedSystem);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseForestierSpeedSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(new MaitriseForestierDamageSystem(professionManager));
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseForestierDamageSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(maitriseForestierStaminaSystem);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseForestierStaminaSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(maitriseFermierSpeedSystem);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseFermierSpeedSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(new MaitriseFermierDamageSystem(professionManager));
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseFermierDamageSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(maitriseFermierRegenSystem);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseFermierRegenSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(new MaitriseChasseurDamageSystem(professionManager));
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseChasseurDamageSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(maitriseChasseurSpeedSystem);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseChasseurSpeedSystem");
+        }
+
+        try {
+            getEntityStoreRegistry().registerSystem(new MaitriseChasseurDamageBoostSystem(professionManager));
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseChasseurDamageBoostSystem");
         }
     }
 

@@ -48,6 +48,11 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
     private final FarmerComboTracker comboTracker;
     private final GuardianCropManager guardianCropManager;
     private final ConcurrentHashMap<UUID, Long> lastSickleCheckMillis = new ConcurrentHashMap<>();
+    private MaitriseFermierTracker maitriseTracker;
+
+    public void setMaitriseTracker(@Nonnull MaitriseFermierTracker maitriseTracker) {
+        this.maitriseTracker = maitriseTracker;
+    }
 
     public FarmerPickupHarvestSystem(@Nonnull ProfessionManager professionManager,
                                      @Nonnull FarmerComboTracker comboTracker,
@@ -84,6 +89,8 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
 
         PlayerAccount acc = professionManager.getAccount(uuid);
         if (acc == null || !acc.isActive(Profession.FERMIER)) return;
+
+        if (maitriseTracker != null) maitriseTracker.onCropPickup(uuid);
 
         boolean dbg = VrpgConfig.isDebugTalents();
         String dbgId = dbg ? "[" + uuid.toString().substring(0, 8) + "|Pickup|" + itemId + "] " : null;

@@ -1340,7 +1340,7 @@ Group {
         Group #BonusTreeNode0BorderAllocated { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4A90D9(0.9); Visible: false; }
         Group #BonusTreeNode0BorderHovered { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #B0B8C8(1.0); Visible: false; }
         Group #BonusTreeNode0Fill { Anchor: (Left: 3, Top: 3, Right: 3, Bottom: 3); Background: #1A1F29; }
-        Label #BonusTreeNode0Label { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: (FontSize: 11, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "I"; }
+        Group #BonusTreeNode0Icon { Anchor: (Left: 8, Top: 8, Right: 8, Bottom: 8); }
         Button #BonusTreeNode0 { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: @SkillNodeButtonStyle; LayoutMode: Top;
         }
       }
@@ -1357,7 +1357,7 @@ Group {
         Group #BonusTreeNode1BorderAllocated { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4A90D9(0.9); Visible: false; }
         Group #BonusTreeNode1BorderHovered { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #B0B8C8(1.0); Visible: false; }
         Group #BonusTreeNode1Fill { Anchor: (Left: 3, Top: 3, Right: 3, Bottom: 3); Background: #1A1F29; }
-        Label #BonusTreeNode1Label { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: (FontSize: 11, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "II"; }
+        Group #BonusTreeNode1Icon { Anchor: (Left: 8, Top: 8, Right: 8, Bottom: 8); }
         Button #BonusTreeNode1 { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: @SkillNodeButtonStyle; LayoutMode: Top;
         }
       }
@@ -1374,7 +1374,7 @@ Group {
         Group #BonusTreeNode2BorderAllocated { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4A90D9(0.9); Visible: false; }
         Group #BonusTreeNode2BorderHovered { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #B0B8C8(1.0); Visible: false; }
         Group #BonusTreeNode2Fill { Anchor: (Left: 3, Top: 3, Right: 3, Bottom: 3); Background: #1A1F29; }
-        Label #BonusTreeNode2Label { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: (FontSize: 11, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "III"; }
+        Group #BonusTreeNode2Icon { Anchor: (Left: 8, Top: 8, Right: 8, Bottom: 8); }
         Button #BonusTreeNode2 { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: @SkillNodeButtonStyle; LayoutMode: Top;
         }
       }
@@ -1452,7 +1452,7 @@ Group {
       }
 
       Group #SkillTreeCurrentBonusRow {
-        LayoutMode: Left;
+        LayoutMode: Top;
         Anchor: (Top: 4);
         Visible: false;
 
@@ -1461,8 +1461,6 @@ Group {
           Text: "Bonus actuel";
         }
 
-        Group { FlexWeight: 1; }
-
         Label #SkillTreeCurrentBonusValue {
           Style: (...@MetaStyle, FontSize: 13, TextColor: #31C677FF, RenderBold: true, Wrap: true);
           Text: "";
@@ -1470,7 +1468,7 @@ Group {
       }
 
       Group #SkillTreeNextRankRow {
-        LayoutMode: Left;
+        LayoutMode: Top;
         Anchor: (Top: 4);
         Visible: false;
 
@@ -1478,8 +1476,6 @@ Group {
           Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
           Text: "Prochain rang";
         }
-
-        Group { FlexWeight: 1; }
 
         Label #SkillTreeNextRankValue {
           Style: (...@MetaStyle, FontSize: 13, TextColor: @GoldHighlight, RenderBold: true, Wrap: true);

@@ -1068,8 +1068,9 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             positionSkillSlot(uiBuilder, id, sl, st);
             positionSkillRank(uiBuilder, id, sl, st);
 
-            String iconPath = node[5].contains("/") ? node[5] : ICON_BASE + node[5];
-            PatchStyle iconStyle = new PatchStyle().setTexturePath(Value.of(iconPath));
+            String rawIcon = node[5];
+            String iconPath = rawIcon.isEmpty() ? null : (rawIcon.contains("/") ? rawIcon : ICON_BASE + rawIcon);
+            PatchStyle iconStyle = iconPath != null ? new PatchStyle().setTexturePath(Value.of(iconPath)) : new PatchStyle();
             int allocated = currentRanks()[i];
 
             uiBuilder.set("#SkillTreeNode" + id + "Slot.Visible", true);
@@ -1077,8 +1078,8 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             uiBuilder.set("#SkillTreeNode" + id + "Unlocked.Visible", true);
             uiBuilder.setObject("#SkillTreeNode" + id + "Unlocked.Background", NODE_FILL_STYLE);
 
-            uiBuilder.set("#SkillTreeNode" + id + "Icon.Visible", true);
-            uiBuilder.setObject("#SkillTreeNode" + id + "Icon.Background", iconStyle);
+            uiBuilder.set("#SkillTreeNode" + id + "Icon.Visible", iconPath != null);
+            if (iconPath != null) uiBuilder.setObject("#SkillTreeNode" + id + "Icon.Background", iconStyle);
 
             uiBuilder.set("#SkillTreeNode" + id + "RankText.Visible", true);
             uiBuilder.set("#SkillTreeNode" + id + "RankText.TextSpans",
@@ -1145,12 +1146,79 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
 
     private static final String[] BONUS_NODE_IDS = {"bonus_0", "bonus_1", "bonus_2"};
     private static final String[] BONUS_NODE_LABELS = {"I", "II", "III"};
-    private static final String[] BONUS_NODE_NAMES = {"Maîtrise I", "Maîtrise II", "Maîtrise III"};
-    private static final String[] BONUS_NODE_DESCS = {
-        "Première maîtrise du métier.",
-        "Maîtrise approfondie du métier.",
-        "Maîtrise ultime du métier."
+    private static final String[] MINEUR_BONUS_NAMES = {"Sang Bouillonnant", "Extracteur des Profondeurs", "Impulsion Souterraine"};
+    private static final String[] MINEUR_BONUS_DESCS = {
+        "Résiste aux flammes et à la lave.",
+        "Les profondeurs te protègent.",
+        "L'immobilité forge l'élan."
     };
+    private static final String[] MINEUR_BONUS_STATS = {"-30% dégâts de feu / lave", "-15% dégâts reçus sous la couche 100", "+30% vitesse après 3s immobile"};
+    private static final String[] FORESTIER_BONUS_NAMES = {"Bras de Bûcheron", "Enfant de la Forêt", "Vigueur Sylvestre"};
+    private static final String[] FORESTIER_BONUS_DESCS = {
+        "L'abattage libère l'énergie.",
+        "La forêt te berce.",
+        "La sève te nourrit."
+    };
+    private static final String[] FORESTIER_BONUS_STATS = {"+30% vitesse pendant 10s après un abattage", "-15% dégâts reçus en zone 1 & 2", "+15% endurance maximale"};
+    private static final String[] FERMIER_BONUS_NAMES = {"Semis-Marathon", "Tournesol Né", "Aura du Fermier"};
+    private static final String[] FERMIER_BONUS_DESCS = {
+        "La moisson t'insuffle de l'énergie.",
+        "Le soleil veille sur toi.",
+        "La terre te régénère."
+    };
+    private static final String[] FERMIER_BONUS_STATS = {"+30% vitesse pendant 30s après une récolte", "-15% dégâts reçus de jour", "+1 PV toutes les 5 secondes"};
+    private static final String[] CHASSEUR_BONUS_NAMES = {"Camouflage Nocturne", "Instinct Affûté", "Traque"};
+    private static final String[] CHASSEUR_BONUS_DESCS = {
+        "La nuit est ton alliée.",
+        "Le sang versé décuple tes sens.",
+        "Ta proie ne peut fuir."
+    };
+    private static final String[] CHASSEUR_BONUS_STATS = {"-15% dégâts reçus la nuit", "+30% vitesse pendant 10s après un kill", "+10% dégâts infligés"};
+
+    private static final String[] MINEUR_BONUS_ICONS    = {"Jobs_Icons/Lava_Damage.png",    "Jobs_Icons/Deep_Mining.png",    "Jobs_Icons/Movement_Speed.png"};
+    private static final String[] FORESTIER_BONUS_ICONS = {"Jobs_Icons/Movement_Speed.png", "Jobs_Icons/Green_Shield.png",   "Jobs_Icons/Stamina_Max.png"};
+    private static final String[] FERMIER_BONUS_ICONS   = {"Jobs_Icons/Movement_Speed.png", "Jobs_Icons/Sunflower.png",      "Jobs_Icons/Health_Regen.png"};
+    private static final String[] CHASSEUR_BONUS_ICONS  = {"Jobs_Icons/Night_Defense.png",  "Jobs_Icons/Movement_Speed.png", "Jobs_Icons/Attack_Buff.png"};
+
+    private static String[] getBonusIcons(Profession prof) {
+        return switch (prof) {
+            case MINEUR    -> MINEUR_BONUS_ICONS;
+            case FORESTIER -> FORESTIER_BONUS_ICONS;
+            case FERMIER   -> FERMIER_BONUS_ICONS;
+            case CHASSEUR  -> CHASSEUR_BONUS_ICONS;
+            default        -> new String[]{"", "", ""};
+        };
+    }
+
+    private static String[] getBonusNames(Profession prof) {
+        return switch (prof) {
+            case MINEUR -> MINEUR_BONUS_NAMES;
+            case FORESTIER -> FORESTIER_BONUS_NAMES;
+            case FERMIER -> FERMIER_BONUS_NAMES;
+            case CHASSEUR -> CHASSEUR_BONUS_NAMES;
+            default -> new String[]{"Maîtrise I", "Maîtrise II", "Maîtrise III"};
+        };
+    }
+
+    private static String[] getBonusDescs(Profession prof) {
+        return switch (prof) {
+            case MINEUR -> MINEUR_BONUS_DESCS;
+            case FORESTIER -> FORESTIER_BONUS_DESCS;
+            case FERMIER -> FERMIER_BONUS_DESCS;
+            case CHASSEUR -> CHASSEUR_BONUS_DESCS;
+            default -> new String[]{"", "", ""};
+        };
+    }
+
+    private static String[] getBonusStats(Profession prof) {
+        return switch (prof) {
+            case MINEUR -> MINEUR_BONUS_STATS;
+            case FORESTIER -> FORESTIER_BONUS_STATS;
+            case FERMIER -> FERMIER_BONUS_STATS;
+            case CHASSEUR -> CHASSEUR_BONUS_STATS;
+            default -> new String[]{"", "", ""};
+        };
+    }
 
     private void populateBonusTree(@Nonnull UICommandBuilder ui,
                                    @Nonnull UIEventBuilder ev,
@@ -1176,6 +1244,9 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             ui.set("#BonusTreeNode" + i + "BorderAllocated.Visible", allocated);
             ui.set("#BonusTreeNode" + i + "RankText.Visible", true);
             ui.set("#BonusTreeNode" + i + "RankText.TextSpans", Message.raw(rank + "/1"));
+            String icon = getBonusIcons(prof)[i];
+            ui.setObject("#BonusTreeNode" + i + "Icon.Background",
+                new PatchStyle().setTexturePath(Value.of(icon)));
 
             if (i < 2) {
                 ui.set("#BonusTreeNode" + i + "Connector.Visible", true);
@@ -1201,13 +1272,18 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             Profession prof = currentTalentProfession();
             int realRank = acc != null ? acc.getTalentRank(prof, BONUS_NODE_IDS[bonusPanel]) : 0;
             int rank = (pendingBonusRanks != null) ? pendingBonusRanks[bonusPanel] : realRank;
-            uiBuilder.set("#SkillTreeSelectedTitle.TextSpans", Message.raw(BONUS_NODE_NAMES[bonusPanel]));
-            uiBuilder.set("#SkillTreeSelectedFlavor.TextSpans", Message.raw("« " + BONUS_NODE_DESCS[bonusPanel] + " »"));
+            uiBuilder.set("#SkillTreeSelectedTitle.TextSpans", Message.raw(getBonusNames(prof)[bonusPanel]));
+            uiBuilder.set("#SkillTreeSelectedFlavor.TextSpans", Message.raw("« " + getBonusDescs(prof)[bonusPanel] + " »"));
             uiBuilder.set("#SkillTreeSelectedEffect.TextSpans", Message.raw(""));
-            uiBuilder.setObject("#SkillSidebarIconImage.Background", new PatchStyle());
+            String bonusIcon = getBonusIcons(prof)[bonusPanel];
+            uiBuilder.setObject("#SkillSidebarIconImage.Background",
+                bonusIcon.isEmpty() ? new PatchStyle() : new PatchStyle().setTexturePath(Value.of(bonusIcon)));
             uiBuilder.set("#SkillTreeCurrentRankValue.TextSpans", Message.raw(rank + "/1"));
-            uiBuilder.set("#SkillTreeCurrentBonusRow.Visible", false);
-            uiBuilder.set("#SkillTreeNextRankRow.Visible", false);
+            String bonusStat = getBonusStats(prof)[bonusPanel];
+            uiBuilder.set("#SkillTreeCurrentBonusRow.Visible", rank > 0);
+            if (rank > 0) uiBuilder.set("#SkillTreeCurrentBonusValue.TextSpans", Message.raw(bonusStat));
+            uiBuilder.set("#SkillTreeNextRankRow.Visible", rank == 0);
+            if (rank == 0) uiBuilder.set("#SkillTreeNextRankValue.TextSpans", Message.raw(bonusStat));
             uiBuilder.set("#SkillTreeTypePassif.Visible", true);
             uiBuilder.set("#SkillTreeTypeActif.Visible", false);
             uiBuilder.set("#SkillTreeTypeObjet.Visible", false);
