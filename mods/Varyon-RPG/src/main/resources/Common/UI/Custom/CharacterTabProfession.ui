@@ -135,12 +135,16 @@ Group {
           Button #ProfessionActiveCard0Reconvert {
             FlexWeight: 1;
             Style: @ProfessionTabSecondaryButton;
-            LayoutMode: Middle;
+            LayoutMode: Left;
+            Group { FlexWeight: 1; }
+            Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Refresh.png", Border: 0); }
+            Group { Anchor: (Width: 5); }
             Label {
               Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true,
                 HorizontalAlignment: Center, VerticalAlignment: Center);
               Text: "Reconversion";
             }
+            Group { FlexWeight: 1; }
           }
 
           Group { Anchor: (Width: 4); }
@@ -148,12 +152,16 @@ Group {
           Button #ProfessionActiveCard0ViewTalents {
             FlexWeight: 1;
             Style: @ProfessionTabViewTalentsButton;
-            LayoutMode: Middle;
+            LayoutMode: Left;
+            Group { FlexWeight: 1; }
+            Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Talent.png", Border: 0); }
+            Group { Anchor: (Width: 5); }
             Label {
               Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true,
                 HorizontalAlignment: Center, VerticalAlignment: Center);
               Text: "Voir talents";
             }
+            Group { FlexWeight: 1; }
           }
         }
       }
@@ -248,12 +256,16 @@ Group {
           Button #ProfessionActiveCard1Reconvert {
             FlexWeight: 1;
             Style: @ProfessionTabSecondaryButton;
-            LayoutMode: Middle;
+            LayoutMode: Left;
+            Group { FlexWeight: 1; }
+            Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Refresh.png", Border: 0); }
+            Group { Anchor: (Width: 5); }
             Label {
               Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true,
                 HorizontalAlignment: Center, VerticalAlignment: Center);
               Text: "Reconversion";
             }
+            Group { FlexWeight: 1; }
           }
 
           Group { Anchor: (Width: 4); }
@@ -261,12 +273,16 @@ Group {
           Button #ProfessionActiveCard1ViewTalents {
             FlexWeight: 1;
             Style: @ProfessionTabViewTalentsButton;
-            LayoutMode: Middle;
+            LayoutMode: Left;
+            Group { FlexWeight: 1; }
+            Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Talent.png", Border: 0); }
+            Group { Anchor: (Width: 5); }
             Label {
               Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true,
                 HorizontalAlignment: Center, VerticalAlignment: Center);
               Text: "Voir talents";
             }
+            Group { FlexWeight: 1; }
           }
         }
       }
