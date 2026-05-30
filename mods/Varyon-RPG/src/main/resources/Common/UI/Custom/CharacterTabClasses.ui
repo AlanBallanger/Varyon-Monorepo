@@ -83,23 +83,31 @@ Group {
       }
 
       Group {
-        Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 30);
+        Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 28);
         LayoutMode: Left;
 
         Button #ClassesChangeProfileButton {
           FlexWeight: 1;
           Style: $P.@PlusButtonStyle;
-          LayoutMode: Middle;
-          Label { Style: (FontSize: 11, TextColor: #F2E8D8, RenderUppercase: true); Text: "Changer de profil"; }
+          LayoutMode: Left;
+          Group { FlexWeight: 1; }
+          Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Refresh.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Changer de profil"; }
+          Group { FlexWeight: 1; }
         }
 
-        Group { Anchor: (Width: 6); }
+        Group { Anchor: (Width: 4); }
 
         Button #ClassesViewTalentsButton {
           FlexWeight: 1;
           Style: $P.@PlusButtonStyle;
-          LayoutMode: Middle;
-          Label { Style: (FontSize: 11, TextColor: #F2E8D8, RenderUppercase: true); Text: "Voir talents"; }
+          LayoutMode: Left;
+          Group { FlexWeight: 1; }
+          Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Talent.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Voir talents"; }
+          Group { FlexWeight: 1; }
         }
       }
     }
@@ -198,7 +206,7 @@ Group {
 
     Group { Anchor: (Height: 8); }
 
-    // --- Statistiques (placeholder) ---
+    // --- Statistiques de classe ---
     Group {
       FlexWeight: 1;
       Anchor: (Left: 0, Right: 0);
@@ -209,7 +217,7 @@ Group {
       Group {
         Anchor: (Left: 0, Right: 0, Height: 20);
         LayoutMode: Left;
-        Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Elements/Sword.png", Border: 0); }
+        Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/health.png", Border: 0); }
         Group { Anchor: (Width: 6); }
         Label {
           Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
@@ -219,10 +227,126 @@ Group {
 
       Group { Anchor: (Height: 8); }
 
-      Label {
-        Anchor: (Left: 0, Right: 0, Height: 16);
-        Style: (FontSize: 13, TextColor: #C8BEB0);
-        Text: "Disponible dans une prochaine mise a jour.";
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 70);
+        LayoutMode: Left;
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 16); LayoutMode: Middle; Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/health.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatPv {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            Style: (FontSize: 20, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "---";
+          }
+          Label {
+            Anchor: (Left: 0, Right: 0, Height: 14);
+            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
+            Text: "Vie max";
+          }
+        }
+
+        Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 16); LayoutMode: Middle; Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/defense.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatDef {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            Style: (FontSize: 20, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "---";
+          }
+          Label {
+            Anchor: (Left: 0, Right: 0, Height: 14);
+            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
+            Text: "Red. degats";
+          }
+        }
+
+        Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 16); LayoutMode: Middle; Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatEnd {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            Style: (FontSize: 20, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "---";
+          }
+          Label {
+            Anchor: (Left: 0, Right: 0, Height: 14);
+            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
+            Text: "Endurance";
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 70);
+        LayoutMode: Left;
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 16); LayoutMode: Middle; Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatAtk {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            Style: (FontSize: 20, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "---";
+          }
+          Label {
+            Anchor: (Left: 0, Right: 0, Height: 14);
+            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
+            Text: "Attaque";
+          }
+        }
+
+        Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 16); LayoutMode: Middle; Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/taux_crit.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatCrit {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            Style: (FontSize: 20, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "---";
+          }
+          Label {
+            Anchor: (Left: 0, Right: 0, Height: 14);
+            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
+            Text: "Taux crit";
+          }
+        }
+
+        Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 16); LayoutMode: Middle; Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/degat_crit.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatDcrit {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            Style: (FontSize: 20, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "---";
+          }
+          Label {
+            Anchor: (Left: 0, Right: 0, Height: 14);
+            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
+            Text: "Dgts crit";
+          }
+        }
       }
     }
   }
@@ -260,23 +384,25 @@ Group {
         Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
         Padding: (Full: 10);
 
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 80);
-          LayoutMode: Middle;
-          Group #ClassesSpec0Icon { Anchor: (Width: 70, Height: 70); }
+        Label #ClassesSpec0Name {
+          Anchor: (Left: 0, Right: 0, Height: 20);
+          Style: (FontSize: 15, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+          Text: "Rempart";
         }
 
-        Group { Anchor: (Height: 6); }
+        Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 22);
-          LayoutMode: Left;
+          Anchor: (Left: 0, Right: 0, Height: 64);
+          LayoutMode: Middle;
+          Group #ClassesSpec0Icon { Anchor: (Width: 60, Height: 60); }
+        }
 
-          Label #ClassesSpec0Name {
-            FlexWeight: 1;
-            Style: (FontSize: 16, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
-            Text: "Rempart";
-          }
+        Group { Anchor: (Height: 4); }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Height: 20);
+          LayoutMode: Center;
 
           Group #ClassesSpec0ActiveBadge {
             Background: #25793C(1.0);
@@ -293,13 +419,59 @@ Group {
           }
         }
 
+        Group { Anchor: (Height: 4); }
+
         Label #ClassesSpec0Keywords {
           Anchor: (Left: 0, Right: 0, Height: 16);
-          Style: (FontSize: 13, TextColor: #6BCB7A);
+          Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
           Text: "";
         }
 
-        Group { Anchor: (Height: 4); }
+        Group { Anchor: (Height: 6); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+        Group { Anchor: (Height: 6); }
+
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/health.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "PV"; }
+          Label #ClassesSpec0StatPv { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/defense.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Red. degats"; }
+          Label #ClassesSpec0StatDef { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Endurance"; }
+          Label #ClassesSpec0StatEnd { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Attaque"; }
+          Label #ClassesSpec0StatAtk { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/taux_crit.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Taux crit"; }
+          Label #ClassesSpec0StatCrit { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/degat_crit.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Dgts crit"; }
+          Label #ClassesSpec0StatDcrit { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
 
         Group { FlexWeight: 1; }
 
@@ -331,23 +503,25 @@ Group {
         Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
         Padding: (Full: 10);
 
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 80);
-          LayoutMode: Middle;
-          Group #ClassesSpec1Icon { Anchor: (Width: 70, Height: 70); }
+        Label #ClassesSpec1Name {
+          Anchor: (Left: 0, Right: 0, Height: 20);
+          Style: (FontSize: 15, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+          Text: "Duelliste";
         }
 
-        Group { Anchor: (Height: 6); }
+        Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 22);
-          LayoutMode: Left;
+          Anchor: (Left: 0, Right: 0, Height: 64);
+          LayoutMode: Middle;
+          Group #ClassesSpec1Icon { Anchor: (Width: 60, Height: 60); }
+        }
 
-          Label #ClassesSpec1Name {
-            FlexWeight: 1;
-            Style: (FontSize: 16, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
-            Text: "Duelliste";
-          }
+        Group { Anchor: (Height: 4); }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Height: 20);
+          LayoutMode: Center;
 
           Group #ClassesSpec1ActiveBadge {
             Background: #25793C(1.0);
@@ -364,13 +538,59 @@ Group {
           }
         }
 
+        Group { Anchor: (Height: 4); }
+
         Label #ClassesSpec1Keywords {
           Anchor: (Left: 0, Right: 0, Height: 16);
-          Style: (FontSize: 13, TextColor: #6BCB7A);
+          Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
           Text: "";
         }
 
-        Group { Anchor: (Height: 4); }
+        Group { Anchor: (Height: 6); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+        Group { Anchor: (Height: 6); }
+
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/health.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "PV"; }
+          Label #ClassesSpec1StatPv { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/defense.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Red. degats"; }
+          Label #ClassesSpec1StatDef { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Endurance"; }
+          Label #ClassesSpec1StatEnd { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Attaque"; }
+          Label #ClassesSpec1StatAtk { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/taux_crit.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Taux crit"; }
+          Label #ClassesSpec1StatCrit { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/degat_crit.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Dgts crit"; }
+          Label #ClassesSpec1StatDcrit { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
 
         Group { FlexWeight: 1; }
 
@@ -402,23 +622,25 @@ Group {
         Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
         Padding: (Full: 10);
 
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 80);
-          LayoutMode: Middle;
-          Group #ClassesSpec2Icon { Anchor: (Width: 70, Height: 70); }
+        Label #ClassesSpec2Name {
+          Anchor: (Left: 0, Right: 0, Height: 20);
+          Style: (FontSize: 15, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+          Text: "Ombre";
         }
 
-        Group { Anchor: (Height: 6); }
+        Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 22);
-          LayoutMode: Left;
+          Anchor: (Left: 0, Right: 0, Height: 64);
+          LayoutMode: Middle;
+          Group #ClassesSpec2Icon { Anchor: (Width: 60, Height: 60); }
+        }
 
-          Label #ClassesSpec2Name {
-            FlexWeight: 1;
-            Style: (FontSize: 16, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
-            Text: "Ombre";
-          }
+        Group { Anchor: (Height: 4); }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Height: 20);
+          LayoutMode: Center;
 
           Group #ClassesSpec2ActiveBadge {
             Background: #25793C(1.0);
@@ -435,13 +657,59 @@ Group {
           }
         }
 
+        Group { Anchor: (Height: 4); }
+
         Label #ClassesSpec2Keywords {
           Anchor: (Left: 0, Right: 0, Height: 16);
-          Style: (FontSize: 13, TextColor: #6BCB7A);
+          Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
           Text: "";
         }
 
-        Group { Anchor: (Height: 4); }
+        Group { Anchor: (Height: 6); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+        Group { Anchor: (Height: 6); }
+
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/health.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "PV"; }
+          Label #ClassesSpec2StatPv { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/defense.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Red. degats"; }
+          Label #ClassesSpec2StatDef { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Endurance"; }
+          Label #ClassesSpec2StatEnd { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Attaque"; }
+          Label #ClassesSpec2StatAtk { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/taux_crit.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Taux crit"; }
+          Label #ClassesSpec2StatCrit { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+          Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/degat_crit.png", Border: 0); }
+          Group { Anchor: (Width: 5); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Dgts crit"; }
+          Label #ClassesSpec2StatDcrit { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        }
 
         Group { FlexWeight: 1; }
 
