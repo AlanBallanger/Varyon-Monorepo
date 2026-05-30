@@ -29,6 +29,7 @@ public final class ClassManager {
     private static final long XP_NOTIF_DEBOUNCE_MS = 1500L;
 
     private final SqliteClassStorage storage;
+    private final ClassStatEngine statEngine = new ClassStatEngine();
     private final ConcurrentHashMap<UUID, ClassAccount> cache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, ReentrantLock> locks = new ConcurrentHashMap<>();
     private final Set<UUID> dirty = ConcurrentHashMap.newKeySet();
@@ -212,12 +213,22 @@ public final class ClassManager {
         }
     }
 
+    public ClassStatEngine getStatEngine() {
+        return statEngine;
+    }
+
+    public ClassPlayerStats applyStats(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = cache.get(uuid);
+        return statEngine.computeAndApply(uuid, playerRef, acc);
+    }
+
     public void onPlayerDisconnect(@Nonnull UUID uuid) {
         ClassAccount acc = cache.get(uuid);
         if (acc != null) {
             storage.savePlayer(uuid, acc);
             dirty.remove(uuid);
         }
+        statEngine.cleanup(uuid);
         locks.remove(uuid);
         cache.remove(uuid);
         xpFractionBank.remove(uuid);

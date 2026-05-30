@@ -270,6 +270,13 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     } catch (Exception e) {
                         LOGGER.atWarning().withCause(e).log("[VaryonRPG] init ProfessionXpHud");
                     }
+                    try {
+                        if (classManager != null && readyRef.isValid()) {
+                            classManager.applyStats(readyRef.getUuid(), readyRef);
+                        }
+                    } catch (Exception e) {
+                        LOGGER.atWarning().withCause(e).log("[VaryonRPG] applyStats classes");
+                    }
                 });
             });
             getEventRegistry().registerGlobal(PlayerInteractEvent.class, event -> {

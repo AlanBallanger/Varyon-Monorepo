@@ -454,6 +454,24 @@ Group {
         }
       }
 
+      Group #ClassTalentsTabContent {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Visible: false;
+        Anchor: (Top: 4);
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Padding: (Full: 12);
+
+          Group #ClassTalentsTabMount {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Full;
+          }
+        }
+      }
+
       Group #ArtisansTabContent {
         LayoutMode: Top;
         FlexWeight: 1;

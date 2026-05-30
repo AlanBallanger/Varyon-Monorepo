@@ -1,0 +1,1543 @@
+$C = "Common.ui";
+
+@Ink = #E8DCC8;
+@InkStrong = #F2E8D8;
+@InkMuted = #C8BEB0;
+@InkFaint = #A89E90;
+@LeatherBg = #000000(0.22);
+@PanelShade = #000000(0.32);
+@CardShade = #000000(0.26);
+@Gold = #D4AF37(0.92);
+@GoldSoft = #D4AF37(0.74);
+@GoldHighlight = #F7E6A5(0.62);
+@GoldShadow = #1A1612(0.55);
+@ActiveGreen = #6BCB7A(0.95);
+@Aging = #8A7A5A(0.22);
+@ParchmentMottle = #FFFFFF(0.03);
+@GrainLight = #FFFFFF(0.02);
+@GrainDark = #000000(0.12);
+@Edge1 = #FFFFFF(0.05);
+@Edge2 = #FFFFFF(0.03);
+@Edge3 = #000000(0.20);
+@Divider = #E8DCC8(0.16);
+@DividerSoft = #E8DCC8(0.10);
+@Backdrop = #000000(0.42);
+@SelectedButtonFill = #D4AF37(0.38);
+@StatusPillBg = #000000(0.40);
+@StatusPillEdge = #D4AF37(0.35);
+@SkillTreeEdgeGlow = #D4AF37(0.62);
+@SkillTreeNodeGlow = #D4AF37(0.18);
+
+@HeadingStyle = (
+  FontSize: 24,
+  TextColor: @Ink,
+  RenderBold: true
+);
+
+@SubHeadingStyle = (
+  FontSize: 18,
+  TextColor: @InkStrong,
+  RenderBold: true
+);
+
+@MetaStyle = (
+  FontSize: 16,
+  TextColor: @InkMuted
+);
+
+@SectionTitleStyle = (
+  FontSize: 16,
+  TextColor: #C8A96E,
+  RenderUppercase: true,
+  RenderBold: true
+);
+
+@StatLabelStyle = (
+  FontSize: 16,
+  TextColor: #B8A88C,
+  RenderUppercase: true
+);
+
+@ReadableStatLabelStyle = (
+  ...@StatLabelStyle,
+  RenderUppercase: false
+);
+
+@StatValueStyle = (
+  FontSize: 18,
+  TextColor: @InkStrong,
+  RenderBold: true
+);
+
+@PlusButtonStyle = (
+  Default: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 8)
+  ),
+  Hovered: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Hovered.png", Border: 8)
+  ),
+  Pressed: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8)
+  ),
+  Disabled: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Disabled.png", Border: 8)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@BlockedButtonStyle = (
+  Default: (
+    Background: #6B4E2E(0.06)
+  ),
+  Hovered: (
+    Background: #6B4E2E(0.06)
+  ),
+  Pressed: (
+    Background: #6B4E2E(0.06)
+  ),
+  Disabled: (
+    Background: #6B4E2E(0.06)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@TabButtonStyle = (
+  Default: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 8)
+  ),
+  Hovered: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Hovered.png", Border: 8)
+  ),
+  Pressed: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8)
+  ),
+  Disabled: (
+    Background: PatchStyle(TexturePath: "Common/Buttons/Disabled.png", Border: 8)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@TabLabelStyle = (
+  FontSize: 14,
+  TextColor: @InkStrong,
+  RenderUppercase: true,
+  RenderBold: true,
+  HorizontalAlignment: Center,
+  VerticalAlignment: Center
+);
+
+@CycleCardTitleStyle = (
+  FontSize: 12,
+  TextColor: @InkMuted,
+  RenderUppercase: true,
+  RenderBold: true
+);
+
+@CycleActiveTagStyle = (
+  FontSize: 12,
+  TextColor: @ActiveGreen,
+  RenderUppercase: true,
+  RenderBold: true
+);
+
+@CycleSlotKeyStyle = (
+  FontSize: 10,
+  TextColor: @InkMuted,
+  RenderUppercase: true,
+  RenderBold: true,
+  VerticalAlignment: Center
+);
+
+@CycleSlotValueStyle = (
+  FontSize: 12,
+  TextColor: @InkStrong,
+  RenderBold: true,
+  VerticalAlignment: Center
+);
+
+@CycleSlotButtonStyle = (
+  Default: (
+    Background: @PanelShade
+  ),
+  Hovered: (
+    Background: #6B4E2E(0.12)
+  ),
+  Pressed: (
+    Background: #6B4E2E(0.16)
+  ),
+  Disabled: (
+    Background: #6B4E2E(0.06)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@SkillNodeButtonStyle = (
+  Default: (
+    Background: #000000(0.0)
+  ),
+  Hovered: (
+    Background: #000000(0.0)
+  ),
+  Pressed: (
+    Background: #000000(0.0)
+  ),
+  Disabled: (
+    Background: #000000(0.0)
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+
+@SkillNodeSlotStyle = (
+  Default: (
+    Background: #000000(0.0)
+  ),
+  Hovered: (
+    Background: #000000(0.0)
+  ),
+  Pressed: (
+    Background: #000000(0.0)
+  ),
+  Disabled: (
+    Background: #000000(0.0)
+  )
+);
+
+@PageWidth = 1170;
+@PageHeight = 768;
+@PagePadding = 31;
+
+
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+  LayoutMode: Top;
+
+  Group {
+    Anchor: (Left: 0, Right: 0, Height: 48);
+    LayoutMode: Full;
+    Padding: (Left: 8, Top: 4, Right: 8);
+
+    Group {
+      Anchor: (Left: 0, Top: 0, Width: 400, Height: 44);
+      LayoutMode: Full;
+
+      Label {
+        Anchor: (Left: 0, Top: 0, Right: 0, Height: 22);
+        Style: @SectionTitleStyle;
+        Text: "Arbre de talents de classe";
+      }
+
+      Label #ClassTreePointsValue {
+        Anchor: (Left: 0, Top: 24, Right: 0, Height: 18);
+        Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
+        Text: "Points restants : 0";
+      }
+    }
+
+    Group #ClassTreeProfessionPickerRow {
+      Anchor: (Right: 0, Top: 11, Width: 140, Height: 26);
+      LayoutMode: Full;
+      Visible: true;
+
+      Button #ClassTreeBackButton {
+        Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0);
+        Style: @CycleSlotButtonStyle;
+        LayoutMode: Middle;
+        Label {
+          Style: (FontSize: 12, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+          Text: "Retour";
+        }
+      }
+    }
+  }
+
+  Group {
+    FlexWeight: 1;
+    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+    LayoutMode: Full;
+
+  Group #ClassTreeCanvas {
+    Anchor: (Left: 0, Top: 0, Bottom: 0, Right: 298);
+    LayoutMode: Full;
+
+      Group #ClassTreePager {
+        Anchor: (Right: 0, Top: 0, Width: 64, Height: 90);
+        LayoutMode: Full;
+        Background: @PanelShade;
+        Padding: (Full: 6);
+        Visible: false;
+
+        Button #ClassTreePageUpButton {
+          Anchor: (Left: 6, Right: 6, Top: 6, Height: 22);
+          Style: @PlusButtonStyle;
+
+          Label {
+            Style: (FontSize: 16, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "^";
+          }
+        }
+
+        Label #ClassTreePageLabel {
+          Anchor: (Left: 0, Right: 0, Top: 37, Height: 16);
+          Style: (...@MetaStyle, FontSize: 12, HorizontalAlignment: Center);
+          Text: "";
+        }
+
+        Button #ClassTreePageDownButton {
+          Anchor: (Left: 6, Right: 6, Bottom: 6, Height: 22);
+          Style: @PlusButtonStyle;
+
+          Label {
+            Style: (FontSize: 16, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "v";
+          }
+        }
+      }
+
+      Group #ClassTreeSpecializationWipRect { Anchor: (Left: 0, Top: 0, Width: 720, Height: 34); Background: @CardShade; Visible: false; }
+      Label #ClassTreeSpecializationWipLabel { Anchor: (Left: 0, Top: 0, Width: 720, Height: 34); Style: (...@MetaStyle, FontSize: 14, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Spécialisation (à venir)"; Visible: false; }
+
+      Button #ClassTreeAttribuerButton { Anchor: (Right: 8, Top: 4, Width: 118, Height: 28); Style: @PlusButtonStyle; LayoutMode: Middle;
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Attribuer"; }
+      }
+      Button #ClassTreeResetButton { Anchor: (Right: 8, Bottom: 8, Width: 88, Height: 26); Style: @PlusButtonStyle; LayoutMode: Middle;
+        Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser"; }
+      }
+
+
+      Group #ClassTreeEdgeRootStem { Anchor: (Left: 390, Top: 134, Width: 4, Height: 16); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeRootBranch { Anchor: (Left: 152, Top: 150, Width: 480, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeRootToNode6 { Anchor: (Left: 150, Top: 150, Width: 4, Height: 10); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeRootToNode7 { Anchor: (Left: 310, Top: 150, Width: 4, Height: 10); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeRootToNode1 { Anchor: (Left: 470, Top: 150, Width: 4, Height: 10); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeRootToNode2 { Anchor: (Left: 630, Top: 150, Width: 4, Height: 10); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeNode6ToNode9 { Anchor: (Left: 150, Top: 224, Width: 4, Height: 46); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeNode2ToNode8 { Anchor: (Left: 630, Top: 224, Width: 4, Height: 46); Background: @Divider; Visible: false; }
+
+      Group #ClassTreeEdgeSeg0 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg1 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg2 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg3 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg4 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg5 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg6 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg7 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg8 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg9 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg10 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg11 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg12 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg13 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg14 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg15 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg16 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg17 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg18 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg19 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg20 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg21 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg22 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg23 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg24 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg25 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg26 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg27 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg28 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg29 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg30 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg31 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg32 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg33 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg34 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg35 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg36 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg37 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg38 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg39 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg40 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg41 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg42 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg43 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg44 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg45 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg46 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg47 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg48 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg49 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg50 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg51 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg52 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg53 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg54 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg55 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg56 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg57 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg58 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg59 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg60 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg61 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg62 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg63 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg64 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg65 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg66 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg67 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg68 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg69 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg70 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg71 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg72 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg73 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg74 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg75 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg76 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg77 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg78 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg79 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg80 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg81 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg82 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg83 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg84 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg85 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg86 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg87 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg88 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg89 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg90 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg91 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg92 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg93 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg94 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg95 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg96 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg97 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg98 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg99 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg100 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg101 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg102 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg103 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg104 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg105 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg106 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg107 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg108 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg109 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg110 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg111 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg112 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg113 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg114 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg115 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg116 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg117 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg118 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg119 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg120 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg121 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg122 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg123 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg124 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg125 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg126 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg127 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg128 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg129 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg130 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg131 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg132 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg133 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg134 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg135 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg136 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg137 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg138 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg139 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg140 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg141 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg142 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg143 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg144 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg145 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg146 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg147 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg148 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg149 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg150 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg151 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg152 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg153 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg154 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg155 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg156 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg157 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg158 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg159 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg160 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg161 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg162 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg163 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg164 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg165 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg166 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg167 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg168 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg169 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg170 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg171 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg172 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg173 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg174 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg175 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg176 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg177 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg178 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg179 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg180 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg181 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg182 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg183 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg184 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg185 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg186 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg187 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg188 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg189 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg190 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg191 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg192 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg193 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg194 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg195 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg196 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg197 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg198 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg199 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg200 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg201 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg202 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg203 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg204 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg205 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg206 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg207 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg208 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg209 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg210 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg211 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg212 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg213 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg214 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg215 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg216 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg217 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg218 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg219 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg220 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg221 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg222 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg223 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg224 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg225 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg226 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg227 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg228 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg229 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg230 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg231 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg232 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg233 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg234 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg235 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg236 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg237 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg238 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg239 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg240 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg241 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg242 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg243 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg244 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg245 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg246 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg247 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg248 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg249 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg250 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg251 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg252 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg253 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg254 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+      Group #ClassTreeEdgeSeg255 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Background: @Divider; Visible: false; }
+
+      AssetImage #ClassTreeEdgeGlowSeg0 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg1 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg2 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg3 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg4 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg5 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg6 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg7 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg8 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg9 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg10 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg11 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg12 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg13 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg14 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg15 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg16 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg17 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg18 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg19 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg20 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg21 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg22 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg23 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg24 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg25 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg26 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg27 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg28 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg29 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg30 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg31 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg32 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg33 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg34 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg35 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg36 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg37 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg38 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg39 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg40 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg41 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg42 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg43 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg44 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg45 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg46 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg47 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg48 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg49 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg50 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg51 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg52 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg53 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg54 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg55 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg56 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg57 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg58 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg59 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg60 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg61 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg62 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg63 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg64 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg65 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg66 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg67 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg68 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg69 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg70 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg71 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg72 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg73 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg74 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg75 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg76 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg77 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg78 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg79 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg80 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg81 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg82 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg83 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg84 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg85 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg86 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg87 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg88 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg89 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg90 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg91 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg92 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg93 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg94 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg95 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg96 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg97 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg98 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg99 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg100 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg101 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg102 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg103 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg104 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg105 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg106 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg107 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg108 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg109 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg110 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg111 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg112 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg113 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg114 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg115 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg116 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg117 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg118 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg119 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg120 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg121 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg122 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg123 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg124 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg125 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg126 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg127 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg128 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg129 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg130 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg131 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg132 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg133 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg134 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg135 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg136 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg137 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg138 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg139 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg140 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg141 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg142 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg143 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg144 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg145 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg146 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg147 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg148 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg149 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg150 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg151 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg152 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg153 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg154 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg155 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg156 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg157 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg158 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg159 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg160 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg161 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg162 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg163 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg164 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg165 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg166 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg167 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg168 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg169 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg170 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg171 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg172 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg173 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg174 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg175 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg176 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg177 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg178 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg179 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg180 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg181 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg182 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg183 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg184 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg185 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg186 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg187 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg188 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg189 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg190 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg191 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg192 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg193 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg194 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg195 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg196 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg197 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg198 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg199 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg200 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg201 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg202 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg203 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg204 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg205 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg206 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg207 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg208 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg209 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg210 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg211 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg212 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg213 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg214 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg215 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg216 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg217 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg218 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg219 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg220 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg221 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg222 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg223 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg224 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg225 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg226 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg227 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg228 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg229 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg230 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg231 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg232 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg233 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg234 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg235 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg236 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg237 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg238 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg239 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg240 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg241 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg242 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg243 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg244 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg245 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg246 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg247 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg248 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg249 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg250 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg251 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg252 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg253 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg254 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+      AssetImage #ClassTreeEdgeGlowSeg255 { Anchor: (Left: 0, Top: 0, Width: 4, Height: 4); Visible: false; }
+
+      Group #ClassTreeNode0Slot { Anchor: (Left: 354, Top: 64, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode0Unlocked { Anchor: (Left: 357, Top: 67, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode0Icon { Anchor: (Left: 372, Top: 82, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode0Veil { Anchor: (Left: 357, Top: 67, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode0RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode0Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode0 { Anchor: (Left: 360, Top: 70, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode1Slot { Anchor: (Left: 434, Top: 154, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode1Unlocked { Anchor: (Left: 437, Top: 157, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode1Icon { Anchor: (Left: 452, Top: 172, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode1Veil { Anchor: (Left: 437, Top: 157, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode1RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode1Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode1 { Anchor: (Left: 440, Top: 160, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode2Slot { Anchor: (Left: 594, Top: 154, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode2Unlocked { Anchor: (Left: 597, Top: 157, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode2Icon { Anchor: (Left: 612, Top: 172, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode2Veil { Anchor: (Left: 597, Top: 157, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode2RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode2Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode2 { Anchor: (Left: 600, Top: 160, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode3Slot { Anchor: (Left: 524, Top: 474, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode3Unlocked { Anchor: (Left: 527, Top: 477, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode3Icon { Anchor: (Left: 542, Top: 492, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode3Veil { Anchor: (Left: 527, Top: 477, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode3RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode3Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode3 { Anchor: (Left: 530, Top: 480, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode4Slot { Anchor: (Left: 354, Top: 544, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode4Unlocked { Anchor: (Left: 357, Top: 547, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode4Icon { Anchor: (Left: 372, Top: 562, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode4Veil { Anchor: (Left: 357, Top: 547, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode4RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode4Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode4 { Anchor: (Left: 360, Top: 550, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode5Slot { Anchor: (Left: 184, Top: 474, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode5Unlocked { Anchor: (Left: 187, Top: 477, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode5Icon { Anchor: (Left: 202, Top: 492, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode5Veil { Anchor: (Left: 187, Top: 477, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode5RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode5Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode5 { Anchor: (Left: 190, Top: 480, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode6Slot { Anchor: (Left: 114, Top: 154, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode6Unlocked { Anchor: (Left: 117, Top: 157, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode6Icon { Anchor: (Left: 132, Top: 172, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode6Veil { Anchor: (Left: 117, Top: 157, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode6RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode6Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode6 { Anchor: (Left: 120, Top: 160, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode7Slot { Anchor: (Left: 274, Top: 154, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode7Unlocked { Anchor: (Left: 277, Top: 157, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode7Icon { Anchor: (Left: 292, Top: 172, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode7Veil { Anchor: (Left: 277, Top: 157, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode7RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode7Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode7 { Anchor: (Left: 280, Top: 160, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode8Slot { Anchor: (Left: 594, Top: 264, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode8Unlocked { Anchor: (Left: 597, Top: 267, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode8Icon { Anchor: (Left: 612, Top: 282, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode8Veil { Anchor: (Left: 597, Top: 267, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode8RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode8Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode8 { Anchor: (Left: 600, Top: 270, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode9Slot { Anchor: (Left: 114, Top: 264, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode9Unlocked { Anchor: (Left: 117, Top: 267, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode9Icon { Anchor: (Left: 132, Top: 282, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode9Veil { Anchor: (Left: 117, Top: 267, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode9RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode9Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode9 { Anchor: (Left: 120, Top: 270, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode10Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode10Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode10Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode10Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode10RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode10Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode10 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode11Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode11Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode11Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode11Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode11RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
+      AssetImage #ClassTreeNode11Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode11 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode12Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode12Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode12Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode12Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode12RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
+      AssetImage #ClassTreeNode12Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode12 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode13Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode13Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode13Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode13Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode13RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
+      AssetImage #ClassTreeNode13Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode13 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode14Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode14Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode14Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode14Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode14RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
+      AssetImage #ClassTreeNode14Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode14 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode15Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode15Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode15Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode15Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode15RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
+      AssetImage #ClassTreeNode15Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode15 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      Group #ClassTreeNode16Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      Group #ClassTreeNode16Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Group #ClassTreeNode16Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      Group #ClassTreeNode16Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
+      Label #ClassTreeNode16RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
+      AssetImage #ClassTreeNode16Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode16 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode17Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode17Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode17Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode17Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode17 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode18Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode18Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode18Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode18Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode18 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode19Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode19Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode19Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode19Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode19 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode20Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode20Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode20Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode20Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode20 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode21Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode21Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode21Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode21Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode21 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode22Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode22Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode22Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode22Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode22 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode23Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode23Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode23Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode23Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode23 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode24Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode24Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode24Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode24Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode24 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode25Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode25Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode25Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode25Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode25 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode26Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode26Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode26Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode26Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode26 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode27Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode27Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode27Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode27Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode27 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode28Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode28Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode28Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode28Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode28 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode29Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode29Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode29Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode29Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode29 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode30Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode30Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode30Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode30Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode30 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode31Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode31Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode31Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode31Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode31 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode32Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode32Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode32Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode32Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode32 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode33Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode33Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode33Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode33Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode33 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode34Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode34Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode34Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode34Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode34 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode35Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode35Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode35Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode35Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode35 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode36Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode36Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode36Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode36Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode36 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode37Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode37Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode37Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode37Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode37 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode38Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode38Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode38Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode38Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode38 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode39Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode39Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode39Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode39Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode39 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode40Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode40Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode40Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode40Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode40 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode41Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode41Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode41Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode41Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode41 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode42Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode42Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode42Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode42Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode42 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode43Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode43Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode43Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode43Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode43 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode44Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode44Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode44Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode44Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode44 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode45Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode45Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode45Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode45Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode45 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode46Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode46Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode46Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode46Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode46 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode47Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode47Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode47Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode47Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode47 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode48Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode48Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode48Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode48Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode48 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode49Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode49Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode49Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode49Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode49 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode50Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode50Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode50Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode50Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode50 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode51Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode51Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode51Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode51Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode51 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode52Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode52Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode52Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode52Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode52 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode53Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode53Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode53Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode53Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode53 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode54Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode54Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode54Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode54Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode54 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode55Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode55Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode55Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode55Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode55 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode56Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode56Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode56Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode56Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode56 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode57Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode57Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode57Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode57Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode57 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode58Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode58Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode58Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode58Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode58 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode59Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode59Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode59Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode59Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode59 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode60Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode60Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode60Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode60Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode60 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode61Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode61Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode61Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode61Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode61 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode62Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode62Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode62Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode62Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode62 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+
+      AssetImage #ClassTreeNode63Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode63Unlocked { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
+      AssetImage #ClassTreeNode63Icon { Anchor: (Left: 0, Top: 0, Width: 40, Height: 40); Visible: false; }
+      AssetImage #ClassTreeNode63Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
+      Button #ClassTreeNode63 { Anchor: (Left: 0, Top: 0, Width: 64, Height: 64); Style: @SkillNodeButtonStyle; LayoutMode: Top; Visible: false;
+      }
+    }
+
+    Group #ClassBonusTreePanel {
+      Anchor: (Left: 550, Top: 0, Bottom: 0, Width: 90);
+      LayoutMode: Full;
+      Visible: false;
+
+      Group #ClassBonusTreeNode0Connector {
+        Anchor: (Left: 44, Top: 186, Width: 4, Height: 123);
+        Background: #E8DCC8(0.16);
+        Visible: false;
+      }
+
+      Group #ClassBonusTreeNode1Connector {
+        Anchor: (Left: 44, Top: 370, Width: 4, Height: 125);
+        Background: #E8DCC8(0.16);
+        Visible: false;
+      }
+
+      Label #ClassBonusTreeNode0RankText { Anchor: (Left: 53, Top: 186, Width: 44, Height: 14); Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; Visible: false; }
+
+      Group #ClassBonusTreeNode0Container {
+        Anchor: (Left: 14, Top: 125, Width: 61, Height: 61);
+        LayoutMode: Full;
+        Visible: false;
+
+        Group #ClassBonusTreeNode0Bg { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #1A1F29; }
+        Group #ClassBonusTreeNode0Border { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4E576D(0.8); }
+        Group #ClassBonusTreeNode0BorderAllocated { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4A90D9(0.9); Visible: false; }
+        Group #ClassBonusTreeNode0BorderHovered { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #B0B8C8(1.0); Visible: false; }
+        Group #ClassBonusTreeNode0Fill { Anchor: (Left: 3, Top: 3, Right: 3, Bottom: 3); Background: #1A1F29; }
+        Group #ClassBonusTreeNode0Icon { Anchor: (Left: 8, Top: 8, Right: 8, Bottom: 8); }
+        Button #ClassBonusTreeNode0 { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: @SkillNodeButtonStyle; LayoutMode: Top;
+        }
+      }
+
+      Label #ClassBonusTreeNode1RankText { Anchor: (Left: 53, Top: 370, Width: 44, Height: 14); Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; Visible: false; }
+
+      Group #ClassBonusTreeNode1Container {
+        Anchor: (Left: 14, Top: 309, Width: 61, Height: 61);
+        LayoutMode: Full;
+        Visible: false;
+
+        Group #ClassBonusTreeNode1Bg { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #1A1F29; }
+        Group #ClassBonusTreeNode1Border { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4E576D(0.8); }
+        Group #ClassBonusTreeNode1BorderAllocated { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4A90D9(0.9); Visible: false; }
+        Group #ClassBonusTreeNode1BorderHovered { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #B0B8C8(1.0); Visible: false; }
+        Group #ClassBonusTreeNode1Fill { Anchor: (Left: 3, Top: 3, Right: 3, Bottom: 3); Background: #1A1F29; }
+        Group #ClassBonusTreeNode1Icon { Anchor: (Left: 8, Top: 8, Right: 8, Bottom: 8); }
+        Button #ClassBonusTreeNode1 { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: @SkillNodeButtonStyle; LayoutMode: Top;
+        }
+      }
+
+      Label #ClassBonusTreeNode2RankText { Anchor: (Left: 53, Top: 556, Width: 44, Height: 14); Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; Visible: false; }
+
+      Group #ClassBonusTreeNode2Container {
+        Anchor: (Left: 14, Top: 495, Width: 61, Height: 61);
+        LayoutMode: Full;
+        Visible: false;
+
+        Group #ClassBonusTreeNode2Bg { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #1A1F29; }
+        Group #ClassBonusTreeNode2Border { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4E576D(0.8); }
+        Group #ClassBonusTreeNode2BorderAllocated { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #4A90D9(0.9); Visible: false; }
+        Group #ClassBonusTreeNode2BorderHovered { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Background: #B0B8C8(1.0); Visible: false; }
+        Group #ClassBonusTreeNode2Fill { Anchor: (Left: 3, Top: 3, Right: 3, Bottom: 3); Background: #1A1F29; }
+        Group #ClassBonusTreeNode2Icon { Anchor: (Left: 8, Top: 8, Right: 8, Bottom: 8); }
+        Button #ClassBonusTreeNode2 { Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0); Style: @SkillNodeButtonStyle; LayoutMode: Top;
+        }
+      }
+    }
+
+  Group {
+    Anchor: (Right: 0, Top: 0, Bottom: 0, Width: 290);
+    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+    LayoutMode: Full;
+    Padding: (Full: 10);
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          LayoutMode: Top;
+
+      Label {
+        Style: @SectionTitleStyle;
+        Text: "Talent";
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Top: 10);
+
+        Group #ClassSidebarIcon {
+          Anchor: (Width: 52, Height: 52);
+          Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 8, Color: #31C677FF);
+
+          Group #ClassSidebarIconImage {
+            Anchor: (Left: 4, Top: 4, Right: 4, Bottom: 4);
+          }
+        }
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Padding: (Left: 10);
+
+          Label #ClassTreeSelectedTitle {
+            Style: (...@SubHeadingStyle, FontSize: 16, TextColor: @InkStrong, RenderBold: true, Wrap: true);
+            Text: "";
+          }
+
+          Label #ClassTreeSelectedFlavor {
+            Anchor: (Top: 4);
+            Style: (...@MetaStyle, FontSize: 12, TextColor: @InkFaint, Wrap: true);
+            Text: "";
+          }
+        }
+      }
+
+      Label #ClassTreeSelectedEffect {
+        Anchor: (Top: 10);
+        Style: (...@MetaStyle, FontSize: 14, TextColor: #FFFFFFFF, Wrap: true);
+        Text: "";
+      }
+
+      Group { Anchor: (Top: 10, Height: 1); Background: @Divider; }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Top: 8);
+
+        Label {
+          Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
+          Text: "Niveau actuel";
+        }
+
+        Group { FlexWeight: 1; }
+
+        Label #ClassTreeCurrentRankValue {
+          Style: (...@MetaStyle, FontSize: 13, TextColor: @InkStrong, RenderBold: true);
+          Text: "0/5";
+        }
+      }
+
+      Group #ClassTreeCurrentBonusRow {
+        LayoutMode: Top;
+        Anchor: (Top: 4);
+        Visible: false;
+
+        Label {
+          Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
+          Text: "Bonus actuel";
+        }
+
+        Label #ClassTreeCurrentBonusValue {
+          Style: (...@MetaStyle, FontSize: 13, TextColor: #31C677FF, RenderBold: true, Wrap: true);
+          Text: "";
+        }
+      }
+
+      Group #ClassTreeNextRankRow {
+        LayoutMode: Top;
+        Anchor: (Top: 4);
+        Visible: false;
+
+        Label {
+          Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
+          Text: "Prochain rang";
+        }
+
+        Label #ClassTreeNextRankValue {
+          Style: (...@MetaStyle, FontSize: 13, TextColor: @GoldHighlight, RenderBold: true, Wrap: true);
+          Text: "";
+        }
+      }
+
+      Label #ClassTreeTypePassif { Anchor: (Top: 8); Style: (...@MetaStyle, FontSize: 13, TextColor: #6BCB7AFF, RenderBold: true, RenderUppercase: true); Text: "Passif"; Visible: false; }
+      Label #ClassTreeTypeActif  { Anchor: (Top: 8); Style: (...@MetaStyle, FontSize: 13, TextColor: #D4AF37FF, RenderBold: true, RenderUppercase: true); Text: "Actif";  Visible: false; }
+      Label #ClassTreeTypeObjet  { Anchor: (Top: 8); Style: (...@MetaStyle, FontSize: 13, TextColor: #FFFFFFFF, RenderBold: true, RenderUppercase: true); Text: "Objet";  Visible: false; }
+
+      Group { FlexWeight: 1; }
+
+      Group {
+        LayoutMode: Full;
+        Anchor: (Top: 10, Height: 28);
+
+        Button #UnlockClassTreeButton {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Style: @PlusButtonStyle;
+          Visible: false;
+
+          Label #UnlockClassTreeButtonLabel {
+            Style: (...@MetaStyle, FontSize: 14, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "Débloquer";
+          }
+        }
+
+        Button #UnlockClassTreeButtonDisabled {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Style: @BlockedButtonStyle;
+          TextTooltipStyle: (MaxWidth: 340, LabelStyle: (FontSize: 13, Wrap: true));
+          TooltipText: "";
+          Visible: false;
+
+          Label #UnlockClassTreeButtonDisabledLabel {
+            Style: (...@MetaStyle, FontSize: 14, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Text: "Débloqué";
+          }
+        }
+      }
+
+        Button #ClassTreeSoundToggle {
+          Anchor: (Width: 26, Height: 26, Right: 0, Bottom: 0);
+          Style: @SkillNodeButtonStyle;
+          Visible: false;
+
+          Group #ClassTreeSoundToggleFrame {
+            Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0);
+            Background: #FFFFFFFF;
+
+            Group #ClassTreeSoundToggleInner {
+              Anchor: (Left: 1, Top: 1, Right: 1, Bottom: 1);
+              Background: #16191F;
+
+              Group #ClassTreeSoundToggleIcon {
+                Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0);
+              }
+            }
+          }
+        }
+    }
+  }
+  }
+}

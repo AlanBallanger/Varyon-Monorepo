@@ -7,21 +7,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum PlayerSpecialization {
-    REMPART  ("rempart",   "Rempart",          PlayerClass.GUERRIER, "Jobs_Icons/Shield.png",    "Tank - Bouclier - Protection",  "Maitre de la defense et de la resilience."),
-    DUELLISTE("duelliste", "Duelliste",         PlayerClass.GUERRIER, "Jobs_Icons/Sword.png",     "Mobilite - Ripostes - Critiques","Expert des duels et des contre-attaques."),
-    OMBRE    ("ombre",     "Ombre",             PlayerClass.GUERRIER, "Jobs_Icons/Shadow.png",    "Furtivite - Poisons - Assassinat","Frappe dans l'ombre, insaisissable et mortel."),
+    //                                                                                                                                             hp    atk   armor stamina critC critD
+    REMPART  ("rempart",   "Rempart",          PlayerClass.GUERRIER, "Jobs_Icons/Shield.png",    "Tank - Bouclier - Protection",   "Maitre de la defense et de la resilience.",    1.15, 0.90, 1.20, 1.00, 0.75, 0.75),
+    DUELLISTE("duelliste", "Duelliste",         PlayerClass.GUERRIER, "Jobs_Icons/Sword.png",     "Mobilite - Ripostes - Critiques", "Expert des duels et des contre-attaques.",    0.95, 1.10, 0.95, 1.05, 1.20, 1.10),
+    OMBRE    ("ombre",     "Ombre",             PlayerClass.GUERRIER, "Jobs_Icons/Shadow.png",    "Furtivite - Poisons - Assassinat","Frappe dans l'ombre, insaisissable et mortel.", 0.85, 1.20, 0.80, 1.10, 1.15, 1.20),
 
-    BERSERKER("berserker", "Berserker",         PlayerClass.BARBARE,  "Jobs_Icons/Axe.png",       "Rage - Vitesse - Frenetique",   "Plus il est blesse, plus il devient dangereux."),
-    RAVAGEUR ("ravageur",  "Ravageur",          PlayerClass.BARBARE,  "Jobs_Icons/DoubleAxe.png", "Arme a deux mains - Executions - Degats","Frappes puissantes et degats massifs."),
-    BAGARREUR("bagarreur", "Bagarreur",         PlayerClass.BARBARE,  "Jobs_Icons/Fist.png",      "Corps a corps - Etourdissements - Tenace","Combat brutal a mains nues ou en melee."),
+    BERSERKER("berserker", "Berserker",         PlayerClass.BARBARE,  "Jobs_Icons/Axe.png",       "Rage - Vitesse - Frenetique",    "Plus il est blesse, plus il devient dangereux.", 1.05, 1.20, 0.85, 0.90, 1.10, 1.15),
+    RAVAGEUR ("ravageur",  "Ravageur",          PlayerClass.BARBARE,  "Jobs_Icons/DoubleAxe.png", "Arme a deux mains - Executions - Degats","Frappes puissantes et degats massifs.", 1.00, 1.25, 0.90, 0.95, 0.90, 1.30),
+    BAGARREUR("bagarreur", "Bagarreur",         PlayerClass.BARBARE,  "Jobs_Icons/Fist.png",      "Corps a corps - Etourdissements - Tenace","Combat brutal a mains nues ou en melee.", 1.15, 1.00, 1.10, 1.05, 0.85, 0.90),
 
-    ARCANISTE      ("arcaniste",       "Arcaniste",       PlayerClass.MAGE, "Jobs_Icons/Staff.png",    "Magie - Sorts - Puissance",     "Lance des sorts devastateurs depuis la distance."),
-    GARDIEN_DE_GAIA("gardien_de_gaia", "Gardien de Gaia", PlayerClass.MAGE, "Jobs_Icons/Nature.png",   "Nature - Soin - Invocation",    "Puise dans la nature pour soigner et invoquer."),
-    VAUDOU         ("vaudou",          "Vaudou",          PlayerClass.MAGE, "Jobs_Icons/Voodoo.png",   "Maledictions - Debuffs - Zones","Affaiblit les ennemis par des maledictions."),
+    ARCANISTE      ("arcaniste",       "Arcaniste",       PlayerClass.MAGE, "Jobs_Icons/Staff.png",    "Magie - Sorts - Puissance",      "Lance des sorts devastateurs depuis la distance.", 0.80, 1.30, 0.75, 1.10, 1.00, 1.20),
+    GARDIEN_DE_GAIA("gardien_de_gaia", "Gardien de Gaia", PlayerClass.MAGE, "Jobs_Icons/Nature.png",   "Nature - Soin - Invocation",     "Puise dans la nature pour soigner et invoquer.",  1.00, 0.85, 0.90, 1.25, 0.70, 0.70),
+    VAUDOU         ("vaudou",          "Vaudou",          PlayerClass.MAGE, "Jobs_Icons/Voodoo.png",   "Maledictions - Debuffs - Zones", "Affaiblit les ennemis par des maledictions.",     0.85, 1.10, 0.85, 1.20, 0.90, 0.90),
 
-    RODEUR     ("rodeur",      "Rodeur",      PlayerClass.TIREUR, "Jobs_Icons/Bow.png",       "Arc - Traque - Mobilite",       "Traque ses proies avec agilite et precision."),
-    ARBALETRIER("arbaletrier", "Arbaletrier", PlayerClass.TIREUR, "Jobs_Icons/Crossbow.png",  "Arbalete - Penetration - Lent", "Tirs lents mais devastateurs a longue portee."),
-    LANCIER    ("lancier",     "Lancier",     PlayerClass.TIREUR, "Jobs_Icons/Spear.png",     "Lance - Zone - Charge",         "Combat avec une lance, efficace en zone et en charge.");
+    RODEUR     ("rodeur",      "Rodeur",      PlayerClass.TIREUR, "Jobs_Icons/Bow.png",       "Arc - Traque - Mobilite",        "Traque ses proies avec agilite et precision.",      0.90, 1.15, 0.85, 1.10, 1.20, 1.10),
+    ARBALETRIER("arbaletrier", "Arbaletrier", PlayerClass.TIREUR, "Jobs_Icons/Crossbow.png",  "Arbalete - Penetration - Lent",  "Tirs lents mais devastateurs a longue portee.",    0.95, 1.25, 0.80, 0.90, 0.90, 1.20),
+    LANCIER    ("lancier",     "Lancier",     PlayerClass.TIREUR, "Jobs_Icons/Spear.png",     "Lance - Zone - Charge",          "Combat avec une lance, efficace en zone et en charge.", 1.05, 1.10, 1.00, 1.05, 1.00, 1.00);
 
     private final String id;
     private final String displayName;
@@ -29,19 +30,37 @@ public enum PlayerSpecialization {
     private final String iconPath;
     private final String keywords;
     private final String description;
+    private final double hpMult;
+    private final double atkMult;
+    private final double armorMult;
+    private final double staminaMult;
+    private final double critChanceMult;
+    private final double critDamageMult;
 
     PlayerSpecialization(@Nonnull String id,
                          @Nonnull String displayName,
                          @Nonnull PlayerClass parentClass,
                          @Nonnull String iconPath,
                          @Nonnull String keywords,
-                         @Nonnull String description) {
+                         @Nonnull String description,
+                         double hpMult,
+                         double atkMult,
+                         double armorMult,
+                         double staminaMult,
+                         double critChanceMult,
+                         double critDamageMult) {
         this.id = id;
         this.displayName = displayName;
         this.parentClass = parentClass;
         this.iconPath = iconPath;
         this.keywords = keywords;
         this.description = description;
+        this.hpMult = hpMult;
+        this.atkMult = atkMult;
+        this.armorMult = armorMult;
+        this.staminaMult = staminaMult;
+        this.critChanceMult = critChanceMult;
+        this.critDamageMult = critDamageMult;
     }
 
     @Nonnull public String getId()             { return id; }
@@ -50,6 +69,12 @@ public enum PlayerSpecialization {
     @Nonnull public String getIconPath()       { return iconPath; }
     @Nonnull public String getKeywords()       { return keywords; }
     @Nonnull public String getDescription()    { return description; }
+    public double getHpMult()         { return hpMult; }
+    public double getAtkMult()        { return atkMult; }
+    public double getArmorMult()      { return armorMult; }
+    public double getStaminaMult()    { return staminaMult; }
+    public double getCritChanceMult() { return critChanceMult; }
+    public double getCritDamageMult() { return critDamageMult; }
 
     private static final Map<String, PlayerSpecialization> BY_ID =
         Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(PlayerSpecialization::getId, s -> s));

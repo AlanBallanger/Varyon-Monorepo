@@ -20,7 +20,9 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.ClassPlayerStats;
 import fr.varyon.vrpg.classes.ClassProgress;
+import fr.varyon.vrpg.classes.ClassStatDefinition;
 import fr.varyon.vrpg.classes.ClassXpCurve;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
@@ -598,6 +600,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.append("#ClassesTabMount", "CharacterTabClasses.ui");
         uiBuilder.append("#CharacterTabMount", "CharacterTabProfession.ui");
         uiBuilder.append("#SkillsTabMount", "CharacterTabSkills.ui");
+        uiBuilder.append("#ClassTalentsTabMount", "CharacterTabClassTalents.ui");
         uiBuilder.append("#ArtisansTabMount", "CharacterTabArtisans.ui");
         uiBuilder.append("#ClassementTabMount", "CharacterTabClassement.ui");
         if (isAdmin) {
@@ -607,6 +610,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.set("#ClassesTabContent.Visible", TAB_CLASSES.equals(activeTab));
         uiBuilder.set("#CharacterTabContent.Visible", "character".equals(activeTab));
         uiBuilder.set("#SkillsTabContent.Visible", "skills".equals(activeTab));
+        uiBuilder.set("#ClassTalentsTabContent.Visible", "classtree".equals(activeTab));
         uiBuilder.set("#ArtisansTabContent.Visible", "artisans".equals(activeTab));
         uiBuilder.set("#ClassementTabContent.Visible", "classement".equals(activeTab));
         uiBuilder.set("#AdminTabContent.Visible", "admin".equals(activeTab));
@@ -637,6 +641,8 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             populateCharacterProfessions(uiBuilder, eventBuilder);
         } else if ("skills".equals(activeTab)) {
             populateSketchSkillTree(uiBuilder, eventBuilder);
+        } else if ("classtree".equals(activeTab)) {
+            populateClassTalents(uiBuilder, eventBuilder);
         } else if ("classement".equals(activeTab)) {
             populateClassement(uiBuilder, eventBuilder);
         } else if ("admin".equals(activeTab) && isAdmin) {
@@ -828,6 +834,24 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             uiBuilder.set("#ClassesActiveSpecDesc.TextSpans", Message.raw("Choisissez une specialisation."));
         }
 
+        ClassPlayerStats activeStats = classManager.getStatEngine().getStats(playerRef.getUuid());
+        if (activeStats == null) {
+            activeStats = ClassStatDefinition.compute(activeProgress.getLevel(), activeSpec);
+        }
+        uiBuilder.set("#ClassesStatPv.TextSpans",    Message.raw(String.valueOf(activeStats.maxHp())));
+        uiBuilder.set("#ClassesStatDef.TextSpans",   Message.raw(activeStats.armorPct() + "%"));
+        uiBuilder.set("#ClassesStatEnd.TextSpans",   Message.raw(String.valueOf(activeStats.maxStamina())));
+        uiBuilder.set("#ClassesStatAtk.TextSpans",   Message.raw(String.valueOf(activeStats.atk())));
+        uiBuilder.set("#ClassesStatCrit.TextSpans",  Message.raw(activeStats.critChancePct() + "%"));
+        uiBuilder.set("#ClassesStatDcrit.TextSpans", Message.raw("+" + activeStats.critDamagePct() + "%"));
+
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ClassesViewTalentsButton",
+            EventData.of("Action", "tab").append("Tab", "classtree"),
+            false
+        );
+
         java.util.List<PlayerSpecialization> specs = activeClass.getSpecializations();
         for (int i = 0; i < 3; i++) {
             String suffix = String.valueOf(i);
@@ -842,9 +866,85 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 uiBuilder.set("#ClassesSpec" + suffix + "InactiveBadge.Visible", !isActive);
                 uiBuilder.set("#ClassesSpec" + suffix + "Level.TextSpans",
                     Message.raw("NIVEAU " + activeProgress.getLevel()));
+
+                ClassPlayerStats specStats = ClassStatDefinition.compute(activeProgress.getLevel(), spec);
+                uiBuilder.set("#ClassesSpec" + suffix + "StatPv.TextSpans",    Message.raw(String.valueOf(specStats.maxHp())));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatDef.TextSpans",   Message.raw(specStats.armorPct() + "%"));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatEnd.TextSpans",   Message.raw(String.valueOf(specStats.maxStamina())));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatAtk.TextSpans",   Message.raw(String.valueOf(specStats.atk())));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatCrit.TextSpans",  Message.raw(specStats.critChancePct() + "%"));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatDcrit.TextSpans", Message.raw("+" + specStats.critDamagePct() + "%"));
             }
         }
 
+    }
+
+    private void populateClassTalents(@Nonnull UICommandBuilder uiBuilder,
+                                      @Nonnull UIEventBuilder eventBuilder) {
+        ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
+        ClassAccount acc = classManager != null ? classManager.getAccount(playerRef.getUuid()) : null;
+        PlayerClass activeClass = acc != null ? acc.getActiveClass() : null;
+        String className = activeClass != null ? activeClass.getDisplayName() : "Classe";
+
+        uiBuilder.set("#ClassTreePointsValue.TextSpans",
+            Message.raw("Talents de " + className + " (à venir)"));
+
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ClassTreeBackButton",
+            EventData.of("Action", "tab").append("Tab", TAB_CLASSES),
+            false
+        );
+
+        String ep = "#ClassTreeEdgeSeg";
+        hideEdgeSegmentRange(uiBuilder, ep, 0, SKILL_TREE_EDGE_SEGMENTS);
+
+        int[][] lt = BASE_TREE_SLOT_LT;
+        int minX = Integer.MAX_VALUE;
+        for (int[] row : lt) if (row[0] < minX) minX = row[0];
+        int xOffset = 58 - minX;
+        int[][] shifted = new int[lt.length][2];
+        for (int i = 0; i < lt.length; i++) {
+            shifted[i][0] = lt[i][0] + xOffset;
+            shifted[i][1] = lt[i][1];
+        }
+
+        int seg = 0;
+        seg = layoutMergeTwoToOne(uiBuilder, ep, seg, cx(shifted[0]), bot(shifted[0]), cx(shifted[1]), bot(shifted[1]), cx(shifted[2]), top(shifted[2]));
+        seg = layoutSplitOneToThree(uiBuilder, ep, seg, cx(shifted[2]), bot(shifted[2]), cx(shifted[3]), cx(shifted[4]), cx(shifted[5]), top(shifted[3]));
+        seg = layoutVerticalConnector(uiBuilder, ep, seg, cx(shifted[3]), bot(shifted[3]), top(shifted[6]));
+        seg = layoutVerticalConnector(uiBuilder, ep, seg, cx(shifted[4]), bot(shifted[4]), top(shifted[7]));
+        seg = layoutVerticalConnector(uiBuilder, ep, seg, cx(shifted[5]), bot(shifted[5]), top(shifted[8]));
+        seg = layoutMergeThreeToOne(uiBuilder, ep, seg, cx(shifted[6]), bot(shifted[6]), cx(shifted[7]), bot(shifted[7]), cx(shifted[8]), bot(shifted[8]), cx(shifted[9]), top(shifted[9]));
+        seg = layoutSplitOneToTwo(uiBuilder, ep, seg, cx(shifted[9]), bot(shifted[9]), cx(shifted[10]), cx(shifted[11]), top(shifted[10]));
+        hideEdgeSegmentRange(uiBuilder, ep, seg, SKILL_TREE_EDGE_SEGMENTS);
+
+        for (int i = 0; i < 12; i++) {
+            String id = String.valueOf(i);
+            int sl = shifted[i][0];
+            int st = shifted[i][1];
+            positionClassSlot(uiBuilder, id, sl, st);
+            positionClassRank(uiBuilder, id, sl, st);
+            uiBuilder.set("#ClassTreeNode" + id + "Slot.Visible", true);
+            uiBuilder.set("#ClassTreeNode" + id + "Unlocked.Visible", true);
+            uiBuilder.setObject("#ClassTreeNode" + id + "Unlocked.Background", NODE_FILL_STYLE);
+            uiBuilder.set("#ClassTreeNode" + id + "RankText.Visible", true);
+            uiBuilder.set("#ClassTreeNode" + id + "RankText.TextSpans", Message.raw("0/5"));
+            uiBuilder.set("#ClassTreeNode" + id + ".Visible", true);
+            eventBuilder.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#ClassTreeNode" + id,
+                EventData.of("Action", "classtreeSkill").append("Node", id),
+                false
+            );
+        }
+
+        uiBuilder.set("#ClassTreeSelectedTitle.TextSpans", Message.raw("Sélectionnez un talent"));
+        uiBuilder.set("#ClassTreeSelectedFlavor.TextSpans", Message.raw(""));
+        uiBuilder.set("#ClassTreeSelectedEffect.TextSpans", Message.raw("Les talents de classe seront disponibles prochainement."));
+        uiBuilder.set("#ClassTreeCurrentRankValue.TextSpans", Message.raw("0/5"));
+        uiBuilder.set("#ClassTreeAttribuerButton.Visible", false);
+        uiBuilder.set("#ClassTreeResetButton.Visible", false);
     }
 
     private static String capitalize(@Nonnull String s) {
@@ -1483,8 +1583,15 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
     private static void hideEdgeSegmentRange(@Nonnull UICommandBuilder ui,
                                             int fromInclusive,
                                             int toExclusive) {
+        hideEdgeSegmentRange(ui, "#SkillTreeEdgeSeg", fromInclusive, toExclusive);
+    }
+
+    private static void hideEdgeSegmentRange(@Nonnull UICommandBuilder ui,
+                                            @Nonnull String edgePrefix,
+                                            int fromInclusive,
+                                            int toExclusive) {
         for (int i = fromInclusive; i < toExclusive; i++) {
-            ui.set("#SkillTreeEdgeSeg" + i + ".Visible", false);
+            ui.set(edgePrefix + i + ".Visible", false);
         }
     }
 
@@ -1508,6 +1615,31 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                                           int slotLeft,
                                           int slotTop) {
         setAnchor(ui, "#SkillTreeNode" + id + "RankText",
+            slotLeft + RANK_LABEL_SHIFT_RIGHT,
+            slotTop + SLOT + RANK_LABEL_GAP_TOP,
+            RANK_LABEL_W, RANK_LABEL_H);
+    }
+
+    private static void positionClassSlot(@Nonnull UICommandBuilder ui,
+                                          @Nonnull String id,
+                                          int slotLeft,
+                                          int slotTop) {
+        setAnchor(ui, "#ClassTreeNode" + id + "Slot", slotLeft, slotTop, SLOT, SLOT);
+        setAnchor(ui, "#ClassTreeNode" + id + "Unlocked",
+            slotLeft + FILL_INSET, slotTop + FILL_INSET, FILL_SIZE, FILL_SIZE);
+        setAnchor(ui, "#ClassTreeNode" + id + "Icon",
+            slotLeft + 8, slotTop + 8, SLOT - 16, SLOT - 16);
+        setAnchor(ui, "#ClassTreeNode" + id + "Veil",
+            slotLeft + FILL_INSET, slotTop + FILL_INSET, FILL_SIZE, FILL_SIZE);
+        setAnchor(ui, "#ClassTreeNode" + id,
+            slotLeft, slotTop, SLOT, SLOT);
+    }
+
+    private static void positionClassRank(@Nonnull UICommandBuilder ui,
+                                          @Nonnull String id,
+                                          int slotLeft,
+                                          int slotTop) {
+        setAnchor(ui, "#ClassTreeNode" + id + "RankText",
             slotLeft + RANK_LABEL_SHIFT_RIGHT,
             slotTop + SLOT + RANK_LABEL_GAP_TOP,
             RANK_LABEL_W, RANK_LABEL_H);
@@ -1686,6 +1818,77 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         return seg;
     }
 
+    private static int layoutMergeTwoToOne(@Nonnull UICommandBuilder ui, @Nonnull String ep,
+                                          int seg, int cxA, int yBotA, int cxB, int yBotB,
+                                          int cxMid, int yTopMid) {
+        int yBotMin = Math.min(yBotA, yBotB);
+        int barTop = yBotMin + STEM_DOWN_FROM_PARENT;
+        int barBot = barTop + RAIL;
+        showEdge(ui, ep, seg++, vx(cxA), yBotA, RAIL, STEM_DOWN_FROM_PARENT);
+        showEdge(ui, ep, seg++, vx(cxB), yBotB, RAIL, STEM_DOWN_FROM_PARENT);
+        int barL = vx(Math.min(cxA, cxB));
+        showEdge(ui, ep, seg++, barL, barTop, vx(Math.max(cxA, cxB)) - barL + RAIL, RAIL);
+        int stemToChild = yTopMid - barBot;
+        if (stemToChild > 0) showEdge(ui, ep, seg++, vx(cxMid), barBot, RAIL, stemToChild);
+        return seg;
+    }
+
+    private static int layoutSplitOneToThree(@Nonnull UICommandBuilder ui, @Nonnull String ep,
+                                              int seg, int cxP, int yBotP,
+                                              int cxL, int cxM, int cxR, int yTopChildRow) {
+        int barTop = yBotP + STEM_DOWN_FROM_PARENT;
+        int barBot = barTop + RAIL;
+        showEdge(ui, ep, seg++, vx(cxP), yBotP, RAIL, STEM_DOWN_FROM_PARENT);
+        int barL = vx(Math.min(cxL, Math.min(cxM, cxR)));
+        showEdge(ui, ep, seg++, barL, barTop, vx(Math.max(cxL, Math.max(cxM, cxR))) - barL + RAIL, RAIL);
+        int stemToChild = yTopChildRow - barBot;
+        if (stemToChild > 0) {
+            showEdge(ui, ep, seg++, vx(cxL), barBot, RAIL, stemToChild);
+            showEdge(ui, ep, seg++, vx(cxM), barBot, RAIL, stemToChild);
+            showEdge(ui, ep, seg++, vx(cxR), barBot, RAIL, stemToChild);
+        }
+        return seg;
+    }
+
+    private static int layoutVerticalConnector(@Nonnull UICommandBuilder ui, @Nonnull String ep,
+                                               int seg, int cx, int yFrom, int yTo) {
+        int h = yTo - yFrom;
+        if (h > 0) showEdge(ui, ep, seg++, vx(cx), yFrom, RAIL, h);
+        return seg;
+    }
+
+    private static int layoutMergeThreeToOne(@Nonnull UICommandBuilder ui, @Nonnull String ep,
+                                            int seg, int cxA, int yBotA, int cxB, int yBotB,
+                                            int cxC, int yBotC, int cxMid, int yTopMid) {
+        int yBotMin = Math.min(yBotA, Math.min(yBotB, yBotC));
+        int barTop = yBotMin + STEM_DOWN_FROM_PARENT;
+        int barBot = barTop + RAIL;
+        showEdge(ui, ep, seg++, vx(cxA), yBotA, RAIL, STEM_DOWN_FROM_PARENT);
+        showEdge(ui, ep, seg++, vx(cxB), yBotB, RAIL, STEM_DOWN_FROM_PARENT);
+        showEdge(ui, ep, seg++, vx(cxC), yBotC, RAIL, STEM_DOWN_FROM_PARENT);
+        int barL = vx(Math.min(cxA, Math.min(cxB, cxC)));
+        showEdge(ui, ep, seg++, barL, barTop, vx(Math.max(cxA, Math.max(cxB, cxC))) - barL + RAIL, RAIL);
+        int stemToChild = yTopMid - barBot;
+        if (stemToChild > 0) showEdge(ui, ep, seg++, vx(cxMid), barBot, RAIL, stemToChild);
+        return seg;
+    }
+
+    private static int layoutSplitOneToTwo(@Nonnull UICommandBuilder ui, @Nonnull String ep,
+                                          int seg, int cxP, int yBotP,
+                                          int cxL, int cxR, int yTopChildRow) {
+        int barTop = yBotP + STEM_DOWN_FROM_PARENT;
+        int barBot = barTop + RAIL;
+        showEdge(ui, ep, seg++, vx(cxP), yBotP, RAIL, STEM_DOWN_FROM_PARENT);
+        int barL = vx(Math.min(cxL, cxR));
+        showEdge(ui, ep, seg++, barL, barTop, vx(Math.max(cxL, cxR)) - barL + RAIL, RAIL);
+        int stemToChild = yTopChildRow - barBot;
+        if (stemToChild > 0) {
+            showEdge(ui, ep, seg++, vx(cxL), barBot, RAIL, stemToChild);
+            showEdge(ui, ep, seg++, vx(cxR), barBot, RAIL, stemToChild);
+        }
+        return seg;
+    }
+
     private static int vx(int cxCenter) {
         return cxCenter - RAIL / 2;
     }
@@ -1696,9 +1899,19 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                                 int top,
                                 int width,
                                 int height) {
+        showEdge(ui, "#SkillTreeEdgeSeg", index, left, top, width, height);
+    }
+
+    private static void showEdge(@Nonnull UICommandBuilder ui,
+                                @Nonnull String edgePrefix,
+                                int index,
+                                int left,
+                                int top,
+                                int width,
+                                int height) {
         if (width <= 0 || height <= 0) return;
-        setAnchor(ui, "#SkillTreeEdgeSeg" + index, left, top, width, height);
-        ui.set("#SkillTreeEdgeSeg" + index + ".Visible", true);
+        setAnchor(ui, edgePrefix + index, left, top, width, height);
+        ui.set(edgePrefix + index + ".Visible", true);
     }
 
     @Override
