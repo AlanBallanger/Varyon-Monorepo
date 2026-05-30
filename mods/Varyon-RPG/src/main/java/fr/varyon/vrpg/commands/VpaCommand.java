@@ -20,8 +20,7 @@ public final class VpaCommand extends AbstractCommandCollection {
 
     @SuppressWarnings("unused")
     public VpaCommand(@Nonnull VaryonRpgPlugin plugin) {
-        super("vpp", "Varyon RPG — Panneau principal");
-        setPermissionGroups("hytale:WorldEditor");
+        super("vp", "Varyon RPG - Panneau principal");
     }
 
     @Override
@@ -29,7 +28,7 @@ public final class VpaCommand extends AbstractCommandCollection {
     public CompletableFuture<Void> acceptCall(@Nonnull CommandSender sender,
                                               @Nonnull ParserContext parserContext,
                                               @Nonnull ParseResult parseResult) {
-        if (sender instanceof PlayerRef playerRef && hasPermission(sender)) {
+        if (sender instanceof PlayerRef playerRef) {
             Ref<EntityStore> ref = playerRef.getReference();
             if (ref != null && ref.isValid()) {
                 Store<EntityStore> store = ref.getStore();

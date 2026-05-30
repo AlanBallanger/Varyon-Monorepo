@@ -8,7 +8,7 @@ public final class FarmerXpTable {
 
     /** @deprecated remplacé par getXp(rawId) — conservé pour compatibilité transitoire */
     @Deprecated
-    public static double BASE_HARVEST_XP = 1.0;
+    public static double BASE_HARVEST_XP = 0.4;
 
     public static java.util.Map<String, Double> CROP_XP = new java.util.HashMap<>();
 
@@ -31,6 +31,21 @@ public final class FarmerXpTable {
         s.add("plant_crop_turnip");
         s.add("plant_crop_wheat");
         CROP_PREFIXES = Collections.unmodifiableSet(s);
+
+        CROP_XP.put("wheat",       0.4);
+        CROP_XP.put("lettuce",     0.4);
+        CROP_XP.put("carrot",      0.45);
+        CROP_XP.put("corn",        0.45);
+        CROP_XP.put("cauliflower", 0.5);
+        CROP_XP.put("turnip",      0.5);
+        CROP_XP.put("aubergine",   0.55);
+        CROP_XP.put("pumpkin",     0.55);
+        CROP_XP.put("tomato",      0.6);
+        CROP_XP.put("chilli",      0.6);
+        CROP_XP.put("cotton",      0.65);
+        CROP_XP.put("rice",        0.65);
+        CROP_XP.put("onion",       0.7);
+        CROP_XP.put("potato",      0.7);
     }
 
     private FarmerXpTable() {}

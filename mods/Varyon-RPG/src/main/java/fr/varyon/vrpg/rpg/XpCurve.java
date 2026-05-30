@@ -10,7 +10,7 @@ public final class XpCurve {
         if (level >= MAX_LEVEL) return 0L;
         if (level < 1) level = 1;
         long l = level;
-        return 50L * l * (75L + l * l) / 75L;
+        return 35L * l * (100L + l * l) / 100L;
     }
 
     public static long cumulativeXp(int level, long xpInLevel) {
