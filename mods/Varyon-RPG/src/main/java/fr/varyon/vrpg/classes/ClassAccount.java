@@ -16,6 +16,9 @@ public final class ClassAccount {
     private final EnumMap<PlayerClass, ClassProgress> progress = new EnumMap<>(PlayerClass.class);
     private final EnumMap<PlayerClass, Map<String, Integer>> talents = new EnumMap<>(PlayerClass.class);
 
+    private final ClassProfile[] profiles;
+    private int activeProfileIndex = 0;
+
     public ClassAccount(@Nonnull UUID uuid, @Nullable String playerName) {
         this.uuid = uuid;
         this.playerName = playerName;
@@ -24,6 +27,10 @@ public final class ClassAccount {
             talents.put(c, new HashMap<>());
         }
         this.activeClass = null;
+        this.profiles = new ClassProfile[ClassProfile.COUNT];
+        for (int i = 0; i < ClassProfile.COUNT; i++) {
+            profiles[i] = new ClassProfile("Profil " + (i + 1));
+        }
     }
 
     @Nonnull  public UUID getUuid()           { return uuid; }
@@ -82,5 +89,21 @@ public final class ClassAccount {
     public int availableTalentPoints(@Nonnull PlayerClass c) {
         int earned = ClassXpCurve.talentPointsAtLevel(progress.get(c).getLevel());
         return Math.max(0, earned - totalTalentRanks(c));
+    }
+
+    @Nonnull
+    public ClassProfile[] getProfiles() { return profiles; }
+
+    public int getActiveProfileIndex() { return activeProfileIndex; }
+
+    public void setActiveProfileIndex(int idx) {
+        if (idx >= 0 && idx < ClassProfile.COUNT) activeProfileIndex = idx;
+    }
+
+    public void switchProfile(int idx) {
+        if (idx < 0 || idx >= ClassProfile.COUNT || idx == activeProfileIndex) return;
+        profiles[activeProfileIndex].snapshotFrom(this);
+        activeProfileIndex = idx;
+        profiles[activeProfileIndex].applyTo(this);
     }
 }

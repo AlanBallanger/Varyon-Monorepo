@@ -1,0 +1,390 @@
+$P = "CharacterPage.ui";
+
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+  LayoutMode: Top;
+
+  Group {
+    Anchor: (Left: 0, Right: 0, Height: 36);
+    LayoutMode: Left;
+
+    Button #ClassProfilesBackButton {
+      Anchor: (Width: 120, Top: 0, Bottom: 0);
+      Style: $P.@PlusButtonStyle;
+      LayoutMode: Left;
+      Group { FlexWeight: 1; }
+      Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/Back.png", Border: 0); }
+      Group { Anchor: (Width: 6); }
+      Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Retour"; }
+      Group { FlexWeight: 1; }
+    }
+
+    Group { FlexWeight: 1; }
+
+    Label {
+      Anchor: (Height: 36);
+      Style: (FontSize: 22, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+      Text: "Profils de classe";
+    }
+
+    Group { FlexWeight: 1; }
+  }
+
+  Group { Anchor: (Height: 12); }
+
+  Group {
+    Anchor: (Left: 0, Right: 0, Height: 1);
+    Background: #E8DCC8(0.16);
+  }
+
+  Group { Anchor: (Height: 12); }
+
+  Group {
+    FlexWeight: 1;
+    Anchor: (Left: 0, Right: 0);
+    LayoutMode: Left;
+
+    Group #ClassProfile0Card {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 10);
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        LayoutMode: Center;
+
+        Group #ClassProfile0ActiveBadge {
+          Background: #25793C(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: false;
+          Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
+        }
+
+        Group #ClassProfile0InactiveBadge {
+          Background: #3A3530(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: true;
+          Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile0Name {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        Style: (FontSize: 15, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "Profil 1";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 52);
+        LayoutMode: Middle;
+        Group #ClassProfile0ClassIcon { Anchor: (Width: 48, Height: 48); }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile0ClassName {
+        Anchor: (Left: 0, Right: 0, Height: 18);
+        Style: (FontSize: 13, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "Aucune classe";
+      }
+
+      Label #ClassProfile0SpecName {
+        Anchor: (Left: 0, Right: 0, Height: 16);
+        Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
+        Text: "";
+      }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile0SelectButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+
+    Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
+
+    Group #ClassProfile1Card {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 10);
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        LayoutMode: Center;
+
+        Group #ClassProfile1ActiveBadge {
+          Background: #25793C(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: false;
+          Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
+        }
+
+        Group #ClassProfile1InactiveBadge {
+          Background: #3A3530(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: true;
+          Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile1Name {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        Style: (FontSize: 15, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "Profil 2";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 52);
+        LayoutMode: Middle;
+        Group #ClassProfile1ClassIcon { Anchor: (Width: 48, Height: 48); }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile1ClassName {
+        Anchor: (Left: 0, Right: 0, Height: 18);
+        Style: (FontSize: 13, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "Aucune classe";
+      }
+
+      Label #ClassProfile1SpecName {
+        Anchor: (Left: 0, Right: 0, Height: 16);
+        Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
+        Text: "";
+      }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile1SelectButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+
+    Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
+
+    Group #ClassProfile2Card {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 10);
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        LayoutMode: Center;
+
+        Group #ClassProfile2ActiveBadge {
+          Background: #25793C(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: false;
+          Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
+        }
+
+        Group #ClassProfile2InactiveBadge {
+          Background: #3A3530(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: true;
+          Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile2Name {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        Style: (FontSize: 15, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "Profil 3";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 52);
+        LayoutMode: Middle;
+        Group #ClassProfile2ClassIcon { Anchor: (Width: 48, Height: 48); }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile2ClassName {
+        Anchor: (Left: 0, Right: 0, Height: 18);
+        Style: (FontSize: 13, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "Aucune classe";
+      }
+
+      Label #ClassProfile2SpecName {
+        Anchor: (Left: 0, Right: 0, Height: 16);
+        Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
+        Text: "";
+      }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile2SelectButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+
+    Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
+
+    Group #ClassProfile3Card {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 10);
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        LayoutMode: Center;
+
+        Group #ClassProfile3ActiveBadge {
+          Background: #25793C(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: false;
+          Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
+        }
+
+        Group #ClassProfile3InactiveBadge {
+          Background: #3A3530(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: true;
+          Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile3Name {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        Style: (FontSize: 15, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "Profil 4";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 52);
+        LayoutMode: Middle;
+        Group #ClassProfile3ClassIcon { Anchor: (Width: 48, Height: 48); }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile3ClassName {
+        Anchor: (Left: 0, Right: 0, Height: 18);
+        Style: (FontSize: 13, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "Aucune classe";
+      }
+
+      Label #ClassProfile3SpecName {
+        Anchor: (Left: 0, Right: 0, Height: 16);
+        Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
+        Text: "";
+      }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile3SelectButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+
+    Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
+
+    Group #ClassProfile4Card {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 10);
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        LayoutMode: Center;
+
+        Group #ClassProfile4ActiveBadge {
+          Background: #25793C(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: false;
+          Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
+        }
+
+        Group #ClassProfile4InactiveBadge {
+          Background: #3A3530(1.0);
+          Padding: (Horizontal: 6, Vertical: 2);
+          Visible: true;
+          Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile4Name {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        Style: (FontSize: 15, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "Profil 5";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 52);
+        LayoutMode: Middle;
+        Group #ClassProfile4ClassIcon { Anchor: (Width: 48, Height: 48); }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassProfile4ClassName {
+        Anchor: (Left: 0, Right: 0, Height: 18);
+        Style: (FontSize: 13, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "Aucune classe";
+      }
+
+      Label #ClassProfile4SpecName {
+        Anchor: (Left: 0, Right: 0, Height: 16);
+        Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
+        Text: "";
+      }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile4SelectButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+  }
+}

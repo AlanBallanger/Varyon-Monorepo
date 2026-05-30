@@ -213,6 +213,19 @@ public final class ClassManager {
         }
     }
 
+    public void switchProfile(@Nonnull UUID uuid, int profileIndex, @Nonnull PlayerRef playerRef) {
+        ReentrantLock lock = lockFor(uuid);
+        lock.lock();
+        try {
+            ClassAccount acc = getOrLoad(uuid);
+            acc.switchProfile(profileIndex);
+            dirty.add(uuid);
+        } finally {
+            lock.unlock();
+        }
+        applyStats(uuid, playerRef);
+    }
+
     public ClassStatEngine getStatEngine() {
         return statEngine;
     }

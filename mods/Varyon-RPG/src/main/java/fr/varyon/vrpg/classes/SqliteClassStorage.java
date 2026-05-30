@@ -66,10 +66,11 @@ public final class SqliteClassStorage {
         try (Statement st = connection.createStatement()) {
             st.execute("""
                 CREATE TABLE IF NOT EXISTS player_class_account (
-                  uuid         TEXT PRIMARY KEY,
-                  player_name  TEXT,
-                  active_class TEXT,
-                  updated_at   INTEGER NOT NULL
+                  uuid                TEXT PRIMARY KEY,
+                  player_name         TEXT,
+                  active_class        TEXT,
+                  active_profile_idx  INTEGER NOT NULL DEFAULT 0,
+                  updated_at          INTEGER NOT NULL
                 )
             """);
             st.execute("""
@@ -92,7 +93,35 @@ public final class SqliteClassStorage {
                   PRIMARY KEY (uuid, class_id, node_id)
                 )
             """);
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS player_class_profiles (
+                  uuid         TEXT NOT NULL,
+                  profile_idx  INTEGER NOT NULL,
+                  name         TEXT NOT NULL DEFAULT 'Profil',
+                  active_class TEXT,
+                  PRIMARY KEY (uuid, profile_idx)
+                )
+            """);
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS player_class_profile_talent (
+                  uuid        TEXT NOT NULL,
+                  profile_idx INTEGER NOT NULL,
+                  class_id    TEXT NOT NULL,
+                  node_id     TEXT NOT NULL,
+                  rank        INTEGER NOT NULL DEFAULT 0,
+                  spec_id     TEXT,
+                  PRIMARY KEY (uuid, profile_idx, class_id, node_id)
+                )
+            """);
+            migrateAddColumn(st, "player_class_account", "active_profile_idx", "INTEGER NOT NULL DEFAULT 0");
         }
+    }
+
+    private static void migrateAddColumn(@Nonnull Statement st, @Nonnull String table,
+                                         @Nonnull String column, @Nonnull String def) {
+        try {
+            st.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + def);
+        } catch (SQLException ignored) {}
     }
 
     public CompletableFuture<ClassAccount> loadPlayer(@Nonnull UUID uuid) {
@@ -103,12 +132,13 @@ public final class SqliteClassStorage {
         try {
             ClassAccount account = null;
             try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT player_name, active_class FROM player_class_account WHERE uuid = ?")) {
+                "SELECT player_name, active_class, active_profile_idx FROM player_class_account WHERE uuid = ?")) {
                 ps.setString(1, uuid.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         account = new ClassAccount(uuid, rs.getString("player_name"));
                         account.setActiveClass(PlayerClass.fromId(rs.getString("active_class")));
+                        account.setActiveProfileIndex(rs.getInt("active_profile_idx"));
                     }
                 }
             }
@@ -140,6 +170,7 @@ public final class SqliteClassStorage {
                     }
                 }
             }
+            loadProfilesSync(uuid, account);
             return account;
         } catch (SQLException e) {
             LOGGER.at(Level.SEVERE).log("loadPlayer(%s) failed: %s", uuid, e.getMessage());
@@ -147,14 +178,51 @@ public final class SqliteClassStorage {
         }
     }
 
+    private void loadProfilesSync(@Nonnull UUID uuid, @Nonnull ClassAccount account) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT profile_idx, name, active_class FROM player_class_profiles WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int idx = rs.getInt("profile_idx");
+                    if (idx < 0 || idx >= ClassProfile.COUNT) continue;
+                    ClassProfile p = account.getProfiles()[idx];
+                    p.setName(rs.getString("name"));
+                    p.setActiveClass(PlayerClass.fromId(rs.getString("active_class")));
+                }
+            }
+        }
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT profile_idx, class_id, node_id, rank, spec_id FROM player_class_profile_talent WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int idx = rs.getInt("profile_idx");
+                    if (idx < 0 || idx >= ClassProfile.COUNT) continue;
+                    PlayerClass c = PlayerClass.fromId(rs.getString("class_id"));
+                    if (c == null) continue;
+                    ClassProfile p = account.getProfiles()[idx];
+                    String nodeId = rs.getString("node_id");
+                    int rank = rs.getInt("rank");
+                    if ("__spec__".equals(nodeId)) {
+                        p.setSpec(c, PlayerSpecialization.fromId(rs.getString("spec_id")));
+                    } else {
+                        p.setTalentRank(c, nodeId, rank);
+                    }
+                }
+            }
+        }
+    }
+
     private void writeInitialAccount(@Nonnull ClassAccount account) throws SQLException {
         long now = System.currentTimeMillis();
         try (PreparedStatement ps = connection.prepareStatement(
-            "INSERT INTO player_class_account (uuid, player_name, active_class, updated_at) VALUES (?,?,?,?)")) {
+            "INSERT INTO player_class_account (uuid, player_name, active_class, active_profile_idx, updated_at) VALUES (?,?,?,?,?)")) {
             ps.setString(1, account.getUuid().toString());
             ps.setString(2, account.getPlayerName());
             ps.setString(3, null);
-            ps.setLong(4, now);
+            ps.setInt(4, account.getActiveProfileIndex());
+            ps.setLong(5, now);
             ps.executeUpdate();
         }
         try (PreparedStatement ps = connection.prepareStatement(
@@ -182,17 +250,19 @@ public final class SqliteClassStorage {
         try {
             connection.setAutoCommit(false);
             try (PreparedStatement ps = connection.prepareStatement("""
-                INSERT INTO player_class_account (uuid, player_name, active_class, updated_at)
-                VALUES (?,?,?,?)
+                INSERT INTO player_class_account (uuid, player_name, active_class, active_profile_idx, updated_at)
+                VALUES (?,?,?,?,?)
                 ON CONFLICT(uuid) DO UPDATE SET
                     player_name = excluded.player_name,
                     active_class = excluded.active_class,
+                    active_profile_idx = excluded.active_profile_idx,
                     updated_at = excluded.updated_at
             """)) {
                 ps.setString(1, uuid.toString());
                 ps.setString(2, account.getPlayerName());
                 ps.setString(3, account.getActiveClass() == null ? null : account.getActiveClass().getId());
-                ps.setLong(4, now);
+                ps.setInt(4, account.getActiveProfileIndex());
+                ps.setLong(5, now);
                 ps.executeUpdate();
             }
             try (PreparedStatement ps = connection.prepareStatement("""
@@ -236,12 +306,68 @@ public final class SqliteClassStorage {
                 }
                 ins.executeBatch();
             }
+            saveProfilesSync(uuid, account);
             connection.commit();
         } catch (SQLException e) {
             LOGGER.at(Level.SEVERE).log("savePlayer(%s) failed: %s", uuid, e.getMessage());
             try { connection.rollback(); } catch (SQLException ignored) {}
         } finally {
             try { connection.setAutoCommit(true); } catch (SQLException ignored) {}
+        }
+    }
+
+    private void saveProfilesSync(@Nonnull UUID uuid, @Nonnull ClassAccount account) throws SQLException {
+        try (PreparedStatement del = connection.prepareStatement(
+            "DELETE FROM player_class_profiles WHERE uuid = ?")) {
+            del.setString(1, uuid.toString());
+            del.executeUpdate();
+        }
+        try (PreparedStatement del = connection.prepareStatement(
+            "DELETE FROM player_class_profile_talent WHERE uuid = ?")) {
+            del.setString(1, uuid.toString());
+            del.executeUpdate();
+        }
+        String uuidStr = uuid.toString();
+        try (PreparedStatement ps = connection.prepareStatement(
+            "INSERT INTO player_class_profiles (uuid, profile_idx, name, active_class) VALUES (?,?,?,?)")) {
+            for (int i = 0; i < ClassProfile.COUNT; i++) {
+                ClassProfile p = account.getProfiles()[i];
+                ps.setString(1, uuidStr);
+                ps.setInt(2, i);
+                ps.setString(3, p.getName());
+                ps.setString(4, p.getActiveClass() == null ? null : p.getActiveClass().getId());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+        try (PreparedStatement ps = connection.prepareStatement(
+            "INSERT INTO player_class_profile_talent (uuid, profile_idx, class_id, node_id, rank, spec_id) VALUES (?,?,?,?,?,?)")) {
+            for (int i = 0; i < ClassProfile.COUNT; i++) {
+                ClassProfile p = account.getProfiles()[i];
+                for (PlayerClass c : PlayerClass.values()) {
+                    PlayerSpecialization spec = p.getSpec(c);
+                    if (spec != null) {
+                        ps.setString(1, uuidStr);
+                        ps.setInt(2, i);
+                        ps.setString(3, c.getId());
+                        ps.setString(4, "__spec__");
+                        ps.setInt(5, 0);
+                        ps.setString(6, spec.getId());
+                        ps.addBatch();
+                    }
+                    for (Map.Entry<String, Integer> e : p.getTalents(c).entrySet()) {
+                        if (e.getValue() == null || e.getValue() <= 0) continue;
+                        ps.setString(1, uuidStr);
+                        ps.setInt(2, i);
+                        ps.setString(3, c.getId());
+                        ps.setString(4, e.getKey());
+                        ps.setInt(5, e.getValue());
+                        ps.setString(6, null);
+                        ps.addBatch();
+                    }
+                }
+            }
+            ps.executeBatch();
         }
     }
 

@@ -20,6 +20,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.ClassProfile;
 import fr.varyon.vrpg.classes.ClassPlayerStats;
 import fr.varyon.vrpg.classes.ClassProgress;
 import fr.varyon.vrpg.classes.ClassStatDefinition;
@@ -601,6 +602,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.append("#CharacterTabMount", "CharacterTabProfession.ui");
         uiBuilder.append("#SkillsTabMount", "CharacterTabSkills.ui");
         uiBuilder.append("#ClassTalentsTabMount", "CharacterTabClassTalents.ui");
+        uiBuilder.append("#ClassProfilesTabMount", "CharacterTabClassProfiles.ui");
         uiBuilder.append("#ArtisansTabMount", "CharacterTabArtisans.ui");
         uiBuilder.append("#ClassementTabMount", "CharacterTabClassement.ui");
         if (isAdmin) {
@@ -611,6 +613,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.set("#CharacterTabContent.Visible", "character".equals(activeTab));
         uiBuilder.set("#SkillsTabContent.Visible", "skills".equals(activeTab));
         uiBuilder.set("#ClassTalentsTabContent.Visible", "classtree".equals(activeTab));
+        uiBuilder.set("#ClassProfilesTabContent.Visible", "classprofiles".equals(activeTab));
         uiBuilder.set("#ArtisansTabContent.Visible", "artisans".equals(activeTab));
         uiBuilder.set("#ClassementTabContent.Visible", "classement".equals(activeTab));
         uiBuilder.set("#AdminTabContent.Visible", "admin".equals(activeTab));
@@ -643,6 +646,8 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             populateSketchSkillTree(uiBuilder, eventBuilder);
         } else if ("classtree".equals(activeTab)) {
             populateClassTalents(uiBuilder, eventBuilder);
+        } else if ("classprofiles".equals(activeTab)) {
+            populateClassProfiles(uiBuilder, eventBuilder);
         } else if ("classement".equals(activeTab)) {
             populateClassement(uiBuilder, eventBuilder);
         } else if ("admin".equals(activeTab) && isAdmin) {
@@ -845,6 +850,12 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.set("#ClassesStatCrit.TextSpans",  Message.raw(activeStats.critChancePct() + "%"));
         uiBuilder.set("#ClassesStatDcrit.TextSpans", Message.raw("+" + activeStats.critDamagePct() + "%"));
 
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ClassesChangeProfileButton",
+            EventData.of("Action", "tab").append("Tab", "classprofiles"),
+            false
+        );
         eventBuilder.addEventBinding(
             CustomUIEventBindingType.Activating,
             "#ClassesViewTalentsButton",
@@ -1092,6 +1103,60 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         if (h > 0) return h + "h " + (m % 60) + "min";
         if (m > 0) return m + "min " + (s % 60) + "s";
         return s + "s";
+    }
+
+    private void populateClassProfiles(@Nonnull UICommandBuilder uiBuilder,
+                                        @Nonnull UIEventBuilder eventBuilder) {
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ClassProfilesBackButton",
+            EventData.of("Action", "tab").append("Tab", TAB_CLASSES),
+            false
+        );
+
+        ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
+        if (classManager == null) return;
+        ClassAccount acc = classManager.getAccount(playerRef.getUuid());
+        if (acc == null) return;
+
+        int activeIdx = acc.getActiveProfileIndex();
+        ClassProfile[] profiles = acc.getProfiles();
+        for (int i = 0; i < ClassProfile.COUNT; i++) {
+            ClassProfile p = profiles[i];
+            boolean isActive = i == activeIdx;
+            String s = String.valueOf(i);
+
+            uiBuilder.set("#ClassProfile" + s + "Name.TextSpans", Message.raw(p.getName()));
+            uiBuilder.set("#ClassProfile" + s + "ActiveBadge.Visible", isActive);
+            uiBuilder.set("#ClassProfile" + s + "InactiveBadge.Visible", !isActive);
+
+            PlayerClass cls = p.getActiveClass();
+            if (cls != null) {
+                uiBuilder.set("#ClassProfile" + s + "ClassName.TextSpans", Message.raw(cls.getDisplayName()));
+                uiBuilder.setObject("#ClassProfile" + s + "ClassIcon.Background",
+                    new PatchStyle().setTexturePath(Value.of(cls.getIconPath())));
+                PlayerSpecialization spec = p.getSpec(cls);
+                if (spec != null) {
+                    uiBuilder.set("#ClassProfile" + s + "SpecName.TextSpans", Message.raw(spec.getDisplayName()));
+                } else {
+                    uiBuilder.set("#ClassProfile" + s + "SpecName.TextSpans", Message.raw(""));
+                }
+            } else {
+                uiBuilder.set("#ClassProfile" + s + "ClassName.TextSpans", Message.raw("Aucune classe"));
+                uiBuilder.set("#ClassProfile" + s + "SpecName.TextSpans", Message.raw(""));
+            }
+
+            if (!isActive) {
+                eventBuilder.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    "#ClassProfile" + s + "SelectButton",
+                    EventData.of("Action", "switchProfile").append("Index", s),
+                    false
+                );
+            } else {
+                uiBuilder.set("#ClassProfile" + s + "SelectButton.Visible", false);
+            }
+        }
     }
 
     private void populateClassement(@Nonnull UICommandBuilder uiBuilder, @Nonnull UIEventBuilder eventBuilder) {
@@ -1930,6 +1995,15 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             return;
         } else if ("classementOrder".equals(data.action)) {
             classementAsc = !classementAsc;
+            rebuild();
+            return;
+        }
+
+        if ("switchProfile".equals(data.action) && data.index != null) {
+            int idx;
+            try { idx = Integer.parseInt(data.index); } catch (NumberFormatException e) { return; }
+            ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManager != null) classManager.switchProfile(playerRef.getUuid(), idx, playerRef);
             rebuild();
             return;
         }
