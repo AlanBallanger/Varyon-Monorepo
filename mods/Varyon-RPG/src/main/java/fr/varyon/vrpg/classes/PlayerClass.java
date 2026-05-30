@@ -8,24 +8,24 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum PlayerClass {
-    GUERRIER("guerrier", "Guerrier", "Jobs_Icons/Warrior.png"),
-    BARBARE ("barbare",  "Barbare",  "Jobs_Icons/Barbarian.png"),
-    MAGE    ("mage",     "Mage",     "Jobs_Icons/Mage.png"),
-    TIREUR  ("tireur",   "Tireur",   "Jobs_Icons/Archer.png");
+    GUERRIER("guerrier", "Guerrier", "Weapon_Sword_Mithril"),
+    BARBARE ("barbare",  "Barbare",  "Weapon_Longsword_Mithril"),
+    MAGE    ("mage",     "Mage",     "Weapon_Staff_Mithril"),
+    TIREUR  ("tireur",   "Tireur",   "Weapon_Shortbow_Mithril");
 
     private final String id;
     private final String displayName;
-    private final String iconPath;
+    private final String itemId;
 
-    PlayerClass(@Nonnull String id, @Nonnull String displayName, @Nonnull String iconPath) {
+    PlayerClass(@Nonnull String id, @Nonnull String displayName, @Nonnull String itemId) {
         this.id = id;
         this.displayName = displayName;
-        this.iconPath = iconPath;
+        this.itemId = itemId;
     }
 
     @Nonnull public String getId()          { return id; }
     @Nonnull public String getDisplayName() { return displayName; }
-    @Nonnull public String getIconPath()    { return iconPath; }
+    @Nonnull public String getItemId()      { return itemId; }
 
     @Nonnull
     public List<PlayerSpecialization> getSpecializations() {

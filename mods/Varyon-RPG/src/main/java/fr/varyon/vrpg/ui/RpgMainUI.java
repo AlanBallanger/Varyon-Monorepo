@@ -21,6 +21,7 @@ import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.ClassProfile;
+import fr.varyon.vrpg.classes.ClassTalentTree;
 import fr.varyon.vrpg.classes.ClassPlayerStats;
 import fr.varyon.vrpg.classes.ClassProgress;
 import fr.varyon.vrpg.classes.ClassStatDefinition;
@@ -824,8 +825,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.set("#ClassesActiveClassXp.TextSpans", Message.raw(xpText));
         float xpRatio = xpNeeded > 0 ? (float) xpIn / xpNeeded : 1f;
         uiBuilder.set("#ClassesActiveClassXpBar.Value", xpRatio);
-        uiBuilder.setObject("#ClassesActiveClassIcon.Background",
-            new PatchStyle().setTexturePath(Value.of(activeClass.getIconPath())));
+        uiBuilder.set("#ClassesActiveClassIcon.ItemId", activeClass.getItemId());
 
         if (activeSpec != null) {
             uiBuilder.set("#ClassesActiveSpecName.TextSpans", Message.raw(activeSpec.getDisplayName()));
@@ -898,7 +898,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         String className = activeClass != null ? activeClass.getDisplayName() : "Classe";
 
         uiBuilder.set("#ClassTreePointsValue.TextSpans",
-            Message.raw("Talents de " + className + " (à venir)"));
+            Message.raw("Talents de " + className));
 
         eventBuilder.addEventBinding(
             CustomUIEventBindingType.Activating,
@@ -930,17 +930,24 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         seg = layoutSplitOneToTwo(uiBuilder, ep, seg, cx(shifted[9]), bot(shifted[9]), cx(shifted[10]), cx(shifted[11]), top(shifted[10]));
         hideEdgeSegmentRange(uiBuilder, ep, seg, SKILL_TREE_EDGE_SEGMENTS);
 
+        ClassTalentTree.Node[] talentNodes = activeClass != null
+            ? ClassTalentTree.getTree(activeClass)
+            : ClassTalentTree.getTree(PlayerClass.GUERRIER);
+
         for (int i = 0; i < 12; i++) {
             String id = String.valueOf(i);
             int sl = shifted[i][0];
             int st = shifted[i][1];
+            ClassTalentTree.Node node = talentNodes[i];
             positionClassSlot(uiBuilder, id, sl, st);
             positionClassRank(uiBuilder, id, sl, st);
             uiBuilder.set("#ClassTreeNode" + id + "Slot.Visible", true);
             uiBuilder.set("#ClassTreeNode" + id + "Unlocked.Visible", true);
             uiBuilder.setObject("#ClassTreeNode" + id + "Unlocked.Background", NODE_FILL_STYLE);
+            uiBuilder.set("#ClassTreeNode" + id + "Icon.Visible", true);
+            uiBuilder.set("#ClassTreeNode" + id + "Icon.ItemId", node.itemId());
             uiBuilder.set("#ClassTreeNode" + id + "RankText.Visible", true);
-            uiBuilder.set("#ClassTreeNode" + id + "RankText.TextSpans", Message.raw("0/5"));
+            uiBuilder.set("#ClassTreeNode" + id + "RankText.TextSpans", Message.raw("0/" + node.maxRank()));
             uiBuilder.set("#ClassTreeNode" + id + ".Visible", true);
             eventBuilder.addEventBinding(
                 CustomUIEventBindingType.Activating,
@@ -950,10 +957,11 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             );
         }
 
-        uiBuilder.set("#ClassTreeSelectedTitle.TextSpans", Message.raw("Sélectionnez un talent"));
-        uiBuilder.set("#ClassTreeSelectedFlavor.TextSpans", Message.raw(""));
-        uiBuilder.set("#ClassTreeSelectedEffect.TextSpans", Message.raw("Les talents de classe seront disponibles prochainement."));
-        uiBuilder.set("#ClassTreeCurrentRankValue.TextSpans", Message.raw("0/5"));
+        ClassTalentTree.Node first = talentNodes[0];
+        uiBuilder.set("#ClassTreeSelectedTitle.TextSpans", Message.raw(first.name()));
+        uiBuilder.set("#ClassTreeSelectedFlavor.TextSpans", Message.raw(first.flavor()));
+        uiBuilder.set("#ClassTreeSelectedEffect.TextSpans", Message.raw(first.description()));
+        uiBuilder.set("#ClassTreeCurrentRankValue.TextSpans", Message.raw("0/" + first.maxRank()));
         uiBuilder.set("#ClassTreeAttribuerButton.Visible", false);
         uiBuilder.set("#ClassTreeResetButton.Visible", false);
     }
@@ -1133,8 +1141,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             PlayerClass cls = p.getActiveClass();
             if (cls != null) {
                 uiBuilder.set("#ClassProfile" + s + "ClassName.TextSpans", Message.raw(cls.getDisplayName()));
-                uiBuilder.setObject("#ClassProfile" + s + "ClassIcon.Background",
-                    new PatchStyle().setTexturePath(Value.of(cls.getIconPath())));
+                uiBuilder.set("#ClassProfile" + s + "ClassIcon.ItemId", cls.getItemId());
                 PlayerSpecialization spec = p.getSpec(cls);
                 if (spec != null) {
                     uiBuilder.set("#ClassProfile" + s + "SpecName.TextSpans", Message.raw(spec.getDisplayName()));

@@ -830,7 +830,7 @@ Group {
 
       Group #ClassTreeNode0Slot { Anchor: (Left: 354, Top: 64, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode0Unlocked { Anchor: (Left: 357, Top: 67, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode0Icon { Anchor: (Left: 372, Top: 82, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode0Icon { Anchor: (Left: 372, Top: 82, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode0Veil { Anchor: (Left: 357, Top: 67, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode0RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode0Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -839,7 +839,7 @@ Group {
 
       Group #ClassTreeNode1Slot { Anchor: (Left: 434, Top: 154, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode1Unlocked { Anchor: (Left: 437, Top: 157, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode1Icon { Anchor: (Left: 452, Top: 172, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode1Icon { Anchor: (Left: 452, Top: 172, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode1Veil { Anchor: (Left: 437, Top: 157, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode1RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode1Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -848,7 +848,7 @@ Group {
 
       Group #ClassTreeNode2Slot { Anchor: (Left: 594, Top: 154, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode2Unlocked { Anchor: (Left: 597, Top: 157, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode2Icon { Anchor: (Left: 612, Top: 172, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode2Icon { Anchor: (Left: 612, Top: 172, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode2Veil { Anchor: (Left: 597, Top: 157, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode2RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode2Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -857,7 +857,7 @@ Group {
 
       Group #ClassTreeNode3Slot { Anchor: (Left: 524, Top: 474, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode3Unlocked { Anchor: (Left: 527, Top: 477, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode3Icon { Anchor: (Left: 542, Top: 492, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode3Icon { Anchor: (Left: 542, Top: 492, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode3Veil { Anchor: (Left: 527, Top: 477, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode3RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode3Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -866,7 +866,7 @@ Group {
 
       Group #ClassTreeNode4Slot { Anchor: (Left: 354, Top: 544, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode4Unlocked { Anchor: (Left: 357, Top: 547, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode4Icon { Anchor: (Left: 372, Top: 562, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode4Icon { Anchor: (Left: 372, Top: 562, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode4Veil { Anchor: (Left: 357, Top: 547, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode4RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode4Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -875,7 +875,7 @@ Group {
 
       Group #ClassTreeNode5Slot { Anchor: (Left: 184, Top: 474, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode5Unlocked { Anchor: (Left: 187, Top: 477, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode5Icon { Anchor: (Left: 202, Top: 492, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode5Icon { Anchor: (Left: 202, Top: 492, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode5Veil { Anchor: (Left: 187, Top: 477, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode5RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode5Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -884,7 +884,7 @@ Group {
 
       Group #ClassTreeNode6Slot { Anchor: (Left: 114, Top: 154, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode6Unlocked { Anchor: (Left: 117, Top: 157, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode6Icon { Anchor: (Left: 132, Top: 172, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode6Icon { Anchor: (Left: 132, Top: 172, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode6Veil { Anchor: (Left: 117, Top: 157, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode6RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode6Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -893,7 +893,7 @@ Group {
 
       Group #ClassTreeNode7Slot { Anchor: (Left: 274, Top: 154, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode7Unlocked { Anchor: (Left: 277, Top: 157, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode7Icon { Anchor: (Left: 292, Top: 172, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode7Icon { Anchor: (Left: 292, Top: 172, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode7Veil { Anchor: (Left: 277, Top: 157, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode7RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode7Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -902,7 +902,7 @@ Group {
 
       Group #ClassTreeNode8Slot { Anchor: (Left: 594, Top: 264, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode8Unlocked { Anchor: (Left: 597, Top: 267, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode8Icon { Anchor: (Left: 612, Top: 282, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode8Icon { Anchor: (Left: 612, Top: 282, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode8Veil { Anchor: (Left: 597, Top: 267, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode8RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode8Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -911,7 +911,7 @@ Group {
 
       Group #ClassTreeNode9Slot { Anchor: (Left: 114, Top: 264, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode9Unlocked { Anchor: (Left: 117, Top: 267, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode9Icon { Anchor: (Left: 132, Top: 282, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode9Icon { Anchor: (Left: 132, Top: 282, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode9Veil { Anchor: (Left: 117, Top: 267, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode9RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode9Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -920,7 +920,7 @@ Group {
 
       Group #ClassTreeNode10Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode10Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode10Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode10Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode10Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode10RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode10Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -929,7 +929,7 @@ Group {
 
       Group #ClassTreeNode11Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode11Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode11Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode11Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode11Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode11RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/5"; }
       AssetImage #ClassTreeNode11Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -938,7 +938,7 @@ Group {
 
       Group #ClassTreeNode12Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode12Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode12Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode12Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode12Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode12RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
       AssetImage #ClassTreeNode12Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -947,7 +947,7 @@ Group {
 
       Group #ClassTreeNode13Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode13Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode13Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode13Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode13Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode13RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
       AssetImage #ClassTreeNode13Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -956,7 +956,7 @@ Group {
 
       Group #ClassTreeNode14Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode14Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode14Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode14Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode14Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode14RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
       AssetImage #ClassTreeNode14Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -965,7 +965,7 @@ Group {
 
       Group #ClassTreeNode15Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode15Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode15Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode15Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode15Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode15RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
       AssetImage #ClassTreeNode15Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }
@@ -974,7 +974,7 @@ Group {
 
       Group #ClassTreeNode16Slot { Anchor: (Left: 0, Top: 0, Width: 76, Height: 76); Visible: false; }
       Group #ClassTreeNode16Unlocked { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
-      Group #ClassTreeNode16Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
+      ItemIcon #ClassTreeNode16Icon { Anchor: (Left: 18, Top: 18, Width: 40, Height: 40); Visible: false; }
       Group #ClassTreeNode16Veil { Anchor: (Left: 3, Top: 3, Width: 70, Height: 70); Visible: false; }
       Label #ClassTreeNode16RankText { Anchor: (Left: 0, Top: 0, Width: 44, Height: 14); Visible: false; Style: (...@MetaStyle, FontSize: 11, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Start); Text: "0/1"; }
       AssetImage #ClassTreeNode16Rank { Anchor: (Left: 0, Top: 0, Width: 20, Height: 14); Visible: false; }

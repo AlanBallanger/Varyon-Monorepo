@@ -147,7 +147,7 @@ public final class ClassManager {
             : String.valueOf(Math.round(toSend * 10.0) / 10.0);
         try {
             Message msg = Message.raw("+" + xpStr + " XP").color(new Color(0xFFD700));
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), msg, null, playerClass.getIconPath());
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), msg, null, (String) null);
         } catch (Exception ignored) {}
     }
 
