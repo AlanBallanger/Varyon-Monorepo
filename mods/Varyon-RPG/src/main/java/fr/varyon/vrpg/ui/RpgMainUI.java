@@ -18,6 +18,12 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.vrpg.VaryonRpgPlugin;
+import fr.varyon.vrpg.classes.ClassAccount;
+import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.ClassProgress;
+import fr.varyon.vrpg.classes.ClassXpCurve;
+import fr.varyon.vrpg.classes.PlayerClass;
+import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.config.VrpgConfig;
 import fr.varyon.vrpg.rpg.PlayerAccount;
 import fr.varyon.vrpg.rpg.Profession;
@@ -553,6 +559,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
 
     private final PlayerRef playerRef;
     private String activeTab = "character";
+    private static final String TAB_CLASSES = "classes";
     private Profession classementFilter = Profession.MINEUR;
     private boolean classementAsc = false;
     private int selectedNode = 0;
@@ -574,6 +581,12 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         this.playerRef = playerRef;
     }
 
+    public RpgMainUI(@Nonnull PlayerRef playerRef, @Nonnull String initialTab) {
+        super(playerRef, CustomPageLifetime.CanDismiss, Data.CODEC);
+        this.playerRef = playerRef;
+        this.activeTab = initialTab;
+    }
+
     @Override
     public void build(@Nonnull Ref<EntityStore> ref,
                       @Nonnull UICommandBuilder uiBuilder,
@@ -582,6 +595,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         boolean isAdmin = isAdmin();
 
         uiBuilder.append("CharacterPage.ui");
+        uiBuilder.append("#ClassesTabMount", "CharacterTabClasses.ui");
         uiBuilder.append("#CharacterTabMount", "CharacterTabProfession.ui");
         uiBuilder.append("#SkillsTabMount", "CharacterTabSkills.ui");
         uiBuilder.append("#ArtisansTabMount", "CharacterTabArtisans.ui");
@@ -590,18 +604,22 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             uiBuilder.append("#AdminTabMount", "CharacterTabAdmin.ui");
         }
 
+        uiBuilder.set("#ClassesTabContent.Visible", TAB_CLASSES.equals(activeTab));
         uiBuilder.set("#CharacterTabContent.Visible", "character".equals(activeTab));
         uiBuilder.set("#SkillsTabContent.Visible", "skills".equals(activeTab));
         uiBuilder.set("#ArtisansTabContent.Visible", "artisans".equals(activeTab));
         uiBuilder.set("#ClassementTabContent.Visible", "classement".equals(activeTab));
         uiBuilder.set("#AdminTabContent.Visible", "admin".equals(activeTab));
 
+        uiBuilder.set("#TabClassesUnderline.Visible", TAB_CLASSES.equals(activeTab));
         uiBuilder.set("#TabCharacterUnderline.Visible", "character".equals(activeTab));
         uiBuilder.set("#TabArtisansUnderline.Visible", "artisans".equals(activeTab));
         uiBuilder.set("#TabClassementUnderline.Visible", "classement".equals(activeTab));
         uiBuilder.set("#TabAdminUnderline.Visible", "admin".equals(activeTab));
         uiBuilder.set("#TabAdminButton.Visible", isAdmin);
 
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabClassesButton",
+            EventData.of("Action", "tab").append("Tab", TAB_CLASSES), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabCharacterButton",
             EventData.of("Action", "tab").append("Tab", "character"), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabArtisansButton",
@@ -613,7 +631,9 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 EventData.of("Action", "tab").append("Tab", "admin"), false);
         }
 
-        if ("character".equals(activeTab)) {
+        if (TAB_CLASSES.equals(activeTab)) {
+            populateClasses(uiBuilder, eventBuilder);
+        } else if ("character".equals(activeTab)) {
             populateCharacterProfessions(uiBuilder, eventBuilder);
         } else if ("skills".equals(activeTab)) {
             populateSketchSkillTree(uiBuilder, eventBuilder);
@@ -769,6 +789,72 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 + " xpToNext=" + xpToNext + " ratio=" + String.format("%.3f", ratio));
         }
         ui.set(fillId + ".Value", ratio);
+    }
+
+    private void populateClasses(@Nonnull UICommandBuilder uiBuilder,
+                                 @Nonnull UIEventBuilder eventBuilder) {
+        ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
+        if (classManager == null) return;
+        ClassAccount acc = classManager.getAccount(playerRef.getUuid());
+        if (acc == null) return;
+
+        PlayerClass activeClass = acc.getActiveClass();
+        if (activeClass == null) activeClass = PlayerClass.GUERRIER;
+
+        ClassProgress activeProgress = acc.getProgress(activeClass);
+        PlayerSpecialization activeSpec = activeProgress.getActiveSpec();
+
+        uiBuilder.set("#ClassesActiveClassName.TextSpans", Message.raw(activeClass.getDisplayName()));
+        uiBuilder.set("#ClassesActiveClassLevel.TextSpans",
+            Message.raw("NIVEAU " + activeProgress.getLevel()));
+        long xpIn = activeProgress.getXpInLevel();
+        long xpNeeded = ClassXpCurve.xpForLevel(activeProgress.getLevel());
+        String xpText = xpIn + " / " + (activeProgress.isMaxLevel() ? "MAX" : xpNeeded + " XP");
+        uiBuilder.set("#ClassesActiveClassXp.TextSpans", Message.raw(xpText));
+        float xpRatio = xpNeeded > 0 ? (float) xpIn / xpNeeded : 1f;
+        uiBuilder.set("#ClassesActiveClassXpBar.Value", xpRatio);
+        uiBuilder.setObject("#ClassesActiveClassIcon.Background",
+            new PatchStyle().setTexturePath(Value.of(activeClass.getIconPath())));
+
+        if (activeSpec != null) {
+            uiBuilder.set("#ClassesActiveSpecName.TextSpans", Message.raw(activeSpec.getDisplayName()));
+            uiBuilder.set("#ClassesActiveSpecKeywords.TextSpans", Message.raw(activeSpec.getKeywords()));
+            uiBuilder.set("#ClassesActiveSpecDesc.TextSpans", Message.raw(activeSpec.getDescription()));
+            uiBuilder.setObject("#ClassesActiveSpecIcon.Background",
+                new PatchStyle().setTexturePath(Value.of(activeSpec.getIconPath())));
+        } else {
+            uiBuilder.set("#ClassesActiveSpecName.TextSpans", Message.raw("Aucune specialisation"));
+            uiBuilder.set("#ClassesActiveSpecKeywords.TextSpans", Message.raw(""));
+            uiBuilder.set("#ClassesActiveSpecDesc.TextSpans", Message.raw("Choisissez une specialisation."));
+        }
+
+        java.util.List<PlayerSpecialization> specs = activeClass.getSpecializations();
+        for (int i = 0; i < 3; i++) {
+            String suffix = String.valueOf(i);
+            if (i < specs.size()) {
+                PlayerSpecialization spec = specs.get(i);
+                boolean isActive = spec == activeSpec;
+                uiBuilder.set("#ClassesSpec" + suffix + "Name.TextSpans", Message.raw(spec.getDisplayName()));
+                uiBuilder.set("#ClassesSpec" + suffix + "Keywords.TextSpans", Message.raw(spec.getKeywords()));
+                uiBuilder.setObject("#ClassesSpec" + suffix + "Icon.Background",
+                    new PatchStyle().setTexturePath(Value.of(spec.getIconPath())));
+                uiBuilder.set("#ClassesSpec" + suffix + "ActiveBadge.Visible", isActive);
+                uiBuilder.set("#ClassesSpec" + suffix + "InactiveBadge.Visible", !isActive);
+                uiBuilder.set("#ClassesSpec" + suffix + "Level.TextSpans",
+                    Message.raw("NIVEAU " + activeProgress.getLevel()));
+            }
+        }
+
+        for (PlayerClass c : PlayerClass.values()) {
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#ClassesTab" + capitalize(c.getId()) + "Button",
+                EventData.of("Action", "classTab").append("ClassId", c.getId()), false);
+        }
+    }
+
+    private static String capitalize(@Nonnull String s) {
+        if (s.isEmpty()) return s;
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
     private void populateCharacterProfessions(@Nonnull UICommandBuilder uiBuilder,
@@ -957,11 +1043,6 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             uiBuilder.set(eid + " #Level.Text", "Niv. " + entry.level());
             uiBuilder.set(eid + " #XpTotal.Text", formatXp(XpCurve.cumulativeXp(entry.level(), entry.xpInLevel())));
         }
-    }
-
-    private static String capitalize(String s) {
-        if (s == null || s.isEmpty()) return s;
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
     private static String formatXp(long xp) {
@@ -1645,6 +1726,19 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             return;
         }
 
+        if ("classTab".equals(data.action) && data.classId != null) {
+            PlayerClass c = PlayerClass.fromId(data.classId);
+            if (c != null) {
+                ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
+                if (classManager != null) {
+                    ClassAccount acc = classManager.getAccount(playerRef.getUuid());
+                    if (acc != null) acc.setActiveClass(c);
+                }
+            }
+            rebuild();
+            return;
+        }
+
         if ("tab".equals(data.action) && data.tab != null) {
             activeTab = data.tab;
             if ("skills".equals(data.tab) && data.talentSlot != null) {
@@ -1910,6 +2004,9 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 .addField(new KeyedCodec<>("Index", Codec.STRING),
                     (d, v) -> d.index = v,
                     d -> d.index)
+                .addField(new KeyedCodec<>("ClassId", Codec.STRING),
+                    (d, v) -> d.classId = v,
+                    d -> d.classId)
                 .build();
 
         private String action;
@@ -1921,6 +2018,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         private String amount;
         private String delta;
         private String index;
+        private String classId;
 
         public Data() {}
     }

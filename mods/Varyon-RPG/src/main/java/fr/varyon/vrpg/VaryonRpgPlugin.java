@@ -21,9 +21,11 @@ import fr.varyon.vrpg.commands.VpaBlastCommand;
 import fr.varyon.vrpg.config.MobCategoriesConfig;
 import fr.varyon.vrpg.config.VrpgConfig;
 import fr.varyon.vrpg.config.XpTableConfig;
+import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.commands.VpaCommand;
 import fr.varyon.vrpg.commands.VpaAdminCommand;
 import fr.varyon.vrpg.commands.VpaSurfaceCommand;
+import fr.varyon.vrpg.commands.VrpgCommand;
 import fr.varyon.vrpg.restriction.TalentItemPlaceRestrictionSystem;
 import fr.varyon.vrpg.restriction.TalentItemRestrictionSystem;
 import fr.varyon.vrpg.profession.fermier.FarmerAnimalDropSystem;
@@ -93,6 +95,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private static volatile VaryonRpgPlugin instance;
 
     private ProfessionManager professionManager;
+    private ClassManager classManager;
     private MiningHelmet miningHelmet;
     private GuardianStoneManager guardianManager;
     private MinerComboTracker comboTracker;
@@ -141,6 +144,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         return professionManager;
     }
 
+    public ClassManager getClassManager() {
+        return classManager;
+    }
+
     public java.nio.file.Path getPluginDataDirectory() {
         return getDataDirectory();
     }
@@ -169,6 +176,12 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     ProfessionXpBoostInteraction.CODEC);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ProfessionXpBoostInteraction");
+        }
+
+        try {
+            this.classManager = new ClassManager(getDataDirectory());
+        } catch (Exception e) {
+            LOGGER.atSevere().withCause(e).log("[VaryonRPG] Failed to initialize ClassManager");
         }
 
         try {
@@ -215,6 +228,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
         try {
             getCommandRegistry().registerCommand(new VpaCommand(this));
+            getCommandRegistry().registerCommand(new VrpgCommand(this));
             getCommandRegistry().registerCommand(new VpaAdminCommand());
             getCommandRegistry().registerCommand(surfaceCommand);
             getCommandRegistry().registerCommand(blastCommand);
@@ -228,6 +242,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 PlayerRef ref = event.getHolder().getComponent(PlayerRef.getComponentType());
                 if (player == null || ref == null || professionManager == null) return;
                 professionManager.ensureAccount(ref.getUuid(), ref.getUsername());
+                if (classManager != null) classManager.ensureAccount(ref.getUuid(), ref.getUsername());
                 pendingProfessionHudInit.put(ref.getUuid(), ref);
             });
             getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
@@ -364,6 +379,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     if (maitriseFermierRegenSystem != null) maitriseFermierRegenSystem.removePlayer(ref.getUuid());
                     if (maitriseChasseurTracker != null) maitriseChasseurTracker.remove(ref.getUuid());
                     if (maitriseChasseurSpeedSystem != null) maitriseChasseurSpeedSystem.removePlayer(ref.getUuid());
+                }
+                if (ref != null && classManager != null) {
+                    classManager.onPlayerDisconnect(ref.getUuid());
                 }
             });
         } catch (Exception e) {

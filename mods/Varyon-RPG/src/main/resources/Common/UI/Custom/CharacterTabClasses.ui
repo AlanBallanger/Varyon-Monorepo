@@ -1,0 +1,465 @@
+$P = "CharacterPage.ui";
+
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+  LayoutMode: Full;
+
+  // Colonne gauche (0..300)
+  Group {
+    Anchor: (Left: 0, Top: 0, Bottom: 0, Width: 300);
+    LayoutMode: Top;
+
+    Group {
+      Anchor: (Left: 0, Right: 0, Height: 160);
+      Background: PatchStyle(TexturePath: "Common/Frames/Panel.png", Border: 12, Color: #000000(0.32));
+      LayoutMode: Top;
+      Padding: (Full: 12);
+
+      Label {
+        Anchor: (Height: 18);
+        Style: $P.@SectionTitleStyle;
+        Text: "Classe principale";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 64);
+        LayoutMode: Full;
+
+        Group #ClassesActiveClassIcon {
+          Anchor: (Left: 0, Top: 0, Width: 64, Height: 64);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Warrior.png", Border: 0);
+        }
+
+        Group {
+          Anchor: (Left: 76, Top: 0, Right: 0, Height: 64);
+          LayoutMode: Top;
+
+          Label #ClassesActiveClassName {
+            Style: $P.@SubHeadingStyle;
+            Anchor: (Height: 26);
+            Text: "Guerrier";
+          }
+
+          Label #ClassesActiveClassLevel {
+            Style: $P.@MetaStyle;
+            Anchor: (Height: 20);
+            Text: "NIVEAU 1";
+          }
+
+          Label #ClassesActiveClassXp {
+            Style: $P.@MetaStyle;
+            Anchor: (Height: 18);
+            Text: "0 / 35 XP";
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 8);
+        Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+
+        ProgressBar #ClassesActiveClassXpBar {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Value: 0.0;
+          BarTexturePath: "Elements/Gauge_Fill.png";
+        }
+      }
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group {
+      Anchor: (Left: 0, Right: 0, Height: 126);
+      Background: PatchStyle(TexturePath: "Common/Frames/Panel.png", Border: 12, Color: #000000(0.32));
+      LayoutMode: Top;
+      Padding: (Full: 12);
+
+      Label {
+        Anchor: (Height: 18);
+        Style: $P.@SectionTitleStyle;
+        Text: "Specialisation active";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 62);
+        LayoutMode: Full;
+
+        Group #ClassesActiveSpecIcon {
+          Anchor: (Left: 0, Top: 0, Width: 48, Height: 48);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Shield.png", Border: 0);
+        }
+
+        Group {
+          Anchor: (Left: 58, Top: 0, Right: 0, Height: 62);
+          LayoutMode: Top;
+
+          Label #ClassesActiveSpecName {
+            Style: $P.@SubHeadingStyle;
+            Anchor: (Height: 24);
+            Text: "Aucune";
+          }
+
+          Label #ClassesActiveSpecKeywords {
+            Style: $P.@MetaStyle;
+            Anchor: (Height: 18);
+            Text: "";
+          }
+
+          Label #ClassesActiveSpecDesc {
+            Style: $P.@MetaStyle;
+            Anchor: (Height: 18);
+            Text: "Choisissez une specialisation.";
+          }
+        }
+      }
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group {
+      FlexWeight: 1;
+      Anchor: (Left: 0, Right: 0);
+      Background: PatchStyle(TexturePath: "Common/Frames/Panel.png", Border: 12, Color: #000000(0.32));
+      LayoutMode: Top;
+      Padding: (Full: 12);
+
+      Label {
+        Anchor: (Height: 18);
+        Style: $P.@SectionTitleStyle;
+        Text: "Statistiques de classe";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Label {
+        Style: $P.@MetaStyle;
+        Anchor: (Height: 18);
+        Text: "Disponible dans une prochaine mise a jour.";
+      }
+    }
+  }
+
+  // Colonne centrale (312..Right:272)
+  Group {
+    Anchor: (Left: 312, Top: 0, Bottom: 0, Right: 272);
+    LayoutMode: Top;
+
+    Label {
+      Anchor: (Height: 18);
+      Style: $P.@SectionTitleStyle;
+      Text: "Specialisations";
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group {
+      Anchor: (Left: 0, Right: 0, Height: 120);
+      Background: PatchStyle(TexturePath: "Common/Frames/Panel.png", Border: 12, Color: #000000(0.32));
+      LayoutMode: Top;
+      Padding: (Full: 12);
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 56);
+        LayoutMode: Full;
+
+        Group #ClassesSpec0Icon {
+          Anchor: (Left: 0, Top: 0, Width: 56, Height: 56);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Shield.png", Border: 0);
+        }
+
+        Group {
+          Anchor: (Left: 68, Top: 0, Right: 0, Height: 56);
+          LayoutMode: Top;
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            LayoutMode: Left;
+
+            Label #ClassesSpec0Name {
+              Style: $P.@SubHeadingStyle;
+              FlexWeight: 1;
+              Text: "Rempart";
+            }
+
+            Group #ClassesSpec0ActiveBadge {
+              Anchor: (Width: 60, Height: 20);
+              Background: PatchStyle(TexturePath: "Common/Frames/BadgeGreen.png", Border: 6);
+              LayoutMode: Middle;
+              Visible: false;
+
+              Label {
+                Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true);
+                Text: "Actif";
+              }
+            }
+
+            Group #ClassesSpec0InactiveBadge {
+              Anchor: (Width: 70, Height: 20);
+              Background: PatchStyle(TexturePath: "Common/Frames/BadgeGrey.png", Border: 6);
+              LayoutMode: Middle;
+              Visible: true;
+
+              Label {
+                Style: (FontSize: 14, TextColor: #A89E90, RenderUppercase: true);
+                Text: "Inactif";
+              }
+            }
+          }
+
+          Label #ClassesSpec0Keywords {
+            Style: $P.@MetaStyle;
+            Anchor: (Height: 18);
+            Text: "";
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassesSpec0Level {
+        Style: $P.@StatLabelStyle;
+        Anchor: (Height: 18);
+        Text: "NIVEAU 1";
+      }
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group {
+      Anchor: (Left: 0, Right: 0, Height: 120);
+      Background: PatchStyle(TexturePath: "Common/Frames/Panel.png", Border: 12, Color: #000000(0.32));
+      LayoutMode: Top;
+      Padding: (Full: 12);
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 56);
+        LayoutMode: Full;
+
+        Group #ClassesSpec1Icon {
+          Anchor: (Left: 0, Top: 0, Width: 56, Height: 56);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Sword.png", Border: 0);
+        }
+
+        Group {
+          Anchor: (Left: 68, Top: 0, Right: 0, Height: 56);
+          LayoutMode: Top;
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            LayoutMode: Left;
+
+            Label #ClassesSpec1Name {
+              Style: $P.@SubHeadingStyle;
+              FlexWeight: 1;
+              Text: "Duelliste";
+            }
+
+            Group #ClassesSpec1ActiveBadge {
+              Anchor: (Width: 60, Height: 20);
+              Background: PatchStyle(TexturePath: "Common/Frames/BadgeGreen.png", Border: 6);
+              LayoutMode: Middle;
+              Visible: false;
+
+              Label {
+                Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true);
+                Text: "Actif";
+              }
+            }
+
+            Group #ClassesSpec1InactiveBadge {
+              Anchor: (Width: 70, Height: 20);
+              Background: PatchStyle(TexturePath: "Common/Frames/BadgeGrey.png", Border: 6);
+              LayoutMode: Middle;
+              Visible: true;
+
+              Label {
+                Style: (FontSize: 14, TextColor: #A89E90, RenderUppercase: true);
+                Text: "Inactif";
+              }
+            }
+          }
+
+          Label #ClassesSpec1Keywords {
+            Style: $P.@MetaStyle;
+            Anchor: (Height: 18);
+            Text: "";
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassesSpec1Level {
+        Style: $P.@StatLabelStyle;
+        Anchor: (Height: 18);
+        Text: "NIVEAU 1";
+      }
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group {
+      Anchor: (Left: 0, Right: 0, Height: 120);
+      Background: PatchStyle(TexturePath: "Common/Frames/Panel.png", Border: 12, Color: #000000(0.32));
+      LayoutMode: Top;
+      Padding: (Full: 12);
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 56);
+        LayoutMode: Full;
+
+        Group #ClassesSpec2Icon {
+          Anchor: (Left: 0, Top: 0, Width: 56, Height: 56);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Shadow.png", Border: 0);
+        }
+
+        Group {
+          Anchor: (Left: 68, Top: 0, Right: 0, Height: 56);
+          LayoutMode: Top;
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Height: 24);
+            LayoutMode: Left;
+
+            Label #ClassesSpec2Name {
+              Style: $P.@SubHeadingStyle;
+              FlexWeight: 1;
+              Text: "Ombre";
+            }
+
+            Group #ClassesSpec2ActiveBadge {
+              Anchor: (Width: 60, Height: 20);
+              Background: PatchStyle(TexturePath: "Common/Frames/BadgeGreen.png", Border: 6);
+              LayoutMode: Middle;
+              Visible: false;
+
+              Label {
+                Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true);
+                Text: "Actif";
+              }
+            }
+
+            Group #ClassesSpec2InactiveBadge {
+              Anchor: (Width: 70, Height: 20);
+              Background: PatchStyle(TexturePath: "Common/Frames/BadgeGrey.png", Border: 6);
+              LayoutMode: Middle;
+              Visible: true;
+
+              Label {
+                Style: (FontSize: 14, TextColor: #A89E90, RenderUppercase: true);
+                Text: "Inactif";
+              }
+            }
+          }
+
+          Label #ClassesSpec2Keywords {
+            Style: $P.@MetaStyle;
+            Anchor: (Height: 18);
+            Text: "";
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #ClassesSpec2Level {
+        Style: $P.@StatLabelStyle;
+        Anchor: (Height: 18);
+        Text: "NIVEAU 1";
+      }
+    }
+  }
+
+  // Colonne droite (Right:0, Width:260)
+  Group {
+    Anchor: (Right: 0, Top: 0, Bottom: 0, Width: 260);
+    LayoutMode: Top;
+
+    Group {
+      Anchor: (Left: 0, Right: 0, Height: 52);
+      Background: PatchStyle(TexturePath: "Common/Frames/Panel.png", Border: 12, Color: #000000(0.32));
+      LayoutMode: Left;
+      Padding: (Left: 8, Right: 8, Top: 6, Bottom: 6);
+
+      Button #ClassesTabGuerrierButton {
+        Anchor: (Width: 54, Height: 40);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Middle;
+
+        Group {
+          Anchor: (Width: 24, Height: 24);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Warrior.png", Border: 0);
+        }
+      }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassesTabBarbareButton {
+        Anchor: (Width: 54, Height: 40);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Middle;
+
+        Group {
+          Anchor: (Width: 24, Height: 24);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Barbarian.png", Border: 0);
+        }
+      }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassesTabMageButton {
+        Anchor: (Width: 54, Height: 40);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Middle;
+
+        Group {
+          Anchor: (Width: 24, Height: 24);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Mage.png", Border: 0);
+        }
+      }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassesTabTireurButton {
+        Anchor: (Width: 54, Height: 40);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Middle;
+
+        Group {
+          Anchor: (Width: 24, Height: 24);
+          Background: PatchStyle(TexturePath: "Jobs_Icons/Archer.png", Border: 0);
+        }
+      }
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group {
+      FlexWeight: 1;
+      Anchor: (Left: 0, Right: 0);
+      Background: PatchStyle(TexturePath: "Common/Frames/Panel.png", Border: 12, Color: #000000(0.32));
+      LayoutMode: Top;
+      Padding: (Full: 12);
+
+      Label {
+        Anchor: (Height: 18);
+        Style: $P.@SectionTitleStyle;
+        Text: "Talents equipes";
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Label {
+        Style: $P.@MetaStyle;
+        Anchor: (Height: 18);
+        Text: "Aucun talent alloue.";
+      }
+    }
+  }
+}
