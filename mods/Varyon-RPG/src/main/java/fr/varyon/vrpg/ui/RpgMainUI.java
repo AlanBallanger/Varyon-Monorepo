@@ -845,11 +845,6 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             }
         }
 
-        for (PlayerClass c : PlayerClass.values()) {
-            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                "#ClassesTab" + capitalize(c.getId()) + "Button",
-                EventData.of("Action", "classTab").append("ClassId", c.getId()), false);
-        }
     }
 
     private static String capitalize(@Nonnull String s) {
