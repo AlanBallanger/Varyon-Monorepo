@@ -1,0 +1,17 @@
+Button {
+  Anchor: (Left: 0, Right: 0, Height: 36);
+  Style: (
+    Default: (Background: #000000(0.0)),
+    Hovered: (Background: #FFFFFF(0.06)),
+    Pressed: (Background: #FFFFFF(0.10))
+  );
+  LayoutMode: Left;
+
+  ItemIcon #SkillEntryIcon { Anchor: (Width: 28, Height: 28); }
+  Group { Anchor: (Width: 8); }
+  Label #SkillEntryName {
+    FlexWeight: 1;
+    Style: (FontSize: 12, TextColor: #F2E8D8, VerticalAlignment: Center);
+    Text: "";
+  }
+}

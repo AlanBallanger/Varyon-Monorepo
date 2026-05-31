@@ -218,19 +218,54 @@ Group {
     Padding: (Left: 8, Top: 4, Right: 8);
 
     Group {
-      Anchor: (Left: 0, Top: 0, Width: 400, Height: 44);
+      Anchor: (Left: 0, Top: 0, Width: 500, Height: 44);
       LayoutMode: Full;
 
-      Label {
+      Label #ClassTreeMainTitle {
         Anchor: (Left: 0, Top: 0, Right: 0, Height: 22);
         Style: @SectionTitleStyle;
         Text: "Arbre de talents de classe";
       }
 
-      Label #ClassTreePointsValue {
-        Anchor: (Left: 0, Top: 24, Right: 0, Height: 18);
-        Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
-        Text: "Points restants : 0";
+    }
+
+    Group {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      LayoutMode: Middle;
+
+      Group {
+        Anchor: (Width: 240, Height: 30);
+        LayoutMode: Left;
+
+        Button #ClassTreeTabTalentsButton {
+          Anchor: (Width: 116, Height: 30);
+          Style: @TabButtonStyle;
+          LayoutMode: Left;
+          Group #ClassTreeTabTalentsUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: true;
+          }
+          Group { FlexWeight: 1; }
+          Label { Style: @TabLabelStyle; Text: "Talents"; }
+          Group { FlexWeight: 1; }
+        }
+
+        Group { Anchor: (Width: 8); }
+
+        Button #ClassTreeTabSkillsButton {
+          Anchor: (Width: 116, Height: 30);
+          Style: @TabButtonStyle;
+          LayoutMode: Left;
+          Group #ClassTreeTabSkillsUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+          Group { FlexWeight: 1; }
+          Label { Style: @TabLabelStyle; Text: "Compétences"; }
+          Group { FlexWeight: 1; }
+        }
       }
     }
 
@@ -251,10 +286,11 @@ Group {
     }
   }
 
-  Group {
+  Group #ClassTreeTalentsPanel {
     FlexWeight: 1;
-    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+    Anchor: (Left: 0, Right: 0);
     LayoutMode: Full;
+    Visible: true;
 
   Group #ClassTreeCanvas {
     Anchor: (Left: 0, Top: 0, Bottom: 0, Right: 298);
@@ -1539,5 +1575,261 @@ Group {
         }
     }
   }
+  }
+
+  Group #ClassTreeSkillsPanel {
+    FlexWeight: 1;
+    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+    LayoutMode: Full;
+    Visible: false;
+
+    Group {
+      Anchor: (Left: 0, Top: 0, Bottom: 0, Right: 436);
+      LayoutMode: Top;
+      Padding: (Full: 16);
+
+      Group {
+        Anchor: (Left: 0, Right: 0);
+        LayoutMode: Top;
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Height: 120);
+          LayoutMode: Left;
+
+          Group { Anchor: (Width: 90); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+            Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: @InkMuted, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 1"; }
+            Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: @InkFaint, HorizontalAlignment: Center); Text: "E"; }
+            Group { Anchor: (Left: 0, Right: 0, Height: 64); LayoutMode: Middle;
+              Button #SkillSlotE { Anchor: (Width: 58, Height: 58); Style: @PlusButtonStyle; LayoutMode: Full;
+                Group #SkillSlotEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                ItemIcon #SkillSlotEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+              }
+            }
+            Label #SkillSlotEName { Anchor: (Left: 0, Right: 0, Height: 16); Style: (FontSize: 10, TextColor: @InkStrong, HorizontalAlignment: Center); Text: ""; }
+          }
+          Group { Anchor: (Width: 8); }
+          Group { Anchor: (Width: 90); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+            Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: @InkMuted, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 2"; }
+            Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: @InkFaint, HorizontalAlignment: Center); Text: "R"; }
+            Group { Anchor: (Left: 0, Right: 0, Height: 64); LayoutMode: Middle;
+              Button #SkillSlotR { Anchor: (Width: 58, Height: 58); Style: @PlusButtonStyle; LayoutMode: Full;
+                Group #SkillSlotRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                ItemIcon #SkillSlotRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+              }
+            }
+            Label #SkillSlotRName { Anchor: (Left: 0, Right: 0, Height: 16); Style: (FontSize: 10, TextColor: @InkStrong, HorizontalAlignment: Center); Text: ""; }
+          }
+          Group { Anchor: (Width: 8); }
+          Group { Anchor: (Width: 90); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+            Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: @InkMuted, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 6"; }
+            Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: @InkFaint, HorizontalAlignment: Center); Text: "A"; }
+            Group { Anchor: (Left: 0, Right: 0, Height: 64); LayoutMode: Middle;
+              Button #SkillSlotA { Anchor: (Width: 58, Height: 58); Style: @PlusButtonStyle; LayoutMode: Full;
+                Group #SkillSlotABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                ItemIcon #SkillSlotAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+              }
+            }
+            Label #SkillSlotAName { Anchor: (Left: 0, Right: 0, Height: 16); Style: (FontSize: 10, TextColor: @InkStrong, HorizontalAlignment: Center); Text: ""; }
+          }
+        }
+
+        Group { Anchor: (Height: 8); }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Height: 120);
+          LayoutMode: Left;
+
+          Group { Anchor: (Width: 90); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+            Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: @InkMuted, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 3"; }
+            Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: @InkFaint, HorizontalAlignment: Center); Text: "Crouch+A"; }
+            Group { Anchor: (Left: 0, Right: 0, Height: 64); LayoutMode: Middle;
+              Button #SkillSlotCrouchA { Anchor: (Width: 58, Height: 58); Style: @PlusButtonStyle; LayoutMode: Full;
+                Group #SkillSlotCrouchABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                ItemIcon #SkillSlotCrouchAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+              }
+            }
+            Label #SkillSlotCrouchAName { Anchor: (Left: 0, Right: 0, Height: 16); Style: (FontSize: 10, TextColor: @InkStrong, HorizontalAlignment: Center); Text: ""; }
+          }
+          Group { Anchor: (Width: 8); }
+          Group { Anchor: (Width: 90); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+            Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: @InkMuted, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 4"; }
+            Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: @InkFaint, HorizontalAlignment: Center); Text: "Crouch+E"; }
+            Group { Anchor: (Left: 0, Right: 0, Height: 64); LayoutMode: Middle;
+              Button #SkillSlotCrouchE { Anchor: (Width: 58, Height: 58); Style: @PlusButtonStyle; LayoutMode: Full;
+                Group #SkillSlotCrouchEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                ItemIcon #SkillSlotCrouchEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+              }
+            }
+            Label #SkillSlotCrouchEName { Anchor: (Left: 0, Right: 0, Height: 16); Style: (FontSize: 10, TextColor: @InkStrong, HorizontalAlignment: Center); Text: ""; }
+          }
+          Group { Anchor: (Width: 8); }
+          Group { Anchor: (Width: 90); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+            Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: @InkMuted, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 5"; }
+            Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: @InkFaint, HorizontalAlignment: Center); Text: "Crouch+R"; }
+            Group { Anchor: (Left: 0, Right: 0, Height: 64); LayoutMode: Middle;
+              Button #SkillSlotCrouchR { Anchor: (Width: 58, Height: 58); Style: @PlusButtonStyle; LayoutMode: Full;
+                Group #SkillSlotCrouchRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                ItemIcon #SkillSlotCrouchRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+              }
+            }
+            Label #SkillSlotCrouchRName { Anchor: (Left: 0, Right: 0, Height: 16); Style: (FontSize: 10, TextColor: @InkStrong, HorizontalAlignment: Center); Text: ""; }
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Button #SkillSlotsResetButton {
+          Anchor: (Width: 140, Height: 28);
+          Style: @PlusButtonStyle;
+          LayoutMode: Left;
+          Group { FlexWeight: 1; }
+          Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser"; }
+          Group { FlexWeight: 1; }
+        }
+      }
+
+      Group { Anchor: (Height: 12); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0);
+        LayoutMode: Top;
+        Padding: (Full: 12);
+        Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Height: 20);
+          LayoutMode: Left;
+          Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Info.png", Border: 0); }
+          Group { Anchor: (Width: 8); }
+          Label {
+            Anchor: (Height: 20);
+            Style: (FontSize: 13, TextColor: #C8A96E, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+            Text: "Assignation des compétences";
+          }
+        }
+
+        Group { Anchor: (Height: 10); }
+
+        Label {
+          Anchor: (Left: 0, Right: 0, Height: 48);
+          Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Start, VerticalAlignment: Center, Wrap: true);
+          Text: "Assignez vos compétences débloquées à la touche de votre choix. Vous disposez de 2 touches non attribuées (E et R) + A qui exécute déjà l'attaque spéciale, ainsi que leurs variantes en vous accroupissant + touche.";
+        }
+      }
+    }
+
+    Group {
+      Anchor: (Right: 0, Top: 0, Bottom: 0, Width: 420);
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 12);
+
+      Label {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        Style: @SectionTitleStyle;
+        Text: "Compétences disponibles";
+      }
+
+      Group { Anchor: (Height: 10); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 30);
+        LayoutMode: Left;
+
+        Button #SkillFilterAll {
+          Anchor: (Width: 70, Height: 30);
+          Style: @TabButtonStyle;
+          LayoutMode: Left;
+          Group #SkillFilterAllUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: true;
+          }
+          Group { FlexWeight: 1; }
+          Label { Style: @TabLabelStyle; Text: "Toutes"; }
+          Group { FlexWeight: 1; }
+        }
+        Group { Anchor: (Width: 4); }
+        Button #SkillFilterAttaque {
+          Anchor: (Width: 76, Height: 30);
+          Style: @TabButtonStyle;
+          LayoutMode: Left;
+          Group #SkillFilterAttaqueUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+          Group { FlexWeight: 1; }
+          Label { Style: @TabLabelStyle; Text: "Attaque"; }
+          Group { FlexWeight: 1; }
+        }
+        Group { Anchor: (Width: 4); }
+        Button #SkillFilterDefense {
+          Anchor: (Width: 76, Height: 30);
+          Style: @TabButtonStyle;
+          LayoutMode: Left;
+          Group #SkillFilterDefenseUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+          Group { FlexWeight: 1; }
+          Label { Style: @TabLabelStyle; Text: "Défense"; }
+          Group { FlexWeight: 1; }
+        }
+        Group { Anchor: (Width: 4); }
+        Button #SkillFilterSoutien {
+          Anchor: (Width: 76, Height: 30);
+          Style: @TabButtonStyle;
+          LayoutMode: Left;
+          Group #SkillFilterSoutienUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+          Group { FlexWeight: 1; }
+          Label { Style: @TabLabelStyle; Text: "Soutien"; }
+          Group { FlexWeight: 1; }
+        }
+        Group { Anchor: (Width: 4); }
+        Button #SkillFilterMobilite {
+          Anchor: (Width: 80, Height: 30);
+          Style: @TabButtonStyle;
+          LayoutMode: Left;
+          Group #SkillFilterMobiliteUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+          Group { FlexWeight: 1; }
+          Label { Style: @TabLabelStyle; Text: "Mobilité"; }
+          Group { FlexWeight: 1; }
+        }
+      }
+
+      Group { Anchor: (Height: 10); }
+
+      Group #SkillPickerPanel {
+        Anchor: (Left: 0, Right: 0);
+        LayoutMode: Top;
+        Visible: false;
+
+        Label #SkillPickerSlotLabel {
+          Anchor: (Left: 0, Right: 0, Height: 16);
+          Style: (...@MetaStyle, FontSize: 12, TextColor: @InkMuted, RenderBold: true);
+          Text: "Sélectionnez pour :";
+        }
+        Group { Anchor: (Height: 6); }
+        Group #SkillPickerList {
+          Anchor: (Left: 0, Right: 0);
+          LayoutMode: Top;
+        }
+      }
+    }
   }
 }

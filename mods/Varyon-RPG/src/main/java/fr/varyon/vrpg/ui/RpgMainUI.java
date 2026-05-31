@@ -563,6 +563,10 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
 
     private final PlayerRef playerRef;
     private String activeTab = "character";
+    private String classTreeSubTab = "talents";
+    private String selectedSkillSlot = null;
+    private String skillFilter = "all";
+    private final java.util.Map<String, String> skillSlotAssignments = new java.util.HashMap<>();
     private static final String TAB_CLASSES = "classes";
     private Profession classementFilter = Profession.MINEUR;
     private boolean classementAsc = false;
@@ -933,8 +937,33 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         PlayerClass activeClass = acc != null ? acc.getActiveClass() : null;
         String className = activeClass != null ? activeClass.getDisplayName() : "Classe";
 
-        uiBuilder.set("#ClassTreePointsValue.TextSpans",
-            Message.raw("Talents de " + className));
+        boolean isTalentsSubTab = "talents".equals(classTreeSubTab);
+        String mainTitle = isTalentsSubTab
+            ? "Arbre de talents de " + className
+            : "Compétences de " + className;
+        uiBuilder.set("#ClassTreeMainTitle.TextSpans", Message.raw(mainTitle));
+
+        uiBuilder.set("#ClassTreeTalentsPanel.Visible", isTalentsSubTab);
+        uiBuilder.set("#ClassTreeSkillsPanel.Visible", !isTalentsSubTab);
+        uiBuilder.set("#ClassTreeTabTalentsUnderline.Visible", isTalentsSubTab);
+        uiBuilder.set("#ClassTreeTabSkillsUnderline.Visible", !isTalentsSubTab);
+
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#SkillSlotsResetButton",
+            EventData.of("Action", "skillSlotsReset"), false);
+
+        String[] filters = {"all", "attaque", "defense", "soutien", "mobilite"};
+        String[] filterIds = {"All", "Attaque", "Defense", "Soutien", "Mobilite"};
+        for (int fi = 0; fi < filters.length; fi++) {
+            boolean active = filters[fi].equals(skillFilter);
+            uiBuilder.set("#SkillFilter" + filterIds[fi] + "Underline.Visible", active);
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#SkillFilter" + filterIds[fi],
+                EventData.of("Action", "skillFilter").append("Filter", filters[fi]), false);
+        }
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ClassTreeTabTalentsButton",
+            EventData.of("Action", "classtreeSubTab").append("Sub", "talents"), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ClassTreeTabSkillsButton",
+            EventData.of("Action", "classtreeSubTab").append("Sub", "skills"), false);
 
         eventBuilder.addEventBinding(
             CustomUIEventBindingType.Activating,
@@ -948,8 +977,11 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
 
         int[][] lt = BASE_TREE_SLOT_LT;
         int minX = Integer.MAX_VALUE;
-        for (int[] row : lt) if (row[0] < minX) minX = row[0];
-        int xOffset = 58 - minX;
+        int maxX = Integer.MIN_VALUE;
+        for (int[] row : lt) { if (row[0] < minX) minX = row[0]; if (row[0] > maxX) maxX = row[0]; }
+        int treeWidth = maxX - minX + 80;
+        int canvasWidth = 872;
+        int xOffset = (canvasWidth - treeWidth) / 2 - minX - 80;
         int[][] shifted = new int[lt.length][2];
         for (int i = 0; i < lt.length; i++) {
             shifted[i][0] = lt[i][0] + xOffset;
@@ -1000,6 +1032,53 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.set("#ClassTreeCurrentRankValue.TextSpans", Message.raw("0/" + first.maxRank()));
         uiBuilder.set("#ClassTreeAttribuerButton.Visible", false);
         uiBuilder.set("#ClassTreeResetButton.Visible", false);
+
+        String[] slotIds = {"E", "R", "CrouchA", "CrouchE", "CrouchR", "A"};
+        for (String slotId : slotIds) {
+            String assigned = skillSlotAssignments.get(slotId);
+            if (assigned != null) {
+                for (ClassTalentTree.Node n : talentNodes) {
+                    if (n.itemId().equals(assigned)) {
+                        uiBuilder.set("#SkillSlot" + slotId + "Icon.ItemId", n.itemId());
+                        uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", true);
+                        uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", false);
+                        uiBuilder.set("#SkillSlot" + slotId + "Name.TextSpans", Message.raw(n.name()));
+                        break;
+                    }
+                }
+            } else {
+                uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
+                uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", true);
+                uiBuilder.set("#SkillSlot" + slotId + "Name.TextSpans", Message.raw(""));
+            }
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#SkillSlot" + slotId,
+                EventData.of("Action", "skillSlotClick").append("Slot", slotId), false);
+        }
+
+        boolean pickerOpen = selectedSkillSlot != null;
+        uiBuilder.set("#SkillPickerPanel.Visible", pickerOpen);
+        if (pickerOpen) {
+            String[] slotLabels = {"Sort 1 (E)", "Sort 2 (R)", "Sort 3 (Crouch+A)", "Sort 4 (Crouch+E)", "Sort 5 (Crouch+R)", "Sort 6 (A)"};
+            String[] slotIdsLabels = {"E", "R", "CrouchA", "CrouchE", "CrouchR", "A"};
+            String slotLabel = selectedSkillSlot;
+            for (int i = 0; i < slotIdsLabels.length; i++) {
+                if (slotIdsLabels[i].equals(selectedSkillSlot)) { slotLabel = slotLabels[i]; break; }
+            }
+            uiBuilder.set("#SkillPickerSlotLabel.TextSpans", Message.raw("Assigner à : " + slotLabel));
+            uiBuilder.clear("#SkillPickerList");
+            for (int i = 0; i < talentNodes.length; i++) {
+                ClassTalentTree.Node n = talentNodes[i];
+                uiBuilder.append("#SkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
+                uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryIcon.ItemId", n.itemId());
+                uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
+                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                    "#SkillPickerList[" + i + "]",
+                    EventData.of("Action", "skillSlotAssign")
+                        .append("Slot", selectedSkillSlot)
+                        .append("Node", n.itemId()), false);
+            }
+        }
     }
 
     private static String capitalize(@Nonnull String s) {
@@ -2142,6 +2221,28 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             selectedNode = 0;
             exitEditMode();
             rebuild();
+        } else if ("classtreeSubTab".equals(data.action) && data.sub != null) {
+            LOG.info("[RPG-SubTab] classtreeSubTab received, sub=" + data.sub);
+            classTreeSubTab = data.sub;
+            selectedSkillSlot = null;
+            rebuild();
+        } else if ("skillSlotClick".equals(data.action) && data.slot != null) {
+            selectedSkillSlot = data.slot.equals(selectedSkillSlot) ? null : data.slot;
+            rebuild();
+        } else if ("skillFilter".equals(data.action) && data.filter != null) {
+            skillFilter = data.filter;
+            rebuild();
+        } else if ("skillSlotsReset".equals(data.action)) {
+            skillSlotAssignments.clear();
+            selectedSkillSlot = null;
+            rebuild();
+        } else if ("skillSlotAssign".equals(data.action) && data.slot != null && data.node != null) {
+            skillSlotAssignments.put(data.slot, data.node);
+            selectedSkillSlot = null;
+            rebuild();
+        } else if ("skillSlotClear".equals(data.action) && data.slot != null) {
+            skillSlotAssignments.remove(data.slot);
+            rebuild();
         } else if ("talentSlotPick".equals(data.action) && data.talentSlot != null) {
             talentTreeSlotIndex = "1".equals(data.talentSlot) ? 1 : 0;
             selectedNode = 0;
@@ -2404,6 +2505,15 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 .addField(new KeyedCodec<>("SpecId", Codec.STRING),
                     (d, v) -> d.specId = v,
                     d -> d.specId)
+                .addField(new KeyedCodec<>("Sub", Codec.STRING),
+                    (d, v) -> d.sub = v,
+                    d -> d.sub)
+                .addField(new KeyedCodec<>("Slot", Codec.STRING),
+                    (d, v) -> d.slot = v,
+                    d -> d.slot)
+                .addField(new KeyedCodec<>("Filter", Codec.STRING),
+                    (d, v) -> d.filter = v,
+                    d -> d.filter)
                 .build();
 
         private String action;
@@ -2417,6 +2527,9 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         private String index;
         private String classId;
         private String specId;
+        private String sub;
+        private String slot;
+        private String filter;
 
         public Data() {}
     }
