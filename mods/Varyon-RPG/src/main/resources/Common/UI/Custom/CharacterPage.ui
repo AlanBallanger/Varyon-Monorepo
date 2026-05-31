@@ -331,6 +331,26 @@ Group {
 
         Group { Anchor: (Width: 10); }
 
+        Button #TabParametresButton {
+          Anchor: (Width: 144, Height: 43);
+          Style: @TabButtonStyle;
+          LayoutMode: Left;
+
+          Group #TabParametresUnderline {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
+            Visible: false;
+          }
+
+          Group { FlexWeight: 1; }
+          Group { Anchor: (Width: 26, Height: 26); Background: PatchStyle(TexturePath: "Elements/Settings.png", Border: 0); }
+          Group { Anchor: (Width: 6); }
+          Label { Style: @TabLabelStyle; Text: "Paramètres"; }
+          Group { FlexWeight: 1; }
+        }
+
+        Group { Anchor: (Width: 10); }
+
         Button #TabAdminButton {
           Anchor: (Width: 144, Height: 43);
           Style: @TabButtonStyle;
@@ -494,6 +514,19 @@ Group {
             Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
             LayoutMode: Full;
           }
+        }
+      }
+
+      Group #ParametresTabContent {
+        LayoutMode: Top;
+        FlexWeight: 1;
+        Visible: false;
+        Anchor: (Top: 4);
+
+        Group {
+          FlexWeight: 1;
+          LayoutMode: Full;
+          Padding: (Full: 12);
         }
       }
 

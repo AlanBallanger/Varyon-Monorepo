@@ -619,12 +619,14 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.set("#ClassProfilesTabContent.Visible", "classprofiles".equals(activeTab));
         uiBuilder.set("#ArtisansTabContent.Visible", "artisans".equals(activeTab));
         uiBuilder.set("#ClassementTabContent.Visible", "classement".equals(activeTab));
+        uiBuilder.set("#ParametresTabContent.Visible", "parametres".equals(activeTab));
         uiBuilder.set("#AdminTabContent.Visible", "admin".equals(activeTab));
 
         uiBuilder.set("#TabClassesUnderline.Visible", TAB_CLASSES.equals(activeTab));
         uiBuilder.set("#TabCharacterUnderline.Visible", "character".equals(activeTab));
         uiBuilder.set("#TabArtisansUnderline.Visible", "artisans".equals(activeTab));
         uiBuilder.set("#TabClassementUnderline.Visible", "classement".equals(activeTab));
+        uiBuilder.set("#TabParametresUnderline.Visible", "parametres".equals(activeTab));
         uiBuilder.set("#TabAdminUnderline.Visible", "admin".equals(activeTab));
         uiBuilder.set("#TabAdminButton.Visible", isAdmin);
 
@@ -636,6 +638,8 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             EventData.of("Action", "tab").append("Tab", "artisans"), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabClassementButton",
             EventData.of("Action", "tab").append("Tab", "classement"), false);
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabParametresButton",
+            EventData.of("Action", "tab").append("Tab", "parametres"), false);
         if (isAdmin) {
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#TabAdminButton",
                 EventData.of("Action", "tab").append("Tab", "admin"), false);
