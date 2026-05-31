@@ -29,85 +29,106 @@ Group {
       Padding: (Full: 10);
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
 
-      Group {
-        Anchor: (Left: 0, Top: 0, Width: 60, Height: 60);
-        LayoutMode: Full;
-        Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 6, Color: #31C677FF);
-        Padding: (Full: 3);
+      Group #ClassesNoClassCard {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Visible: false;
 
-        Group {
-          LayoutMode: Middle;
-          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-          Background: #141820(0.82);
-
-          ItemIcon #ClassesActiveClassIcon { Anchor: (Width: 48, Height: 48); }
+        Button #ClassesSelectClassButton {
+          Anchor: (Width: 210, Height: 36);
+          Style: $P.@PlusButtonStyle;
+          LayoutMode: Left;
+          Group { FlexWeight: 1; }
+          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner une classe"; }
+          Group { FlexWeight: 1; }
         }
       }
 
-      Label #ClassesActiveClassName {
-        Anchor: (Left: 70, Right: 0, Top: 0, Height: 36);
-        Style: (FontSize: 22, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
-        Text: "Guerrier";
-      }
-
-      Group {
-        Anchor: (Left: 70, Right: 0, Top: 36, Height: 22);
-        LayoutMode: Left;
+      Group #ClassesHasClassCard {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Full;
+        Visible: true;
 
         Group {
-          Background: #25793C(1.0);
-          Padding: (Horizontal: 6, Vertical: 2);
-          Label #ClassesActiveClassLevel {
-            Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, VerticalAlignment: Center);
-            Text: "NIVEAU 1";
+          Anchor: (Left: 0, Top: 0, Width: 60, Height: 60);
+          LayoutMode: Full;
+          Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 6, Color: #31C677FF);
+          Padding: (Full: 3);
+
+          Group {
+            LayoutMode: Middle;
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Background: #141820(0.82);
+
+            ItemIcon #ClassesActiveClassIcon { Anchor: (Width: 48, Height: 48); }
           }
         }
 
-        Group { Anchor: (Width: 8); }
-
-        Label #ClassesActiveClassXp {
-          Anchor: (Height: 22);
-          Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Start);
-          Text: "0 / 35 XP";
+        Label #ClassesActiveClassName {
+          Anchor: (Left: 70, Right: 0, Top: 0, Height: 36);
+          Style: (FontSize: 22, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+          Text: "Guerrier";
         }
-      }
 
-      Group {
-        Anchor: (Left: 0, Right: 0, Top: 72, Bottom: 32);
-        Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
-        ProgressBar #ClassesActiveClassXpBar {
-          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-          Value: 0.0;
-          BarTexturePath: "Elements/Gauge_Fill.png";
-        }
-      }
-
-      Group {
-        Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 28);
-        LayoutMode: Left;
-
-        Button #ClassesChangeProfileButton {
-          FlexWeight: 1;
-          Style: $P.@PlusButtonStyle;
+        Group {
+          Anchor: (Left: 70, Right: 0, Top: 36, Height: 22);
           LayoutMode: Left;
-          Group { FlexWeight: 1; }
-          Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Refresh.png", Border: 0); }
-          Group { Anchor: (Width: 5); }
-          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Changer de profil"; }
-          Group { FlexWeight: 1; }
+
+          Group {
+            Background: #25793C(1.0);
+            Padding: (Horizontal: 6, Vertical: 2);
+            Label #ClassesActiveClassLevel {
+              Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, VerticalAlignment: Center);
+              Text: "NIVEAU 1";
+            }
+          }
+
+          Group { Anchor: (Width: 8); }
+
+          Label #ClassesActiveClassXp {
+            Anchor: (Height: 22);
+            Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center, HorizontalAlignment: Start);
+            Text: "0 / 35 XP";
+          }
         }
 
-        Group { Anchor: (Width: 4); }
+        Group {
+          Anchor: (Left: 0, Right: 0, Top: 72, Bottom: 32);
+          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+          ProgressBar #ClassesActiveClassXpBar {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Value: 0.0;
+            BarTexturePath: "Elements/Gauge_Fill.png";
+          }
+        }
 
-        Button #ClassesViewTalentsButton {
-          FlexWeight: 1;
-          Style: $P.@PlusButtonStyle;
+        Group {
+          Anchor: (Left: 0, Right: 0, Bottom: 0, Height: 28);
           LayoutMode: Left;
-          Group { FlexWeight: 1; }
-          Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Talent.png", Border: 0); }
-          Group { Anchor: (Width: 5); }
-          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Voir talents"; }
-          Group { FlexWeight: 1; }
+
+          Button #ClassesChangeProfileButton {
+            FlexWeight: 1;
+            Style: $P.@PlusButtonStyle;
+            LayoutMode: Left;
+            Group { FlexWeight: 1; }
+            Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Refresh.png", Border: 0); }
+            Group { Anchor: (Width: 5); }
+            Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Changer de profil"; }
+            Group { FlexWeight: 1; }
+          }
+
+          Group { Anchor: (Width: 4); }
+
+          Button #ClassesViewTalentsButton {
+            FlexWeight: 1;
+            Style: $P.@PlusButtonStyle;
+            LayoutMode: Left;
+            Group { FlexWeight: 1; }
+            Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Talent.png", Border: 0); }
+            Group { Anchor: (Width: 5); }
+            Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Voir talents"; }
+            Group { FlexWeight: 1; }
+          }
         }
       }
     }
@@ -147,7 +168,7 @@ Group {
             LayoutMode: Middle;
             Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
             Background: #141820(0.82);
-            Group #ClassesActiveSpecIcon { Anchor: (Width: 40, Height: 40); }
+            ItemIcon #ClassesActiveSpecIcon { Anchor: (Width: 40, Height: 40); }
           }
         }
 
@@ -393,9 +414,9 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 32);
+          Anchor: (Left: 0, Right: 0, Height: 64);
           LayoutMode: Middle;
-          Group #ClassesSpec0Icon { Anchor: (Width: 28, Height: 28); }
+          ItemIcon #ClassesSpec0Icon { Anchor: (Width: 56, Height: 56); }
         }
 
         Group { Anchor: (Height: 4); }
@@ -492,6 +513,15 @@ Group {
             BarTexturePath: "Elements/Gauge_Fill.png";
           }
         }
+        Group { Anchor: (Height: 6); }
+        Button #ClassesSpec0SelectButton {
+          Anchor: (Left: 0, Right: 0, Height: 26);
+          Style: $P.@PlusButtonStyle;
+          LayoutMode: Left;
+          Group { FlexWeight: 1; }
+          Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
+          Group { FlexWeight: 1; }
+        }
       }
 
       Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
@@ -512,9 +542,9 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 32);
+          Anchor: (Left: 0, Right: 0, Height: 64);
           LayoutMode: Middle;
-          Group #ClassesSpec1Icon { Anchor: (Width: 28, Height: 28); }
+          ItemIcon #ClassesSpec1Icon { Anchor: (Width: 56, Height: 56); }
         }
 
         Group { Anchor: (Height: 4); }
@@ -611,6 +641,15 @@ Group {
             BarTexturePath: "Elements/Gauge_Fill.png";
           }
         }
+        Group { Anchor: (Height: 6); }
+        Button #ClassesSpec1SelectButton {
+          Anchor: (Left: 0, Right: 0, Height: 26);
+          Style: $P.@PlusButtonStyle;
+          LayoutMode: Left;
+          Group { FlexWeight: 1; }
+          Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
+          Group { FlexWeight: 1; }
+        }
       }
 
       Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
@@ -631,9 +670,9 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 32);
+          Anchor: (Left: 0, Right: 0, Height: 64);
           LayoutMode: Middle;
-          Group #ClassesSpec2Icon { Anchor: (Width: 28, Height: 28); }
+          ItemIcon #ClassesSpec2Icon { Anchor: (Width: 56, Height: 56); }
         }
 
         Group { Anchor: (Height: 4); }
@@ -729,6 +768,15 @@ Group {
             Value: 0.0;
             BarTexturePath: "Elements/Gauge_Fill.png";
           }
+        }
+        Group { Anchor: (Height: 6); }
+        Button #ClassesSpec2SelectButton {
+          Anchor: (Left: 0, Right: 0, Height: 26);
+          Style: $P.@PlusButtonStyle;
+          LayoutMode: Left;
+          Group { FlexWeight: 1; }
+          Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
+          Group { FlexWeight: 1; }
         }
       }
     }

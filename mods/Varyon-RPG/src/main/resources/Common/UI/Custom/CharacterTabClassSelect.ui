@@ -1,0 +1,288 @@
+$P = "CharacterPage.ui";
+
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+  LayoutMode: Top;
+
+  Group {
+    Anchor: (Left: 0, Right: 0, Height: 36);
+    LayoutMode: Left;
+
+    Button #ClassSelectBackButton {
+      Anchor: (Width: 120, Top: 0, Bottom: 0);
+      Style: $P.@PlusButtonStyle;
+      LayoutMode: Left;
+      Group { FlexWeight: 1; }
+      Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/Back.png", Border: 0); }
+      Group { Anchor: (Width: 6); }
+      Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Retour"; }
+      Group { FlexWeight: 1; }
+    }
+
+    Group { FlexWeight: 1; }
+
+    Label {
+      Anchor: (Height: 36);
+      Style: (FontSize: 22, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Center);
+      Text: "Choisir une classe";
+    }
+
+    Group { FlexWeight: 1; }
+  }
+
+  Group { Anchor: (Height: 12); }
+  Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+  Group { Anchor: (Height: 12); }
+
+  Group {
+    FlexWeight: 1;
+    Anchor: (Left: 0, Right: 0);
+    LayoutMode: Left;
+
+    Group #ClassSelectCard0 {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 12);
+
+      Group { Anchor: (Left: 0, Right: 0, Height: 56); LayoutMode: Middle;
+        ItemIcon #ClassSelectCard0Icon { Anchor: (Width: 48, Height: 48); }
+      }
+      Group { Anchor: (Height: 8); }
+      Label #ClassSelectCard0Name {
+        Anchor: (Left: 0, Right: 0, Height: 22);
+        Style: (FontSize: 17, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "";
+      }
+      Group { Anchor: (Height: 6); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+      Group { Anchor: (Height: 6); }
+      Label #ClassSelectCard0Desc {
+        Anchor: (Left: 0, Right: 0, Height: 40);
+        Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "";
+      }
+      Group { Anchor: (Height: 8); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+      Group { Anchor: (Height: 6); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard0Spec0Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard0Spec0Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard0Spec0Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { Anchor: (Height: 3); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard0Spec1Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard0Spec1Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard0Spec1Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { Anchor: (Height: 3); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard0Spec2Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard0Spec2Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard0Spec2Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { FlexWeight: 1; }
+      Button #ClassSelectCard0Button {
+        Anchor: (Left: 0, Right: 0, Height: 30);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+
+    Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
+
+    Group #ClassSelectCard1 {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 12);
+
+      Group { Anchor: (Left: 0, Right: 0, Height: 56); LayoutMode: Middle;
+        ItemIcon #ClassSelectCard1Icon { Anchor: (Width: 48, Height: 48); }
+      }
+      Group { Anchor: (Height: 8); }
+      Label #ClassSelectCard1Name {
+        Anchor: (Left: 0, Right: 0, Height: 22);
+        Style: (FontSize: 17, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "";
+      }
+      Group { Anchor: (Height: 6); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+      Group { Anchor: (Height: 6); }
+      Label #ClassSelectCard1Desc {
+        Anchor: (Left: 0, Right: 0, Height: 40);
+        Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "";
+      }
+      Group { Anchor: (Height: 8); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+      Group { Anchor: (Height: 6); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard1Spec0Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard1Spec0Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard1Spec0Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { Anchor: (Height: 3); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard1Spec1Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard1Spec1Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard1Spec1Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { Anchor: (Height: 3); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard1Spec2Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard1Spec2Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard1Spec2Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { FlexWeight: 1; }
+      Button #ClassSelectCard1Button {
+        Anchor: (Left: 0, Right: 0, Height: 30);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+
+    Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
+
+    Group #ClassSelectCard2 {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 12);
+
+      Group { Anchor: (Left: 0, Right: 0, Height: 56); LayoutMode: Middle;
+        ItemIcon #ClassSelectCard2Icon { Anchor: (Width: 48, Height: 48); }
+      }
+      Group { Anchor: (Height: 8); }
+      Label #ClassSelectCard2Name {
+        Anchor: (Left: 0, Right: 0, Height: 22);
+        Style: (FontSize: 17, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "";
+      }
+      Group { Anchor: (Height: 6); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+      Group { Anchor: (Height: 6); }
+      Label #ClassSelectCard2Desc {
+        Anchor: (Left: 0, Right: 0, Height: 40);
+        Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "";
+      }
+      Group { Anchor: (Height: 8); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+      Group { Anchor: (Height: 6); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard2Spec0Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard2Spec0Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard2Spec0Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { Anchor: (Height: 3); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard2Spec1Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard2Spec1Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard2Spec1Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { Anchor: (Height: 3); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard2Spec2Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard2Spec2Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard2Spec2Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { FlexWeight: 1; }
+      Button #ClassSelectCard2Button {
+        Anchor: (Left: 0, Right: 0, Height: 30);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+
+    Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
+
+    Group #ClassSelectCard3 {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+      Padding: (Full: 12);
+
+      Group { Anchor: (Left: 0, Right: 0, Height: 56); LayoutMode: Middle;
+        ItemIcon #ClassSelectCard3Icon { Anchor: (Width: 48, Height: 48); }
+      }
+      Group { Anchor: (Height: 8); }
+      Label #ClassSelectCard3Name {
+        Anchor: (Left: 0, Right: 0, Height: 22);
+        Style: (FontSize: 17, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+        Text: "";
+      }
+      Group { Anchor: (Height: 6); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+      Group { Anchor: (Height: 6); }
+      Label #ClassSelectCard3Desc {
+        Anchor: (Left: 0, Right: 0, Height: 40);
+        Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Center);
+        Text: "";
+      }
+      Group { Anchor: (Height: 8); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 1); Background: #E8DCC8(0.16); }
+      Group { Anchor: (Height: 6); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard3Spec0Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard3Spec0Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard3Spec0Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { Anchor: (Height: 3); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard3Spec1Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard3Spec1Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard3Spec1Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { Anchor: (Height: 3); }
+      Group { Anchor: (Left: 0, Right: 0, Height: 18); LayoutMode: Left;
+        ItemIcon #ClassSelectCard3Spec2Icon { Anchor: (Width: 14, Height: 14); }
+        Group { Anchor: (Width: 5); }
+        Label #ClassSelectCard3Spec2Name { Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: ""; }
+        Group { Anchor: (Width: 4); }
+        Label #ClassSelectCard3Spec2Keys { FlexWeight: 1; Style: (FontSize: 10, TextColor: #6BCB7A, VerticalAlignment: Center); Text: ""; }
+      }
+      Group { FlexWeight: 1; }
+      Button #ClassSelectCard3Button {
+        Anchor: (Left: 0, Right: 0, Height: 30);
+        Style: $P.@PlusButtonStyle;
+        LayoutMode: Left;
+        Group { FlexWeight: 1; }
+        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
+        Group { FlexWeight: 1; }
+      }
+    }
+  }
+}

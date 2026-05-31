@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum PlayerClass {
-    GUERRIER("guerrier", "Guerrier", "Weapon_Sword_Mithril"),
-    BARBARE ("barbare",  "Barbare",  "Weapon_Longsword_Mithril"),
-    MAGE    ("mage",     "Mage",     "Weapon_Staff_Mithril"),
-    TIREUR  ("tireur",   "Tireur",   "Weapon_Shortbow_Mithril");
+    GUERRIER("guerrier", "Guerrier", "Weapon_Sword_Nexus"),
+    BARBARE ("barbare",  "Barbare",  "Weapon_Mace_Thorium"),
+    MAGE    ("mage",     "Mage",     "Weapon_Staff_Crystal_Ice"),
+    TIREUR  ("tireur",   "Tireur",   "Weapon_Shortbow_Crude");
 
     private final String id;
     private final String displayName;

@@ -603,6 +603,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.append("#CharacterTabMount", "CharacterTabProfession.ui");
         uiBuilder.append("#SkillsTabMount", "CharacterTabSkills.ui");
         uiBuilder.append("#ClassTalentsTabMount", "CharacterTabClassTalents.ui");
+        uiBuilder.append("#ClassSelectTabMount", "CharacterTabClassSelect.ui");
         uiBuilder.append("#ClassProfilesTabMount", "CharacterTabClassProfiles.ui");
         uiBuilder.append("#ArtisansTabMount", "CharacterTabArtisans.ui");
         uiBuilder.append("#ClassementTabMount", "CharacterTabClassement.ui");
@@ -614,6 +615,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.set("#CharacterTabContent.Visible", "character".equals(activeTab));
         uiBuilder.set("#SkillsTabContent.Visible", "skills".equals(activeTab));
         uiBuilder.set("#ClassTalentsTabContent.Visible", "classtree".equals(activeTab));
+        uiBuilder.set("#ClassSelectTabContent.Visible", "classselect".equals(activeTab));
         uiBuilder.set("#ClassProfilesTabContent.Visible", "classprofiles".equals(activeTab));
         uiBuilder.set("#ArtisansTabContent.Visible", "artisans".equals(activeTab));
         uiBuilder.set("#ClassementTabContent.Visible", "classement".equals(activeTab));
@@ -647,6 +649,8 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             populateSketchSkillTree(uiBuilder, eventBuilder);
         } else if ("classtree".equals(activeTab)) {
             populateClassTalents(uiBuilder, eventBuilder);
+        } else if ("classselect".equals(activeTab)) {
+            populateClassSelect(uiBuilder, eventBuilder);
         } else if ("classprofiles".equals(activeTab)) {
             populateClassProfiles(uiBuilder, eventBuilder);
         } else if ("classement".equals(activeTab)) {
@@ -811,7 +815,21 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         if (acc == null) return;
 
         PlayerClass activeClass = acc.getActiveClass();
-        if (activeClass == null) activeClass = PlayerClass.GUERRIER;
+
+        if (activeClass == null) {
+            uiBuilder.set("#ClassesNoClassCard.Visible", true);
+            uiBuilder.set("#ClassesHasClassCard.Visible", false);
+            eventBuilder.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#ClassesSelectClassButton",
+                EventData.of("Action", "tab").append("Tab", "classselect"),
+                false
+            );
+            return;
+        }
+
+        uiBuilder.set("#ClassesNoClassCard.Visible", false);
+        uiBuilder.set("#ClassesHasClassCard.Visible", true);
 
         ClassProgress activeProgress = acc.getProgress(activeClass);
         PlayerSpecialization activeSpec = activeProgress.getActiveSpec();
@@ -831,8 +849,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             uiBuilder.set("#ClassesActiveSpecName.TextSpans", Message.raw(activeSpec.getDisplayName()));
             uiBuilder.set("#ClassesActiveSpecKeywords.TextSpans", Message.raw(activeSpec.getKeywords()));
             uiBuilder.set("#ClassesActiveSpecDesc.TextSpans", Message.raw(activeSpec.getDescription()));
-            uiBuilder.setObject("#ClassesActiveSpecIcon.Background",
-                new PatchStyle().setTexturePath(Value.of(activeSpec.getIconPath())));
+            uiBuilder.set("#ClassesActiveSpecIcon.ItemId", activeSpec.getItemId());
         } else {
             uiBuilder.set("#ClassesActiveSpecName.TextSpans", Message.raw("Aucune specialisation"));
             uiBuilder.set("#ClassesActiveSpecKeywords.TextSpans", Message.raw(""));
@@ -871,23 +888,42 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 boolean isActive = spec == activeSpec;
                 uiBuilder.set("#ClassesSpec" + suffix + "Name.TextSpans", Message.raw(spec.getDisplayName()));
                 uiBuilder.set("#ClassesSpec" + suffix + "Keywords.TextSpans", Message.raw(spec.getKeywords()));
-                uiBuilder.setObject("#ClassesSpec" + suffix + "Icon.Background",
-                    new PatchStyle().setTexturePath(Value.of(spec.getIconPath())));
+                uiBuilder.set("#ClassesSpec" + suffix + "Icon.ItemId", spec.getItemId());
                 uiBuilder.set("#ClassesSpec" + suffix + "ActiveBadge.Visible", isActive);
                 uiBuilder.set("#ClassesSpec" + suffix + "InactiveBadge.Visible", !isActive);
                 uiBuilder.set("#ClassesSpec" + suffix + "Level.TextSpans",
                     Message.raw("NIVEAU " + activeProgress.getLevel()));
 
-                ClassPlayerStats specStats = ClassStatDefinition.compute(activeProgress.getLevel(), spec);
-                uiBuilder.set("#ClassesSpec" + suffix + "StatPv.TextSpans",    Message.raw(String.valueOf(specStats.maxHp())));
-                uiBuilder.set("#ClassesSpec" + suffix + "StatDef.TextSpans",   Message.raw(specStats.armorPct() + "%"));
-                uiBuilder.set("#ClassesSpec" + suffix + "StatEnd.TextSpans",   Message.raw(String.valueOf(specStats.maxStamina())));
-                uiBuilder.set("#ClassesSpec" + suffix + "StatAtk.TextSpans",   Message.raw(String.valueOf(specStats.atk())));
-                uiBuilder.set("#ClassesSpec" + suffix + "StatCrit.TextSpans",  Message.raw(specStats.critChancePct() + "%"));
-                uiBuilder.set("#ClassesSpec" + suffix + "StatDcrit.TextSpans", Message.raw("+" + specStats.critDamagePct() + "%"));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatPv.TextSpans",    specDiffMsg(spec.getHpMult()));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatDef.TextSpans",   specDiffMsg(spec.getArmorMult()));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatEnd.TextSpans",   specDiffMsg(spec.getStaminaMult()));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatAtk.TextSpans",   specDiffMsg(spec.getAtkMult()));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatCrit.TextSpans",  specDiffMsg(spec.getCritChanceMult()));
+                uiBuilder.set("#ClassesSpec" + suffix + "StatDcrit.TextSpans", specDiffMsg(spec.getCritDamageMult()));
+
+                if (!isActive) {
+                    eventBuilder.addEventBinding(
+                        CustomUIEventBindingType.Activating,
+                        "#ClassesSpec" + suffix + "SelectButton",
+                        EventData.of("Action", "selectSpec").append("SpecId", spec.getId()),
+                        false
+                    );
+                } else {
+                    uiBuilder.set("#ClassesSpec" + suffix + "SelectButton.Visible", false);
+                }
             }
         }
+    }
 
+    private static Message specDiffMsg(double mult) {
+        int pct = (int) Math.round((mult - 1.0) * 100);
+        String text = (pct > 0 ? "+" : "") + pct + "%";
+        java.awt.Color color = pct > 0
+            ? new java.awt.Color(0x6B, 0xCB, 0x7A)
+            : pct < 0
+                ? new java.awt.Color(0xFF, 0x66, 0x66)
+                : new java.awt.Color(0xC8, 0xBE, 0xB0);
+        return Message.raw(text).color(color);
     }
 
     private void populateClassTalents(@Nonnull UICommandBuilder uiBuilder,
@@ -1163,6 +1199,46 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             } else {
                 uiBuilder.set("#ClassProfile" + s + "SelectButton.Visible", false);
             }
+        }
+    }
+
+    private void populateClassSelect(@Nonnull UICommandBuilder uiBuilder,
+                                      @Nonnull UIEventBuilder eventBuilder) {
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ClassSelectBackButton",
+            EventData.of("Action", "tab").append("Tab", TAB_CLASSES),
+            false
+        );
+
+        PlayerClass[] classes = PlayerClass.values();
+        for (int i = 0; i < classes.length; i++) {
+            PlayerClass cls = classes[i];
+            String suffix = String.valueOf(i);
+
+            uiBuilder.set("#ClassSelectCard" + suffix + "Name.TextSpans", Message.raw(cls.getDisplayName()));
+            uiBuilder.set("#ClassSelectCard" + suffix + "Icon.ItemId", cls.getItemId());
+            uiBuilder.set("#ClassSelectCard" + suffix + "Desc.TextSpans", Message.raw(cls.getDescription()));
+
+            java.util.List<PlayerSpecialization> specs = cls.getSpecializations();
+            for (int j = 0; j < 3; j++) {
+                String specSuffix = suffix + "Spec" + j;
+                if (j < specs.size()) {
+                    PlayerSpecialization spec = specs.get(j);
+                    uiBuilder.set("#ClassSelectCard" + specSuffix + "Name.TextSpans",
+                        Message.raw(spec.getDisplayName()));
+                    uiBuilder.set("#ClassSelectCard" + specSuffix + "Keys.TextSpans",
+                        Message.raw(spec.getKeywords()));
+                    uiBuilder.set("#ClassSelectCard" + specSuffix + "Icon.ItemId", spec.getItemId());
+                }
+            }
+
+            eventBuilder.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#ClassSelectCard" + suffix + "Button",
+                EventData.of("Action", "selectClass").append("ClassId", cls.getId()),
+                false
+            );
         }
     }
 
@@ -2006,6 +2082,35 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             return;
         }
 
+        if ("selectClass".equals(data.action) && data.classId != null) {
+            PlayerClass c = PlayerClass.fromId(data.classId);
+            ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
+            if (c != null && classManager != null) {
+                classManager.setActiveClass(playerRef.getUuid(), c);
+                classManager.applyStats(playerRef.getUuid(), playerRef);
+            }
+            activeTab = TAB_CLASSES;
+            rebuild();
+            return;
+        }
+
+        if ("selectSpec".equals(data.action) && data.specId != null) {
+            ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManager != null) {
+                ClassAccount acc = classManager.getAccount(playerRef.getUuid());
+                PlayerClass activeClass = acc != null ? acc.getActiveClass() : null;
+                if (activeClass != null) {
+                    PlayerSpecialization spec = PlayerSpecialization.fromId(data.specId);
+                    if (spec != null && spec.getParentClass() == activeClass) {
+                        classManager.setActiveSpec(playerRef.getUuid(), activeClass, spec);
+                        classManager.applyStats(playerRef.getUuid(), playerRef);
+                    }
+                }
+            }
+            rebuild();
+            return;
+        }
+
         if ("switchProfile".equals(data.action) && data.index != null) {
             int idx;
             try { idx = Integer.parseInt(data.index); } catch (NumberFormatException e) { return; }
@@ -2296,6 +2401,9 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 .addField(new KeyedCodec<>("ClassId", Codec.STRING),
                     (d, v) -> d.classId = v,
                     d -> d.classId)
+                .addField(new KeyedCodec<>("SpecId", Codec.STRING),
+                    (d, v) -> d.specId = v,
+                    d -> d.specId)
                 .build();
 
         private String action;
@@ -2308,6 +2416,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         private String delta;
         private String index;
         private String classId;
+        private String specId;
 
         public Data() {}
     }
