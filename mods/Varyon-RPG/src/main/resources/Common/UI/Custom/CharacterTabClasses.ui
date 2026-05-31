@@ -139,11 +139,11 @@ Group {
     Group {
       Anchor: (Left: 0, Right: 0, Height: 24);
       LayoutMode: Left;
-      Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Crown.png", Border: 0); }
+      Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Star.png", Border: 0); }
       Group { Anchor: (Width: 6); }
       Label {
         Style: (FontSize: 21, TextColor: #C8A96E, RenderBold: true, HorizontalAlignment: Start, RenderUppercase: true);
-        Text: "Specialisation";
+        Text: "Spécialisation";
       }
     }
 
@@ -186,13 +186,13 @@ Group {
             Background: #25793C(1.0);
             Padding: (Horizontal: 6, Vertical: 2);
             Visible: false;
-            Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
+            Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Actif"; }
           }
 
           Group #ClassesActiveSpecInactiveBadge {
             Background: #3A3530(1.0);
             Padding: (Horizontal: 6, Vertical: 2);
-            Visible: true;
+            Visible: false;
             Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
           }
         }
@@ -209,44 +209,33 @@ Group {
       Label #ClassesActiveSpecDesc {
         Anchor: (Left: 0, Right: 0, Height: 16);
         Style: (FontSize: 13, TextColor: #C8BEB0, HorizontalAlignment: Start);
-        Text: "Choisissez une specialisation.";
+        Text: "Choisissez une spécialisation.";
       }
 
-      Group { Anchor: (Height: 6); }
-
-      Group {
-        Anchor: (Left: 0, Right: 0, Height: 22);
-        Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
-        ProgressBar #ClassesActiveSpecXpBar {
-          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-          Value: 0.0;
-          BarTexturePath: "Elements/Gauge_Fill.png";
-        }
-      }
     }
 
     Group { Anchor: (Height: 8); }
 
     // --- Statistiques de classe ---
     Group {
+      Anchor: (Left: 0, Right: 0, Height: 24);
+      LayoutMode: Left;
+      Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Stats.png", Border: 0); }
+      Group { Anchor: (Width: 6); }
+      Label {
+        Style: (FontSize: 21, TextColor: #C8A96E, RenderBold: true, HorizontalAlignment: Start, RenderUppercase: true);
+        Text: "Statistiques de classe";
+      }
+    }
+
+    Group { Anchor: (Height: 8); }
+
+    Group {
       FlexWeight: 1;
       Anchor: (Left: 0, Right: 0);
       LayoutMode: Top;
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
       Padding: (Full: 10);
-
-      Group {
-        Anchor: (Left: 0, Right: 0, Height: 20);
-        LayoutMode: Left;
-        Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/health.png", Border: 0); }
-        Group { Anchor: (Width: 6); }
-        Label {
-          Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
-          Text: "Statistiques de classe";
-        }
-      }
-
-      Group { Anchor: (Height: 8); }
 
       Group {
         Anchor: (Left: 0, Right: 0, Height: 82);
@@ -382,11 +371,11 @@ Group {
       Anchor: (Left: 0, Right: 0, Height: 24);
       LayoutMode: Left;
 
-      Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Sword.png", Border: 0); }
+      Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Star.png", Border: 0); }
       Group { Anchor: (Width: 8); }
       Label #ClassesSpecSectionTitle {
         Style: (FontSize: 21, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Start);
-        Text: "Specialisations du Guerrier";
+        Text: "Spécialisations du Guerrier";
       }
     }
 
@@ -399,11 +388,24 @@ Group {
       LayoutMode: Left;
 
       // Spec 0
-      Group {
+      Group #ClassesSpec0Card {
         FlexWeight: 1;
-        LayoutMode: Top;
+        LayoutMode: Full;
         Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-        Padding: (Full: 10);
+
+        Button #ClassesSpec0HoverButton {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.0))),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10))
+          );
+        }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          LayoutMode: Top;
+          Padding: (Full: 14);
 
         Label #ClassesSpec0Name {
           Anchor: (Left: 0, Right: 0, Height: 20);
@@ -414,33 +416,12 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 64);
+          Anchor: (Left: 0, Right: 0, Height: 96);
           LayoutMode: Middle;
-          ItemIcon #ClassesSpec0Icon { Anchor: (Width: 56, Height: 56); }
+          ItemIcon #ClassesSpec0Icon { Anchor: (Width: 84, Height: 84); }
         }
 
-        Group { Anchor: (Height: 4); }
-
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 20);
-          LayoutMode: Center;
-
-          Group #ClassesSpec0ActiveBadge {
-            Background: #25793C(1.0);
-            Padding: (Horizontal: 6, Vertical: 2);
-            Visible: false;
-            Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
-          }
-
-          Group #ClassesSpec0InactiveBadge {
-            Background: #3A3530(1.0);
-            Padding: (Horizontal: 6, Vertical: 2);
-            Visible: true;
-            Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
-          }
-        }
-
-        Group { Anchor: (Height: 4); }
+        Group { Anchor: (Height: 8); }
 
         Label #ClassesSpec0Keywords {
           Anchor: (Left: 0, Right: 0, Height: 16);
@@ -494,44 +475,30 @@ Group {
           Label #ClassesSpec0StatDcrit { Style: (FontSize: 12, TextColor: #FF8900, RenderBold: true, VerticalAlignment: Center); Text: ""; }
         }
 
-        Group { FlexWeight: 1; }
-
-        Label #ClassesSpec0Level {
-          Anchor: (Left: 0, Right: 0, Height: 18);
-          Style: (FontSize: 14, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-          Text: "NIVEAU 1";
-        }
-
-        Group { Anchor: (Height: 4); }
-
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 22);
-          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
-          ProgressBar #ClassesSpec0XpBar {
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            Value: 0.0;
-            BarTexturePath: "Elements/Gauge_Fill.png";
-          }
-        }
-        Group { Anchor: (Height: 6); }
-        Button #ClassesSpec0SelectButton {
-          Anchor: (Left: 0, Right: 0, Height: 26);
-          Style: $P.@PlusButtonStyle;
-          LayoutMode: Left;
-          Group { FlexWeight: 1; }
-          Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
-          Group { FlexWeight: 1; }
         }
       }
 
       Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
 
       // Spec 1
-      Group {
+      Group #ClassesSpec1Card {
         FlexWeight: 1;
-        LayoutMode: Top;
+        LayoutMode: Full;
         Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-        Padding: (Full: 10);
+
+        Button #ClassesSpec1HoverButton {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.0))),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10))
+          );
+        }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          LayoutMode: Top;
+          Padding: (Full: 14);
 
         Label #ClassesSpec1Name {
           Anchor: (Left: 0, Right: 0, Height: 20);
@@ -542,33 +509,12 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 64);
+          Anchor: (Left: 0, Right: 0, Height: 96);
           LayoutMode: Middle;
-          ItemIcon #ClassesSpec1Icon { Anchor: (Width: 56, Height: 56); }
+          ItemIcon #ClassesSpec1Icon { Anchor: (Width: 84, Height: 84); }
         }
 
-        Group { Anchor: (Height: 4); }
-
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 20);
-          LayoutMode: Center;
-
-          Group #ClassesSpec1ActiveBadge {
-            Background: #25793C(1.0);
-            Padding: (Horizontal: 6, Vertical: 2);
-            Visible: false;
-            Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
-          }
-
-          Group #ClassesSpec1InactiveBadge {
-            Background: #3A3530(1.0);
-            Padding: (Horizontal: 6, Vertical: 2);
-            Visible: true;
-            Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
-          }
-        }
-
-        Group { Anchor: (Height: 4); }
+        Group { Anchor: (Height: 8); }
 
         Label #ClassesSpec1Keywords {
           Anchor: (Left: 0, Right: 0, Height: 16);
@@ -622,44 +568,31 @@ Group {
           Label #ClassesSpec1StatDcrit { Style: (FontSize: 12, TextColor: #FF8900, RenderBold: true, VerticalAlignment: Center); Text: ""; }
         }
 
-        Group { FlexWeight: 1; }
-
-        Label #ClassesSpec1Level {
-          Anchor: (Left: 0, Right: 0, Height: 18);
-          Style: (FontSize: 14, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-          Text: "NIVEAU 1";
         }
 
-        Group { Anchor: (Height: 4); }
-
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 22);
-          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
-          ProgressBar #ClassesSpec1XpBar {
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            Value: 0.0;
-            BarTexturePath: "Elements/Gauge_Fill.png";
-          }
-        }
-        Group { Anchor: (Height: 6); }
-        Button #ClassesSpec1SelectButton {
-          Anchor: (Left: 0, Right: 0, Height: 26);
-          Style: $P.@PlusButtonStyle;
-          LayoutMode: Left;
-          Group { FlexWeight: 1; }
-          Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
-          Group { FlexWeight: 1; }
-        }
       }
 
       Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
 
       // Spec 2
-      Group {
+      Group #ClassesSpec2Card {
         FlexWeight: 1;
-        LayoutMode: Top;
+        LayoutMode: Full;
         Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-        Padding: (Full: 10);
+
+        Button #ClassesSpec2HoverButton {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.0))),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10))
+          );
+        }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          LayoutMode: Top;
+          Padding: (Full: 14);
 
         Label #ClassesSpec2Name {
           Anchor: (Left: 0, Right: 0, Height: 20);
@@ -670,33 +603,12 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 64);
+          Anchor: (Left: 0, Right: 0, Height: 96);
           LayoutMode: Middle;
-          ItemIcon #ClassesSpec2Icon { Anchor: (Width: 56, Height: 56); }
+          ItemIcon #ClassesSpec2Icon { Anchor: (Width: 84, Height: 84); }
         }
 
-        Group { Anchor: (Height: 4); }
-
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 20);
-          LayoutMode: Center;
-
-          Group #ClassesSpec2ActiveBadge {
-            Background: #25793C(1.0);
-            Padding: (Horizontal: 6, Vertical: 2);
-            Visible: false;
-            Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center); Text: "Actif"; }
-          }
-
-          Group #ClassesSpec2InactiveBadge {
-            Background: #3A3530(1.0);
-            Padding: (Horizontal: 6, Vertical: 2);
-            Visible: true;
-            Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
-          }
-        }
-
-        Group { Anchor: (Height: 4); }
+        Group { Anchor: (Height: 8); }
 
         Label #ClassesSpec2Keywords {
           Anchor: (Left: 0, Right: 0, Height: 16);
@@ -750,33 +662,6 @@ Group {
           Label #ClassesSpec2StatDcrit { Style: (FontSize: 12, TextColor: #FF8900, RenderBold: true, VerticalAlignment: Center); Text: ""; }
         }
 
-        Group { FlexWeight: 1; }
-
-        Label #ClassesSpec2Level {
-          Anchor: (Left: 0, Right: 0, Height: 18);
-          Style: (FontSize: 14, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-          Text: "NIVEAU 1";
-        }
-
-        Group { Anchor: (Height: 4); }
-
-        Group {
-          Anchor: (Left: 0, Right: 0, Height: 22);
-          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
-          ProgressBar #ClassesSpec2XpBar {
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            Value: 0.0;
-            BarTexturePath: "Elements/Gauge_Fill.png";
-          }
-        }
-        Group { Anchor: (Height: 6); }
-        Button #ClassesSpec2SelectButton {
-          Anchor: (Left: 0, Right: 0, Height: 26);
-          Style: $P.@PlusButtonStyle;
-          LayoutMode: Left;
-          Group { FlexWeight: 1; }
-          Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sélectionner"; }
-          Group { FlexWeight: 1; }
         }
       }
     }
@@ -785,7 +670,7 @@ Group {
 
     // --- Bas : Talents équipés + Maîtrises d'armes ---
     Group {
-      Anchor: (Left: 0, Right: 0, Height: 160);
+      Anchor: (Left: 0, Right: 0, Height: 200);
       LayoutMode: Left;
 
       Group {
@@ -801,7 +686,7 @@ Group {
           Group { Anchor: (Width: 6); }
           Label {
             Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
-            Text: "Talents equipes";
+            Text: "Talents équipés";
           }
         }
 
@@ -810,7 +695,7 @@ Group {
         Label {
           Anchor: (Left: 0, Right: 0, Height: 16);
           Style: (FontSize: 13, TextColor: #C8BEB0);
-          Text: "Aucun talent alloue.";
+          Text: "Aucun talent alloué.";
         }
       }
 
@@ -825,18 +710,56 @@ Group {
         Group {
           Anchor: (Left: 0, Right: 0, Height: 20);
           LayoutMode: Left;
+          Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Elements/Mastery.png", Border: 0); }
+          Group { Anchor: (Width: 6); }
           Label {
             Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
-            Text: "Maitrises d'armes";
+            Text: "Maîtrises d'armes";
           }
         }
 
-        Group { Anchor: (Height: 8); }
+        Group { Anchor: (Height: 6); }
 
-        Label {
-          Anchor: (Left: 0, Right: 0, Height: 16);
-          Style: (FontSize: 13, TextColor: #C8BEB0);
-          Text: "Disponible dans une prochaine mise a jour.";
+        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Sword_Adamantite"; }
+          Group { Anchor: (Width: 6); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Épées"; }
+          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Daggers_Adamantite"; }
+          Group { Anchor: (Width: 6); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Dagues"; }
+          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Axe_Adamantite"; }
+          Group { Anchor: (Width: 6); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Haches"; }
+          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Longsword_Adamantite"; }
+          Group { Anchor: (Width: 6); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Épées longues"; }
+          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Shortbow_Adamantite"; }
+          Group { Anchor: (Width: 6); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Arcs"; }
+          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+        }
+        Group { Anchor: (Height: 2); }
+        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Staff_Adamantite"; }
+          Group { Anchor: (Width: 6); }
+          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Bâtons"; }
+          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
       }
     }

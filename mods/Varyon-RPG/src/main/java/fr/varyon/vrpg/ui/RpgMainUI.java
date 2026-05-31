@@ -889,11 +889,8 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 uiBuilder.set("#ClassesSpec" + suffix + "Name.TextSpans", Message.raw(spec.getDisplayName()));
                 uiBuilder.set("#ClassesSpec" + suffix + "Keywords.TextSpans", Message.raw(spec.getKeywords()));
                 uiBuilder.set("#ClassesSpec" + suffix + "Icon.ItemId", spec.getItemId());
-                uiBuilder.set("#ClassesSpec" + suffix + "ActiveBadge.Visible", isActive);
-                uiBuilder.set("#ClassesSpec" + suffix + "InactiveBadge.Visible", !isActive);
-                uiBuilder.set("#ClassesSpec" + suffix + "Level.TextSpans",
-                    Message.raw("NIVEAU " + activeProgress.getLevel()));
-
+                uiBuilder.setObject("#ClassesSpec" + suffix + "Card.Background",
+                    isActive ? CARD_BG_ACTIVE_STYLE : CARD_BG_INACTIVE_STYLE);
                 uiBuilder.set("#ClassesSpec" + suffix + "StatPv.TextSpans",    specDiffMsg(spec.getHpMult()));
                 uiBuilder.set("#ClassesSpec" + suffix + "StatDef.TextSpans",   specDiffMsg(spec.getArmorMult()));
                 uiBuilder.set("#ClassesSpec" + suffix + "StatEnd.TextSpans",   specDiffMsg(spec.getStaminaMult()));
@@ -901,15 +898,14 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 uiBuilder.set("#ClassesSpec" + suffix + "StatCrit.TextSpans",  specDiffMsg(spec.getCritChanceMult()));
                 uiBuilder.set("#ClassesSpec" + suffix + "StatDcrit.TextSpans", specDiffMsg(spec.getCritDamageMult()));
 
+                uiBuilder.set("#ClassesSpec" + suffix + "HoverButton.Visible", !isActive);
                 if (!isActive) {
                     eventBuilder.addEventBinding(
                         CustomUIEventBindingType.Activating,
-                        "#ClassesSpec" + suffix + "SelectButton",
+                        "#ClassesSpec" + suffix + "HoverButton",
                         EventData.of("Action", "selectSpec").append("SpecId", spec.getId()),
                         false
                     );
-                } else {
-                    uiBuilder.set("#ClassesSpec" + suffix + "SelectButton.Visible", false);
                 }
             }
         }

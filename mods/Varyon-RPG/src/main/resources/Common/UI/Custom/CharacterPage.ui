@@ -118,7 +118,7 @@ $C = "Common.ui";
 );
 
 @TabLabelStyle = (
-  FontSize: 14,
+  FontSize: 16,
   TextColor: @InkStrong,
   RenderUppercase: true,
   RenderBold: true,
@@ -254,6 +254,7 @@ Group {
         Button #TabClassesButton {
           Anchor: (Width: 144, Height: 43);
           Style: @TabButtonStyle;
+          LayoutMode: Left;
 
           Group #TabClassesUnderline {
             Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
@@ -261,23 +262,11 @@ Group {
             Visible: false;
           }
 
-          Group {
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            LayoutMode: Middle;
-            Padding: (Left: 10);
-            Group {
-              LayoutMode: Left;
-              Group {
-                Anchor: (Width: 16, Height: 16);
-                Background: PatchStyle(TexturePath: "Elements/Sword.png", Border: 0);
-              }
-              Group { Anchor: (Width: 6); }
-              Label {
-                Style: @TabLabelStyle;
-                Text: "Classes";
-              }
-            }
-          }
+          Group { FlexWeight: 1; }
+          Group { Anchor: (Width: 26, Height: 26); Background: PatchStyle(TexturePath: "Elements/Swords.png", Border: 0); }
+          Group { Anchor: (Width: 6); }
+          Label { Style: @TabLabelStyle; Text: "Classes"; }
+          Group { FlexWeight: 1; }
         }
 
         Group { Anchor: (Width: 10); }
@@ -285,30 +274,19 @@ Group {
         Button #TabCharacterButton {
           Anchor: (Width: 144, Height: 43);
           Style: @TabButtonStyle;
+          LayoutMode: Left;
 
           Group #TabCharacterUnderline {
             Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
             Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary_Pressed.png", Border: 8, Color: #D4AF37(0.72));
-            Visible: true;
+            Visible: false;
           }
 
-          Group {
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            LayoutMode: Middle;
-            Padding: (Left: 10);
-            Group {
-              LayoutMode: Left;
-              Group {
-                Anchor: (Width: 16, Height: 16);
-                Background: PatchStyle(TexturePath: "Elements/Tools.png", Border: 0);
-              }
-              Group { Anchor: (Width: 6); }
-              Label {
-                Style: @TabLabelStyle;
-                Text: "Métiers";
-              }
-            }
-          }
+          Group { FlexWeight: 1; }
+          Group { Anchor: (Width: 26, Height: 26); Background: PatchStyle(TexturePath: "Elements/Tools.png", Border: 0); }
+          Group { Anchor: (Width: 6); }
+          Label { Style: @TabLabelStyle; Text: "Métiers"; }
+          Group { FlexWeight: 1; }
         }
 
         Group { Anchor: (Width: 10); }
@@ -316,6 +294,7 @@ Group {
         Button #TabArtisansButton {
           Anchor: (Width: 144, Height: 43);
           Style: @TabButtonStyle;
+          LayoutMode: Left;
 
           Group #TabArtisansUnderline {
             Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
@@ -323,23 +302,11 @@ Group {
             Visible: false;
           }
 
-          Group {
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            LayoutMode: Middle;
-            Padding: (Left: 10);
-            Group {
-              LayoutMode: Left;
-              Group {
-                Anchor: (Width: 16, Height: 16);
-                Background: PatchStyle(TexturePath: "Elements/People.png", Border: 0);
-              }
-              Group { Anchor: (Width: 6); }
-              Label {
-                Style: @TabLabelStyle;
-                Text: "Artisans";
-              }
-            }
-          }
+          Group { FlexWeight: 1; }
+          Group { Anchor: (Width: 26, Height: 26); Background: PatchStyle(TexturePath: "Elements/People.png", Border: 0); }
+          Group { Anchor: (Width: 6); }
+          Label { Style: @TabLabelStyle; Text: "Artisans"; }
+          Group { FlexWeight: 1; }
         }
 
         Group { Anchor: (Width: 10); }
@@ -347,6 +314,7 @@ Group {
         Button #TabClassementButton {
           Anchor: (Width: 144, Height: 43);
           Style: @TabButtonStyle;
+          LayoutMode: Left;
 
           Group #TabClassementUnderline {
             Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
@@ -354,23 +322,11 @@ Group {
             Visible: false;
           }
 
-          Group {
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            LayoutMode: Middle;
-            Padding: (Left: 10);
-            Group {
-              LayoutMode: Left;
-              Group {
-                Anchor: (Width: 16, Height: 16);
-                Background: PatchStyle(TexturePath: "Elements/Leaderboard.png", Border: 0);
-              }
-              Group { Anchor: (Width: 6); }
-              Label {
-                Style: @TabLabelStyle;
-                Text: "Classement";
-              }
-            }
-          }
+          Group { FlexWeight: 1; }
+          Group { Anchor: (Width: 26, Height: 26); Background: PatchStyle(TexturePath: "Elements/Leaderboard.png", Border: 0); }
+          Group { Anchor: (Width: 6); }
+          Label { Style: @TabLabelStyle; Text: "Classement"; }
+          Group { FlexWeight: 1; }
         }
 
         Group { Anchor: (Width: 10); }
@@ -378,6 +334,7 @@ Group {
         Button #TabAdminButton {
           Anchor: (Width: 144, Height: 43);
           Style: @TabButtonStyle;
+          LayoutMode: Left;
           Visible: false;
 
           Group #TabAdminUnderline {
@@ -386,15 +343,11 @@ Group {
             Visible: false;
           }
 
-          Group {
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            LayoutMode: Middle;
-            Padding: (Left: 10);
-            Label {
-              Style: @TabLabelStyle;
-              Text: "Admin";
-            }
-          }
+          Group { FlexWeight: 1; }
+          Group { Anchor: (Width: 26, Height: 26); Background: PatchStyle(TexturePath: "Elements/Admin.png", Border: 0); }
+          Group { Anchor: (Width: 6); }
+          Label { Style: @TabLabelStyle; Text: "Admin"; }
+          Group { FlexWeight: 1; }
         }
 
 
