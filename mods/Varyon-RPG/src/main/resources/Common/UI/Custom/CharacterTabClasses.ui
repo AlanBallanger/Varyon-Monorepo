@@ -476,6 +476,24 @@ Group {
         }
 
         }
+
+        Group #ClassesSpec0ConfirmPanel {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          LayoutMode: Middle;
+          Background: #000000(0.72);
+          Visible: false;
+
+          Button #ClassesSpec0ConfirmButton {
+            Anchor: (Width: 120, Height: 36);
+            Style: (
+              Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+              Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+              Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+            );
+            LayoutMode: Middle;
+            Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+          }
+        }
       }
 
       Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
@@ -570,6 +588,23 @@ Group {
 
         }
 
+        Group #ClassesSpec1ConfirmPanel {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          LayoutMode: Middle;
+          Background: #000000(0.72);
+          Visible: false;
+
+          Button #ClassesSpec1ConfirmButton {
+            Anchor: (Width: 120, Height: 36);
+            Style: (
+              Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+              Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+              Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+            );
+            LayoutMode: Middle;
+            Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+          }
+        }
       }
 
       Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
@@ -662,6 +697,24 @@ Group {
           Label #ClassesSpec2StatDcrit { Style: (FontSize: 12, TextColor: #FF8900, RenderBold: true, VerticalAlignment: Center); Text: ""; }
         }
 
+        }
+
+        Group #ClassesSpec2ConfirmPanel {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          LayoutMode: Middle;
+          Background: #000000(0.72);
+          Visible: false;
+
+          Button #ClassesSpec2ConfirmButton {
+            Anchor: (Width: 120, Height: 36);
+            Style: (
+              Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+              Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+              Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+            );
+            LayoutMode: Middle;
+            Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+          }
         }
       }
     }

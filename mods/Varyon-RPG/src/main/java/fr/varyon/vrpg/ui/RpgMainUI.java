@@ -564,6 +564,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
     private final PlayerRef playerRef;
     private String activeTab = "character";
     private String classTreeSubTab = "talents";
+    private String pendingSpecId = null;
     private String selectedSkillSlot = null;
     private String skillFilter = "all";
     private final java.util.Map<String, String> skillSlotAssignments = new java.util.HashMap<>();
@@ -827,6 +828,10 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         if (activeClass == null) {
             uiBuilder.set("#ClassesNoClassCard.Visible", true);
             uiBuilder.set("#ClassesHasClassCard.Visible", false);
+            uiBuilder.set("#ClassesSpec0Card.Visible", false);
+            uiBuilder.set("#ClassesSpec1Card.Visible", false);
+            uiBuilder.set("#ClassesSpec2Card.Visible", false);
+            uiBuilder.set("#ClassesSpecSectionTitle.Visible", false);
             eventBuilder.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#ClassesSelectClassButton",
@@ -835,6 +840,11 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             );
             return;
         }
+
+        uiBuilder.set("#ClassesSpec0Card.Visible", true);
+        uiBuilder.set("#ClassesSpec1Card.Visible", true);
+        uiBuilder.set("#ClassesSpec2Card.Visible", true);
+        uiBuilder.set("#ClassesSpecSectionTitle.Visible", true);
 
         uiBuilder.set("#ClassesNoClassCard.Visible", false);
         uiBuilder.set("#ClassesHasClassCard.Visible", true);
@@ -906,11 +916,21 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 uiBuilder.set("#ClassesSpec" + suffix + "StatCrit.TextSpans",  specDiffMsg(spec.getCritChanceMult()));
                 uiBuilder.set("#ClassesSpec" + suffix + "StatDcrit.TextSpans", specDiffMsg(spec.getCritDamageMult()));
 
-                uiBuilder.set("#ClassesSpec" + suffix + "HoverButton.Visible", !isActive);
-                if (!isActive) {
+                boolean isPending = spec.getId().equals(pendingSpecId);
+                uiBuilder.set("#ClassesSpec" + suffix + "ConfirmPanel.Visible", isPending);
+                uiBuilder.set("#ClassesSpec" + suffix + "HoverButton.Visible", !isActive && !isPending);
+                if (!isActive && !isPending) {
                     eventBuilder.addEventBinding(
                         CustomUIEventBindingType.Activating,
                         "#ClassesSpec" + suffix + "HoverButton",
+                        EventData.of("Action", "pendingSpec").append("SpecId", spec.getId()),
+                        false
+                    );
+                }
+                if (isPending) {
+                    eventBuilder.addEventBinding(
+                        CustomUIEventBindingType.Activating,
+                        "#ClassesSpec" + suffix + "ConfirmButton",
                         EventData.of("Action", "selectSpec").append("SpecId", spec.getId()),
                         false
                     );
@@ -2173,7 +2193,14 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             return;
         }
 
+        if ("pendingSpec".equals(data.action) && data.specId != null) {
+            pendingSpecId = data.specId.equals(pendingSpecId) ? null : data.specId;
+            rebuild();
+            return;
+        }
+
         if ("selectSpec".equals(data.action) && data.specId != null) {
+            pendingSpecId = null;
             ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
             if (classManager != null) {
                 ClassAccount acc = classManager.getAccount(playerRef.getUuid());
