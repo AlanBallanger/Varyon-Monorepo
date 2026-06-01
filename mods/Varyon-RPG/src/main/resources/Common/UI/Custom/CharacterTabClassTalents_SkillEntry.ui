@@ -1,17 +1,23 @@
-Button {
-  Anchor: (Left: 0, Right: 0, Height: 36);
-  Style: (
-    Default: (Background: #000000(0.0)),
-    Hovered: (Background: #FFFFFF(0.06)),
-    Pressed: (Background: #FFFFFF(0.10))
-  );
+Group {
+  Anchor: (Left: 0, Right: 0, Height: 30);
   LayoutMode: Left;
 
-  ItemIcon #SkillEntryIcon { Anchor: (Width: 28, Height: 28); }
-  Group { Anchor: (Width: 8); }
+  ItemIcon #SkillEntryIcon { Anchor: (Width: 24, Height: 24); }
+  Group { Anchor: (Width: 6); }
   Label #SkillEntryName {
     FlexWeight: 1;
-    Style: (FontSize: 12, TextColor: #F2E8D8, VerticalAlignment: Center);
+    Style: (FontSize: 11, TextColor: #F2E8D8, VerticalAlignment: Center);
     Text: "";
+  }
+  Button #SkillEntryAssign {
+    Anchor: (Width: 60, Height: 22);
+    Style: (
+      Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 8)),
+      Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 8)),
+      Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 8))
+    );
+    LayoutMode: Middle;
+    Visible: false;
+    Label { Style: (FontSize: 10, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Attribuer"; }
   }
 }

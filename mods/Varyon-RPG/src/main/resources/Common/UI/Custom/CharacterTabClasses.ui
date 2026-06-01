@@ -24,7 +24,7 @@ Group {
     Group { Anchor: (Height: 8); }
 
     Group {
-      Anchor: (Left: 0, Right: 0, Height: 150);
+      Anchor: (Left: 0, Right: 0, Height: 210);
       LayoutMode: Full;
       Padding: (Full: 10);
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
@@ -93,7 +93,44 @@ Group {
         }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Top: 72, Bottom: 32);
+          Anchor: (Left: 0, Right: 0, Top: 72, Height: 46);
+          LayoutMode: Left;
+
+          Group {
+            Anchor: (Width: 40, Height: 40);
+            LayoutMode: Full;
+            Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 6);
+            Padding: (Full: 3);
+            Group {
+              LayoutMode: Middle;
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Background: #141820(0.82);
+              ItemIcon #ClassesActiveSpecIcon { Anchor: (Width: 32, Height: 32); }
+            }
+          }
+
+          Group { Anchor: (Width: 8); }
+
+          Group {
+            FlexWeight: 1;
+            LayoutMode: Top;
+
+            Label #ClassesActiveSpecName {
+              Anchor: (Left: 0, Right: 0, Height: 20);
+              Style: (FontSize: 14, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+              Text: "Aucune";
+            }
+
+            Label #ClassesActiveSpecKeywords {
+              Anchor: (Left: 0, Right: 0, Height: 14);
+              Style: (FontSize: 11, TextColor: #6BCB7A, HorizontalAlignment: Start);
+              Text: "";
+            }
+          }
+        }
+
+        Group {
+          Anchor: (Left: 0, Right: 0, Top: 126, Bottom: 32);
           Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
           ProgressBar #ClassesActiveClassXpBar {
             Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
@@ -133,167 +170,23 @@ Group {
       }
     }
 
-    Group { Anchor: (Height: 8); }
-
-    // --- Spécialisation ---
-    Group {
-      Anchor: (Left: 0, Right: 0, Height: 24);
-      LayoutMode: Left;
-      Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Star.png", Border: 0); }
-      Group { Anchor: (Width: 6); }
-      Label {
-        Style: (FontSize: 21, TextColor: #C8A96E, RenderBold: true, HorizontalAlignment: Start, RenderUppercase: true);
-        Text: "Spécialisation";
-      }
-    }
-
-    Group { Anchor: (Height: 8); }
-
-    Group {
-      Anchor: (Left: 0, Right: 0);
-      LayoutMode: Top;
-      Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-      Padding: (Full: 10);
-
-      Group {
-        Anchor: (Left: 0, Right: 0, Height: 60);
-        LayoutMode: Full;
-
-        Group {
-          Anchor: (Left: 0, Top: 0, Width: 52, Height: 52);
-          LayoutMode: Full;
-          Background: PatchStyle(TexturePath: "Common/Buttons/Tertiary.png", Border: 6);
-          Padding: (Full: 3);
-          Group {
-            LayoutMode: Middle;
-            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-            Background: #141820(0.82);
-            ItemIcon #ClassesActiveSpecIcon { Anchor: (Width: 40, Height: 40); }
-          }
-        }
-
-        Label #ClassesActiveSpecName {
-          Anchor: (Left: 62, Right: 0, Top: 0, Height: 26);
-          Style: (FontSize: 18, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: Start);
-          Text: "Aucune";
-        }
-
-        Group {
-          Anchor: (Left: 62, Right: 0, Top: 28, Height: 20);
-          LayoutMode: Left;
-
-          Group #ClassesActiveSpecActiveBadge {
-            Background: #25793C(1.0);
-            Padding: (Horizontal: 6, Vertical: 2);
-            Visible: false;
-            Label { Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Actif"; }
-          }
-
-          Group #ClassesActiveSpecInactiveBadge {
-            Background: #3A3530(1.0);
-            Padding: (Horizontal: 6, Vertical: 2);
-            Visible: false;
-            Label { Style: (FontSize: 11, TextColor: #A89E90, RenderUppercase: true, VerticalAlignment: Center); Text: "Inactif"; }
-          }
-        }
-      }
-
-      Group { Anchor: (Height: 4); }
-
-      Label #ClassesActiveSpecKeywords {
-        Anchor: (Left: 0, Right: 0, Height: 16);
-        Style: (FontSize: 13, TextColor: #6BCB7A, HorizontalAlignment: Start);
-        Text: "";
-      }
-
-      Label #ClassesActiveSpecDesc {
-        Anchor: (Left: 0, Right: 0, Height: 16);
-        Style: (FontSize: 13, TextColor: #C8BEB0, HorizontalAlignment: Start);
-        Text: "Choisissez une spécialisation.";
-      }
-
-    }
-
-    Group { Anchor: (Height: 8); }
+    Group { FlexWeight: 1; }
 
     // --- Statistiques de classe ---
     Group {
-      Anchor: (Left: 0, Right: 0, Height: 24);
-      LayoutMode: Left;
-      Group { Anchor: (Width: 20, Height: 20); Background: PatchStyle(TexturePath: "Elements/Stats.png", Border: 0); }
-      Group { Anchor: (Width: 6); }
-      Label {
-        Style: (FontSize: 21, TextColor: #C8A96E, RenderBold: true, HorizontalAlignment: Start, RenderUppercase: true);
-        Text: "Statistiques de classe";
-      }
-    }
-
-    Group { Anchor: (Height: 8); }
-
-    Group {
-      FlexWeight: 1;
-      Anchor: (Left: 0, Right: 0);
+      Anchor: (Left: 0, Right: 0, Height: 220);
       LayoutMode: Top;
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
       Padding: (Full: 10);
 
       Group {
-        Anchor: (Left: 0, Right: 0, Height: 82);
+        Anchor: (Left: 0, Right: 0, Height: 20);
         LayoutMode: Left;
-
-        Group {
-          FlexWeight: 1;
-          LayoutMode: Top;
-          Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/health.png", Border: 0); } }
-          Group { Anchor: (Height: 4); }
-          Label #ClassesStatPv {
-            Anchor: (Left: 0, Right: 0, Height: 24);
-            Style: (FontSize: 20, TextColor: #FF6666, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "---";
-          }
-          Label {
-            Anchor: (Left: 0, Right: 0, Height: 14);
-            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-            Text: "Vie max";
-          }
-        }
-
-        Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
-
-        Group {
-          FlexWeight: 1;
-          LayoutMode: Top;
-          Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/defense.png", Border: 0); } }
-          Group { Anchor: (Height: 4); }
-          Label #ClassesStatDef {
-            Anchor: (Left: 0, Right: 0, Height: 24);
-            Style: (FontSize: 20, TextColor: #66AAFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "---";
-          }
-          Label {
-            Anchor: (Left: 0, Right: 0, Height: 14);
-            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-            Text: "Red. degats";
-          }
-        }
-
-        Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
-
-        Group {
-          FlexWeight: 1;
-          LayoutMode: Top;
-          Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0); } }
-          Group { Anchor: (Height: 4); }
-          Label #ClassesStatEnd {
-            Anchor: (Left: 0, Right: 0, Height: 24);
-            Style: (FontSize: 20, TextColor: #66AAFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "---";
-          }
-          Label {
-            Anchor: (Left: 0, Right: 0, Height: 14);
-            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-            Text: "Endurance";
-          }
+        Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Elements/Stats.png", Border: 0); }
+        Group { Anchor: (Width: 6); }
+        Label {
+          Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
+          Text: "Statistiques de classe";
         }
       }
 
@@ -302,60 +195,52 @@ Group {
       Group {
         Anchor: (Left: 0, Right: 0, Height: 82);
         LayoutMode: Left;
+        Group { FlexWeight: 1; LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/health.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatPv { Anchor: (Left: 0, Right: 0, Height: 24); Style: (FontSize: 20, TextColor: #FF6666, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "---"; }
+          Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center); Text: "Vie max"; }
+        }
+        Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
+        Group { FlexWeight: 1; LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/defense.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatDef { Anchor: (Left: 0, Right: 0, Height: 24); Style: (FontSize: 20, TextColor: #66AAFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "---"; }
+          Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center); Text: "Red. degats"; }
+        }
+        Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
+        Group { FlexWeight: 1; LayoutMode: Top;
+          Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0); } }
+          Group { Anchor: (Height: 4); }
+          Label #ClassesStatEnd { Anchor: (Left: 0, Right: 0, Height: 24); Style: (FontSize: 20, TextColor: #66AAFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "---"; }
+          Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center); Text: "Endurance"; }
+        }
+      }
 
-        Group {
-          FlexWeight: 1;
-          LayoutMode: Top;
+      Group { Anchor: (Height: 8); }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Height: 82);
+        LayoutMode: Left;
+        Group { FlexWeight: 1; LayoutMode: Top;
           Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0); } }
           Group { Anchor: (Height: 4); }
-          Label #ClassesStatAtk {
-            Anchor: (Left: 0, Right: 0, Height: 24);
-            Style: (FontSize: 20, TextColor: #FFD166, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "---";
-          }
-          Label {
-            Anchor: (Left: 0, Right: 0, Height: 14);
-            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-            Text: "Attaque";
-          }
+          Label #ClassesStatAtk { Anchor: (Left: 0, Right: 0, Height: 24); Style: (FontSize: 20, TextColor: #FFD166, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "---"; }
+          Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center); Text: "Attaque"; }
         }
-
         Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
-
-        Group {
-          FlexWeight: 1;
-          LayoutMode: Top;
+        Group { FlexWeight: 1; LayoutMode: Top;
           Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/taux_crit.png", Border: 0); } }
           Group { Anchor: (Height: 4); }
-          Label #ClassesStatCrit {
-            Anchor: (Left: 0, Right: 0, Height: 24);
-            Style: (FontSize: 20, TextColor: #FF8900, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "---";
-          }
-          Label {
-            Anchor: (Left: 0, Right: 0, Height: 14);
-            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-            Text: "Taux crit";
-          }
+          Label #ClassesStatCrit { Anchor: (Left: 0, Right: 0, Height: 24); Style: (FontSize: 20, TextColor: #FF8900, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "---"; }
+          Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center); Text: "Taux crit"; }
         }
-
         Group { Anchor: (Width: 4, Top: 0, Bottom: 0); }
-
-        Group {
-          FlexWeight: 1;
-          LayoutMode: Top;
+        Group { FlexWeight: 1; LayoutMode: Top;
           Group { Anchor: (Left: 0, Right: 0, Height: 36); LayoutMode: Middle; Group { Anchor: (Width: 36, Height: 36); Background: PatchStyle(TexturePath: "Icons/degat_crit.png", Border: 0); } }
           Group { Anchor: (Height: 4); }
-          Label #ClassesStatDcrit {
-            Anchor: (Left: 0, Right: 0, Height: 24);
-            Style: (FontSize: 20, TextColor: #FF8900, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "---";
-          }
-          Label {
-            Anchor: (Left: 0, Right: 0, Height: 14);
-            Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center);
-            Text: "Dgts crit";
-          }
+          Label #ClassesStatDcrit { Anchor: (Left: 0, Right: 0, Height: 24); Style: (FontSize: 20, TextColor: #FF8900, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "---"; }
+          Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 11, TextColor: #C8BEB0, RenderUppercase: true, HorizontalAlignment: Center); Text: "Dgts crit"; }
         }
       }
     }
@@ -416,9 +301,9 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 96);
+          Anchor: (Left: 0, Right: 0, Height: 72);
           LayoutMode: Middle;
-          ItemIcon #ClassesSpec0Icon { Anchor: (Width: 84, Height: 84); }
+          ItemIcon #ClassesSpec0Icon { Anchor: (Width: 64, Height: 64); }
         }
 
         Group { Anchor: (Height: 8); }
@@ -527,9 +412,9 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 96);
+          Anchor: (Left: 0, Right: 0, Height: 72);
           LayoutMode: Middle;
-          ItemIcon #ClassesSpec1Icon { Anchor: (Width: 84, Height: 84); }
+          ItemIcon #ClassesSpec1Icon { Anchor: (Width: 64, Height: 64); }
         }
 
         Group { Anchor: (Height: 8); }
@@ -638,9 +523,9 @@ Group {
         Group { Anchor: (Height: 4); }
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 96);
+          Anchor: (Left: 0, Right: 0, Height: 72);
           LayoutMode: Middle;
-          ItemIcon #ClassesSpec2Icon { Anchor: (Width: 84, Height: 84); }
+          ItemIcon #ClassesSpec2Icon { Anchor: (Width: 64, Height: 64); }
         }
 
         Group { Anchor: (Height: 8); }
@@ -721,41 +606,130 @@ Group {
 
     Group { Anchor: (Height: 8); }
 
-    // --- Bas : Talents équipés + Maîtrises d'armes ---
+    // --- Bas : Compétences actives + Maîtrises d'armes ---
     Group {
-      Anchor: (Left: 0, Right: 0, Height: 200);
+      Anchor: (Left: 0, Right: 0, Height: 220);
       LayoutMode: Left;
 
       Group {
         FlexWeight: 1;
-        LayoutMode: Top;
+        LayoutMode: Full;
         Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
         Padding: (Full: 10);
 
         Group {
-          Anchor: (Left: 0, Right: 0, Height: 20);
+          Anchor: (Left: 0, Top: 0, Right: 0, Height: 20);
           LayoutMode: Left;
           Group { Anchor: (Width: 16, Height: 16); Background: PatchStyle(TexturePath: "Icons/Talent.png", Border: 0); }
           Group { Anchor: (Width: 6); }
           Label {
             Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
-            Text: "Talents équipés";
+            Text: "Compétences actives";
           }
         }
 
-        Group { Anchor: (Height: 8); }
+        Group {
+          Anchor: (Left: 0, Top: 28, Bottom: 0, Right: 180);
+          LayoutMode: Top;
 
-        Label {
-          Anchor: (Left: 0, Right: 0, Height: 16);
-          Style: (FontSize: 13, TextColor: #C8BEB0);
-          Text: "Aucun talent alloué.";
+          Group {
+            Anchor: (Left: 0, Right: 0, Height: 82);
+            LayoutMode: Left;
+            Group { Anchor: (Width: 70); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+              Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 1"; }
+              Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "E"; }
+              Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
+                Button #SkillSlotE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
+                  Group #SkillSlotEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                  ItemIcon #SkillSlotEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                }
+              }
+            }
+            Group { Anchor: (Width: 4); }
+            Group { Anchor: (Width: 70); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+              Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 2"; }
+              Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "R"; }
+              Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
+                Button #SkillSlotR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
+                  Group #SkillSlotRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                  ItemIcon #SkillSlotRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                }
+              }
+            }
+            Group { Anchor: (Width: 4); }
+            Group { Anchor: (Width: 70); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+              Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 6"; }
+              Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "A"; }
+              Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
+                Button #SkillSlotA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
+                  Group #SkillSlotABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                  ItemIcon #SkillSlotAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                }
+              }
+            }
+          }
+
+          Group { Anchor: (Height: 6); }
+
+          Group {
+            Anchor: (Left: 0, Right: 0, Height: 82);
+            LayoutMode: Left;
+            Group { Anchor: (Width: 70); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+              Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 3"; }
+              Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "Crouch+A"; }
+              Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
+                Button #SkillSlotCrouchA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
+                  Group #SkillSlotCrouchABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                  ItemIcon #SkillSlotCrouchAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                }
+              }
+            }
+            Group { Anchor: (Width: 4); }
+            Group { Anchor: (Width: 70); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+              Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 4"; }
+              Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "Crouch+E"; }
+              Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
+                Button #SkillSlotCrouchE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
+                  Group #SkillSlotCrouchEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                  ItemIcon #SkillSlotCrouchEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                }
+              }
+            }
+            Group { Anchor: (Width: 4); }
+            Group { Anchor: (Width: 70); LayoutMode: Top; Background: #FFFFFF(0.05); Padding: (Full: 6);
+              Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 5"; }
+              Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "Crouch+R"; }
+              Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
+                Button #SkillSlotCrouchR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
+                  Group #SkillSlotCrouchRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
+                  ItemIcon #SkillSlotCrouchRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                }
+              }
+            }
+          }
+        }
+
+        Group {
+          Anchor: (Right: 0, Top: 0, Bottom: 0, Width: 240);
+          LayoutMode: Top;
+
+          Label #ClassesSkillPickerLabel {
+            Anchor: (Left: 0, Right: 0, Height: 16);
+            Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true);
+            Text: "Compétences disponibles";
+          }
+          Group { Anchor: (Height: 4); }
+          Group #ClassesSkillPickerList {
+            Anchor: (Left: 0, Right: 0);
+            LayoutMode: Top;
+          }
         }
       }
 
       Group { Anchor: (Width: 8, Top: 0, Bottom: 0); }
 
       Group {
-        FlexWeight: 1;
+        Anchor: (Width: 240, Top: 0, Bottom: 0);
         LayoutMode: Top;
         Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
         Padding: (Full: 10);
@@ -773,49 +747,51 @@ Group {
 
         Group { Anchor: (Height: 6); }
 
-        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
-          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Sword_Adamantite"; }
+        Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Sword_Adamantite"; }
           Group { Anchor: (Width: 6); }
-          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Épées"; }
-          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Épée à une main"; }
+          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
-        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
-          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Daggers_Adamantite"; }
+        Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Daggers_Adamantite"; }
           Group { Anchor: (Width: 6); }
-          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Dagues"; }
-          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Dagues"; }
+          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
-        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
-          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Axe_Adamantite"; }
+        Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Axe_Adamantite"; }
           Group { Anchor: (Width: 6); }
-          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Haches"; }
-          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Hache à une main"; }
+          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
-        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
-          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Longsword_Adamantite"; }
+        Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Longsword_Adamantite"; }
           Group { Anchor: (Width: 6); }
-          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Épées longues"; }
-          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Armes à deux mains"; }
+          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
-        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
-          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Shortbow_Adamantite"; }
+        Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Shortbow_Adamantite"; }
           Group { Anchor: (Width: 6); }
-          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Arcs"; }
-          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Armes de distance"; }
+          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
-        Group { Anchor: (Left: 0, Right: 0, Height: 22); LayoutMode: Left;
-          ItemIcon { Anchor: (Width: 20, Height: 20); ItemId: "Weapon_Staff_Adamantite"; }
+        Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
+          ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Staff_Adamantite"; }
           Group { Anchor: (Width: 6); }
-          Label { FlexWeight: 1; Style: (FontSize: 12, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Bâtons"; }
-          Label { Style: (FontSize: 12, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Équipements magiques"; }
+          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
       }
+
     }
+
   }
 }
 

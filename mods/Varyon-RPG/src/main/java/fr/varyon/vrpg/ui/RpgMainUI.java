@@ -866,12 +866,10 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         if (activeSpec != null) {
             uiBuilder.set("#ClassesActiveSpecName.TextSpans", Message.raw(activeSpec.getDisplayName()));
             uiBuilder.set("#ClassesActiveSpecKeywords.TextSpans", Message.raw(activeSpec.getKeywords()));
-            uiBuilder.set("#ClassesActiveSpecDesc.TextSpans", Message.raw(activeSpec.getDescription()));
             uiBuilder.set("#ClassesActiveSpecIcon.ItemId", activeSpec.getItemId());
         } else {
-            uiBuilder.set("#ClassesActiveSpecName.TextSpans", Message.raw("Aucune specialisation"));
+            uiBuilder.set("#ClassesActiveSpecName.TextSpans", Message.raw("Aucune"));
             uiBuilder.set("#ClassesActiveSpecKeywords.TextSpans", Message.raw(""));
-            uiBuilder.set("#ClassesActiveSpecDesc.TextSpans", Message.raw("Choisissez une specialisation."));
         }
 
         ClassPlayerStats activeStats = classManager.getStatEngine().getStats(playerRef.getUuid());
@@ -937,6 +935,46 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 }
             }
         }
+
+        ClassTalentTree.Node[] talentNodes = ClassTalentTree.getTree(activeClass);
+        String[] slotIds = {"E", "R", "CrouchA", "CrouchE", "CrouchR", "A"};
+        for (String slotId : slotIds) {
+            String assigned = skillSlotAssignments.get(slotId);
+            if (assigned != null) {
+                for (ClassTalentTree.Node n : talentNodes) {
+                    if (n.itemId().equals(assigned)) {
+                        uiBuilder.set("#SkillSlot" + slotId + "Icon.ItemId", n.itemId());
+                        uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", true);
+                        uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", false);
+                        break;
+                    }
+                }
+            } else {
+                uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
+                uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", true);
+            }
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#SkillSlot" + slotId,
+                EventData.of("Action", "skillSlotClick").append("Slot", slotId), false);
+        }
+
+        uiBuilder.clear("#ClassesSkillPickerList");
+        int maxDisplay = Math.min(6, talentNodes.length);
+        for (int i = 0; i < maxDisplay; i++) {
+            ClassTalentTree.Node n = talentNodes[i];
+            uiBuilder.append("#ClassesSkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
+            uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryIcon.ItemId", n.itemId());
+            uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
+            uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", selectedSkillSlot != null);
+            if (selectedSkillSlot != null) {
+                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                    "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign",
+                    EventData.of("Action", "skillSlotAssign")
+                        .append("Slot", selectedSkillSlot)
+                        .append("Node", n.itemId()), false);
+            }
+        }
+        uiBuilder.set("#ClassesSkillPickerLabel.TextSpans", Message.raw("Compétences disponibles"));
     }
 
     private static Message specDiffMsg(double mult) {
