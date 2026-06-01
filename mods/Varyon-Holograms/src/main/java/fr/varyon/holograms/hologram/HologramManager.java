@@ -292,13 +292,19 @@ public class HologramManager {
     private UUID spawnImageLine(@Nonnull Vector3d position, @Nonnull String line,
                                  @Nonnull Hologram hologram, @Nonnull World world) {
         HologramLineType.ImageLineData data = HologramLineType.parseImageLine(line);
-        Model model = imageManager.createImageModel(data.imageName, data.scale, data.billboard);
+        if (data.imageName.isBlank()) {
+            LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Nom d'image vide dans la ligne: %s", line);
+            return spawnTextLine(position, line, hologram.getWorldId(), world);
+        }
+
+        Model model = imageManager.createImageModel(data.imageName, data.scale, data.billboard, data.doubleSided);
         if (model == null) {
+            LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Fallback texte pour image '%s' (billboard=%s)", data.imageName, data.billboard);
             return spawnTextLine(position, "[Image: " + data.imageName + "]", hologram.getWorldId(), world);
         }
 
         UUID entityUuid = UUID.randomUUID();
-        world.execute(() -> {
+        Runnable logic = () -> {
             try {
                 Store<EntityStore> store = world.getEntityStore().getStore();
                 Holder<EntityStore> holder = EntityStore.REGISTRY.newHolder();
@@ -309,6 +315,7 @@ public class HologramManager {
                 holder.addComponent(PersistentModel.getComponentType(),
                     new PersistentModel(new Model.ModelReference(model.getModelAssetId(), data.scale, null, true)));
                 holder.addComponent(EntityScaleComponent.getComponentType(), new EntityScaleComponent(data.scale));
+                holder.addComponent(PropComponent.getComponentType(), PropComponent.get());
                 holder.addComponent(NetworkId.getComponentType(), new NetworkId(((EntityStore) store.getExternalData()).takeNextNetworkId()));
                 holder.ensureComponent(EntityModule.get().getVisibleComponentType());
                 holder.ensureComponent(EntityStore.REGISTRY.getNonSerializedComponentType());
@@ -316,13 +323,14 @@ public class HologramManager {
                 if (ref != null && !data.billboard) {
                     store.ensureComponent(ref, Frozen.getComponentType());
                 }
-                if (data.billboard) {
-                    billboardManager.register(entityUuid, hologram.getWorldId(), position, data.trackingDistance);
+                if (ref != null && data.billboard) {
+                    billboardManager.register(entityUuid, hologram.getWorldId(), data.trackingDistance);
                 }
             } catch (Exception e) {
                 LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur spawn ligne image: %s", e.getMessage());
             }
-        });
+        };
+        if (world.isInThread()) logic.run(); else world.execute(logic);
         return entityUuid;
     }
 

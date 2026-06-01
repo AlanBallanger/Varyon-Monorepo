@@ -2,31 +2,61 @@ package fr.varyon.holograms.hologram;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.regex.Pattern;
 
 public enum HologramLineType {
     TEXT,
     IMAGE,
     ITEM;
 
+    private static final Pattern DOUBLE_SIDED_PATTERN =
+        Pattern.compile(":ds(?:$|:)|:doublesided(?:$|:)", Pattern.CASE_INSENSITIVE);
+
     @Nonnull
     public static HologramLineType fromLine(@Nonnull String line) {
-        String lower = line.toLowerCase();
+        String special = extractSpecialLine(line);
+        String lower = special.toLowerCase();
         if (lower.startsWith("image:")) return IMAGE;
         if (lower.startsWith("item:")) return ITEM;
         return TEXT;
+    }
+
+    @Nonnull
+    public static String extractSpecialLine(@Nonnull String line) {
+        String trimmed = line.trim();
+        String lower = trimmed.toLowerCase();
+        int imageIdx = lower.indexOf("image:");
+        if (imageIdx >= 0) return trimmed.substring(imageIdx);
+        int itemIdx = lower.indexOf("item:");
+        if (itemIdx >= 0) return trimmed.substring(itemIdx);
+        return trimmed;
+    }
+
+    public static boolean hasDoubleSidedFlag(@Nonnull String line) {
+        return DOUBLE_SIDED_PATTERN.matcher(line.toLowerCase()).find();
+    }
+
+    @Nonnull
+    public static String stripDoubleSidedFlag(@Nonnull String line) {
+        String result = line.replaceAll("(?i):ds:", ":").replaceAll("(?i):doublesided:", ":");
+        result = result.replaceAll("(?i):ds$", "").replaceAll("(?i):doublesided$", "");
+        return result.trim();
     }
 
     public static class ImageLineData {
         public final String imageName;
         public final float scale;
         public final boolean billboard;
+        public final boolean doubleSided;
         public final float trackingDistance;
         @Nullable public final String animationName;
 
-        public ImageLineData(String imageName, float scale, boolean billboard, float trackingDistance, @Nullable String animationName) {
+        public ImageLineData(String imageName, float scale, boolean billboard, boolean doubleSided,
+                             float trackingDistance, @Nullable String animationName) {
             this.imageName = imageName;
             this.scale = scale;
             this.billboard = billboard;
+            this.doubleSided = doubleSided;
             this.trackingDistance = trackingDistance;
             this.animationName = animationName;
         }
@@ -49,12 +79,14 @@ public enum HologramLineType {
     }
 
     /**
-     * Parses: image:<name>[:<scale>][:<billboard>][:<dist>][:anim_<name>]
-     * billboard = "true" token; dist = numeric after "true"; anim = token starting with "anim_"
+     * Parses: image:<name>[:<scale>][:<billboard>][:<dist>][:ds|:doublesided][:anim_<name>]
      */
     @Nonnull
     public static ImageLineData parseImageLine(@Nonnull String line) {
-        String body = line.substring("image:".length());
+        String special = extractSpecialLine(line);
+        boolean doubleSided = hasDoubleSidedFlag(special);
+        String clean = stripDoubleSidedFlag(special);
+        String body = clean.substring("image:".length());
         String[] parts = body.split(":");
         String imageName = parts.length > 0 ? parts[0].trim() : "";
         float scale = 1.0f;
@@ -72,6 +104,10 @@ public enum HologramLineType {
                 billboard = true;
                 continue;
             }
+            if (p.equalsIgnoreCase("ds") || p.equalsIgnoreCase("doublesided")) {
+                doubleSided = true;
+                continue;
+            }
             try {
                 float v = Float.parseFloat(p);
                 if (billboard && trackingDistance < 0) {
@@ -82,7 +118,7 @@ public enum HologramLineType {
             } catch (NumberFormatException ignored) {
             }
         }
-        return new ImageLineData(imageName, scale, billboard, trackingDistance, animationName);
+        return new ImageLineData(imageName, scale, billboard, doubleSided, trackingDistance, animationName);
     }
 
     /**
@@ -90,7 +126,7 @@ public enum HologramLineType {
      */
     @Nonnull
     public static ItemLineData parseItemLine(@Nonnull String line) {
-        String body = line.substring("item:".length());
+        String body = extractSpecialLine(line).substring("item:".length());
         String[] parts = body.split(":");
         String itemId = parts.length > 0 ? parts[0].trim() : "";
         float scale = 1.0f;

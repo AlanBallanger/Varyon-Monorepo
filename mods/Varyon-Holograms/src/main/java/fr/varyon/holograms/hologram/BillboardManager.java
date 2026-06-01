@@ -3,16 +3,23 @@ package fr.varyon.holograms.hologram;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.protocol.Direction;
+import com.hypixel.hytale.protocol.ModelTransform;
+import com.hypixel.hytale.protocol.Position;
+import com.hypixel.hytale.protocol.TransformUpdate;
+import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.modules.entity.tracker.EntityTrackerSystems;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -24,10 +31,11 @@ import java.util.logging.Level;
 public class BillboardManager {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-    private static final float DEFAULT_TRACKING_DISTANCE = 64f;
-    private static final long TICK_MS = 100;
+    private static final long TICK_MS = 50;
+    private static final double MAX_TRACKING_DISTANCE = 64.0;
+    private static final double MIN_TRACKING_DISTANCE = 32.0;
 
-    private record BillboardEntry(UUID entityId, UUID worldId, Vector3d position, float trackingDistance) {}
+    private record BillboardEntry(UUID entityId, UUID worldId, float customMinDistance, float defaultYaw) {}
 
     private final Map<UUID, BillboardEntry> billboards = new ConcurrentHashMap<>();
     private ScheduledExecutorService scheduler;
@@ -48,9 +56,13 @@ public class BillboardManager {
         billboards.clear();
     }
 
-    public void register(@Nonnull UUID entityId, @Nonnull UUID worldId, @Nonnull Vector3d position, float trackingDistance) {
-        float dist = trackingDistance > 0 ? trackingDistance : DEFAULT_TRACKING_DISTANCE;
-        billboards.put(entityId, new BillboardEntry(entityId, worldId, new Vector3d(position), dist));
+    public void register(@Nonnull UUID entityId, @Nonnull UUID worldId, float trackingDistance) {
+        register(entityId, worldId, trackingDistance, 0f);
+    }
+
+    public void register(@Nonnull UUID entityId, @Nonnull UUID worldId, float trackingDistance, float defaultYaw) {
+        float customMin = trackingDistance > 0 ? trackingDistance : -1f;
+        billboards.put(entityId, new BillboardEntry(entityId, worldId, customMin, defaultYaw));
     }
 
     public void unregister(@Nonnull UUID entityId) {
@@ -66,57 +78,87 @@ public class BillboardManager {
         Universe universe = Universe.get();
         if (universe == null) return;
 
-        for (World world : universe.getWorlds().values()) {
-            Collection<PlayerRef> playerRefs = world.getPlayerRefs();
-            if (playerRefs.isEmpty()) continue;
+        Map<UUID, List<BillboardEntry>> byWorld = new ConcurrentHashMap<>();
+        for (BillboardEntry entry : billboards.values()) {
+            byWorld.computeIfAbsent(entry.worldId(), k -> new ArrayList<>()).add(entry);
+        }
 
-            for (BillboardEntry entry : billboards.values()) {
-                if (!entry.worldId().equals(world.getWorldConfig().getUuid())) continue;
+        for (Map.Entry<UUID, List<BillboardEntry>> worldEntry : byWorld.entrySet()) {
+            World world = findWorld(universe, worldEntry.getKey());
+            if (world == null) continue;
+            List<BillboardEntry> entries = worldEntry.getValue();
+            world.execute(() -> {
+                try {
+                    updateBillboards(world, entries);
+                } catch (Exception e) {
+                    LOGGER.at(Level.FINE).log("[Varyon-Holograms] Billboard tick error: %s", e.getMessage());
+                }
+            });
+        }
+    }
 
-                world.execute(() -> {
-                    try {
-                        Store<EntityStore> store = world.getEntityStore().getStore();
-                        Ref<EntityStore> ref = ((EntityStore) store.getExternalData()).getRefFromUUID(entry.entityId());
-                        if (ref == null || !ref.isValid()) return;
+    private void updateBillboards(@Nonnull World world, @Nonnull List<BillboardEntry> entries) {
+        Store<EntityStore> store = world.getEntityStore().getStore();
 
-                        TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
-                        if (transform == null) return;
+        for (BillboardEntry entry : entries) {
+            try {
+                Ref<EntityStore> billboardRef = ((EntityStore) store.getExternalData()).getRefFromUUID(entry.entityId());
+                if (billboardRef == null || !billboardRef.isValid()) continue;
 
-                        PlayerRef nearest = findNearestPlayer(playerRefs, entry.position(), entry.trackingDistance(), world);
-                        if (nearest == null) return;
+                TransformComponent billboardTransform = store.getComponent(billboardRef, TransformComponent.getComponentType());
+                if (billboardTransform == null) continue;
 
-                        Vector3d playerPos = nearest.getTransform().getPosition();
-                        double dx = playerPos.x - entry.position().x;
-                        double dz = playerPos.z - entry.position().z;
-                        float yaw = (float) Math.atan2(-dx, dz);
-                        transform.getRotation().set(0f, yaw, 0f);
-                        transform.markChunkDirty(store);
-                    } catch (Exception e) {
-                        LOGGER.at(Level.FINE).log("[Varyon-Holograms] Billboard tick error: %s", e.getMessage());
+                Vector3d billboardPos = billboardTransform.getPosition();
+                EntityTrackerSystems.Visible visible = store.getComponent(billboardRef, EntityModule.get().getVisibleComponentType());
+                if (visible == null || visible.visibleTo.isEmpty()) continue;
+
+                double minDist = entry.customMinDistance() > 0
+                    ? entry.customMinDistance()
+                    : MIN_TRACKING_DISTANCE;
+                double maxDist = MAX_TRACKING_DISTANCE;
+
+                for (Map.Entry<Ref<EntityStore>, EntityTrackerSystems.EntityViewer> viewerEntry : visible.visibleTo.entrySet()) {
+                    Ref<EntityStore> playerRef = viewerEntry.getKey();
+                    EntityTrackerSystems.EntityViewer viewer = viewerEntry.getValue();
+                    if (!playerRef.isValid()) continue;
+
+                    TransformComponent playerTransform = store.getComponent(playerRef, TransformComponent.getComponentType());
+                    if (playerTransform == null) continue;
+
+                    Vector3d playerPos = playerTransform.getPosition();
+                    double dx = playerPos.x - billboardPos.x;
+                    double dz = playerPos.z - billboardPos.z;
+                    double distSq = dx * dx + dz * dz;
+                    if (distSq > maxDist * maxDist) continue;
+
+                    float yaw;
+                    if (distSq <= minDist * minDist) {
+                        yaw = (float) Math.atan2(-dx, -dz);
+                    } else {
+                        yaw = entry.defaultYaw();
                     }
-                });
+
+                    ModelTransform transform = new ModelTransform();
+                    transform.position = new Position(billboardPos.x, billboardPos.y, billboardPos.z);
+                    transform.bodyOrientation = new Direction(yaw, 0f, 0f);
+                    transform.lookOrientation = new Direction(yaw, 0f, 0f);
+                    TransformUpdate update = new TransformUpdate(transform);
+                    if (!viewer.visible.contains(billboardRef)) {
+                        viewer.visible.add(billboardRef);
+                    }
+                    viewer.queueUpdate(billboardRef, update);
+                }
+            } catch (Exception e) {
+                LOGGER.at(Level.FINE).log("[Varyon-Holograms] Billboard update error for %s: %s", entry.entityId(), e.getMessage());
             }
         }
     }
 
-    @javax.annotation.Nullable
-    private PlayerRef findNearestPlayer(@Nonnull Collection<PlayerRef> playerRefs, @Nonnull Vector3d position,
-                                         float maxDistance, @Nonnull World world) {
-        PlayerRef nearest = null;
-        double nearestDist = maxDistance * maxDistance;
-        for (PlayerRef ref : playerRefs) {
-            try {
-                Vector3d pos = ref.getTransform().getPosition();
-                double dx = pos.x - position.x;
-                double dz = pos.z - position.z;
-                double distSq = dx * dx + dz * dz;
-                if (distSq < nearestDist) {
-                    nearestDist = distSq;
-                    nearest = ref;
-                }
-            } catch (Exception ignored) {
-            }
+    @Nullable
+    private World findWorld(@Nonnull Universe universe, @Nonnull UUID worldId) {
+        for (World world : universe.getWorlds().values()) {
+            if (world.getWorldConfig().getUuid().equals(worldId)) return world;
         }
-        return nearest;
+        return null;
     }
 }

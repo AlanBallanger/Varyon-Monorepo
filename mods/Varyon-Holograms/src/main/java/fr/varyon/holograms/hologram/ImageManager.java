@@ -84,8 +84,13 @@ public class ImageManager {
 
     @Nullable
     public Model createImageModel(@Nonnull String imageName, float scale, boolean billboard) {
+        return createImageModel(imageName, scale, billboard, false);
+    }
+
+    @Nullable
+    public Model createImageModel(@Nonnull String imageName, float scale, boolean billboard, boolean doubleSided) {
         String key = normalize(imageName);
-        String cacheKey = key + "_" + scale + "_" + billboard;
+        String cacheKey = key + "_" + scale + "_" + billboard + "_" + doubleSided;
         Model cached = modelCache.get(cacheKey);
         if (cached != null) return cached;
 
@@ -95,21 +100,34 @@ public class ImageManager {
             return null;
         }
 
-        String modelAssetId = billboard ? data.modelAssetId() + "_Billboard" : data.modelAssetId();
-        if (!isLoaded(modelAssetId) && billboard) modelAssetId = data.modelAssetId();
-        if (!isLoaded(modelAssetId)) {
-            LOGGER.at(Level.WARNING).log("[Varyon-Holograms] ModelAsset '%s' pas encore dans le registry — liveLoad peut-être échoué", modelAssetId);
-            return null;
+        String base = data.modelAssetId();
+        List<String> candidates = new ArrayList<>();
+        if (billboard && doubleSided) candidates.add(base + "_Billboard_DoubleSided");
+        if (billboard) candidates.add(base + "_Billboard");
+        if (doubleSided) candidates.add(base + "_DoubleSided");
+        candidates.add(base);
+
+        for (String modelAssetId : candidates) {
+            if (!isLoaded(modelAssetId)) continue;
+            Model model = tryCreateModel(modelAssetId, scale);
+            if (model != null) {
+                modelCache.put(cacheKey, model);
+                return model;
+            }
         }
 
+        LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Aucun ModelAsset disponible pour '%s' — /holo reload puis redémarrer si besoin", imageName);
+        return null;
+    }
+
+    @Nullable
+    private Model tryCreateModel(@Nonnull String modelAssetId, float scale) {
         try {
             ModelAsset asset = (ModelAsset) ModelAsset.getAssetMap().getAsset(modelAssetId);
             if (asset == null) return null;
-            Model model = Model.createStaticScaledModel(asset, scale);
-            modelCache.put(cacheKey, model);
-            return model;
+            return Model.createStaticScaledModel(asset, scale);
         } catch (Exception e) {
-            LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur createImageModel %s: %s", imageName, e.getMessage());
+            LOGGER.at(Level.FINE).log("[Varyon-Holograms] Échec modèle %s: %s", modelAssetId, e.getMessage());
             return null;
         }
     }
@@ -133,14 +151,22 @@ public class ImageManager {
 
                     commonAssets.add(addCommon(module, "Characters/VaryonHolograms/" + info.modelAssetId + ".png", texBytes));
                     commonAssets.add(addCommon(module, "Characters/VaryonHolograms/" + info.modelAssetId + ".blockymodel",
-                        blockyModel(info.width, info.height, false).getBytes(StandardCharsets.UTF_8)));
+                        blockyModel(info.width, info.height, false, false).getBytes(StandardCharsets.UTF_8)));
+                    commonAssets.add(addCommon(module, "Characters/VaryonHolograms/" + info.modelAssetId + "_DoubleSided.blockymodel",
+                        blockyModel(info.width, info.height, false, true).getBytes(StandardCharsets.UTF_8)));
                     commonAssets.add(addCommon(module, "Characters/VaryonHolograms/" + info.modelAssetId + "_Billboard.blockymodel",
-                        blockyModel(info.width, info.height, true).getBytes(StandardCharsets.UTF_8)));
+                        blockyModel(info.width, info.height, true, false).getBytes(StandardCharsets.UTF_8)));
+                    commonAssets.add(addCommon(module, "Characters/VaryonHolograms/" + info.modelAssetId + "_Billboard_DoubleSided.blockymodel",
+                        blockyModel(info.width, info.height, true, true).getBytes(StandardCharsets.UTF_8)));
 
-                    ModelAsset ma = buildModelAsset(info.modelAssetId, info.texturePath, info.width, info.height, false);
+                    ModelAsset ma = buildModelAsset(info.modelAssetId, info.texturePath, info.width, info.height, false, false);
                     if (ma != null) modelAssets.add(ma);
-                    ModelAsset maBb = buildModelAsset(info.modelAssetId + "_Billboard", info.texturePath, info.width, info.height, true);
+                    ModelAsset maDs = buildModelAsset(info.modelAssetId + "_DoubleSided", info.texturePath, info.width, info.height, false, true);
+                    if (maDs != null) modelAssets.add(maDs);
+                    ModelAsset maBb = buildModelAsset(info.modelAssetId + "_Billboard", info.texturePath, info.width, info.height, true, false);
                     if (maBb != null) modelAssets.add(maBb);
+                    ModelAsset maBbDs = buildModelAsset(info.modelAssetId + "_Billboard_DoubleSided", info.texturePath, info.width, info.height, true, true);
+                    if (maBbDs != null) modelAssets.add(maBbDs);
 
                     registry.put(info.imageName, new ImageData(info, true));
                     LOGGER.at(Level.INFO).log("[Varyon-Holograms] Image chargée: %s (%dx%d)", info.imageName, info.width, info.height);
@@ -197,14 +223,20 @@ public class ImageManager {
     }
 
     @Nullable
-    private ModelAsset buildModelAsset(String id, String texturePath, int width, int height, boolean billboard) {
+    private ModelAsset buildModelAsset(String id, String texturePath, int width, int height,
+                                       boolean billboard, boolean doubleSided) {
         try {
             double ar = (double) width / height;
             double nw = width >= height ? 1.0 : ar;
             double nh = width >= height ? 1.0 / ar : 1.0;
             double hw = nw / 2.0;
-            String suffix = billboard ? "_Billboard" : "";
-            String modelPath = "Characters/VaryonHolograms/" + id.replace("_Billboard", "") + suffix + ".blockymodel";
+            String baseAssetId = id.replace("_Billboard_DoubleSided", "")
+                .replace("_Billboard", "").replace("_DoubleSided", "");
+            String suffix = "";
+            if (billboard && doubleSided) suffix = "_Billboard_DoubleSided";
+            else if (billboard) suffix = "_Billboard";
+            else if (doubleSided) suffix = "_DoubleSided";
+            String modelPath = "Characters/VaryonHolograms/" + baseAssetId + suffix + ".blockymodel";
 
             ModelAsset ma = new ModelAsset();
             setField(ma, "id", id);
@@ -291,8 +323,35 @@ public class ImageManager {
         return sb.toString();
     }
 
-    private static String blockyModel(int width, int height, boolean billboard) {
+    private static String blockyModel(int width, int height, boolean billboard, boolean doubleSided) {
         String lod = billboard ? "billboard" : "auto";
+        if (doubleSided) {
+            return String.format(Locale.US,
+                "{\n  \"nodes\": [\n    {\n      \"id\": \"1\",\n      \"name\": \"Front\",\n" +
+                "      \"position\": {\"x\": 0, \"y\": 0, \"z\": 0},\n" +
+                "      \"orientation\": {\"x\": 0, \"y\": 0, \"z\": 0, \"w\": 1},\n" +
+                "      \"shape\": {\n        \"type\": \"quad\",\n" +
+                "        \"offset\": {\"x\": 0.0, \"y\": 0.0, \"z\": 0.001},\n" +
+                "        \"stretch\": {\"x\": 1, \"y\": 1, \"z\": 1},\n" +
+                "        \"settings\": {\"size\": {\"x\": %d, \"y\": %d}, \"normal\": \"+Z\"},\n" +
+                "        \"visible\": true, \"doubleSided\": false, \"shadingMode\": \"flat\",\n" +
+                "        \"unwrapMode\": \"custom\",\n" +
+                "        \"textureLayout\": {\"front\": {\"offset\": {\"x\": 0, \"y\": 0},\n" +
+                "          \"mirror\": {\"x\": false, \"y\": false}, \"angle\": 0}}\n" +
+                "      }\n    },\n    {\n      \"id\": \"2\",\n      \"name\": \"Back\",\n" +
+                "      \"position\": {\"x\": 0, \"y\": 0, \"z\": 0},\n" +
+                "      \"orientation\": {\"x\": 0, \"y\": 0, \"z\": 0, \"w\": 1},\n" +
+                "      \"shape\": {\n        \"type\": \"quad\",\n" +
+                "        \"offset\": {\"x\": 0.0, \"y\": 0.0, \"z\": -0.001},\n" +
+                "        \"stretch\": {\"x\": 1, \"y\": 1, \"z\": 1},\n" +
+                "        \"settings\": {\"size\": {\"x\": %d, \"y\": %d}, \"normal\": \"-Z\"},\n" +
+                "        \"visible\": true, \"doubleSided\": false, \"shadingMode\": \"flat\",\n" +
+                "        \"unwrapMode\": \"custom\",\n" +
+                "        \"textureLayout\": {\"front\": {\"offset\": {\"x\": 0, \"y\": 0},\n" +
+                "          \"mirror\": {\"x\": false, \"y\": false}, \"angle\": 0}}\n" +
+                "      }\n    }\n  ],\n  \"format\": \"character\",\n  \"lod\": \"%s\"\n}\n",
+                width, height, width, height, lod);
+        }
         return String.format(Locale.US,
             "{\n  \"nodes\": [\n    {\n      \"id\": \"1\",\n      \"name\": \"Plane\",\n" +
             "      \"position\": {\"x\": 0, \"y\": 0, \"z\": 0},\n" +

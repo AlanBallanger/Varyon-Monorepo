@@ -23,6 +23,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.holograms.VaryonHologramsPlugin;
+import fr.varyon.holograms.hologram.HologramLineType;
 import fr.varyon.holograms.hologram.Hologram;
 import org.joml.Vector3d;
 import javax.annotation.Nonnull;
@@ -293,7 +294,8 @@ public final class HologramCommand extends AbstractCommandCollection {
             String name = nameArg.get(context);
             Hologram h = plugin.getHologramManager().getHologram(name);
             if (h == null) { context.sendMessage(Message.raw("Hologramme '" + name + "' introuvable.").color(RED)); return; }
-            h.addLine(textArg.get(context));
+            String line = HologramLineType.extractSpecialLine(textArg.get(context).trim());
+            h.addLine(line);
             plugin.getHologramManager().updateHologram(h);
             context.sendMessage(Message.raw("Ligne ajoutée à '").color(GREEN).insert(Message.raw(name).color(YELLOW)).insert(Message.raw("'.").color(GREEN)));
         }

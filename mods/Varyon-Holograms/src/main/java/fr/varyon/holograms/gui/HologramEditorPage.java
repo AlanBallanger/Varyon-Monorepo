@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.holograms.VaryonHologramsPlugin;
 import fr.varyon.holograms.hologram.Hologram;
+import fr.varyon.holograms.hologram.HologramLineType;
 import org.joml.Vector3d;
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -101,9 +102,9 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         switch (action) {
             case "addLine" -> {
                 if (!canEdit) { deny(playerRef, ref, store); return; }
-                String text = data.getNewText();
+                String text = normalizeLineText(data.getNewText());
                 if (text != null && !text.isBlank()) {
-                    hologram.addLine(text.trim());
+                    hologram.addLine(text);
                     plugin.getHologramManager().updateHologram(hologram);
                     editingLineIndex = -1;
                 }
@@ -111,10 +112,10 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             }
             case "updateLine" -> {
                 if (!canEdit) { deny(playerRef, ref, store); return; }
-                String text = data.getNewText();
+                String text = normalizeLineText(data.getNewText());
                 if (editingLineIndex >= 0 && editingLineIndex < hologram.getLineCount()
                         && text != null && !text.isBlank()) {
-                    hologram.setLine(editingLineIndex, text.trim());
+                    hologram.setLine(editingLineIndex, text);
                     plugin.getHologramManager().updateHologram(hologram);
                     editingLineIndex = -1;
                 }
@@ -249,5 +250,13 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
 
     private static String escape(@Nonnull String text) {
         return text.replace(";", ",").replace("{", "(").replace("}", ")").replace("\"", "'");
+    }
+
+    @javax.annotation.Nullable
+    private static String normalizeLineText(@javax.annotation.Nullable String text) {
+        if (text == null) return null;
+        String trimmed = text.trim();
+        if (trimmed.isEmpty()) return trimmed;
+        return HologramLineType.extractSpecialLine(trimmed);
     }
 }
