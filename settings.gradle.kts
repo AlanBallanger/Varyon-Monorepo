@@ -31,4 +31,5 @@ include(
     ":mods:Varyon-World-Inventory",
     ":mods:varyon-UI",
     ":mods:Varyon-Progression",
+    ":mods:Varyon-Holograms",
 )
