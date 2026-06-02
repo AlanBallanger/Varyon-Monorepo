@@ -15,9 +15,11 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.holograms.VaryonHologramsPlugin;
+import fr.varyon.holograms.hologram.CarouselTransition;
 import fr.varyon.holograms.hologram.Hologram;
 import fr.varyon.holograms.hologram.HologramLineFormat;
 import fr.varyon.holograms.hologram.HologramGroups;
+import fr.varyon.holograms.hologram.HologramLayout;
 import fr.varyon.holograms.hologram.HologramNames;
 import org.joml.Vector3d;
 import javax.annotation.Nonnull;
@@ -59,6 +61,7 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
 
     private final VaryonHologramsPlugin plugin;
     private String hologramName;
+    private int editingPageIndex = 0;
     private int editingLineIndex = -1;
     private HologramLineFormat.EditState editState = new HologramLineFormat.EditState();
     @javax.annotation.Nullable private String holoAnimPickerFamily;
@@ -86,7 +89,10 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         cmd.set("#YInput.Value", String.format(Locale.US, "%.1f", pos.y));
         cmd.set("#ZInput.Value", String.format(Locale.US, "%.1f", pos.z));
 
+        buildLayoutSection(hologram, cmd);
         buildHologramAnimSection(hologram, cmd, evt);
+        buildPagesSection(hologram, cmd, evt);
+        buildCarouselSection(hologram, cmd, evt);
         buildLinesList(hologram, cmd, evt);
         buildLineEditor(cmd, evt);
         bindEditorEvents(evt);
@@ -112,6 +118,56 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         boolean canDelete = playerRef.hasPermission("*") || playerRef.hasPermission("varyon.holograms.delete");
 
         switch (action) {
+            case "selectPage" -> {
+                int idx = data.getPageIndexInt();
+                if (idx >= 0 && idx < hologram.getPageCount()) {
+                    editingPageIndex = idx;
+                    resetEditor();
+                }
+                refreshUI(ref, store);
+            }
+            case "addPage" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                if (hologram.addPage()) {
+                    editingPageIndex = hologram.getPageCount() - 1;
+                    resetEditor();
+                    plugin.getHologramManager().updateHologram(hologram);
+                }
+                refreshUI(ref, store);
+            }
+            case "removePage" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                if (hologram.getPageCount() > 1) {
+                    hologram.removePage(editingPageIndex);
+                    if (editingPageIndex >= hologram.getPageCount()) {
+                        editingPageIndex = hologram.getPageCount() - 1;
+                    }
+                    resetEditor();
+                    plugin.getHologramManager().updateHologram(hologram);
+                }
+                refreshUI(ref, store);
+            }
+            case "setCarousel" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                boolean enabled = "on".equalsIgnoreCase(data.getMode());
+                plugin.getHologramManager().setHologramCarousel(hologramName, enabled,
+                    hologram.getCarouselIntervalSeconds(), hologram.getCarouselTransition());
+                refreshUI(ref, store);
+            }
+            case "setCarouselInterval" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                float interval = data.getCarouselInterval(hologram.getCarouselIntervalSeconds());
+                plugin.getHologramManager().setHologramCarousel(hologramName, hologram.isCarouselEnabled(),
+                    interval, hologram.getCarouselTransition());
+                refreshUI(ref, store);
+            }
+            case "setCarouselTransition" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                CarouselTransition transition = parseTransition(data.getTransition());
+                plugin.getHologramManager().setHologramCarousel(hologramName, hologram.isCarouselEnabled(),
+                    hologram.getCarouselIntervalSeconds(), transition);
+                refreshUI(ref, store);
+            }
             case "setMode" -> {
                 if (!canEdit) { deny(playerRef, ref, store); return; }
                 applyMode(parseMode(data.getMode()));
@@ -130,6 +186,12 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             case "setDoubleSided" -> {
                 if (!canEdit) { deny(playerRef, ref, store); return; }
                 editState.doubleSided = true;
+                refreshUI(ref, store);
+            }
+            case "setLayout" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                HologramLayout layout = parseLayout(data.getLayout());
+                plugin.getHologramManager().setHologramLayout(hologramName, layout);
                 refreshUI(ref, store);
             }
             case "selectAnim" -> {
@@ -189,7 +251,7 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
                 mergeEditorFields(data);
                 String line = HologramLineFormat.format(editState);
                 if (!line.isBlank()) {
-                    hologram.addLine(line);
+                    hologram.addPageLine(editingPageIndex, line);
                     plugin.getHologramManager().updateHologram(hologram);
                     resetEditor();
                 }
@@ -198,8 +260,8 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             case "updateLine" -> {
                 if (!canEdit) { deny(playerRef, ref, store); return; }
                 mergeEditorFields(data);
-                if (editingLineIndex >= 0 && editingLineIndex < hologram.getLineCount()) {
-                    hologram.setLine(editingLineIndex, HologramLineFormat.format(editState));
+                if (editingLineIndex >= 0 && editingLineIndex < hologram.getPageLineCount(editingPageIndex)) {
+                    hologram.setPageLine(editingPageIndex, editingLineIndex, HologramLineFormat.format(editState));
                     plugin.getHologramManager().updateHologram(hologram);
                     resetEditor();
                 }
@@ -208,8 +270,8 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             case "removeLine" -> {
                 if (!canDelete) { deny(playerRef, ref, store); return; }
                 int idx = data.getLineIndexInt();
-                if (idx >= 0 && idx < hologram.getLineCount()) {
-                    hologram.removeLine(idx);
+                if (idx >= 0 && idx < hologram.getPageLineCount(editingPageIndex)) {
+                    hologram.removePageLine(editingPageIndex, idx);
                     plugin.getHologramManager().updateHologram(hologram);
                     resetEditor();
                 }
@@ -217,9 +279,9 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             }
             case "editLine" -> {
                 int idx = data.getLineIndexInt();
-                if (idx >= 0 && idx < hologram.getLineCount()) {
+                if (idx >= 0 && idx < hologram.getPageLineCount(editingPageIndex)) {
                     editingLineIndex = idx;
-                    editState = HologramLineFormat.parse(hologram.getLines().get(idx));
+                    editState = HologramLineFormat.parse(hologram.getPageLines(editingPageIndex).get(idx));
                 }
                 refreshUI(ref, store);
             }
@@ -293,10 +355,31 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
     public void onDismiss(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {}
 
     private void bindPageEvents(@Nonnull UIEventBuilder evt) {
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#AddPageButton",
+            EventData.of("Action", "addPage"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#RemovePageButton",
+            EventData.of("Action", "removePage"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#CarouselOnButton",
+            EventData.of("Action", "setCarousel").append("Mode", "on"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#CarouselOffButton",
+            EventData.of("Action", "setCarousel").append("Mode", "off"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#CarouselIntervalButton",
+            new EventData().append("Action", "setCarouselInterval")
+                .append("@CarouselInterval", "#CarouselIntervalInput.Value"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#TransitionLeftButton",
+            EventData.of("Action", "setCarouselTransition").append("Transition", "slide_left"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#TransitionUpButton",
+            EventData.of("Action", "setCarouselTransition").append("Transition", "slide_up"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#TransitionInstantButton",
+            EventData.of("Action", "setCarouselTransition").append("Transition", "instant"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#RenameButton",
             new EventData().append("Action", "rename").append("@HologramName", "#HologramNameInput.Value"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#SetGroupButton",
             new EventData().append("Action", "setGroup").append("@HologramGroup", "#HologramGroupInput.Value"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#LayoutWallButton",
+            EventData.of("Action", "setLayout").append("Layout", "wall"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#LayoutFloorButton",
+            EventData.of("Action", "setLayout").append("Layout", "floor"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#BackToListButton",
             EventData.of("Action", "backToList"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#MoveHereButton",
@@ -428,6 +511,52 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         }
     }
 
+    private void buildPagesSection(@Nonnull Hologram hologram, @Nonnull UICommandBuilder cmd,
+                                    @Nonnull UIEventBuilder evt) {
+        cmd.clear("#PageTabList");
+        int pageCount = hologram.getPageCount();
+        for (int i = 0; i < pageCount; i++) {
+            cmd.append("#PageTabList", "Pages/HologramPageTabButton.ui");
+            String sel = "#PageTabList[" + i + "]";
+            boolean selected = i == editingPageIndex;
+            cmd.set(sel + " #PageTabButton.Background", selected ? "#3a6a9e" : "#2a3544");
+            cmd.set(sel + " #PageTabLabel.Text", "P" + (i + 1));
+            evt.addEventBinding(CustomUIEventBindingType.Activating, sel + " #PageTabButton",
+                EventData.of("Action", "selectPage").append("PageIndex", String.valueOf(i)), false);
+        }
+        cmd.set("#AddPageButton.Visible", pageCount < Hologram.MAX_PAGES);
+        cmd.set("#RemovePageButton.Visible", pageCount > 1);
+    }
+
+    private void buildCarouselSection(@Nonnull Hologram hologram, @Nonnull UICommandBuilder cmd,
+                                       @Nonnull UIEventBuilder evt) {
+        highlightCarouselOption("#CarouselOnButton", hologram.isCarouselEnabled(), cmd);
+        highlightCarouselOption("#CarouselOffButton", !hologram.isCarouselEnabled(), cmd);
+        cmd.set("#CarouselIntervalInput.Value",
+            String.format(Locale.US, "%.0f", hologram.getCarouselIntervalSeconds()));
+        highlightCarouselOption("#TransitionLeftButton",
+            hologram.getCarouselTransition() == CarouselTransition.SLIDE_LEFT, cmd);
+        highlightCarouselOption("#TransitionUpButton",
+            hologram.getCarouselTransition() == CarouselTransition.SLIDE_UP, cmd);
+        highlightCarouselOption("#TransitionInstantButton",
+            hologram.getCarouselTransition() == CarouselTransition.INSTANT, cmd);
+    }
+
+    private static void highlightCarouselOption(@Nonnull String selector, boolean active,
+                                                 @Nonnull UICommandBuilder cmd) {
+        cmd.set(selector + ".Background", active ? "#3a6a9e" : "#2a3544");
+    }
+
+    private void buildLayoutSection(@Nonnull Hologram hologram, @Nonnull UICommandBuilder cmd) {
+        highlightLayoutOption("#LayoutWallButton", hologram.getLayout() == HologramLayout.WALL, cmd);
+        highlightLayoutOption("#LayoutFloorButton", hologram.getLayout() == HologramLayout.FLOOR, cmd);
+    }
+
+    private static void highlightLayoutOption(@Nonnull String selector, boolean active,
+                                               @Nonnull UICommandBuilder cmd) {
+        cmd.set(selector + ".Background", active ? "#3a6a9e" : "#2a3544");
+    }
+
     private void buildHologramAnimSection(@Nonnull Hologram hologram, @Nonnull UICommandBuilder cmd,
                                            @Nonnull UIEventBuilder evt) {
         AnimFamily openFamily = holoAnimPickerFamily != null ? findFamily(holoAnimPickerFamily) : null;
@@ -544,8 +673,10 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
 
     private void buildLinesList(@Nonnull Hologram hologram, @Nonnull UICommandBuilder cmd,
                                  @Nonnull UIEventBuilder evt) {
+        cmd.set("#LinesSectionLabel.Text",
+            "LIGNES — PAGE " + (editingPageIndex + 1));
         cmd.clear("#LinesList");
-        List<String> lines = hologram.getLines();
+        List<String> lines = hologram.getPageLines(editingPageIndex);
         if (lines.isEmpty()) {
             cmd.appendInline("#LinesList",
                 "Label { Text: \"Aucune ligne.\"; Style: (TextColor: #96a9be, HorizontalAlignment: Center); }");
@@ -577,7 +708,13 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         cmd.set("#ZInput.Value", String.format(Locale.US, "%.1f", pos.z));
         cmd.set("#HologramNameInput.Value", hologram.getName());
         cmd.set("#HologramGroupInput.Value", safeStr(hologram.getGroup()));
+        if (editingPageIndex >= hologram.getPageCount()) {
+            editingPageIndex = Math.max(0, hologram.getPageCount() - 1);
+        }
+        buildLayoutSection(hologram, cmd);
         buildHologramAnimSection(hologram, cmd, evt);
+        buildPagesSection(hologram, cmd, evt);
+        buildCarouselSection(hologram, cmd, evt);
         buildLinesList(hologram, cmd, evt);
         buildLineEditor(cmd, evt);
         bindEditorEvents(evt);
@@ -633,6 +770,16 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
     private void closePage(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player != null) player.getPageManager().setPage(ref, store, Page.None);
+    }
+
+    @Nonnull
+    private static CarouselTransition parseTransition(@javax.annotation.Nullable String transition) {
+        return CarouselTransition.parse(transition);
+    }
+
+    @Nonnull
+    private static HologramLayout parseLayout(@javax.annotation.Nullable String layout) {
+        return HologramLayout.parse(layout);
     }
 
     @Nonnull

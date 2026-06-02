@@ -5,7 +5,7 @@ $C.@PageOverlay {
 }
 
 $C.@Container {
-  Anchor: (Width: 760, Height: 840);
+  Anchor: (Width: 760, Height: 920);
 
   #Title {
     $C.@Title {
@@ -122,6 +122,41 @@ $C.@Container {
           @Anchor = (Width: 26, Height: 26, Right: 6);
         }
       }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 4);
+
+        Label {
+          Text: "Orientation";
+          Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 72);
+        }
+
+        Button #LayoutWallButton {
+          Anchor: (Width: 88, Height: 28, Right: 6);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "MUR";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #LayoutFloorButton {
+          Anchor: (Width: 88, Height: 28);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "SOL";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+      }
     }
 
     Group #HologramAnimSection {
@@ -146,7 +181,135 @@ $C.@Container {
       }
     }
 
-    Label {
+    Group #PagesSection {
+      LayoutMode: Top;
+      Anchor: (Bottom: 6);
+
+      Label {
+        Text: "PAGES";
+        Style: (RenderBold: true, RenderUppercase: true, TextColor: #ffaa00);
+        Anchor: (Bottom: 4);
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 4);
+
+        Group #PageTabList {
+          LayoutMode: Left;
+          FlexWeight: 1;
+        }
+
+        $C.@SmallSecondaryTextButton #AddPageButton {
+          @Text = "+";
+          @Anchor = (Width: 32, Height: 28, Left: 4);
+        }
+
+        $C.@CancelTextButton #RemovePageButton {
+          @Text = "X";
+          @Anchor = (Width: 32, Height: 28, Left: 4);
+        }
+      }
+    }
+
+    Group #CarouselSection {
+      LayoutMode: Top;
+      Anchor: (Bottom: 6);
+
+      Label {
+        Text: "CARROUSEL";
+        Style: (RenderBold: true, RenderUppercase: true, TextColor: #ffaa00);
+        Anchor: (Bottom: 4);
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 4);
+
+        Button #CarouselOnButton {
+          Anchor: (Width: 56, Height: 28, Right: 4);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "ON";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #CarouselOffButton {
+          Anchor: (Width: 56, Height: 28, Right: 10);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "OFF";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Label {
+          Text: "Secondes";
+          Style: (TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 58);
+        }
+
+        $C.@TextField #CarouselIntervalInput {
+          @Anchor = (Width: 48, Height: 28);
+        }
+
+        $C.@TertiaryTextButton #CarouselIntervalButton {
+          @Text = "OK";
+          @Anchor = (Width: 40, Height: 28, Left: 4, Right: 10);
+        }
+
+        Label {
+          Text: "Transition";
+          Style: (TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 62);
+        }
+
+        Button #TransitionLeftButton {
+          Anchor: (Width: 72, Height: 28, Right: 4);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "GAUCHE";
+            Style: (TextColor: #ffffff, FontSize: 10, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #TransitionUpButton {
+          Anchor: (Width: 56, Height: 28, Right: 4);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "HAUT";
+            Style: (TextColor: #ffffff, FontSize: 10, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #TransitionInstantButton {
+          Anchor: (Width: 72, Height: 28);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "INSTANT";
+            Style: (TextColor: #ffffff, FontSize: 10, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+      }
+    }
+
+    Label #LinesSectionLabel {
       Text: "LIGNES";
       Style: (RenderBold: true, RenderUppercase: true, TextColor: #ffaa00);
       Anchor: (Bottom: 4);
@@ -154,7 +317,7 @@ $C.@Container {
 
     Group #LinesContainer {
       Background: (Color: #0a0f17);
-      Anchor: (Height: 144, Bottom: 6);
+      Anchor: (Height: 120, Bottom: 6);
       Padding: 4;
 
       Group #LinesList {

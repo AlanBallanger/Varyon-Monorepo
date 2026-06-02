@@ -18,6 +18,8 @@ public class HologramEditorEventData {
                 (d, v) -> d.anim = v, d -> d.anim)
             .addField(new KeyedCodec<>("Image", Codec.STRING),
                 (d, v) -> d.image = v, d -> d.image)
+            .addField(new KeyedCodec<>("Layout", Codec.STRING),
+                (d, v) -> d.layout = v, d -> d.layout)
             .addField(new KeyedCodec<>("@TextContent", Codec.STRING),
                 (d, v) -> d.textContent = v, d -> d.textContent)
             .addField(new KeyedCodec<>("@ImageName", Codec.STRING),
@@ -38,11 +40,18 @@ public class HologramEditorEventData {
                 (d, v) -> d.posY = v, d -> d.posY)
             .addField(new KeyedCodec<>("@Z", Codec.STRING),
                 (d, v) -> d.posZ = v, d -> d.posZ)
+            .addField(new KeyedCodec<>("PageIndex", Codec.STRING),
+                (d, v) -> d.pageIndex = v, d -> d.pageIndex)
+            .addField(new KeyedCodec<>("Transition", Codec.STRING),
+                (d, v) -> d.transition = v, d -> d.transition)
+            .addField(new KeyedCodec<>("@CarouselInterval", Codec.STRING),
+                (d, v) -> d.carouselInterval = v, d -> d.carouselInterval)
             .build();
 
     String action;
     String lineIndex;
     String mode;
+    String layout;
     String anim;
     String image;
     String textContent;
@@ -55,9 +64,13 @@ public class HologramEditorEventData {
     String posX;
     String posY;
     String posZ;
+    String pageIndex;
+    String transition;
+    String carouselInterval;
 
     public String getAction() { return action; }
     public String getMode() { return mode; }
+    public String getLayout() { return layout; }
     public String getAnim() { return anim; }
     public String getImage() { return image; }
     public String getTextContent() { return textContent; }
@@ -65,6 +78,17 @@ public class HologramEditorEventData {
     public String getItemId() { return itemId; }
     public String getHologramNameInput() { return hologramNameInput; }
     public String getHologramGroupInput() { return hologramGroupInput; }
+
+    public int getPageIndexInt() {
+        if (pageIndex == null) return -1;
+        try { return Integer.parseInt(pageIndex); } catch (NumberFormatException e) { return -1; }
+    }
+
+    public String getTransition() { return transition; }
+
+    public float getCarouselInterval(float def) {
+        return parseFloat(carouselInterval, def);
+    }
 
     public int getLineIndexInt() {
         if (lineIndex == null) return -1;

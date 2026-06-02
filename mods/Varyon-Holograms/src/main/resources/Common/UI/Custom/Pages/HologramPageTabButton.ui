@@ -1,0 +1,14 @@
+Group {
+  Button #PageTabButton {
+    Anchor: (Width: 40, Height: 28, Right: 4);
+    Padding: (Horizontal: 2, Vertical: 1);
+    Background: #2a3544;
+    Style: (
+      Hovered: (Background: #3a4a5e)
+    );
+
+    Label #PageTabLabel {
+      Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+  }
+}

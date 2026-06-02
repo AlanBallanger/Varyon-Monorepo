@@ -34,6 +34,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.holograms.VaryonHologramsPlugin;
 import fr.varyon.holograms.animation.AnimationData;
 import fr.varyon.holograms.animation.HologramAnimGroup;
+import fr.varyon.holograms.carousel.CarouselManager;
 import org.joml.Vector3d;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -69,18 +70,23 @@ public class HologramManager {
     private final Set<String> groups = ConcurrentHashMap.newKeySet();
     private final ImageManager imageManager;
     private final BillboardManager billboardManager;
+    private final CarouselManager carouselManager;
+    private final Map<UUID, Map<UUID, Vector3d>> carouselBasePositions = new ConcurrentHashMap<>();
     private boolean spawned = false;
 
     public HologramManager(@Nonnull VaryonHologramsPlugin plugin) {
         this.plugin = plugin;
         this.imageManager = new ImageManager(plugin);
         this.billboardManager = new BillboardManager();
+        this.carouselManager = new CarouselManager(plugin);
         imageManager.initialize();
         billboardManager.start();
+        carouselManager.start();
         plugin.getAnimationManager().start();
     }
 
     public void shutdown() {
+        carouselManager.stop();
         billboardManager.stop();
         plugin.getAnimationManager().stop();
         removeAllHolograms();
@@ -88,6 +94,7 @@ public class HologramManager {
 
     @Nonnull public ImageManager getImageManager() { return imageManager; }
     @Nonnull public BillboardManager getBillboardManager() { return billboardManager; }
+    @Nonnull public CarouselManager getCarouselManager() { return carouselManager; }
 
     @Nonnull
     public Collection<Hologram> getAllHolograms() {
@@ -175,6 +182,27 @@ public class HologramManager {
         updateHologram(hologram);
     }
 
+    public void setHologramLayout(@Nonnull String hologramName, @Nonnull HologramLayout layout) {
+        Hologram hologram = getHologram(hologramName);
+        if (hologram == null) {
+            throw new IllegalArgumentException("Hologramme introuvable: " + hologramName);
+        }
+        hologram.setLayout(layout);
+        updateHologram(hologram);
+    }
+
+    public void setHologramCarousel(@Nonnull String hologramName, boolean enabled,
+                                     float intervalSeconds, @Nonnull CarouselTransition transition) {
+        Hologram hologram = getHologram(hologramName);
+        if (hologram == null) {
+            throw new IllegalArgumentException("Hologramme introuvable: " + hologramName);
+        }
+        hologram.setCarouselEnabled(enabled);
+        hologram.setCarouselIntervalSeconds(intervalSeconds);
+        hologram.setCarouselTransition(transition);
+        updateHologram(hologram);
+    }
+
     public void setHologramGroup(@Nonnull String hologramName, @Nullable String groupPath) {
         Hologram hologram = getHologram(hologramName);
         if (hologram == null) {
@@ -244,38 +272,125 @@ public class HologramManager {
                 if (chunkRef == null || !chunkRef.isValid()) { LOGGER.at(Level.WARNING).log("[Varyon-Holograms] spawnHologram: chunk non chargé chunkX=%d chunkZ=%d pour %s", chunkX, chunkZ, hologram.getName()); return; }
 
                 hologram.clearLineEntityIds();
-                List<String> lines = hologram.getLines();
-                double yOffset = 0;
-                Vector3d anchor = new Vector3d(pos);
-                List<HologramAnimGroup.Member> animMembers = new ArrayList<>();
-
-                for (int i = 0; i < lines.size(); i++) {
-                    String line = lines.get(i);
-                    HologramLineType type = HologramLineType.fromLine(line);
-                    if (i > 0) yOffset -= hologram.getLineSpacing() * (type == HologramLineType.TEXT ? 1 : 1.5);
-                    Vector3d linePos = new Vector3d(pos.x, pos.y + yOffset, pos.z);
-                    float lineScale = resolveLineScale(line, type);
-
-                    UUID entityId = switch (type) {
-                        case IMAGE -> spawnImageLine(linePos, line, hologram, world);
-                        case ITEM  -> spawnItemLine(linePos, line, world);
-                        default    -> spawnTextLine(linePos, line, world);
-                    };
-
-                    if (entityId != null) {
-                        hologram.addLineEntityId(entityId);
-                        Vector3d offset = new Vector3d(
-                            linePos.x - anchor.x, linePos.y - anchor.y, linePos.z - anchor.z);
-                        animMembers.add(new HologramAnimGroup.Member(
-                            entityId, offset, new org.joml.Vector3f(), lineScale));
-                    }
+                carouselBasePositions.remove(hologram.getId());
+                spawnActivePage(hologram, 0, new Vector3d());
+                if (hologram.isCarouselActive()) {
+                    carouselManager.register(hologram);
+                } else {
+                    carouselManager.unregister(hologram.getId());
                 }
-
-                registerHologramAnimation(hologram, anchor, animMembers);
             } catch (Exception e) {
                 LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur spawn hologram %s: %s", hologram.getName(), e.getMessage());
             }
         });
+    }
+
+    public void spawnActivePage(@Nonnull Hologram hologram, int pageIndex, @Nonnull Vector3d slideOffset) {
+        spawnPageEntities(hologram, pageIndex, slideOffset, true);
+    }
+
+    @Nonnull
+    public List<UUID> spawnPageEntities(@Nonnull Hologram hologram, int pageIndex,
+                                         @Nonnull Vector3d slideOffset, boolean attachToHologram) {
+        World world = findWorld(hologram.getWorldId());
+        if (world == null) return List.of();
+
+        Vector3d pos = hologram.getPosition();
+        Vector3d anchor = new Vector3d(pos);
+        HologramLayout layout = hologram.getLayout();
+        Rotation3f spawnRotation = layout.spawnRotation();
+        org.joml.Vector3f animRotation = layout.animBaseRotationDegrees();
+        List<String> lines = hologram.getPageLines(pageIndex);
+        List<UUID> entityIds = new ArrayList<>();
+        List<HologramAnimGroup.Member> animMembers = new ArrayList<>();
+        Map<UUID, Vector3d> basePositions = new ConcurrentHashMap<>();
+
+        if (attachToHologram) {
+            hologram.clearLineEntityIds();
+        }
+
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            HologramLineType type = HologramLineType.fromLine(line);
+            Vector3d lineOffset = layout.lineOffset(i, hologram.getLineSpacing(), type);
+            Vector3d linePos = new Vector3d(
+                pos.x + lineOffset.x + slideOffset.x,
+                pos.y + lineOffset.y + slideOffset.y,
+                pos.z + lineOffset.z + slideOffset.z);
+            Vector3d centerPos = new Vector3d(
+                pos.x + lineOffset.x,
+                pos.y + lineOffset.y,
+                pos.z + lineOffset.z);
+            float lineScale = resolveLineScale(line, type);
+
+            UUID entityId = switch (type) {
+                case IMAGE -> spawnImageLine(linePos, line, hologram, world, spawnRotation, layout);
+                case ITEM  -> spawnItemLine(linePos, line, world, spawnRotation);
+                default    -> spawnTextLine(linePos, line, world, spawnRotation);
+            };
+
+            if (entityId != null) {
+                entityIds.add(entityId);
+                basePositions.put(entityId, centerPos);
+                if (attachToHologram) {
+                    hologram.addLineEntityId(entityId);
+                }
+                animMembers.add(new HologramAnimGroup.Member(
+                    entityId, lineOffset, animRotation, lineScale));
+            }
+        }
+
+        carouselBasePositions.computeIfAbsent(hologram.getId(), k -> new ConcurrentHashMap<>())
+            .putAll(basePositions);
+        if (attachToHologram && !animMembers.isEmpty()) {
+            registerHologramAnimation(hologram, anchor, animMembers);
+        }
+        return entityIds;
+    }
+
+    public void registerPageAnimation(@Nonnull Hologram hologram, int pageIndex) {
+        Vector3d anchor = new Vector3d(hologram.getPosition());
+        HologramLayout layout = hologram.getLayout();
+        org.joml.Vector3f animRotation = layout.animBaseRotationDegrees();
+        List<HologramAnimGroup.Member> animMembers = new ArrayList<>();
+        List<String> lines = hologram.getPageLines(pageIndex);
+        List<UUID> entityIds = hologram.getLineEntityIds();
+        for (int i = 0; i < entityIds.size() && i < lines.size(); i++) {
+            UUID entityId = entityIds.get(i);
+            HologramLineType type = HologramLineType.fromLine(lines.get(i));
+            Vector3d lineOffset = layout.lineOffset(i, hologram.getLineSpacing(), type);
+            float lineScale = resolveLineScale(lines.get(i), type);
+            animMembers.add(new HologramAnimGroup.Member(entityId, lineOffset, animRotation, lineScale));
+        }
+        if (!animMembers.isEmpty()) {
+            registerHologramAnimation(hologram, anchor, animMembers);
+        }
+    }
+
+    public void despawnActivePage(@Nonnull Hologram hologram) {
+        despawnEntityIds(hologram, hologram.getLineEntityIds());
+        hologram.clearLineEntityIds();
+        carouselBasePositions.remove(hologram.getId());
+        plugin.getAnimationManager().unregisterHologramAnimation(hologram.getId());
+    }
+
+    public void despawnEntityIds(@Nonnull Hologram hologram, @Nonnull List<UUID> entityIds) {
+        World world = findWorld(hologram.getWorldId());
+        if (world == null || entityIds.isEmpty()) return;
+        entityIds.forEach(billboardManager::unregister);
+        Runnable logic = () -> removeEntities(world, entityIds);
+        if (world.isInThread()) logic.run();
+        else world.execute(logic);
+        Map<UUID, Vector3d> bases = carouselBasePositions.get(hologram.getId());
+        if (bases != null) {
+            entityIds.forEach(bases::remove);
+        }
+    }
+
+    @Nonnull
+    public Map<UUID, Vector3d> getCarouselBasePositions(@Nonnull UUID hologramId) {
+        Map<UUID, Vector3d> bases = carouselBasePositions.get(hologramId);
+        return bases != null ? bases : Map.of();
     }
 
     private static float resolveLineScale(@Nonnull String line, @Nonnull HologramLineType type) {
@@ -300,7 +415,8 @@ public class HologramManager {
     }
 
     @Nullable
-    private UUID spawnTextLine(@Nonnull Vector3d position, @Nonnull String text, @Nonnull World world) {
+    private UUID spawnTextLine(@Nonnull Vector3d position, @Nonnull String text,
+                                @Nonnull World world, @Nonnull Rotation3f rotation) {
         try {
             UUID entityUuid = UUID.randomUUID();
             Runnable logic = () -> {
@@ -308,7 +424,7 @@ public class HologramManager {
                     Store<EntityStore> store = world.getEntityStore().getStore();
                     Holder<EntityStore> holder = EntityStore.REGISTRY.newHolder();
                     holder.putComponent(TransformComponent.getComponentType(),
-                        new TransformComponent(new org.joml.Vector3d(position), Rotation3f.ZERO));
+                        new TransformComponent(new org.joml.Vector3d(position), rotation));
                     ProjectileComponent proj = new ProjectileComponent("Projectile");
                     holder.putComponent(ProjectileComponent.getComponentType(), proj);
                     if (proj.getProjectile() == null) proj.initialize();
@@ -332,7 +448,8 @@ public class HologramManager {
     }
 
     @Nullable
-    private UUID spawnItemLine(@Nonnull Vector3d position, @Nonnull String line, @Nonnull World world) {
+    private UUID spawnItemLine(@Nonnull Vector3d position, @Nonnull String line,
+                                @Nonnull World world, @Nonnull Rotation3f rotation) {
         HologramLineType.ItemLineData data = HologramLineType.parseItemLine(line);
         UUID entityUuid = UUID.randomUUID();
         Runnable logic = () -> {
@@ -340,7 +457,7 @@ public class HologramManager {
                 Store<EntityStore> store = world.getEntityStore().getStore();
                 Holder<EntityStore> holder = EntityStore.REGISTRY.newHolder();
                 holder.addComponent(TransformComponent.getComponentType(),
-                    new TransformComponent(new org.joml.Vector3d(position), Rotation3f.ZERO));
+                    new TransformComponent(new org.joml.Vector3d(position), rotation));
 
                 Item item = (Item) Item.getAssetMap().getAsset(data.itemId);
                 if (item == null) {
@@ -387,17 +504,18 @@ public class HologramManager {
 
     @Nullable
     private UUID spawnImageLine(@Nonnull Vector3d position, @Nonnull String line,
-                                 @Nonnull Hologram hologram, @Nonnull World world) {
+                                 @Nonnull Hologram hologram, @Nonnull World world,
+                                 @Nonnull Rotation3f rotation, @Nonnull HologramLayout layout) {
         HologramLineType.ImageLineData data = HologramLineType.parseImageLine(line);
         if (data.imageName.isBlank()) {
             LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Nom d'image vide dans la ligne: %s", line);
-            return spawnTextLine(position, line, world);
+            return spawnTextLine(position, line, world, rotation);
         }
 
         Model model = imageManager.createImageModel(data.imageName, data.scale, data.billboard, data.doubleSided);
         if (model == null) {
             LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Fallback texte pour image '%s' (billboard=%s)", data.imageName, data.billboard);
-            return spawnTextLine(position, "[Image: " + data.imageName + "]", world);
+            return spawnTextLine(position, "[Image: " + data.imageName + "]", world, rotation);
         }
 
         UUID entityUuid = UUID.randomUUID();
@@ -406,7 +524,7 @@ public class HologramManager {
                 Store<EntityStore> store = world.getEntityStore().getStore();
                 Holder<EntityStore> holder = EntityStore.REGISTRY.newHolder();
                 holder.addComponent(TransformComponent.getComponentType(),
-                    new TransformComponent(new org.joml.Vector3d(position), Rotation3f.ZERO));
+                    new TransformComponent(new org.joml.Vector3d(position), rotation));
                 holder.addComponent(UUIDComponent.getComponentType(), new UUIDComponent(entityUuid));
                 holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(model));
                 holder.addComponent(PersistentModel.getComponentType(),
@@ -417,11 +535,14 @@ public class HologramManager {
                 holder.ensureComponent(EntityModule.get().getVisibleComponentType());
                 holder.ensureComponent(EntityStore.REGISTRY.getNonSerializedComponentType());
                 Ref<EntityStore> ref = store.addEntity(holder, AddReason.SPAWN);
-                if (ref != null && !data.billboard) {
+                if (ref != null && layout == HologramLayout.WALL && !data.billboard) {
                     store.ensureComponent(ref, Frozen.getComponentType());
                 }
-                if (ref != null && data.billboard) {
+                if (ref != null && layout == HologramLayout.WALL && data.billboard) {
                     billboardManager.register(entityUuid, hologram.getWorldId(), data.trackingDistance);
+                }
+                if (ref != null && layout == HologramLayout.FLOOR) {
+                    store.ensureComponent(ref, Frozen.getComponentType());
                 }
             } catch (Exception e) {
                 LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur spawn ligne image: %s", e.getMessage());
@@ -435,6 +556,8 @@ public class HologramManager {
         World world = findWorld(hologram.getWorldId());
         List<UUID> entityIds = new ArrayList<>(hologram.getLineEntityIds());
         hologram.clearLineEntityIds();
+        carouselManager.unregister(hologram.getId());
+        carouselBasePositions.remove(hologram.getId());
         plugin.getAnimationManager().unregisterHologramAnimation(hologram.getId());
         entityIds.forEach(billboardManager::unregister);
         if (world != null && !entityIds.isEmpty()) {
@@ -446,6 +569,8 @@ public class HologramManager {
         World world = findWorld(hologram.getWorldId());
         List<UUID> entityIds = new ArrayList<>(hologram.getLineEntityIds());
         hologram.clearLineEntityIds();
+        carouselManager.unregister(hologram.getId());
+        carouselBasePositions.remove(hologram.getId());
         plugin.getAnimationManager().unregisterHologramAnimation(hologram.getId());
         entityIds.forEach(billboardManager::unregister);
         if (world == null || entityIds.isEmpty()) return;
@@ -507,7 +632,11 @@ public class HologramManager {
         world.execute(() -> {
             Store<EntityStore> store = world.getEntityStore().getStore();
             for (Hologram h : toCheck) {
-                boolean needsRespawn = h.getLineEntityIds().isEmpty() && !h.getLines().isEmpty();
+                boolean hasContent = false;
+                for (int p = 0; p < h.getPageCount(); p++) {
+                    if (!h.getPageLines(p).isEmpty()) { hasContent = true; break; }
+                }
+                boolean needsRespawn = h.getLineEntityIds().isEmpty() && hasContent;
                 if (!needsRespawn) {
                     for (UUID entityId : h.getLineEntityIds()) {
                         Ref<EntityStore> ref = ((EntityStore) store.getExternalData()).getRefFromUUID(entityId);
@@ -622,19 +751,24 @@ public class HologramManager {
 
     private static void migrateAnimation(@Nonnull Hologram hologram) {
         if (hologram.getAnimation() == null || hologram.getAnimation().isBlank()) {
-            for (String line : hologram.getLines()) {
-                String anim = HologramLineType.extractAnimationName(line);
-                if (anim != null && !anim.isBlank()) {
-                    hologram.setAnimation(anim);
-                    break;
+            for (int p = 0; p < hologram.getPageCount(); p++) {
+                for (String line : hologram.getPageLines(p)) {
+                    String anim = HologramLineType.extractAnimationName(line);
+                    if (anim != null && !anim.isBlank()) {
+                        hologram.setAnimation(anim);
+                        break;
+                    }
                 }
+                if (hologram.getAnimation() != null && !hologram.getAnimation().isBlank()) break;
             }
         }
-        List<String> cleaned = new ArrayList<>();
-        for (String line : hologram.getLines()) {
-            cleaned.add(HologramLineType.stripAnimation(line));
+        for (int p = 0; p < hologram.getPageCount(); p++) {
+            List<String> cleaned = new ArrayList<>();
+            for (String line : hologram.getPageLines(p)) {
+                cleaned.add(HologramLineType.stripAnimation(line));
+            }
+            hologram.setPageLines(p, cleaned);
         }
-        hologram.setLines(cleaned);
     }
 
     @Nullable
@@ -671,18 +805,42 @@ public class HologramManager {
         sb.append("      \"y\": ").append(h.getPosition().y).append(",\n");
         sb.append("      \"z\": ").append(h.getPosition().z).append(",\n");
         sb.append("      \"lineSpacing\": ").append(h.getLineSpacing()).append(",\n");
-        sb.append("      \"visible\": ").append(h.isVisible()).append(",\n");
-        if (h.getCreatorId() != null) sb.append("      \"creatorId\": \"").append(h.getCreatorId()).append("\",\n");
-        if (h.getGroup() != null) sb.append("      \"group\": \"").append(escJson(h.getGroup())).append("\",\n");
-        if (h.getAnimation() != null) sb.append("      \"animation\": \"").append(escJson(h.getAnimation())).append("\",\n");
-        sb.append("      \"lines\": [");
-        List<String> lines = h.getLines();
+        sb.append("      \"visible\": ").append(h.isVisible());
+        if (h.getCreatorId() != null) sb.append(",\n      \"creatorId\": \"").append(h.getCreatorId()).append("\"");
+        if (h.getGroup() != null) sb.append(",\n      \"group\": \"").append(escJson(h.getGroup())).append("\"");
+        if (h.getAnimation() != null) sb.append(",\n      \"animation\": \"").append(escJson(h.getAnimation())).append("\"");
+        if (h.getLayout() != HologramLayout.WALL) {
+            sb.append(",\n      \"layout\": \"").append(h.getLayout().jsonValue()).append("\"");
+        }
+        if (h.getPageCount() > 1 || h.isCarouselEnabled()) {
+            sb.append(",\n      \"pages\": [\n");
+            for (int p = 0; p < h.getPageCount(); p++) {
+                sb.append("        [");
+                appendLinesJson(sb, h.getPageLines(p));
+                sb.append("]");
+                if (p + 1 < h.getPageCount()) sb.append(',');
+                sb.append('\n');
+            }
+            sb.append("      ]");
+            if (h.isCarouselEnabled()) {
+                sb.append(",\n      \"carouselEnabled\": true");
+                sb.append(",\n      \"carouselIntervalSeconds\": ").append(h.getCarouselIntervalSeconds());
+                sb.append(",\n      \"carouselTransition\": \"").append(h.getCarouselTransition().jsonValue()).append("\"");
+            }
+        } else {
+            sb.append(",\n      \"lines\": [");
+            appendLinesJson(sb, h.getLines());
+            sb.append(']');
+        }
+        sb.append("\n    }");
+        return sb.toString();
+    }
+
+    private static void appendLinesJson(@Nonnull StringBuilder sb, @Nonnull List<String> lines) {
         for (int i = 0; i < lines.size(); i++) {
             sb.append("\"").append(escJson(lines.get(i))).append("\"");
             if (i + 1 < lines.size()) sb.append(", ");
         }
-        sb.append("]\n    }");
-        return sb.toString();
     }
 
     @Nullable
@@ -700,8 +858,23 @@ public class HologramManager {
             UUID creatorId = creatorRaw != null ? UUID.fromString(creatorRaw) : null;
             String group = HologramGroups.normalize(extractStrNullable(body, "group"));
             String animation = extractStrNullable(body, "animation");
+            HologramLayout layout = HologramLayout.parse(extractStrNullable(body, "layout"));
+            List<List<String>> pages = extractPages(body);
             List<String> lines = extractStringArray(body, "lines");
-            return new Hologram(id, name, new Vector3d(x, y, z), worldId, lines, lineSpacing, visible, creatorId, group, animation);
+            if (pages.isEmpty() && !lines.isEmpty()) {
+                pages = new ArrayList<>();
+                pages.add(lines);
+            }
+            if (pages.isEmpty()) {
+                pages = new ArrayList<>();
+                pages.add(new ArrayList<>());
+            }
+            boolean carouselEnabled = extractBool(body, "carouselEnabled");
+            float carouselInterval = (float) extractDouble(body, "carouselIntervalSeconds");
+            if (carouselInterval <= 0f) carouselInterval = 5f;
+            CarouselTransition carouselTransition = CarouselTransition.parse(extractStrNullable(body, "carouselTransition"));
+            return new Hologram(id, name, new Vector3d(x, y, z), worldId, pages, lineSpacing, visible, creatorId,
+                group, animation, layout, carouselEnabled, carouselInterval, carouselTransition);
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur parsing hologram JSON: %s", e.getMessage());
             return null;
@@ -732,6 +905,35 @@ public class HologramManager {
     private static boolean extractBool(String json, String key) {
         Matcher m = Pattern.compile("\"" + key + "\"\\s*:\\s*(true|false)").matcher(json);
         return m.find() && Boolean.parseBoolean(m.group(1));
+    }
+
+    @Nonnull
+    private static List<List<String>> extractPages(@Nonnull String json) {
+        int keyIdx = json.indexOf("\"pages\"");
+        if (keyIdx < 0) return List.of();
+        int start = json.indexOf('[', keyIdx);
+        if (start < 0) return List.of();
+        int depth = 0;
+        int end = -1;
+        for (int i = start; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (c == '[') depth++;
+            else if (c == ']') {
+                depth--;
+                if (depth == 0) { end = i; break; }
+            }
+        }
+        if (end < 0) return List.of();
+        String content = json.substring(start + 1, end);
+        List<List<String>> pages = new ArrayList<>();
+        Matcher innerM = Pattern.compile("\\[([^\\]]*)\\]").matcher(content);
+        while (innerM.find()) {
+            List<String> lines = new ArrayList<>();
+            Matcher itemM = Pattern.compile("\"((?:\\\\.|[^\"])*)\"").matcher(innerM.group(1));
+            while (itemM.find()) lines.add(unescJson(itemM.group(1)));
+            pages.add(lines);
+        }
+        return pages;
     }
 
     @Nonnull
