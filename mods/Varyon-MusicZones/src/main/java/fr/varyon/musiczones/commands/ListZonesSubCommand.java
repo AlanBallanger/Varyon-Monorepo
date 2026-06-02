@@ -1,9 +1,9 @@
 package fr.varyon.musiczones.commands;
 
-import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -13,6 +13,7 @@ import fr.varyon.musiczones.VaryonMusicZonesPlugin;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public final class ListZonesSubCommand extends MusicZoneAdminCommandBase {
 
@@ -21,51 +22,54 @@ public final class ListZonesSubCommand extends MusicZoneAdminCommandBase {
     }
 
     @Override
-    protected void executeSync(@Nonnull CommandContext context) {
+    @Nonnull
+    protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext context) {
         if (!requireMusicZoneAdmin(context)) {
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         if (!context.isPlayer()) {
             context.sendMessage(Message.raw("Joueur uniquement."));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
-        Ref<EntityStore> _ref = context.senderAsPlayerRef();
-        Store<EntityStore> _store = _ref != null ? _ref.getStore() : null;
-        PlayerRef _pr = _store != null ? _store.getComponent(_ref, PlayerRef.getComponentType()) : null;
         VaryonMusicZonesPlugin plugin = VaryonMusicZonesPlugin.getInstance();
         if (plugin == null) {
             context.sendMessage(Message.raw("Plugin non chargé."));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
-        World _w = _pr != null ? Universe.get().getWorld(_pr.getWorldUuid()) : null;
-        String worldName = _w != null ? _w.getName() : "";
-        List<MusicZone> list = plugin.getRepository().zonesForWorld(worldName);
-        if (list.isEmpty()) {
-            context.sendMessage(Message.raw("Aucune zone dans " + worldName + "."));
-            return;
-        }
-        for (MusicZone z : list) {
-            context.sendMessage(Message.raw(
-                    "• "
-                            + z.getId()
-                            + " → "
-                            + z.getMusicFileName()
-                            + " | "
-                            + z.ambienceAssetId()
-                            + " | ["
-                            + fmt(z.getMinX())
-                            + ","
-                            + fmt(z.getMinY())
-                            + ","
-                            + fmt(z.getMinZ())
-                            + "]–["
-                            + fmt(z.getMaxX())
-                            + ","
-                            + fmt(z.getMaxY())
-                            + ","
-                            + fmt(z.getMaxZ())
-                            + "]"));
-        }
+        return onWorld(context, () -> {
+            Ref<EntityStore> ref = context.senderAsPlayerRef();
+            Store<EntityStore> store = ref != null ? ref.getStore() : null;
+            PlayerRef pr = store != null ? store.getComponent(ref, PlayerRef.getComponentType()) : null;
+            World w = pr != null ? Universe.get().getWorld(pr.getWorldUuid()) : null;
+            String worldName = w != null ? w.getName() : "";
+            List<MusicZone> list = plugin.getRepository().zonesForWorld(worldName);
+            if (list.isEmpty()) {
+                context.sendMessage(Message.raw("Aucune zone dans " + worldName + "."));
+                return;
+            }
+            for (MusicZone z : list) {
+                context.sendMessage(Message.raw(
+                        "• "
+                                + z.getId()
+                                + " → "
+                                + z.getMusicFileName()
+                                + " | "
+                                + z.ambienceAssetId()
+                                + " | ["
+                                + fmt(z.getMinX())
+                                + ","
+                                + fmt(z.getMinY())
+                                + ","
+                                + fmt(z.getMinZ())
+                                + "]–["
+                                + fmt(z.getMaxX())
+                                + ","
+                                + fmt(z.getMaxY())
+                                + ","
+                                + fmt(z.getMaxZ())
+                                + "]"));
+            }
+        });
     }
 
     private static String fmt(double v) {

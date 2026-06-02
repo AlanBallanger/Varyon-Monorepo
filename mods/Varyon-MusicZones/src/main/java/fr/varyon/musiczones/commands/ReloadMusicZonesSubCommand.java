@@ -5,6 +5,7 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import fr.varyon.musiczones.VaryonMusicZonesPlugin;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
 
 public final class ReloadMusicZonesSubCommand extends MusicZoneAdminCommandBase {
 
@@ -13,22 +14,24 @@ public final class ReloadMusicZonesSubCommand extends MusicZoneAdminCommandBase 
     }
 
     @Override
-    protected void executeSync(@Nonnull CommandContext context) {
+    @Nonnull
+    protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext context) {
         if (!requireMusicZoneAdmin(context)) {
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         VaryonMusicZonesPlugin plugin = VaryonMusicZonesPlugin.getInstance();
         if (plugin == null) {
             context.sendMessage(Message.raw("Plugin non chargé."));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         plugin.getRepository().load();
         try {
             plugin.rebuildAssetPack();
         } catch (Exception e) {
             context.sendMessage(Message.raw("Échec : " + e.getMessage()));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         context.sendMessage(Message.raw("MusicZones rechargé (" + plugin.getRepository().getZonesReadOnly().size() + " zone(s))."));
+        return CompletableFuture.completedFuture(null);
     }
 }

@@ -13,6 +13,7 @@ import fr.varyon.musiczones.VaryonMusicZonesPlugin;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public final class Pos2SubCommand extends MusicZoneAdminCommandBase {
 
@@ -21,39 +22,41 @@ public final class Pos2SubCommand extends MusicZoneAdminCommandBase {
     }
 
     @Override
-    @SuppressWarnings("removal")
-    protected void executeSync(@Nonnull CommandContext context) {
+    @Nonnull
+    protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext context) {
         if (!requireMusicZoneAdmin(context)) {
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         if (!context.isPlayer()) {
             context.sendMessage(Message.raw("Joueur uniquement."));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
-        Ref<EntityStore> _ref = context.senderAsPlayerRef();
-        Store<EntityStore> _store = _ref != null ? _ref.getStore() : null;
-        PlayerRef _pr = _store != null ? _store.getComponent(_ref, PlayerRef.getComponentType()) : null;
         VaryonMusicZonesPlugin plugin = VaryonMusicZonesPlugin.getInstance();
         if (plugin == null) {
             context.sendMessage(Message.raw("Plugin non chargé."));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
-        Object _tcObj = _store != null ? _store.getComponent(_ref, TransformComponent.getComponentType()) : null;
-        if (!(_tcObj instanceof TransformComponent t)) {
-            context.sendMessage(Message.raw("Transform indisponible."));
-            return;
-        }
-        double x = t.getPosition().x;
-        double y = t.getPosition().y;
-        double z = t.getPosition().z;
-        UUID uuid = _pr != null ? _pr.getUuid() : null;
-        if (uuid == null) {
-            context.sendMessage(Message.raw("UUID indisponible."));
-            return;
-        }
-        World _w = _pr != null ? Universe.get().getWorld(_pr.getWorldUuid()) : null;
-        plugin.setPendingCorner2(_w != null ? _w.getName() : "", uuid, x, y, z);
-        context.sendMessage(Message.raw("pos2 enregistré (" + fmt(x) + ", " + fmt(y) + ", " + fmt(z) + ")."));
+        return onWorld(context, () -> {
+            Ref<EntityStore> ref = context.senderAsPlayerRef();
+            Store<EntityStore> store = ref != null ? ref.getStore() : null;
+            PlayerRef pr = store != null ? store.getComponent(ref, PlayerRef.getComponentType()) : null;
+            Object tcObj = store != null ? store.getComponent(ref, TransformComponent.getComponentType()) : null;
+            if (!(tcObj instanceof TransformComponent t)) {
+                context.sendMessage(Message.raw("Transform indisponible."));
+                return;
+            }
+            UUID uuid = pr != null ? pr.getUuid() : null;
+            if (uuid == null) {
+                context.sendMessage(Message.raw("UUID indisponible."));
+                return;
+            }
+            double x = t.getPosition().x;
+            double y = t.getPosition().y;
+            double z = t.getPosition().z;
+            World w = pr != null ? Universe.get().getWorld(pr.getWorldUuid()) : null;
+            plugin.setPendingCorner2(w != null ? w.getName() : "", uuid, x, y, z);
+            context.sendMessage(Message.raw("pos2 enregistré (" + fmt(x) + ", " + fmt(y) + ", " + fmt(z) + ")."));
+        });
     }
 
     private static String fmt(double v) {

@@ -14,6 +14,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.musiczones.VaryonMusicZonesPlugin;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
 
 public final class RemoveZoneSubCommand extends MusicZoneAdminCommandBase {
 
@@ -25,36 +26,39 @@ public final class RemoveZoneSubCommand extends MusicZoneAdminCommandBase {
     }
 
     @Override
-    protected void executeSync(@Nonnull CommandContext context) {
+    @Nonnull
+    protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext context) {
         if (!requireMusicZoneAdmin(context)) {
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         if (!context.isPlayer()) {
             context.sendMessage(Message.raw("Joueur uniquement."));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
-        Ref<EntityStore> _ref = context.senderAsPlayerRef();
-        Store<EntityStore> _store = _ref != null ? _ref.getStore() : null;
-        PlayerRef _pr = _store != null ? _store.getComponent(_ref, PlayerRef.getComponentType()) : null;
         VaryonMusicZonesPlugin plugin = VaryonMusicZonesPlugin.getInstance();
         if (plugin == null) {
             context.sendMessage(Message.raw("Plugin non chargé."));
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         String zoneId = idArg.get(context).trim();
-        World _w = _pr != null ? Universe.get().getWorld(_pr.getWorldUuid()) : null;
-        String worldName = _w != null ? _w.getName() : "";
-        if (plugin.getRepository().remove(worldName, zoneId)) {
-            plugin.getRepository().save();
-            try {
-                plugin.rebuildAssetPack();
-            } catch (Exception e) {
-                context.sendMessage(Message.raw("Supprimé mais pack audio : " + e.getMessage()));
-                return;
+        return onWorld(context, () -> {
+            Ref<EntityStore> ref = context.senderAsPlayerRef();
+            Store<EntityStore> store = ref != null ? ref.getStore() : null;
+            PlayerRef pr = store != null ? store.getComponent(ref, PlayerRef.getComponentType()) : null;
+            World w = pr != null ? Universe.get().getWorld(pr.getWorldUuid()) : null;
+            String worldName = w != null ? w.getName() : "";
+            if (plugin.getRepository().remove(worldName, zoneId)) {
+                plugin.getRepository().save();
+                try {
+                    plugin.rebuildAssetPack();
+                } catch (Exception e) {
+                    context.sendMessage(Message.raw("Supprimé mais pack audio : " + e.getMessage()));
+                    return;
+                }
+                context.sendMessage(Message.raw("Zone « " + zoneId + " » supprimée."));
+            } else {
+                context.sendMessage(Message.raw("Aucune zone « " + zoneId + " » dans " + worldName + "."));
             }
-            context.sendMessage(Message.raw("Zone « " + zoneId + " » supprimée."));
-        } else {
-            context.sendMessage(Message.raw("Aucune zone « " + zoneId + " » dans " + worldName + "."));
-        }
+        });
     }
 }
