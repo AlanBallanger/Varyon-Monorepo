@@ -79,6 +79,10 @@ public final class MusicZone implements Comparable<MusicZone> {
         return "VaryonMZ_" + sanitizedId() + "_Amb";
     }
 
+    public String musicContainerId() {
+        return "VaryonMZ_" + sanitizedId() + "_MC";
+    }
+
     public String musicOggFileName() {
         return "VaryonMZ_" + sanitizedId() + ".ogg";
     }
@@ -89,20 +93,23 @@ public final class MusicZone implements Comparable<MusicZone> {
 
     public static String sanitizeToken(String raw) {
         if (raw == null || raw.isBlank()) {
-            return "zone";
+            return "Zone";
         }
         StringBuilder b = new StringBuilder();
+        boolean capitalizeNext = true;
         for (int i = 0; i < raw.length(); i++) {
             char c = raw.charAt(i);
             if (Character.isLetterOrDigit(c)) {
-                b.append(Character.toLowerCase(c));
+                b.append(capitalizeNext ? Character.toUpperCase(c) : c);
+                capitalizeNext = false;
             } else if (c == '_' || c == '-' || c == '.') {
                 b.append('_');
+                capitalizeNext = true;
             }
         }
         String s = b.toString().replaceAll("_+", "_");
         if (s.isEmpty() || s.charAt(0) == '_') {
-            return "zone_" + Integer.toHexString(raw.hashCode());
+            return "Zone_" + Integer.toHexString(raw.hashCode());
         }
         if (s.length() > 48) {
             return s.substring(0, 48);

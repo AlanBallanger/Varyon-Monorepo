@@ -12,8 +12,10 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Stream;
 
 final class ZoneMusicAssetGenerator {
@@ -23,15 +25,21 @@ final class ZoneMusicAssetGenerator {
 
     private ZoneMusicAssetGenerator() {}
 
-    static void rebuildPack(JavaPlugin plugin, List<MusicZone> zones) throws IOException {
-        Path packRoot = plugin.getDataDirectory().resolve("generated_pack");
-        if (Files.exists(packRoot, LinkOption.NOFOLLOW_LINKS)) {
-            deleteRecursive(packRoot);
-        }
-        Files.createDirectories(packRoot);
+    static void rebuildPack(JavaPlugin plugin, Path packRoot, List<MusicZone> zones) throws IOException {
+
+        Path oggDestDir = packRoot.resolve("Common").resolve("Music").resolve("VaryonMZ");
+        Path ambDestDir = packRoot.resolve("Server").resolve("Audio").resolve("AmbienceFX").resolve("Music").resolve("Global");
+        Path mcDestDir = packRoot.resolve("Server").resolve("Audio").resolve("MusicContainer").resolve("VaryonMZ");
+        Files.createDirectories(oggDestDir);
+        Files.createDirectories(ambDestDir);
+        Files.createDirectories(mcDestDir);
         ensurePackStubDirectories(packRoot);
 
         Path musicSrc = plugin.getDataDirectory().resolve("music");
+
+        Set<String> expectedOgg = new HashSet<>();
+        Set<String> expectedAmb = new HashSet<>();
+        Set<String> expectedMc = new HashSet<>();
 
         for (MusicZone zone : zones) {
             Path oggSource = resolveMusicFile(musicSrc, zone.getMusicFileName());
@@ -39,35 +47,33 @@ final class ZoneMusicAssetGenerator {
                 LOGGER.atWarning().log("[MusicZones] OGG manquant pour la zone " + zone.getId() + " : " + zone.getMusicFileName());
                 continue;
             }
-            String ambId = zone.ambienceAssetId();
-            Path oggDestDir = packRoot.resolve("Common").resolve("Music").resolve("VaryonMZ");
-            Files.createDirectories(oggDestDir);
-            Path oggDest = oggDestDir.resolve(zone.musicOggFileName());
-            Files.copy(oggSource, oggDest, StandardCopyOption.REPLACE_EXISTING);
+            String oggFileName = zone.musicOggFileName();
+            Files.copy(oggSource, oggDestDir.resolve(oggFileName), StandardCopyOption.REPLACE_EXISTING);
+            expectedOgg.add(oggFileName);
 
-            Path ambPath = packRoot.resolve("Server")
-                    .resolve("Audio")
-                    .resolve("AmbienceFX")
-                    .resolve("Music")
-                    .resolve("Global");
-            Files.createDirectories(ambPath);
-            String ambJson = buildAmbienceFxJson(ambId, zone.musicCommonTrackPath());
-            Files.writeString(ambPath.resolve(ambId + ".json"), ambJson, StandardCharsets.UTF_8);
+            String mcId = zone.musicContainerId();
+            String mcFileName = mcId + ".json";
+            Files.writeString(mcDestDir.resolve(mcFileName), buildMusicContainerJson(zone.musicCommonTrackPath()), StandardCharsets.UTF_8);
+            expectedMc.add(mcFileName);
+
+            String ambId = zone.ambienceAssetId();
+            String ambFileName = ambId + ".json";
+            Files.writeString(ambDestDir.resolve(ambFileName), buildAmbienceFxJson(mcId), StandardCharsets.UTF_8);
+            expectedAmb.add(ambFileName);
         }
+
+        deleteStaleFiles(oggDestDir, expectedOgg);
+        deleteStaleFiles(ambDestDir, expectedAmb);
+        deleteStaleFiles(mcDestDir, expectedMc);
 
         AssetModule am = AssetModule.get();
         if (am == null) {
             LOGGER.atWarning().log("[MusicZones] AssetModule indisponible");
             return;
         }
-        try {
-            if (am.getAssetPack(PACK_ID) != null) {
-                am.unregisterPack(PACK_ID);
-            }
-        } catch (Exception e) {
-            LOGGER.atWarning().withCause(e).log("[MusicZones] unregisterPack");
-        }
-        if (!zones.isEmpty()) {
+
+        if (am.getAssetPack(PACK_ID) == null) {
+            LOGGER.atInfo().log("[MusicZones] registerPack...");
             PluginManifest m = new PluginManifest();
             m.setGroup("fr.varyon");
             m.setName("Varyon-MusicZones-generated");
@@ -79,11 +85,29 @@ final class ZoneMusicAssetGenerator {
             am.registerPack(PACK_ID, packRoot, m, AssetPack.PackSource.MODS);
             am.initPendingStores();
             LOGGER.atInfo().log("[MusicZones] Pack enregistré, zones=" + zones.size());
+        } else {
+            LOGGER.atInfo().log("[MusicZones] Pack déjà enregistré, fichiers mis à jour en place, zones=" + zones.size());
         }
     }
 
-    private static void ensurePackStubDirectories(Path packRoot) throws IOException {
-        Files.createDirectories(packRoot.resolve("Server").resolve("NPC").resolve("Roles"));
+    private static void ensurePackStubDirectories(Path root) throws IOException {
+        Files.createDirectories(root.resolve("Server").resolve("NPC").resolve("Roles"));
+    }
+
+    private static void deleteStaleFiles(Path dir, Set<String> expected) throws IOException {
+        if (!Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        try (Stream<Path> stream = Files.list(dir)) {
+            stream.filter(Files::isRegularFile)
+                    .filter(p -> !expected.contains(p.getFileName().toString()))
+                    .forEach(p -> {
+                        try {
+                            Files.deleteIfExists(p);
+                        } catch (IOException ignored) {
+                        }
+                    });
+        }
     }
 
     private static Path resolveMusicFile(Path musicDir, String name) {
@@ -116,36 +140,22 @@ final class ZoneMusicAssetGenerator {
         return fnStem.equalsIgnoreCase(stem);
     }
 
-    private static String buildAmbienceFxJson(String ambienceId, String commonMusicOggPathUnderCommon) {
+    private static String buildMusicContainerJson(String commonTrackPath) {
         return "{\n"
-                + "  \"Id\": \""
-                + ambienceId
-                + "\",\n"
-                + "  \"Music\": {\n"
-                + "    \"Tracks\": [\n"
-                + "      \""
-                + commonMusicOggPathUnderCommon
+                + "  \"Type\": \"SingleTrack\",\n"
+                + "  \"Track\": \""
+                + commonTrackPath
                 + "\"\n"
-                + "    ],\n"
-                + "    \"Volume\": 1.0\n"
-                + "  },\n"
-                + "  \"Priority\": 100,\n"
-                + "  \"AudioCategory\": \"AudioCat_Music\"\n"
                 + "}\n";
     }
 
-    private static void deleteRecursive(Path root) throws IOException {
-        if (!Files.exists(root)) {
-            return;
-        }
-        try (Stream<Path> walk = Files.walk(root)) {
-            walk.sorted((a, b) -> b.getNameCount() - a.getNameCount())
-                    .forEach(p -> {
-                        try {
-                            Files.deleteIfExists(p);
-                        } catch (IOException ignored) {
-                        }
-                    });
-        }
+    private static String buildAmbienceFxJson(String musicContainerId) {
+        return "{\n"
+                + "  \"MusicContainer\": \""
+                + musicContainerId
+                + "\",\n"
+                + "  \"Priority\": 100,\n"
+                + "  \"AudioCategory\": \"AudioCat_Music\"\n"
+                + "}\n";
     }
 }

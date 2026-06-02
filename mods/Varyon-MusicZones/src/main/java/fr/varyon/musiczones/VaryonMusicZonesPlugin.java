@@ -25,6 +25,8 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
     private MusicZoneRepository repository;
     private final Map<UUID, CornerSession> cornerSessions = new ConcurrentHashMap<>();
     private MusicZoneApplySystem applySystem;
+    private MusicZoneVisualizer visualizer;
+    private Path packRoot;
 
     public VaryonMusicZonesPlugin(@Nonnull JavaPluginInit init) {
         super(init);
@@ -32,6 +34,13 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
 
     public static VaryonMusicZonesPlugin getInstance() {
         return instance;
+    }
+
+    public MusicZoneVisualizer getVisualizer() {
+        if (visualizer == null) {
+            throw new IllegalStateException("Plugin not started");
+        }
+        return visualizer;
     }
 
     public MusicZoneRepository getRepository() {
@@ -51,6 +60,8 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
         }
         applySystem = new MusicZoneApplySystem(this);
         getEntityStoreRegistry().registerSystem(applySystem);
+        visualizer = new MusicZoneVisualizer(this);
+        getEntityStoreRegistry().registerSystem(visualizer);
     }
 
     @Override
@@ -64,7 +75,14 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
         }
         repository.load();
         try {
-            ZoneMusicAssetGenerator.rebuildPack(this, repository.getZonesReadOnly());
+            packRoot = Files.createTempDirectory("VaryonMusicZones");
+            packRoot.toFile().deleteOnExit();
+            LOGGER.atInfo().log("[MusicZones] pack dir=" + packRoot);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[MusicZones] création temp dir");
+        }
+        try {
+            ZoneMusicAssetGenerator.rebuildPack(this, packRoot, repository.getZonesReadOnly());
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[MusicZones] pack initial");
         }
@@ -76,7 +94,14 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
     }
 
     public void rebuildAssetPack() throws Exception {
-        ZoneMusicAssetGenerator.rebuildPack(this, repository.getZonesReadOnly());
+        LOGGER.atInfo().log("[MusicZones] rebuildAssetPack() start, zones=" + repository.getZonesReadOnly().size());
+        try {
+            ZoneMusicAssetGenerator.rebuildPack(this, packRoot, repository.getZonesReadOnly());
+            LOGGER.atInfo().log("[MusicZones] rebuildAssetPack() done");
+        } catch (Throwable t) {
+            LOGGER.atSevere().withCause(t).log("[MusicZones] rebuildAssetPack() FAILED");
+            throw t;
+        }
     }
 
     public void setPendingCorner1(String worldName, UUID playerUuid, double x, double y, double z) {

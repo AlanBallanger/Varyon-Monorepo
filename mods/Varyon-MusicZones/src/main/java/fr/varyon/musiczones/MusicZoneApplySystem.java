@@ -96,7 +96,12 @@ public final class MusicZoneApplySystem extends EntityTickingSystem<EntityStore>
             sendIfChanged(playerRef, tracker, baseline, lastSentIndex);
             return;
         }
-        int idx = AmbienceFX.getAssetMap().getIndex(best.ambienceAssetId());
+        AmbienceFX ambience = AmbienceFX.getAssetMap().getAsset(best.ambienceAssetId());
+        if (ambience == null) {
+            sendIfChanged(playerRef, tracker, baseline, lastSentIndex);
+            return;
+        }
+        int idx = ambience.getMusicContainerIndex();
         if (idx < 0) {
             sendIfChanged(playerRef, tracker, baseline, lastSentIndex);
             return;

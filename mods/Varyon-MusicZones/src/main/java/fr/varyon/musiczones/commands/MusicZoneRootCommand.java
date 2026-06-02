@@ -14,6 +14,7 @@ public final class MusicZoneRootCommand extends AbstractCommandCollection {
         addSubCommand(new RemoveZoneSubCommand());
         addSubCommand(new ListZonesSubCommand());
         addSubCommand(new InfoZoneSubCommand());
+        addSubCommand(new PreviewZoneSubCommand());
         addSubCommand(new ReloadMusicZonesSubCommand());
     }
 

@@ -5,13 +5,10 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class MusicZoneAdminCommandBase extends AbstractAsyncCommand {
@@ -32,16 +29,11 @@ public abstract class MusicZoneAdminCommandBase extends AbstractAsyncCommand {
         return false;
     }
 
-    @Nullable
-    protected static World resolveWorld(CommandContext context) {
+    protected final CompletableFuture<Void> onWorld(CommandContext context, Runnable action) {
         Ref<EntityStore> ref = context.senderAsPlayerRef();
         Store<EntityStore> store = ref != null ? ref.getStore() : null;
-        PlayerRef pr = store != null ? store.getComponent(ref, PlayerRef.getComponentType()) : null;
-        return pr != null ? Universe.get().getWorld(pr.getWorldUuid()) : null;
-    }
-
-    protected final CompletableFuture<Void> onWorld(CommandContext context, Runnable action) {
-        World world = resolveWorld(context);
+        EntityStore entityStore = store != null ? store.getExternalData() : null;
+        World world = entityStore != null ? entityStore.getWorld() : null;
         if (world == null) {
             context.sendMessage(Message.raw("Monde indisponible."));
             return CompletableFuture.completedFuture(null);
