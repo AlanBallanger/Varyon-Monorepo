@@ -43,6 +43,7 @@ public final class HologramCommand extends AbstractCommandCollection {
         super("hologram", "Gérer les hologrammes");
         addAliases(new String[]{"holo", "hg"});
         addSubCommand(new CreateCommand(plugin));
+        addSubCommand(new RenameCommand(plugin));
         addSubCommand(new EditCommand(plugin));
         addSubCommand(new DeleteCommand(plugin));
         addSubCommand(new ListCommand(plugin));
@@ -98,6 +99,40 @@ public final class HologramCommand extends AbstractCommandCollection {
                 context.sendMessage(Message.raw("Hologramme '").color(GREEN)
                     .insert(Message.raw(name).color(YELLOW))
                     .insert(Message.raw("' créé.").color(GREEN)));
+            } catch (Exception e) {
+                context.sendMessage(Message.raw(e.getMessage()).color(RED));
+            }
+        }
+    }
+
+    private static class RenameCommand extends AbstractPlayerCommand {
+        private final VaryonHologramsPlugin plugin;
+        private final RequiredArg<String> oldNameArg;
+        private final RequiredArg<String> newNameArg;
+
+        RenameCommand(@Nonnull VaryonHologramsPlugin plugin) {
+            super("rename", "Renommer un hologramme");
+            this.plugin = plugin;
+            this.oldNameArg = withRequiredArg("ancien", "Nom actuel", (ArgumentType<String>) ArgTypes.STRING);
+            this.newNameArg = withRequiredArg("nouveau", "Nouveau nom", (ArgumentType<String>) ArgTypes.STRING);
+        }
+
+        @Override protected boolean canGeneratePermission() { return false; }
+
+        @Override
+        protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
+                               @Nonnull Ref<EntityStore> ref, @Nonnull PlayerRef playerRef, @Nonnull World world) {
+            if (!perm(context, "varyon.holograms.edit")) {
+                context.sendMessage(Message.raw("Permission refusée.").color(RED)); return;
+            }
+            try {
+                String oldName = oldNameArg.get(context);
+                String newName = newNameArg.get(context);
+                plugin.getHologramManager().renameHologram(oldName, newName);
+                context.sendMessage(Message.raw("Hologramme renommé: ").color(GREEN)
+                    .insert(Message.raw(oldName).color(YELLOW))
+                    .insert(Message.raw(" -> ").color(GREEN))
+                    .insert(Message.raw(newName).color(YELLOW)));
             } catch (Exception e) {
                 context.sendMessage(Message.raw(e.getMessage()).color(RED));
             }

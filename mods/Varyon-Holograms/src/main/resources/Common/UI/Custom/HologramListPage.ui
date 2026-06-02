@@ -4,7 +4,7 @@ $C.@PageOverlay {
   LayoutMode: Middle;
 
   $C.@DecoratedContainer {
-    Anchor: (Width: 620, Height: 520);
+    Anchor: (Width: 620, Height: 700);
 
     #Title {
       Group {
@@ -28,7 +28,7 @@ $C.@PageOverlay {
     }
 
     #Content {
-      Padding: (Top: 4, Bottom: 4, Left: 10, Right: 10);
+      Padding: (Top: 4, Bottom: 10, Left: 10, Right: 10);
       LayoutMode: Top;
 
       Label #EmptyLabel {
@@ -51,8 +51,53 @@ $C.@PageOverlay {
 
       Group { Anchor: (Height: 8); }
 
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 6);
+
+        Label {
+          Text: "Nouveau dossier";
+          Style: (FontSize: 12, TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 110);
+        }
+
+        $C.@TextField #CreateGroupInput {
+          @Anchor = (Width: 160, Height: 32);
+        }
+
+        $C.@SecondaryTextButton #CreateGroupButton {
+          @Text = "CREER";
+          @Anchor = (Width: 120, Height: 32, Left: 6);
+        }
+      }
+
+      Group {
+        LayoutMode: Top;
+        Anchor: (Bottom: 8);
+
+        Label {
+          Text: "Groupe (optionnel)";
+          Style: (FontSize: 12, TextColor: #96a9be);
+          Anchor: (Bottom: 3);
+        }
+
+        $C.@TextField #CreateHoloGroupInput {
+          @Anchor = (Height: 30, Bottom: 6);
+        }
+
+        Label {
+          Text: "Nom (obligatoire)";
+          Style: (FontSize: 12, TextColor: #96a9be);
+          Anchor: (Bottom: 3);
+        }
+
+        $C.@TextField #CreateNameInput {
+          @Anchor = (Height: 30);
+        }
+      }
+
       Button #CreateButton {
-        Anchor: (Left: 0, Right: 0, Height: 44);
+        Anchor: (Left: 0, Right: 0, Height: 40, Top: 6);
         Style: ButtonStyle(
           Default: (Background: (Color: #185a28)),
           Hovered: (Background: (Color: #286a38)),

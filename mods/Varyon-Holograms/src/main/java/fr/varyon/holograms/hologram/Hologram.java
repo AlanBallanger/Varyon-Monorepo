@@ -17,6 +17,8 @@ public class Hologram {
     @Nullable private UUID creatorId;
     private boolean visible;
     private double lineSpacing;
+    @Nullable private String group;
+    @Nullable private String animation;
     @Nonnull private final List<UUID> lineEntityIds;
 
     public Hologram(@Nonnull String name, @Nonnull Vector3d position, @Nonnull UUID worldId) {
@@ -31,7 +33,8 @@ public class Hologram {
     }
 
     public Hologram(@Nonnull UUID id, @Nonnull String name, @Nonnull Vector3d position, @Nonnull UUID worldId,
-                    @Nonnull List<String> lines, double lineSpacing, boolean visible, @Nullable UUID creatorId) {
+                    @Nonnull List<String> lines, double lineSpacing, boolean visible, @Nullable UUID creatorId,
+                    @Nullable String group, @Nullable String animation) {
         this.id = id;
         this.name = name;
         this.position = new Vector3d(position);
@@ -41,6 +44,8 @@ public class Hologram {
         this.lineSpacing = lineSpacing;
         this.visible = visible;
         this.creatorId = creatorId;
+        this.group = group;
+        this.animation = animation;
     }
 
     @Nonnull public UUID getId() { return id; }
@@ -50,11 +55,16 @@ public class Hologram {
     @Nullable public UUID getCreatorId() { return creatorId; }
     public boolean isVisible() { return visible; }
     public double getLineSpacing() { return lineSpacing; }
+    @Nullable public String getGroup() { return group; }
+    @Nullable public String getAnimation() { return animation; }
 
     public void setPosition(@Nonnull Vector3d position) { this.position = new Vector3d(position); }
+    public void setName(@Nonnull String name) { this.name = name; }
     public void setVisible(boolean visible) { this.visible = visible; }
     public void setCreatorId(@Nullable UUID creatorId) { this.creatorId = creatorId; }
     public void setLineSpacing(double lineSpacing) { this.lineSpacing = lineSpacing; }
+    public void setGroup(@Nullable String group) { this.group = group; }
+    public void setAnimation(@Nullable String animation) { this.animation = animation; }
 
     @Nonnull
     public List<String> getLines() { return new ArrayList<>(lines); }

@@ -155,4 +155,30 @@ public enum HologramLineType {
         }
         return null;
     }
+
+    @Nonnull
+    public static String stripAnimation(@Nonnull String line) {
+        HologramLineType type = fromLine(line);
+        if (type == TEXT) {
+            return line;
+        }
+        if (type == IMAGE) {
+            ImageLineData data = parseImageLine(line);
+            StringBuilder sb = new StringBuilder("image:").append(data.imageName);
+            if (data.scale != 1.0f) sb.append(":").append(trimNum(data.scale));
+            if (data.billboard) sb.append(":true");
+            if (data.trackingDistance >= 0) sb.append(":").append(trimNum(data.trackingDistance));
+            if (data.doubleSided) sb.append(":ds");
+            return sb.toString();
+        }
+        ItemLineData data = parseItemLine(line);
+        StringBuilder sb = new StringBuilder("item:").append(data.itemId);
+        if (data.scale != 1.0f) sb.append(":").append(trimNum(data.scale));
+        return sb.toString();
+    }
+
+    private static String trimNum(float value) {
+        if (value == (long) value) return String.valueOf((long) value);
+        return String.valueOf(value);
+    }
 }

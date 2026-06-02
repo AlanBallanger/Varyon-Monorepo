@@ -1,0 +1,21 @@
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 0, Right: 0, Height: 40, Bottom: 2);
+  Background: (Color: #172639);
+  Padding: (Left: 8, Right: 4, Top: 4, Bottom: 4);
+
+  Button #OpenFolderButton {
+    FlexWeight: 1;
+    Style: ButtonStyle(
+      Default: (Background: (Color: #000000(0))),
+      Hovered: (Background: (Color: #000000(0.2))),
+      Pressed: (Background: (Color: #000000(0.3)))
+    );
+    Group {
+      LayoutMode: Middle;
+      Label #GroupLabel {
+        Style: (TextColor: #55aaff, FontSize: 13, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+      }
+    }
+  }
+}

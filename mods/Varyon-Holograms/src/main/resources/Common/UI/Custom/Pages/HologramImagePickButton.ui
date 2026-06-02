@@ -1,0 +1,13 @@
+Group {
+  Button #ImagePickButton {
+    Anchor: (Width: 100, Height: 24, Right: 4, Bottom: 2);
+    Background: #2a3544;
+    Style: (
+      Hovered: (Background: #3a4a5e)
+    );
+
+    Label #ImagePickLabel {
+      Style: (TextColor: #ffffff, FontSize: 10, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+  }
+}

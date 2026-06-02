@@ -1,0 +1,22 @@
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 0, Right: 0, Height: 40, Bottom: 2);
+  Background: (Color: #172639);
+  Padding: (Left: 8, Right: 4, Top: 4, Bottom: 4);
+
+  Button #BackButton {
+    FlexWeight: 1;
+    Style: ButtonStyle(
+      Default: (Background: (Color: #000000(0))),
+      Hovered: (Background: (Color: #000000(0.2))),
+      Pressed: (Background: (Color: #000000(0.3)))
+    );
+    Group {
+      LayoutMode: Middle;
+      Label {
+        Text: "< Retour";
+        Style: (TextColor: #96a9be, FontSize: 13, VerticalAlignment: Center, HorizontalAlignment: Start);
+      }
+    }
+  }
+}

@@ -33,6 +33,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.holograms.VaryonHologramsPlugin;
 import fr.varyon.holograms.animation.AnimationData;
+import fr.varyon.holograms.animation.HologramAnimGroup;
 import org.joml.Vector3d;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -46,6 +47,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -63,6 +66,7 @@ public class HologramManager {
     private final VaryonHologramsPlugin plugin;
     private final Map<UUID, Hologram> holograms = new ConcurrentHashMap<>();
     private final Map<String, UUID> byName = new ConcurrentHashMap<>();
+    private final Set<String> groups = ConcurrentHashMap.newKeySet();
     private final ImageManager imageManager;
     private final BillboardManager billboardManager;
     private boolean spawned = false;
@@ -110,16 +114,90 @@ public class HologramManager {
     @Nonnull
     public Hologram createHologram(@Nonnull String name, @Nonnull Vector3d position,
                                     @Nonnull UUID worldId, @Nullable UUID creatorId) {
-        if (hologramExists(name)) throw new IllegalArgumentException("Un hologramme nommé '" + name + "' existe déjà.");
-        Hologram hologram = new Hologram(name, position, worldId);
+        return createHologram(name, position, worldId, creatorId, null);
+    }
+
+    @Nonnull
+    public Hologram createHologram(@Nonnull String name, @Nonnull Vector3d position,
+                                    @Nonnull UUID worldId, @Nullable UUID creatorId,
+                                    @Nullable String groupPath) {
+        String validName = HologramNames.requireValid(name);
+        if (hologramExists(validName)) {
+            throw new IllegalArgumentException("Un hologramme nommé '" + validName + "' existe déjà.");
+        }
+        String group = HologramGroups.normalize(groupPath);
+        if (group != null) {
+            groups.add(group);
+        }
+        Hologram hologram = new Hologram(validName, position, worldId);
         hologram.setCreatorId(creatorId);
-        hologram.addLine("Hologramme: " + name);
-        hologram.addLine("Utilisez /holo addline " + name + " <texte>");
+        hologram.setGroup(group);
+        hologram.addLine("Nouvel hologramme");
+        hologram.addLine("Editez les lignes ci-dessous");
         holograms.put(hologram.getId(), hologram);
-        byName.put(name.toLowerCase(), hologram.getId());
+        byName.put(validName.toLowerCase(), hologram.getId());
         spawnHologram(hologram);
         saveHolograms();
         return hologram;
+    }
+
+    public void renameHologram(@Nonnull String oldName, @Nonnull String newName) {
+        String validName = HologramNames.requireValid(newName);
+        UUID id = byName.get(oldName.toLowerCase());
+        if (id == null) throw new IllegalArgumentException("Hologramme introuvable: " + oldName);
+        if (hologramExists(validName) && !validName.equalsIgnoreCase(oldName)) {
+            throw new IllegalArgumentException("Le nom '" + validName + "' est déjà utilisé.");
+        }
+        Hologram hologram = holograms.get(id);
+        if (hologram == null) throw new IllegalArgumentException("Hologramme introuvable: " + oldName);
+        byName.remove(oldName.toLowerCase());
+        hologram.setName(validName);
+        byName.put(validName.toLowerCase(), id);
+        saveHolograms();
+    }
+
+    public void createGroup(@Nonnull String groupPath) {
+        String group = HologramGroups.normalize(groupPath);
+        if (group == null) {
+            throw new IllegalArgumentException("Nom de groupe vide.");
+        }
+        groups.add(group);
+        saveHolograms();
+    }
+
+    public void setHologramAnimation(@Nonnull String hologramName, @Nullable String animationName) {
+        Hologram hologram = getHologram(hologramName);
+        if (hologram == null) {
+            throw new IllegalArgumentException("Hologramme introuvable: " + hologramName);
+        }
+        String animation = animationName == null || animationName.isBlank() ? null : animationName.trim();
+        hologram.setAnimation(animation);
+        updateHologram(hologram);
+    }
+
+    public void setHologramGroup(@Nonnull String hologramName, @Nullable String groupPath) {
+        Hologram hologram = getHologram(hologramName);
+        if (hologram == null) {
+            throw new IllegalArgumentException("Hologramme introuvable: " + hologramName);
+        }
+        String group = HologramGroups.normalize(groupPath);
+        if (group != null) {
+            groups.add(group);
+        }
+        hologram.setGroup(group);
+        saveHolograms();
+    }
+
+    @Nonnull
+    public List<String> getSortedGroupPaths() {
+        TreeSet<String> all = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        all.addAll(groups);
+        for (Hologram hologram : holograms.values()) {
+            if (hologram.getGroup() != null && !hologram.getGroup().isBlank()) {
+                all.add(hologram.getGroup());
+            }
+        }
+        return new ArrayList<>(all);
     }
 
     public boolean deleteHologram(@Nonnull String name) {
@@ -168,41 +246,61 @@ public class HologramManager {
                 hologram.clearLineEntityIds();
                 List<String> lines = hologram.getLines();
                 double yOffset = 0;
+                Vector3d anchor = new Vector3d(pos);
+                List<HologramAnimGroup.Member> animMembers = new ArrayList<>();
 
                 for (int i = 0; i < lines.size(); i++) {
                     String line = lines.get(i);
                     HologramLineType type = HologramLineType.fromLine(line);
                     if (i > 0) yOffset -= hologram.getLineSpacing() * (type == HologramLineType.TEXT ? 1 : 1.5);
                     Vector3d linePos = new Vector3d(pos.x, pos.y + yOffset, pos.z);
+                    float lineScale = resolveLineScale(line, type);
 
                     UUID entityId = switch (type) {
                         case IMAGE -> spawnImageLine(linePos, line, hologram, world);
-                        case ITEM  -> spawnItemLine(linePos, line, hologram.getWorldId(), world);
-                        default    -> spawnTextLine(linePos, line, hologram.getWorldId(), world);
+                        case ITEM  -> spawnItemLine(linePos, line, world);
+                        default    -> spawnTextLine(linePos, line, world);
                     };
 
                     if (entityId != null) {
                         hologram.addLineEntityId(entityId);
-                        String animName = HologramLineType.extractAnimationName(line);
-                        if (animName != null) {
-                            AnimationData anim = plugin.getAnimationRegistry().getAnimation(animName);
-                            if (anim != null) {
-                                plugin.getAnimationManager().registerAnimation(entityId, anim, linePos, new org.joml.Vector3f(), 1f);
-                            } else {
-                                LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Animation inconnue: %s", animName);
-                            }
-                        }
+                        Vector3d offset = new Vector3d(
+                            linePos.x - anchor.x, linePos.y - anchor.y, linePos.z - anchor.z);
+                        animMembers.add(new HologramAnimGroup.Member(
+                            entityId, offset, new org.joml.Vector3f(), lineScale));
                     }
                 }
+
+                registerHologramAnimation(hologram, anchor, animMembers);
             } catch (Exception e) {
                 LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur spawn hologram %s: %s", hologram.getName(), e.getMessage());
             }
         });
     }
 
+    private static float resolveLineScale(@Nonnull String line, @Nonnull HologramLineType type) {
+        return switch (type) {
+            case IMAGE -> HologramLineType.parseImageLine(line).scale;
+            case ITEM -> HologramLineType.parseItemLine(line).scale;
+            default -> 1f;
+        };
+    }
+
+    private void registerHologramAnimation(@Nonnull Hologram hologram, @Nonnull Vector3d anchor,
+                                            @Nonnull List<HologramAnimGroup.Member> members) {
+        String animName = hologram.getAnimation();
+        if (animName == null || animName.isBlank() || members.isEmpty()) return;
+        AnimationData animation = plugin.getAnimationRegistry().getAnimation(animName);
+        if (animation == null) {
+            LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Animation inconnue: %s", animName);
+            return;
+        }
+        plugin.getAnimationManager().registerHologramAnimation(
+            hologram.getId(), hologram.getWorldId(), animation, anchor, members);
+    }
+
     @Nullable
-    private UUID spawnTextLine(@Nonnull Vector3d position, @Nonnull String text,
-                                @Nonnull UUID worldId, @Nonnull World world) {
+    private UUID spawnTextLine(@Nonnull Vector3d position, @Nonnull String text, @Nonnull World world) {
         try {
             UUID entityUuid = UUID.randomUUID();
             Runnable logic = () -> {
@@ -234,8 +332,7 @@ public class HologramManager {
     }
 
     @Nullable
-    private UUID spawnItemLine(@Nonnull Vector3d position, @Nonnull String line,
-                                @Nonnull UUID worldId, @Nonnull World world) {
+    private UUID spawnItemLine(@Nonnull Vector3d position, @Nonnull String line, @Nonnull World world) {
         HologramLineType.ItemLineData data = HologramLineType.parseItemLine(line);
         UUID entityUuid = UUID.randomUUID();
         Runnable logic = () -> {
@@ -294,13 +391,13 @@ public class HologramManager {
         HologramLineType.ImageLineData data = HologramLineType.parseImageLine(line);
         if (data.imageName.isBlank()) {
             LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Nom d'image vide dans la ligne: %s", line);
-            return spawnTextLine(position, line, hologram.getWorldId(), world);
+            return spawnTextLine(position, line, world);
         }
 
         Model model = imageManager.createImageModel(data.imageName, data.scale, data.billboard, data.doubleSided);
         if (model == null) {
             LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Fallback texte pour image '%s' (billboard=%s)", data.imageName, data.billboard);
-            return spawnTextLine(position, "[Image: " + data.imageName + "]", hologram.getWorldId(), world);
+            return spawnTextLine(position, "[Image: " + data.imageName + "]", world);
         }
 
         UUID entityUuid = UUID.randomUUID();
@@ -338,10 +435,8 @@ public class HologramManager {
         World world = findWorld(hologram.getWorldId());
         List<UUID> entityIds = new ArrayList<>(hologram.getLineEntityIds());
         hologram.clearLineEntityIds();
-        entityIds.forEach(id -> {
-            billboardManager.unregister(id);
-            plugin.getAnimationManager().unregisterAnimation(id);
-        });
+        plugin.getAnimationManager().unregisterHologramAnimation(hologram.getId());
+        entityIds.forEach(billboardManager::unregister);
         if (world != null && !entityIds.isEmpty()) {
             world.execute(() -> removeEntities(world, entityIds));
         }
@@ -351,10 +446,8 @@ public class HologramManager {
         World world = findWorld(hologram.getWorldId());
         List<UUID> entityIds = new ArrayList<>(hologram.getLineEntityIds());
         hologram.clearLineEntityIds();
-        entityIds.forEach(id -> {
-            billboardManager.unregister(id);
-            plugin.getAnimationManager().unregisterAnimation(id);
-        });
+        plugin.getAnimationManager().unregisterHologramAnimation(hologram.getId());
+        entityIds.forEach(billboardManager::unregister);
         if (world == null || entityIds.isEmpty()) return;
         Runnable logic = () -> removeEntities(world, entityIds);
         try {
@@ -390,6 +483,7 @@ public class HologramManager {
         }
         holograms.clear();
         byName.clear();
+        groups.clear();
         spawned = false;
     }
 
@@ -481,7 +575,13 @@ public class HologramManager {
     public void saveHolograms() {
         Path file = plugin.getDataDirectory().resolve("holograms.json");
         StringBuilder sb = new StringBuilder();
-        sb.append("{\n  \"holograms\": [\n");
+        sb.append("{\n  \"groups\": [");
+        List<String> groupList = getSortedGroupPaths();
+        for (int i = 0; i < groupList.size(); i++) {
+            sb.append("\"").append(escJson(groupList.get(i))).append("\"");
+            if (i + 1 < groupList.size()) sb.append(", ");
+        }
+        sb.append("],\n  \"holograms\": [\n");
         List<Hologram> list = new ArrayList<>(holograms.values());
         for (int i = 0; i < list.size(); i++) {
             sb.append(toJson(list.get(i)));
@@ -503,10 +603,13 @@ public class HologramManager {
         if (!Files.exists(file, LinkOption.NOFOLLOW_LINKS)) return;
         try {
             String json = Files.readString(file, StandardCharsets.UTF_8);
+            groups.clear();
+            groups.addAll(extractStringArray(json, "groups"));
             Matcher m = HOLO_PATTERN.matcher(json);
             while (m.find()) {
                 Hologram h = fromJson(m.group(1));
                 if (h != null) {
+                    migrateAnimation(h);
                     holograms.put(h.getId(), h);
                     byName.put(h.getName().toLowerCase(), h.getId());
                 }
@@ -515,6 +618,23 @@ public class HologramManager {
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("[Varyon-Holograms] Échec chargement holograms: %s", e.getMessage());
         }
+    }
+
+    private static void migrateAnimation(@Nonnull Hologram hologram) {
+        if (hologram.getAnimation() == null || hologram.getAnimation().isBlank()) {
+            for (String line : hologram.getLines()) {
+                String anim = HologramLineType.extractAnimationName(line);
+                if (anim != null && !anim.isBlank()) {
+                    hologram.setAnimation(anim);
+                    break;
+                }
+            }
+        }
+        List<String> cleaned = new ArrayList<>();
+        for (String line : hologram.getLines()) {
+            cleaned.add(HologramLineType.stripAnimation(line));
+        }
+        hologram.setLines(cleaned);
     }
 
     @Nullable
@@ -553,6 +673,8 @@ public class HologramManager {
         sb.append("      \"lineSpacing\": ").append(h.getLineSpacing()).append(",\n");
         sb.append("      \"visible\": ").append(h.isVisible()).append(",\n");
         if (h.getCreatorId() != null) sb.append("      \"creatorId\": \"").append(h.getCreatorId()).append("\",\n");
+        if (h.getGroup() != null) sb.append("      \"group\": \"").append(escJson(h.getGroup())).append("\",\n");
+        if (h.getAnimation() != null) sb.append("      \"animation\": \"").append(escJson(h.getAnimation())).append("\",\n");
         sb.append("      \"lines\": [");
         List<String> lines = h.getLines();
         for (int i = 0; i < lines.size(); i++) {
@@ -576,8 +698,10 @@ public class HologramManager {
             boolean visible = extractBool(body, "visible");
             String creatorRaw = extractStrNullable(body, "creatorId");
             UUID creatorId = creatorRaw != null ? UUID.fromString(creatorRaw) : null;
+            String group = HologramGroups.normalize(extractStrNullable(body, "group"));
+            String animation = extractStrNullable(body, "animation");
             List<String> lines = extractStringArray(body, "lines");
-            return new Hologram(id, name, new Vector3d(x, y, z), worldId, lines, lineSpacing, visible, creatorId);
+            return new Hologram(id, name, new Vector3d(x, y, z), worldId, lines, lineSpacing, visible, creatorId, group, animation);
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur parsing hologram JSON: %s", e.getMessage());
             return null;

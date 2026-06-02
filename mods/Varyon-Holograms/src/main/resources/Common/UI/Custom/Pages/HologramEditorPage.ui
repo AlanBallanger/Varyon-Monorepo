@@ -5,7 +5,7 @@ $C.@PageOverlay {
 }
 
 $C.@Container {
-  Anchor: (Width: 680, Height: 580);
+  Anchor: (Width: 760, Height: 840);
 
   #Title {
     $C.@Title {
@@ -18,102 +18,144 @@ $C.@Container {
 
     Group #InfoSection {
       LayoutMode: Top;
-      Anchor: (Bottom: 10);
+      Anchor: (Bottom: 6);
 
       Group {
         LayoutMode: Left;
-        Anchor: (Bottom: 5);
+        Anchor: (Bottom: 4);
 
         Label {
           Text: "Name:";
-          Style: (RenderBold: true, TextColor: #96a9be);
-          Anchor: (Width: 80);
+          Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 52);
         }
 
-        Label #HologramName {
-          Style: (TextColor: #ffffff, RenderBold: true);
+        $C.@TextField #HologramNameInput {
+          @Anchor = (Height: 28);
           FlexWeight: 1;
+        }
+
+        $C.@TertiaryTextButton #RenameButton {
+          @Text = "OK";
+          @Anchor = (Width: 48, Height: 28, Left: 6);
         }
       }
 
-      Label {
-        Text: "Position:";
-        Style: (RenderBold: true, TextColor: #96a9be);
-        Anchor: (Bottom: 5);
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 4);
+
+        Label {
+          Text: "Groupe:";
+          Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 58);
+        }
+
+        $C.@TextField #HologramGroupInput {
+          @Anchor = (Height: 28);
+          FlexWeight: 1;
+        }
+
+        $C.@TertiaryTextButton #SetGroupButton {
+          @Text = "OK";
+          @Anchor = (Width: 48, Height: 28, Left: 6);
+        }
       }
 
       Group #PositionControls {
         LayoutMode: Left;
-        Anchor: (Bottom: 10);
 
         Label {
-          Text: "X:";
-          Style: (RenderBold: true, TextColor: #ff6666);
-          Anchor: (Width: 20);
+          Text: "Pos";
+          Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 32);
+        }
+
+        Label {
+          Text: "X";
+          Style: (TextColor: #ff6666, VerticalAlignment: Center);
+          Anchor: (Width: 14);
         }
         $C.@SmallSecondaryTextButton #XDownButton {
           @Text = "-";
-          @Anchor = (Width: 28, Height: 28);
+          @Anchor = (Width: 26, Height: 26);
         }
         $C.@TextField #XInput {
-          @Anchor = (Width: 70, Height: 28);
+          @Anchor = (Width: 62, Height: 26);
         }
         $C.@SmallSecondaryTextButton #XUpButton {
           @Text = "+";
-          @Anchor = (Width: 28, Height: 28, Right: 10);
+          @Anchor = (Width: 26, Height: 26, Right: 6);
         }
 
         Label {
-          Text: "Y:";
-          Style: (RenderBold: true, TextColor: #66ff66);
-          Anchor: (Width: 20, Left: 5);
+          Text: "Y";
+          Style: (TextColor: #66ff66, VerticalAlignment: Center);
+          Anchor: (Width: 14, Left: 2);
         }
         $C.@SmallSecondaryTextButton #YDownButton {
           @Text = "-";
-          @Anchor = (Width: 28, Height: 28);
+          @Anchor = (Width: 26, Height: 26);
         }
         $C.@TextField #YInput {
-          @Anchor = (Width: 70, Height: 28);
+          @Anchor = (Width: 62, Height: 26);
         }
         $C.@SmallSecondaryTextButton #YUpButton {
           @Text = "+";
-          @Anchor = (Width: 28, Height: 28, Right: 10);
+          @Anchor = (Width: 26, Height: 26, Right: 6);
         }
 
         Label {
-          Text: "Z:";
-          Style: (RenderBold: true, TextColor: #6666ff);
-          Anchor: (Width: 20, Left: 5);
+          Text: "Z";
+          Style: (TextColor: #6666ff, VerticalAlignment: Center);
+          Anchor: (Width: 14, Left: 2);
         }
         $C.@SmallSecondaryTextButton #ZDownButton {
           @Text = "-";
-          @Anchor = (Width: 28, Height: 28);
+          @Anchor = (Width: 26, Height: 26);
         }
         $C.@TextField #ZInput {
-          @Anchor = (Width: 70, Height: 28);
+          @Anchor = (Width: 62, Height: 26);
         }
         $C.@SmallSecondaryTextButton #ZUpButton {
           @Text = "+";
-          @Anchor = (Width: 28, Height: 28);
+          @Anchor = (Width: 26, Height: 26, Right: 6);
         }
+      }
+    }
 
-        $C.@TertiaryTextButton #SetPositionButton {
-          @Text = "SET";
-          @Anchor = (Width: 80, Left: 10);
+    Group #HologramAnimSection {
+      LayoutMode: Top;
+      Anchor: (Bottom: 6);
+
+      Label #AnimSectionLabel {
+        Text: "Animation";
+        Style: (RenderBold: true, TextColor: #96a9be);
+        Anchor: (Bottom: 4);
+      }
+
+      Group #AnimListContainer {
+        Background: (Color: #0a0f17);
+        Anchor: (Height: 72);
+        Padding: 4;
+
+        Group #AnimList {
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
         }
       }
     }
 
     Label {
-      Text: "LINES";
+      Text: "LIGNES";
       Style: (RenderBold: true, RenderUppercase: true, TextColor: #ffaa00);
-      Anchor: (Bottom: 5);
+      Anchor: (Bottom: 4);
     }
 
     Group #LinesContainer {
       Background: (Color: #0a0f17);
-      Anchor: (Height: 150, Bottom: 10);
-      Padding: 5;
+      Anchor: (Height: 144, Bottom: 6);
+      Padding: 4;
 
       Group #LinesList {
         FlexWeight: 1;
@@ -123,56 +165,206 @@ $C.@Container {
     }
 
     Label #EditModeLabel {
-      Text: "Editing line:";
+      Text: "Nouvelle ligne";
       Style: (RenderBold: true, TextColor: #44aaff);
-      Anchor: (Bottom: 5);
-      Visible: false;
+      Anchor: (Bottom: 4);
     }
 
-    Group #AddSection {
-      LayoutMode: Left;
-      Anchor: (Bottom: 10);
+    Group #LineEditorSection {
+      LayoutMode: Top;
+      Background: (Color: #121825);
+      Padding: (Full: 8);
+      Anchor: (Bottom: 6);
 
-      $C.@TextField #NewLineInput {
-        @Anchor = (Height: 38);
-        FlexWeight: 1;
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 6);
+
+        Label {
+          Text: "Type";
+          Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 40);
+        }
+
+        $C.@SecondaryTextButton #ModeTextButton {
+          @Text = "TEXTE";
+          @Anchor = (Width: 96, Height: 30, Right: 6);
+        }
+
+        $C.@SecondaryTextButton #ModeImageButton {
+          @Text = "IMAGE";
+          @Anchor = (Width: 96, Height: 30, Right: 6);
+        }
+
+        $C.@SecondaryTextButton #ModeItemButton {
+          @Text = "ITEM";
+          @Anchor = (Width: 96, Height: 30);
+        }
       }
 
-      $C.@TertiaryTextButton #AddLineButton {
-        @Text = "ADD";
-        @Anchor = (Left: 8, Width: 100);
+      Group #TextModeSection {
+        LayoutMode: Top;
+        Anchor: (Bottom: 6);
+
+        $C.@TextField #TextContentInput {
+          @Anchor = (Height: 32);
+        }
       }
 
-      $C.@SecondaryTextButton #UpdateLineButton {
-        @Text = "UPDATE";
-        @Anchor = (Left: 8, Width: 80);
-        Visible: false;
+      Group #ImageModeSection {
+        LayoutMode: Top;
+        Anchor: (Bottom: 6);
+
+        Label {
+          Text: "Choisir une image";
+          Style: (RenderBold: true, TextColor: #96a9be);
+          Anchor: (Bottom: 4);
+        }
+
+        Group #ImagePickList {
+          LayoutMode: TopScrolling;
+          Anchor: (Height: 52, Bottom: 4);
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Bottom: 4);
+
+          Label {
+            Text: "Scale";
+            Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+            Anchor: (Width: 40);
+          }
+
+          $C.@SmallSecondaryTextButton #ScaleDownButton {
+            @Text = "-";
+            @Anchor = (Width: 28, Height: 28);
+          }
+
+          $C.@TextField #ScaleInput {
+            @Anchor = (Width: 36, Height: 28);
+          }
+
+          $C.@SmallSecondaryTextButton #ScaleUpButton {
+            @Text = "+";
+            @Anchor = (Width: 28, Height: 28, Right: 10);
+          }
+
+          Button #BillboardButton {
+            Anchor: (Width: 118, Height: 26, Right: 4);
+            Padding: (Horizontal: 2, Vertical: 1);
+            Background: #2a3544;
+            Style: (Hovered: (Background: #3a4a5e));
+
+            Label {
+              Text: "BILLBOARD";
+              Style: (TextColor: #ffffff, FontSize: 10, HorizontalAlignment: Center, VerticalAlignment: Center);
+            }
+          }
+
+          Button #SingleSidedButton {
+            Anchor: (Width: 72, Height: 26, Right: 4);
+            Padding: (Horizontal: 2, Vertical: 1);
+            Background: #2a3544;
+            Style: (Hovered: (Background: #3a4a5e));
+
+            Label {
+              Text: "1 FACE";
+              Style: (TextColor: #ffffff, FontSize: 10, HorizontalAlignment: Center, VerticalAlignment: Center);
+            }
+          }
+
+          Button #DoubleSidedButton {
+            Anchor: (Width: 78, Height: 26);
+            Padding: (Horizontal: 2, Vertical: 1);
+            Background: #2a3544;
+            Style: (Hovered: (Background: #3a4a5e));
+
+            Label {
+              Text: "2 FACES";
+              Style: (TextColor: #ffffff, FontSize: 10, HorizontalAlignment: Center, VerticalAlignment: Center);
+            }
+          }
+        }
       }
 
-      $C.@CancelTextButton #CancelEditButton {
-        @Text = "CANCEL";
-        @Anchor = (Left: 5, Width: 80);
-        Visible: false;
+      Group #ItemModeSection {
+        LayoutMode: Top;
+        Anchor: (Bottom: 6);
+
+        $C.@TextField #ItemIdInput {
+          @Anchor = (Height: 30, Bottom: 4);
+        }
+
+        Group {
+          LayoutMode: Left;
+
+          Label {
+            Text: "Scale";
+            Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+            Anchor: (Width: 40);
+          }
+
+          $C.@SmallSecondaryTextButton #ItemScaleDownButton {
+            @Text = "-";
+            @Anchor = (Width: 28, Height: 28);
+          }
+
+          $C.@TextField #ItemScaleInput {
+            @Anchor = (Width: 50, Height: 28);
+          }
+
+          $C.@SmallSecondaryTextButton #ItemScaleUpButton {
+            @Text = "+";
+            @Anchor = (Width: 28, Height: 28);
+          }
+        }
+      }
+
+      Group {
+        LayoutMode: Left;
+
+        $C.@TertiaryTextButton #AddLineButton {
+          @Text = "AJOUTER";
+          @Anchor = (Width: 120, Height: 34);
+        }
+
+        $C.@SecondaryTextButton #UpdateLineButton {
+          @Text = "VALIDER";
+          @Anchor = (Width: 120, Height: 34, Left: 8);
+          Visible: false;
+        }
+
+        $C.@CancelTextButton #CancelEditButton {
+          @Text = "ANNULER";
+          @Anchor = (Width: 110, Height: 34, Left: 8);
+          Visible: false;
+        }
       }
     }
 
     Group #ButtonSection {
       LayoutMode: Left;
-      Anchor: (Bottom: 15);
+
+      $C.@SecondaryTextButton #BackToListButton {
+        @Text = "RETOUR";
+        @Anchor = (Width: 100, Height: 36);
+      }
 
       $C.@TextButton #MoveHereButton {
         @Text = "MOVE HERE";
-        @Anchor = (Width: 160);
+        @Anchor = (Width: 130, Height: 36, Left: 8);
       }
 
       $C.@CancelTextButton #DeleteButton {
         @Text = "DELETE";
-        @Anchor = (Left: 10, Width: 140);
+        @Anchor = (Left: 8, Width: 110, Height: 36);
       }
 
       $C.@SecondaryTextButton #ExitButton {
         @Text = "EXIT";
-        @Anchor = (Left: 10, Width: 120);
+        @Anchor = (Left: 8, Width: 90, Height: 36);
       }
     }
   }

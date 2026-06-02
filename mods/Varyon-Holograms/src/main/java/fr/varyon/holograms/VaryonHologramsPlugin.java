@@ -25,7 +25,7 @@ public final class VaryonHologramsPlugin extends JavaPlugin {
     private static VaryonHologramsPlugin instance;
 
     private final AnimationRegistry animationRegistry = new AnimationRegistry();
-    private final AnimationManager animationManager = new AnimationManager(this);
+    private final AnimationManager animationManager = new AnimationManager();
     private final PlaceholderIntegration placeholderIntegration = new PlaceholderIntegration();
     private final AtomicBoolean playerInitScheduled = new AtomicBoolean(false);
 
