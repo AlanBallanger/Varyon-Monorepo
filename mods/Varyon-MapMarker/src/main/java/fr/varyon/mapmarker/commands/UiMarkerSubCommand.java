@@ -8,15 +8,15 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import fr.varyon.mapmarker.MarkerEntry;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import fr.varyon.mapmarker.VaryonMapMarkerPlugin;
-import java.util.List;
+import fr.varyon.mapmarker.gui.MarkerListPage;
 import javax.annotation.Nonnull;
 
-public final class ListMarkerSubCommand extends AbstractPlayerCommand {
+public final class UiMarkerSubCommand extends AbstractPlayerCommand {
 
-    public ListMarkerSubCommand() {
-        super("list", "Lister les marqueurs du mod dans le monde courant");
+    public UiMarkerSubCommand() {
+        super("list", "Ouvrir l'interface graphique de gestion des marqueurs");
     }
 
     @Override
@@ -35,26 +35,11 @@ public final class ListMarkerSubCommand extends AbstractPlayerCommand {
             context.sendMessage(Message.raw("Erreur : le plugin n'est pas chargé."));
             return;
         }
-        List<MarkerEntry> markers = plugin.listMarkersInWorld(world);
-        if (markers.isEmpty()) {
-            context.sendMessage(Message.raw("Aucun marqueur Varyon-MapMarker dans ce monde (" + world.getName() + ")."));
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player == null) {
+            context.sendMessage(Message.raw("Erreur : impossible d'ouvrir l'interface."));
             return;
         }
-        context.sendMessage(Message.raw("Marqueurs (monde « " + world.getName() + " ») : " + markers.size()));
-        for (MarkerEntry e : markers) {
-            context.sendMessage(Message.raw(
-                    "— « "
-                            + e.markerName()
-                            + " » | X "
-                            + String.format("%.1f", e.x())
-                            + " Z "
-                            + String.format("%.1f", e.z())
-                            + " | icône "
-                            + e.imageName()
-                            + " | par "
-                            + e.createdByName()
-                            + " | id "
-                            + e.id()));
-        }
+        player.getPageManager().openCustomPage(ref, store, new MarkerListPage(playerRef, plugin, world));
     }
 }

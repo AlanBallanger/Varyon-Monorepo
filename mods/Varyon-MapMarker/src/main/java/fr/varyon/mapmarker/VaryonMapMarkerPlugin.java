@@ -4,7 +4,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
 import org.joml.Vector3d;
-import com.hypixel.hytale.protocol.packets.setup.RequestCommonAssetsRebuild;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
@@ -251,14 +250,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                     .log("[Varyon-MapMarker] Échec warm-up textures MapMarkers pour joueur");
             return;
         }
-        try {
-            if (delivered > 0 && playerRef.getPacketHandler() != null) {
-                playerRef.getPacketHandler().writeNoCache(new RequestCommonAssetsRebuild());
-            }
-        } catch (Exception e) {
-            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                    .log("[Varyon-MapMarker] Échec RequestCommonAssetsRebuild warm-up joueur");
-        }
         debug("Warm-up textures marqueur joueur uuid=%s fichiers_livrés=%s", playerRef.getUuid(), delivered);
     }
 
@@ -276,7 +267,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             return;
         }
         pushMapMarkerPngToAllOnlinePlayers(fileName);
-        requestClientsRebuildCommonAssets();
         debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), playerRef.getUsername(), fileName, markerName);
         try {
             org.joml.Vector3d position = playerRef.getTransform().getPosition();
@@ -303,7 +293,8 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                     (float) position.x,
                     (float) position.z,
                     playerUuid,
-                    displayName));
+                    displayName,
+                    null));
             rebuildManagedMarkersForWorld(world);
             refreshWorldMapTrackers(world);
             debug(
@@ -337,6 +328,101 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         return result;
     }
 
+    public MarkerEntry findMarkerById(@Nonnull String id) {
+        synchronized (savedMarkers) {
+            for (SavedMarker sm : savedMarkers) {
+                if (id.equals(sm.id())) {
+                    String author = sm.createdByName() != null ? sm.createdByName() : "";
+                    return new MarkerEntry(sm.id(), sm.worldName(), sm.imageName(),
+                            sm.markerName(), sm.x(), sm.z(), author, sm.group());
+                }
+            }
+        }
+        return null;
+    }
+
+    public void updateMarkerName(@Nonnull World world, @Nonnull String id, @Nonnull String newName) {
+        SavedMarker existing = null;
+        synchronized (savedMarkers) {
+            for (SavedMarker sm : savedMarkers) {
+                if (id.equals(sm.id())) { existing = sm; break; }
+            }
+        }
+        if (existing == null) return;
+        upsertSavedMarker(new SavedMarker(existing.id(), existing.worldName(), existing.imageName(),
+                newName, existing.x(), existing.z(), existing.createdByUuid(), existing.createdByName(), existing.group()));
+        rebuildManagedMarkersForWorld(world);
+        refreshWorldMapTrackers(world);
+    }
+
+    public void updateMarkerImage(@Nonnull World world, @Nonnull String id, @Nonnull String newImage) {
+        SavedMarker existing = null;
+        synchronized (savedMarkers) {
+            for (SavedMarker sm : savedMarkers) {
+                if (id.equals(sm.id())) { existing = sm; break; }
+            }
+        }
+        if (existing == null) return;
+        Path sourceImage = resolvePngInImages(newImage);
+        if (sourceImage == null) return;
+        String fileName = sourceImage.getFileName().toString();
+        copyImageToMapMarkers(sourceImage, fileName);
+        pushMapMarkerPngToAllOnlinePlayers(fileName);
+        upsertSavedMarker(new SavedMarker(existing.id(), existing.worldName(), fileName,
+                existing.markerName(), existing.x(), existing.z(), existing.createdByUuid(), existing.createdByName(), existing.group()));
+        rebuildManagedMarkersForWorld(world);
+        refreshWorldMapTrackers(world);
+    }
+
+    public void moveMarker(@Nonnull World world, @Nonnull String id, float newX, float newZ) {
+        SavedMarker existing = null;
+        synchronized (savedMarkers) {
+            for (SavedMarker sm : savedMarkers) {
+                if (id.equals(sm.id())) { existing = sm; break; }
+            }
+        }
+        if (existing == null) return;
+        upsertSavedMarker(new SavedMarker(existing.id(), existing.worldName(), existing.imageName(),
+                existing.markerName(), newX, newZ, existing.createdByUuid(), existing.createdByName(), existing.group()));
+        rebuildManagedMarkersForWorld(world);
+        refreshWorldMapTrackers(world);
+    }
+
+    public void updateMarkerGroup(@Nonnull World world, @Nonnull String id, @javax.annotation.Nullable String newGroup) {
+        SavedMarker existing = null;
+        synchronized (savedMarkers) {
+            for (SavedMarker sm : savedMarkers) {
+                if (id.equals(sm.id())) { existing = sm; break; }
+            }
+        }
+        if (existing == null) return;
+        String normalized = (newGroup == null || newGroup.isBlank()) ? null : newGroup.trim();
+        upsertSavedMarker(new SavedMarker(existing.id(), existing.worldName(), existing.imageName(),
+                existing.markerName(), existing.x(), existing.z(), existing.createdByUuid(), existing.createdByName(), normalized));
+    }
+
+    public List<String> listGroupsInWorld(@Nonnull World world) {
+        String wname = world.getName();
+        java.util.TreeSet<String> groups = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        synchronized (savedMarkers) {
+            for (SavedMarker sm : savedMarkers) {
+                if (wname.equals(sm.worldName()) && sm.group() != null && !sm.group().isBlank()) {
+                    groups.add(sm.group());
+                }
+            }
+        }
+        return List.copyOf(groups);
+    }
+
+    public void clearMarkerById(@Nonnull World world, @Nonnull String id) {
+        synchronized (savedMarkers) {
+            savedMarkers.removeIf(sm -> id.equals(sm.id()));
+        }
+        saveSavedMarkers();
+        rebuildManagedMarkersForWorld(world);
+        refreshWorldMapTrackers(world);
+    }
+
     public List<MarkerEntry> findMarkersInWorldByName(@Nonnull World world, String markerName) {
         if (markerName == null || markerName.isBlank()) {
             return List.of();
@@ -354,7 +440,8 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                             sm.markerName(),
                             sm.x(),
                             sm.z(),
-                            author));
+                            author,
+                            sm.group()));
                 }
             }
         }
@@ -376,12 +463,14 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                             sm.markerName(),
                             sm.x(),
                             sm.z(),
-                            author));
+                            author,
+                            sm.group()));
                 }
             }
         }
         out.sort(Comparator
-                .comparing(MarkerEntry::markerName, String.CASE_INSENSITIVE_ORDER)
+                .comparing((MarkerEntry e) -> e.group() != null ? e.group() : "", String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(MarkerEntry::markerName, String.CASE_INSENSITIVE_ORDER)
                 .thenComparing(MarkerEntry::id, String.CASE_INSENSITIVE_ORDER));
         return List.copyOf(out);
     }
@@ -500,26 +589,12 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                 completableFuture.join();
             }
             refreshAllWorldMapTrackers();
-            requestClientsRebuildCommonAssets();
             debug("importSavedMarkers terminé");
             return true;
         } catch (Exception e) {
             ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
                     .log("[Varyon-MapMarker] Échec import des marqueurs sauvegardés");
             return false;
-        }
-    }
-
-    private void requestClientsRebuildCommonAssets() {
-        try {
-            Universe universe = Universe.get();
-            if (universe != null) {
-                universe.broadcastPacketNoCache(new RequestCommonAssetsRebuild());
-                debug("RequestCommonAssetsRebuild diffusé");
-            }
-        } catch (Exception e) {
-            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                    .log("[Varyon-MapMarker] Échec diffusion RequestCommonAssetsRebuild");
         }
     }
 
@@ -941,7 +1016,8 @@ commands_help:
             float x,
             float z,
             UUID createdByUuid,
-            String createdByName) {
+            String createdByName,
+            @javax.annotation.Nullable String group) {
 
         private String toJson() {
             return "    {\n      \"id\": \""
@@ -960,7 +1036,9 @@ commands_help:
                     + (createdByUuid != null ? "\"" + createdByUuid + "\"" : "null")
                     + ",\n      \"createdByName\": \""
                     + SavedMarker.escapeJson(createdByName)
-                    + "\"\n    }";
+                    + "\",\n      \"group\": "
+                    + (group != null ? "\"" + SavedMarker.escapeJson(group) + "\"" : "null")
+                    + "\n    }";
         }
 
         private static SavedMarker fromJsonObject(String jsonObject) {
@@ -972,6 +1050,7 @@ commands_help:
             Float z = SavedMarker.extractFloat(jsonObject, "z");
             String createdByUuidRaw = SavedMarker.extractNullableString(jsonObject, "createdByUuid");
             String createdByName = SavedMarker.extractString(jsonObject, "createdByName");
+            String group = SavedMarker.extractNullableString(jsonObject, "group");
             if (id == null
                     || worldName == null
                     || imageName == null
@@ -985,7 +1064,7 @@ commands_help:
                 UUID uuid = createdByUuidRaw == null || createdByUuidRaw.isBlank()
                         ? null
                         : UUID.fromString(createdByUuidRaw);
-                return new SavedMarker(id, worldName, imageName, markerName, x, z, uuid, createdByName);
+                return new SavedMarker(id, worldName, imageName, markerName, x, z, uuid, createdByName, group);
             } catch (Exception ignored) {
                 return null;
             }
