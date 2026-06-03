@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.holograms.VaryonHologramsPlugin;
 import fr.varyon.holograms.hologram.CarouselTransition;
 import fr.varyon.holograms.hologram.Hologram;
+import fr.varyon.holograms.hologram.HologramFacing;
 import fr.varyon.holograms.hologram.HologramLineFormat;
 import fr.varyon.holograms.hologram.HologramGroups;
 import fr.varyon.holograms.hologram.HologramLayout;
@@ -83,6 +84,7 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         cmd.append("Pages/HologramEditorPage.ui");
         cmd.set("#HologramNameInput.Value", hologram.getName());
         cmd.set("#HologramGroupInput.Value", safeStr(hologram.getGroup()));
+        cmd.set("#WorldLabel.Text", plugin.getHologramManager().getWorldName(hologram));
 
         Vector3d pos = hologram.getPosition();
         cmd.set("#XInput.Value", String.format(Locale.US, "%.1f", pos.x));
@@ -90,6 +92,7 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         cmd.set("#ZInput.Value", String.format(Locale.US, "%.1f", pos.z));
 
         buildLayoutSection(hologram, cmd);
+        buildFacingSection(hologram, cmd);
         buildHologramAnimSection(hologram, cmd, evt);
         buildPagesSection(hologram, cmd, evt);
         buildCarouselSection(hologram, cmd, evt);
@@ -192,6 +195,17 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
                 if (!canEdit) { deny(playerRef, ref, store); return; }
                 HologramLayout layout = parseLayout(data.getLayout());
                 plugin.getHologramManager().setHologramLayout(hologramName, layout);
+                refreshUI(ref, store);
+            }
+            case "setFacing" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                HologramFacing facing = HologramFacing.parse(data.getFacing());
+                plugin.getHologramManager().setHologramFacing(hologramName, facing);
+                refreshUI(ref, store);
+            }
+            case "toggleBillboardGlobal" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                plugin.getHologramManager().setHologramBillboard(hologramName, !hologram.isBillboard());
                 refreshUI(ref, store);
             }
             case "selectAnim" -> {
@@ -348,6 +362,27 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             case "posYDown" -> nudge(hologram, canMove, playerRef, ref, store,  0,   -0.5,  0);
             case "posZUp"   -> nudge(hologram, canMove, playerRef, ref, store,  0,    0,    0.5);
             case "posZDown" -> nudge(hologram, canMove, playerRef, ref, store,  0,    0,   -0.5);
+            case "setPosX" -> {
+                if (!canMove) { deny(playerRef, ref, store); return; }
+                Vector3d cur = hologram.getPosition();
+                plugin.getHologramManager().moveHologram(hologram,
+                    new Vector3d(data.getPosX(cur.x), cur.y, cur.z));
+                refreshUI(ref, store);
+            }
+            case "setPosY" -> {
+                if (!canMove) { deny(playerRef, ref, store); return; }
+                Vector3d cur = hologram.getPosition();
+                plugin.getHologramManager().moveHologram(hologram,
+                    new Vector3d(cur.x, data.getPosY(cur.y), cur.z));
+                refreshUI(ref, store);
+            }
+            case "setPosZ" -> {
+                if (!canMove) { deny(playerRef, ref, store); return; }
+                Vector3d cur = hologram.getPosition();
+                plugin.getHologramManager().moveHologram(hologram,
+                    new Vector3d(cur.x, cur.y, data.getPosZ(cur.z)));
+                refreshUI(ref, store);
+            }
         }
     }
 
@@ -380,6 +415,16 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             EventData.of("Action", "setLayout").append("Layout", "wall"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#LayoutFloorButton",
             EventData.of("Action", "setLayout").append("Layout", "floor"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#FacingNorthButton",
+            EventData.of("Action", "setFacing").append("Facing", "north"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#FacingSouthButton",
+            EventData.of("Action", "setFacing").append("Facing", "south"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#FacingEastButton",
+            EventData.of("Action", "setFacing").append("Facing", "east"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#FacingWestButton",
+            EventData.of("Action", "setFacing").append("Facing", "west"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#BillboardGlobalButton",
+            EventData.of("Action", "toggleBillboardGlobal"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#BackToListButton",
             EventData.of("Action", "backToList"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#MoveHereButton",
@@ -400,6 +445,12 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             EventData.of("Action", "posZUp"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#ZDownButton",
             EventData.of("Action", "posZDown"));
+        evt.addEventBinding(CustomUIEventBindingType.Validating, "#XInput",
+            new EventData().append("Action", "setPosX").append("@X", "#XInput.Value"));
+        evt.addEventBinding(CustomUIEventBindingType.Validating, "#YInput",
+            new EventData().append("Action", "setPosY").append("@Y", "#YInput.Value"));
+        evt.addEventBinding(CustomUIEventBindingType.Validating, "#ZInput",
+            new EventData().append("Action", "setPosZ").append("@Z", "#ZInput.Value"));
     }
 
     private void bindEditorEvents(@Nonnull UIEventBuilder evt) {
@@ -557,6 +608,15 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         cmd.set(selector + ".Background", active ? "#3a6a9e" : "#2a3544");
     }
 
+    private void buildFacingSection(@Nonnull Hologram hologram, @Nonnull UICommandBuilder cmd) {
+        HologramFacing f = hologram.getFacing();
+        cmd.set("#FacingNorthButton.Background", f == HologramFacing.NORTH ? "#3a6a9e" : "#2a3544");
+        cmd.set("#FacingSouthButton.Background", f == HologramFacing.SOUTH ? "#3a6a9e" : "#2a3544");
+        cmd.set("#FacingEastButton.Background",  f == HologramFacing.EAST  ? "#3a6a9e" : "#2a3544");
+        cmd.set("#FacingWestButton.Background",  f == HologramFacing.WEST  ? "#3a6a9e" : "#2a3544");
+        cmd.set("#BillboardGlobalButton.Background", hologram.isBillboard() ? "#3a6a9e" : "#2a3544");
+    }
+
     private void buildHologramAnimSection(@Nonnull Hologram hologram, @Nonnull UICommandBuilder cmd,
                                            @Nonnull UIEventBuilder evt) {
         AnimFamily openFamily = holoAnimPickerFamily != null ? findFamily(holoAnimPickerFamily) : null;
@@ -708,10 +768,12 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         cmd.set("#ZInput.Value", String.format(Locale.US, "%.1f", pos.z));
         cmd.set("#HologramNameInput.Value", hologram.getName());
         cmd.set("#HologramGroupInput.Value", safeStr(hologram.getGroup()));
+        cmd.set("#WorldLabel.Text", plugin.getHologramManager().getWorldName(hologram));
         if (editingPageIndex >= hologram.getPageCount()) {
             editingPageIndex = Math.max(0, hologram.getPageCount() - 1);
         }
         buildLayoutSection(hologram, cmd);
+        buildFacingSection(hologram, cmd);
         buildHologramAnimSection(hologram, cmd, evt);
         buildPagesSection(hologram, cmd, evt);
         buildCarouselSection(hologram, cmd, evt);
@@ -781,6 +843,7 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
     private static HologramLayout parseLayout(@javax.annotation.Nullable String layout) {
         return HologramLayout.parse(layout);
     }
+
 
     @Nonnull
     private static HologramLineFormat.Mode parseMode(@javax.annotation.Nullable String mode) {

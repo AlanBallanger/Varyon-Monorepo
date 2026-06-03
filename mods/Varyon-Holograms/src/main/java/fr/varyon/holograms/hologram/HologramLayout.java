@@ -51,9 +51,15 @@ public enum HologramLayout {
 
     @Nonnull
     public Rotation3f spawnRotation() {
+        return spawnRotationWithFacing(HologramFacing.NORTH);
+    }
+
+    @Nonnull
+    public Rotation3f spawnRotationWithFacing(@Nonnull HologramFacing facing) {
+        float yaw = facing.yawRadians();
         return switch (this) {
-            case WALL -> new Rotation3f();
-            case FLOOR -> new Rotation3f((float) (-Math.PI / 2), 0f, 0f);
+            case WALL -> new Rotation3f(0f, yaw, 0f);
+            case FLOOR -> new Rotation3f((float) (-Math.PI / 2), yaw, 0f);
         };
     }
 

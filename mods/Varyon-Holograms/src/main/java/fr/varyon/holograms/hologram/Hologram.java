@@ -22,6 +22,8 @@ public class Hologram {
     @Nullable private String group;
     @Nullable private String animation;
     @Nonnull private HologramLayout layout;
+    @Nonnull private HologramFacing facing;
+    private boolean billboard;
     private boolean carouselEnabled;
     private float carouselIntervalSeconds;
     @Nonnull private CarouselTransition carouselTransition;
@@ -38,6 +40,8 @@ public class Hologram {
         this.visible = true;
         this.lineSpacing = 0.35;
         this.layout = HologramLayout.WALL;
+        this.facing = HologramFacing.NORTH;
+        this.billboard = false;
         this.carouselEnabled = false;
         this.carouselIntervalSeconds = 5f;
         this.carouselTransition = CarouselTransition.SLIDE_LEFT;
@@ -46,6 +50,7 @@ public class Hologram {
     public Hologram(@Nonnull UUID id, @Nonnull String name, @Nonnull Vector3d position, @Nonnull UUID worldId,
                     @Nonnull List<List<String>> pages, double lineSpacing, boolean visible, @Nullable UUID creatorId,
                     @Nullable String group, @Nullable String animation, @Nonnull HologramLayout layout,
+                    @Nonnull HologramFacing facing, boolean billboard,
                     boolean carouselEnabled, float carouselIntervalSeconds,
                     @Nonnull CarouselTransition carouselTransition) {
         this.id = id;
@@ -63,6 +68,8 @@ public class Hologram {
         this.group = group;
         this.animation = animation;
         this.layout = layout;
+        this.facing = facing;
+        this.billboard = billboard;
         this.carouselEnabled = carouselEnabled;
         this.carouselIntervalSeconds = carouselIntervalSeconds;
         this.carouselTransition = carouselTransition;
@@ -78,6 +85,8 @@ public class Hologram {
     @Nullable public String getGroup() { return group; }
     @Nullable public String getAnimation() { return animation; }
     @Nonnull public HologramLayout getLayout() { return layout; }
+    @Nonnull public HologramFacing getFacing() { return facing; }
+    public boolean isBillboard() { return billboard; }
     public boolean isCarouselEnabled() { return carouselEnabled; }
     public float getCarouselIntervalSeconds() { return carouselIntervalSeconds; }
     @Nonnull public CarouselTransition getCarouselTransition() { return carouselTransition; }
@@ -90,6 +99,8 @@ public class Hologram {
     public void setGroup(@Nullable String group) { this.group = group; }
     public void setAnimation(@Nullable String animation) { this.animation = animation; }
     public void setLayout(@Nonnull HologramLayout layout) { this.layout = layout; }
+    public void setFacing(@Nonnull HologramFacing facing) { this.facing = facing; }
+    public void setBillboard(boolean billboard) { this.billboard = billboard; }
     public void setCarouselEnabled(boolean carouselEnabled) { this.carouselEnabled = carouselEnabled; }
     public void setCarouselIntervalSeconds(float carouselIntervalSeconds) {
         this.carouselIntervalSeconds = Math.max(1f, Math.min(120f, carouselIntervalSeconds));

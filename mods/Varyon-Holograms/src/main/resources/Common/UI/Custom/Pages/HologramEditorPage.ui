@@ -25,9 +25,9 @@ $C.@Container {
         Anchor: (Bottom: 4);
 
         Label {
-          Text: "Name:";
+          Text: "Nom :";
           Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
-          Anchor: (Width: 52);
+          Anchor: (Width: 64);
         }
 
         $C.@TextField #HologramNameInput {
@@ -37,18 +37,13 @@ $C.@Container {
 
         $C.@TertiaryTextButton #RenameButton {
           @Text = "OK";
-          @Anchor = (Width: 48, Height: 28, Left: 6);
+          @Anchor = (Width: 48, Height: 28, Left: 6, Right: 16);
         }
-      }
-
-      Group {
-        LayoutMode: Left;
-        Anchor: (Bottom: 4);
 
         Label {
-          Text: "Groupe:";
+          Text: "Groupe :";
           Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
-          Anchor: (Width: 58);
+          Anchor: (Width: 80);
         }
 
         $C.@TextField #HologramGroupInput {
@@ -59,6 +54,22 @@ $C.@Container {
         $C.@TertiaryTextButton #SetGroupButton {
           @Text = "OK";
           @Anchor = (Width: 48, Height: 28, Left: 6);
+        }
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 4);
+
+        Label {
+          Text: "Monde :";
+          Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+          Anchor: (Width: 80);
+        }
+
+        Label #WorldLabel {
+          Text: "";
+          Style: (TextColor: #ffffff, VerticalAlignment: Center);
         }
       }
 
@@ -128,13 +139,13 @@ $C.@Container {
         Anchor: (Bottom: 4);
 
         Label {
-          Text: "Orientation";
+          Text: "Orientation :";
           Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
-          Anchor: (Width: 72);
+          Anchor: (Width: 110);
         }
 
         Button #LayoutWallButton {
-          Anchor: (Width: 88, Height: 28, Right: 6);
+          Anchor: (Width: 72, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
           Style: (Hovered: (Background: #3a4a5e));
@@ -146,13 +157,73 @@ $C.@Container {
         }
 
         Button #LayoutFloorButton {
-          Anchor: (Width: 88, Height: 28);
+          Anchor: (Width: 72, Height: 28, Right: 16);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
           Style: (Hovered: (Background: #3a4a5e));
 
           Label {
             Text: "SOL";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #FacingNorthButton {
+          Anchor: (Width: 58, Height: 28, Right: 4);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "NORD";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #FacingSouthButton {
+          Anchor: (Width: 58, Height: 28, Right: 4);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "SUD";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #FacingEastButton {
+          Anchor: (Width: 58, Height: 28, Right: 4);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "EST";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #FacingWestButton {
+          Anchor: (Width: 58, Height: 28, Right: 16);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "OUEST";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #BillboardGlobalButton {
+          Anchor: (Width: 130, Height: 28);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e));
+
+          Label {
+            Text: "SUIT DU REGARD";
             Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
           }
         }

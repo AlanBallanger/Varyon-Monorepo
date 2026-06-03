@@ -191,6 +191,34 @@ public class HologramManager {
         updateHologram(hologram);
     }
 
+    public void setHologramBillboard(@Nonnull String hologramName, boolean billboard) {
+        Hologram hologram = getHologram(hologramName);
+        if (hologram == null) {
+            throw new IllegalArgumentException("Hologramme introuvable: " + hologramName);
+        }
+        hologram.setBillboard(billboard);
+        updateHologram(hologram);
+    }
+
+    public void setHologramFacing(@Nonnull String hologramName, @Nonnull HologramFacing facing) {
+        Hologram hologram = getHologram(hologramName);
+        if (hologram == null) {
+            throw new IllegalArgumentException("Hologramme introuvable: " + hologramName);
+        }
+        hologram.setFacing(facing);
+        updateHologram(hologram);
+    }
+
+    @Nonnull
+    public String getWorldName(@Nonnull Hologram hologram) {
+        World world = findWorld(hologram.getWorldId());
+        if (world == null) return hologram.getWorldId().toString().substring(0, 8) + "…";
+        String display = world.getWorldConfig().getDisplayName();
+        if (display != null && !display.isBlank()) return display;
+        String folderName = world.getName();
+        return (folderName != null && !folderName.isBlank()) ? folderName : hologram.getWorldId().toString().substring(0, 8) + "…";
+    }
+
     public void setHologramCarousel(@Nonnull String hologramName, boolean enabled,
                                      float intervalSeconds, @Nonnull CarouselTransition transition) {
         Hologram hologram = getHologram(hologramName);
@@ -298,7 +326,7 @@ public class HologramManager {
         Vector3d pos = hologram.getPosition();
         Vector3d anchor = new Vector3d(pos);
         HologramLayout layout = hologram.getLayout();
-        Rotation3f spawnRotation = layout.spawnRotation();
+        Rotation3f spawnRotation = layout.spawnRotationWithFacing(hologram.getFacing());
         org.joml.Vector3f animRotation = layout.animBaseRotationDegrees();
         List<String> lines = hologram.getPageLines(pageIndex);
         List<UUID> entityIds = new ArrayList<>();
@@ -334,6 +362,9 @@ public class HologramManager {
                 basePositions.put(entityId, centerPos);
                 if (attachToHologram) {
                     hologram.addLineEntityId(entityId);
+                }
+                if (hologram.isBillboard()) {
+                    billboardManager.register(entityId, hologram.getWorldId(), -1f);
                 }
                 animMembers.add(new HologramAnimGroup.Member(
                     entityId, lineOffset, animRotation, lineScale));
@@ -427,7 +458,6 @@ public class HologramManager {
                         new TransformComponent(new org.joml.Vector3d(position), rotation));
                     ProjectileComponent proj = new ProjectileComponent("Projectile");
                     holder.putComponent(ProjectileComponent.getComponentType(), proj);
-                    if (proj.getProjectile() == null) proj.initialize();
                     holder.ensureComponent(Intangible.getComponentType());
                     holder.addComponent(Nameplate.getComponentType(), new Nameplate(stripColorCodes(text)));
                     holder.addComponent(EntityScaleComponent.getComponentType(), new EntityScaleComponent(1.0f));
@@ -463,7 +493,6 @@ public class HologramManager {
                 if (item == null) {
                     ProjectileComponent proj = new ProjectileComponent("Projectile");
                     holder.putComponent(ProjectileComponent.getComponentType(), proj);
-                    if (proj.getProjectile() == null) proj.initialize();
                     holder.ensureComponent(Intangible.getComponentType());
                     holder.addComponent(Nameplate.getComponentType(), new Nameplate("[Item: " + data.itemId + "]"));
                 } else {
@@ -812,6 +841,12 @@ public class HologramManager {
         if (h.getLayout() != HologramLayout.WALL) {
             sb.append(",\n      \"layout\": \"").append(h.getLayout().jsonValue()).append("\"");
         }
+        if (h.getFacing() != HologramFacing.NORTH) {
+            sb.append(",\n      \"facing\": \"").append(h.getFacing().jsonValue()).append("\"");
+        }
+        if (h.isBillboard()) {
+            sb.append(",\n      \"billboard\": true");
+        }
         if (h.getPageCount() > 1 || h.isCarouselEnabled()) {
             sb.append(",\n      \"pages\": [\n");
             for (int p = 0; p < h.getPageCount(); p++) {
@@ -859,6 +894,8 @@ public class HologramManager {
             String group = HologramGroups.normalize(extractStrNullable(body, "group"));
             String animation = extractStrNullable(body, "animation");
             HologramLayout layout = HologramLayout.parse(extractStrNullable(body, "layout"));
+            HologramFacing facing = HologramFacing.parse(extractStrNullable(body, "facing"));
+            boolean billboard = extractBool(body, "billboard");
             List<List<String>> pages = extractPages(body);
             List<String> lines = extractStringArray(body, "lines");
             if (pages.isEmpty() && !lines.isEmpty()) {
@@ -874,7 +911,7 @@ public class HologramManager {
             if (carouselInterval <= 0f) carouselInterval = 5f;
             CarouselTransition carouselTransition = CarouselTransition.parse(extractStrNullable(body, "carouselTransition"));
             return new Hologram(id, name, new Vector3d(x, y, z), worldId, pages, lineSpacing, visible, creatorId,
-                group, animation, layout, carouselEnabled, carouselInterval, carouselTransition);
+                group, animation, layout, facing, billboard, carouselEnabled, carouselInterval, carouselTransition);
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur parsing hologram JSON: %s", e.getMessage());
             return null;

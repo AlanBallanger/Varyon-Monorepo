@@ -44,6 +44,8 @@ public class HologramEditorEventData {
                 (d, v) -> d.pageIndex = v, d -> d.pageIndex)
             .addField(new KeyedCodec<>("Transition", Codec.STRING),
                 (d, v) -> d.transition = v, d -> d.transition)
+            .addField(new KeyedCodec<>("Facing", Codec.STRING),
+                (d, v) -> d.facing = v, d -> d.facing)
             .addField(new KeyedCodec<>("@CarouselInterval", Codec.STRING),
                 (d, v) -> d.carouselInterval = v, d -> d.carouselInterval)
             .build();
@@ -67,6 +69,7 @@ public class HologramEditorEventData {
     String pageIndex;
     String transition;
     String carouselInterval;
+    String facing;
 
     public String getAction() { return action; }
     public String getMode() { return mode; }
@@ -85,6 +88,7 @@ public class HologramEditorEventData {
     }
 
     public String getTransition() { return transition; }
+    public String getFacing() { return facing; }
 
     public float getCarouselInterval(float def) {
         return parseFloat(carouselInterval, def);
