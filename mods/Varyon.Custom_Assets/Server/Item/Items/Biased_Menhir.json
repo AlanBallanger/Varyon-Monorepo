@@ -1,0 +1,118 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Biased_Menhir.name",
+    "Description": "server.items.Biased_Menhir.description"
+  },
+  "Categories": [
+    "Items.Ingredients"
+  ],
+  "BlockType": {
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Items/Ingredients/Poop.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Weight": 1,
+        "Texture": "Items/Ingredients/Poop_Texture.png"
+      }
+    ],
+    "Group": "",
+    "Flags": {},
+    "RandomRotation": "YawStep1",
+    "Gathering": {
+      "Harvest": {},
+      "Soft": {}
+    },
+    "BlockParticleSetId": "Mud",
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "ParticleColor": "#765222",
+    "Material": "Empty",
+    "HitboxType": "Plant_Small",
+    "Particles": [
+      {
+        "SystemId": "Flies_Poop",
+        "Color": "#ffffff"
+      }
+    ],
+    "BlockSoundSetId": "Mud",
+    "CustomModelScale": 0.75
+  },
+  "ResourceTypes": [
+    {
+      "Id": "Rock"
+    }
+  ],
+  "Recipe": {
+    "TimeSeconds": 4,
+    "Input": [
+      {
+        "ItemId": "Rock_Stone_Cobble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rock_Calcite_Cobble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rock_Aqua_Cobble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rock_Marble_Cobble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rock_Quartzite_Cobble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rock_Sandstone_Red_Cobble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rock_Sandstone_White_Cobble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rock_Shale_Cobble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rock_Slate_Cobble",
+        "Quantity": 100
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Workbench",
+        "Type": "Crafting",
+        "Categories": [
+          "Workbench_Tinkering"
+        ],
+        "RequiredTierLevel": 3
+      }
+    ]
+  },
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 0.8,
+    "Rotation": [
+      10.125,
+      54,
+      16.875
+    ],
+    "Translation": [
+      0,
+      -6.6
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Biased_Menhir.png",
+  "Scale": 1.5,
+  "DropOnDeath": true
+}

@@ -1,0 +1,102 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Call_Posterior.name",
+    "Description": "server.items.Call_Posterior.description"
+  },
+  "Categories": [
+    "Items.Ingredients"
+  ],
+  "BlockType": {
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Items/Ingredients/Poop.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Weight": 1,
+        "Texture": "Items/Ingredients/Poop_Texture.png"
+      }
+    ],
+    "Group": "",
+    "Flags": {},
+    "RandomRotation": "YawStep1",
+    "Gathering": {
+      "Harvest": {},
+      "Soft": {}
+    },
+    "BlockParticleSetId": "Mud",
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "ParticleColor": "#765222",
+    "Material": "Empty",
+    "HitboxType": "Plant_Small",
+    "Particles": [
+      {
+        "SystemId": "Flies_Poop",
+        "Color": "#ffffff"
+      }
+    ],
+    "BlockSoundSetId": "Mud",
+    "CustomModelScale": 0.75
+  },
+  "ResourceTypes": [
+    {
+      "Id": "Rock"
+    }
+  ],
+  "Recipe": {
+    "TimeSeconds": 4,
+    "Input": [
+      {
+        "ItemId": "Wood_Palo_Trunk",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Wood_Jungle_Trunk",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Wood_Aspen_Trunk",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Wood_Bamboo_Trunk",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Wood_Sallow_Trunk",
+        "Quantity": 100
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Workbench",
+        "Type": "Crafting",
+        "Categories": [
+          "Workbench_Tinkering"
+        ],
+        "RequiredTierLevel": 3
+      }
+    ]
+  },
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 0.8,
+    "Rotation": [
+      10.125,
+      54,
+      16.875
+    ],
+    "Translation": [
+      0,
+      -6.6
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Call_Posterior.png",
+  "Scale": 1.5,
+  "DropOnDeath": true
+}

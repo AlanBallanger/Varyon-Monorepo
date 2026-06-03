@@ -1,0 +1,118 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Gravel_Gratin.name",
+    "Description": "server.items.Gravel_Gratin.description"
+  },
+  "Categories": [
+    "Items.Ingredients"
+  ],
+  "BlockType": {
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Items/Ingredients/Poop.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Weight": 1,
+        "Texture": "Items/Ingredients/Poop_Texture.png"
+      }
+    ],
+    "Group": "",
+    "Flags": {},
+    "RandomRotation": "YawStep1",
+    "Gathering": {
+      "Harvest": {},
+      "Soft": {}
+    },
+    "BlockParticleSetId": "Mud",
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "ParticleColor": "#765222",
+    "Material": "Empty",
+    "HitboxType": "Plant_Small",
+    "Particles": [
+      {
+        "SystemId": "Flies_Poop",
+        "Color": "#ffffff"
+      }
+    ],
+    "BlockSoundSetId": "Mud",
+    "CustomModelScale": 0.75
+  },
+  "ResourceTypes": [
+    {
+      "Id": "Rock"
+    }
+  ],
+  "Recipe": {
+    "TimeSeconds": 4,
+    "Input": [
+      {
+        "ItemId": "Rubble_Stone",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rubble_Calcite",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rubble_Marble",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rubble_Quartzite",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rubble_Sandstone_Red",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rubble_Sandstone_White",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rubble_Shale",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Rubble_Slate",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Food_Cheese",
+        "Quantity": 10
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Workbench",
+        "Type": "Crafting",
+        "Categories": [
+          "Workbench_Tinkering"
+        ],
+        "RequiredTierLevel": 3
+      }
+    ]
+  },
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 0.8,
+    "Rotation": [
+      10.125,
+      54,
+      16.875
+    ],
+    "Translation": [
+      0,
+      -6.6
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Gravel_Gratin.png",
+  "Scale": 1.5,
+  "DropOnDeath": true
+}

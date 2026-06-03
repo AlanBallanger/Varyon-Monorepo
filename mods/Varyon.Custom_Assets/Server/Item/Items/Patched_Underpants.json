@@ -1,0 +1,98 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Patched_Underpants.name",
+    "Description": "server.items.Patched_Underpants.description"
+  },
+  "Categories": [
+    "Items.Ingredients"
+  ],
+  "BlockType": {
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Items/Ingredients/Poop.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Weight": 1,
+        "Texture": "Items/Ingredients/Poop_Texture.png"
+      }
+    ],
+    "Group": "",
+    "Flags": {},
+    "RandomRotation": "YawStep1",
+    "Gathering": {
+      "Harvest": {},
+      "Soft": {}
+    },
+    "BlockParticleSetId": "Mud",
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "ParticleColor": "#765222",
+    "Material": "Empty",
+    "HitboxType": "Plant_Small",
+    "Particles": [
+      {
+        "SystemId": "Flies_Poop",
+        "Color": "#ffffff"
+      }
+    ],
+    "BlockSoundSetId": "Mud",
+    "CustomModelScale": 0.75
+  },
+  "ResourceTypes": [
+    {
+      "Id": "Rock"
+    }
+  ],
+  "Recipe": {
+    "TimeSeconds": 4,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Fabric_Scrap_Linen",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Ingredient_Fabric_Scrap_Shadoweave",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Ingredient_Fabric_Scrap_Cindercloth",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Ingredient_Poop",
+        "Quantity": 1
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Workbench",
+        "Type": "Crafting",
+        "Categories": [
+          "Workbench_Tinkering"
+        ],
+        "RequiredTierLevel": 3
+      }
+    ]
+  },
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 0.8,
+    "Rotation": [
+      10.125,
+      54,
+      16.875
+    ],
+    "Translation": [
+      0,
+      -6.6
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Patched_Underpants.png",
+  "Scale": 1.5,
+  "DropOnDeath": true
+}

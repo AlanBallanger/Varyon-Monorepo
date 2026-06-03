@@ -1,0 +1,106 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Crown_Kanda_King.name",
+    "Description": "server.items.Crown_Kanda_King.description"
+  },
+  "Categories": [
+    "Items.Ingredients"
+  ],
+  "BlockType": {
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Items/Ingredients/Poop.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Weight": 1,
+        "Texture": "Items/Ingredients/Poop_Texture.png"
+      }
+    ],
+    "Group": "",
+    "Flags": {},
+    "RandomRotation": "YawStep1",
+    "Gathering": {
+      "Harvest": {},
+      "Soft": {}
+    },
+    "BlockParticleSetId": "Mud",
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "ParticleColor": "#765222",
+    "Material": "Empty",
+    "HitboxType": "Plant_Small",
+    "Particles": [
+      {
+        "SystemId": "Flies_Poop",
+        "Color": "#ffffff"
+      }
+    ],
+    "BlockSoundSetId": "Mud",
+    "CustomModelScale": 0.75
+  },
+  "ResourceTypes": [
+    {
+      "Id": "Rock"
+    }
+  ],
+  "Recipe": {
+    "TimeSeconds": 4,
+    "Input": [
+      {
+        "ItemId": "Rock_Gem_Emerald",
+        "Quantity": 1
+      },
+      {
+        "ItemId": "Rock_Gem_Ruby",
+        "Quantity": 1
+      },
+      {
+        "ItemId": "Rock_Gem_Sapphire",
+        "Quantity": 1
+      },
+      {
+        "ItemId": "Rock_Gem_Topaz",
+        "Quantity": 1
+      },
+      {
+        "ItemId": "Rock_Gem_Diamond",
+        "Quantity": 1
+      },
+      {
+        "ItemId": "Rock_Gem_Zephyr",
+        "Quantity": 1
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Workbench",
+        "Type": "Crafting",
+        "Categories": [
+          "Workbench_Tinkering"
+        ],
+        "RequiredTierLevel": 3
+      }
+    ]
+  },
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 0.8,
+    "Rotation": [
+      10.125,
+      54,
+      16.875
+    ],
+    "Translation": [
+      0,
+      -6.6
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Crown_Kanda_King.png",
+  "Scale": 1.5,
+  "DropOnDeath": true
+}

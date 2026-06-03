@@ -1,0 +1,9 @@
+{
+  "Group": "Varyon",
+  "Name": "Custom_Assets",
+  "Version": "1.0.0",
+  "Description": "Musiques custom Varyon",
+  "Authors": [{ "Name": "Varyon" }],
+  "ServerVersion": "0.5.0",
+  "IncludesAssetPack": true
+}

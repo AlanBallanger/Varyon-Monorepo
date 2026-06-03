@@ -1,0 +1,27 @@
+{
+  "Quality": "Common",
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 2.5,
+    "Rotation": [
+      0,
+      0,
+      0
+    ],
+    "Translation": [
+      -4,
+      -5
+    ]
+  },
+  "Tags": {
+    "Type": [
+      "Ingredient"
+    ]
+  },
+  "Texture": "Items/key_fragment4.png",
+  "Model": "Items/key_fragment.blockymodel",
+  "UsePlayerAnimations": false,
+  "MaxStack": 1000,
+  "DropOnDeath": false,
+  "Icon": "Icons/ItemsGenerated/Key_Fragment4.png"
+}

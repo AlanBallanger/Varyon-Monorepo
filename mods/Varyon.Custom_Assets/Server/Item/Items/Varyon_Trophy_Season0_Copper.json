@@ -1,0 +1,54 @@
+{
+  "Set": "Rock_Gold_Brick",
+  "BlockType": {
+    "CustomModelTexture": [
+      {
+        "Texture": "BlockTextures/Copper.png",
+        "Weight": 1
+      }
+    ],
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Rocks"
+      }
+    },
+    "BlockParticleSetId": "Metal",
+    "Supporting": {
+      "Down": [
+        {
+          "FaceType": "Rock_Beam"
+        }
+      ],
+      "Up": [
+        {
+          "FaceType": "Rock_Beam"
+        }
+      ]
+    },
+    "BlockSoundSetId": "Metal",
+    "ParticleColor": "#feb03f",
+    "DrawType": "Model",
+    "CustomModel": "Blocks/Varyon_S0.blockymodel",
+    "VariantRotation": "NESW"
+  },
+  "Parent": "Rock_Stone_Brick_Beam",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Trophy_Season0_Copper.name",
+    "Description": "server.items.Varyon_Trophy_Season0_Copper.description"
+  },
+  "Icon": "Icons/ItemsGenerated/Varyon_Trophy_Season0_Copper.png",
+  "IconProperties": {
+    "Scale": 0.75,
+    "Rotation": [
+      5,
+      345,
+      0
+    ],
+    "Translation": [
+      0,
+      -17
+    ]
+  },
+  "Quality": "Rare",
+  "MaxStack": 1
+}
