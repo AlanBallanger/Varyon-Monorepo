@@ -13,17 +13,16 @@ public final class ClassXpCurve {
         return 35L * l * (100L + l * l) / 100L;
     }
 
+    private static final int[] TALENT_POINTS_PER_LEVEL = {
+        1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 3
+    };
+
     public static int talentPointsAtLevel(int level) {
         if (level <= 1) return 0;
-        int points = 0;
         int cap = Math.min(level, MAX_LEVEL);
+        int points = 0;
         for (int L = 2; L <= cap; L++) {
-            switch (L) {
-                case 10 -> points += 2;
-                case 20 -> points += 3;
-                case MAX_LEVEL -> points += 4;
-                default -> points += 1;
-            }
+            points += TALENT_POINTS_PER_LEVEL[L - 2];
         }
         return points;
     }

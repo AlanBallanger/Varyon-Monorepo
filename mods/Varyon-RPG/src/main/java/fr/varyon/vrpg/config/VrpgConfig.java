@@ -53,7 +53,13 @@ public final class VrpgConfig {
             "\n" +
             "# Active les logs de debug pour les jauges XP des metiers (ProfessionActiveCard / ProfessionCatalogCard)\n" +
             "# Utile pour diagnostiquer l'affichage des barres de progression\n" +
-            "debug_professions = false\n";
+            "debug_professions = false\n" +
+            "\n" +
+            "[class_xp]\n" +
+            "anti_farm_window = 30\n" +
+            "anti_farm_max_kills = 10\n" +
+            "base_kill_multiplier = 1.0\n" +
+            "min_kill_xp = 1.0\n";
         try {
             Files.createDirectories(path.getParent());
             Files.writeString(path, content);

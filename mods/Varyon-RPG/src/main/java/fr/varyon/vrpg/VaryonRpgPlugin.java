@@ -18,9 +18,13 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import fr.varyon.vrpg.commands.VpaBlastCommand;
+import fr.varyon.vrpg.combat.MobParticipantsTracker;
+import fr.varyon.vrpg.config.ClassXpConfig;
 import fr.varyon.vrpg.config.MobCategoriesConfig;
+import fr.varyon.vrpg.config.TierMappingConfig;
 import fr.varyon.vrpg.config.VrpgConfig;
 import fr.varyon.vrpg.config.XpTableConfig;
+import fr.varyon.vrpg.classes.ClassKillXpSystem;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.commands.VpaCommand;
 import fr.varyon.vrpg.commands.VpaAdminCommand;
@@ -96,6 +100,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
     private ProfessionManager professionManager;
     private ClassManager classManager;
+    private MobParticipantsTracker mobParticipantsTracker;
+    private ClassKillXpSystem classKillXpSystem;
     private MiningHelmet miningHelmet;
     private GuardianStoneManager guardianManager;
     private MinerComboTracker comboTracker;
@@ -159,6 +165,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         VrpgConfig.load(getDataDirectory());
         XpTableConfig.load(getDataDirectory());
         MobCategoriesConfig.load(getDataDirectory());
+        TierMappingConfig.load(getDataDirectory());
+        ClassXpConfig.load(getDataDirectory());
 
         try {
             getCodecRegistry(Interaction.CODEC)
@@ -180,6 +188,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
         try {
             this.classManager = new ClassManager(getDataDirectory());
+            this.mobParticipantsTracker = new MobParticipantsTracker();
+            this.classKillXpSystem = new ClassKillXpSystem(classManager, mobParticipantsTracker);
         } catch (Exception e) {
             LOGGER.atSevere().withCause(e).log("[VaryonRPG] Failed to initialize ClassManager");
         }
@@ -387,6 +397,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     if (maitriseChasseurTracker != null) maitriseChasseurTracker.remove(ref.getUuid());
                     if (maitriseChasseurSpeedSystem != null) maitriseChasseurSpeedSystem.removePlayer(ref.getUuid());
                 }
+                if (ref != null && classKillXpSystem != null) {
+                    classKillXpSystem.cleanup(ref.getUuid());
+                }
                 if (ref != null && classManager != null) {
                     classManager.onPlayerDisconnect(ref.getUuid());
                 }
@@ -538,6 +551,23 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             getEntityStoreRegistry().registerSystem(chasseurKillSystem.new DropOnDeath());
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ChasseurKillSystem");
+        }
+
+        if (mobParticipantsTracker != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(mobParticipantsTracker.createRecorderSystem());
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MobParticipantsTracker");
+            }
+        }
+
+        if (classKillXpSystem != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(classKillXpSystem.new KillPredictor());
+                getEntityStoreRegistry().registerSystem(classKillXpSystem.new ParticipantDeathXp());
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ClassKillXpSystem");
+            }
         }
 
         try {
