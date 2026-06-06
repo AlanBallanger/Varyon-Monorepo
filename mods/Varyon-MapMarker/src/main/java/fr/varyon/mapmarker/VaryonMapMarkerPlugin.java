@@ -44,11 +44,11 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final String SHARED_MARKER_ID_PREFIX = "mk-shared-";
-    private static final String MARKERS_STATE_FILE = "markers.db";
+    private static final String MARKERS_STATE_FILE = "markers.json";
+    private static final String MARKERS_LEGACY_FILE = "markers.db";
     private static final String CONFIG_FILE = "config.yml";
     private static final String MAP_MARKER_CLIENT_TEXTURE_PREFIX = "UI/WorldMap/MapMarkers/";
     private static final Pattern DEBUG_PATTERN = Pattern.compile("(?m)^\\s*debug\\s*:\\s*(true|false)\\s*$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern MARKER_OBJECT_PATTERN = Pattern.compile("\\{(.*?)\\}", Pattern.DOTALL);
     private static VaryonMapMarkerPlugin instance;
     private final List<SavedMarker> savedMarkers = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean debugLogging = true;
@@ -73,17 +73,12 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         ensureDirectories();
         ensureConfigFile();
         loadConfig();
-        extractDefaultBundledImages();
         loadSavedMarkers();
         importSavedMarkers();
         registerMarkerTextureWarmupEvents();
         printStartupBanner();
         debug("Démarrage dataDir=%s", getDataDirectory());
-        debug(
-                "Démarrage terminé images=%s mapmarkers=%s savedMarkers=%s",
-                getImagesDir(),
-                getMapMarkersAssetDir(),
-                savedMarkers.size());
+        debug("Démarrage terminé images=%s savedMarkers=%s", getImagesDir(), savedMarkers.size());
     }
 
     @Override
@@ -94,10 +89,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 
     public Path getImagesDir() {
         return getDataDirectory().resolve("images");
-    }
-
-    public Path getMapMarkersAssetDir() {
-        return getDataDirectory().resolve("Common/UI/WorldMap/MapMarkers");
     }
 
     public Path resolvePngInImages(String imageName) {
@@ -118,17 +109,49 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         }
         final String request = base;
         try (Stream<Path> stream = Files.list(dir)) {
-            return stream.filter(Files::isRegularFile)
+            Path found = stream.filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".png"))
                     .filter(p -> matchesPngRequest(request, p.getFileName().toString()))
                     .min(Comparator.comparing(
                             p -> p.getFileName().toString(), String.CASE_INSENSITIVE_ORDER))
                     .orElse(null);
+            if (found != null) return found;
         } catch (Exception e) {
             ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
                     .log("[Varyon-MapMarker] Échec résolution PNG %s", imageName);
             return null;
         }
+        for (String bundled : getDefaultBundledImageNames()) {
+            if (matchesPngRequest(request, bundled)) {
+                return getImagesDir().resolve(bundled);
+            }
+        }
+        return null;
+    }
+
+    private byte[] readPngBytes(String fileName) {
+        Path file = getImagesDir().resolve(fileName);
+        if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
+            try {
+                return Files.readAllBytes(file);
+            } catch (Exception e) {
+                ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
+                        .log("[Varyon-MapMarker] Échec lecture PNG %s", fileName);
+                return null;
+            }
+        }
+        for (String bundled : getDefaultBundledImageNames()) {
+            if (bundled.equalsIgnoreCase(fileName)) {
+                try (InputStream in = getClass().getClassLoader().getResourceAsStream("default-images/" + bundled)) {
+                    if (in != null) return in.readAllBytes();
+                } catch (Exception e) {
+                    ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
+                            .log("[Varyon-MapMarker] Échec lecture PNG bundlé %s", fileName);
+                }
+                return null;
+            }
+        }
+        return null;
     }
 
     private static boolean matchesPngRequest(String requestedBase, String fileName) {
@@ -160,13 +183,12 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
     }
 
     private void pushMapMarkerPngToAllOnlinePlayers(String pngBaseFileName) {
-        Path file = getMapMarkersAssetDir().resolve(pngBaseFileName);
-        if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
-            debug("pushMapMarkerPng fichier absent %s", file);
-            return;
-        }
         try {
-            byte[] bytes = Files.readAllBytes(file);
+            byte[] bytes = readPngBytes(pngBaseFileName);
+            if (bytes == null) {
+                debug("pushMapMarkerPng PNG introuvable %s", pngBaseFileName);
+                return;
+            }
             String clientPath = mapMarkerClientTexturePath(pngBaseFileName);
             Universe universe = Universe.get();
             if (universe == null) {
@@ -175,7 +197,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             int ok = 0;
             for (World w : universe.getWorlds().values()) {
                 for (PlayerRef ref : w.getPlayerRefs()) {
-                    if (MapMarkerAssetPublisher.deliver(ref, clientPath, bytes, false)) {
+                    if (MapMarkerAssetPublisher.deliver(ref, clientPath, bytes, true)) {
                         ok++;
                     }
                 }
@@ -221,34 +243,24 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         if (playerRef == null) {
             return;
         }
-        Path dir = getMapMarkersAssetDir();
-        if (!Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)) {
-            return;
-        }
         int delivered = 0;
-        try (Stream<Path> stream = Files.list(dir)) {
-            ArrayList<Path> pngs = new ArrayList<>();
-            stream.filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".png"))
-                    .sorted(Comparator.comparing(p -> p.getFileName().toString(), String.CASE_INSENSITIVE_ORDER))
-                    .forEach(pngs::add);
-            for (Path file : pngs) {
-                String base = file.getFileName().toString();
-                try {
-                    byte[] bytes = Files.readAllBytes(file);
-                    if (MapMarkerAssetPublisher.deliver(
-                            playerRef, mapMarkerClientTexturePath(base), bytes, false)) {
-                        delivered++;
-                    }
-                } catch (Exception e) {
-                    ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                            .log("[Varyon-MapMarker] Échec push PNG joueur %s fichier=%s", playerRef.getUuid(), base);
+        for (String name : listAvailablePngs()) {
+            byte[] bytes = readPngBytes(name);
+            if (bytes == null) continue;
+            try {
+                if (MapMarkerAssetPublisher.deliver(playerRef, mapMarkerClientTexturePath(name), bytes, false)) {
+                    delivered++;
                 }
+            } catch (Exception e) {
+                ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
+                        .log("[Varyon-MapMarker] Échec push PNG joueur %s fichier=%s", playerRef.getUuid(), name);
             }
-        } catch (Exception e) {
-            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                    .log("[Varyon-MapMarker] Échec warm-up textures MapMarkers pour joueur");
-            return;
+        }
+        if (delivered > 0) {
+            try {
+                playerRef.getPacketHandler().writeNoCache(
+                    new com.hypixel.hytale.protocol.packets.setup.RequestCommonAssetsRebuild());
+            } catch (Exception ignored) {}
         }
         debug("Warm-up textures marqueur joueur uuid=%s fichiers_livrés=%s", playerRef.getUuid(), delivered);
     }
@@ -261,11 +273,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             return;
         }
         String fileName = sourceImage.getFileName().toString();
-        if (!copyImageToMapMarkers(sourceImage, fileName)) {
-            debug("createSharedMarkerFromPlayer annulé : échec copie image=%s", fileName);
-            playerRef.sendMessage(Message.raw("Erreur : impossible de copier l'image vers la carte."));
-            return;
-        }
         pushMapMarkerPngToAllOnlinePlayers(fileName);
         debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), playerRef.getUsername(), fileName, markerName);
         try {
@@ -315,12 +322,16 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 
     public List<String> listAvailablePngs() {
         ensureDirectories();
+        java.util.TreeSet<String> seen = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         ArrayList<String> result = new ArrayList<>();
+        for (String name : getDefaultBundledImageNames()) {
+            if (seen.add(name)) result.add(name);
+        }
         try (Stream<Path> stream = Files.list(getImagesDir())) {
-            stream.filter(path -> path.getFileName().toString().toLowerCase().endsWith(".png"))
+            stream.filter(path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".png"))
                     .map(path -> path.getFileName().toString())
                     .sorted(String.CASE_INSENSITIVE_ORDER)
-                    .forEach(result::add);
+                    .forEach(name -> { if (seen.add(name)) result.add(name); });
         } catch (Exception e) {
             ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e)).log("[Varyon-MapMarker] Échec lors de la liste des PNG");
         }
@@ -366,7 +377,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         Path sourceImage = resolvePngInImages(newImage);
         if (sourceImage == null) return;
         String fileName = sourceImage.getFileName().toString();
-        copyImageToMapMarkers(sourceImage, fileName);
         pushMapMarkerPngToAllOnlinePlayers(fileName);
         upsertSavedMarker(new SavedMarker(existing.id(), existing.worldName(), fileName,
                 existing.markerName(), existing.x(), existing.z(), existing.createdByUuid(), existing.createdByName(), existing.group()));
@@ -524,20 +534,13 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         try {
             debug("reloadMarkerAssets début");
             ensureDirectories();
-            ArrayList<Path> copied = new ArrayList<>();
             try (Stream<Path> stream = Files.list(getImagesDir())) {
                 stream.filter(path -> path.getFileName().toString().toLowerCase().endsWith(".png"))
-                        .forEach(path -> {
-                            String base = path.getFileName().toString();
-                            if (copyImageToMapMarkers(path, base)) {
-                                copied.add(path);
-                                pushMapMarkerPngToAllOnlinePlayers(base);
-                            }
-                        });
+                        .forEach(path -> pushMapMarkerPngToAllOnlinePlayers(path.getFileName().toString()));
             }
             boolean imported = importSavedMarkers();
-            debug("reloadMarkerAssets fin copiés=%s importOk=%s", copied.size(), imported);
-            return imported && (!copied.isEmpty() || Files.exists(getImagesDir(), LinkOption.NOFOLLOW_LINKS));
+            debug("reloadMarkerAssets fin importOk=%s", imported);
+            return imported;
         } catch (Exception e) {
             ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
                     .log("[Varyon-MapMarker] Échec rechargement des assets marqueurs");
@@ -578,10 +581,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                     }
                     Path source = resolvePngInImages(savedMarker.imageName());
                     if (source != null) {
-                        String base = source.getFileName().toString();
-                        if (copyImageToMapMarkers(source, base)) {
-                            pushMapMarkerPngToAllOnlinePlayers(base);
-                        }
+                        pushMapMarkerPngToAllOnlinePlayers(source.getFileName().toString());
                     }
                 }
             }
@@ -611,8 +611,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 
     private void ensureDirectories() {
         ensureDirectory(getImagesDir());
-        ensureDirectory(getMapMarkersAssetDir());
-        debug("Dossiers prêts images=%s mapmarkers=%s", getImagesDir(), getMapMarkersAssetDir());
+        debug("Dossier prêt images=%s", getImagesDir());
     }
 
     private void ensureDirectory(Path dir) {
@@ -715,49 +714,12 @@ commands_help:
         logInfo("# Varyon-MapMarker démarré");
         logInfo("# Dossier données    : Varyon-MapMarker/");
         logInfo("# PNG dans images/ : " + pngCount);
-        logInfo("# Fichier marqueurs : Varyon-MapMarker/markers.db");
+        logInfo("# Fichier marqueurs : Varyon-MapMarker/markers.json");
         logInfo("# Commandes         : /mapmarker … | /mm …");
         logInfo("################################################################################");
     }
 
-    private void extractDefaultBundledImages() {
-        int extracted = 0;
-        for (String fileName : getDefaultBundledImageNames()) {
-            Path target = getImagesDir().resolve(fileName);
-            if (Files.exists(target, LinkOption.NOFOLLOW_LINKS)) {
-                continue;
-            }
-            try (InputStream in = getClass().getClassLoader().getResourceAsStream("default-images/" + fileName)) {
-                if (in == null) {
-                    continue;
-                }
-                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-                extracted++;
-            } catch (Exception e) {
-                ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                        .log("[Varyon-MapMarker] Échec extraction image par défaut %s", fileName);
-            }
-        }
-        debug("extractDefaultBundledImages extraits=%s", extracted);
-    }
 
-    private boolean copyImageToMapMarkers(Path sourceImage, String fileName) {
-        try {
-            ensureDirectories();
-            if (!Files.exists(sourceImage, LinkOption.NOFOLLOW_LINKS)) {
-                debug("copyImageToMapMarkers annulé : source absente %s", sourceImage);
-                return false;
-            }
-            Path target = getMapMarkersAssetDir().resolve(fileName);
-            Files.copy(sourceImage, target, StandardCopyOption.REPLACE_EXISTING);
-            debug("PNG copié source=%s cible=%s", sourceImage, target);
-            return true;
-        } catch (Exception e) {
-            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                    .log("[Varyon-MapMarker] Échec copie image %s vers MapMarkers", sourceImage);
-            return false;
-        }
-    }
 
     private void refreshWorldMapTrackers(World world) {
         try {
@@ -893,23 +855,59 @@ commands_help:
         saveSavedMarkers();
     }
 
+    private static List<String> extractJsonObjects(String json) {
+        List<String> objects = new ArrayList<>();
+        int depth = 0;
+        int start = -1;
+        boolean inString = false;
+        boolean escape = false;
+        for (int i = 0; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (escape) { escape = false; continue; }
+            if (c == '\\' && inString) { escape = true; continue; }
+            if (c == '"') { inString = !inString; continue; }
+            if (inString) continue;
+            if (c == '{') {
+                depth++;
+                if (depth == 2) start = i;
+            } else if (c == '}') {
+                if (depth == 2 && start >= 0) {
+                    objects.add(json.substring(start + 1, i));
+                    start = -1;
+                }
+                depth--;
+            }
+        }
+        return objects;
+    }
+
     private void loadSavedMarkers() {
         savedMarkers.clear();
         Path stateFile = getMarkersStateFile();
         if (!Files.exists(stateFile, LinkOption.NOFOLLOW_LINKS)) {
-            debug("loadSavedMarkers : fichier absent path=%s", stateFile);
-            return;
+            Path legacy = getDataDirectory().resolve(MARKERS_LEGACY_FILE);
+            if (Files.exists(legacy, LinkOption.NOFOLLOW_LINKS)) {
+                debug("loadSavedMarkers : migration markers.db -> markers.json");
+                stateFile = legacy;
+            } else {
+                debug("loadSavedMarkers : fichier absent path=%s", stateFile);
+                return;
+            }
         }
         try {
             String json = Files.readString(stateFile, StandardCharsets.UTF_8);
-            Matcher matcher = MARKER_OBJECT_PATTERN.matcher(json);
-            while (matcher.find()) {
-                SavedMarker marker = SavedMarker.fromJsonObject(matcher.group(1));
+            for (String obj : extractJsonObjects(json)) {
+                SavedMarker marker = SavedMarker.fromJsonObject(obj);
                 if (marker != null) {
                     savedMarkers.add(marker);
                 }
             }
             debug("loadSavedMarkers terminé total=%s path=%s", savedMarkers.size(), stateFile);
+            if (stateFile.getFileName().toString().equals(MARKERS_LEGACY_FILE)) {
+                saveSavedMarkers();
+                try { Files.delete(stateFile); } catch (Exception ignored) {}
+                debug("loadSavedMarkers migration terminée, markers.db supprimé");
+            }
         } catch (Exception e) {
             ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
                     .log("[Varyon-MapMarker] Échec chargement des marqueurs sauvegardés");

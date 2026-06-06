@@ -11,8 +11,6 @@ import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCu
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
-import com.hypixel.hytale.server.core.ui.PatchStyle;
-import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -154,8 +152,6 @@ public class MarkerListPage extends InteractiveCustomUIPage<MarkerEventData> {
                 + "  |  X " + String.format("%.0f", e.x())
                 + "  Z " + String.format("%.0f", e.z());
             cmd.append("#MarkerList", "Pages/MarkerListItem.ui");
-            cmd.setObject(selector + " #IconSlot.Background",
-                new PatchStyle().setTexturePath(Value.of("../WorldMap/MapMarkers/" + e.imageName())));
             cmd.set(selector + " #RowLabel.Text", escape(rowText));
             evt.addEventBinding(CustomUIEventBindingType.Activating, selector + " #EditButton",
                 EventData.of("Action", "edit").append("MarkerId", e.id()), false);

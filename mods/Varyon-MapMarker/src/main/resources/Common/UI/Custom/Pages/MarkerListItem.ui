@@ -4,11 +4,6 @@ Group {
   Background: (Color: #172639);
   Padding: (Left: 4, Right: 4, Top: 4, Bottom: 4);
 
-  Group #IconSlot {
-    Anchor: (Width: 32, Height: 32);
-    Background: (Color: #0a0f17);
-  }
-
   Button #EditButton {
     FlexWeight: 1;
     Style: ButtonStyle(

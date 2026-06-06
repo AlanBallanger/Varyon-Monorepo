@@ -132,11 +132,10 @@ public class MarkerEditorPage extends InteractiveCustomUIPage<MarkerEventData> {
             return;
         }
         String current = entry.imageName();
-        int rowIdx = -1;
+        int rowIdx = 0;
         int col = 0;
         for (int i = 0; i < images.size(); i++) {
             if (col == 0) {
-                rowIdx++;
                 cmd.appendInline("#ImagePickList", "Group { LayoutMode: Left; Anchor: (Bottom: 2); }");
             }
             String name = images.get(i);
@@ -151,7 +150,10 @@ public class MarkerEditorPage extends InteractiveCustomUIPage<MarkerEventData> {
             evt.addEventBinding(CustomUIEventBindingType.Activating, sel + " #ImagePickButton",
                 EventData.of("Action", "selectImage").append("Image", name), false);
             col++;
-            if (col >= IMAGES_PER_ROW) col = 0;
+            if (col >= IMAGES_PER_ROW) {
+                col = 0;
+                rowIdx++;
+            }
         }
     }
 
