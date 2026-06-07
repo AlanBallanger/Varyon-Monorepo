@@ -201,13 +201,11 @@ public final class ClassesTab {
                 uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
                 uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", state.selectedSkillSlot != null);
                 if (state.selectedSkillSlot != null) {
-                    EventData assignEvent = EventData.of("Action", "skillSlotAssign")
-                        .append("Slot", state.selectedSkillSlot)
-                        .append("Node", n.itemId());
                     eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                        "#ClassesSkillPickerList[" + i + "]", assignEvent, false);
-                    eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                        "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign", assignEvent, false);
+                        "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign",
+                        EventData.of("Action", "skillSlotAssign")
+                            .append("Slot", state.selectedSkillSlot)
+                            .append("Node", n.itemId()), false);
                 }
             }
         }

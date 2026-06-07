@@ -13,7 +13,9 @@ import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.duelliste.AssautBretteurSkill;
 import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
 import fr.varyon.vrpg.classes.duelliste.DuellisteState;
-import fr.varyon.vrpg.classes.duelliste.PerceeSkill;
+import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
+import fr.varyon.vrpg.classes.duelliste.FeintSkill;
+import fr.varyon.vrpg.classes.duelliste.RiposteParfaiteSkill;
 import fr.varyon.vrpg.ui.RpgUiAdmin;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 
@@ -48,8 +50,14 @@ public final class ClassSkillService {
         if (DesarmementSkill.SKILL_ID.equals(skillId)) {
             return tryCastDesarmement(uuid, playerRef, entityRef, store);
         }
-        if (PerceeSkill.SKILL_ID.equals(skillId)) {
-            return tryCastPercee(uuid, playerRef, entityRef, store, commandBuffer);
+        if (CoupEstocSkill.SKILL_ID.equals(skillId)) {
+            return tryCastCoupEstoc(uuid, playerRef, entityRef, store);
+        }
+        if (FeintSkill.SKILL_ID.equals(skillId)) {
+            return tryCastFeinte(uuid, playerRef);
+        }
+        if (RiposteParfaiteSkill.SKILL_ID.equals(skillId)) {
+            return tryCastRiposte(uuid, playerRef);
         }
         return false;
     }
@@ -137,22 +145,77 @@ public final class ClassSkillService {
         return true;
     }
 
-    public boolean tryCastPercee(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef,
-                                 @Nonnull Ref<EntityStore> entityRef,
-                                 @Nonnull Store<EntityStore> store,
-                                 @Nullable CommandBuffer<EntityStore> commandBuffer) {
+    public boolean tryCastCoupEstoc(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef,
+                                    @Nonnull Ref<EntityStore> entityRef,
+                                    @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
-        if (!isDuelliste(acc)) { deny(playerRef, "Percée — Duelliste requis."); return false; }
-        int rank = acc.getTalentRank(PlayerClass.GUERRIER, PerceeSkill.TALENT_NODE_ID);
-        if (rank <= 0) { deny(playerRef, "Percée — talent non débloqué."); return false; }
+        if (!isDuelliste(acc)) { deny(playerRef, "Coup d'Estoc — Duelliste requis."); return false; }
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, CoupEstocSkill.TALENT_NODE_ID);
+        if (rank <= 0) { deny(playerRef, "Coup d'Estoc — talent non debloque."); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
-        if (!bypass && cooldowns.isOnCooldown(uuid, PerceeSkill.SKILL_ID, PerceeSkill.cooldownMsForRank(rank))) {
-            deny(playerRef, String.format("Percée — cooldown %.1fs",
-                cooldowns.remainingMs(uuid, PerceeSkill.SKILL_ID, PerceeSkill.cooldownMsForRank(rank)) / 1000f));
+        long cd = CoupEstocSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, CoupEstocSkill.SKILL_ID, cd)) {
+            deny(playerRef, String.format("Coup d'Estoc — cooldown %.1fs", cooldowns.remainingMs(uuid, CoupEstocSkill.SKILL_ID, cd) / 1000f));
             return false;
         }
-        if (!bypass) cooldowns.markUsed(uuid, PerceeSkill.SKILL_ID);
-        notifySkill(uuid, "Percée");
+        // AoE au cast
+        try {
+            long casterIdx = entityRef.getIndex();
+            float dmg = CoupEstocSkill.castDamageForRank(rank);
+            com.hypixel.hytale.server.core.modules.entity.component.TransformComponent tc =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+            if (tc != null) {
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                    store, tc.getPosition(), CoupEstocSkill.castRadius(), targetRef -> {
+                        try {
+                            if (targetRef.getIndex() == casterIdx) return;
+                            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                                targetRef, store,
+                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+                        } catch (Exception ignored) {}
+                    }, t2 -> t2.getIndex() != casterIdx);
+            }
+        } catch (Exception ignored) {}
+        // Arme le prochain coup
+        duellisteState.armCoupEstoc(uuid, CoupEstocSkill.nextHitMultForRank(rank), CoupEstocSkill.armedWindowMs());
+        if (!bypass) cooldowns.markUsed(uuid, CoupEstocSkill.SKILL_ID);
+        notifySkill(uuid, "Coup d'Estoc");
+        return true;
+    }
+
+    public boolean tryCastFeinte(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isDuelliste(acc)) { deny(playerRef, "Feinte — Duelliste requis."); return false; }
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, FeintSkill.TALENT_NODE_ID);
+        if (rank <= 0) { deny(playerRef, "Feinte — talent non debloque."); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        long cd = FeintSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, FeintSkill.SKILL_ID, cd)) {
+            deny(playerRef, String.format("Feinte — cooldown %.1fs", cooldowns.remainingMs(uuid, FeintSkill.SKILL_ID, cd) / 1000f));
+            return false;
+        }
+        duellisteState.startFeinte(uuid, FeintSkill.windowMs());
+        if (!bypass) cooldowns.markUsed(uuid, FeintSkill.SKILL_ID);
+        notifySkill(uuid, "Feinte");
+        return true;
+    }
+
+    public boolean tryCastRiposte(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isDuelliste(acc)) { deny(playerRef, "Riposte Parfaite — Duelliste requis."); return false; }
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, RiposteParfaiteSkill.TALENT_NODE_ID);
+        if (rank <= 0) { deny(playerRef, "Riposte Parfaite — talent non debloque."); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        long cd = RiposteParfaiteSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, RiposteParfaiteSkill.SKILL_ID, cd)) {
+            deny(playerRef, String.format("Riposte — cooldown %.1fs", cooldowns.remainingMs(uuid, RiposteParfaiteSkill.SKILL_ID, cd) / 1000f));
+            return false;
+        }
+        duellisteState.startRiposteWindow(uuid, RiposteParfaiteSkill.windowMsForRank(rank), rank);
+        if (!bypass) cooldowns.markUsed(uuid, RiposteParfaiteSkill.SKILL_ID);
+        notifySkill(uuid, "Riposte Parfaite");
         return true;
     }
 

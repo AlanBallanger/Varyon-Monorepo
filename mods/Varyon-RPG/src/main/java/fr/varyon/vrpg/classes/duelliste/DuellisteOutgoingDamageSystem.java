@@ -19,6 +19,8 @@ import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
+import fr.varyon.vrpg.classes.duelliste.FeintSkill;
 import fr.varyon.vrpg.integration.DamageFloatBridge;
 
 import javax.annotation.Nonnull;
@@ -79,10 +81,23 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
             if (acc.getActiveClass() != PlayerClass.GUERRIER) return;
             if (acc.getActiveSpec(PlayerClass.GUERRIER) != PlayerSpecialization.DUELLISTE) return;
 
+            // Feinte — prochain coup imparable (bypass BLOCKED)
+            int feinteRank = acc.getTalentRank(PlayerClass.GUERRIER, FeintSkill.TALENT_NODE_ID);
+            if (feinteRank > 0 && state.consumeFeinte(uuid)) {
+                damage.putMetaObject(com.hypixel.hytale.server.core.modules.entity.damage.Damage.BLOCKED, Boolean.FALSE);
+            }
+
             float base = damage.getAmount();
             float amount = base;
             StringBuilder log = new StringBuilder();
             log.append(String.format("[Dmg] base=%.1f", base));
+
+            // Coup d'Estoc — prochain coup armé
+            float coupEstocMult = state.consumeCoupEstoc(uuid);
+            if (coupEstocMult > 0f) {
+                amount *= coupEstocMult;
+                log.append(String.format(" CoupEstoc=x%.2f", coupEstocMult));
+            }
 
             // Assaut du Bretteur — outgoing damage bonus
             if (state.isAssautBretteurActive(uuid)) {

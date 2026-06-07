@@ -8,7 +8,9 @@ import com.hypixel.hytale.component.SystemGroup;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
+import com.hypixel.hytale.server.core.modules.entity.damage.DamageCause;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageEventSystem;
+import com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -72,6 +74,25 @@ public final class DuellisteIncomingDamageSystem extends DamageEventSystem {
                 state.recordParry(uuid);
                 if (debug) LOG.atInfo().log(String.format("[Recu] %.1f ESQUIVE (EsquiveBretteur rank=%d)", incoming, dodgeRank));
                 return;
+            }
+
+            // Riposte Parfaite — contre-attaque si fenêtre active
+            int riposteRank = state.consumeRiposte(uuid);
+            if (riposteRank > 0) {
+                Damage.Source source = damage.getSource();
+                if (source instanceof Damage.EntitySource entitySource) {
+                    Ref<EntityStore> attackerRef = entitySource.getRef();
+                    if (attackerRef != null && attackerRef.isValid()) {
+                        try {
+                            Ref<EntityStore> playerEntityRef = chunk.getReferenceTo(index);
+                            float riposteDmg = incoming * (1.0f + RiposteParfaiteSkill.dmgBonusForRank(riposteRank));
+                            DamageCause cause = DamageCause.PHYSICAL;
+                            DamageSystems.executeDamage(attackerRef, store,
+                                new Damage(new Damage.EntitySource(playerEntityRef), cause, riposteDmg));
+                            if (debug) LOG.atInfo().log(String.format("[Recu] RIPOSTE -> %.1f degats", riposteDmg));
+                        } catch (Exception ignored) {}
+                    }
+                }
             }
 
             // Track hit taken for Momentum reset

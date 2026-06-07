@@ -81,19 +81,20 @@ public final class ClassTalentTree {
             new Node("Archer Légendaire",     "Passif", "Des siècles après, les bardes chanteront encore ses exploits.",       "Augmente définitivement tous les dégâts à distance.",              "Weapon_Shortbow_Onyxium",    5),
         });
 
+        final String DI = "Classes_Icons/Duellist/";
         SPEC_TREES.put(PlayerSpecialization.DUELLISTE, new Node[]{
-            new Node("Assaut Éclair",         "Actif",  "Une botte parfaite ne laisse aucune fenêtre à l'adversaire.",             "Ruée vers l'avant, infligeant des dégâts à l'impact.",             "Weapon_Sword_Mithril",       5),
-            new Node("Expert en Duel",        "Passif", "La prudence du bretteur, c'est de toujours avoir l'avantage.",            "Gain d'expérience augmenté lorsque les PV sont supérieurs à 70 %.", "Armor_Leather_Light_Chest",  5),
-            new Node("Blessure Ouverte",      "Passif", "Une lame qui accroche, c'est une victoire qui se compte en secondes.",    "Les attaques ont une chance d'infliger un saignement.",             "Ingredient_Sac_Venom",       5),
-            new Node("Feinte",                "Actif",  "Montrer une faille pour en créer une vraie — c'est tout l'art du duel.", "Le prochain coup ne peut être ni bloqué ni paré par l'adversaire.", "Weapon_Daggers_Mithril",     5),
-            new Node("Riposte Parfaite",      "Actif",  "Absorber le coup pour mieux le rendre — trois fois.",                    "Entre en posture défensive. Si une attaque est reçue, contre-attaque instantanément.", "Weapon_Shield_Cobalt", 5),
-            new Node("Contre-Attaque",        "Passif", "La parade n'est pas une fin — c'est une invitation.",                    "Après une parade réussie, la prochaine attaque inflige davantage de dégâts.", "Ingredient_Crystal_Blue", 5),
-            new Node("Percée",                "Actif",  "La cible au sommet de sa forme ne voit pas le coup venir.",              "Frappe rapidement la cible. Inflige davantage de dégâts si celle-ci est à pleine santé.", "Weapon_Sword_Onyxium", 5),
-            new Node("Esquive du Bretteur",   "Passif", "Le sol sous ses pieds n'est qu'un appui — il n'y reste jamais.",         "Augmente les chances d'esquive.",                                   "Armor_Leather_Medium_Chest", 5),
-            new Node("Frappe Précise",        "Passif", "L'endroit précis, au moment précis — l'armure ne compte plus.",          "Les coups critiques infligent des dégâts supplémentaires.",          "Ingredient_Bar_Mithril",     5),
-            new Node("Désarmement",           "Actif",  "Ôter l'arme, c'est ôter la menace avant même qu'elle frappe.",           "Réduit temporairement les dégâts infligés par la cible.",           "Weapon_Longsword_Mithril",   5),
-            new Node("Momentum",              "Passif", "Chaque coup sans en recevoir rend le suivant un peu plus dévastateur.",   "Chaque coup consécutif sans en recevoir augmente légèrement les dégâts.", "Ingredient_Crystal_Cyan", 5),
-            new Node("Assaut du Bretteur",    "Actif",  "Quand l'élan est là, rien ne peut l'arrêter — pas même l'ennemi.",       "Augmente les dégâts d'attaque et la vitesse de déplacement pendant quelques secondes.", "Weapon_Sword_Adamantite", 5),
+            new Node("Assaut Éclair",         "Actif",  "Une botte parfaite ne laisse aucune fenêtre à l'adversaire.",             "Ruée vers l'avant, infligeant des dégâts à l'impact.",             DI + "Percée.png",                5),
+            new Node("Expert en Duel",        "Passif", "La prudence du bretteur, c'est de toujours avoir l'avantage.",            "Gain d'expérience augmenté lorsque les PV sont supérieurs à 70 %.", DI + "Expert_En_Duel.png",         5),
+            new Node("Blessure Ouverte",      "Passif", "Une lame qui accroche, c'est une victoire qui se compte en secondes.",    "Les attaques ont une chance d'infliger un saignement.",             DI + "Blessure_Ouverte.png",       5),
+            new Node("Coup d'Estoc",          "Actif",  "Une frappe tranchante qui ouvre le combat — ou le clôt.",                "Frappe en AoE autour du joueur, puis arme le prochain coup d'un multiplicateur de dégâts.", DI + "Coup_D_estoc.png", 5),
+            new Node("Riposte Parfaite",      "Actif",  "Absorber le coup pour mieux le rendre — trois fois.",                    "Entre en posture défensive. Si une attaque est reçue, contre-attaque instantanément.", DI + "Riposte_Parfaite.png",  5),
+            new Node("Contre-Attaque",        "Passif", "La parade n'est pas une fin — c'est une invitation.",                    "Après une parade réussie, la prochaine attaque inflige davantage de dégâts.", DI + "Contre_Attaque.png",    5),
+            new Node("Feinte",                "Actif",  "Montrer une faille pour en créer une vraie — c'est tout l'art du duel.", "Le prochain coup ne peut être ni bloqué ni paré par l'adversaire.", DI + "Feinte.png",                 5),
+            new Node("Esquive du Bretteur",   "Passif", "Le sol sous ses pieds n'est qu'un appui — il n'y reste jamais.",         "Augmente les chances d'esquive.",                                   DI + "Esquive_du_bretteur.png",    5),
+            new Node("Frappe Précise",        "Passif", "L'endroit précis, au moment précis — l'armure ne compte plus.",          "Les coups critiques infligent des dégâts supplémentaires.",          DI + "Frappe_Précise.png",         5),
+            new Node("Désarmement",           "Actif",  "Ôter l'arme, c'est ôter la menace avant même qu'elle frappe.",           "Réduit temporairement les dégâts infligés par la cible.",           DI + "Désarmement.png",            5),
+            new Node("Momentum",              "Passif", "Chaque coup sans en recevoir rend le suivant un peu plus dévastateur.",   "Chaque coup consécutif sans en recevoir augmente légèrement les dégâts.", DI + "Momentum.png",           5),
+            new Node("Assaut du Bretteur",    "Actif",  "Quand l'élan est là, rien ne peut l'arrêter — pas même l'ennemi.",       "Augmente les dégâts d'attaque et la vitesse de déplacement pendant quelques secondes.", DI + "Assaut_Du_Bretteur.png", 5),
         });
     }
 

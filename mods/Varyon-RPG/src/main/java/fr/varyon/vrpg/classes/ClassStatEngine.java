@@ -85,13 +85,24 @@ public final class ClassStatEngine {
             clearModifier(statMap, hIdx, MOD_KEY_HP);
             clearModifier(statMap, sIdx, MOD_KEY_STAMINA);
 
-            // HP: modificateur multiplicatif — s'applique automatiquement sur le HP natif courant.
-            // HP final = hpNatif × hpMult, recalculé par le moteur à chaque changement d'armure.
+            // HP: additif depuis la base nue 100 HP.
+            // Le bonus = (100 * hpMult - 100) = hp VRPG cible sur base nue.
+            // L'armure s'ajoute par-dessus naturellement via le moteur.
             if (hIdx >= 0) {
-                float hpMultBonus = (float)(stats.hpMult() - 1.0);
-                statMap.putModifier(EntityStatMap.Predictable.ALL, hIdx, MOD_KEY_HP,
-                    new StaticModifier(Modifier.ModifierTarget.MAX,
-                        StaticModifier.CalculationType.MULTIPLICATIVE, hpMultBonus));
+                float hpBonus = (float)(stats.maxHp() - 100.0);
+                if (Math.abs(hpBonus) > 0.1f) {
+                    statMap.putModifier(EntityStatMap.Predictable.ALL, hIdx, MOD_KEY_HP,
+                        new StaticModifier(Modifier.ModifierTarget.MAX,
+                            StaticModifier.CalculationType.ADDITIVE, hpBonus));
+                }
+                // Refill systématique au nouveau max
+                var hpStat = statMap.get(hIdx);
+                if (hpStat != null) {
+                    float newMax = hpStat.getMax();
+                    if (newMax > 0f) {
+                        statMap.setStatValue(EntityStatMap.Predictable.ALL, hIdx, newMax);
+                    }
+                }
             }
 
             // Stamina: VRPG définit la stamina complète (remplace la base de 100)

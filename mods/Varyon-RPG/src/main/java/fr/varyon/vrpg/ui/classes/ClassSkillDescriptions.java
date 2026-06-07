@@ -5,9 +5,11 @@ import fr.varyon.vrpg.classes.ability.AssautEclairSkill;
 import fr.varyon.vrpg.classes.ability.ClassSkillRegistry;
 import fr.varyon.vrpg.classes.ability.ExpertEnDuelSkill;
 import fr.varyon.vrpg.classes.duelliste.AssautBretteurSkill;
+import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
 import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
 import fr.varyon.vrpg.classes.duelliste.DuellistePassifs;
-import fr.varyon.vrpg.classes.duelliste.PerceeSkill;
+import fr.varyon.vrpg.classes.duelliste.FeintSkill;
+import fr.varyon.vrpg.classes.duelliste.RiposteParfaiteSkill;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,11 +33,13 @@ public final class ClassSkillDescriptions {
     public static String statLineForRank(@Nullable String skillId, int rank) {
         if (rank < 1 || skillId == null) return null;
         return switch (skillId) {
-            case AssautEclairSkill.SKILL_ID   -> assautEclairLine(rank);
-            case ExpertEnDuelSkill.SKILL_ID   -> ExpertEnDuelSkill.statLineForRank(rank);
-            case AssautBretteurSkill.SKILL_ID -> AssautBretteurSkill.statLineForRank(rank);
-            case DesarmementSkill.SKILL_ID    -> DesarmementSkill.statLineForRank(rank);
-            case PerceeSkill.SKILL_ID         -> PerceeSkill.statLineForRank(rank);
+            case AssautEclairSkill.SKILL_ID      -> assautEclairLine(rank);
+            case ExpertEnDuelSkill.SKILL_ID      -> ExpertEnDuelSkill.statLineForRank(rank);
+            case AssautBretteurSkill.SKILL_ID    -> AssautBretteurSkill.statLineForRank(rank);
+            case DesarmementSkill.SKILL_ID       -> DesarmementSkill.statLineForRank(rank);
+            case CoupEstocSkill.SKILL_ID         -> CoupEstocSkill.statLineForRank(rank);
+            case FeintSkill.SKILL_ID             -> FeintSkill.statLineForRank(rank);
+            case RiposteParfaiteSkill.SKILL_ID   -> RiposteParfaiteSkill.statLineForRank(rank);
             case DuellistePassifs.BLESSURE_NODE -> DuellistePassifs.bleedStatLine(rank);
             case DuellistePassifs.FRAPPE_NODE   -> DuellistePassifs.critStatLine(rank);
             case DuellistePassifs.CONTRE_NODE   -> DuellistePassifs.contreStatLine(rank);
@@ -46,10 +50,10 @@ public final class ClassSkillDescriptions {
     }
 
     private static String assautEclairLine(int rank) {
-        int blocks = AssautEclairSkill.blocksForRank(rank);
-        String cd = formatCooldownShort(AssautEclairSkill.cooldownMsForRank(rank));
+        int dmg    = (int) AssautEclairSkill.baseDamageForRank(rank);
+        String cd  = formatCooldownShort(AssautEclairSkill.cooldownMsForRank(rank));
         int stamina = Math.round(AssautEclairSkill.staminaCostForRank(rank));
-        return blocks + " blocs - " + cd + " - " + stamina + " endurance";
+        return dmg + " dégâts, CD " + cd + " - " + stamina + " endurance";
     }
 
     private static String formatCooldownShort(long cooldownMs) {

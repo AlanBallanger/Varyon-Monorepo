@@ -144,8 +144,17 @@ public final class ClassTalentsTab {
             uiBuilder.set("#ClassTreeNode" + id + "Slot.Visible", true);
             uiBuilder.set("#ClassTreeNode" + id + "Unlocked.Visible", true);
             uiBuilder.setObject("#ClassTreeNode" + id + "Unlocked.Background", NODE_FILL_STYLE);
-            uiBuilder.set("#ClassTreeNode" + id + "Icon.Visible", true);
-            uiBuilder.set("#ClassTreeNode" + id + "Icon.ItemId", node.itemId());
+            String iconRef = node.itemId();
+            if (iconRef.contains("/")) {
+                uiBuilder.set("#ClassTreeNode" + id + "Icon.Visible", false);
+                uiBuilder.set("#ClassTreeNode" + id + "CustomIcon.Visible", true);
+                uiBuilder.setObject("#ClassTreeNode" + id + "CustomIcon.Background",
+                    new PatchStyle().setTexturePath(Value.of(iconRef)));
+            } else {
+                uiBuilder.set("#ClassTreeNode" + id + "Icon.Visible", true);
+                uiBuilder.set("#ClassTreeNode" + id + "CustomIcon.Visible", false);
+                uiBuilder.set("#ClassTreeNode" + id + "Icon.ItemId", iconRef);
+            }
             uiBuilder.set("#ClassTreeNode" + id + "RankText.Visible", true);
             uiBuilder.set("#ClassTreeNode" + id + "RankText.TextSpans", Message.raw(rank + "/" + node.maxRank()));
             uiBuilder.set("#ClassTreeNode" + id + ".Visible", true);
@@ -307,13 +316,11 @@ public final class ClassTalentsTab {
             uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryIcon.ItemId", n.itemId());
             uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
             uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryAssign.Visible", true);
-            EventData assignEvent = EventData.of("Action", "skillSlotAssign")
-                .append("Slot", state.selectedSkillSlot)
-                .append("Node", n.itemId());
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                "#SkillPickerList[" + i + "]", assignEvent, false);
-            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                "#SkillPickerList[" + i + "] #SkillEntryAssign", assignEvent, false);
+                "#SkillPickerList[" + i + "] #SkillEntryAssign",
+                EventData.of("Action", "skillSlotAssign")
+                    .append("Slot", state.selectedSkillSlot)
+                    .append("Node", n.itemId()), false);
         }
     }
 }

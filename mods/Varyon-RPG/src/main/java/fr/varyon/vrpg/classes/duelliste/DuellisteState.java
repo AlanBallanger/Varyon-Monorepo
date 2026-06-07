@@ -15,6 +15,13 @@ public final class DuellisteState {
     private final ConcurrentHashMap<UUID, Integer> momentumStacks     = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long> lastHitTakenAt        = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long> lastDamageDealtAt     = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Long>  coupEstocExpiry      = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Float> coupEstocMult        = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Long> feintExpiry           = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Long> riposteWindowExpiry   = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Integer> riposteRank        = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Long> perceeExpiry          = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Integer> perceeRank         = new ConcurrentHashMap<>();
 
     public DuellisteState() {}
 
@@ -106,6 +113,68 @@ public final class DuellisteState {
         return momentumStacks.getOrDefault(uuid, 0);
     }
 
+    // --- Coup d'Estoc (prochain coup armé) ---
+
+    public void armCoupEstoc(@Nonnull UUID uuid, float mult, long windowMs) {
+        coupEstocExpiry.put(uuid, System.currentTimeMillis() + windowMs);
+        coupEstocMult.put(uuid, mult);
+    }
+
+    public float consumeCoupEstoc(@Nonnull UUID uuid) {
+        Long exp = coupEstocExpiry.remove(uuid);
+        Float mult = coupEstocMult.remove(uuid);
+        if (exp == null || System.currentTimeMillis() >= exp) return 0f;
+        return mult != null ? mult : 0f;
+    }
+
+    // --- Feinte ---
+
+    public void startFeinte(@Nonnull UUID uuid, long windowMs) {
+        feintExpiry.put(uuid, System.currentTimeMillis() + windowMs);
+    }
+
+    public boolean consumeFeinte(@Nonnull UUID uuid) {
+        Long exp = feintExpiry.remove(uuid);
+        return exp != null && System.currentTimeMillis() < exp;
+    }
+
+    // --- Riposte Parfaite ---
+
+    public void startRiposteWindow(@Nonnull UUID uuid, long windowMs, int rank) {
+        riposteWindowExpiry.put(uuid, System.currentTimeMillis() + windowMs);
+        riposteRank.put(uuid, rank);
+    }
+
+    public boolean isRiposteWindowActive(@Nonnull UUID uuid) {
+        Long exp = riposteWindowExpiry.get(uuid);
+        if (exp == null) return false;
+        if (System.currentTimeMillis() < exp) return true;
+        riposteWindowExpiry.remove(uuid);
+        riposteRank.remove(uuid);
+        return false;
+    }
+
+    public int consumeRiposte(@Nonnull UUID uuid) {
+        Long exp = riposteWindowExpiry.remove(uuid);
+        Integer rank = riposteRank.remove(uuid);
+        if (exp == null || System.currentTimeMillis() >= exp) return 0;
+        return rank != null ? rank : 0;
+    }
+
+    // --- Percée (prochaine attaque boostée) ---
+
+    public void startPercee(@Nonnull UUID uuid, long windowMs, int rank) {
+        perceeExpiry.put(uuid, System.currentTimeMillis() + windowMs);
+        perceeRank.put(uuid, rank);
+    }
+
+    public int consumePercee(@Nonnull UUID uuid) {
+        Long exp = perceeExpiry.remove(uuid);
+        Integer rank = perceeRank.remove(uuid);
+        if (exp == null || System.currentTimeMillis() >= exp) return 0;
+        return rank != null ? rank : 0;
+    }
+
     public void cleanup(@Nonnull UUID uuid) {
         assautBretteurExpiry.remove(uuid);
         Integer targetIdx = desarmementTarget.remove(uuid);
@@ -114,5 +183,12 @@ public final class DuellisteState {
         momentumStacks.remove(uuid);
         lastHitTakenAt.remove(uuid);
         lastDamageDealtAt.remove(uuid);
+        coupEstocExpiry.remove(uuid);
+        coupEstocMult.remove(uuid);
+        feintExpiry.remove(uuid);
+        riposteWindowExpiry.remove(uuid);
+        riposteRank.remove(uuid);
+        perceeExpiry.remove(uuid);
+        perceeRank.remove(uuid);
     }
 }

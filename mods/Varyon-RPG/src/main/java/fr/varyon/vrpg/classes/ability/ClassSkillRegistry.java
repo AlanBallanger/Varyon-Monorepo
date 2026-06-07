@@ -6,7 +6,9 @@ import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.duelliste.AssautBretteurSkill;
 import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
 import fr.varyon.vrpg.classes.duelliste.DuellistePassifs;
-import fr.varyon.vrpg.classes.duelliste.PerceeSkill;
+import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
+import fr.varyon.vrpg.classes.duelliste.FeintSkill;
+import fr.varyon.vrpg.classes.duelliste.RiposteParfaiteSkill;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -30,8 +32,10 @@ public final class ClassSkillRegistry {
                 case 0  -> AssautEclairSkill.SKILL_ID;
                 case 1  -> ExpertEnDuelSkill.SKILL_ID;
                 case 2  -> DuellistePassifs.BLESSURE_NODE;
+                case 3  -> CoupEstocSkill.SKILL_ID;
+                case 4  -> RiposteParfaiteSkill.SKILL_ID;
                 case 5  -> DuellistePassifs.CONTRE_NODE;
-                case 6  -> PerceeSkill.SKILL_ID;
+                case 6  -> FeintSkill.SKILL_ID;
                 case 7  -> DuellistePassifs.ESQUIVE_NODE;
                 case 8  -> DuellistePassifs.FRAPPE_NODE;
                 case 9  -> DesarmementSkill.SKILL_ID;

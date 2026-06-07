@@ -90,6 +90,8 @@ public final class TalentTreeEdgeLayout {
             slotLeft + FILL_INSET, slotTop + FILL_INSET, FILL_SIZE, FILL_SIZE);
         setAnchor(ui, "#ClassTreeNode" + id + "Icon",
             slotLeft + 8, slotTop + 8, SLOT - 16, SLOT - 16);
+        setAnchor(ui, "#ClassTreeNode" + id + "CustomIcon",
+            slotLeft + 8, slotTop + 8, SLOT - 16, SLOT - 16);
         setAnchor(ui, "#ClassTreeNode" + id + "Veil",
             slotLeft + FILL_INSET, slotTop + FILL_INSET, FILL_SIZE, FILL_SIZE);
         setAnchor(ui, "#ClassTreeNode" + id, slotLeft, slotTop, SLOT, SLOT);
