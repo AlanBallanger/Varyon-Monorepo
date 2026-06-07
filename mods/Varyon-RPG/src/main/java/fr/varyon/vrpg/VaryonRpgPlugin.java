@@ -93,6 +93,7 @@ import fr.varyon.vrpg.rpg.ProfessionManager;
 import fr.varyon.vrpg.item.ProfessionXpBoostInteraction;
 import fr.varyon.vrpg.item.ProfessionXpPotionInteraction;
 import fr.varyon.vrpg.ui.ProfessionXpHud;
+import fr.varyon.vrpg.ui.XpNotifHud;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 
 import javax.annotation.Nonnull;
@@ -303,6 +304,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     try {
                         if (!readyRef.isValid()) return;
                         ProfessionXpHud.getOrCreate(readyPlayer, readyRef);
+                        XpNotifHud.getOrCreate(readyPlayer, readyRef);
                     } catch (Exception e) {
                         LOGGER.atWarning().withCause(e).log("[VaryonRPG] init ProfessionXpHud");
                     }
@@ -393,6 +395,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 if (ref != null) {
                     pendingProfessionHudInit.remove(ref.getUuid());
                     ProfessionXpHud.cleanup(ref.getUuid());
+                    XpNotifHud.cleanup(ref.getUuid());
                 }
                 if (ref != null && professionManager != null) {
                     professionManager.onPlayerDisconnect(ref.getUuid());

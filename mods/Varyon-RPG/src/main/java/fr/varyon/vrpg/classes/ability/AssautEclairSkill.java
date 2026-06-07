@@ -3,16 +3,14 @@ package fr.varyon.vrpg.classes.ability;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.vector.Rotation3f;
-import com.hypixel.hytale.math.vector.Rotation3fc;
-import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
-import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
-import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
+import com.hypixel.hytale.protocol.ChangeVelocityType;
+import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
+import com.hypixel.hytale.server.core.modules.physics.component.Velocity;
+import com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import fr.varyon.vrpg.ui.XpNotifHud;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,6 +23,7 @@ public final class AssautEclairSkill {
     private static final int[] BLOCKS = {3, 4, 5, 6, 8};
     private static final long[] COOLDOWN_MS = {30_000L, 28_000L, 26_000L, 24_000L, 20_000L};
     private static final float[] STAMINA_COST = {6f, 7f, 8f, 9f, 10f};
+    private static final double[] DASH_FORCE = {20.0, 24.0, 28.0, 34.0, 42.0};
 
     private AssautEclairSkill() {}
 
@@ -49,30 +48,30 @@ public final class AssautEclairSkill {
                                   @Nonnull Store<EntityStore> store,
                                   @Nullable CommandBuffer<EntityStore> commandBuffer,
                                   int rank) {
-        TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
-        if (tc == null) return false;
+        HeadRotation headRot = store.getComponent(entityRef, HeadRotation.getComponentType());
+        if (headRot == null) return false;
 
-        World world = store.getExternalData().getWorld();
-        if (world == null) return false;
+        Velocity velocity = commandBuffer != null
+                ? commandBuffer.getComponent(entityRef, Velocity.getComponentType())
+                : store.getComponent(entityRef, Velocity.getComponentType());
+        if (velocity == null) return false;
 
         int blocks = blocksForRank(rank);
-        Vector3d pos = new Vector3d(tc.getPosition());
-        HeadRotation headRot = store.getComponent(entityRef, HeadRotation.getComponentType());
-        float yaw = headRot != null ? headRot.getRotation().y : 0f;
-        Rotation3fc rot = headRot != null ? headRot.getRotation() : Rotation3f.ZERO;
+        double force = dashForceForRank(rank);
+        float yaw = headRot.getRotation().y;
 
-        double dx = -Math.sin(yaw) * blocks;
-        double dz = Math.cos(yaw) * blocks;
-        Vector3d target = new Vector3d(pos.x + dx, pos.y, pos.z + dz);
+        double vx = Math.sin(yaw) * force;
+        double vz = -Math.cos(yaw) * force;
+        Vector3d dashVelocity = new Vector3d(vx, 0.0, vz);
 
-        Teleport teleport = Teleport.createForPlayer(world, target, rot);
-        if (commandBuffer != null) {
-            commandBuffer.addComponent(entityRef, Teleport.getComponentType(), teleport);
-        } else {
-            store.addComponent(entityRef, Teleport.getComponentType(), teleport);
-        }
+        velocity.addInstruction(dashVelocity, new VelocityConfig(), ChangeVelocityType.Add);
 
-        playerRef.sendMessage(Message.raw("Assaut éclair — " + blocks + " blocs"));
+        XpNotifHud hud = XpNotifHud.get(playerRef.getUuid());
+        if (hud != null) hud.showBurst("Assaut Éclair", "Weapon_Sword_Mithril");
         return true;
+    }
+
+    private static double dashForceForRank(int rank) {
+        return DASH_FORCE[Math.max(0, Math.min(rank - 1, DASH_FORCE.length - 1))];
     }
 }

@@ -1,5 +1,6 @@
 package fr.varyon.vrpg.ui;
 
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.ui.ItemGridSlot;
@@ -7,9 +8,13 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 public final class XpNotifHud extends CustomUIHud {
 
@@ -18,12 +23,36 @@ public final class XpNotifHud extends CustomUIHud {
     private static final int MAX_SLOTS = 4;
     private static final long SLOT_DURATION_MS = 4000L;
 
-    private final long[] slotExpiresAt = new long[MAX_SLOTS];
-    private final ScheduledExecutorService scheduler;
+    private static final ConcurrentHashMap<UUID, XpNotifHud> INSTANCES = new ConcurrentHashMap<>();
+    private static final ScheduledExecutorService SCHEDULER =
+        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(
+            r -> { Thread t = new Thread(r, "xp-notif-hud"); t.setDaemon(true); return t; });
 
-    public XpNotifHud(@Nonnull PlayerRef playerRef, @Nonnull ScheduledExecutorService scheduler) {
+    private final long[] slotExpiresAt = new long[MAX_SLOTS];
+
+    public XpNotifHud(@Nonnull PlayerRef playerRef) {
         super(playerRef, HUD_KEY);
-        this.scheduler = scheduler;
+    }
+
+    @Nonnull
+    public static XpNotifHud getOrCreate(@Nonnull Player player, @Nonnull PlayerRef playerRef) {
+        UUID uuid = playerRef.getUuid();
+        XpNotifHud existing = INSTANCES.get(uuid);
+        if (existing != null) return existing;
+        XpNotifHud hud = new XpNotifHud(playerRef);
+        XpNotifHud race = INSTANCES.putIfAbsent(uuid, hud);
+        if (race != null) return race;
+        player.getHudManager().addCustomHud(playerRef, hud);
+        return hud;
+    }
+
+    @Nullable
+    public static XpNotifHud get(@Nonnull UUID uuid) {
+        return INSTANCES.get(uuid);
+    }
+
+    public static void cleanup(@Nonnull UUID uuid) {
+        INSTANCES.remove(uuid);
     }
 
     @Override
@@ -44,7 +73,7 @@ public final class XpNotifHud extends CustomUIHud {
 
         final int finalSlot = slot;
         final long finalExpires = expiresAt;
-        scheduler.schedule(() -> {
+        SCHEDULER.schedule(() -> {
             if (slotExpiresAt[finalSlot] == finalExpires) {
                 clearSlot(finalSlot);
             }

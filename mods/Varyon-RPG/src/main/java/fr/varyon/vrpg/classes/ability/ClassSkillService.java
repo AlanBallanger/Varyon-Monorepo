@@ -10,6 +10,7 @@ import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.ui.RpgUiAdmin;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,7 +60,8 @@ public final class ClassSkillService {
         }
 
         long cooldownMs = AssautEclairSkill.cooldownMsForRank(rank);
-        if (cooldowns.isOnCooldown(uuid, AssautEclairSkill.SKILL_ID, cooldownMs)) {
+        boolean bypassCooldown = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypassCooldown && cooldowns.isOnCooldown(uuid, AssautEclairSkill.SKILL_ID, cooldownMs)) {
             float sec = cooldowns.remainingMs(uuid, AssautEclairSkill.SKILL_ID, cooldownMs) / 1000f;
             deny(playerRef, String.format("Assaut éclair — cooldown %.1fs", sec));
             return false;
