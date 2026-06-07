@@ -17,9 +17,12 @@ import fr.varyon.vrpg.classes.ClassXpCurve;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.ui.RpgUiStyles;
+import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 import fr.varyon.vrpg.ui.classes.RpgClassUiState;
+import fr.varyon.vrpg.ui.classes.layout.ClassTalentTreeLayouts;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public final class ClassesTab {
 
@@ -148,20 +151,25 @@ public final class ClassesTab {
             }
         }
 
-        ClassTalentTree.Node[] talentNodes = ClassTalentTree.getTree(activeClass);
+        ClassTalentTree.Node[] talentNodes = ClassTalentTreeLayouts.talentNodes(acc);
+        List<ClassUnlockedActiveSkills.Entry> unlockedActives = ClassUnlockedActiveSkills.list(acc);
+
         String[] slotIds = {"E", "R", "CrouchA", "CrouchE", "CrouchR", "A"};
         for (String slotId : slotIds) {
             String assigned = state.skillSlotAssignments.get(slotId);
+            boolean shown = false;
             if (assigned != null) {
                 for (ClassTalentTree.Node n : talentNodes) {
                     if (n.itemId().equals(assigned)) {
                         uiBuilder.set("#SkillSlot" + slotId + "Icon.ItemId", n.itemId());
                         uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", true);
                         uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", false);
+                        shown = true;
                         break;
                     }
                 }
-            } else {
+            }
+            if (!shown) {
                 uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
                 uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", true);
             }
@@ -171,22 +179,30 @@ public final class ClassesTab {
         }
 
         uiBuilder.clear("#ClassesSkillPickerList");
-        int maxDisplay = Math.min(6, talentNodes.length);
-        for (int i = 0; i < maxDisplay; i++) {
-            ClassTalentTree.Node n = talentNodes[i];
-            uiBuilder.append("#ClassesSkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
-            uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryIcon.ItemId", n.itemId());
-            uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
-            uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", state.selectedSkillSlot != null);
-            if (state.selectedSkillSlot != null) {
-                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                    "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign",
-                    EventData.of("Action", "skillSlotAssign")
-                        .append("Slot", state.selectedSkillSlot)
-                        .append("Node", n.itemId()), false);
+        if (activeSpec == null) {
+            uiBuilder.set("#ClassesSkillPickerLabel.TextSpans",
+                Message.raw("Choisissez une spécialisation pour débloquer des compétences actives"));
+        } else if (unlockedActives.isEmpty()) {
+            uiBuilder.set("#ClassesSkillPickerLabel.TextSpans",
+                Message.raw("Aucune compétence active débloquée"));
+        } else {
+            uiBuilder.set("#ClassesSkillPickerLabel.TextSpans",
+                Message.raw("Compétences actives débloquées"));
+            for (int i = 0; i < unlockedActives.size(); i++) {
+                ClassTalentTree.Node n = unlockedActives.get(i).node();
+                uiBuilder.append("#ClassesSkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
+                uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryIcon.ItemId", n.itemId());
+                uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
+                uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", state.selectedSkillSlot != null);
+                if (state.selectedSkillSlot != null) {
+                    eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                        "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign",
+                        EventData.of("Action", "skillSlotAssign")
+                            .append("Slot", state.selectedSkillSlot)
+                            .append("Node", n.itemId()), false);
+                }
             }
         }
-        uiBuilder.set("#ClassesSkillPickerLabel.TextSpans", Message.raw("Compétences disponibles"));
     }
 
     static Message specDiffMsg(double mult) {

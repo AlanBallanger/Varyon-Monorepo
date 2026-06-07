@@ -12,5 +12,7 @@ public final class RpgClassUiState {
     public final Map<String, String> skillSlotAssignments = new HashMap<>();
     public int selectedClassNode = 0;
     public int hoveredClassNode = -1;
+    public boolean classEditMode = false;
     public int[] pendingClassRanks = null;
+    public int[] savedClassRanks = null;
 }

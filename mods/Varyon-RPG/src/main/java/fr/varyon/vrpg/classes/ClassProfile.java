@@ -14,10 +14,14 @@ public final class ClassProfile {
     @Nullable private PlayerClass activeClass;
     private final EnumMap<PlayerClass, PlayerSpecialization> specs = new EnumMap<>(PlayerClass.class);
     private final EnumMap<PlayerClass, Map<String, Integer>> talents = new EnumMap<>(PlayerClass.class);
+    private final EnumMap<PlayerClass, Map<String, String>> skillSlots = new EnumMap<>(PlayerClass.class);
 
     public ClassProfile(@Nonnull String name) {
         this.name = name;
-        for (PlayerClass c : PlayerClass.values()) talents.put(c, new HashMap<>());
+        for (PlayerClass c : PlayerClass.values()) {
+            talents.put(c, new HashMap<>());
+            skillSlots.put(c, new HashMap<>());
+        }
     }
 
     @Nonnull  public String getName()                               { return name; }
@@ -46,6 +50,19 @@ public final class ClassProfile {
 
     public void resetTalents(@Nonnull PlayerClass c) { getTalents(c).clear(); }
 
+    @Nonnull
+    public Map<String, String> getSkillSlots(@Nonnull PlayerClass c) {
+        return skillSlots.computeIfAbsent(c, k -> new HashMap<>());
+    }
+
+    public void setSkillSlot(@Nonnull PlayerClass c, @Nonnull String slotId, @Nonnull String itemId) {
+        getSkillSlots(c).put(slotId, itemId);
+    }
+
+    public void clearSkillSlots(@Nonnull PlayerClass c) {
+        getSkillSlots(c).clear();
+    }
+
     public int totalTalentRanks(@Nonnull PlayerClass c) {
         int s = 0;
         for (int r : getTalents(c).values()) s += r;
@@ -58,6 +75,8 @@ public final class ClassProfile {
             setSpec(c, acc.getProgress(c).getActiveSpec());
             getTalents(c).clear();
             getTalents(c).putAll(acc.getTalents(c));
+            getSkillSlots(c).clear();
+            getSkillSlots(c).putAll(acc.getSkillSlots(c));
         }
     }
 
@@ -67,6 +86,8 @@ public final class ClassProfile {
             acc.getProgress(c).setActiveSpec(specs.get(c));
             acc.getTalents(c).clear();
             acc.getTalents(c).putAll(getTalents(c));
+            acc.getSkillSlots(c).clear();
+            acc.getSkillSlots(c).putAll(getSkillSlots(c));
         }
     }
 }

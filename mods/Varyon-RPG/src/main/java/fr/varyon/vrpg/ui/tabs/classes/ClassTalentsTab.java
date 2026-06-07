@@ -14,12 +14,16 @@ import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.ClassTalentTree;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.ui.classes.ClassSkillDescriptions;
+import fr.varyon.vrpg.ui.classes.ClassTalentTreeLogic;
+import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 import fr.varyon.vrpg.ui.classes.RpgClassUiState;
 import fr.varyon.vrpg.ui.classes.layout.ClassTalentTreeLayouts;
 import fr.varyon.vrpg.ui.tree.TalentTreeEdgeLayout;
 import fr.varyon.vrpg.ui.tree.TalentTreeTheme;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static fr.varyon.vrpg.ui.tree.TalentTreeTheme.*;
 
@@ -75,7 +79,7 @@ public final class ClassTalentsTab {
         int[][] shifted = ClassTalentTreeLayouts.positionsForAccount(acc);
         ClassTalentTreeLayouts.buildEdges(acc, uiBuilder, 0);
 
-        syncPendingRanks(state, acc, activeClass, talentNodes);
+        ClassTalentTreeLogic.syncDisplayRanks(state, acc, activeClass, talentNodes.length);
 
         int effectiveSel = (state.selectedClassNode >= 0 && state.selectedClassNode < talentNodes.length)
             ? state.selectedClassNode : 0;
@@ -85,7 +89,7 @@ public final class ClassTalentsTab {
         renderNodes(uiBuilder, eventBuilder, talentNodes, shifted, state, effectiveSel, effectiveHov);
         renderDetailPanel(uiBuilder, eventBuilder, talentNodes, state, acc, activeClass, effectiveSel, effectiveHov);
         renderSkillSlots(uiBuilder, eventBuilder, talentNodes, state);
-        renderSkillPicker(uiBuilder, eventBuilder, talentNodes, state);
+        renderSkillPicker(uiBuilder, eventBuilder, acc, state);
     }
 
     public static void applyHoverChrome(@Nonnull PlayerRef playerRef,
@@ -110,34 +114,13 @@ public final class ClassTalentsTab {
         int panelRank = state.pendingClassRanks != null && panelNode < state.pendingClassRanks.length
             ? state.pendingClassRanks[panelNode] : 0;
 
-        cmd.set("#ClassTreeSelectedTitle.TextSpans", Message.raw(panelTalent.name()));
-        cmd.set("#ClassTreeSelectedFlavor.TextSpans", Message.raw("« " + panelTalent.flavor() + " »"));
-        cmd.set("#ClassTreeSelectedEffect.TextSpans", Message.raw(panelTalent.description()));
-        cmd.set("#ClassTreeCurrentRankValue.TextSpans", Message.raw(panelRank + "/" + panelTalent.maxRank()));
-        cmd.set("#ClassTreeCurrentBonusRow.Visible", false);
-        cmd.set("#ClassTreeNextRankRow.Visible", false);
+        applyTalentDetail(cmd, acc, panelNode, panelTalent, panelRank);
         String type = panelTalent.type();
         cmd.set("#ClassTreeTypePassif.Visible", "Passif".equals(type));
         cmd.set("#ClassTreeTypeActif.Visible", "Actif".equals(type));
         cmd.set("#ClassTreeTypeObjet.Visible", "Objet".equals(type));
 
-        boolean hasPoints = acc != null && activeClass != null && acc.availableTalentPoints(activeClass) > 0;
-        boolean canAdd = hasPoints && panelRank < panelTalent.maxRank();
-        cmd.set("#ClassTreeAttribuerButton.Visible", canAdd);
-    }
-
-    private static void syncPendingRanks(@Nonnull RpgClassUiState state,
-                                         ClassAccount acc,
-                                         PlayerClass activeClass,
-                                         ClassTalentTree.Node[] talentNodes) {
-        if (state.pendingClassRanks == null || state.pendingClassRanks.length != talentNodes.length) {
-            state.pendingClassRanks = new int[talentNodes.length];
-            if (acc != null && activeClass != null) {
-                for (int i = 0; i < talentNodes.length; i++) {
-                    state.pendingClassRanks[i] = acc.getTalentRank(activeClass, String.valueOf(i));
-                }
-            }
-        }
+        cmd.set("#ClassTreeAttribuerButton.Visible", state.classEditMode);
     }
 
     private static void renderNodes(@Nonnull UICommandBuilder uiBuilder,
@@ -171,6 +154,9 @@ public final class ClassTalentsTab {
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 "#ClassTreeNode" + id,
                 EventData.of("Action", "classtreeSkill").append("Node", id), false);
+            eventBuilder.addEventBinding(CustomUIEventBindingType.RightClicking,
+                "#ClassTreeNode" + id,
+                EventData.of("Action", "classtreeSkillRight").append("Node", id), false);
             eventBuilder.addEventBinding(CustomUIEventBindingType.MouseEntered,
                 "#ClassTreeNode" + id,
                 EventData.of("Action", "classtreeHover").append("Node", id), false);
@@ -212,27 +198,20 @@ public final class ClassTalentsTab {
         int panelRank = state.pendingClassRanks != null && panelNode < state.pendingClassRanks.length
             ? state.pendingClassRanks[panelNode] : 0;
 
-        uiBuilder.set("#ClassTreeSelectedTitle.TextSpans", Message.raw(panelTalent.name()));
-        uiBuilder.set("#ClassTreeSelectedFlavor.TextSpans", Message.raw("« " + panelTalent.flavor() + " »"));
-        uiBuilder.set("#ClassTreeSelectedEffect.TextSpans", Message.raw(panelTalent.description()));
-        uiBuilder.set("#ClassTreeCurrentRankValue.TextSpans", Message.raw(panelRank + "/" + panelTalent.maxRank()));
-        uiBuilder.set("#ClassTreeCurrentBonusRow.Visible", false);
-        uiBuilder.set("#ClassTreeNextRankRow.Visible", false);
+        applyTalentDetail(uiBuilder, acc, panelNode, panelTalent, panelRank);
 
         String type = panelTalent.type();
         uiBuilder.set("#ClassTreeTypePassif.Visible", "Passif".equals(type));
         uiBuilder.set("#ClassTreeTypeActif.Visible", "Actif".equals(type));
         uiBuilder.set("#ClassTreeTypeObjet.Visible", "Objet".equals(type));
 
-        boolean hasPoints = acc != null && activeClass != null && acc.availableTalentPoints(activeClass) > 0;
-        boolean canAdd = hasPoints && panelRank < panelTalent.maxRank();
-        uiBuilder.set("#ClassTreeAttribuerButton.Visible", canAdd);
+        uiBuilder.set("#ClassTreeAttribuerButton.Visible", state.classEditMode);
         uiBuilder.set("#ClassTreeResetButton.Visible", acc != null && activeClass != null);
 
-        if (canAdd) {
+        if (state.classEditMode) {
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 "#ClassTreeAttribuerButton",
-                EventData.of("Action", "classtreeAttribuer").append("Node", String.valueOf(effectiveSel)),
+                EventData.of("Action", "classtreeAttribuer"),
                 false);
         }
         if (acc != null && activeClass != null) {
@@ -270,9 +249,41 @@ public final class ClassTalentsTab {
         }
     }
 
+    private static void applyTalentDetail(@Nonnull UICommandBuilder ui,
+                                          @Nullable ClassAccount acc,
+                                          int panelNode,
+                                          @Nonnull ClassTalentTree.Node panelTalent,
+                                          int panelRank) {
+        String skillId = ClassSkillDescriptions.skillIdForNode(acc, panelNode);
+        ui.set("#ClassTreeSelectedTitle.TextSpans", Message.raw(panelTalent.name()));
+        ui.set("#ClassTreeSelectedFlavor.TextSpans", Message.raw("« " + panelTalent.flavor() + " »"));
+        ui.set("#ClassTreeSelectedEffect.TextSpans", Message.raw(
+            ClassSkillDescriptions.effectText(skillId, panelTalent.description())));
+        ui.set("#ClassTreeCurrentRankValue.TextSpans",
+            Message.raw(panelRank + "/" + panelTalent.maxRank()));
+
+        boolean hasCurrent = panelRank > 0 && skillId != null;
+        ui.set("#ClassTreeCurrentBonusRow.Visible", hasCurrent);
+        if (hasCurrent) {
+            String current = ClassSkillDescriptions.statLineForRank(skillId, panelRank);
+            if (current != null) {
+                ui.set("#ClassTreeCurrentBonusValue.TextSpans", Message.raw(current));
+            }
+        }
+
+        boolean hasNext = panelRank < panelTalent.maxRank() && skillId != null;
+        ui.set("#ClassTreeNextRankRow.Visible", hasNext);
+        if (hasNext) {
+            String next = ClassSkillDescriptions.statLineForRank(skillId, panelRank + 1);
+            if (next != null) {
+                ui.set("#ClassTreeNextRankValue.TextSpans", Message.raw(next));
+            }
+        }
+    }
+
     private static void renderSkillPicker(@Nonnull UICommandBuilder uiBuilder,
                                           @Nonnull UIEventBuilder eventBuilder,
-                                          @Nonnull ClassTalentTree.Node[] talentNodes,
+                                          ClassAccount acc,
                                           @Nonnull RpgClassUiState state) {
         boolean pickerOpen = state.selectedSkillSlot != null;
         uiBuilder.set("#SkillPickerPanel.Visible", pickerOpen);
@@ -289,8 +300,10 @@ public final class ClassTalentsTab {
         }
         uiBuilder.set("#SkillPickerSlotLabel.TextSpans", Message.raw("Assigner à : " + slotLabel));
         uiBuilder.clear("#SkillPickerList");
-        for (int i = 0; i < talentNodes.length; i++) {
-            ClassTalentTree.Node n = talentNodes[i];
+
+        var unlockedActives = ClassUnlockedActiveSkills.list(acc);
+        for (int i = 0; i < unlockedActives.size(); i++) {
+            ClassTalentTree.Node n = unlockedActives.get(i).node();
             uiBuilder.append("#SkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
             uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryIcon.ItemId", n.itemId());
             uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));

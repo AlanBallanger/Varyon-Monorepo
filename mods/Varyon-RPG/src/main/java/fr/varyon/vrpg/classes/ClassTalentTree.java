@@ -83,7 +83,7 @@ public final class ClassTalentTree {
 
         SPEC_TREES.put(PlayerSpecialization.DUELLISTE, new Node[]{
             new Node("Assaut Éclair",         "Actif",  "Une botte parfaite ne laisse aucune fenêtre à l'adversaire.",             "Ruée vers l'avant, infligeant des dégâts à l'impact.",             "Weapon_Sword_Mithril",       5),
-            new Node("Expert en Duel",        "Passif", "La prudence du bretteur, c'est de toujours avoir l'avantage.",            "Gain d'expérience augmenté lorsque les PV sont supérieurs à 80 %.", "Armor_Leather_Light_Chest",  5),
+            new Node("Expert en Duel",        "Passif", "La prudence du bretteur, c'est de toujours avoir l'avantage.",            "Gain d'expérience augmenté lorsque les PV sont supérieurs à 70 %.", "Armor_Leather_Light_Chest",  5),
             new Node("Blessure Ouverte",      "Passif", "Une lame qui accroche, c'est une victoire qui se compte en secondes.",    "Les attaques ont une chance d'infliger un saignement.",             "Ingredient_Sac_Venom",       5),
             new Node("Feinte",                "Actif",  "Montrer une faille pour en créer une vraie — c'est tout l'art du duel.", "Le prochain coup ne peut être ni bloqué ni paré par l'adversaire.", "Weapon_Daggers_Mithril",     5),
             new Node("Riposte Parfaite",      "Actif",  "Absorber le coup pour mieux le rendre — trois fois.",                    "Entre en posture défensive. Si une attaque est reçue, contre-attaque instantanément.", "Weapon_Shield_Cobalt", 5),

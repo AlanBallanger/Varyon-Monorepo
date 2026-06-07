@@ -2,6 +2,7 @@ package fr.varyon.vrpg.classes;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ public final class ClassAccount {
 
     private final EnumMap<PlayerClass, ClassProgress> progress = new EnumMap<>(PlayerClass.class);
     private final EnumMap<PlayerClass, Map<String, Integer>> talents = new EnumMap<>(PlayerClass.class);
+    private final EnumMap<PlayerClass, Map<String, String>> skillSlots = new EnumMap<>(PlayerClass.class);
 
     private final ClassProfile[] profiles;
     private int activeProfileIndex = 0;
@@ -25,6 +27,7 @@ public final class ClassAccount {
         for (PlayerClass c : PlayerClass.values()) {
             progress.put(c, ClassProgress.freshLevel1(c));
             talents.put(c, new HashMap<>());
+            skillSlots.put(c, new HashMap<>());
         }
         this.activeClass = null;
         this.profiles = new ClassProfile[ClassProfile.COUNT];
@@ -84,6 +87,33 @@ public final class ClassAccount {
 
     public void resetTalents(@Nonnull PlayerClass c) {
         talents.get(c).clear();
+    }
+
+    @Nonnull
+    public Map<String, String> getSkillSlots(@Nonnull PlayerClass c) {
+        return skillSlots.get(c);
+    }
+
+    @Nullable
+    public String getSkillSlot(@Nonnull PlayerClass c, @Nonnull String slotId) {
+        return skillSlots.get(c).get(slotId);
+    }
+
+    public void setSkillSlot(@Nonnull PlayerClass c, @Nonnull String slotId, @Nonnull String itemId) {
+        skillSlots.get(c).put(slotId, itemId);
+    }
+
+    public void clearSkillSlot(@Nonnull PlayerClass c, @Nonnull String slotId) {
+        skillSlots.get(c).remove(slotId);
+    }
+
+    public void clearSkillSlots(@Nonnull PlayerClass c) {
+        skillSlots.get(c).clear();
+    }
+
+    @Nonnull
+    public Map<String, String> copySkillSlots(@Nonnull PlayerClass c) {
+        return Collections.unmodifiableMap(new HashMap<>(skillSlots.get(c)));
     }
 
     public int availableTalentPoints(@Nonnull PlayerClass c) {

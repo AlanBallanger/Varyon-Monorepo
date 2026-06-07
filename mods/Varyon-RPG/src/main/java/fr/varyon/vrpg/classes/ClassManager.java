@@ -4,6 +4,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
+import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -206,7 +207,66 @@ public final class ClassManager {
         ReentrantLock lock = lockFor(uuid);
         lock.lock();
         try {
-            getOrLoad(uuid).resetTalents(playerClass);
+            ClassAccount acc = getOrLoad(uuid);
+            acc.resetTalents(playerClass);
+            pruneInvalidSkillSlots(acc, playerClass);
+            dirty.add(uuid);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void setSkillSlot(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass,
+                             @Nonnull String slotId, @Nonnull String itemId) {
+        ReentrantLock lock = lockFor(uuid);
+        lock.lock();
+        try {
+            getOrLoad(uuid).setSkillSlot(playerClass, slotId, itemId);
+            dirty.add(uuid);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void clearSkillSlot(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, @Nonnull String slotId) {
+        ReentrantLock lock = lockFor(uuid);
+        lock.lock();
+        try {
+            getOrLoad(uuid).clearSkillSlot(playerClass, slotId);
+            dirty.add(uuid);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void clearSkillSlots(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass) {
+        ReentrantLock lock = lockFor(uuid);
+        lock.lock();
+        try {
+            getOrLoad(uuid).clearSkillSlots(playerClass);
+            dirty.add(uuid);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void pruneInvalidSkillSlots(@Nonnull ClassAccount acc, @Nonnull PlayerClass playerClass) {
+        acc.getSkillSlots(playerClass).entrySet().removeIf(e ->
+            !ClassUnlockedActiveSkills.isUnlockedActive(acc, e.getValue()));
+    }
+
+    public void resetAccount(@Nonnull UUID uuid) {
+        ReentrantLock lock = lockFor(uuid);
+        lock.lock();
+        try {
+            ClassAccount acc = getOrLoad(uuid);
+            for (PlayerClass c : PlayerClass.values()) {
+                acc.getProgress(c).setLevel(1, 0L);
+                acc.getProgress(c).setActiveSpec(null);
+                acc.resetTalents(c);
+                acc.clearSkillSlots(c);
+            }
+            acc.setActiveClass(null);
             dirty.add(uuid);
         } finally {
             lock.unlock();

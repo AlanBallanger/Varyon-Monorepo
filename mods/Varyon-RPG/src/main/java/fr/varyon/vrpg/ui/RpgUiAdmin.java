@@ -17,6 +17,7 @@ public final class RpgUiAdmin {
     private RpgUiAdmin() {}
 
     public static boolean isAdmin(@Nonnull PlayerRef playerRef) {
+        if (playerRef.hasPermission("hytale.command")) return true;
         try {
             List<PlayerRef> players = new ArrayList<>(Universe.get().getPlayers());
             for (PlayerRef pr : players) {

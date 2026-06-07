@@ -8,6 +8,8 @@ import fr.varyon.vrpg.classes.ClassTalentTree;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.ui.RpgMainUI;
+import fr.varyon.vrpg.ui.classes.ClassTalentTreeLogic;
+import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 import fr.varyon.vrpg.ui.classes.RpgClassUiState;
 import fr.varyon.vrpg.ui.classes.layout.ClassTalentTreeLayouts;
 import fr.varyon.vrpg.ui.tabs.classes.ClassTalentsTab;
@@ -35,7 +37,7 @@ public final class ClassUiEvents {
                 classManager.setActiveClass(playerRef.getUuid(), c);
                 classManager.applyStats(playerRef.getUuid(), playerRef);
             }
-            state.pendingClassRanks = null;
+            ClassTalentTreeLogic.exitEditMode(state);
             state.selectedClassNode = 0;
             setActiveTab.accept(ClassTalentsTab.TAB_CLASSES);
             return UiEventResult.REBUILD;
@@ -48,7 +50,7 @@ public final class ClassUiEvents {
 
         if ("selectSpec".equals(data.action) && data.specId != null) {
             state.pendingSpecId = null;
-            state.pendingClassRanks = null;
+            ClassTalentTreeLogic.exitEditMode(state);
             state.selectedClassNode = 0;
             ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
             if (classManager != null) {
@@ -89,14 +91,51 @@ public final class ClassUiEvents {
             LOG.info("[RPG-SubTab] classtreeSubTab received, sub=" + data.sub);
             state.classTreeSubTab = data.sub;
             state.selectedSkillSlot = null;
+            ClassTalentTreeLogic.exitEditMode(state);
             return UiEventResult.REBUILD;
         }
         if ("classtreeSkill".equals(data.action) && data.node != null) {
-            try {
-                int idx = Integer.parseInt(data.node);
-                state.selectedClassNode = idx;
-                state.hoveredClassNode = -1;
-            } catch (NumberFormatException ignored) {}
+            ClassManager classManagerSkill = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManagerSkill != null) {
+                ClassAccount accSkill = classManagerSkill.getAccount(playerRef.getUuid());
+                PlayerClass activeClassSkill = accSkill != null ? accSkill.getActiveClass() : null;
+                if (activeClassSkill != null) {
+                    try {
+                        int idx = Integer.parseInt(data.node);
+                        ClassTalentTree.Node[] nodes = ClassTalentTreeLayouts.talentNodes(accSkill);
+                        if (idx >= 0 && idx < nodes.length) {
+                            state.selectedClassNode = idx;
+                            state.hoveredClassNode = -1;
+                            ClassTalentTreeLogic.enterEditMode(state, accSkill, activeClassSkill, nodes);
+                            ClassTalentTreeLogic.tryPendingAdd(state, accSkill, activeClassSkill, idx, nodes);
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            return UiEventResult.REBUILD;
+        }
+        if ("classtreeSkillRight".equals(data.action) && data.node != null) {
+            ClassManager classManagerRight = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManagerRight != null) {
+                ClassAccount accRight = classManagerRight.getAccount(playerRef.getUuid());
+                PlayerClass activeClassRight = accRight != null ? accRight.getActiveClass() : null;
+                if (activeClassRight != null) {
+                    try {
+                        int idx = Integer.parseInt(data.node);
+                        ClassTalentTree.Node[] nodes = ClassTalentTreeLayouts.talentNodes(accRight);
+                        if (idx >= 0 && idx < nodes.length) {
+                            state.selectedClassNode = idx;
+                            if (!state.classEditMode) {
+                                if (accRight.availableTalentPoints(activeClassRight) > 0) {
+                                    ClassTalentTreeLogic.enterEditMode(state, accRight, activeClassRight, nodes);
+                                }
+                            } else {
+                                ClassTalentTreeLogic.tryPendingRemove(state, idx);
+                            }
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
             return UiEventResult.REBUILD;
         }
         if ("classtreeHover".equals(data.action) && data.node != null) {
@@ -105,37 +144,40 @@ public final class ClassUiEvents {
             } catch (NumberFormatException ignored) {}
             return UiEventResult.HOVER_UPDATE;
         }
-        if ("classtreeAttribuer".equals(data.action) && data.node != null) {
+        if ("classtreeAttribuer".equals(data.action)) {
+            if (!state.classEditMode) return UiEventResult.NONE;
             ClassManager classManager2 = VaryonRpgPlugin.getInstance().getClassManager();
             if (classManager2 != null) {
                 ClassAccount acc2 = classManager2.getAccount(playerRef.getUuid());
                 PlayerClass activeClass2 = acc2 != null ? acc2.getActiveClass() : null;
-                if (activeClass2 != null) {
-                    try {
-                        int idx = Integer.parseInt(data.node);
-                        ClassTalentTree.Node[] nodes = ClassTalentTreeLayouts.talentNodes(acc2);
-                        if (idx >= 0 && idx < nodes.length) {
-                            boolean allocated = classManager2.allocateTalent(
-                                playerRef.getUuid(), activeClass2, String.valueOf(idx), nodes[idx].maxRank());
-                            if (allocated) {
-                                state.pendingClassRanks = null;
+                if (activeClass2 != null && state.pendingClassRanks != null && state.savedClassRanks != null) {
+                    ClassTalentTree.Node[] nodes = ClassTalentTreeLayouts.talentNodes(acc2);
+                    for (int i = 0; i < nodes.length && i < state.pendingClassRanks.length; i++) {
+                        int delta = state.pendingClassRanks[i] - state.savedClassRanks[i];
+                        if (delta > 0) {
+                            for (int d = 0; d < delta; d++) {
+                                classManager2.allocateTalent(
+                                    playerRef.getUuid(), activeClass2, String.valueOf(i), nodes[i].maxRank());
                             }
                         }
-                    } catch (NumberFormatException ignored) {}
+                    }
+                    classManager2.applyStats(playerRef.getUuid(), playerRef);
                 }
             }
+            ClassTalentTreeLogic.exitEditMode(state);
             return UiEventResult.REBUILD;
         }
         if ("classtreeReset".equals(data.action)) {
+            ClassTalentTreeLogic.exitEditMode(state);
             ClassManager classManager3 = VaryonRpgPlugin.getInstance().getClassManager();
             if (classManager3 != null) {
                 ClassAccount acc3 = classManager3.getAccount(playerRef.getUuid());
                 PlayerClass activeClass3 = acc3 != null ? acc3.getActiveClass() : null;
                 if (activeClass3 != null) {
                     classManager3.resetTalents(playerRef.getUuid(), activeClass3);
+                    classManager3.applyStats(playerRef.getUuid(), playerRef);
                 }
             }
-            state.pendingClassRanks = null;
             state.selectedClassNode = 0;
             return UiEventResult.REBUILD;
         }
@@ -149,16 +191,42 @@ public final class ClassUiEvents {
             return UiEventResult.REBUILD;
         }
         if ("skillSlotsReset".equals(data.action)) {
+            ClassManager classManagerReset = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManagerReset != null) {
+                ClassAccount accReset = classManagerReset.getAccount(playerRef.getUuid());
+                PlayerClass activeClassReset = accReset != null ? accReset.getActiveClass() : null;
+                if (activeClassReset != null) {
+                    classManagerReset.clearSkillSlots(playerRef.getUuid(), activeClassReset);
+                }
+            }
             state.skillSlotAssignments.clear();
             state.selectedSkillSlot = null;
             return UiEventResult.REBUILD;
         }
         if ("skillSlotAssign".equals(data.action) && data.slot != null && data.node != null) {
-            state.skillSlotAssignments.put(data.slot, data.node);
+            ClassManager classManager4 = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManager4 != null) {
+                classManager4.ensureAccount(playerRef.getUuid(), playerRef.getUsername());
+                ClassAccount acc4 = classManager4.getOrLoad(playerRef.getUuid());
+                PlayerClass activeClass4 = acc4.getActiveClass();
+                if (activeClass4 != null && ClassUnlockedActiveSkills.isUnlockedActive(acc4, data.node)) {
+                    classManager4.setSkillSlot(playerRef.getUuid(), activeClass4, data.slot, data.node);
+                    state.skillSlotAssignments.put(data.slot, data.node);
+                }
+            }
             state.selectedSkillSlot = null;
             return UiEventResult.REBUILD;
         }
         if ("skillSlotClear".equals(data.action) && data.slot != null) {
+            ClassManager classManagerClear = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManagerClear != null) {
+                classManagerClear.ensureAccount(playerRef.getUuid(), playerRef.getUsername());
+                ClassAccount accClear = classManagerClear.getOrLoad(playerRef.getUuid());
+                PlayerClass activeClassClear = accClear.getActiveClass();
+                if (activeClassClear != null) {
+                    classManagerClear.clearSkillSlot(playerRef.getUuid(), activeClassClear, data.slot);
+                }
+            }
             state.skillSlotAssignments.remove(data.slot);
             return UiEventResult.REBUILD;
         }

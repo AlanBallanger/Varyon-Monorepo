@@ -16,28 +16,15 @@ import fr.varyon.vrpg.ui.profession.ProfessionSkillTrees;
 import fr.varyon.vrpg.ui.profession.RpgProfessionUiState;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 public final class ProfessionAdminTab {
 
     private ProfessionAdminTab() {}
 
-    public static void build(@Nonnull RpgProfessionUiState state,
-                             @Nonnull UICommandBuilder ui,
-                             @Nonnull UIEventBuilder ev) {
-        List<PlayerRef> players = RpgUiAdmin.getOnlinePlayers();
+    public static void buildPanel(@Nonnull RpgProfessionUiState state,
+                                  @Nonnull UICommandBuilder ui,
+                                  @Nonnull UIEventBuilder ev) {
         PlayerRef target = RpgUiAdmin.adminTargetRef(state);
-
-        String targetName = target != null ? target.getUsername() : "—";
-        ui.set("#AdminTargetName.TextSpans", Message.raw(targetName));
-        ui.set("#AdminPlayerCount.TextSpans", Message.raw("(" + players.size() + " en ligne)"));
-
-        ev.addEventBinding(CustomUIEventBindingType.Activating, "#AdminPlayerPrev",
-            EventData.of("Action", "adminPlayerNav").append("Dir", "-1"), false);
-        ev.addEventBinding(CustomUIEventBindingType.Activating, "#AdminPlayerNext",
-            EventData.of("Action", "adminPlayerNav").append("Dir", "1"), false);
-        ev.addEventBinding(CustomUIEventBindingType.Activating, "#AdminPlayerSelf",
-            EventData.of("Action", "adminPlayerSelf"), false);
 
         Profession prof = ProfessionSkillTrees.CATALOG_ORDER[state.adminProfIndex];
         ui.set("#AdminProfName.TextSpans", Message.raw(prof.getDisplayName()));

@@ -113,6 +113,25 @@ public final class SqliteClassStorage {
                   PRIMARY KEY (uuid, profile_idx, class_id, node_id)
                 )
             """);
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS player_class_skill_slot (
+                  uuid     TEXT NOT NULL,
+                  class_id TEXT NOT NULL,
+                  slot_id  TEXT NOT NULL,
+                  item_id  TEXT NOT NULL,
+                  PRIMARY KEY (uuid, class_id, slot_id)
+                )
+            """);
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS player_class_profile_skill_slot (
+                  uuid        TEXT NOT NULL,
+                  profile_idx INTEGER NOT NULL,
+                  class_id    TEXT NOT NULL,
+                  slot_id     TEXT NOT NULL,
+                  item_id     TEXT NOT NULL,
+                  PRIMARY KEY (uuid, profile_idx, class_id, slot_id)
+                )
+            """);
             migrateAddColumn(st, "player_class_account", "active_profile_idx", "INTEGER NOT NULL DEFAULT 0");
         }
     }
@@ -170,6 +189,17 @@ public final class SqliteClassStorage {
                     }
                 }
             }
+            try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT class_id, slot_id, item_id FROM player_class_skill_slot WHERE uuid = ?")) {
+                ps.setString(1, uuid.toString());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        PlayerClass c = PlayerClass.fromId(rs.getString("class_id"));
+                        if (c == null) continue;
+                        account.setSkillSlot(c, rs.getString("slot_id"), rs.getString("item_id"));
+                    }
+                }
+            }
             loadProfilesSync(uuid, account);
             return account;
         } catch (SQLException e) {
@@ -209,6 +239,19 @@ public final class SqliteClassStorage {
                     } else {
                         p.setTalentRank(c, nodeId, rank);
                     }
+                }
+            }
+        }
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT profile_idx, class_id, slot_id, item_id FROM player_class_profile_skill_slot WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int idx = rs.getInt("profile_idx");
+                    if (idx < 0 || idx >= ClassProfile.COUNT) continue;
+                    PlayerClass c = PlayerClass.fromId(rs.getString("class_id"));
+                    if (c == null) continue;
+                    account.getProfiles()[idx].setSkillSlot(c, rs.getString("slot_id"), rs.getString("item_id"));
                 }
             }
         }
@@ -306,6 +349,25 @@ public final class SqliteClassStorage {
                 }
                 ins.executeBatch();
             }
+            try (PreparedStatement del = connection.prepareStatement(
+                "DELETE FROM player_class_skill_slot WHERE uuid = ?")) {
+                del.setString(1, uuid.toString());
+                del.executeUpdate();
+            }
+            try (PreparedStatement ins = connection.prepareStatement(
+                "INSERT INTO player_class_skill_slot (uuid, class_id, slot_id, item_id) VALUES (?,?,?,?)")) {
+                for (PlayerClass c : PlayerClass.values()) {
+                    for (Map.Entry<String, String> e : account.getSkillSlots(c).entrySet()) {
+                        if (e.getValue() == null || e.getValue().isBlank()) continue;
+                        ins.setString(1, uuid.toString());
+                        ins.setString(2, c.getId());
+                        ins.setString(3, e.getKey());
+                        ins.setString(4, e.getValue());
+                        ins.addBatch();
+                    }
+                }
+                ins.executeBatch();
+            }
             saveProfilesSync(uuid, account);
             connection.commit();
         } catch (SQLException e) {
@@ -324,6 +386,11 @@ public final class SqliteClassStorage {
         }
         try (PreparedStatement del = connection.prepareStatement(
             "DELETE FROM player_class_profile_talent WHERE uuid = ?")) {
+            del.setString(1, uuid.toString());
+            del.executeUpdate();
+        }
+        try (PreparedStatement del = connection.prepareStatement(
+            "DELETE FROM player_class_profile_skill_slot WHERE uuid = ?")) {
             del.setString(1, uuid.toString());
             del.executeUpdate();
         }
@@ -363,6 +430,24 @@ public final class SqliteClassStorage {
                         ps.setString(4, e.getKey());
                         ps.setInt(5, e.getValue());
                         ps.setString(6, null);
+                        ps.addBatch();
+                    }
+                }
+            }
+            ps.executeBatch();
+        }
+        try (PreparedStatement ps = connection.prepareStatement(
+            "INSERT INTO player_class_profile_skill_slot (uuid, profile_idx, class_id, slot_id, item_id) VALUES (?,?,?,?,?)")) {
+            for (int i = 0; i < ClassProfile.COUNT; i++) {
+                ClassProfile p = account.getProfiles()[i];
+                for (PlayerClass c : PlayerClass.values()) {
+                    for (Map.Entry<String, String> e : p.getSkillSlots(c).entrySet()) {
+                        if (e.getValue() == null || e.getValue().isBlank()) continue;
+                        ps.setString(1, uuidStr);
+                        ps.setInt(2, i);
+                        ps.setString(3, c.getId());
+                        ps.setString(4, e.getKey());
+                        ps.setString(5, e.getValue());
                         ps.addBatch();
                     }
                 }

@@ -8,7 +8,6 @@ import fr.varyon.vrpg.rpg.ProfessionManager;
 import fr.varyon.vrpg.rpg.TalentSoundNodes;
 import fr.varyon.vrpg.rpg.XpCurve;
 import fr.varyon.vrpg.ui.RpgMainUI;
-import fr.varyon.vrpg.ui.RpgUiAdmin;
 import fr.varyon.vrpg.ui.profession.ProfessionAccounts;
 import fr.varyon.vrpg.ui.profession.ProfessionBonusData;
 import fr.varyon.vrpg.ui.profession.ProfessionSkillTreeDef;
@@ -18,7 +17,6 @@ import fr.varyon.vrpg.ui.profession.RpgProfessionUiState;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 public final class ProfessionUiEvents {
@@ -214,95 +212,6 @@ public final class ProfessionUiEvents {
             return UiEventResult.REBUILD;
         }
 
-        UiEventResult adminResult = handleAdmin(playerRef, state, data);
-        if (adminResult != UiEventResult.NONE) return adminResult;
-
-        return UiEventResult.NONE;
-    }
-
-    private static UiEventResult handleAdmin(@Nonnull PlayerRef playerRef,
-                                             @Nonnull RpgProfessionUiState state,
-                                             @Nonnull RpgMainUI.Data data) {
-        if ("adminPlayerNav".equals(data.action) && data.dir != null) {
-            if (!RpgUiAdmin.isAdmin(playerRef)) return UiEventResult.NONE;
-            List<PlayerRef> players = RpgUiAdmin.getOnlinePlayers();
-            if (!players.isEmpty()) {
-                int dir = "1".equals(data.dir) ? 1 : -1;
-                state.adminPlayerIndex = Math.floorMod(state.adminPlayerIndex + dir, players.size());
-            }
-            return UiEventResult.REBUILD;
-        }
-        if ("adminPlayerSelf".equals(data.action)) {
-            if (!RpgUiAdmin.isAdmin(playerRef)) return UiEventResult.NONE;
-            List<PlayerRef> players = RpgUiAdmin.getOnlinePlayers();
-            for (int i = 0; i < players.size(); i++) {
-                if (players.get(i).getUuid().equals(playerRef.getUuid())) {
-                    state.adminPlayerIndex = i;
-                    break;
-                }
-            }
-            return UiEventResult.REBUILD;
-        }
-        if ("adminProfNav".equals(data.action) && data.dir != null) {
-            if (!RpgUiAdmin.isAdmin(playerRef)) return UiEventResult.NONE;
-            int dir = "1".equals(data.dir) ? 1 : -1;
-            state.adminProfIndex = Math.floorMod(state.adminProfIndex + dir, ProfessionSkillTrees.CATALOG_ORDER.length);
-            return UiEventResult.REBUILD;
-        }
-        if ("adminXp".equals(data.action) && data.amount != null) {
-            if (!RpgUiAdmin.isAdmin(playerRef)) return UiEventResult.NONE;
-            PlayerRef target = RpgUiAdmin.adminTargetRef(state);
-            if (target == null) return UiEventResult.NONE;
-            ProfessionManager mgr = VaryonRpgPlugin.getInstance().getProfessionManager();
-            if (mgr == null) return UiEventResult.NONE;
-            Profession prof = ProfessionSkillTrees.CATALOG_ORDER[state.adminProfIndex];
-            try {
-                int amount = Integer.parseInt(data.amount);
-                mgr.addXp(target.getUuid(), prof, amount);
-            } catch (NumberFormatException ignored) {}
-            return UiEventResult.REBUILD;
-        }
-        if ("adminLevel".equals(data.action) && data.delta != null) {
-            if (!RpgUiAdmin.isAdmin(playerRef)) return UiEventResult.NONE;
-            PlayerRef target = RpgUiAdmin.adminTargetRef(state);
-            if (target == null) return UiEventResult.NONE;
-            ProfessionManager mgr = VaryonRpgPlugin.getInstance().getProfessionManager();
-            if (mgr == null) return UiEventResult.NONE;
-            Profession prof = ProfessionSkillTrees.CATALOG_ORDER[state.adminProfIndex];
-            mgr.ensureAccount(target.getUuid(), target.getUsername());
-            PlayerAccount acc = mgr.getAccount(target.getUuid());
-            if (acc == null) return UiEventResult.NONE;
-            int currentLevel = acc.getProgress(prof).getLevel();
-            int newLevel;
-            if ("max".equals(data.delta)) {
-                newLevel = XpCurve.MAX_LEVEL;
-            } else {
-                try {
-                    newLevel = Math.max(1, Math.min(XpCurve.MAX_LEVEL, currentLevel + Integer.parseInt(data.delta)));
-                } catch (NumberFormatException ignored) { return UiEventResult.NONE; }
-            }
-            mgr.setLevel(target.getUuid(), prof, newLevel);
-            return UiEventResult.REBUILD;
-        }
-        if ("adminResetTalents".equals(data.action)) {
-            if (!RpgUiAdmin.isAdmin(playerRef)) return UiEventResult.NONE;
-            PlayerRef target = RpgUiAdmin.adminTargetRef(state);
-            if (target == null) return UiEventResult.NONE;
-            ProfessionManager mgr = VaryonRpgPlugin.getInstance().getProfessionManager();
-            if (mgr == null) return UiEventResult.NONE;
-            Profession prof = ProfessionSkillTrees.CATALOG_ORDER[state.adminProfIndex];
-            mgr.resetTalents(target.getUuid(), prof);
-            return UiEventResult.REBUILD;
-        }
-        if ("adminResetAll".equals(data.action)) {
-            if (!RpgUiAdmin.isAdmin(playerRef)) return UiEventResult.NONE;
-            PlayerRef target = RpgUiAdmin.adminTargetRef(state);
-            if (target == null) return UiEventResult.NONE;
-            ProfessionManager mgr = VaryonRpgPlugin.getInstance().getProfessionManager();
-            if (mgr == null) return UiEventResult.NONE;
-            mgr.resetAccount(target.getUuid());
-            return UiEventResult.REBUILD;
-        }
         return UiEventResult.NONE;
     }
 }

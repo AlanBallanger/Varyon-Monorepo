@@ -24,6 +24,12 @@ import fr.varyon.vrpg.config.MobCategoriesConfig;
 import fr.varyon.vrpg.config.TierMappingConfig;
 import fr.varyon.vrpg.config.VrpgConfig;
 import fr.varyon.vrpg.config.XpTableConfig;
+import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
+import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
+import fr.varyon.vrpg.classes.ability.ClassSkillInteractionInjector;
+import fr.varyon.vrpg.classes.ability.ClassSkillKeyFilter;
+import fr.varyon.vrpg.classes.ability.ClassSkillService;
+import fr.varyon.vrpg.classes.ability.ClassSkillTriggerInteraction;
 import fr.varyon.vrpg.classes.ClassKillXpSystem;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.commands.VpaCommand;
@@ -102,6 +108,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private ClassManager classManager;
     private MobParticipantsTracker mobParticipantsTracker;
     private ClassKillXpSystem classKillXpSystem;
+    private ClassSkillService classSkillService;
+    private ClassSkillKeyFilter classSkillKeyFilter;
+    private PacketFilter classSkillPacketFilter;
     private MiningHelmet miningHelmet;
     private GuardianStoneManager guardianManager;
     private MinerComboTracker comboTracker;
@@ -154,6 +163,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         return classManager;
     }
 
+    public ClassSkillService getClassSkillService() {
+        return classSkillService;
+    }
+
     public java.nio.file.Path getPluginDataDirectory() {
         return getDataDirectory();
     }
@@ -187,7 +200,20 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         }
 
         try {
+            getCodecRegistry(Interaction.CODEC)
+                .register(ClassSkillTriggerInteraction.TYPE_NAME,
+                    ClassSkillTriggerInteraction.class,
+                    ClassSkillTriggerInteraction.CODEC);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ClassSkillTriggerInteraction");
+        }
+
+        try {
             this.classManager = new ClassManager(getDataDirectory());
+            this.classSkillService = new ClassSkillService(classManager);
+            this.classSkillKeyFilter = new ClassSkillKeyFilter();
+            this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
+            ClassSkillInteractionInjector.register();
             this.mobParticipantsTracker = new MobParticipantsTracker();
             this.classKillXpSystem = new ClassKillXpSystem(classManager, mobParticipantsTracker);
         } catch (Exception e) {
@@ -399,6 +425,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 }
                 if (ref != null && classKillXpSystem != null) {
                     classKillXpSystem.cleanup(ref.getUuid());
+                }
+                if (ref != null && classSkillService != null) {
+                    classSkillService.cleanup(ref.getUuid());
                 }
                 if (ref != null && classManager != null) {
                     classManager.onPlayerDisconnect(ref.getUuid());
@@ -669,6 +698,21 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
     @Override
     protected void shutdown() {
+        if (classSkillPacketFilter != null) {
+            try {
+                PacketAdapters.deregisterInbound(classSkillPacketFilter);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] deregister ClassSkillKeyFilter");
+            }
+            classSkillPacketFilter = null;
+        }
+        if (classManager != null) {
+            try {
+                classManager.shutdown();
+            } catch (Exception e) {
+                LOGGER.atSevere().withCause(e).log("[VaryonRPG] shutdown ClassManager");
+            }
+        }
         if (professionManager != null) {
             try {
                 professionManager.shutdown();

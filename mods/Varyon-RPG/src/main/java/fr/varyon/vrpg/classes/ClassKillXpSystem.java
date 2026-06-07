@@ -18,10 +18,10 @@ import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntitySta
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
+import fr.varyon.vrpg.classes.ability.ExpertEnDuelSkill;
 import fr.varyon.vrpg.combat.MobKillXpResolver;
 import fr.varyon.vrpg.combat.MobParticipantsTracker;
 import fr.varyon.vrpg.config.ClassXpConfig;
-import fr.varyon.vrpg.config.VrpgConfig;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -91,7 +91,7 @@ public final class ClassKillXpSystem {
             NPCEntity npc = store.getComponent(victimRef, NPCEntity.getComponentType());
             if (npc == null) return;
 
-            grantKillXp(playerRef, npc);
+            grantKillXp(playerRef, attackerRef, npc, store);
             participantsTracker.markHandledByPrediction(victimRef, playerRef.getUuid());
         }
     }
@@ -127,7 +127,7 @@ public final class ClassKillXpSystem {
                 if (playerRef == null) continue;
 
                 try {
-                    grantKillXp(playerRef, npc);
+                    grantKillXp(playerRef, entry.playerRef(), npc, (Store<EntityStore>) store);
                 } catch (Exception e) {
                     LOGGER.atWarning().log("[ClassKillXp] XP error for %s: %s",
                         entry.playerUuid(), e.getMessage());
@@ -136,7 +136,10 @@ public final class ClassKillXpSystem {
         }
     }
 
-    private void grantKillXp(@Nonnull PlayerRef playerRef, @Nonnull NPCEntity npc) {
+    // XP bonus factors sourced from ExpertEnDuelSkill
+
+    private void grantKillXp(@Nonnull PlayerRef playerRef, @Nonnull Ref<EntityStore> attackerRef,
+                             @Nonnull NPCEntity npc, @Nonnull Store<EntityStore> store) {
         UUID uuid = playerRef.getUuid();
         ClassAccount acc = classManager.getOrLoad(uuid);
         PlayerClass activeClass = acc.getActiveClass();
@@ -151,11 +154,42 @@ public final class ClassKillXpSystem {
         String farmKey = MobKillXpResolver.antiFarmKey(npc);
         if (farmKey == null || !checkAntiFarm(uuid, farmKey)) return;
 
-        if (VrpgConfig.isDebugTalents()) {
-            LOGGER.atInfo().log("[ClassKillXp] +" + baseXp + " class=" + activeClass
-                + " mob=" + MobKillXpResolver.npcRoleKey(npc));
+        double mult = 1.0;
+        String multReason = null;
+
+        PlayerSpecialization spec = acc.getActiveSpec(activeClass);
+        if (spec == PlayerSpecialization.DUELLISTE) {
+            int rank = acc.getTalentRank(activeClass, ExpertEnDuelSkill.TALENT_NODE_ID);
+            if (rank > 0) {
+                double hpPct = getPlayerHpPercent(attackerRef, store);
+                if (hpPct > 0.70) {
+                    double bonus = ExpertEnDuelSkill.xpBonusForRank(rank);
+                    mult = 1.0 + bonus;
+                    multReason = "ExpertEnDuel(rank=" + rank + ", hp=" + String.format("%.0f", hpPct * 100) + "%)=+" + String.format("%.0f", bonus * 100) + "%";
+                }
+            }
         }
-        classManager.addXp(uuid, activeClass, baseXp, playerRef);
+
+        double finalXp = baseXp * mult;
+        LOGGER.atInfo().log("[ClassKillXp] +" + String.format("%.2f", finalXp) + " xp"
+            + " (base=" + String.format("%.2f", baseXp) + (multReason != null ? " x" + multReason : "")
+            + ") class=" + activeClass + " mob=" + MobKillXpResolver.npcRoleKey(npc));
+
+        classManager.addXp(uuid, activeClass, finalXp, playerRef);
+    }
+
+    private double getPlayerHpPercent(@Nonnull Ref<EntityStore> attackerRef,
+                                      @Nonnull Store<EntityStore> store) {
+        int hIdx = healthStatIndex();
+        if (hIdx < 0) return 0.0;
+        EntityStatMap stats = store.getComponent(attackerRef, EntityStatMap.getComponentType());
+        if (stats == null) return 0.0;
+        var hp = stats.get(hIdx);
+        if (hp == null) return 0.0;
+        float current = hp.get();
+        float max = hp.getMax();
+        if (max <= 0f) return 0.0;
+        return current / max;
     }
 
     private boolean checkAntiFarm(@Nonnull UUID playerId, @Nonnull String mobKey) {

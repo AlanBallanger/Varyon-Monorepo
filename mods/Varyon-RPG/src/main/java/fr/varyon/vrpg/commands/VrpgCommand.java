@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.vrpg.VaryonRpgPlugin;
+import fr.varyon.vrpg.classes.ability.ClassSkillService;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
@@ -27,6 +28,7 @@ public final class VrpgCommand extends AbstractAsyncCommand {
         this.addSubCommand(new ResetClassSub());
         this.addSubCommand(new ResetTalentsSub());
         this.addSubCommand(new ResetAllSub());
+        this.addSubCommand(new SkillSub());
     }
 
     @Override
@@ -101,6 +103,26 @@ public final class VrpgCommand extends AbstractAsyncCommand {
                 cm.resetTalents(playerRef.getUuid(), c);
             }
             ctx.sender().sendMessage(Message.raw("Profil actif entièrement réinitialisé.").color(new Color(0x6BCB7A)));
+            return done();
+        }
+    }
+
+    private static final class SkillSub extends AbstractAsyncCommand {
+        SkillSub() { super("skill", "Utilise Assaut éclair (Duelliste)"); }
+
+        @Override
+        @Nonnull
+        protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
+            if (!(ctx.sender() instanceof PlayerRef playerRef)) return done();
+            VaryonRpgPlugin plugin = VaryonRpgPlugin.getInstance();
+            ClassSkillService skills = plugin != null ? plugin.getClassSkillService() : null;
+            if (skills == null) return done();
+            Ref<EntityStore> ref = playerRef.getReference();
+            if (ref == null || !ref.isValid()) return done();
+            Store<EntityStore> store = ref.getStore();
+            ((EntityStore) store.getExternalData()).getWorld().execute(() -> {
+                skills.tryCastAssautEclair(playerRef.getUuid(), playerRef, ref, store, null);
+            });
             return done();
         }
     }

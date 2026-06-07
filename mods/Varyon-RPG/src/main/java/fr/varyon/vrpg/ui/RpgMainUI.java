@@ -13,9 +13,13 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import fr.varyon.vrpg.ui.classes.ClassSkillUiSync;
+import fr.varyon.vrpg.ui.classes.ClassTalentTreeLogic;
 import fr.varyon.vrpg.ui.classes.RpgClassUiState;
+import fr.varyon.vrpg.ui.events.AdminUiEvents;
 import fr.varyon.vrpg.ui.events.ClassUiEvents;
 import fr.varyon.vrpg.ui.events.ProfessionUiEvents;
+import fr.varyon.vrpg.ui.tabs.admin.AdminTab;
 import fr.varyon.vrpg.ui.events.UiEventResult;
 import fr.varyon.vrpg.ui.profession.ProfessionSkillTreeLogic;
 import fr.varyon.vrpg.ui.profession.RpgProfessionUiState;
@@ -25,7 +29,6 @@ import fr.varyon.vrpg.ui.tabs.classes.ClassTalentsTab;
 import fr.varyon.vrpg.ui.tabs.classes.ClassesTab;
 import fr.varyon.vrpg.ui.tabs.profession.CharacterProfessionsTab;
 import fr.varyon.vrpg.ui.tabs.profession.ClassementTab;
-import fr.varyon.vrpg.ui.tabs.profession.ProfessionAdminTab;
 import fr.varyon.vrpg.ui.tabs.profession.ProfessionSkillsTab;
 
 import javax.annotation.Nonnull;
@@ -56,6 +59,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                       @Nonnull UIEventBuilder eventBuilder,
                       @Nonnull Store<EntityStore> store) {
         boolean isAdmin = RpgUiAdmin.isAdmin(playerRef);
+        ClassSkillUiSync.hydrate(playerRef.getUuid(), classUi);
 
         uiBuilder.append("CharacterPage.ui");
         uiBuilder.append("#ClassesTabMount", "CharacterTabClasses.ui");
@@ -119,7 +123,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         } else if ("classement".equals(activeTab)) {
             ClassementTab.build(professionUi, uiBuilder, eventBuilder);
         } else if ("admin".equals(activeTab) && isAdmin) {
-            ProfessionAdminTab.build(professionUi, uiBuilder, eventBuilder);
+            AdminTab.build(professionUi, uiBuilder, eventBuilder);
         }
     }
 
@@ -139,13 +143,16 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             professionUi.selectedNode = 0;
             classUi.hoveredClassNode = -1;
             classUi.selectedClassNode = 0;
-            classUi.pendingClassRanks = null;
+            ClassTalentTreeLogic.exitEditMode(classUi);
             ProfessionSkillTreeLogic.exitEditMode(professionUi);
             rebuild();
             return;
         }
 
         UiEventResult result = ProfessionUiEvents.handle(playerRef, professionUi, data);
+        if (result == UiEventResult.NONE) {
+            result = AdminUiEvents.handle(playerRef, professionUi, data);
+        }
         if (result == UiEventResult.NONE) {
             result = ClassUiEvents.handle(playerRef, classUi, tab -> activeTab = tab, data);
         }
