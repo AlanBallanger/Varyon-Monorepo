@@ -624,7 +624,7 @@ Group {
           Group { Anchor: (Width: 6); }
           Label {
             Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
-            Text: "Compétences actives";
+            Text: "Compétences disponibles";
           }
         }
 

@@ -10,7 +10,7 @@ import com.hypixel.hytale.server.core.modules.physics.component.Velocity;
 import com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import fr.varyon.vrpg.ui.XpNotifHud;
+import com.hypixel.hytale.server.core.util.NotificationUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -58,16 +58,18 @@ public final class AssautEclairSkill {
 
         int blocks = blocksForRank(rank);
         double force = dashForceForRank(rank);
-        float yaw = headRot.getRotation().y;
+        double yawRad = Math.toRadians(headRot.getRotation().y);
 
-        double vx = Math.sin(yaw) * force;
-        double vz = -Math.cos(yaw) * force;
+        double vx = Math.sin(yawRad) * force;
+        double vz = -Math.cos(yawRad) * force;
         Vector3d dashVelocity = new Vector3d(vx, 0.0, vz);
 
         velocity.addInstruction(dashVelocity, new VelocityConfig(), ChangeVelocityType.Add);
 
-        XpNotifHud hud = XpNotifHud.get(playerRef.getUuid());
-        if (hud != null) hud.showBurst("Assaut Éclair", "Weapon_Sword_Mithril");
+        try {
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(),
+                com.hypixel.hytale.server.core.Message.raw("Assaut Eclair"), "Weapon_Sword_Mithril");
+        } catch (Exception ignored) {}
         return true;
     }
 

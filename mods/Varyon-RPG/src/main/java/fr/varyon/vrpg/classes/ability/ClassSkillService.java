@@ -15,7 +15,7 @@ import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
 import fr.varyon.vrpg.classes.duelliste.DuellisteState;
 import fr.varyon.vrpg.classes.duelliste.PerceeSkill;
 import fr.varyon.vrpg.ui.RpgUiAdmin;
-import fr.varyon.vrpg.ui.XpNotifHud;
+import com.hypixel.hytale.server.core.util.NotificationUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -170,8 +170,21 @@ public final class ClassSkillService {
     }
 
     private void notifySkill(@Nonnull UUID uuid, @Nonnull String name) {
-        XpNotifHud hud = XpNotifHud.get(uuid);
-        if (hud != null) hud.showBurst(name, "Weapon_Sword_Mithril");
+        try {
+            ClassAccount acc = classManager.getOrLoad(uuid);
+            PlayerClass cls = acc.getActiveClass();
+            PlayerSpecialization spec = cls != null ? acc.getActiveSpec(cls) : null;
+            String icon = spec != null ? spec.getItemId() : "Weapon_Sword_Mithril";
+            java.util.List<com.hypixel.hytale.server.core.universe.PlayerRef> players =
+                new java.util.ArrayList<>(com.hypixel.hytale.server.core.universe.Universe.get().getPlayers());
+            for (com.hypixel.hytale.server.core.universe.PlayerRef pr : players) {
+                if (pr.getUuid().equals(uuid)) {
+                    NotificationUtil.sendNotification(pr.getPacketHandler(),
+                        com.hypixel.hytale.server.core.Message.raw(name), icon);
+                    break;
+                }
+            }
+        } catch (Exception ignored) {}
     }
 
     public void cleanup(@Nonnull UUID uuid) {

@@ -18,25 +18,51 @@ public final class ClassStatDefinition {
         34, 36, 37, 39, 41, 42, 44, 46, 48, 50
     };
 
-    private static final int[] BASE_STAMINA = {
-        100, 102, 104, 106, 108, 110, 113, 116, 119, 122,
-        125, 128, 131, 134, 138, 142, 146, 150, 154, 158,
-        162, 166, 170, 175, 180, 185, 190, 195, 200, 206
-    };
-
-    private static final double BASE_CRIT_CHANCE_PCT = 5.0;
-    private static final double BASE_CRIT_DAMAGE_PCT = 50.0;
+    private static final double LEVEL_EASE  = 1.3;
+    private static final double CRIT_DMG_LVL1  = 120.0;
+    private static final double CRIT_DMG_RANGE = 80.0;
 
     private static int clamp(int level) {
         return Math.max(1, Math.min(30, level));
     }
 
-    public static int baseHp(int level)      { return BASE_HP     [clamp(level) - 1]; }
-    public static int baseAtk(int level)     { return BASE_ATK    [clamp(level) - 1]; }
-    public static int baseStamina(int level) { return BASE_STAMINA[clamp(level) - 1]; }
+    public static int baseHp(int level) {
+        return BASE_HP[clamp(level) - 1];
+    }
+
+    public static double hpLevelMult(int level) {
+        int L = clamp(level);
+        double m;
+        if (L <= 10) m = 1.0 + (L - 1) / 9.0;
+        else if (L <= 20) m = 2.0 + (L - 10) / 10.0;
+        else m = 3.0 + (L - 20) / 10.0;
+        return 1.0 + (m - 1.0) * (2.0 / 3.0);
+    }
+
+    public static int baseAtk(int level) {
+        return BASE_ATK[clamp(level) - 1];
+    }
+
+    public static int baseStamina(int level) {
+        int L = clamp(level);
+        if (L <= 10) return (int) Math.round(10.0 + (L - 1) * (20.0 / 9.0));
+        if (L <= 20) return 30 + (L - 10) * 2;
+        return 50 + (L - 20) * 2;
+    }
 
     public static double armorPctForLevel(int level) {
         return (clamp(level) / 30.0) * 66.0;
+    }
+
+    public static double critChancePctForLevel(int level) {
+        int L = clamp(level);
+        return (L - 1) / 29.0 * 50.0;
+    }
+
+    public static double critDamagePctForLevel(int level) {
+        int L = clamp(level);
+        double t = (L - 1) / 29.0;
+        return CRIT_DMG_LVL1 + CRIT_DMG_RANGE * Math.pow(t, LEVEL_EASE);
     }
 
     public static ClassPlayerStats compute(int level, @Nullable PlayerSpecialization spec) {
@@ -47,13 +73,15 @@ public final class ClassStatDefinition {
         double critCMult   = spec != null ? spec.getCritChanceMult() : 1.0;
         double critDMult   = spec != null ? spec.getCritDamageMult() : 1.0;
 
-        int hp      = (int) Math.round(baseHp(level)            * hpMult);
-        int atk     = (int) Math.round(baseAtk(level)           * atkMult);
-        int stamina = (int) Math.round(baseStamina(level)       * staminaMult);
-        int armor   = (int) Math.round(armorPctForLevel(level)  * armorMult);
-        int critC   = (int) Math.round(BASE_CRIT_CHANCE_PCT     * critCMult);
-        int critD   = (int) Math.round(BASE_CRIT_DAMAGE_PCT     * critDMult);
+        double combinedHpMult = hpLevelMult(level) * hpMult;
 
-        return new ClassPlayerStats(hp, atk, armor, stamina, critC, critD);
+        int hp      = (int) Math.round(BASE_HP[clamp(level) - 1]    * combinedHpMult);
+        int atk     = (int) Math.round(baseAtk(level)               * atkMult);
+        int stamina = (int) Math.round(baseStamina(level)           * staminaMult);
+        int armor   = (int) Math.round(armorPctForLevel(level)      * armorMult);
+        int critC   = (int) Math.round(critChancePctForLevel(level)  * critCMult);
+        int critD   = (int) Math.round(critDamagePctForLevel(level)  * critDMult);
+
+        return new ClassPlayerStats(hp, atk, armor, stamina, critC, critD, combinedHpMult);
     }
 }

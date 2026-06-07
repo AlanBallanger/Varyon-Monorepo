@@ -217,6 +217,9 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 .addField(new KeyedCodec<>("Filter", Codec.STRING),
                     (d, v) -> d.filter = v,
                     d -> d.filter)
+                .addField(new KeyedCodec<>("Hovered", Codec.STRING),
+                    (d, v) -> d.hovered = v,
+                    d -> d.hovered)
                 .build();
 
         public String action;
@@ -233,6 +236,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         public String sub;
         public String slot;
         public String filter;
+        public String hovered;
 
         public Data() {}
     }

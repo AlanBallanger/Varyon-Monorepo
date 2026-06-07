@@ -1,7 +1,10 @@
 package fr.varyon.vrpg.ui.tabs.classes;
 
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import javax.annotation.Nonnull;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
+import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
@@ -91,10 +94,15 @@ public final class ClassesTab {
         if (activeStats == null) {
             activeStats = ClassStatDefinition.compute(activeProgress.getLevel(), activeSpec);
         }
-        uiBuilder.set("#ClassesStatPv.TextSpans",    Message.raw(String.valueOf(activeStats.maxHp())));
+
+        int displayHp = readLiveStatMax(playerRef, true, activeStats.maxHp());
+        int displayStamina = readLiveStatMax(playerRef, false, activeStats.maxStamina());
+        int displayAtk = readLiveAtk(playerRef, activeStats.atk());
+
+        uiBuilder.set("#ClassesStatPv.TextSpans",    Message.raw(String.valueOf(displayHp)));
         uiBuilder.set("#ClassesStatDef.TextSpans",   Message.raw(activeStats.armorPct() + "%"));
-        uiBuilder.set("#ClassesStatEnd.TextSpans",   Message.raw(String.valueOf(activeStats.maxStamina())));
-        uiBuilder.set("#ClassesStatAtk.TextSpans",   Message.raw(String.valueOf(activeStats.atk())));
+        uiBuilder.set("#ClassesStatEnd.TextSpans",   Message.raw(String.valueOf(displayStamina)));
+        uiBuilder.set("#ClassesStatAtk.TextSpans",   Message.raw(String.valueOf(displayAtk)));
         uiBuilder.set("#ClassesStatCrit.TextSpans",  Message.raw(activeStats.critChancePct() + "%"));
         uiBuilder.set("#ClassesStatDcrit.TextSpans", Message.raw("+" + activeStats.critDamagePct() + "%"));
 
@@ -163,7 +171,6 @@ public final class ClassesTab {
                     if (n.itemId().equals(assigned)) {
                         uiBuilder.set("#SkillSlot" + slotId + "Icon.ItemId", n.itemId());
                         uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", true);
-                        uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", false);
                         shown = true;
                         break;
                     }
@@ -171,7 +178,6 @@ public final class ClassesTab {
             }
             if (!shown) {
                 uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
-                uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", true);
             }
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 "#SkillSlot" + slotId,
@@ -187,7 +193,7 @@ public final class ClassesTab {
                 Message.raw("Aucune compétence active débloquée"));
         } else {
             uiBuilder.set("#ClassesSkillPickerLabel.TextSpans",
-                Message.raw("Compétences actives débloquées"));
+                Message.raw("Compétences disponibles"));
             for (int i = 0; i < unlockedActives.size(); i++) {
                 ClassTalentTree.Node n = unlockedActives.get(i).node();
                 uiBuilder.append("#ClassesSkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
@@ -195,14 +201,62 @@ public final class ClassesTab {
                 uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
                 uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", state.selectedSkillSlot != null);
                 if (state.selectedSkillSlot != null) {
+                    EventData assignEvent = EventData.of("Action", "skillSlotAssign")
+                        .append("Slot", state.selectedSkillSlot)
+                        .append("Node", n.itemId());
                     eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                        "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign",
-                        EventData.of("Action", "skillSlotAssign")
-                            .append("Slot", state.selectedSkillSlot)
-                            .append("Node", n.itemId()), false);
+                        "#ClassesSkillPickerList[" + i + "]", assignEvent, false);
+                    eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                        "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign", assignEvent, false);
                 }
             }
         }
+    }
+
+    private static int hIdx = Integer.MIN_VALUE;
+    private static int sIdx = Integer.MIN_VALUE;
+
+    private static int healthIndex() {
+        if (hIdx == Integer.MIN_VALUE) {
+            try { hIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { hIdx = -1; }
+        }
+        return hIdx;
+    }
+
+    private static int staminaIndex() {
+        if (sIdx == Integer.MIN_VALUE) {
+            try { sIdx = DefaultEntityStatTypes.getStamina(); } catch (Exception e) { sIdx = -1; }
+        }
+        return sIdx;
+    }
+
+    private static int readLiveStatMax(@Nonnull PlayerRef playerRef, boolean hp, int fallback) {
+        try {
+            EntityStatMap statMap = playerRef.getComponent(EntityStatMap.getComponentType());
+            if (statMap == null) return fallback;
+            int idx = hp ? healthIndex() : staminaIndex();
+            if (idx < 0) return fallback;
+            var stat = statMap.get(idx);
+            if (stat == null) return fallback;
+            double max = stat.getMax();
+            return max > 0.5 ? (int) Math.round(max) : fallback;
+        } catch (Exception e) {
+            return fallback;
+        }
+    }
+
+    private static int readLiveAtk(@Nonnull PlayerRef playerRef, int vrpgAtk) {
+        try {
+            EntityStatMap statMap = playerRef.getComponent(EntityStatMap.getComponentType());
+            if (statMap == null) return vrpgAtk;
+            var dmgStat = statMap.get("damage");
+            if (dmgStat != null && dmgStat.getMax() > 0.5) {
+                double weaponBase = dmgStat.getMax();
+                double atkMult = vrpgAtk / 10.0;
+                return (int) Math.max(1, Math.round(weaponBase * atkMult));
+            }
+        } catch (Exception ignored) {}
+        return vrpgAtk;
     }
 
     static Message specDiffMsg(double mult) {

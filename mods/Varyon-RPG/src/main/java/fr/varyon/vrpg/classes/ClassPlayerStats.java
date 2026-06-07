@@ -6,5 +6,6 @@ public record ClassPlayerStats(
     int armorPct,
     int maxStamina,
     int critChancePct,
-    int critDamagePct
+    int critDamagePct,
+    double hpMult
 ) {}
