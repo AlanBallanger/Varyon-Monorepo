@@ -32,6 +32,12 @@ import fr.varyon.vrpg.classes.ability.ClassSkillService;
 import fr.varyon.vrpg.classes.ability.ClassSkillTriggerInteraction;
 import fr.varyon.vrpg.classes.ClassKillXpSystem;
 import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.duelliste.DuellisteBleedSystem;
+import fr.varyon.vrpg.classes.duelliste.DuellisteDesarmementDamageSystem;
+import fr.varyon.vrpg.classes.duelliste.DuellisteIncomingDamageSystem;
+import fr.varyon.vrpg.classes.duelliste.DuellisteOutgoingDamageSystem;
+import fr.varyon.vrpg.classes.duelliste.DuellisteSpeedSystem;
+import fr.varyon.vrpg.classes.duelliste.DuellisteState;
 import fr.varyon.vrpg.commands.VpaCommand;
 import fr.varyon.vrpg.commands.VpaAdminCommand;
 import fr.varyon.vrpg.commands.VpaSurfaceCommand;
@@ -112,6 +118,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private ClassSkillService classSkillService;
     private ClassSkillKeyFilter classSkillKeyFilter;
     private PacketFilter classSkillPacketFilter;
+    private DuellisteState duellisteState;
+    private DuellisteBleedSystem duellisteBleedSystem;
+    private DuellisteSpeedSystem duellisteSpeedSystem;
     private MiningHelmet miningHelmet;
     private GuardianStoneManager guardianManager;
     private MinerComboTracker comboTracker;
@@ -211,7 +220,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
         try {
             this.classManager = new ClassManager(getDataDirectory());
-            this.classSkillService = new ClassSkillService(classManager);
+            this.duellisteState = new DuellisteState();
+            this.duellisteBleedSystem = new DuellisteBleedSystem();
+            this.duellisteSpeedSystem = new DuellisteSpeedSystem(classManager, duellisteState);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState);
             this.classSkillKeyFilter = new ClassSkillKeyFilter();
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
@@ -425,6 +437,12 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     if (maitriseFermierRegenSystem != null) maitriseFermierRegenSystem.removePlayer(ref.getUuid());
                     if (maitriseChasseurTracker != null) maitriseChasseurTracker.remove(ref.getUuid());
                     if (maitriseChasseurSpeedSystem != null) maitriseChasseurSpeedSystem.removePlayer(ref.getUuid());
+                }
+                if (ref != null && duellisteState != null) {
+                    duellisteState.cleanup(ref.getUuid());
+                }
+                if (ref != null && duellisteSpeedSystem != null) {
+                    duellisteSpeedSystem.removePlayer(ref.getUuid());
                 }
                 if (ref != null && classKillXpSystem != null) {
                     classKillXpSystem.cleanup(ref.getUuid());
@@ -696,6 +714,37 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             getEntityStoreRegistry().registerSystem(new MaitriseChasseurDamageBoostSystem(professionManager));
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseChasseurDamageBoostSystem");
+        }
+
+        if (duellisteBleedSystem != null && duellisteState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(
+                    new DuellisteOutgoingDamageSystem(classManager, duellisteState, duellisteBleedSystem));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register DuellisteOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(
+                    new DuellisteIncomingDamageSystem(classManager, duellisteState));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register DuellisteIncomingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(
+                    new DuellisteDesarmementDamageSystem(duellisteState));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register DuellisteDesarmementDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(duellisteBleedSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register DuellisteBleedSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(duellisteSpeedSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register DuellisteSpeedSystem");
+            }
         }
     }
 

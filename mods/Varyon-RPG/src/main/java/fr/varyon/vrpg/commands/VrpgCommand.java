@@ -25,6 +25,7 @@ public final class VrpgCommand extends AbstractAsyncCommand {
     @SuppressWarnings("unused")
     public VrpgCommand(@Nonnull VaryonRpgPlugin plugin) {
         super("vrpg", "Varyon RPG - Classes");
+        this.addSubCommand(new ReloadConfigSub());
         this.addSubCommand(new ResetClassSub());
         this.addSubCommand(new ResetTalentsSub());
         this.addSubCommand(new ResetAllSub());

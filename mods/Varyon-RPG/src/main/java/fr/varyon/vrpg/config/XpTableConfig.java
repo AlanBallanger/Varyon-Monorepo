@@ -25,7 +25,7 @@ public final class XpTableConfig {
     public static Map<String, Long> getMinerXp() { return minerXp; }
 
     public static void load(Path dataDir) {
-        Path file = dataDir.resolve("xp_tables.toml");
+        Path file = dataDir.resolve("profession_profession_xp_tables.toml");
         if (!Files.exists(file)) {
             writeDefaults(file);
         }
@@ -61,13 +61,13 @@ public final class XpTableConfig {
             }
             ChasseurXpTable.TIER_WEIGHTS = tierWeights;
 
-            LOGGER.atInfo().log("[VaryonRPG] xp_tables.toml chargé — "
+            LOGGER.atInfo().log("[VaryonRPG] profession_xp_tables.toml chargé — "
                 + minerXp.size() + " entrées mineur"
                 + ", fermier=" + FarmerXpTable.CROP_XP.size() + " crops"
                 + ", forestier=" + ForestierXpTable.LOG_XP.size() + " bois"
                 + ", tiers=" + ChasseurXpTable.TIER_WEIGHTS.size());
         } catch (IOException e) {
-            LOGGER.atWarning().withCause(e).log("[VaryonRPG] Impossible de lire xp_tables.toml, valeurs par défaut utilisées");
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] Impossible de lire profession_xp_tables.toml, valeurs par défaut utilisées");
         }
     }
 
@@ -217,7 +217,7 @@ public final class XpTableConfig {
             Files.createDirectories(path.getParent());
             Files.writeString(path, content);
         } catch (IOException e) {
-            LOGGER.atWarning().withCause(e).log("[VaryonRPG] Impossible d'écrire xp_tables.toml");
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] Impossible d'écrire profession_xp_tables.toml");
         }
     }
 }

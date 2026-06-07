@@ -49,6 +49,22 @@ public final class ReferenceTomlInstaller {
         return file;
     }
 
+    public static Path ensureInstalledAtRoot(Path dataDir, String fileName) {
+        Path file = dataDir.resolve(fileName);
+        if (Files.isRegularFile(file)) return file;
+        try (InputStream in = ReferenceTomlInstaller.class.getClassLoader()
+                .getResourceAsStream(fileName)) {
+            if (in != null) {
+                Files.createDirectories(dataDir);
+                Files.copy(in, file);
+                LOGGER.atInfo().log("[VaryonRPG] " + fileName + " installé à la racine");
+            }
+        } catch (IOException e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] Impossible d'installer " + fileName);
+        }
+        return file;
+    }
+
     public static InputStream openClasspathResource(String fileName) {
         return ReferenceTomlInstaller.class.getClassLoader().getResourceAsStream(RESOURCE_PREFIX + fileName);
     }

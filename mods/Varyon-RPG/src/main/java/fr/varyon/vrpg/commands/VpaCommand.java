@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.vrpg.VaryonRpgPlugin;
+import fr.varyon.vrpg.commands.ReloadConfigSub;
 import fr.varyon.vrpg.ui.RpgMainUI;
 
 import javax.annotation.Nonnull;
@@ -21,6 +22,7 @@ public final class VpaCommand extends AbstractCommandCollection {
     @SuppressWarnings("unused")
     public VpaCommand(@Nonnull VaryonRpgPlugin plugin) {
         super("vp", "Varyon RPG - Panneau principal");
+        this.addSubCommand(new ReloadConfigSub());
     }
 
     @Override

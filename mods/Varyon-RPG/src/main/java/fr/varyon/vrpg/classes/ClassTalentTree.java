@@ -93,7 +93,7 @@ public final class ClassTalentTree {
             new Node("Frappe Précise",        "Passif", "L'endroit précis, au moment précis — l'armure ne compte plus.",          "Les coups critiques infligent des dégâts supplémentaires.",          "Ingredient_Bar_Mithril",     5),
             new Node("Désarmement",           "Actif",  "Ôter l'arme, c'est ôter la menace avant même qu'elle frappe.",           "Réduit temporairement les dégâts infligés par la cible.",           "Weapon_Longsword_Mithril",   5),
             new Node("Momentum",              "Passif", "Chaque coup sans en recevoir rend le suivant un peu plus dévastateur.",   "Chaque coup consécutif sans en recevoir augmente légèrement les dégâts.", "Ingredient_Crystal_Cyan", 5),
-            new Node("Assaut du Bretteur",    "Actif",  "Quand l'élan est là, rien ne peut l'arrêter — pas même l'ennemi.",       "Augmente la vitesse d'attaque et de déplacement pendant quelques secondes.", "Weapon_Sword_Adamantite", 5),
+            new Node("Assaut du Bretteur",    "Actif",  "Quand l'élan est là, rien ne peut l'arrêter — pas même l'ennemi.",       "Augmente les dégâts d'attaque et la vitesse de déplacement pendant quelques secondes.", "Weapon_Sword_Adamantite", 5),
         });
     }
 

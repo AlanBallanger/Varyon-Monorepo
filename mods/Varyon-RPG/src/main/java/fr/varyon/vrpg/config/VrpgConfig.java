@@ -15,16 +15,13 @@ public final class VrpgConfig {
 
     private static boolean debugTalents = false;
     private static boolean debugProfessions = false;
+    private static boolean debugCombat = false;
 
     private VrpgConfig() {}
 
-    public static boolean isDebugTalents() {
-        return debugTalents;
-    }
-
-    public static boolean isDebugProfessions() {
-        return debugProfessions;
-    }
+    public static boolean isDebugTalents()     { return debugTalents; }
+    public static boolean isDebugProfessions() { return debugProfessions; }
+    public static boolean isDebugCombat()      { return debugCombat; }
 
     public static void load(Path dataDir) {
         Path configFile = dataDir.resolve("config.toml");
@@ -36,8 +33,10 @@ public final class VrpgConfig {
             Map<String, String> values = parseToml(lines);
             debugTalents = parseBoolean(values.getOrDefault("debug_talents", "false"));
             debugProfessions = parseBoolean(values.getOrDefault("debug_professions", "false"));
+            debugCombat = parseBoolean(values.getOrDefault("debug_combat", "false"));
             LOGGER.atInfo().log("[VaryonRPG] Config chargée — debug_talents=" + debugTalents
-                + " debug_professions=" + debugProfessions);
+                + " debug_professions=" + debugProfessions
+                + " debug_combat=" + debugCombat);
         } catch (IOException e) {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] Impossible de lire config.toml, valeurs par défaut utilisées");
         }
@@ -54,6 +53,9 @@ public final class VrpgConfig {
             "# Active les logs de debug pour les jauges XP des metiers (ProfessionActiveCard / ProfessionCatalogCard)\n" +
             "# Utile pour diagnostiquer l'affichage des barres de progression\n" +
             "debug_professions = false\n" +
+            "\n" +
+            "# Active les logs de dégats infligés/reçus et des DoT (saignement etc.)\n" +
+            "debug_combat = false\n" +
             "\n" +
             "[class_xp]\n" +
             "anti_farm_window = 30\n" +

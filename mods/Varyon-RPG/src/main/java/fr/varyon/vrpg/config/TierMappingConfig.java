@@ -21,7 +21,7 @@ public final class TierMappingConfig {
     private TierMappingConfig() {}
 
     public static void load(Path dataDir) {
-        Path file = ReferenceTomlInstaller.ensureInstalled(dataDir, FILE_NAME);
+        Path file = ReferenceTomlInstaller.ensureInstalledAtRoot(dataDir, FILE_NAME);
         try {
             TIER_WEIGHTS = parseTierWeights(Files.readAllLines(file));
             LOGGER.atInfo().log("[VaryonRPG] " + FILE_NAME + " chargé — " + TIER_WEIGHTS.size() + " tiers");

@@ -19,7 +19,7 @@ public final class MobCategoriesConfig {
     private MobCategoriesConfig() {}
 
     public static void load(Path dataDir) {
-        Path file = ReferenceTomlInstaller.ensureInstalled(dataDir, FILE_NAME);
+        Path file = ReferenceTomlInstaller.ensureInstalledAtRoot(dataDir, FILE_NAME);
         try {
             Map<String, String> mobTiers = parseMobCategories(Files.readAllLines(file));
             ChasseurXpTable.MOB_TIERS = mobTiers;
