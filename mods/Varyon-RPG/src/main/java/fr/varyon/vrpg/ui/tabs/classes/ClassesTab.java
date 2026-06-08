@@ -1,10 +1,11 @@
 package fr.varyon.vrpg.ui.tabs.classes;
 
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
-import javax.annotation.Nonnull;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
+import com.hypixel.hytale.server.core.ui.PatchStyle;
+import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
@@ -19,12 +20,15 @@ import fr.varyon.vrpg.classes.ClassTalentTree;
 import fr.varyon.vrpg.classes.ClassXpCurve;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.classes.WeaponCategory;
+import fr.varyon.vrpg.classes.WeaponDamageReader;
 import fr.varyon.vrpg.ui.RpgUiStyles;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 import fr.varyon.vrpg.ui.classes.RpgClassUiState;
 import fr.varyon.vrpg.ui.classes.layout.ClassTalentTreeLayouts;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public final class ClassesTab {
@@ -106,6 +110,13 @@ public final class ClassesTab {
         uiBuilder.set("#ClassesStatCrit.TextSpans",  Message.raw(activeStats.critChancePct() + "%"));
         uiBuilder.set("#ClassesStatDcrit.TextSpans", Message.raw("+" + activeStats.critDamagePct() + "%"));
 
+        uiBuilder.set("#MasteryEpee.TextSpans",      weaponMasteryMsg(activeSpec, WeaponCategory.EPEE));
+        uiBuilder.set("#MasteryDagues.TextSpans",    weaponMasteryMsg(activeSpec, WeaponCategory.DAGUE));
+        uiBuilder.set("#MasteryHache.TextSpans",     weaponMasteryMsg(activeSpec, WeaponCategory.HACHE));
+        uiBuilder.set("#MasteryDeuxMains.TextSpans", weaponMasteryMsg(activeSpec, WeaponCategory.DEUX_MAINS));
+        uiBuilder.set("#MasteryDistance.TextSpans",  weaponMasteryMsg(activeSpec, WeaponCategory.DISTANCE));
+        uiBuilder.set("#MasteryMagie.TextSpans",     weaponMasteryMsg(activeSpec, WeaponCategory.MAGIE));
+
         eventBuilder.addEventBinding(
             CustomUIEventBindingType.Activating,
             "#ClassesChangeProfileButton",
@@ -169,15 +180,16 @@ public final class ClassesTab {
             if (assigned != null) {
                 for (ClassTalentTree.Node n : talentNodes) {
                     if (n.itemId().equals(assigned)) {
-                        uiBuilder.set("#SkillSlot" + slotId + "Icon.ItemId", n.itemId());
-                        uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", true);
+                        applySkillSlotIcon(uiBuilder, slotId, n.itemId());
                         shown = true;
                         break;
                     }
                 }
             }
             if (!shown) {
+                uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", true);
                 uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
+                uiBuilder.set("#SkillSlot" + slotId + "CustomIcon.Visible", false);
             }
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 "#SkillSlot" + slotId,
@@ -185,28 +197,19 @@ public final class ClassesTab {
         }
 
         uiBuilder.clear("#ClassesSkillPickerList");
-        if (activeSpec == null) {
-            uiBuilder.set("#ClassesSkillPickerLabel.TextSpans",
-                Message.raw("Choisissez une spécialisation pour débloquer des compétences actives"));
-        } else if (unlockedActives.isEmpty()) {
-            uiBuilder.set("#ClassesSkillPickerLabel.TextSpans",
-                Message.raw("Aucune compétence active débloquée"));
-        } else {
-            uiBuilder.set("#ClassesSkillPickerLabel.TextSpans",
-                Message.raw("Compétences disponibles"));
-            for (int i = 0; i < unlockedActives.size(); i++) {
-                ClassTalentTree.Node n = unlockedActives.get(i).node();
-                uiBuilder.append("#ClassesSkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
-                uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryIcon.ItemId", n.itemId());
-                uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
-                uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", state.selectedSkillSlot != null);
-                if (state.selectedSkillSlot != null) {
-                    eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                        "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign",
-                        EventData.of("Action", "skillSlotAssign")
-                            .append("Slot", state.selectedSkillSlot)
-                            .append("Node", n.itemId()), false);
-                }
+        uiBuilder.set("#ClassesSkillPickerLabel.TextSpans", Message.raw("Compétences disponibles"));
+        for (int i = 0; i < unlockedActives.size(); i++) {
+            ClassTalentTree.Node n = unlockedActives.get(i).node();
+            uiBuilder.append("#ClassesSkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
+            applySkillEntryIcon(uiBuilder, "#ClassesSkillPickerList[" + i + "]", n.itemId());
+            uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
+            uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", state.selectedSkillSlot != null);
+            if (state.selectedSkillSlot != null) {
+                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                    "#ClassesSkillPickerList[" + i + "] #SkillEntryAssign",
+                    EventData.of("Action", "skillSlotAssign")
+                        .append("Slot", state.selectedSkillSlot)
+                        .append("Node", n.itemId()), false);
             }
         }
     }
@@ -245,19 +248,59 @@ public final class ClassesTab {
 
     private static int readLiveAtk(@Nonnull PlayerRef playerRef, int vrpgAtk) {
         try {
-            EntityStatMap statMap = playerRef.getComponent(EntityStatMap.getComponentType());
-            if (statMap == null) return vrpgAtk;
-            var dmgStat = statMap.get("damage");
-            if (dmgStat != null && dmgStat.getMax() > 0.5) {
-                double weaponBase = dmgStat.getMax();
+            int weaponDmg = WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            if (weaponDmg > 0) {
                 double atkMult = vrpgAtk / 10.0;
-                return (int) Math.max(1, Math.round(weaponBase * atkMult));
+                return (int) Math.max(1, Math.round(weaponDmg * atkMult));
             }
         } catch (Exception ignored) {}
         return vrpgAtk;
     }
 
     static Message specDiffMsg(double mult) {
+        int pct = (int) Math.round((mult - 1.0) * 100);
+        String text = (pct > 0 ? "+" : "") + pct + "%";
+        java.awt.Color color = pct > 0
+            ? new java.awt.Color(0x6B, 0xCB, 0x7A)
+            : pct < 0
+                ? new java.awt.Color(0xFF, 0x66, 0x66)
+                : new java.awt.Color(0xC8, 0xBE, 0xB0);
+        return Message.raw(text).color(color);
+    }
+
+    private static void applySkillSlotIcon(@Nonnull UICommandBuilder uiBuilder,
+                                            @Nonnull String slotId,
+                                            @Nonnull String iconRef) {
+        uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", false);
+        if (iconRef.contains("/")) {
+            uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
+            uiBuilder.set("#SkillSlot" + slotId + "CustomIcon.Visible", true);
+            uiBuilder.setObject("#SkillSlot" + slotId + "CustomIcon.Background",
+                new PatchStyle().setTexturePath(Value.of(iconRef)));
+        } else {
+            uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", true);
+            uiBuilder.set("#SkillSlot" + slotId + "Icon.ItemId", iconRef);
+            uiBuilder.set("#SkillSlot" + slotId + "CustomIcon.Visible", false);
+        }
+    }
+
+    static void applySkillEntryIcon(@Nonnull UICommandBuilder uiBuilder,
+                                        @Nonnull String prefix,
+                                        @Nonnull String iconRef) {
+        if (iconRef.contains("/")) {
+            uiBuilder.set(prefix + " #SkillEntryIcon.Visible", false);
+            uiBuilder.set(prefix + " #SkillEntryCustomIcon.Visible", true);
+            uiBuilder.setObject(prefix + " #SkillEntryCustomIcon.Background",
+                new PatchStyle().setTexturePath(Value.of(iconRef)));
+        } else {
+            uiBuilder.set(prefix + " #SkillEntryIcon.Visible", true);
+            uiBuilder.set(prefix + " #SkillEntryCustomIcon.Visible", false);
+            uiBuilder.set(prefix + " #SkillEntryIcon.ItemId", iconRef);
+        }
+    }
+
+    private static Message weaponMasteryMsg(@Nullable PlayerSpecialization spec, @Nonnull WeaponCategory category) {
+        double mult = category.getMultiplierFor(spec);
         int pct = (int) Math.round((mult - 1.0) * 100);
         String text = (pct > 0 ? "+" : "") + pct + "%";
         java.awt.Color color = pct > 0

@@ -1,9 +1,15 @@
 Group {
-  Anchor: (Left: 0, Right: 0, Height: 30);
+  Anchor: (Left: 0, Right: 0, Height: 36);
   LayoutMode: Left;
 
-  ItemIcon #SkillEntryIcon { Anchor: (Width: 24, Height: 24); }
-  Group { Anchor: (Width: 6); }
+  Group {
+    Anchor: (Width: 32, Height: 32);
+    LayoutMode: Full;
+    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 6);
+    ItemIcon #SkillEntryIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); }
+    Group #SkillEntryCustomIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
+  }
+  Group { Anchor: (Width: 8); }
   Label #SkillEntryName {
     FlexWeight: 1;
     Style: (FontSize: 11, TextColor: #F2E8D8, VerticalAlignment: Center);

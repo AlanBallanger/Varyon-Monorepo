@@ -13,7 +13,6 @@ import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.ClassTalentTree;
 import fr.varyon.vrpg.classes.PlayerClass;
-import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.ui.classes.ClassSkillDescriptions;
 import fr.varyon.vrpg.ui.classes.ClassTalentTreeLogic;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
@@ -40,16 +39,9 @@ public final class ClassTalentsTab {
         ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
         ClassAccount acc = classManager != null ? classManager.getAccount(playerRef.getUuid()) : null;
         PlayerClass activeClass = acc != null ? acc.getActiveClass() : null;
-        PlayerSpecialization activeSpec = (acc != null && activeClass != null) ? acc.getActiveSpec(activeClass) : null;
-
-        String treeLabel = activeSpec != null ? activeSpec.getDisplayName()
-            : (activeClass != null ? activeClass.getDisplayName() : "Classe");
 
         boolean isTalentsSubTab = "talents".equals(state.classTreeSubTab);
-        String mainTitle = isTalentsSubTab
-            ? "Arbre de talents — " + treeLabel
-            : "Compétences de " + treeLabel;
-        uiBuilder.set("#ClassTreeMainTitle.TextSpans", Message.raw(mainTitle));
+        uiBuilder.set("#ClassTreeMainTitle.TextSpans", Message.raw("Arbre de talents"));
 
         uiBuilder.set("#ClassTreeTalentsPanel.Visible", isTalentsSubTab);
         uiBuilder.set("#ClassTreeSkillsPanel.Visible", !isTalentsSubTab);
@@ -313,7 +305,7 @@ public final class ClassTalentsTab {
         for (int i = 0; i < unlockedActives.size(); i++) {
             ClassTalentTree.Node n = unlockedActives.get(i).node();
             uiBuilder.append("#SkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
-            uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryIcon.ItemId", n.itemId());
+            ClassesTab.applySkillEntryIcon(uiBuilder, "#SkillPickerList[" + i + "]", n.itemId());
             uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
             uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryAssign.Visible", true);
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,

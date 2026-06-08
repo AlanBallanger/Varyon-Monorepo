@@ -85,17 +85,16 @@ public final class ClassStatEngine {
             clearModifier(statMap, hIdx, MOD_KEY_HP);
             clearModifier(statMap, sIdx, MOD_KEY_STAMINA);
 
-            // HP: additif depuis la base nue 100 HP.
-            // Le bonus = (100 * hpMult - 100) = hp VRPG cible sur base nue.
-            // L'armure s'ajoute par-dessus naturellement via le moteur.
+            // HP: multiplicateur VRPG appliqué sur le max HP actuel du joueur (base + équipement).
+            // combinedHpMult = hpLevelMult(level) * specHpMult
+            // Le modificateur MULTIPLICATIF fait en sorte que le moteur multiplie tout le max HP.
             if (hIdx >= 0) {
-                float hpBonus = (float)(stats.maxHp() - 100.0);
-                if (Math.abs(hpBonus) > 0.1f) {
+                double mult = stats.hpMult();
+                if (Math.abs(mult - 1.0) > 0.001) {
                     statMap.putModifier(EntityStatMap.Predictable.ALL, hIdx, MOD_KEY_HP,
                         new StaticModifier(Modifier.ModifierTarget.MAX,
-                            StaticModifier.CalculationType.ADDITIVE, hpBonus));
+                            StaticModifier.CalculationType.MULTIPLICATIVE, (float) mult));
                 }
-                // Refill systématique au nouveau max
                 var hpStat = statMap.get(hIdx);
                 if (hpStat != null) {
                     float newMax = hpStat.getMax();

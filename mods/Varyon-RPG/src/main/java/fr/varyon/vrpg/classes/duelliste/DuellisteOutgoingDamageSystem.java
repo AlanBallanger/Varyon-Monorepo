@@ -61,7 +61,7 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
                        @Nonnull CommandBuffer<EntityStore> commandBuffer,
                        @Nonnull Damage damage) {
         try {
-            if (damage.isCancelled() || damage.getAmount() <= 0f) return;
+            if (damage.isCancelled()) return;
 
             Damage.Source source = damage.getSource();
             if (!(source instanceof Damage.EntitySource entitySource)) return;
@@ -81,11 +81,14 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
             if (acc.getActiveClass() != PlayerClass.GUERRIER) return;
             if (acc.getActiveSpec(PlayerClass.GUERRIER) != PlayerSpecialization.DUELLISTE) return;
 
-            // Feinte — prochain coup imparable (bypass BLOCKED)
+            // Feinte — prochain coup imparable (bypass BLOCKED), agit même sur les coups bloqués (amount==0)
             int feinteRank = acc.getTalentRank(PlayerClass.GUERRIER, FeintSkill.TALENT_NODE_ID);
             if (feinteRank > 0 && state.consumeFeinte(uuid)) {
-                damage.putMetaObject(com.hypixel.hytale.server.core.modules.entity.damage.Damage.BLOCKED, Boolean.FALSE);
+                damage.putMetaObject(Damage.BLOCKED, Boolean.FALSE);
+                if (damage.getAmount() <= 0f) damage.setAmount(damage.getInitialAmount());
             }
+
+            if (damage.getAmount() <= 0f) return;
 
             float base = damage.getAmount();
             float amount = base;
@@ -109,18 +112,18 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
                 }
             }
 
-            // Frappe Précise — crit damage bonus
-            boolean isCrit = base > damage.getInitialAmount() * 1.1f;
+            // Frappe Précise — bonus si crit (natif ou VRPG déjà appliqué par SpecWeaponMasteryDamageSystem)
+            float initialAmount = damage.getInitialAmount();
+            boolean isCrit = initialAmount > 0f && base > initialAmount * 1.1f;
             if (isCrit) {
                 int rank = acc.getTalentRank(PlayerClass.GUERRIER, DuellistePassifs.FRAPPE_NODE);
                 if (rank > 0) {
                     float mult = DuellistePassifs.critBonusForRank(rank);
                     amount *= (1.0f + mult);
-                    log.append(String.format(" FrappePrecise(CRIT)=+%.0f%%", mult * 100));
+                    log.append(String.format(" FrappePrecise=+%.0f%%", mult * 100));
                 } else {
                     log.append(" CRIT");
                 }
-                DamageFloatBridge.markCritical(damage);
             }
 
             // Contre-Attaque — bonus after parry
@@ -131,6 +134,18 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
                     amount *= (1.0f + mult);
                     log.append(String.format(" ContreAttaque=+%.0f%%", mult * 100));
                     state.consumeContreAttaque(uuid);
+                    try {
+                        com.hypixel.hytale.server.core.entity.AnimationUtils.playAnimation(
+                            attackerRef, com.hypixel.hytale.protocol.AnimationSlot.Action,
+                            "Sword", "SwingLeft", true, store);
+                        com.hypixel.hytale.server.core.modules.entity.component.TransformComponent ctc =
+                            store.getComponent(attackerRef,
+                                com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+                        if (ctc != null) {
+                            fr.varyon.vrpg.audio.ClassSkillSounds.playSkillSound(
+                                "SFX_Sword_T2_Swing", playerRef, ctc.getPosition(), commandBuffer);
+                        }
+                    } catch (Exception ignored) {}
                 }
             }
 

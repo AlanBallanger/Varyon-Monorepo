@@ -54,7 +54,7 @@ public final class DuellisteIncomingDamageSystem extends DamageEventSystem {
                        @Nonnull CommandBuffer<EntityStore> commandBuffer,
                        @Nonnull Damage damage) {
         try {
-            if (damage.getAmount() <= 0f) return;
+            if (damage.isCancelled()) return;
 
             PlayerRef playerRef = chunk.getComponent(index, PlayerRef.getComponentType());
             if (playerRef == null) return;
@@ -66,6 +66,19 @@ public final class DuellisteIncomingDamageSystem extends DamageEventSystem {
 
             float incoming = damage.getAmount();
             boolean debug = fr.varyon.vrpg.config.VrpgConfig.isDebugCombat();
+
+            // Contre-Attaque — détection parade via Damage.BLOCKED (avant le guard amount <= 0)
+            int contreRank = acc.getTalentRank(PlayerClass.GUERRIER, DuellistePassifs.CONTRE_NODE);
+            if (contreRank > 0) {
+                Boolean blocked = damage.getIfPresentMetaObject(Damage.BLOCKED);
+                if (Boolean.TRUE.equals(blocked)) {
+                    state.recordParry(uuid);
+                    if (debug) LOG.atInfo().log(String.format("[Recu] %.1f PARE -> ContreAttaque prete", incoming));
+                    return;
+                }
+            }
+
+            if (incoming <= 0f) return;
 
             // Esquive du Bretteur — chance to negate damage entirely
             int dodgeRank = acc.getTalentRank(PlayerClass.GUERRIER, DuellistePassifs.ESQUIVE_NODE);
@@ -99,17 +112,6 @@ public final class DuellisteIncomingDamageSystem extends DamageEventSystem {
             int momentumRank = acc.getTalentRank(PlayerClass.GUERRIER, DuellistePassifs.MOMENTUM_NODE);
             if (momentumRank > 0 && !damage.isCancelled()) {
                 state.recordHitTaken(uuid);
-            }
-
-            // Contre-Attaque — détection parade via Damage.BLOCKED
-            int contreRank = acc.getTalentRank(PlayerClass.GUERRIER, DuellistePassifs.CONTRE_NODE);
-            if (contreRank > 0) {
-                Boolean blocked = damage.getIfPresentMetaObject(Damage.BLOCKED);
-                if (Boolean.TRUE.equals(blocked)) {
-                    state.recordParry(uuid);
-                    if (debug) LOG.atInfo().log(String.format("[Recu] %.1f PARE -> ContreAttaque prete", incoming));
-                    return;
-                }
             }
 
             if (debug) LOG.atInfo().log(String.format("[Recu] %.1f degats recus", incoming));

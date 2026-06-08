@@ -72,6 +72,7 @@ public final class ClassUiEvents {
             try { idx = Integer.parseInt(data.index); } catch (NumberFormatException e) { return UiEventResult.NONE; }
             ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
             if (classManager != null) classManager.switchProfile(playerRef.getUuid(), idx, playerRef);
+            setActiveTab.accept(ClassTalentsTab.TAB_CLASSES);
             return UiEventResult.REBUILD;
         }
 

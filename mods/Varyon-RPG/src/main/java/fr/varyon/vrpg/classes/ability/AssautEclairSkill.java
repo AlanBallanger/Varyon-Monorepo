@@ -1,9 +1,12 @@
 package fr.varyon.vrpg.classes.ability;
 
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.AnimationSlot;
 import com.hypixel.hytale.protocol.ChangeVelocityType;
+import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
@@ -56,6 +59,10 @@ public final class AssautEclairSkill {
 
             Vector3d dir = headRot.getDirection();
             Vector3d startPos = transform.getPosition();
+            final PlayerRef finalPlayerRef = playerRef;
+
+            ComponentAccessor<EntityStore> accessor = commandBuffer != null ? commandBuffer : store;
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "StabDashCharged", true, accessor);
 
             Velocity velocity = commandBuffer != null
                 ? commandBuffer.getComponent(entityRef, Velocity.getComponentType())
@@ -85,6 +92,11 @@ public final class AssautEclairSkill {
                         if (tidx == casterIdx || !hitSet.add(tidx)) return;
                         DamageSystems.executeDamage(targetRef, store,
                             new Damage(new Damage.EntitySource(entityRef), DamageCause.PHYSICAL, dmg));
+                        if (commandBuffer != null) {
+                            fr.varyon.vrpg.audio.ClassSkillSounds.playSkillSound(
+                                fr.varyon.vrpg.audio.ClassSkillSounds.ASSAUT_ECLAIR_IMPACT,
+                                finalPlayerRef, sample, commandBuffer);
+                        }
                     } catch (Exception ignored) {}
                 }, t2 -> t2.getIndex() != casterIdx);
             }

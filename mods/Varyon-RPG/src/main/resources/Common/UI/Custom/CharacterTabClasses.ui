@@ -641,7 +641,8 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                  ItemIcon #SkillSlotEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotECustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
                 }
               }
             }
@@ -652,7 +653,8 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                  ItemIcon #SkillSlotRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotRCustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
                 }
               }
             }
@@ -663,7 +665,8 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                  ItemIcon #SkillSlotAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotACustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
                 }
               }
             }
@@ -680,7 +683,8 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotCrouchA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotCrouchABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotCrouchAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                  ItemIcon #SkillSlotCrouchAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotCrouchACustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
                 }
               }
             }
@@ -691,7 +695,8 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotCrouchE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotCrouchEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotCrouchEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                  ItemIcon #SkillSlotCrouchEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotCrouchECustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
                 }
               }
             }
@@ -702,7 +707,8 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotCrouchR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotCrouchRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotCrouchRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
+                  ItemIcon #SkillSlotCrouchRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotCrouchRCustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
                 }
               }
             }
@@ -751,42 +757,42 @@ Group {
           ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Sword_Adamantite"; }
           Group { Anchor: (Width: 6); }
           Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Épée à une main"; }
-          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label #MasteryEpee { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
         Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
           ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Daggers_Adamantite"; }
           Group { Anchor: (Width: 6); }
           Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Dagues"; }
-          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label #MasteryDagues { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
         Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
           ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Axe_Adamantite"; }
           Group { Anchor: (Width: 6); }
           Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Hache à une main"; }
-          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label #MasteryHache { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
         Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
           ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Longsword_Adamantite"; }
           Group { Anchor: (Width: 6); }
           Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Armes à deux mains"; }
-          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label #MasteryDeuxMains { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
         Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
           ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Shortbow_Adamantite"; }
           Group { Anchor: (Width: 6); }
           Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Armes de distance"; }
-          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label #MasteryDistance { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
         Group { Anchor: (Height: 2); }
         Group { Anchor: (Left: 0, Right: 0, Height: 26); LayoutMode: Left;
           ItemIcon { Anchor: (Width: 24, Height: 24); ItemId: "Weapon_Staff_Adamantite"; }
           Group { Anchor: (Width: 6); }
           Label { FlexWeight: 1; Style: (FontSize: 13, TextColor: #C8BEB0, VerticalAlignment: Center); Text: "Équipements magiques"; }
-          Label { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
+          Label #MasteryMagie { Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center); Text: "0%"; }
         }
       }
 
@@ -794,4 +800,5 @@ Group {
 
   }
 }
+
 

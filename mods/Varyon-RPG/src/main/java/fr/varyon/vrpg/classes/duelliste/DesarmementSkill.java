@@ -23,6 +23,6 @@ public final class DesarmementSkill {
         int red = Math.round(reductionForRank(rank) * 100);
         int dur = (int) (durationMsForRank(rank) / 1000);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return "-" + red + "% dégâts cible, " + dur + "s, CD " + cd + "s";
+        return "-" + red + "% dégâts, -50% vitesse, " + dur + "s, CD " + cd + "s";
     }
 }
