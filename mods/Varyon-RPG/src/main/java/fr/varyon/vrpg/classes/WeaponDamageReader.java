@@ -45,6 +45,9 @@ public final class WeaponDamageReader {
 
     private WeaponDamageReader() {}
 
+    private static final com.hypixel.hytale.logger.HytaleLogger LOG =
+        com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
+
     public static int readHeldWeaponDamage(@Nullable PlayerRef playerRef) {
         if (playerRef == null) return -1;
         try {
@@ -55,12 +58,17 @@ public final class WeaponDamageReader {
             ItemStack held = hotbar.getInventory().getItemStack((short) slot);
             if (held == null || held.isEmpty()) return -1;
             String itemId = held.getItemId();
-            int dmg = readDamageFromItem(held.getItem());
-            if (dmg < 0 && itemId != null && !itemId.isEmpty()) {
-                dmg = CACHE.computeIfAbsent(itemId, id -> readFromAsset(id));
-            }
+            if (itemId == null || itemId.isEmpty()) return -1;
+            int dmg = CACHE.computeIfAbsent(itemId, id -> {
+                int v = readDamageFromItem(held.getItem());
+                if (v < 0) v = readFromAsset(id);
+                LOG.atInfo().log("[WeaponDamageReader] itemId=" + id + " dmg=" + v
+                    + " itemNull=" + (held.getItem() == null));
+                return v;
+            });
             return dmg;
         } catch (Exception e) {
+            LOG.atWarning().log("[WeaponDamageReader] exception: " + e.getMessage());
             return -1;
         }
     }

@@ -188,6 +188,7 @@ public final class ClassesTab {
             }
             if (!shown) {
                 uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", true);
+                uiBuilder.set("#SkillSlot" + slotId + "Border.Visible", false);
                 uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
                 uiBuilder.set("#SkillSlot" + slotId + "CustomIcon.Visible", false);
             }
@@ -211,6 +212,14 @@ public final class ClassesTab {
                         .append("Slot", state.selectedSkillSlot)
                         .append("Node", n.itemId()), false);
             }
+        }
+
+        boolean slotAssigned = state.selectedSkillSlot != null
+            && state.skillSlotAssignments.containsKey(state.selectedSkillSlot);
+        uiBuilder.set("#ClassesSkillDeassign.Visible", slotAssigned);
+        if (slotAssigned) {
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ClassesSkillDeassign",
+                EventData.of("Action", "skillSlotClear").append("Slot", state.selectedSkillSlot), false);
         }
     }
 
@@ -272,6 +281,7 @@ public final class ClassesTab {
                                             @Nonnull String slotId,
                                             @Nonnull String iconRef) {
         uiBuilder.set("#SkillSlot" + slotId + "Bg.Visible", false);
+        uiBuilder.set("#SkillSlot" + slotId + "Border.Visible", true);
         if (iconRef.contains("/")) {
             uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
             uiBuilder.set("#SkillSlot" + slotId + "CustomIcon.Visible", true);

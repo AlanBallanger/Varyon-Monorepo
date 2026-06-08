@@ -7,6 +7,7 @@ import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.ClassTalentTree;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.ui.AbilitySlotsHud;
 import fr.varyon.vrpg.ui.RpgMainUI;
 import fr.varyon.vrpg.ui.classes.ClassTalentTreeLogic;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
@@ -145,6 +146,10 @@ public final class ClassUiEvents {
             } catch (NumberFormatException ignored) {}
             return UiEventResult.HOVER_UPDATE;
         }
+        if ("classtreeUnhover".equals(data.action)) {
+            state.hoveredClassNode = -1;
+            return UiEventResult.HOVER_UPDATE;
+        }
         if ("classtreeAttribuer".equals(data.action)) {
             if (!state.classEditMode) return UiEventResult.NONE;
             ClassManager classManager2 = VaryonRpgPlugin.getInstance().getClassManager();
@@ -185,6 +190,7 @@ public final class ClassUiEvents {
 
         if ("skillSlotClick".equals(data.action) && data.slot != null) {
             state.selectedSkillSlot = data.slot.equals(state.selectedSkillSlot) ? null : data.slot;
+            state.skillPickerOffset = 0;
             return UiEventResult.REBUILD;
         }
         if ("skillFilter".equals(data.action) && data.filter != null) {
@@ -202,6 +208,8 @@ public final class ClassUiEvents {
             }
             state.skillSlotAssignments.clear();
             state.selectedSkillSlot = null;
+            // AbilitySlotsHud hudReset = AbilitySlotsHud.get(playerRef.getUuid());
+            // if (hudReset != null) hudReset.refreshSlots();
             return UiEventResult.REBUILD;
         }
         if ("skillSlotAssign".equals(data.action) && data.slot != null && data.node != null) {
@@ -213,6 +221,8 @@ public final class ClassUiEvents {
                 if (activeClass4 != null && ClassUnlockedActiveSkills.isUnlockedActive(acc4, data.node)) {
                     classManager4.setSkillSlot(playerRef.getUuid(), activeClass4, data.slot, data.node);
                     state.skillSlotAssignments.put(data.slot, data.node);
+                    AbilitySlotsHud hud4 = AbilitySlotsHud.get(playerRef.getUuid());
+                    if (hud4 != null) hud4.refreshSlots();
                 }
             }
             state.selectedSkillSlot = null;
@@ -229,6 +239,8 @@ public final class ClassUiEvents {
                 }
             }
             state.skillSlotAssignments.remove(data.slot);
+            // AbilitySlotsHud hudClear = AbilitySlotsHud.get(playerRef.getUuid());
+            // if (hudClear != null) hudClear.refreshSlots();
             return UiEventResult.REBUILD;
         }
 

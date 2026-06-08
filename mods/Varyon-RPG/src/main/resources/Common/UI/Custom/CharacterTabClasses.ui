@@ -1,4 +1,5 @@
 ﻿$P = "CharacterPage.ui";
+$C = "Common.ui";
 
 Group {
   Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
@@ -624,7 +625,7 @@ Group {
           Group { Anchor: (Width: 6); }
           Label {
             Style: (FontSize: 13, TextColor: #C8A96E, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
-            Text: "Compétences disponibles";
+            Text: "Compétences actives";
           }
         }
 
@@ -641,8 +642,9 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
-                  Group #SkillSlotECustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotEBorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
+                  ItemIcon #SkillSlotEIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
+                  Group #SkillSlotECustomIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
                 }
               }
             }
@@ -653,8 +655,9 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
-                  Group #SkillSlotRCustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotRBorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
+                  ItemIcon #SkillSlotRIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
+                  Group #SkillSlotRCustomIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
                 }
               }
             }
@@ -665,8 +668,9 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
-                  Group #SkillSlotACustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotABorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
+                  ItemIcon #SkillSlotAIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
+                  Group #SkillSlotACustomIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
                 }
               }
             }
@@ -683,8 +687,9 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotCrouchA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotCrouchABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotCrouchAIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
-                  Group #SkillSlotCrouchACustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotCrouchABorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
+                  ItemIcon #SkillSlotCrouchAIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
+                  Group #SkillSlotCrouchACustomIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
                 }
               }
             }
@@ -695,8 +700,9 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotCrouchE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotCrouchEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotCrouchEIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
-                  Group #SkillSlotCrouchECustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotCrouchEBorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
+                  ItemIcon #SkillSlotCrouchEIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
+                  Group #SkillSlotCrouchECustomIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
                 }
               }
             }
@@ -707,8 +713,9 @@ Group {
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
                 Button #SkillSlotCrouchR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: #000000(0.0)), Hovered: (Background: #FFFFFF(0.08)), Pressed: (Background: #FFFFFF(0.12))); LayoutMode: Full;
                   Group #SkillSlotCrouchRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0); }
-                  ItemIcon #SkillSlotCrouchRIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
-                  Group #SkillSlotCrouchRCustomIcon { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Visible: false; }
+                  Group #SkillSlotCrouchRBorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
+                  ItemIcon #SkillSlotCrouchRIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
+                  Group #SkillSlotCrouchRCustomIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
                 }
               }
             }
@@ -725,9 +732,25 @@ Group {
             Text: "Compétences disponibles";
           }
           Group { Anchor: (Height: 4); }
-          Group #ClassesSkillPickerList {
-            Anchor: (Left: 0, Right: 0);
-            LayoutMode: Top;
+          Group {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Group #ClassesSkillPickerList {
+              LayoutMode: Top;
+            }
+          }
+          Group { Anchor: (Height: 4); }
+          Button #ClassesSkillDeassign {
+            Anchor: (Left: 0, Right: 0, Height: 28);
+            Visible: false;
+            Style: (
+              Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 8)),
+              Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 8)),
+              Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 8))
+            );
+            LayoutMode: Middle;
+            Label { Style: (FontSize: 11, TextColor: #FF6666, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Désattribuer"; }
           }
         }
       }
@@ -800,5 +823,8 @@ Group {
 
   }
 }
+
+
+
 
 

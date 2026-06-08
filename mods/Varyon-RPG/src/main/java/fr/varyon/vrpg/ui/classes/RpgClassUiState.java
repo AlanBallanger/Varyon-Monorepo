@@ -13,6 +13,7 @@ public final class RpgClassUiState {
     public int selectedClassNode = 0;
     public int hoveredClassNode = -1;
     public boolean classEditMode = false;
+    public int skillPickerOffset = 0;
     public int[] pendingClassRanks = null;
     public int[] savedClassRanks = null;
 }

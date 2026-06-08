@@ -149,6 +149,13 @@ public final class ClassTalentsTab {
             }
             uiBuilder.set("#ClassTreeNode" + id + "RankText.Visible", true);
             uiBuilder.set("#ClassTreeNode" + id + "RankText.TextSpans", Message.raw(rank + "/" + node.maxRank()));
+            boolean isActif = "Actif".equals(node.type());
+            java.awt.Color typeColor = isActif
+                ? new java.awt.Color(0xFF, 0xD7, 0x00)
+                : new java.awt.Color(0x6B, 0xCB, 0x7A);
+            uiBuilder.set("#ClassTreeNode" + id + "TypeText.Visible", true);
+            uiBuilder.set("#ClassTreeNode" + id + "TypeText.TextSpans",
+                Message.raw(isActif ? "A" : "P").color(typeColor));
             uiBuilder.set("#ClassTreeNode" + id + ".Visible", true);
 
             applyNodeChrome(uiBuilder, state, i, i == effectiveSel, i == effectiveHov);
@@ -162,6 +169,9 @@ public final class ClassTalentsTab {
             eventBuilder.addEventBinding(CustomUIEventBindingType.MouseEntered,
                 "#ClassTreeNode" + id,
                 EventData.of("Action", "classtreeHover").append("Node", id), false);
+            eventBuilder.addEventBinding(CustomUIEventBindingType.MouseExited,
+                "#ClassTreeNode" + id,
+                EventData.of("Action", "classtreeUnhover"), false);
         }
     }
 
@@ -255,6 +265,17 @@ public final class ClassTalentsTab {
                                           @Nonnull ClassTalentTree.Node panelTalent,
                                           int panelRank) {
         String skillId = ClassSkillDescriptions.skillIdForNode(acc, panelNode);
+        String iconRef = panelTalent.itemId();
+        if (iconRef.contains("/")) {
+            ui.set("#ClassSidebarItemIcon.Visible", false);
+            ui.set("#ClassSidebarCustomIcon.Visible", true);
+            ui.setObject("#ClassSidebarCustomIcon.Background",
+                new PatchStyle().setTexturePath(Value.of(iconRef)));
+        } else {
+            ui.set("#ClassSidebarItemIcon.Visible", true);
+            ui.set("#ClassSidebarCustomIcon.Visible", false);
+            ui.set("#ClassSidebarItemIcon.ItemId", iconRef);
+        }
         ui.set("#ClassTreeSelectedTitle.TextSpans", Message.raw(panelTalent.name()));
         ui.set("#ClassTreeSelectedFlavor.TextSpans", Message.raw("« " + panelTalent.flavor() + " »"));
         ui.set("#ClassTreeSelectedEffect.TextSpans", Message.raw(

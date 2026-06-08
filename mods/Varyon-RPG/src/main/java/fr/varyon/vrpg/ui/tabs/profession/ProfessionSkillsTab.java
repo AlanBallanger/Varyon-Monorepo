@@ -108,6 +108,12 @@ public final class ProfessionSkillsTab {
                 EventData.of("Action", "skillHover").append("Node", id),
                 false
             );
+            eventBuilder.addEventBinding(
+                CustomUIEventBindingType.MouseExited,
+                "#SkillTreeNode" + id,
+                EventData.of("Action", "skillUnhover"),
+                false
+            );
         }
 
         for (String xId : new String[]{"12", "13", "14", "15", "16"}) {

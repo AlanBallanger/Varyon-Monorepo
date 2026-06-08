@@ -5,7 +5,7 @@ Group {
   Group {
     Anchor: (Width: 32, Height: 32);
     LayoutMode: Full;
-    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 6);
+    Background: #443C23FF;
     ItemIcon #SkillEntryIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); }
     Group #SkillEntryCustomIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
   }

@@ -9,7 +9,7 @@ public final class TalentTreeTheme {
     public static final String NODE_BORDER = "#4E576DFF";
     public static final String NODE_BORDER_SELECTION = "#B0B8C8FF";
     public static final String NODE_BORDER_ALLOCATED = "#31C677FF";
-    public static final String NODE_VEIL = "#14182166";
+    public static final String NODE_VEIL = "#141821AA";
 
     public static final PatchStyle NODE_FILL_STYLE =
         new PatchStyle().setColor(Value.of(NODE_FILL));

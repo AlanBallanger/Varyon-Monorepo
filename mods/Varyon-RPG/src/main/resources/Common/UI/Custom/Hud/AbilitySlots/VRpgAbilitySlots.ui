@@ -1,0 +1,23 @@
+Group {
+  Group #VRpgSlotE {
+    Visible: true;
+    Anchor: (Right: 165, Bottom: 140, Width: 58, Height: 58);
+    Background: PatchStyle(TexturePath: "Assets/BackgroundAbility.png", Border: 0);
+
+    Group #VRpgSlotEIcon {
+      LayoutMode: Middle;
+      Anchor: (Width: 42, Height: 42);
+    }
+  }
+
+  Group #VRpgSlotR {
+    Visible: true;
+    Anchor: (Right: 79, Bottom: 140, Width: 58, Height: 58);
+    Background: PatchStyle(TexturePath: "Assets/BackgroundAbility.png", Border: 0);
+
+    Group #VRpgSlotRIcon {
+      LayoutMode: Middle;
+      Anchor: (Width: 42, Height: 42);
+    }
+  }
+}

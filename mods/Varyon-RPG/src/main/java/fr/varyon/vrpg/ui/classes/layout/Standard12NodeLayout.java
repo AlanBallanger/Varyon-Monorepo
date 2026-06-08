@@ -14,16 +14,16 @@ public final class Standard12NodeLayout implements TalentTreeLayout {
     private static final int[][] SLOT_LT = {
         {118,  32},
         {298,  32},
-        {208, 125},
-        {58,  218},
-        {208, 218},
-        {358, 218},
-        {58,  309},
-        {208, 309},
-        {358, 309},
-        {208, 402},
-        {118, 495},
-        {298, 495},
+        {208, 121},
+        {58,  210},
+        {208, 210},
+        {358, 210},
+        {58,  297},
+        {208, 297},
+        {358, 297},
+        {208, 386},
+        {118, 475},
+        {298, 475},
     };
 
     public static final Standard12NodeLayout INSTANCE = new Standard12NodeLayout();

@@ -14,16 +14,16 @@ public final class DuellisteLayout implements TalentTreeLayout {
     private static final int[][] SLOT_LT = {
         {240,  32},
         {430,  32},
-        {170, 155},
-        {330, 155},
-        {490, 155},
-        {170, 278},
-        {330, 278},
-        {490, 278},
-        {240, 401},
-        {430, 401},
-        {240, 524},
-        {430, 524},
+        {170, 151},
+        {330, 151},
+        {490, 151},
+        {170, 270},
+        {330, 270},
+        {490, 270},
+        {240, 389},
+        {430, 389},
+        {240, 508},
+        {430, 508},
     };
 
     public static final DuellisteLayout INSTANCE = new DuellisteLayout();
@@ -45,7 +45,7 @@ public final class DuellisteLayout implements TalentTreeLayout {
         seg = TalentTreeEdgeLayout.layoutFanTwoToThree(ui, ep, seg,
             cx(lt[0]), bot(lt[0]), cx(lt[1]), bot(lt[1]),
             cx(lt[2]), cx(lt[3]), cx(lt[4]), top(lt[2]));
-        seg = TalentTreeEdgeLayout.layoutVerticalConnector(ui, ep, seg, cx(lt[2]), bot(lt[2]), top(lt[5]));
+        seg = TalentTreeEdgeLayout.layoutVerticalConnector(ui, ep, seg, cx(lt[2]), bot(lt[2]), top(lt[5]) + 4);
         seg = TalentTreeEdgeLayout.layoutVerticalConnector(ui, ep, seg, cx(lt[3]), bot(lt[3]), top(lt[6]));
         seg = TalentTreeEdgeLayout.layoutVerticalConnector(ui, ep, seg, cx(lt[4]), bot(lt[4]), top(lt[7]));
         seg = TalentTreeEdgeLayout.layoutMergeTwoToOne(ui, ep, seg,

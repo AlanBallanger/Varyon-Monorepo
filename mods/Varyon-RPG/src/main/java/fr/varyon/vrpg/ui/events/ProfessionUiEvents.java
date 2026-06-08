@@ -95,6 +95,10 @@ public final class ProfessionUiEvents {
             }
             return UiEventResult.HOVER_UPDATE;
         }
+        if ("skillUnhover".equals(data.action)) {
+            state.hoveredNode = -1;
+            return UiEventResult.HOVER_UPDATE;
+        }
 
         if ("bonusClick".equals(data.action) && data.index != null) {
             int idx;

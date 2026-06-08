@@ -289,7 +289,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             marker.setId(markerId);
             marker.setPosition((float) position.x, (float) position.z);
             marker.setName(markerName);
-            marker.setIcon(fileName);
+            marker.setIcon(mapMarkerClientTexturePath(fileName));
             marker.withCreatedByName(displayName);
             marker.withCreatedByUuid(playerUuid);
             upsertSavedMarker(new SavedMarker(
@@ -811,7 +811,7 @@ commands_help:
                 marker.setId(savedMarker.id());
                 marker.setPosition(savedMarker.x(), savedMarker.z());
                 marker.setName(savedMarker.markerName());
-                marker.setIcon(savedMarker.imageName());
+                marker.setIcon(mapMarkerClientTexturePath(savedMarker.imageName()));
                 marker.withCreatedByUuid(savedMarker.createdByUuid());
                 marker.withCreatedByName(savedMarker.createdByName());
                 updated.add(marker);

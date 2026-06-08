@@ -89,9 +89,9 @@ public final class TalentTreeEdgeLayout {
         setAnchor(ui, "#ClassTreeNode" + id + "Unlocked",
             slotLeft + FILL_INSET, slotTop + FILL_INSET, FILL_SIZE, FILL_SIZE);
         setAnchor(ui, "#ClassTreeNode" + id + "Icon",
-            slotLeft + 8, slotTop + 8, SLOT - 16, SLOT - 16);
+            slotLeft + FILL_INSET + 1, slotTop + FILL_INSET + 1, FILL_SIZE - 2, FILL_SIZE - 2);
         setAnchor(ui, "#ClassTreeNode" + id + "CustomIcon",
-            slotLeft + 8, slotTop + 8, SLOT - 16, SLOT - 16);
+            slotLeft + FILL_INSET, slotTop + FILL_INSET, FILL_SIZE, FILL_SIZE);
         setAnchor(ui, "#ClassTreeNode" + id + "Veil",
             slotLeft + FILL_INSET, slotTop + FILL_INSET, FILL_SIZE, FILL_SIZE);
         setAnchor(ui, "#ClassTreeNode" + id, slotLeft, slotTop, SLOT, SLOT);
@@ -105,6 +105,10 @@ public final class TalentTreeEdgeLayout {
             slotLeft + RANK_LABEL_SHIFT_RIGHT,
             slotTop + SLOT + RANK_LABEL_GAP_TOP,
             RANK_LABEL_W, RANK_LABEL_H);
+        setAnchor(ui, "#ClassTreeNode" + id + "TypeText",
+            slotLeft + 8,
+            slotTop + SLOT + RANK_LABEL_GAP_TOP,
+            20, RANK_LABEL_H);
     }
 
     public static int layoutMergeTwoToOne(@Nonnull UICommandBuilder ui,
