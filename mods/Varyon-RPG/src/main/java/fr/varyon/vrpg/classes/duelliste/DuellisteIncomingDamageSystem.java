@@ -85,6 +85,11 @@ public final class DuellisteIncomingDamageSystem extends DamageEventSystem {
             if (dodgeRank > 0 && Math.random() < DuellistePassifs.dodgeChanceForRank(dodgeRank)) {
                 damage.setAmount(0f);
                 state.recordParry(uuid);
+                try {
+                    fr.varyon.vrpg.audio.ClassSkillSounds.playSkillSound(
+                        fr.varyon.vrpg.audio.ClassSkillSounds.ESQUIVE_BRETTEUR_SOUND,
+                        playerRef, new org.joml.Vector3d(), commandBuffer);
+                } catch (Exception ignored) {}
                 if (debug) LOG.atInfo().log(String.format("[Recu] %.1f ESQUIVE (EsquiveBretteur rank=%d)", incoming, dodgeRank));
                 return;
             }

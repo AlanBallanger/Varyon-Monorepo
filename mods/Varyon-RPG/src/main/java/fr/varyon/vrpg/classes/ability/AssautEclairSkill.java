@@ -29,7 +29,7 @@ public final class AssautEclairSkill {
     public static final String SKILL_ID       = "assaut_eclair";
     public static final String TALENT_NODE_ID = "0";
 
-    private static final float[] BASE_DAMAGE = {50f, 65f, 80f, 100f, 120f};
+    private static final float[] DAMAGE_FACTOR = {1.8f, 2.3f, 2.8f, 3.5f, 4.2f};
     private static final long[]  COOLDOWN_MS = {28000, 26000, 24000, 22000, 18000};
     private static final float[] STAMINA_COST = {6f, 7f, 8f, 9f, 10f};
     private static final float   DASH_SPEED   = 24f;
@@ -40,12 +40,18 @@ public final class AssautEclairSkill {
 
     private AssautEclairSkill() {}
 
-    public static int   maxRank()                  { return BASE_DAMAGE.length; }
+    public static int   maxRank()                  { return DAMAGE_FACTOR.length; }
     public static float staminaCostForRank(int rank){ return STAMINA_COST[idx(rank)]; }
     public static long  cooldownMsForRank(int rank) { return COOLDOWN_MS[idx(rank)]; }
-    public static float baseDamageForRank(int rank) { return BASE_DAMAGE[idx(rank)]; }
+    public static float damageFactor(int rank)      { return DAMAGE_FACTOR[idx(rank)]; }
 
-    private static int idx(int rank) { return Math.max(0, Math.min(rank - 1, BASE_DAMAGE.length - 1)); }
+    public static float computeDamage(int rank, @Nonnull PlayerRef playerRef) {
+        int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+        int base = weaponDmg > 0 ? weaponDmg : 1;
+        return base * damageFactor(rank);
+    }
+
+    private static int idx(int rank) { return Math.max(0, Math.min(rank - 1, DAMAGE_FACTOR.length - 1)); }
 
     public static boolean execute(@Nonnull PlayerRef playerRef,
                                   @Nonnull Ref<EntityStore> entityRef,
@@ -77,7 +83,7 @@ public final class AssautEclairSkill {
                     null, ChangeVelocityType.Set);
             }
 
-            float dmg = baseDamageForRank(rank);
+            float dmg = computeDamage(rank, playerRef);
             long casterIdx = entityRef.getIndex();
             HashSet<Long> hitSet = new HashSet<>();
 

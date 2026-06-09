@@ -18,9 +18,10 @@ public final class ClassStatDefinition {
         34, 36, 37, 39, 41, 42, 44, 46, 48, 50
     };
 
-    private static final double LEVEL_EASE  = 1.3;
-    private static final double CRIT_DMG_LVL1  = 120.0;
-    private static final double CRIT_DMG_RANGE = 80.0;
+    private static final double LEVEL_EASE       = 1.3;
+    private static final double ATK_MAX_LVL30   = 3.5;
+    private static final double CRIT_DMG_LVL1   = 120.0;
+    private static final double CRIT_DMG_RANGE  = 80.0;
 
     private static int clamp(int level) {
         return Math.max(1, Math.min(30, level));
@@ -52,6 +53,18 @@ public final class ClassStatDefinition {
 
     public static double armorPctForLevel(int level) {
         return (clamp(level) / 30.0) * 66.0;
+    }
+
+    public static double atkLevelMultiplier(int level) {
+        int L = clamp(level);
+        double t = (L - 1) / 29.0;
+        return 1.0 + (ATK_MAX_LVL30 - 1.0) * Math.pow(t, LEVEL_EASE);
+    }
+
+    public static double atkDisplayMultiplier(int level, @Nullable PlayerSpecialization spec) {
+        double specMult = spec != null ? spec.getAtkMult() : 1.0;
+        double levelAtk = atkLevelMultiplier(level);
+        return (1.0 + (levelAtk - 1.0) * specMult);
     }
 
     public static double critChancePctForLevel(int level) {

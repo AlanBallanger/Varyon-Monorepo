@@ -7,9 +7,8 @@ public final class DuellistePassifs {
     // --- Blessure Ouverte (node 2) ---
     public static final String BLESSURE_NODE   = "2";
     private static final float[]  BLEED_CHANCE  = {0.08f, 0.12f, 0.16f, 0.20f, 0.25f};
-    public static final float  BLEED_DPS_PCT    = 0.01f;
+    public static final float  BLEED_WEAPON_PCT  = 0.30f;
     public static final long   BLEED_DURATION_MS = 5_000L;
-    public static final float  BLEED_MAX_DAMAGE  = 100f;
 
     public static float bleedChanceForRank(int rank) {
         return BLEED_CHANCE[Math.max(0, Math.min(rank - 1, BLEED_CHANCE.length - 1))];
@@ -19,7 +18,8 @@ public final class DuellistePassifs {
 
     public static String bleedStatLine(int rank) {
         int pct = Math.round(bleedChanceForRank(rank) * 100);
-        return pct + "% chance, 1% HP/s pendant 5s (max 100 dégâts)";
+        int weaponPct = Math.round(BLEED_WEAPON_PCT * 100);
+        return pct + "% chance, " + weaponPct + "% dégâts arme/s pendant 5s";
     }
 
     // --- Frappe Précise (node 8) ---

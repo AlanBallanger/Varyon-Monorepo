@@ -11,6 +11,8 @@ import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
+import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.classes.WeaponCategory;
 import fr.varyon.vrpg.classes.ability.ClassSkillService;
 
 import javax.annotation.Nonnull;
@@ -40,6 +42,8 @@ public final class AbilitySlotsHud extends CustomUIHud {
         });
 
     private final ConcurrentHashMap<String, ScheduledFuture<?>> cooldownTasks = new ConcurrentHashMap<>();
+    private ScheduledFuture<?> weaponWatchTask;
+    private WeaponCategory lastSeenCategory = null;
 
     public AbilitySlotsHud(@Nonnull PlayerRef playerRef) {
         super(playerRef, HUD_KEY);
@@ -70,14 +74,32 @@ public final class AbilitySlotsHud extends CustomUIHud {
     @Override
     protected void build(@Nonnull UICommandBuilder builder) {
         builder.append("Hud/AbilitySlots/VRpgAbilitySlots.ui");
+        startWeaponWatch();
+    }
+
+    private void startWeaponWatch() {
+        if (weaponWatchTask != null) weaponWatchTask.cancel(false);
+        weaponWatchTask = SCHEDULER.scheduleAtFixedRate(() -> {
+            try {
+                WeaponCategory current = WeaponCategory.heldCategory(getPlayerRef());
+                if (current != lastSeenCategory) {
+                    lastSeenCategory = current;
+                    refreshSlots();
+                }
+            } catch (Exception ignored) {}
+        }, 500, 500, TimeUnit.MILLISECONDS);
     }
 
     public void refreshSlots() {
+        PlayerRef ref = getPlayerRef();
+        boolean weaponOk = resolveActiveSpec() != null
+            && WeaponCategory.specCanUseHeldWeapon(resolveActiveSpec(), ref);
+
         UICommandBuilder cmd = new UICommandBuilder();
         for (String slotId : SLOT_IDS) {
             String uiId = slotUiId(slotId);
             String iconPath = resolveSlotItemId(slotId);
-            boolean bound = iconPath != null && !iconPath.isBlank();
+            boolean bound = weaponOk && iconPath != null && !iconPath.isBlank();
             cmd.set("#VRpgSlot" + uiId + ".Visible", bound);
             cmd.set("#VRpgSlot" + uiId + "Key.Visible", bound);
             if (bound) {
@@ -86,6 +108,21 @@ public final class AbilitySlotsHud extends CustomUIHud {
             }
         }
         this.update(false, cmd);
+    }
+
+    @Nullable
+    private PlayerSpecialization resolveActiveSpec() {
+        VaryonRpgPlugin plugin = VaryonRpgPlugin.getInstance();
+        if (plugin == null) return null;
+        ClassManager classManager = plugin.getClassManager();
+        if (classManager == null) return null;
+        UUID uuid = getPlayerRef().getUuid();
+        if (uuid == null) return null;
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (acc == null) return null;
+        PlayerClass cls = acc.getActiveClass();
+        if (cls == null) return null;
+        return acc.getActiveSpec(cls);
     }
 
     public void startCooldown(@Nonnull String slotId, @Nonnull String skillId) {
@@ -170,6 +207,7 @@ public final class AbilitySlotsHud extends CustomUIHud {
     private void cancelAllCooldownTasks() {
         cooldownTasks.values().forEach(f -> f.cancel(false));
         cooldownTasks.clear();
+        if (weaponWatchTask != null) { weaponWatchTask.cancel(false); weaponWatchTask = null; }
     }
 
     @Nonnull

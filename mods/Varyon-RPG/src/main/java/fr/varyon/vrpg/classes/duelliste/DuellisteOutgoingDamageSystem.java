@@ -112,9 +112,10 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
                 }
             }
 
-            // Frappe Précise — bonus si crit (natif ou VRPG déjà appliqué par SpecWeaponMasteryDamageSystem)
-            float initialAmount = damage.getInitialAmount();
-            boolean isCrit = initialAmount > 0f && base > initialAmount * 1.1f;
+            // Frappe Précise — bonus si crit détecté via particules d'impact
+            boolean isCrit = isCriticalHit(damage);
+            if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
+                LOG.atInfo().log("[FrappePrecise] isCrit=" + isCrit + " base=" + base + " initial=" + damage.getInitialAmount());
             if (isCrit) {
                 int rank = acc.getTalentRank(PlayerClass.GUERRIER, DuellistePassifs.FRAPPE_NODE);
                 if (rank > 0) {
@@ -168,16 +169,40 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
             int bleedRank = acc.getTalentRank(PlayerClass.GUERRIER, DuellistePassifs.BLESSURE_NODE);
             if (bleedRank > 0 && Math.random() < DuellistePassifs.bleedChanceForRank(bleedRank)) {
                 Ref<EntityStore> victimRef = chunk.getReferenceTo(index);
-                float maxHp = getMaxHp(victimRef, store);
-                if (maxHp > 0f) {
-                    bleedSystem.applyBleed(victimRef, maxHp, store);
-                    if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
-                        LOG.atInfo().log("[Dmg] BlessureOuverte dpt=" +
-                            String.format("%.1f", maxHp * DuellistePassifs.BLEED_DPS_PCT) + "/s");
-                }
+                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float weaponBase = weaponDmg > 0 ? (float) weaponDmg : 1f;
+                bleedSystem.applyBleed(victimRef, weaponBase, store);
+                if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
+                    LOG.atInfo().log("[Dmg] BlessureOuverte dpt=" +
+                        String.format("%.1f", weaponBase * DuellistePassifs.BLEED_WEAPON_PCT) + "/s");
             }
 
         } catch (Exception ignored) {}
+    }
+
+    private static boolean isCriticalHit(@Nonnull Damage damage) {
+        try {
+            boolean[] found = {false};
+            java.util.List<String> debugValues = fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()
+                ? new java.util.ArrayList<>() : null;
+            damage.forEachMetaObject(new com.hypixel.hytale.server.core.meta.IMetaStore.MetaEntryConsumer() {
+                @Override
+                public <T> void accept(int metaId, T value) {
+                    if (value == null) return;
+                    String s = value.toString();
+                    if (debugValues != null) debugValues.add(metaId + "=" + s.substring(0, Math.min(60, s.length())));
+                    String sl = s.toLowerCase(java.util.Locale.ROOT);
+                    if (!found[0] && (sl.contains("impact_critical") || (sl.contains("critical")
+                            && (sl.contains("particle") || sl.contains("systemid"))))) {
+                        found[0] = true;
+                    }
+                }
+            });
+            if (debugValues != null)
+                LOG.atInfo().log("[FrappePrecise] meta entries: " + debugValues);
+            return found[0];
+        } catch (Exception ignored) {}
+        return false;
     }
 
     private float getMaxHp(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {

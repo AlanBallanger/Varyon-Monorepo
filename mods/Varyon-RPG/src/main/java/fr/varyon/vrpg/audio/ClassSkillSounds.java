@@ -19,9 +19,11 @@ public final class ClassSkillSounds {
 
     private static final HytaleLogger LOG = HytaleLogger.forEnclosingClass();
 
-    public static final String COUP_ESTOC_SOUND     = "SFX_Sword_T2_Lunge_Local";
-    public static final String ASSAUT_ECLAIR_SOUND  = "SFX_Daggers_T1_Pounce";
-    public static final String ASSAUT_ECLAIR_IMPACT = "SFX_Sword_T2_Swing";
+    public static final String COUP_ESTOC_SOUND        = "SFX_Sword_T2_Lunge_Local";
+    public static final String ASSAUT_ECLAIR_SOUND     = "SFX_Daggers_T1_Pounce";
+    public static final String ASSAUT_ECLAIR_IMPACT    = "SFX_Sword_T2_Swing";
+    public static final String ASSAUT_BRETTEUR_SOUND   = "Sword_Signature_Part_1_01";
+    public static final String ESQUIVE_BRETTEUR_SOUND  = "SFX_Player_Slide";
 
     private ClassSkillSounds() {}
 

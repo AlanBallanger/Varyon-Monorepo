@@ -101,7 +101,7 @@ public final class ClassesTab {
 
         int displayHp = readLiveStatMax(playerRef, true, activeStats.maxHp());
         int displayStamina = readLiveStatMax(playerRef, false, activeStats.maxStamina());
-        int displayAtk = readLiveAtk(playerRef, activeStats.atk());
+        int displayAtk = readLiveAtk(playerRef, activeProgress.getLevel(), activeSpec);
 
         uiBuilder.set("#ClassesStatPv.TextSpans",    Message.raw(String.valueOf(displayHp)));
         uiBuilder.set("#ClassesStatDef.TextSpans",   Message.raw(activeStats.armorPct() + "%"));
@@ -255,15 +255,14 @@ public final class ClassesTab {
         }
     }
 
-    private static int readLiveAtk(@Nonnull PlayerRef playerRef, int vrpgAtk) {
+    private static int readLiveAtk(@Nonnull PlayerRef playerRef, int level, @Nullable PlayerSpecialization spec) {
+        double atkMult = ClassStatDefinition.atkDisplayMultiplier(level, spec);
         try {
             int weaponDmg = WeaponDamageReader.readHeldWeaponDamage(playerRef);
-            if (weaponDmg > 0) {
-                double atkMult = vrpgAtk / 10.0;
-                return (int) Math.max(1, Math.round(weaponDmg * atkMult));
-            }
+            int base = weaponDmg > 0 ? weaponDmg : 1;
+            return (int) Math.max(1, Math.round(base * atkMult));
         } catch (Exception ignored) {}
-        return vrpgAtk;
+        return (int) Math.max(1, Math.round(atkMult));
     }
 
     static Message specDiffMsg(double mult) {

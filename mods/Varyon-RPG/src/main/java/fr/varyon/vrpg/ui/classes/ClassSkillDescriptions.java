@@ -50,10 +50,10 @@ public final class ClassSkillDescriptions {
     }
 
     private static String assautEclairLine(int rank) {
-        int dmg    = (int) AssautEclairSkill.baseDamageForRank(rank);
-        String cd  = formatCooldownShort(AssautEclairSkill.cooldownMsForRank(rank));
+        int pct     = Math.round(AssautEclairSkill.damageFactor(rank) * 100);
+        String cd   = formatCooldownShort(AssautEclairSkill.cooldownMsForRank(rank));
         int stamina = Math.round(AssautEclairSkill.staminaCostForRank(rank));
-        return dmg + " dégâts, CD " + cd + " - " + stamina + " endurance";
+        return pct + "% dégâts arme, CD " + cd + " - " + stamina + " endurance";
     }
 
     private static String formatCooldownShort(long cooldownMs) {

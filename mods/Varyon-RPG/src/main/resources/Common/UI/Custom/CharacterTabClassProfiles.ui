@@ -13,7 +13,7 @@ Group {
       Style: $P.@PlusButtonStyle;
       LayoutMode: Left;
       Group { FlexWeight: 1; }
-      Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Icons/Back.png", Border: 0); }
+      Group { Anchor: (Width: 14, Height: 14); Background: PatchStyle(TexturePath: "Elements/Return.png", Border: 0); }
       Group { Anchor: (Width: 6); }
       Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Retour"; }
       Group { FlexWeight: 1; }

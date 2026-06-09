@@ -111,6 +111,17 @@ public final class ClassSkillService {
         if (!bypass && cooldowns.isOnCooldown(uuid, AssautBretteurSkill.SKILL_ID, AssautBretteurSkill.cooldownMsForRank(rank))) return false;
         duellisteState.startAssautBretteur(uuid, AssautBretteurSkill.durationMsForRank(rank));
         if (!bypass) cooldowns.markUsed(uuid, AssautBretteurSkill.SKILL_ID);
+        try {
+            for (com.hypixel.hytale.server.core.universe.PlayerRef pr :
+                    new java.util.ArrayList<>(com.hypixel.hytale.server.core.universe.Universe.get().getPlayers())) {
+                if (pr.getUuid().equals(uuid)) {
+                    fr.varyon.vrpg.audio.ClassSkillSounds.playSkillSound(
+                        fr.varyon.vrpg.audio.ClassSkillSounds.ASSAUT_BRETTEUR_SOUND,
+                        pr, new org.joml.Vector3d(), null);
+                    break;
+                }
+            }
+        } catch (Exception ignored) {}
         notifySkill(uuid, "Assaut du Bretteur");
         return true;
     }
@@ -178,7 +189,7 @@ public final class ClassSkillService {
         try {
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "Stab", true, store);
             long casterIdx = entityRef.getIndex();
-            float dmg = CoupEstocSkill.castDamageForRank(rank);
+            float dmg = CoupEstocSkill.castDamageForRank(rank, playerRef);
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             if (tc != null) {
                 ClassSkillSounds.playSkillSound(ClassSkillSounds.COUP_ESTOC_SOUND, playerRef, tc.getPosition(), null);
@@ -338,11 +349,8 @@ public final class ClassSkillService {
             if (held == null || held.isEmpty()) return false;
             String id = held.getItemId();
             if (id == null) return false;
-            String lower = id.toLowerCase();
-            return lower.startsWith("weapon_sword") || lower.startsWith("weapon_longsword")
-                || lower.startsWith("weapon_daggers") || lower.startsWith("weapon_dagger")
-                || lower.startsWith("weapon_axe") || lower.startsWith("weapon_spear")
-                || lower.startsWith("weapon_leaf_spear");
+            return fr.varyon.vrpg.classes.WeaponCategory.fromItemId(id)
+                == fr.varyon.vrpg.classes.WeaponCategory.EPEE;
         } catch (Exception e) {
             return false;
         }

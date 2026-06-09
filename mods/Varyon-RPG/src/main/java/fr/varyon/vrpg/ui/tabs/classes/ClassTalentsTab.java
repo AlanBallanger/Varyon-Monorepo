@@ -40,30 +40,14 @@ public final class ClassTalentsTab {
         ClassAccount acc = classManager != null ? classManager.getAccount(playerRef.getUuid()) : null;
         PlayerClass activeClass = acc != null ? acc.getActiveClass() : null;
 
-        boolean isTalentsSubTab = "talents".equals(state.classTreeSubTab);
         uiBuilder.set("#ClassTreeMainTitle.TextSpans", Message.raw("Arbre de talents"));
+        uiBuilder.set("#ClassTreeTalentsPanel.Visible", true);
+        uiBuilder.set("#ClassTreeSkillsPanel.Visible", false);
+        uiBuilder.set("#ClassTreeTabTalentsButton.Visible", false);
+        uiBuilder.set("#ClassTreeTabSkillsButton.Visible", false);
+        uiBuilder.set("#ClassTreeTabTalentsUnderline.Visible", false);
+        uiBuilder.set("#ClassTreeTabSkillsUnderline.Visible", false);
 
-        uiBuilder.set("#ClassTreeTalentsPanel.Visible", isTalentsSubTab);
-        uiBuilder.set("#ClassTreeSkillsPanel.Visible", !isTalentsSubTab);
-        uiBuilder.set("#ClassTreeTabTalentsUnderline.Visible", isTalentsSubTab);
-        uiBuilder.set("#ClassTreeTabSkillsUnderline.Visible", !isTalentsSubTab);
-
-        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#SkillSlotsResetButton",
-            EventData.of("Action", "skillSlotsReset"), false);
-
-        String[] filters = {"all", "attaque", "defense", "soutien", "mobilite"};
-        String[] filterIds = {"All", "Attaque", "Defense", "Soutien", "Mobilite"};
-        for (int fi = 0; fi < filters.length; fi++) {
-            boolean active = filters[fi].equals(state.skillFilter);
-            uiBuilder.set("#SkillFilter" + filterIds[fi] + "Underline.Visible", active);
-            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                "#SkillFilter" + filterIds[fi],
-                EventData.of("Action", "skillFilter").append("Filter", filters[fi]), false);
-        }
-        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ClassTreeTabTalentsButton",
-            EventData.of("Action", "classtreeSubTab").append("Sub", "talents"), false);
-        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ClassTreeTabSkillsButton",
-            EventData.of("Action", "classtreeSubTab").append("Sub", "skills"), false);
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ClassTreeBackButton",
             EventData.of("Action", "tab").append("Tab", TAB_CLASSES), false);
 
@@ -80,8 +64,6 @@ public final class ClassTalentsTab {
 
         renderNodes(uiBuilder, eventBuilder, talentNodes, shifted, state, effectiveSel, effectiveHov);
         renderDetailPanel(uiBuilder, eventBuilder, talentNodes, state, acc, activeClass, effectiveSel, effectiveHov);
-        renderSkillSlots(uiBuilder, eventBuilder, talentNodes, state);
-        renderSkillPicker(uiBuilder, eventBuilder, acc, state);
     }
 
     public static void applyHoverChrome(@Nonnull PlayerRef playerRef,
@@ -233,32 +215,6 @@ public final class ClassTalentsTab {
         }
     }
 
-    private static void renderSkillSlots(@Nonnull UICommandBuilder uiBuilder,
-                                         @Nonnull UIEventBuilder eventBuilder,
-                                         @Nonnull ClassTalentTree.Node[] talentNodes,
-                                         @Nonnull RpgClassUiState state) {
-        String[] slotIds = {"E", "R", "CrouchA", "CrouchE", "CrouchR", "A"};
-        for (String slotId : slotIds) {
-            String assigned = state.skillSlotAssignments.get(slotId);
-            if (assigned != null) {
-                for (ClassTalentTree.Node n : talentNodes) {
-                    if (n.itemId().equals(assigned)) {
-                        uiBuilder.set("#SkillSlot" + slotId + "Icon.ItemId", n.itemId());
-                        uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", true);
-                        uiBuilder.set("#SkillSlot" + slotId + "Name.TextSpans", Message.raw(n.name()));
-                        break;
-                    }
-                }
-            } else {
-                uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
-                uiBuilder.set("#SkillSlot" + slotId + "Name.TextSpans", Message.raw(""));
-            }
-            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                "#SkillSlot" + slotId,
-                EventData.of("Action", "skillSlotClick").append("Slot", slotId), false);
-        }
-    }
-
     private static void applyTalentDetail(@Nonnull UICommandBuilder ui,
                                           @Nullable ClassAccount acc,
                                           int panelNode,
@@ -302,38 +258,4 @@ public final class ClassTalentsTab {
         }
     }
 
-    private static void renderSkillPicker(@Nonnull UICommandBuilder uiBuilder,
-                                          @Nonnull UIEventBuilder eventBuilder,
-                                          ClassAccount acc,
-                                          @Nonnull RpgClassUiState state) {
-        boolean pickerOpen = state.selectedSkillSlot != null;
-        uiBuilder.set("#SkillPickerPanel.Visible", pickerOpen);
-        if (!pickerOpen) return;
-
-        String[] slotLabels = {"Sort 1 (E)", "Sort 2 (R)", "Sort 3 (Crouch+A)", "Sort 4 (Crouch+E)", "Sort 5 (Crouch+R)", "Sort 6 (A)"};
-        String[] slotIdsLabels = {"E", "R", "CrouchA", "CrouchE", "CrouchR", "A"};
-        String slotLabel = state.selectedSkillSlot;
-        for (int i = 0; i < slotIdsLabels.length; i++) {
-            if (slotIdsLabels[i].equals(state.selectedSkillSlot)) {
-                slotLabel = slotLabels[i];
-                break;
-            }
-        }
-        uiBuilder.set("#SkillPickerSlotLabel.TextSpans", Message.raw("Assigner à : " + slotLabel));
-        uiBuilder.clear("#SkillPickerList");
-
-        var unlockedActives = ClassUnlockedActiveSkills.list(acc);
-        for (int i = 0; i < unlockedActives.size(); i++) {
-            ClassTalentTree.Node n = unlockedActives.get(i).node();
-            uiBuilder.append("#SkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
-            ClassesTab.applySkillEntryIcon(uiBuilder, "#SkillPickerList[" + i + "]", n.itemId());
-            uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
-            uiBuilder.set("#SkillPickerList[" + i + "] #SkillEntryAssign.Visible", true);
-            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                "#SkillPickerList[" + i + "] #SkillEntryAssign",
-                EventData.of("Action", "skillSlotAssign")
-                    .append("Slot", state.selectedSkillSlot)
-                    .append("Node", n.itemId()), false);
-        }
-    }
 }
