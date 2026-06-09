@@ -2,6 +2,7 @@ package fr.varyon.vrpg.ui;
 
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
+import com.hypixel.hytale.server.core.ui.Anchor;
 import com.hypixel.hytale.server.core.ui.PatchStyle;
 import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
@@ -10,21 +11,35 @@ import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
+import fr.varyon.vrpg.classes.ability.ClassSkillService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public final class AbilitySlotsHud extends CustomUIHud {
 
     public static final String HUD_KEY = "vrpg_ability_slots_hud";
 
-    private static final String ASSETS = "AbilitySlots/Assets/";
-    private static final PatchStyle BG_NORMAL = new PatchStyle().setTexturePath(Value.of(ASSETS + "BackgroundAbility@2x.png"));
-    private static final PatchStyle BG_ON_USE = new PatchStyle().setTexturePath(Value.of(ASSETS + "BackgroundAbilityOnUse@2x.png"));
+    private static final int SLOT_SIZE = 46;
+
+    private static final List<String> SLOT_IDS = List.of("E", "R", "A", "CrouchE", "CrouchR", "CrouchA");
 
     private static final ConcurrentHashMap<UUID, AbilitySlotsHud> INSTANCES = new ConcurrentHashMap<>();
+    private static final ScheduledExecutorService SCHEDULER =
+        Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "ability-slots-hud");
+            t.setDaemon(true);
+            return t;
+        });
+
+    private final ConcurrentHashMap<String, ScheduledFuture<?>> cooldownTasks = new ConcurrentHashMap<>();
 
     public AbilitySlotsHud(@Nonnull PlayerRef playerRef) {
         super(playerRef, HUD_KEY);
@@ -48,7 +63,8 @@ public final class AbilitySlotsHud extends CustomUIHud {
     }
 
     public static void cleanup(@Nonnull UUID uuid) {
-        INSTANCES.remove(uuid);
+        AbilitySlotsHud hud = INSTANCES.remove(uuid);
+        if (hud != null) hud.cancelAllCooldownTasks();
     }
 
     @Override
@@ -57,32 +73,113 @@ public final class AbilitySlotsHud extends CustomUIHud {
     }
 
     public void refreshSlots() {
-        String e = resolveSlotItemId("E");
-        String r = resolveSlotItemId("R");
-        com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass()
-            .atInfo().log("[AbilitySlotsHud] refreshSlots e=" + e + " r=" + r);
         UICommandBuilder cmd = new UICommandBuilder();
-        applySlots(cmd, e, r);
+        for (String slotId : SLOT_IDS) {
+            String uiId = slotUiId(slotId);
+            String iconPath = resolveSlotItemId(slotId);
+            boolean bound = iconPath != null && !iconPath.isBlank();
+            cmd.set("#VRpgSlot" + uiId + ".Visible", bound);
+            cmd.set("#VRpgSlot" + uiId + "Key.Visible", bound);
+            if (bound) {
+                cmd.setObject("#VRpgSlot" + uiId + "Icon.Background",
+                    new PatchStyle(Value.of(iconPath), Value.of(0)));
+            }
+        }
         this.update(false, cmd);
     }
 
-    public void setSlotOnUse(@Nonnull String slotId, boolean onUse) {
+    public void startCooldown(@Nonnull String slotId, @Nonnull String skillId) {
+        VaryonRpgPlugin plugin = VaryonRpgPlugin.getInstance();
+        if (plugin == null) return;
+        ClassSkillService skills = plugin.getClassSkillService();
+        ClassManager classManager = plugin.getClassManager();
+        if (skills == null || classManager == null) return;
+        UUID uuid = getPlayerRef().getUuid();
+        if (uuid == null) return;
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (acc == null) return;
+        PlayerClass cls = acc.getActiveClass();
+        if (cls == null) return;
+
+        long totalMs = skills.getCooldownTotalMs(skillId, acc, cls);
+        if (totalMs <= 0L) return;
+
+        cancelCooldownTask(slotId);
+        scheduleCooldownTick(slotId, skillId, totalMs, uuid, acc, cls, skills);
+    }
+
+    private void scheduleCooldownTick(@Nonnull String slotId, @Nonnull String skillId,
+                                      long totalMs, @Nonnull UUID uuid,
+                                      @Nonnull ClassAccount acc, @Nonnull PlayerClass cls,
+                                      @Nonnull ClassSkillService skills) {
+        long remainingMs = skills.getCooldownRemainingMs(uuid, skillId, acc, cls);
+        if (remainingMs <= 0L) {
+            clearCooldownOverlay(slotId);
+            return;
+        }
+
+        updateCooldownOverlay(slotId, remainingMs, totalMs);
+
+        long delayMs = 200L;
+        ScheduledFuture<?> task = SCHEDULER.schedule(
+            () -> scheduleCooldownTick(slotId, skillId, totalMs, uuid, acc, cls, skills),
+            delayMs, TimeUnit.MILLISECONDS
+        );
+        cooldownTasks.put(slotId, task);
+    }
+
+    private void updateCooldownOverlay(@Nonnull String slotId, long remainingMs, long totalMs) {
+        String uiId = slotUiId(slotId);
+        double ratio = Math.min(1.0, (double) remainingMs / totalMs);
+
+        String timerText = remainingMs > 1000L
+            ? String.valueOf((int) Math.ceil(remainingMs / 1000.0))
+            : String.format("%.1f", remainingMs / 1000.0).replace(",", ".");
+
         UICommandBuilder cmd = new UICommandBuilder();
-        String bgId = "E".equals(slotId) ? "#VRpgSlotEBg" : "#VRpgSlotRBg";
-        cmd.setObject(bgId + ".Background", onUse ? BG_ON_USE : BG_NORMAL);
+        int cropHeight = (int) Math.round(ratio * SLOT_SIZE);
+        int cropTop = 6 + (SLOT_SIZE - cropHeight);
+        Anchor cdAnchor = new Anchor();
+        cdAnchor.setLeft(Value.of(6));
+        cdAnchor.setTop(Value.of(cropTop));
+        cdAnchor.setWidth(Value.of(SLOT_SIZE));
+        cdAnchor.setHeight(Value.of(cropHeight));
+        cmd.set("#VRpgSlot" + uiId + "CooldownBg.Visible", true);
+        cmd.set("#VRpgSlot" + uiId + "Cooldown.Visible", true);
+        cmd.setObject("#VRpgSlot" + uiId + "Cooldown.Anchor", cdAnchor);
+        cmd.set("#VRpgSlot" + uiId + "TimerGroup.Visible", true);
+        cmd.set("#VRpgSlot" + uiId + "TimerLabel.Text", timerText);
         this.update(false, cmd);
     }
 
-    public void setSlotAvailable(@Nonnull String slotId, boolean available) {
+    private void clearCooldownOverlay(@Nonnull String slotId) {
+        String uiId = slotUiId(slotId);
         UICommandBuilder cmd = new UICommandBuilder();
-        String overlayId = "E".equals(slotId) ? "#VRpgSlotEErrorOverlay" : "#VRpgSlotRErrorOverlay";
-        cmd.set(overlayId + ".Visible", !available);
+        cmd.set("#VRpgSlot" + uiId + "CooldownBg.Visible", false);
+        cmd.set("#VRpgSlot" + uiId + "Cooldown.Visible", false);
+        cmd.set("#VRpgSlot" + uiId + "TimerGroup.Visible", false);
+        cmd.set("#VRpgSlot" + uiId + "TimerLabel.Text", "");
         this.update(false, cmd);
     }
 
-    private void applySlots(@Nonnull UICommandBuilder cmd, @Nullable String eItemId, @Nullable String rItemId) {
-        applyIcon(cmd, "#VRpgSlotEIcon", eItemId);
-        applyIcon(cmd, "#VRpgSlotRIcon", rItemId);
+    private void cancelCooldownTask(@Nonnull String slotId) {
+        ScheduledFuture<?> existing = cooldownTasks.remove(slotId);
+        if (existing != null) existing.cancel(false);
+    }
+
+    private void cancelAllCooldownTasks() {
+        cooldownTasks.values().forEach(f -> f.cancel(false));
+        cooldownTasks.clear();
+    }
+
+    @Nonnull
+    private String slotUiId(@Nonnull String slotId) {
+        return switch (slotId) {
+            case "CrouchE" -> "CrouchE";
+            case "CrouchR" -> "CrouchR";
+            case "CrouchA" -> "CrouchA";
+            default -> slotId;
+        };
     }
 
     private void applyIcon(@Nonnull UICommandBuilder cmd, @Nonnull String elementId, @Nullable String iconPath) {
@@ -104,9 +201,6 @@ public final class AbilitySlotsHud extends CustomUIHud {
         if (acc == null) return null;
         PlayerClass activeClass = acc.getActiveClass();
         if (activeClass == null) return null;
-        String result = acc.getSkillSlot(activeClass, slotId);
-        com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass()
-            .atInfo().log("[AbilitySlotsHud] slot=" + slotId + " iconPath=" + result);
-        return result;
+        return acc.getSkillSlot(activeClass, slotId);
     }
 }

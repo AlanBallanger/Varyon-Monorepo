@@ -81,7 +81,11 @@ public final class ClassSkillSlots {
                 deny(castRef, "Sort assigné mais non disponible (talent ou spé requis).");
                 return;
             }
-            skills.tryCast(skillId, uuid, castRef, ref, store, null);
+            boolean cast = skills.tryCast(skillId, uuid, castRef, ref, store, null);
+            if (cast) {
+                fr.varyon.vrpg.ui.AbilitySlotsHud hud = fr.varyon.vrpg.ui.AbilitySlotsHud.get(uuid);
+                if (hud != null) hud.startCooldown(slotId, skillId);
+            }
         });
     }
 

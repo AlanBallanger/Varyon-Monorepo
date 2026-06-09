@@ -14,6 +14,7 @@ import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.duelliste.AssautBretteurSkill;
 import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
+import fr.varyon.vrpg.classes.ability.AssautEclairSkill;
 import fr.varyon.vrpg.classes.duelliste.DuellisteState;
 import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
 import fr.varyon.vrpg.classes.duelliste.FeintSkill;
@@ -345,6 +346,29 @@ public final class ClassSkillService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public long getCooldownTotalMs(@Nonnull String skillId, @Nonnull ClassAccount acc, @Nonnull PlayerClass cls) {
+        if (AssautEclairSkill.SKILL_ID.equals(skillId))
+            return AssautEclairSkill.cooldownMsForRank(acc.getTalentRank(cls, AssautEclairSkill.TALENT_NODE_ID));
+        if (AssautBretteurSkill.SKILL_ID.equals(skillId))
+            return AssautBretteurSkill.cooldownMsForRank(acc.getTalentRank(cls, AssautBretteurSkill.TALENT_NODE_ID));
+        if (DesarmementSkill.SKILL_ID.equals(skillId))
+            return DesarmementSkill.cooldownMsForRank(acc.getTalentRank(cls, DesarmementSkill.TALENT_NODE_ID));
+        if (CoupEstocSkill.SKILL_ID.equals(skillId))
+            return CoupEstocSkill.cooldownMsForRank(acc.getTalentRank(cls, CoupEstocSkill.TALENT_NODE_ID));
+        if (FeintSkill.SKILL_ID.equals(skillId))
+            return FeintSkill.cooldownMsForRank(acc.getTalentRank(cls, FeintSkill.TALENT_NODE_ID));
+        if (RiposteParfaiteSkill.SKILL_ID.equals(skillId))
+            return RiposteParfaiteSkill.cooldownMsForRank(acc.getTalentRank(cls, RiposteParfaiteSkill.TALENT_NODE_ID));
+        return 0L;
+    }
+
+    public long getCooldownRemainingMs(@Nonnull UUID uuid, @Nonnull String skillId,
+                                       @Nonnull ClassAccount acc, @Nonnull PlayerClass cls) {
+        long total = getCooldownTotalMs(skillId, acc, cls);
+        if (total <= 0L) return 0L;
+        return cooldowns.remainingMs(uuid, skillId, total);
     }
 
     public void cleanup(@Nonnull UUID uuid) {

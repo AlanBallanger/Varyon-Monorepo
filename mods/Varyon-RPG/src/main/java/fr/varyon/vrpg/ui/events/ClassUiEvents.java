@@ -208,8 +208,8 @@ public final class ClassUiEvents {
             }
             state.skillSlotAssignments.clear();
             state.selectedSkillSlot = null;
-            // AbilitySlotsHud hudReset = AbilitySlotsHud.get(playerRef.getUuid());
-            // if (hudReset != null) hudReset.refreshSlots();
+            AbilitySlotsHud hudReset = AbilitySlotsHud.get(playerRef.getUuid());
+            if (hudReset != null) hudReset.refreshSlots();
             return UiEventResult.REBUILD;
         }
         if ("skillSlotAssign".equals(data.action) && data.slot != null && data.node != null) {
@@ -239,8 +239,8 @@ public final class ClassUiEvents {
                 }
             }
             state.skillSlotAssignments.remove(data.slot);
-            // AbilitySlotsHud hudClear = AbilitySlotsHud.get(playerRef.getUuid());
-            // if (hudClear != null) hudClear.refreshSlots();
+            AbilitySlotsHud hudClear = AbilitySlotsHud.get(playerRef.getUuid());
+            if (hudClear != null) hudClear.refreshSlots();
             return UiEventResult.REBUILD;
         }
 
