@@ -10,6 +10,13 @@ import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
 import fr.varyon.vrpg.classes.duelliste.DuellistePassifs;
 import fr.varyon.vrpg.classes.duelliste.FeintSkill;
 import fr.varyon.vrpg.classes.duelliste.RiposteParfaiteSkill;
+import fr.varyon.vrpg.classes.ombre.PasDesTenebresSkill;
+import fr.varyon.vrpg.classes.ombre.EcranDeFumeeSkill;
+import fr.varyon.vrpg.classes.ombre.FrappeFataleSkill;
+import fr.varyon.vrpg.classes.ombre.DelugeDeGamesSkill;
+import fr.varyon.vrpg.classes.ombre.PasDeLOmbreSkill;
+import fr.varyon.vrpg.classes.ombre.ChaseOuverteSkill;
+import fr.varyon.vrpg.classes.ombre.OmbrePassifs;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,6 +52,18 @@ public final class ClassSkillDescriptions {
             case DuellistePassifs.CONTRE_NODE   -> DuellistePassifs.contreStatLine(rank);
             case DuellistePassifs.ESQUIVE_NODE  -> DuellistePassifs.dodgeStatLine(rank);
             case DuellistePassifs.MOMENTUM_NODE -> DuellistePassifs.momentumStatLine(rank);
+            case PasDesTenebresSkill.SKILL_ID    -> PasDesTenebresSkill.statLineForRank(rank);
+            case EcranDeFumeeSkill.SKILL_ID      -> EcranDeFumeeSkill.statLineForRank(rank);
+            case FrappeFataleSkill.SKILL_ID      -> FrappeFataleSkill.statLineForRank(rank);
+            case DelugeDeGamesSkill.SKILL_ID     -> DelugeDeGamesSkill.statLineForRank(rank);
+            case PasDeLOmbreSkill.SKILL_ID       -> PasDeLOmbreSkill.statLineForRank(rank);
+            case ChaseOuverteSkill.SKILL_ID      -> ChaseOuverteSkill.statLineForRank(rank);
+            case OmbrePassifs.EXECUTION_RAPIDE_NODE  -> OmbrePassifs.executionStatLine(rank);
+            case OmbrePassifs.DANSE_LAMES_NODE       -> OmbrePassifs.danseStatLine(rank);
+            case OmbrePassifs.LAMES_EMPOISONNEES_NODE-> OmbrePassifs.poisonStatLine(rank);
+            case OmbrePassifs.EMBUSCADE_NODE         -> OmbrePassifs.embuscadeStatLine(rank);
+            case OmbrePassifs.OMBRE_INSAISISSABLE_NODE -> OmbrePassifs.ombreInsaisissableStatLine(rank);
+            case OmbrePassifs.INSTINCT_SURVIE_NODE   -> OmbrePassifs.instinctSurvieStatLine(rank);
             default -> null;
         };
     }

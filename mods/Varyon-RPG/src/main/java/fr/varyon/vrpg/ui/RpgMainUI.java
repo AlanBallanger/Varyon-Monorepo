@@ -85,8 +85,11 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.set("#ParametresTabContent.Visible", "parametres".equals(activeTab));
         uiBuilder.set("#AdminTabContent.Visible", "admin".equals(activeTab));
 
-        uiBuilder.set("#TabClassesUnderline.Visible", TAB_CLASSES.equals(activeTab));
-        uiBuilder.set("#TabCharacterUnderline.Visible", "character".equals(activeTab));
+        boolean classesActive = TAB_CLASSES.equals(activeTab) || "classtree".equals(activeTab)
+            || "classselect".equals(activeTab) || "classprofiles".equals(activeTab);
+        boolean characterActive = "character".equals(activeTab) || "skills".equals(activeTab);
+        uiBuilder.set("#TabClassesUnderline.Visible", classesActive);
+        uiBuilder.set("#TabCharacterUnderline.Visible", characterActive);
         uiBuilder.set("#TabArtisansUnderline.Visible", "artisans".equals(activeTab));
         uiBuilder.set("#TabClassementUnderline.Visible", "classement".equals(activeTab));
         uiBuilder.set("#TabParametresUnderline.Visible", "parametres".equals(activeTab));

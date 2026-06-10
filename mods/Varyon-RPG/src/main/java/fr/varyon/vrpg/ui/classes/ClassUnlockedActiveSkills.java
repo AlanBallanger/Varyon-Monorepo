@@ -30,7 +30,8 @@ public final class ClassUnlockedActiveSkills {
         for (int i = 0; i < nodes.length; i++) {
             ClassTalentTree.Node node = nodes[i];
             if (!"Actif".equals(node.type())) continue;
-            if (acc.getTalentRank(activeClass, String.valueOf(i)) <= 0) continue;
+            String talentKey = fr.varyon.vrpg.ui.classes.ClassTalentTreeLogic.nodeKey(acc, activeClass, i);
+            if (acc.getTalentRank(activeClass, talentKey) <= 0) continue;
             out.add(new Entry(i, node));
         }
         return List.copyOf(out);

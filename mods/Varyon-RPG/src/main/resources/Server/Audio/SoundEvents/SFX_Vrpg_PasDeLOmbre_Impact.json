@@ -1,0 +1,17 @@
+{
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Weapons/Daggers/Daggers_T2_Signature_P1_Slash_Stereo_03.ogg"
+      ],
+      "RandomSettings": {
+        "MinPitch": -1,
+        "MaxPitch": 1,
+        "MinVolume": -1
+      },
+      "StartDelay": 0,
+      "Volume": 0.0
+    }
+  ],
+  "AudioCategory": "AudioCat_Daggers"
+}

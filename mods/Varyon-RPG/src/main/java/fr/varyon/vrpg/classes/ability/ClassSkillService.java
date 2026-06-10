@@ -19,6 +19,14 @@ import fr.varyon.vrpg.classes.duelliste.DuellisteState;
 import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
 import fr.varyon.vrpg.classes.duelliste.FeintSkill;
 import fr.varyon.vrpg.classes.duelliste.RiposteParfaiteSkill;
+import fr.varyon.vrpg.classes.ombre.OmbreState;
+import fr.varyon.vrpg.classes.ombre.PasDesTenebresSkill;
+import fr.varyon.vrpg.classes.ombre.EcranDeFumeeSkill;
+import fr.varyon.vrpg.classes.ombre.FrappeFataleSkill;
+import fr.varyon.vrpg.classes.ombre.DelugeDeGamesSkill;
+import fr.varyon.vrpg.classes.ombre.PasDeLOmbreSkill;
+import fr.varyon.vrpg.classes.ombre.ChaseOuverteSkill;
+import fr.varyon.vrpg.classes.ombre.OmbrePassifs;
 import com.hypixel.hytale.protocol.AnimationSlot;
 import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import fr.varyon.vrpg.audio.ClassSkillSounds;
@@ -33,13 +41,20 @@ import java.util.UUID;
 
 public final class ClassSkillService {
 
+    private static final com.hypixel.hytale.logger.HytaleLogger LOG =
+        com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
+
     private final ClassManager classManager;
     private final DuellisteState duellisteState;
+    private final OmbreState ombreState;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
 
-    public ClassSkillService(@Nonnull ClassManager classManager, @Nonnull DuellisteState duellisteState) {
+    public ClassSkillService(@Nonnull ClassManager classManager,
+                             @Nonnull DuellisteState duellisteState,
+                             @Nonnull OmbreState ombreState) {
         this.classManager = classManager;
         this.duellisteState = duellisteState;
+        this.ombreState = ombreState;
     }
 
     public boolean tryCast(@Nonnull String skillId,
@@ -65,6 +80,24 @@ public final class ClassSkillService {
         }
         if (RiposteParfaiteSkill.SKILL_ID.equals(skillId)) {
             return tryCastRiposte(uuid, playerRef, entityRef, store);
+        }
+        if (PasDesTenebresSkill.SKILL_ID.equals(skillId)) {
+            return tryCastPasDesTenebres(uuid, playerRef, entityRef, store, commandBuffer);
+        }
+        if (EcranDeFumeeSkill.SKILL_ID.equals(skillId)) {
+            return tryCastEcranDeFumee(uuid, playerRef);
+        }
+        if (FrappeFataleSkill.SKILL_ID.equals(skillId)) {
+            return tryCastFrappeFatale(uuid, playerRef);
+        }
+        if (DelugeDeGamesSkill.SKILL_ID.equals(skillId)) {
+            return tryCastDelugeDeGames(uuid, playerRef, entityRef, store);
+        }
+        if (PasDeLOmbreSkill.SKILL_ID.equals(skillId)) {
+            return tryCastPasDeLOmbre(uuid, playerRef, entityRef, store);
+        }
+        if (ChaseOuverteSkill.SKILL_ID.equals(skillId)) {
+            return tryCastChaseOuverte(uuid, playerRef, entityRef, store);
         }
         return false;
     }
@@ -260,9 +293,417 @@ public final class ClassSkillService {
         return true;
     }
 
+    public boolean tryCastPasDesTenebres(@Nonnull UUID uuid,
+                                          @Nonnull PlayerRef playerRef,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull Store<EntityStore> store,
+                                          @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        LOG.atInfo().log("[PasDesTenebres] cast attempt uuid=" + uuid + " class=" + acc.getActiveClass() + " spec=" + (acc.getActiveClass() != null ? acc.getActiveSpec(acc.getActiveClass()) : "null"));
+        if (!isOmbre(acc)) { LOG.atInfo().log("[PasDesTenebres] BLOCKED not ombre"); return false; }
+        if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); LOG.atInfo().log("[PasDesTenebres] BLOCKED no dagger"); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, PasDesTenebresSkill.TALENT_NODE_ID);
+        LOG.atInfo().log("[PasDesTenebres] rank=" + rank + " bypass=" + bypass);
+        if (rank <= 0 && !bypass) { LOG.atInfo().log("[PasDesTenebres] BLOCKED rank=0"); return false; }
+        if (rank <= 0) rank = 1;
+        long cdMs = PasDesTenebresSkill.cooldownMsForRank(rank);
+        boolean onCd = !bypass && cooldowns.isOnCooldown(uuid, PasDesTenebresSkill.SKILL_ID, cdMs);
+        LOG.atInfo().log("[PasDesTenebres] onCooldown=" + onCd);
+        if (onCd) return false;
+        float staminaCost = PasDesTenebresSkill.staminaCostForRank(rank);
+        boolean hasStamina = ClassSkillStamina.hasEnough(playerRef, staminaCost);
+        LOG.atInfo().log("[PasDesTenebres] staminaCost=" + staminaCost + " hasStamina=" + hasStamina);
+        if (!hasStamina) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = hr.getDirection();
+                double dx = dir.x, dz = dir.z;
+                double len = Math.sqrt(dx*dx + dz*dz);
+                if (len > 1e-6) { dx /= len; dz /= len; }
+
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Daggers", "DashBackward", true,
+                    commandBuffer != null ? commandBuffer : store);
+                ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, tc.getPosition(), commandBuffer);
+
+                double dist = PasDesTenebresSkill.dashDistanceForRank(rank);
+                org.joml.Vector3d newPos = new org.joml.Vector3d(
+                    tc.getPosition().x - dx * dist,
+                    tc.getPosition().y,
+                    tc.getPosition().z - dz * dist);
+                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
+                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(
+                    curRot.pitch(), curRot.yaw(), curRot.roll());
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(
+                        newPos, keepRot);
+                tele.withoutVelocityReset();
+                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+            }
+        } catch (Exception ignored) {}
+
+        long stealthMs = PasDesTenebresSkill.stealthDurationMs(rank);
+        LOG.atInfo().log("[PasDesTenebres] stealth started durationMs=" + stealthMs);
+        ombreState.startStealth(uuid, stealthMs);
+        fr.varyon.vrpg.classes.ombre.OmbreStealthAggroResetSystem.resetAggroAround(entityRef, store);
+        int embRank = acc.getTalentRank(PlayerClass.GUERRIER, OmbrePassifs.EMBUSCADE_NODE);
+        if (embRank > 0) ombreState.armEmbuscade(uuid, stealthMs + 2000, embRank);
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, PasDesTenebresSkill.SKILL_ID);
+        notifySkill(uuid, "Pas des Ténèbres");
+        return true;
+    }
+
+    public boolean tryCastEcranDeFumee(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        LOG.atInfo().log("[EcranDeFumee] cast attempt uuid=" + uuid + " class=" + acc.getActiveClass() + " spec=" + (acc.getActiveClass() != null ? acc.getActiveSpec(acc.getActiveClass()) : "null"));
+        if (!isOmbre(acc)) { LOG.atInfo().log("[EcranDeFumee] BLOCKED not ombre"); return false; }
+        if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); LOG.atInfo().log("[EcranDeFumee] BLOCKED no dagger"); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, EcranDeFumeeSkill.TALENT_NODE_ID);
+        LOG.atInfo().log("[EcranDeFumee] rank=" + rank + " bypass=" + bypass);
+        if (rank <= 0 && !bypass) { LOG.atInfo().log("[EcranDeFumee] BLOCKED rank=0"); return false; }
+        if (rank <= 0) rank = 1;
+        boolean onCd = !bypass && cooldowns.isOnCooldown(uuid, EcranDeFumeeSkill.SKILL_ID, EcranDeFumeeSkill.cooldownMsForRank(rank));
+        LOG.atInfo().log("[EcranDeFumee] onCooldown=" + onCd);
+        if (onCd) return false;
+
+        long durationMs = EcranDeFumeeSkill.durationMsForRank(rank);
+        LOG.atInfo().log("[EcranDeFumee] stealth started durationMs=" + durationMs);
+        ombreState.startEcranFumee(uuid, durationMs);
+        try {
+            Ref<EntityStore> ecranRef = playerRef.getReference();
+            if (ecranRef != null && ecranRef.isValid()) {
+                fr.varyon.vrpg.classes.ombre.OmbreStealthAggroResetSystem.resetAggroAround(
+                    ecranRef, ecranRef.getStore());
+            }
+        } catch (Exception ignored) {}
+        int embRank = acc.getTalentRank(PlayerClass.GUERRIER, OmbrePassifs.EMBUSCADE_NODE);
+        if (embRank > 0) ombreState.armEmbuscade(uuid, durationMs + 2000, embRank);
+        try {
+            for (com.hypixel.hytale.server.core.universe.PlayerRef pr :
+                    new java.util.ArrayList<>(com.hypixel.hytale.server.core.universe.Universe.get().getPlayers())) {
+                if (pr.getUuid().equals(uuid)) {
+                    ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", pr, new org.joml.Vector3d(), null);
+                    break;
+                }
+            }
+        } catch (Exception ignored) {}
+        if (!bypass) cooldowns.markUsed(uuid, EcranDeFumeeSkill.SKILL_ID);
+        notifySkill(uuid, "Écran de Fumée");
+        return true;
+    }
+
+    public boolean tryCastFrappeFatale(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isOmbre(acc)) return false;
+        if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, FrappeFataleSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, FrappeFataleSkill.SKILL_ID, FrappeFataleSkill.cooldownMsForRank(rank))) return false;
+
+        ombreState.armFrappeFatale(uuid, FrappeFataleSkill.armedWindowMs());
+        try {
+            for (com.hypixel.hytale.server.core.universe.PlayerRef pr :
+                    new java.util.ArrayList<>(com.hypixel.hytale.server.core.universe.Universe.get().getPlayers())) {
+                if (pr.getUuid().equals(uuid)) {
+                    ClassSkillSounds.playSkillSound(ClassSkillSounds.FRAPPE_FATALE_SOUND, pr, new org.joml.Vector3d(), null);
+                    break;
+                }
+            }
+        } catch (Exception ignored) {}
+        if (!bypass) cooldowns.markUsed(uuid, FrappeFataleSkill.SKILL_ID);
+        notifySkill(uuid, "Frappe Fatale");
+        return true;
+    }
+
+    public boolean tryCastDelugeDeGames(@Nonnull UUID uuid,
+                                        @Nonnull PlayerRef playerRef,
+                                        @Nonnull Ref<EntityStore> entityRef,
+                                        @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isOmbre(acc)) return false;
+        if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, DelugeDeGamesSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, DelugeDeGamesSkill.SKILL_ID, DelugeDeGamesSkill.cooldownMsForRank(rank))) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d pos = tc.getPosition();
+                org.joml.Vector3d dir = hr.getDirection();
+                double searchRadius = 2.5;
+                long casterIdx = entityRef.getIndex();
+                int strikes = DelugeDeGamesSkill.strikeCountForRank(rank);
+                float dmgPct = DelugeDeGamesSkill.damagePctForRank(rank);
+                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float baseDmg = weaponDmg > 0 ? weaponDmg : 1f;
+
+                org.joml.Vector3d target = new org.joml.Vector3d(
+                    pos.x + dir.x * 2.0, pos.y + dir.y * 2.0 + 0.5, pos.z + dir.z * 2.0);
+
+                com.hypixel.hytale.server.core.universe.world.World world = null;
+                try {
+                    java.util.UUID worldUuid = playerRef.getWorldUuid();
+                    if (worldUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(worldUuid);
+                } catch (Exception ignored) {}
+                final com.hypixel.hytale.server.core.universe.world.World delugeWorld = world;
+                if (delugeWorld == null) return false;
+
+                java.util.concurrent.ScheduledExecutorService delugeExec =
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread t = new Thread(r, "ombre-deluge");
+                        t.setDaemon(true);
+                        return t;
+                    });
+                int[] strikesDone = {0};
+                delugeExec.scheduleAtFixedRate(() -> {
+                    try {
+                        if (strikesDone[0] >= strikes) {
+                            delugeExec.shutdown();
+                            return;
+                        }
+                        strikesDone[0]++;
+                        boolean leftStrike = (strikesDone[0] % 2 == 1);
+                        ClassSkillSounds.playSkillSound("SFX_Daggers_T2_Slash_Impact", playerRef, pos, null);
+                        delugeWorld.execute(() -> {
+                            try {
+                                String anim = leftStrike ? "SwingLeft" : "SwingRight";
+                                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Daggers", anim, true, store);
+                                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                                    .selectNearbyEntities(store, target, searchRadius, targetRef -> {
+                                        try {
+                                            if (targetRef.getIndex() == casterIdx) return;
+                                            float finalDmg = baseDmg * dmgPct;
+                                            com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
+                                                store.getComponent(targetRef, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+                                            if (sm != null) {
+                                                try {
+                                                    int hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth();
+                                                    var hpStat = sm.get(hIdx);
+                                                    if (hpStat != null && hpStat.getMax() > 0
+                                                            && (hpStat.get() / hpStat.getMax()) < DelugeDeGamesSkill.lowHpThreshold()) {
+                                                        finalDmg *= (1f + DelugeDeGamesSkill.lowHpBonus());
+                                                    }
+                                                } catch (Exception ignored2) {}
+                                            }
+                                            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                                                targetRef, store,
+                                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                                                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, finalDmg));
+                                        } catch (Exception ignored) {}
+                                    }, ref -> ref.getIndex() != casterIdx);
+                            } catch (Exception ignored) {}
+                        });
+                    } catch (Exception ignored) {}
+                }, 0, DelugeDeGamesSkill.intervalMs(), java.util.concurrent.TimeUnit.MILLISECONDS);
+            }
+        } catch (Exception ignored) {}
+
+        if (!bypass) cooldowns.markUsed(uuid, DelugeDeGamesSkill.SKILL_ID);
+        notifySkill(uuid, "Déluge de Lames");
+        return true;
+    }
+
+    public boolean tryCastPasDeLOmbre(@Nonnull UUID uuid,
+                                      @Nonnull PlayerRef playerRef,
+                                      @Nonnull Ref<EntityStore> entityRef,
+                                      @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isOmbre(acc)) return false;
+        if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, PasDeLOmbreSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, PasDeLOmbreSkill.SKILL_ID, PasDeLOmbreSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = PasDeLOmbreSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, PasDeLOmbreSkill.rangeForRank(rank));
+        if (targeted == null) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            TransformComponent targetTc = store.getComponent(targeted, TransformComponent.getComponentType());
+
+            if (tc != null && targetTc != null) {
+                org.joml.Vector3d targetPos = targetTc.getPosition();
+
+                double toPlayerX = tc.getPosition().x - targetPos.x;
+                double toPlayerZ = tc.getPosition().z - targetPos.z;
+                double toPlayerLen = Math.sqrt(toPlayerX*toPlayerX + toPlayerZ*toPlayerZ);
+                if (toPlayerLen > 1e-6) { toPlayerX /= toPlayerLen; toPlayerZ /= toPlayerLen; }
+
+                double behindX = targetPos.x - toPlayerX * 1.5;
+                double behindZ = targetPos.z - toPlayerZ * 1.5;
+
+                org.joml.Vector3d behindPos = new org.joml.Vector3d(behindX, targetPos.y, behindZ);
+                double facingDx = targetPos.x - behindX;
+                double facingDz = targetPos.z - behindZ;
+                float facingYaw = (float) Math.atan2(-facingDx, -facingDz);
+                com.hypixel.hytale.math.vector.Rotation3f faceRot = new com.hypixel.hytale.math.vector.Rotation3f(0f, facingYaw, 0f);
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele2 =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(
+                        behindPos, faceRot);
+                tele2.withoutVelocityReset();
+                store.addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele2);
+
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Daggers", "DashForward", true, store);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_PasDeLOmbre_Dash", playerRef, targetPos, null);
+                try {
+                    final Ref<EntityStore> strikeRef = entityRef;
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread t = new Thread(r, "ombre-strike-anim"); t.setDaemon(true); return t;
+                    }).schedule(() -> {
+                        try {
+                            AnimationUtils.playAnimation(strikeRef, AnimationSlot.Action, "Daggers", "SwingRight", true, store);
+                        } catch (Exception ignored3) {}
+                    }, 150, java.util.concurrent.TimeUnit.MILLISECONDS);
+                } catch (Exception ignored2) {}
+                int baseWeaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                if (baseWeaponDmg > 0) {
+                    try {
+                        com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                            targeted, store,
+                            new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                                com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL,
+                                (float) baseWeaponDmg));
+                    } catch (Exception ignored3) {}
+                }
+                try {
+                    final org.joml.Vector3d impactPos = new org.joml.Vector3d(targetPos);
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread t = new Thread(r, "ombre-impact-sound"); t.setDaemon(true); return t;
+                    }).schedule(() -> ClassSkillSounds.playSkillSound(
+                        "SFX_Vrpg_PasDeLOmbre_Impact", playerRef, impactPos, null),
+                        100, java.util.concurrent.TimeUnit.MILLISECONDS);
+                } catch (Exception ignored2) {}
+
+                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float baseDmg = weaponDmg > 0 ? weaponDmg : 1f;
+                try {
+                    com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
+                        store.getComponent(targeted, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+                    if (sm != null) {
+                        int hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth();
+                        var hpStat = sm.get(hIdx);
+                        if (hpStat != null && hpStat.getMax() > 0
+                                && (hpStat.get() / hpStat.getMax()) < PasDeLOmbreSkill.lowHpThreshold()) {
+                            baseDmg *= (1f + PasDeLOmbreSkill.lowHpBonus());
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                float finalDmg = baseDmg * PasDeLOmbreSkill.damagePctForRank(rank);
+                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                    targeted, store,
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, finalDmg));
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, PasDeLOmbreSkill.SKILL_ID);
+        notifySkill(uuid, "Pas de l'Ombre");
+        return true;
+    }
+
+    public boolean tryCastChaseOuverte(@Nonnull UUID uuid,
+                                       @Nonnull PlayerRef playerRef,
+                                       @Nonnull Ref<EntityStore> entityRef,
+                                       @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isOmbre(acc)) return false;
+        if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, ChaseOuverteSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, ChaseOuverteSkill.SKILL_ID, ChaseOuverteSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = ChaseOuverteSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        long durationMs = ChaseOuverteSkill.durationMsForRank(rank);
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store);
+        if (targeted == null) {
+            LOG.atInfo().log("[ChaseOuverte] BLOCKED no target in range");
+            return false;
+        }
+
+        ombreState.startChaseOuverte(uuid, durationMs, rank);
+
+        try {
+            TransformComponent casterTc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (casterTc != null) {
+                ClassSkillSounds.playSkillSound("Bow_T2_Shoot_01", playerRef, casterTc.getPosition(), null);
+            }
+
+            float durationSec = durationMs / 1000f;
+            int idx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap()
+                .getIndex("Vrpg_Chasse_Ouverte");
+            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect effect =
+                (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(idx);
+            if (effect != null) {
+                com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                    store.getComponent(targeted,
+                        com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                if (ec != null) {
+                    ec.addEffect(targeted, effect, durationSec,
+                        com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+                }
+            }
+            LOG.atInfo().log("[ChaseOuverte] target marked rank=" + rank + " durationMs=" + durationMs);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, ChaseOuverteSkill.SKILL_ID);
+        notifySkill(uuid, "Chasse Ouverte");
+        return true;
+    }
+
     private boolean isDuelliste(@Nonnull ClassAccount acc) {
         return acc.getActiveClass() == PlayerClass.GUERRIER
             && acc.getActiveSpec(PlayerClass.GUERRIER) == PlayerSpecialization.DUELLISTE;
+    }
+
+    private boolean isOmbre(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.GUERRIER
+            && acc.getActiveSpec(PlayerClass.GUERRIER) == PlayerSpecialization.OMBRE;
+    }
+
+    private boolean isHoldingDagger(@Nonnull PlayerRef playerRef) {
+        return fr.varyon.vrpg.classes.WeaponCategory.fromItemId(getHeldItemId(playerRef))
+            == fr.varyon.vrpg.classes.WeaponCategory.DAGUE;
+    }
+
+    private String getHeldItemId(@Nonnull PlayerRef playerRef) {
+        try {
+            var hotbar = playerRef.getComponent(InventoryComponent.Hotbar.getComponentType());
+            if (hotbar == null) return null;
+            ItemStack held = hotbar.getInventory().getItemStack((short) hotbar.getActiveSlot());
+            if (held == null || held.isEmpty()) return null;
+            return held.getItemId();
+        } catch (Exception e) { return null; }
     }
 
     @Nullable
@@ -270,6 +711,15 @@ public final class ClassSkillService {
             @Nonnull PlayerRef playerRef,
             @Nonnull Ref<EntityStore> entityRef,
             @Nonnull Store<EntityStore> store) {
+        return findTargetedNpcRef(playerRef, entityRef, store, 5.0);
+    }
+
+    @Nullable
+    private Ref<EntityStore> findTargetedNpcRef(
+            @Nonnull PlayerRef playerRef,
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            double maxRange) {
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             if (tc == null) return null;
@@ -280,7 +730,7 @@ public final class ClassSkillService {
             org.joml.Vector3d dir = hr != null ? hr.getDirection() : new org.joml.Vector3d(0, 0, 1);
 
             long casterIdx = entityRef.getIndex();
-            double searchRadius = 5.0;
+            double searchRadius = maxRange;
             double[] bestDist = {searchRadius * searchRadius + 1};
             Ref<EntityStore>[] bestRef = new Ref[]{null};
 
@@ -369,6 +819,18 @@ public final class ClassSkillService {
             return FeintSkill.cooldownMsForRank(acc.getTalentRank(cls, FeintSkill.TALENT_NODE_ID));
         if (RiposteParfaiteSkill.SKILL_ID.equals(skillId))
             return RiposteParfaiteSkill.cooldownMsForRank(acc.getTalentRank(cls, RiposteParfaiteSkill.TALENT_NODE_ID));
+        if (PasDesTenebresSkill.SKILL_ID.equals(skillId))
+            return PasDesTenebresSkill.cooldownMsForRank(acc.getTalentRank(cls, PasDesTenebresSkill.TALENT_NODE_ID));
+        if (EcranDeFumeeSkill.SKILL_ID.equals(skillId))
+            return EcranDeFumeeSkill.cooldownMsForRank(acc.getTalentRank(cls, EcranDeFumeeSkill.TALENT_NODE_ID));
+        if (FrappeFataleSkill.SKILL_ID.equals(skillId))
+            return FrappeFataleSkill.cooldownMsForRank(acc.getTalentRank(cls, FrappeFataleSkill.TALENT_NODE_ID));
+        if (DelugeDeGamesSkill.SKILL_ID.equals(skillId))
+            return DelugeDeGamesSkill.cooldownMsForRank(acc.getTalentRank(cls, DelugeDeGamesSkill.TALENT_NODE_ID));
+        if (PasDeLOmbreSkill.SKILL_ID.equals(skillId))
+            return PasDeLOmbreSkill.cooldownMsForRank(acc.getTalentRank(cls, PasDeLOmbreSkill.TALENT_NODE_ID));
+        if (ChaseOuverteSkill.SKILL_ID.equals(skillId))
+            return ChaseOuverteSkill.cooldownMsForRank(acc.getTalentRank(cls, ChaseOuverteSkill.TALENT_NODE_ID));
         return 0L;
     }
 

@@ -133,7 +133,16 @@ public final class SqliteClassStorage {
                 )
             """);
             migrateAddColumn(st, "player_class_account", "active_profile_idx", "INTEGER NOT NULL DEFAULT 0");
+            migrateFixDoubleSpecPrefix(st);
         }
+    }
+
+    private static void migrateFixDoubleSpecPrefix(@Nonnull Statement st) {
+        String validSlots = "('E','R','A','CrouchA','CrouchE','CrouchR')";
+        try {
+            st.execute("DELETE FROM player_class_skill_slot WHERE slot_id NOT IN " + validSlots);
+            st.execute("DELETE FROM player_class_profile_skill_slot WHERE slot_id NOT IN " + validSlots);
+        } catch (SQLException ignored) {}
     }
 
     private static void migrateAddColumn(@Nonnull Statement st, @Nonnull String table,
@@ -196,7 +205,10 @@ public final class SqliteClassStorage {
                     while (rs.next()) {
                         PlayerClass c = PlayerClass.fromId(rs.getString("class_id"));
                         if (c == null) continue;
-                        account.setSkillSlot(c, rs.getString("slot_id"), rs.getString("item_id"));
+                        String slotId = rs.getString("slot_id");
+                        String itemId = rs.getString("item_id");
+                        LOGGER.at(Level.INFO).log("[SkillSlot] LOAD uuid=%s class=%s slot=%s item=%s", uuid, c, slotId, itemId);
+                        account.setSkillSlot(c, slotId, itemId);
                     }
                 }
             }
@@ -359,6 +371,7 @@ public final class SqliteClassStorage {
                 for (PlayerClass c : PlayerClass.values()) {
                     for (Map.Entry<String, String> e : account.getSkillSlots(c).entrySet()) {
                         if (e.getValue() == null || e.getValue().isBlank()) continue;
+                        LOGGER.at(Level.INFO).log("[SkillSlot] SAVE uuid=%s class=%s slot=%s item=%s", uuid, c, e.getKey(), e.getValue());
                         ins.setString(1, uuid.toString());
                         ins.setString(2, c.getId());
                         ins.setString(3, e.getKey());

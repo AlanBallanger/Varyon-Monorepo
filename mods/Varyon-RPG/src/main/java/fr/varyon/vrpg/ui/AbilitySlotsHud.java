@@ -81,11 +81,28 @@ public final class AbilitySlotsHud extends CustomUIHud {
         if (weaponWatchTask != null) weaponWatchTask.cancel(false);
         weaponWatchTask = SCHEDULER.scheduleAtFixedRate(() -> {
             try {
-                WeaponCategory current = WeaponCategory.heldCategory(getPlayerRef());
-                if (current != lastSeenCategory) {
-                    lastSeenCategory = current;
-                    refreshSlots();
-                }
+                PlayerRef ref = getPlayerRef();
+                if (ref == null) return;
+                UUID uid = ref.getUuid();
+                if (uid == null) return;
+                com.hypixel.hytale.server.core.universe.Universe universe =
+                    com.hypixel.hytale.server.core.universe.Universe.get();
+                if (universe == null) return;
+                PlayerRef liveRef = universe.getPlayer(uid);
+                if (liveRef == null) return;
+                java.util.UUID worldUuid = liveRef.getWorldUuid();
+                com.hypixel.hytale.server.core.universe.world.World world =
+                    worldUuid != null ? universe.getWorld(worldUuid) : null;
+                if (world == null) return;
+                world.execute(() -> {
+                    try {
+                        WeaponCategory current = WeaponCategory.heldCategory(liveRef);
+                        if (current != lastSeenCategory) {
+                            lastSeenCategory = current;
+                            refreshSlots();
+                        }
+                    } catch (Exception ignored) {}
+                });
             } catch (Exception ignored) {}
         }, 500, 500, TimeUnit.MILLISECONDS);
     }

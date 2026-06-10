@@ -9,6 +9,13 @@ import fr.varyon.vrpg.classes.duelliste.DuellistePassifs;
 import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
 import fr.varyon.vrpg.classes.duelliste.FeintSkill;
 import fr.varyon.vrpg.classes.duelliste.RiposteParfaiteSkill;
+import fr.varyon.vrpg.classes.ombre.PasDesTenebresSkill;
+import fr.varyon.vrpg.classes.ombre.EcranDeFumeeSkill;
+import fr.varyon.vrpg.classes.ombre.FrappeFataleSkill;
+import fr.varyon.vrpg.classes.ombre.DelugeDeGamesSkill;
+import fr.varyon.vrpg.classes.ombre.PasDeLOmbreSkill;
+import fr.varyon.vrpg.classes.ombre.ChaseOuverteSkill;
+import fr.varyon.vrpg.classes.ombre.OmbrePassifs;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -41,6 +48,23 @@ public final class ClassSkillRegistry {
                 case 9  -> DesarmementSkill.SKILL_ID;
                 case 10 -> DuellistePassifs.MOMENTUM_NODE;
                 case 11 -> AssautBretteurSkill.SKILL_ID;
+                default -> null;
+            };
+        }
+        if (activeClass == PlayerClass.GUERRIER && spec == PlayerSpecialization.OMBRE) {
+            return switch (nodeIndex) {
+                case 0  -> PasDesTenebresSkill.SKILL_ID;         // Actif
+                case 1  -> OmbrePassifs.EXECUTION_RAPIDE_NODE;   // Passif
+                case 2  -> OmbrePassifs.LAMES_EMPOISONNEES_NODE; // Passif
+                case 3  -> DelugeDeGamesSkill.SKILL_ID;          // Actif
+                case 4  -> EcranDeFumeeSkill.SKILL_ID;           // Actif
+                case 5  -> OmbrePassifs.EMBUSCADE_NODE;          // Passif
+                case 6  -> FrappeFataleSkill.SKILL_ID;           // Actif
+                case 7  -> OmbrePassifs.OMBRE_INSAISISSABLE_NODE;// Passif
+                case 8  -> OmbrePassifs.DANSE_LAMES_NODE;        // Passif
+                case 9  -> PasDeLOmbreSkill.SKILL_ID;            // Actif
+                case 10 -> OmbrePassifs.INSTINCT_SURVIE_NODE;    // Passif
+                case 11 -> ChaseOuverteSkill.SKILL_ID;           // Actif
                 default -> null;
             };
         }

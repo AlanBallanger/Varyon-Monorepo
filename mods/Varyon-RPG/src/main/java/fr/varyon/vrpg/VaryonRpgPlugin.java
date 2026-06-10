@@ -11,6 +11,8 @@ import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerInteractEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.events.StartWorldEvent;
+import javax.annotation.Nonnull;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
@@ -39,6 +41,12 @@ import fr.varyon.vrpg.classes.duelliste.DuellisteIncomingDamageSystem;
 import fr.varyon.vrpg.classes.duelliste.DuellisteOutgoingDamageSystem;
 import fr.varyon.vrpg.classes.duelliste.DuellisteSpeedSystem;
 import fr.varyon.vrpg.classes.duelliste.DuellisteState;
+import fr.varyon.vrpg.classes.ombre.OmbreState;
+import fr.varyon.vrpg.classes.ombre.OmbrePoisonSystem;
+import fr.varyon.vrpg.classes.ombre.OmbreOutgoingDamageSystem;
+import fr.varyon.vrpg.classes.ombre.OmbreIncomingDamageSystem;
+import fr.varyon.vrpg.classes.ombre.OmbreSpeedSystem;
+import fr.varyon.vrpg.classes.ombre.OmbreStealthAttitudeProvider;
 import fr.varyon.vrpg.commands.VpaCommand;
 import fr.varyon.vrpg.commands.VpaAdminCommand;
 import fr.varyon.vrpg.commands.VpaSurfaceCommand;
@@ -123,6 +131,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private DuellisteState duellisteState;
     private DuellisteBleedSystem duellisteBleedSystem;
     private DuellisteSpeedSystem duellisteSpeedSystem;
+    private OmbreState ombreState;
+    private OmbrePoisonSystem ombrePoisonSystem;
+    private OmbreSpeedSystem ombreSpeedSystem;
     private MiningHelmet miningHelmet;
     private GuardianStoneManager guardianManager;
     private MinerComboTracker comboTracker;
@@ -225,7 +236,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.duellisteState = new DuellisteState();
             this.duellisteBleedSystem = new DuellisteBleedSystem();
             this.duellisteSpeedSystem = new DuellisteSpeedSystem(classManager, duellisteState);
-            this.classSkillService = new ClassSkillService(classManager, duellisteState);
+            this.ombreState = new OmbreState();
+            this.ombrePoisonSystem = new OmbrePoisonSystem();
+            this.ombreSpeedSystem = new OmbreSpeedSystem(classManager, ombreState);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState);
             this.classSkillKeyFilter = new ClassSkillKeyFilter();
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
@@ -447,6 +461,12 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 }
                 if (ref != null && duellisteSpeedSystem != null) {
                     duellisteSpeedSystem.removePlayer(ref.getUuid());
+                }
+                if (ref != null && ombreState != null) {
+                    ombreState.cleanup(ref.getUuid());
+                }
+                if (ref != null && ombreSpeedSystem != null) {
+                    ombreSpeedSystem.removePlayer(ref.getUuid());
                 }
                 if (ref != null && classKillXpSystem != null) {
                     classKillXpSystem.cleanup(ref.getUuid());
@@ -751,12 +771,80 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             }
         }
 
+        if (ombreState != null && ombrePoisonSystem != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(
+                    new OmbreOutgoingDamageSystem(classManager, ombreState, ombrePoisonSystem));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register OmbreOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(
+                    new OmbreIncomingDamageSystem(classManager, ombreState));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register OmbreIncomingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(ombrePoisonSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register OmbrePoisonSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(ombreSpeedSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register OmbreSpeedSystem");
+            }
+            // Injecter l'attitude provider stealth Ombre dans tous les mondes actifs et futurs
+            final fr.varyon.vrpg.classes.ombre.OmbreStealthAttitudeProvider stealthProvider =
+                new OmbreStealthAttitudeProvider(ombreState);
+            try {
+                for (World w : com.hypixel.hytale.server.core.universe.Universe.get().getWorlds().values()) {
+                    injectOmbreStealthProvider(w, stealthProvider);
+                }
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] inject OmbreStealthAttitudeProvider existing worlds");
+            }
+            try {
+                getEventRegistry().registerGlobal(
+                    com.hypixel.hytale.server.core.universe.world.events.StartWorldEvent.class,
+                    event -> injectOmbreStealthProvider(event.getWorld(), stealthProvider));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register StartWorldEvent for OmbreStealthAttitudeProvider");
+            }
+        }
+
         if (classManager != null) {
             try {
                 getEntityStoreRegistry().registerSystem(new SpecWeaponMasteryDamageSystem(classManager));
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register SpecWeaponMasteryDamageSystem");
             }
+        }
+    }
+
+    private static void injectOmbreStealthProvider(@Nonnull World world,
+                                                    @Nonnull OmbreStealthAttitudeProvider provider) {
+        try {
+            world.execute(() -> {
+                try {
+                    com.hypixel.hytale.server.npc.NPCPlugin npcPlugin =
+                        com.hypixel.hytale.server.npc.NPCPlugin.get();
+                    if (npcPlugin == null) { LOGGER.atWarning().log("[StealthProvider] NPCPlugin null"); return; }
+                    var store = world.getEntityStore().getStore();
+                    com.hypixel.hytale.server.npc.blackboard.Blackboard blackboard =
+                        store.getResource(npcPlugin.getBlackboardResourceType());
+                    if (blackboard == null) { LOGGER.atWarning().log("[StealthProvider] Blackboard null world=" + world.getName()); return; }
+                    int[] count = {0};
+                    blackboard.forEachView(
+                        com.hypixel.hytale.server.npc.blackboard.view.attitude.AttitudeView.class,
+                        attitudeView -> { attitudeView.registerProvider(-1, provider); count[0]++; });
+                    LOGGER.atInfo().log("[StealthProvider] injected into " + count[0] + " AttitudeViews in world=" + world.getName());
+                } catch (Exception e) {
+                    LOGGER.atWarning().withCause(e).log("[VaryonRPG] OmbreStealthAttitudeProvider inject world=" + world.getName());
+                }
+            });
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] OmbreStealthAttitudeProvider schedule world=" + world.getName());
         }
     }
 

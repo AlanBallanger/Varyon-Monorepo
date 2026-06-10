@@ -1,0 +1,17 @@
+{
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Weapons/Daggers/Daggers_T2_Signature_P2_Swing_Stereo_01.ogg"
+      ],
+      "RandomSettings": {
+        "MinPitch": -1,
+        "MaxPitch": 1,
+        "MinVolume": -1
+      },
+      "StartDelay": 0,
+      "Volume": 0.0
+    }
+  ],
+  "AudioCategory": "AudioCat_Daggers"
+}

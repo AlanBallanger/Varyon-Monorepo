@@ -96,6 +96,22 @@ public final class ClassTalentTree {
             new Node("Momentum",              "Passif", "Chaque coup sans en recevoir rend le suivant un peu plus dévastateur.",   "Chaque coup consécutif sans en recevoir augmente légèrement les dégâts.", DI + "Momentum.png",           5),
             new Node("Assaut du Bretteur",    "Actif",  "Quand l'élan est là, rien ne peut l'arrêter — pas même l'ennemi.",       "Augmente les dégâts d'attaque et la vitesse de déplacement pendant quelques secondes.", DI + "Assaut_Du_Bretteur.png", 5),
         });
+
+        final String OI = "Classes_Icons/Shadow/";
+        SPEC_TREES.put(PlayerSpecialization.OMBRE, new Node[]{
+            new Node("Pas des Ténèbres",      "Actif",  "L'ombre n'attend pas — elle frappe et disparaît.",                          "Ruée vers l'arrière suivie d'une courte invisibilité.",                              OI + "Pas_Des_Tenebres.png",      5),
+            new Node("Exécution Rapide",      "Passif", "Le prédateur qui hésite perd sa proie.",                                    "Gain d'expérience augmenté si la cible est tuée en moins de 5 secondes.",            OI + "Execution_Rapide.png",      5),
+            new Node("Lames Empoisonnées",    "Passif", "Une égratignure anodine — pour l'instant.",                                 "Les attaques ont une chance d'empoisonner la cible.",                                OI + "Lames_Empoisonnees.png",    5),
+            new Node("Déluge de Lames",       "Actif",  "Quand une lame ne suffit pas, on en envoie cinq.",                          "Enchaînement rapide de frappes infligeant des dégâts à la cible devant soi.",       OI + "Deluge_De_Lames.png",       5),
+            new Node("Écran de Fumée",        "Actif",  "Disparaître n'est pas fuir — c'est choisir le bon moment.",                 "Devient invisible pendant quelques secondes, bloquant les dégâts reçus.",           OI + "Ecran_De_Fumee.png",        5),
+            new Node("Embuscade",             "Passif", "La première frappe depuis l'ombre laisse peu de place à la réaction.",      "La première attaque après une invisibilité immobilise brièvement la cible.",         OI + "Embuscade.png",             5),
+            new Node("Frappe Fatale",         "Actif",  "Un seul coup, au bon endroit, peut tout changer.",                          "Le prochain coup inflige des dégâts significativement accrus.",                      OI + "Frappe_Fatale.png",         5),
+            new Node("Ombre Insaisissable",   "Passif", "Toucher l'ombre, c'est attraper le vent.",                                  "Augmente les chances d'esquive.",                                                    OI + "Ombre_Insaisissable.png",   5),
+            new Node("Danse des Lames",       "Passif", "Chaque coup critique est une invitation à accélérer.",                      "Après un coup critique, gagne un bonus de vitesse de déplacement pendant 3 sec.",   OI + "Danse_Des_Lames.png",       5),
+            new Node("Pas de l'Ombre",        "Actif",  "Surgir de nulle part, frapper, disparaître — telle est la voie.",           "Se téléporte derrière la cible et frappe. Bonus si la cible est à moins de 30 % HP.", OI + "Pas_De_L_Ombre.png",      5),
+            new Node("Instinct de Survie",    "Passif", "Sous 30 %, l'ombre ne meurt pas — elle s'adapte.",                          "Sous 30 % de points de vie, les chances d'esquive sont fortement augmentées.",       OI + "Instict_De_Survie.png",     5),
+            new Node("Chasse Ouverte",        "Actif",  "Marquer une proie, c'est déjà la posséder.",                                "Marque une cible — toutes les attaques contre elle sont des coups critiques.",       OI + "Chasse_Ouverte.png",        5),
+        });
     }
 
     @Nonnull

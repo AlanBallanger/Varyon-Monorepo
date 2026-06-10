@@ -21,7 +21,8 @@ public final class ClassTalentTreeLogic {
         state.pendingClassRanks = new int[nodes.length];
         if (acc != null && activeClass != null) {
             for (int i = 0; i < nodes.length; i++) {
-                int rank = acc.getTalentRank(activeClass, String.valueOf(i));
+                String key = nodeKey(acc, activeClass, i);
+                int rank = acc.getTalentRank(activeClass, key);
                 state.savedClassRanks[i] = rank;
                 state.pendingClassRanks[i] = rank;
             }
@@ -70,6 +71,15 @@ public final class ClassTalentTreeLogic {
         return available - spent;
     }
 
+    @Nonnull
+    public static String nodeKey(@Nonnull ClassAccount acc, @Nonnull PlayerClass activeClass, int nodeIndex) {
+        fr.varyon.vrpg.classes.PlayerSpecialization spec = acc.getActiveSpec(activeClass);
+        if (spec == fr.varyon.vrpg.classes.PlayerSpecialization.OMBRE) {
+            return "ombre_" + nodeIndex;
+        }
+        return String.valueOf(nodeIndex);
+    }
+
     public static void syncDisplayRanks(@Nonnull RpgClassUiState state,
                                         @Nullable ClassAccount acc,
                                         @Nullable PlayerClass activeClass,
@@ -79,7 +89,8 @@ public final class ClassTalentTreeLogic {
             state.pendingClassRanks = new int[nodeCount];
             if (acc != null && activeClass != null) {
                 for (int i = 0; i < nodeCount; i++) {
-                    state.pendingClassRanks[i] = acc.getTalentRank(activeClass, String.valueOf(i));
+                    String key = nodeKey(acc, activeClass, i);
+                    state.pendingClassRanks[i] = acc.getTalentRank(activeClass, key);
                 }
             }
         }

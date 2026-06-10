@@ -235,6 +235,12 @@ Group {
         Text: "Arbre de talents de classe";
       }
 
+      Label #ClassTreePointsLabel {
+        Anchor: (Left: 0, Top: 24, Right: 0, Height: 18);
+        Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
+        Text: "Points restants : 0";
+      }
+
     }
 
     Group {

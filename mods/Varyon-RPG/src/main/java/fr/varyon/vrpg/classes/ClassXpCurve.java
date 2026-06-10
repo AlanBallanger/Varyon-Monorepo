@@ -14,7 +14,7 @@ public final class ClassXpCurve {
     }
 
     private static final int[] TALENT_POINTS_PER_LEVEL = {
-        1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 3
+        1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 3, 2, 2, 2, 3, 2, 2, 2, 2, 3
     };
 
     public static int talentPointsAtLevel(int level) {

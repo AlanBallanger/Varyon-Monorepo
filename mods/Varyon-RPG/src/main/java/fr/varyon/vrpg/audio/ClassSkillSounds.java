@@ -24,6 +24,7 @@ public final class ClassSkillSounds {
     public static final String ASSAUT_ECLAIR_IMPACT    = "SFX_Sword_T2_Swing";
     public static final String ASSAUT_BRETTEUR_SOUND   = "Sword_Signature_Part_1_01";
     public static final String ESQUIVE_BRETTEUR_SOUND  = "SFX_Player_Slide";
+    public static final String FRAPPE_FATALE_SOUND     = "Daggers_T2_Signature_P1_Slash_01";
 
     private ClassSkillSounds() {}
 

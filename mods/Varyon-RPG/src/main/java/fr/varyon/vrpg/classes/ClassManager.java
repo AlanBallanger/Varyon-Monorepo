@@ -209,7 +209,6 @@ public final class ClassManager {
         try {
             ClassAccount acc = getOrLoad(uuid);
             acc.resetTalents(playerClass);
-            pruneInvalidSkillSlots(acc, playerClass);
             dirty.add(uuid);
         } finally {
             lock.unlock();
@@ -298,7 +297,7 @@ public final class ClassManager {
     public void onPlayerDisconnect(@Nonnull UUID uuid) {
         ClassAccount acc = cache.get(uuid);
         if (acc != null) {
-            storage.savePlayer(uuid, acc);
+            storage.savePlayer(uuid, acc).join();
             dirty.remove(uuid);
         }
         statEngine.cleanup(uuid);

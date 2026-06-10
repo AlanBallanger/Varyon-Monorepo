@@ -41,6 +41,14 @@ public final class ClassTalentsTab {
         PlayerClass activeClass = acc != null ? acc.getActiveClass() : null;
 
         uiBuilder.set("#ClassTreeMainTitle.TextSpans", Message.raw("Arbre de talents"));
+        int remaining = acc != null && activeClass != null
+            ? ClassTalentTreeLogic.pendingRemainingPoints(state, acc, activeClass)
+            : 0;
+        String specName = acc != null && activeClass != null && acc.getActiveSpec(activeClass) != null
+            ? acc.getActiveSpec(activeClass).getDisplayName() : activeClass != null ? activeClass.getDisplayName() : "";
+        uiBuilder.set("#ClassTreePointsLabel.TextSpans",
+            Message.raw("Points restants : " + remaining + " (" + specName + ")"));
+
         uiBuilder.set("#ClassTreeTalentsPanel.Visible", true);
         uiBuilder.set("#ClassTreeSkillsPanel.Visible", false);
         uiBuilder.set("#ClassTreeTabTalentsButton.Visible", false);

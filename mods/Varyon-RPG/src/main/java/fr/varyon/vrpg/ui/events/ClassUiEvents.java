@@ -161,9 +161,10 @@ public final class ClassUiEvents {
                     for (int i = 0; i < nodes.length && i < state.pendingClassRanks.length; i++) {
                         int delta = state.pendingClassRanks[i] - state.savedClassRanks[i];
                         if (delta > 0) {
+                            String key = ClassTalentTreeLogic.nodeKey(acc2, activeClass2, i);
                             for (int d = 0; d < delta; d++) {
                                 classManager2.allocateTalent(
-                                    playerRef.getUuid(), activeClass2, String.valueOf(i), nodes[i].maxRank());
+                                    playerRef.getUuid(), activeClass2, key, nodes[i].maxRank());
                             }
                         }
                     }
@@ -218,7 +219,8 @@ public final class ClassUiEvents {
                 classManager4.ensureAccount(playerRef.getUuid(), playerRef.getUsername());
                 ClassAccount acc4 = classManager4.getOrLoad(playerRef.getUuid());
                 PlayerClass activeClass4 = acc4.getActiveClass();
-                if (activeClass4 != null && ClassUnlockedActiveSkills.isUnlockedActive(acc4, data.node)) {
+                boolean adminBypass4 = fr.varyon.vrpg.ui.RpgUiAdmin.isAdmin(playerRef) && fr.varyon.vrpg.ui.RpgUiAdmin.isCreative(playerRef);
+                if (activeClass4 != null && (adminBypass4 || ClassUnlockedActiveSkills.isUnlockedActive(acc4, data.node))) {
                     classManager4.setSkillSlot(playerRef.getUuid(), activeClass4, data.slot, data.node);
                     state.skillSlotAssignments.put(data.slot, data.node);
                     AbilitySlotsHud hud4 = AbilitySlotsHud.get(playerRef.getUuid());

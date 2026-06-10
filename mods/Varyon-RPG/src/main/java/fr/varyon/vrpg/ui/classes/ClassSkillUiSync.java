@@ -18,7 +18,6 @@ public final class ClassSkillUiSync {
         ClassAccount acc = classManager.getOrLoad(uuid);
         PlayerClass activeClass = acc.getActiveClass();
         if (activeClass == null) return;
-        classManager.pruneInvalidSkillSlots(acc, activeClass);
         state.skillSlotAssignments.clear();
         state.skillSlotAssignments.putAll(acc.copySkillSlots(activeClass));
     }

@@ -20,6 +20,7 @@ public final class ClassTalentTreeLayouts {
 
     static {
         BY_SPEC.put(PlayerSpecialization.DUELLISTE, DuellisteLayout.INSTANCE);
+        BY_SPEC.put(PlayerSpecialization.OMBRE,     OmbreLayout.INSTANCE);
     }
 
     private ClassTalentTreeLayouts() {}
