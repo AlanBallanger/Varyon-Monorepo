@@ -1,0 +1,17 @@
+{
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Deployables/Totem_Slowing/Deployable_Totem_Slowing_Despawn_02.ogg"
+      ],
+      "RandomSettings": {
+        "MinPitch": -1,
+        "MaxPitch": 1,
+        "MinVolume": -1
+      },
+      "StartDelay": 0,
+      "Volume": 0.0
+    }
+  ],
+  "AudioCategory": "AudioCat_SFX"
+}

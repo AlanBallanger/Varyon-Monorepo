@@ -82,9 +82,7 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
                         acc.getProgress(activeClass).getLevel(), spec);
                 }
                 if (stats != null && stats.critChancePct() > 0) {
-                    float initialAmount = damage.getInitialAmount();
-                    boolean isNativeCrit = initialAmount > 0f && base > initialAmount * 1.1f;
-                    if (!isNativeCrit && Math.random() < stats.critChancePct() / 100.0) {
+                    if (Math.random() < stats.critChancePct() / 100.0) {
                         float critMult = 1.0f + stats.critDamagePct() / 100.0f;
                         amount *= critMult;
                         DamageFloatBridge.markCritical(damage);

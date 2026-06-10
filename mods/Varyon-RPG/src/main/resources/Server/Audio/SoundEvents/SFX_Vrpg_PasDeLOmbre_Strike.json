@@ -1,0 +1,17 @@
+{
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Weapons/Daggers/Daggers_Swing_Base_01.ogg"
+      ],
+      "RandomSettings": {
+        "MinPitch": -1,
+        "MaxPitch": 1,
+        "MinVolume": -1
+      },
+      "StartDelay": 0,
+      "Volume": 0.0
+    }
+  ],
+  "AudioCategory": "AudioCat_Daggers"
+}

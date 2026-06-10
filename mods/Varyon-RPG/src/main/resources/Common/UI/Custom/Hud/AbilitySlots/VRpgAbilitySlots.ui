@@ -1,7 +1,7 @@
 Group {
   Group #VRpgSlotA {
     Visible: false;
-    Anchor: (Right: 259, Bottom: 186, Width: 58, Height: 58);
+    Anchor: (Right: 259, Bottom: 170, Width: 58, Height: 58);
     Background: PatchStyle(TexturePath: "Assets/BackgroundAbility.png", Border: 0);
     LayoutMode: Full;
     Group #VRpgSlotAIcon { Anchor: (Left: 6, Top: 6, Width: 46, Height: 46); }
@@ -10,13 +10,13 @@ Group {
   }
   Group #VRpgSlotATimerGroup {
     Visible: false;
-    Anchor: (Right: 259, Bottom: 186, Width: 58, Height: 58);
+    Anchor: (Right: 259, Bottom: 170, Width: 58, Height: 58);
     LayoutMode: Middle;
     Label #VRpgSlotATimerLabel { Text: ""; Style: (RenderBold: true, Alignment: Center, TextColor: #FFD700, FontName: "Secondary", FontSize: 20); }
   }
   Group #VRpgSlotAKey {
     Visible: false;
-    Anchor: (Right: 259, Bottom: 160, Width: 58, Height: 20);
+    Anchor: (Right: 259, Bottom: 150, Width: 58, Height: 20);
     LayoutMode: Center;
     Group {
       LayoutMode: Middle;
@@ -28,7 +28,7 @@ Group {
 
   Group #VRpgSlotCrouchA {
     Visible: false;
-    Anchor: (Right: 259, Bottom: 278, Width: 58, Height: 58);
+    Anchor: (Right: 259, Bottom: 254, Width: 58, Height: 58);
     Background: PatchStyle(TexturePath: "Assets/BackgroundAbility.png", Border: 0);
     LayoutMode: Full;
     Group #VRpgSlotCrouchAIcon { Anchor: (Left: 6, Top: 6, Width: 46, Height: 46); }
@@ -37,13 +37,13 @@ Group {
   }
   Group #VRpgSlotCrouchATimerGroup {
     Visible: false;
-    Anchor: (Right: 259, Bottom: 278, Width: 58, Height: 58);
+    Anchor: (Right: 259, Bottom: 254, Width: 58, Height: 58);
     LayoutMode: Middle;
     Label #VRpgSlotCrouchATimerLabel { Text: ""; Style: (RenderBold: true, Alignment: Center, TextColor: #FFD700, FontName: "Secondary", FontSize: 20); }
   }
   Group #VRpgSlotCrouchAKey {
     Visible: false;
-    Anchor: (Right: 259, Bottom: 252, Width: 58, Height: 20);
+    Anchor: (Right: 259, Bottom: 234, Width: 58, Height: 20);
     LayoutMode: Center;
     Group {
       LayoutMode: Middle;
@@ -55,7 +55,7 @@ Group {
 
   Group #VRpgSlotE {
     Visible: false;
-    Anchor: (Right: 165, Bottom: 156, Width: 58, Height: 58);
+    Anchor: (Right: 165, Bottom: 148, Width: 58, Height: 58);
     Background: PatchStyle(TexturePath: "Assets/BackgroundAbility.png", Border: 0);
     LayoutMode: Full;
     Group #VRpgSlotEIcon { Anchor: (Left: 6, Top: 6, Width: 46, Height: 46); }
@@ -64,13 +64,13 @@ Group {
   }
   Group #VRpgSlotETimerGroup {
     Visible: false;
-    Anchor: (Right: 165, Bottom: 156, Width: 58, Height: 58);
+    Anchor: (Right: 165, Bottom: 148, Width: 58, Height: 58);
     LayoutMode: Middle;
     Label #VRpgSlotETimerLabel { Text: ""; Style: (RenderBold: true, Alignment: Center, TextColor: #FFD700, FontName: "Secondary", FontSize: 20); }
   }
   Group #VRpgSlotEKey {
     Visible: false;
-    Anchor: (Right: 165, Bottom: 130, Width: 58, Height: 20);
+    Anchor: (Right: 165, Bottom: 128, Width: 58, Height: 20);
     LayoutMode: Center;
     Group {
       LayoutMode: Middle;
@@ -82,7 +82,7 @@ Group {
 
   Group #VRpgSlotCrouchE {
     Visible: false;
-    Anchor: (Right: 165, Bottom: 248, Width: 58, Height: 58);
+    Anchor: (Right: 165, Bottom: 232, Width: 58, Height: 58);
     Background: PatchStyle(TexturePath: "Assets/BackgroundAbility.png", Border: 0);
     LayoutMode: Full;
     Group #VRpgSlotCrouchEIcon { Anchor: (Left: 6, Top: 6, Width: 46, Height: 46); }
@@ -91,13 +91,13 @@ Group {
   }
   Group #VRpgSlotCrouchETimerGroup {
     Visible: false;
-    Anchor: (Right: 165, Bottom: 248, Width: 58, Height: 58);
+    Anchor: (Right: 165, Bottom: 232, Width: 58, Height: 58);
     LayoutMode: Middle;
     Label #VRpgSlotCrouchETimerLabel { Text: ""; Style: (RenderBold: true, Alignment: Center, TextColor: #FFD700, FontName: "Secondary", FontSize: 20); }
   }
   Group #VRpgSlotCrouchEKey {
     Visible: false;
-    Anchor: (Right: 165, Bottom: 222, Width: 58, Height: 20);
+    Anchor: (Right: 165, Bottom: 212, Width: 58, Height: 20);
     LayoutMode: Center;
     Group {
       LayoutMode: Middle;
@@ -109,7 +109,7 @@ Group {
 
   Group #VRpgSlotR {
     Visible: false;
-    Anchor: (Right: 79, Bottom: 156, Width: 58, Height: 58);
+    Anchor: (Right: 79, Bottom: 148, Width: 58, Height: 58);
     Background: PatchStyle(TexturePath: "Assets/BackgroundAbility.png", Border: 0);
     LayoutMode: Full;
     Group #VRpgSlotRIcon { Anchor: (Left: 6, Top: 6, Width: 46, Height: 46); }
@@ -118,13 +118,13 @@ Group {
   }
   Group #VRpgSlotRTimerGroup {
     Visible: false;
-    Anchor: (Right: 79, Bottom: 156, Width: 58, Height: 58);
+    Anchor: (Right: 79, Bottom: 148, Width: 58, Height: 58);
     LayoutMode: Middle;
     Label #VRpgSlotRTimerLabel { Text: ""; Style: (RenderBold: true, Alignment: Center, TextColor: #FFD700, FontName: "Secondary", FontSize: 20); }
   }
   Group #VRpgSlotRKey {
     Visible: false;
-    Anchor: (Right: 79, Bottom: 130, Width: 58, Height: 20);
+    Anchor: (Right: 79, Bottom: 128, Width: 58, Height: 20);
     LayoutMode: Center;
     Group {
       LayoutMode: Middle;
@@ -136,7 +136,7 @@ Group {
 
   Group #VRpgSlotCrouchR {
     Visible: false;
-    Anchor: (Right: 79, Bottom: 248, Width: 58, Height: 58);
+    Anchor: (Right: 79, Bottom: 232, Width: 58, Height: 58);
     Background: PatchStyle(TexturePath: "Assets/BackgroundAbility.png", Border: 0);
     LayoutMode: Full;
     Group #VRpgSlotCrouchRIcon { Anchor: (Left: 6, Top: 6, Width: 46, Height: 46); }
@@ -145,13 +145,13 @@ Group {
   }
   Group #VRpgSlotCrouchRTimerGroup {
     Visible: false;
-    Anchor: (Right: 79, Bottom: 248, Width: 58, Height: 58);
+    Anchor: (Right: 79, Bottom: 232, Width: 58, Height: 58);
     LayoutMode: Middle;
     Label #VRpgSlotCrouchRTimerLabel { Text: ""; Style: (RenderBold: true, Alignment: Center, TextColor: #FFD700, FontName: "Secondary", FontSize: 20); }
   }
   Group #VRpgSlotCrouchRKey {
     Visible: false;
-    Anchor: (Right: 79, Bottom: 222, Width: 58, Height: 20);
+    Anchor: (Right: 79, Bottom: 212, Width: 58, Height: 20);
     LayoutMode: Center;
     Group {
       LayoutMode: Middle;

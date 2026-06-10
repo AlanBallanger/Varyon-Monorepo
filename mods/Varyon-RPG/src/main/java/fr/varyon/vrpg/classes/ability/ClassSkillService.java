@@ -97,7 +97,7 @@ public final class ClassSkillService {
             return tryCastPasDeLOmbre(uuid, playerRef, entityRef, store);
         }
         if (ChaseOuverteSkill.SKILL_ID.equals(skillId)) {
-            return tryCastChaseOuverte(uuid, playerRef, entityRef, store);
+            return tryCastChaseOuverte(uuid, playerRef, entityRef, store, commandBuffer);
         }
         return false;
     }
@@ -151,6 +151,7 @@ public final class ClassSkillService {
                     fr.varyon.vrpg.audio.ClassSkillSounds.playSkillSound(
                         fr.varyon.vrpg.audio.ClassSkillSounds.ASSAUT_BRETTEUR_SOUND,
                         pr, new org.joml.Vector3d(), null);
+                    ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", pr, new org.joml.Vector3d(), null);
                     break;
                 }
             }
@@ -329,6 +330,14 @@ public final class ClassSkillService {
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Daggers", "DashBackward", true,
                     commandBuffer != null ? commandBuffer : store);
                 ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, tc.getPosition(), commandBuffer);
+                try {
+                    final org.joml.Vector3d vanishPos = new org.joml.Vector3d(tc.getPosition());
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread t = new Thread(r, "ombre-vanish-sound"); t.setDaemon(true); return t;
+                    }).schedule(() -> ClassSkillSounds.playSkillSound(
+                        "SFX_Vrpg_OmbreVanish", playerRef, vanishPos, null),
+                        100, java.util.concurrent.TimeUnit.MILLISECONDS);
+                } catch (Exception ignored2) {}
 
                 double dist = PasDesTenebresSkill.dashDistanceForRank(rank);
                 org.joml.Vector3d newPos = new org.joml.Vector3d(
@@ -344,6 +353,17 @@ public final class ClassSkillService {
                 tele.withoutVelocityReset();
                 (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
                     com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(-dx * 30.0, 0.2, -dz * 30.0);
+                    vel.setClient(dashVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
             }
         } catch (Exception ignored) {}
 
@@ -390,7 +410,7 @@ public final class ClassSkillService {
             for (com.hypixel.hytale.server.core.universe.PlayerRef pr :
                     new java.util.ArrayList<>(com.hypixel.hytale.server.core.universe.Universe.get().getPlayers())) {
                 if (pr.getUuid().equals(uuid)) {
-                    ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", pr, new org.joml.Vector3d(), null);
+                    ClassSkillSounds.playSkillSound("SFX_Vrpg_OmbreVanish", pr, new org.joml.Vector3d(), null);
                     break;
                 }
             }
@@ -416,6 +436,7 @@ public final class ClassSkillService {
                     new java.util.ArrayList<>(com.hypixel.hytale.server.core.universe.Universe.get().getPlayers())) {
                 if (pr.getUuid().equals(uuid)) {
                     ClassSkillSounds.playSkillSound(ClassSkillSounds.FRAPPE_FATALE_SOUND, pr, new org.joml.Vector3d(), null);
+                    ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", pr, new org.joml.Vector3d(), null);
                     break;
                 }
             }
@@ -564,40 +585,28 @@ public final class ClassSkillService {
                 store.addComponent(entityRef,
                     com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele2);
 
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Daggers", "DashForward", true, store);
-                ClassSkillSounds.playSkillSound("SFX_Vrpg_PasDeLOmbre_Dash", playerRef, targetPos, null);
+                ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, targetPos, null);
                 try {
-                    final Ref<EntityStore> strikeRef = entityRef;
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                        Thread t = new Thread(r, "ombre-strike-anim"); t.setDaemon(true); return t;
-                    }).schedule(() -> {
-                        try {
-                            AnimationUtils.playAnimation(strikeRef, AnimationSlot.Action, "Daggers", "SwingRight", true, store);
-                        } catch (Exception ignored3) {}
-                    }, 150, java.util.concurrent.TimeUnit.MILLISECONDS);
-                } catch (Exception ignored2) {}
-                int baseWeaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-                if (baseWeaponDmg > 0) {
+                    com.hypixel.hytale.server.core.universe.world.World stabWorld = null;
                     try {
-                        com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
-                            targeted, store,
-                            new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
-                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
-                                com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL,
-                                (float) baseWeaponDmg));
+                        java.util.UUID wUuid = playerRef.getWorldUuid();
+                        if (wUuid != null) stabWorld = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
                     } catch (Exception ignored3) {}
-                }
-                try {
-                    final org.joml.Vector3d impactPos = new org.joml.Vector3d(targetPos);
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                        Thread t = new Thread(r, "ombre-impact-sound"); t.setDaemon(true); return t;
-                    }).schedule(() -> ClassSkillSounds.playSkillSound(
-                        "SFX_Vrpg_PasDeLOmbre_Impact", playerRef, impactPos, null),
-                        100, java.util.concurrent.TimeUnit.MILLISECONDS);
+                    if (stabWorld != null) {
+                        final com.hypixel.hytale.server.core.universe.world.World fw = stabWorld;
+                        final Ref<EntityStore> stabRef = entityRef;
+                        final org.joml.Vector3d soundPos = new org.joml.Vector3d(targetPos);
+                        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                            Thread t = new Thread(r, "ombre-stab"); t.setDaemon(true); return t;
+                        }).schedule(() -> fw.execute(() -> {
+                            try { AnimationUtils.playAnimation(stabRef, AnimationSlot.Action, "Daggers", "SwingRight", true, store); } catch (Exception ignored3) {}
+                            ClassSkillSounds.playSkillSound("SFX_Vrpg_PasDeLOmbre_Strike", playerRef, soundPos, null);
+                        }), 100, java.util.concurrent.TimeUnit.MILLISECONDS);
+                    }
                 } catch (Exception ignored2) {}
 
-                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-                float baseDmg = weaponDmg > 0 ? weaponDmg : 1f;
+                int weaponDmg2 = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float baseDmg2 = weaponDmg2 > 0 ? weaponDmg2 : 1f;
                 try {
                     com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
                         store.getComponent(targeted, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
@@ -606,17 +615,35 @@ public final class ClassSkillService {
                         var hpStat = sm.get(hIdx);
                         if (hpStat != null && hpStat.getMax() > 0
                                 && (hpStat.get() / hpStat.getMax()) < PasDeLOmbreSkill.lowHpThreshold()) {
-                            baseDmg *= (1f + PasDeLOmbreSkill.lowHpBonus());
+                            baseDmg2 *= (1f + PasDeLOmbreSkill.lowHpBonus());
                         }
                     }
                 } catch (Exception ignored) {}
-
-                float finalDmg = baseDmg * PasDeLOmbreSkill.damagePctForRank(rank);
-                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
-                    targeted, store,
-                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
-                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
-                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, finalDmg));
+                final float skillDmg = baseDmg2 * PasDeLOmbreSkill.damagePctForRank(rank);
+                final Ref<EntityStore> skillTarget = targeted;
+                final Ref<EntityStore> skillCaster = entityRef;
+                com.hypixel.hytale.server.core.universe.world.World dmgWorldRef = null;
+                try { java.util.UUID wUuid2 = playerRef.getWorldUuid(); if (wUuid2 != null) dmgWorldRef = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid2); } catch (Exception ignored2) {}
+                if (dmgWorldRef != null) {
+                    final com.hypixel.hytale.server.core.universe.world.World dmgWorld = dmgWorldRef;
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread t = new Thread(r, "ombre-skilldmg"); t.setDaemon(true); return t;
+                    }).schedule(() -> dmgWorld.execute(() -> {
+                        try {
+                            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                                skillTarget, store,
+                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(skillCaster),
+                                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, skillDmg));
+                        } catch (Exception ignored3) {}
+                    }), 100, java.util.concurrent.TimeUnit.MILLISECONDS);
+                } else {
+                    com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                        targeted, store,
+                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                            new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                            com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, skillDmg));
+                }
             }
         } catch (Exception ignored) {}
 
@@ -629,7 +656,8 @@ public final class ClassSkillService {
     public boolean tryCastChaseOuverte(@Nonnull UUID uuid,
                                        @Nonnull PlayerRef playerRef,
                                        @Nonnull Ref<EntityStore> entityRef,
-                                       @Nonnull Store<EntityStore> store) {
+                                       @Nonnull Store<EntityStore> store,
+                                       @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isOmbre(acc)) return false;
         if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); return false; }
@@ -643,7 +671,7 @@ public final class ClassSkillService {
 
         long durationMs = ChaseOuverteSkill.durationMsForRank(rank);
 
-        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store);
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 7.0);
         if (targeted == null) {
             LOG.atInfo().log("[ChaseOuverte] BLOCKED no target in range");
             return false;
@@ -653,8 +681,81 @@ public final class ClassSkillService {
 
         try {
             TransformComponent casterTc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            TransformComponent targetTc = store.getComponent(targeted, TransformComponent.getComponentType());
             if (casterTc != null) {
                 ClassSkillSounds.playSkillSound("Bow_T2_Shoot_01", playerRef, casterTc.getPosition(), null);
+
+                if (targetTc != null) {
+                    try {
+                        com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig kunaiConfig =
+                            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap()
+                                .getAsset("Projectile_Config_Kunai");
+                        LOG.atInfo().log("[Kunai] config=" + kunaiConfig);
+                        if (kunaiConfig != null) {
+                            org.joml.Vector3d casterPos = casterTc.getPosition();
+                            org.joml.Vector3d targetPos2 = targetTc.getPosition();
+                            double toDx = targetPos2.x - casterPos.x;
+                            double toDy = (targetPos2.y + 0.5) - (casterPos.y + 1.5);
+                            double toDz = targetPos2.z - casterPos.z;
+                            double len = Math.sqrt(toDx*toDx + toDy*toDy + toDz*toDz);
+                            if (len > 1e-6) { toDx /= len; toDy /= len; toDz /= len; }
+                            org.joml.Vector3d direction = new org.joml.Vector3d(toDx, toDy, toDz);
+                            org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                                casterPos.x - toDx * 1.0 - toDz * 0.5,
+                                casterPos.y + 1.8,
+                                casterPos.z - toDz * 1.0 + toDx * 0.5);
+                            if (commandBuffer != null) {
+                                com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                                    .spawnProjectile(entityRef, commandBuffer, kunaiConfig, spawnPos, direction);
+                                LOG.atInfo().log("[Kunai] spawned via commandBuffer!");
+                            } else {
+                                com.hypixel.hytale.server.core.universe.world.World kunaiWorld = null;
+                                try {
+                                    java.util.UUID wUuid = playerRef.getWorldUuid();
+                                    if (wUuid != null) kunaiWorld = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+                                } catch (Exception ignored2) {}
+                                if (kunaiWorld != null) {
+                                    final com.hypixel.hytale.server.core.universe.world.World fw = kunaiWorld;
+                                    final org.joml.Vector3d fSpawnPos = spawnPos;
+                                    final org.joml.Vector3d fDir = direction;
+                                    final Ref<EntityStore> fEntityRef = entityRef;
+                                    final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fConfig = kunaiConfig;
+                                    fw.execute(() -> {
+                                        try {
+                                            Store<EntityStore> ws = fw.getEntityStore().getStore();
+                                            java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
+                                            takeCmd.setAccessible(true);
+                                            @SuppressWarnings("unchecked")
+                                            CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
+                                            Exception spawnEx = null;
+                                            try {
+                                                com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                                                    .spawnProjectile(fEntityRef, cb, fConfig, fSpawnPos, fDir);
+                                                LOG.atInfo().log("[Kunai] spawnProjectile OK");
+                                            } catch (Exception e3) {
+                                                spawnEx = e3;
+                                                LOG.atWarning().log("[Kunai] spawnProjectile EXCEPTION: " + e3 + " cause=" + e3.getCause());
+                                            }
+                                            try {
+                                                java.lang.reflect.Method consume = cb.getClass().getDeclaredMethod("consume");
+                                                consume.setAccessible(true);
+                                                consume.invoke(cb);
+                                                LOG.atInfo().log("[Kunai] commandBuffer consumed OK");
+                                            } catch (Exception e4) {
+                                                LOG.atWarning().log("[Kunai] consume EXCEPTION: " + e4 + " cause=" + e4.getCause());
+                                            }
+                                            if (spawnEx == null) LOG.atInfo().log("[Kunai] fully spawned!");
+                                        } catch (Exception e2) {
+                                            LOG.atWarning().log("[Kunai] reflection EXCEPTION: " + e2 + " cause=" + e2.getCause());
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    } catch (Exception ignoredProj) {
+                        LOG.atWarning().log("[Kunai] EXCEPTION: " + ignoredProj.getMessage());
+                    }
+                }
             }
 
             float durationSec = durationMs / 1000f;
