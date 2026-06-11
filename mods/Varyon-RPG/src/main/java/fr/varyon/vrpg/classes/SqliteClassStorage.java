@@ -140,8 +140,10 @@ public final class SqliteClassStorage {
     private static void migrateFixDoubleSpecPrefix(@Nonnull Statement st) {
         String validSlots = "('E','R','A','CrouchA','CrouchE','CrouchR')";
         try {
-            st.execute("DELETE FROM player_class_skill_slot WHERE slot_id NOT IN " + validSlots);
-            st.execute("DELETE FROM player_class_profile_skill_slot WHERE slot_id NOT IN " + validSlots);
+            st.execute("DELETE FROM player_class_skill_slot WHERE slot_id NOT IN " + validSlots
+                + " AND INSTR(SUBSTR(slot_id, INSTR(slot_id, ':') + 1), ':') > 0");
+            st.execute("DELETE FROM player_class_profile_skill_slot WHERE slot_id NOT IN " + validSlots
+                + " AND INSTR(SUBSTR(slot_id, INSTR(slot_id, ':') + 1), ':') > 0");
         } catch (SQLException ignored) {}
     }
 
@@ -208,7 +210,7 @@ public final class SqliteClassStorage {
                         String slotId = rs.getString("slot_id");
                         String itemId = rs.getString("item_id");
                         LOGGER.at(Level.INFO).log("[SkillSlot] LOAD uuid=%s class=%s slot=%s item=%s", uuid, c, slotId, itemId);
-                        account.setSkillSlot(c, slotId, itemId);
+                        account.getSkillSlots(c).put(slotId, itemId);
                     }
                 }
             }

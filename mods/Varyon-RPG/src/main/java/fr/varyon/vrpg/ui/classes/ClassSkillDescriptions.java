@@ -76,6 +76,19 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.rempart.RempartPassifs.INFATIGABLE_NODE         -> fr.varyon.vrpg.classes.rempart.RempartPassifs.infatigableStatLine(rank);
             case fr.varyon.vrpg.classes.rempart.RempartPassifs.CONTRE_OFFENSIF_NODE     -> fr.varyon.vrpg.classes.rempart.RempartPassifs.contreOffensifStatLine(rank);
             case fr.varyon.vrpg.classes.rempart.RempartPassifs.DERNIER_BASTION_NODE     -> fr.varyon.vrpg.classes.rempart.RempartPassifs.dernierBastionStatLine(rank);
+            // Berserker
+            case fr.varyon.vrpg.classes.berserker.AssautBestialSkill.SKILL_ID        -> fr.varyon.vrpg.classes.berserker.AssautBestialSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.berserker.DechiquetageSkill.SKILL_ID               -> fr.varyon.vrpg.classes.berserker.DechiquetageSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.berserker.CriRalliementSkill.SKILL_ID       -> fr.varyon.vrpg.classes.berserker.CriRalliementSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.SKILL_ID    -> fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID         -> fr.varyon.vrpg.classes.berserker.DixPourSangSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID         -> fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.DERNIER_SOUFFLE_NODE -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.dernierSouffleStatLine();
+            case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FERVEUR_NODE     -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.ferveurStatLine(rank);
+            case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FUREUR_NODE      -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.fureurStatLine(rank);
+            case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.CARNAGE_NODE     -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.carnageStatLine(rank);
+            case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.BLESSURES_NODE   -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.blessuresStatLine(rank);
+            case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FRENESIE_NODE    -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.frenesieStatLine(rank);
             default -> null;
         };
     }

@@ -19,6 +19,9 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import fr.varyon.vrpg.classes.ability.ExpertEnDuelSkill;
+import fr.varyon.vrpg.classes.berserker.BerserkerPassifs;
+import fr.varyon.vrpg.classes.berserker.BerserkerState;
+import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.combat.MobKillXpResolver;
 import fr.varyon.vrpg.combat.MobParticipantsTracker;
 import fr.varyon.vrpg.config.ClassXpConfig;
@@ -35,13 +38,16 @@ public final class ClassKillXpSystem {
 
     private final ClassManager classManager;
     private final MobParticipantsTracker participantsTracker;
+    private final BerserkerState berserkerState;
     private final Map<UUID, Map<String, KillTracker>> killTrackers = new ConcurrentHashMap<>();
     private Integer healthStatIndex = null;
 
     public ClassKillXpSystem(@Nonnull ClassManager classManager,
-                             @Nonnull MobParticipantsTracker participantsTracker) {
+                             @Nonnull MobParticipantsTracker participantsTracker,
+                             @Nonnull BerserkerState berserkerState) {
         this.classManager = classManager;
         this.participantsTracker = participantsTracker;
+        this.berserkerState = berserkerState;
     }
 
     public void cleanup(@Nonnull UUID playerId) {
@@ -176,6 +182,25 @@ public final class ClassKillXpSystem {
             + ") class=" + activeClass + " mob=" + MobKillXpResolver.npcRoleKey(npc));
 
         classManager.addXp(uuid, activeClass, finalXp, playerRef);
+
+        if (activeClass == PlayerClass.BARBARE
+                && acc.getActiveSpec(activeClass) == PlayerSpecialization.BERSERKER) {
+            int frenesieRank = acc.getTalentRank(activeClass, BerserkerPassifs.FRENESIE_NODE);
+            if (frenesieRank > 0) {
+                berserkerState.onKillFrenesie(uuid,
+                    BerserkerPassifs.FRENESIE_MAX_STACKS,
+                    BerserkerPassifs.frenesieDurationMs(),
+                    5000L);
+            }
+            int fureurRank = acc.getTalentRank(activeClass, BerserkerPassifs.FUREUR_NODE);
+            if (fureurRank > 0) {
+                berserkerState.triggerFureur(uuid, BerserkerPassifs.fureurDurationMs(), fureurRank);
+            }
+            int carnageRank = acc.getTalentRank(activeClass, BerserkerPassifs.CARNAGE_NODE);
+            if (carnageRank > 0) {
+                berserkerState.onKillCarnage(uuid, BerserkerPassifs.CARNAGE_MAX_STACKS, 10000L);
+            }
+        }
     }
 
     private double getPlayerHpPercent(@Nonnull Ref<EntityStore> attackerRef,

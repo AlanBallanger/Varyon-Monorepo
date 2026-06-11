@@ -113,6 +113,22 @@ public final class ClassTalentTree {
             new Node("Chasse Ouverte",        "Actif",  "Marquer une proie, c'est déjà la posséder.",                                "Marque une cible — toutes les attaques contre elle sont des coups critiques.",       OI + "Chasse_Ouverte.png",        5),
         });
 
+        final String BI = "Classes_Icons/Berserker/";
+        SPEC_TREES.put(PlayerSpecialization.BERSERKER, new Node[]{
+            new Node("Assaut Bestial",        "Actif",  "Quand la bête charge, même les murs cèdent.",                              "Bond en avant dans la direction du regard, infligeant des dégâts à l'impact.",                         BI + "Assaut_Bestial.png",         5),
+            new Node("Carnage",               "Passif", "Chaque mort est une leçon ensanglantée.",                                 "Gain d'expérience augmenté lors des séries d'éliminations (max 5 cumuls).",                             BI + "Carnage.png",                5),
+            new Node("Fureur Sanguinaire",    "Passif", "Le sang ennemi nourrit la rage qui nourrit les coups.",                   "Après un kill, le vol de vie est augmenté pendant quelques secondes.",                                   BI + "Fureur_Sanguinaire.png",     5),
+            new Node("Frénésie",              "Passif", "Chaque mort allume une flamme de plus dans ses yeux.",                    "Chaque élimination augmente vitesse et dégâts pendant quelques secondes (max 3 cumuls).",               BI + "Frénésie.png",               5),
+            new Node("Dix pour Sang",         "Actif",  "Chaque goutte versée est un gage de puissance.",                          "Frappe puissante en zone qui consomme 10 % de tes propres HP.",                                          BI + "Dix_Pour_Sang.png",          5),
+            new Node("Cor de Guerre",         "Actif",  "Le son du cor précède toujours la tempête.",                              "Augmente ta vitesse de déplacement pendant quelques secondes.",                                          BI + "Cor_De_Guerre.png",          5),
+            new Node("Blessures Profondes",   "Passif", "Là où sa hache passe, les plaies ne se referment pas.",                   "Les attaques ont une chance d'infliger un saignement progressif.",                                      BI + "Blessures_Profondes.png",    5),
+            new Node("Ferveur Guerrière",     "Passif", "Plus la bataille dure, plus la rage se cristallise.",                     "Les dégâts augmentent d'un cran chaque seconde passée en combat (max 15 cumuls).",                      BI + "Ferveur_Guerrière.png",      5),
+            new Node("Cri de Ralliement",     "Actif",  "Un hurlement qui fait oublier la peur et décuple la hargne.",             "Augmente temporairement les dégâts de toi et des alliés proches.",                                      BI + "Cri_De_Ralliement.png",      5),
+            new Node("Déchiquetage",          "Actif",  "La chair cède, et avec elle une partie de son énergie vitale.",           "Le prochain coup tranche profondément et récupère une partie des dégâts infligés en HP.",               BI + "Eviscération.png",           5),
+            new Node("Dernier Souffle",       "Passif", "La mort attendra — il a encore des ennemis à abattre.",                   "Ignore temporairement la mort pendant 4 secondes (CD 90s).",                                            BI + "Dernier_Souffle.png",        5),
+            new Node("Exécution Sauvage",     "Actif",  "Pour les blessés, chaque coup est le dernier.",                           "Frappe dévastatrice infligeant davantage de dégâts aux ennemis déjà affaiblis.",                        BI + "Exécution_Sauvage.png",      5),
+        });
+
         final String RI = "Classes_Icons/Rampart/";
         SPEC_TREES.put(PlayerSpecialization.REMPART, new Node[]{
             new Node("Charge Lourde",         "Actif",  "Quand l'acier avance, rien ne résiste.",                                    "Charge en ligne droite en repoussant et frappant les ennemis sur le passage.",     RI + "Charge_Lourde.png",         5),

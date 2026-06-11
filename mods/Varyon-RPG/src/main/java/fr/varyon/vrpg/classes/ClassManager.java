@@ -241,8 +241,15 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
     }
 
     public void shutdown() {
-        flushDirty();
         scheduler.shutdown();
+        // Sauvegarde synchrone de tous les comptes en cache pour ne rien perdre au restart
+        for (java.util.Map.Entry<java.util.UUID, ClassAccount> entry : cache.entrySet()) {
+            try {
+                storage.savePlayer(entry.getKey(), entry.getValue()).join();
+            } catch (Exception e) {
+                LOGGER.at(java.util.logging.Level.WARNING).log("shutdown save failed for %s: %s", entry.getKey(), e.getMessage());
+            }
+        }
         storage.shutdown();
     }
 }

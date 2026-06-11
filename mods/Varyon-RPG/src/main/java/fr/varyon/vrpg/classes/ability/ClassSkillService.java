@@ -59,17 +59,20 @@ public final class ClassSkillService {
     private final DuellisteState duellisteState;
     private final OmbreState ombreState;
     private final fr.varyon.vrpg.classes.rempart.RempartState rempartState;
+    private final fr.varyon.vrpg.classes.berserker.BerserkerState berserkerState;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
     private final Map<String, SkillCaster> casters = new HashMap<>();
 
     public ClassSkillService(@Nonnull ClassManager classManager,
                              @Nonnull DuellisteState duellisteState,
                              @Nonnull OmbreState ombreState,
-                             @Nonnull fr.varyon.vrpg.classes.rempart.RempartState rempartState) {
+                             @Nonnull fr.varyon.vrpg.classes.rempart.RempartState rempartState,
+                             @Nonnull fr.varyon.vrpg.classes.berserker.BerserkerState berserkerState) {
         this.classManager = classManager;
         this.duellisteState = duellisteState;
         this.ombreState = ombreState;
         this.rempartState = rempartState;
+        this.berserkerState = berserkerState;
         registerCasters();
     }
 
@@ -110,6 +113,19 @@ public final class ClassSkillService {
             (uuid, pr, er, st, cb) -> tryCastGardeRapprochee(uuid, pr, er, st));
         casters.put(fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastProvocation(uuid, pr, er, st));
+        // Berserker
+        casters.put(fr.varyon.vrpg.classes.berserker.AssautBestialSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastAssautBestial(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.berserker.DechiquetageSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastDechiquetage(uuid, pr));
+        casters.put(fr.varyon.vrpg.classes.berserker.CriRalliementSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastCriRalliement(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastExecutionSauvage(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastDixPourSang(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastCorDeGuerre(uuid, pr, er, st));
     }
 
     public boolean tryCast(@Nonnull String skillId,
@@ -1258,6 +1274,19 @@ public final class ClassSkillService {
             (acc, cls) -> fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.TALENT_NODE_ID)));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID,
             (acc, cls) -> fr.varyon.vrpg.classes.rempart.ProvocationSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ProvocationSkill.TALENT_NODE_ID)));
+        // Berserker
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.berserker.AssautBestialSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.berserker.AssautBestialSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.AssautBestialSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.berserker.DechiquetageSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.berserker.DechiquetageSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.DechiquetageSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.berserker.CriRalliementSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.berserker.CriRalliementSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.CriRalliementSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.berserker.DixPourSangSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.TALENT_NODE_ID)));
     }
 
     public long getCooldownTotalMs(@Nonnull String skillId, @Nonnull ClassAccount acc, @Nonnull PlayerClass cls) {
@@ -1270,6 +1299,377 @@ public final class ClassSkillService {
         long total = getCooldownTotalMs(skillId, acc, cls);
         if (total <= 0L) return 0L;
         return cooldowns.remainingMs(uuid, skillId, total);
+    }
+
+    // ========== BERSERKER ==========
+
+    private boolean isBerserker(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.BARBARE
+            && acc.getActiveSpec(PlayerClass.BARBARE) == fr.varyon.vrpg.classes.PlayerSpecialization.BERSERKER;
+    }
+
+    private boolean isHoldingAxe(@Nonnull PlayerRef playerRef) {
+        return fr.varyon.vrpg.classes.WeaponCategory.fromItemId(getHeldItemId(playerRef))
+            == fr.varyon.vrpg.classes.WeaponCategory.HACHE;
+    }
+
+    public boolean tryCastAssautBestial(@Nonnull UUID uuid,
+                                         @Nonnull PlayerRef playerRef,
+                                         @Nonnull Ref<EntityStore> entityRef,
+                                         @Nonnull Store<EntityStore> store,
+                                         @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBerserker(acc)) return false;
+        if (!isHoldingAxe(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.berserker.AssautBestialSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.berserker.AssautBestialSkill.SKILL_ID, fr.varyon.vrpg.classes.berserker.AssautBestialSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.berserker.AssautBestialSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = hr.getDirection();
+                double dx = dir.x, dz = dir.z;
+                double hlen = Math.sqrt(dx*dx + dz*dz);
+                if (hlen > 1e-6) { dx /= hlen; dz /= hlen; }
+
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    double hSpeed = fr.varyon.vrpg.classes.berserker.AssautBestialSkill.dashDistanceForRank(rank) * 2.4;
+                    org.joml.Vector3d leapVel = new org.joml.Vector3d(dx * hSpeed, 16.0, dz * hSpeed);
+                    vel.setClient(leapVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(leapVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Battleaxe", "DownstrikeLeap", true,
+                    commandBuffer != null ? commandBuffer : store);
+                ClassSkillSounds.playSkillSound("SFX_Battleaxe_T1_Launch", playerRef, tc.getPosition(), commandBuffer);
+
+                final org.joml.Vector3d landPos = new org.joml.Vector3d(
+                    tc.getPosition().x + dx * fr.varyon.vrpg.classes.berserker.AssautBestialSkill.dashDistanceForRank(rank),
+                    tc.getPosition().y,
+                    tc.getPosition().z + dz * fr.varyon.vrpg.classes.berserker.AssautBestialSkill.dashDistanceForRank(rank));
+                final double fdx = dx, fdz = dz;
+                final int fRank = rank;
+                final PlayerRef fPlayerRef = playerRef;
+                final Ref<EntityStore> fEntityRef = entityRef;
+
+                com.hypixel.hytale.server.core.universe.world.World world = null;
+                try {
+                    java.util.UUID wUuid = playerRef.getWorldUuid();
+                    if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+                } catch (Exception ignored2) {}
+                if (world != null) {
+                    final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                    final Store<EntityStore> fStore = store;
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread t = new Thread(r, "assaut-bestial-strike"); t.setDaemon(true); return t;
+                    }).schedule(() -> fw.execute(() -> {
+                        try {
+                            AnimationUtils.playAnimation(fEntityRef, AnimationSlot.Action, "Battleaxe", "DownstrikeCharged", true, fStore);
+                            ClassSkillSounds.playSkillSound("SFX_Battleaxe_T2_Swing_Charged", fPlayerRef, landPos, null);
+
+                            float dmg = fr.varyon.vrpg.classes.berserker.AssautBestialSkill.damagePctForRank(fRank)
+                                * fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(fPlayerRef);
+                            if (dmg < 1f) dmg = 1f;
+                            final float finalDmg = dmg;
+                            long casterIdx = fEntityRef.getIndex();
+                            java.util.HashSet<Long> hitSet = new java.util.HashSet<>();
+
+                            double sweepRadius = 3.5;
+                            double sweepAngle = Math.PI * 2.0 / 3.0;
+                            double casterYaw = Math.atan2(-fdx, -fdz);
+                            int steps = 16;
+                            for (int i = 0; i <= steps; i++) {
+                                double angle = casterYaw - sweepAngle / 2.0 + sweepAngle * i / steps;
+                                org.joml.Vector3d sample = new org.joml.Vector3d(
+                                    landPos.x + Math.sin(angle) * sweepRadius * 0.5,
+                                    landPos.y + 0.8,
+                                    landPos.z - Math.cos(angle) * sweepRadius * 0.5);
+                                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                                    .selectNearbyEntities(fStore, sample, 2.2, targetRef -> {
+                                        try {
+                                            long tidx = targetRef.getIndex();
+                                            if (tidx == casterIdx || !hitSet.add(tidx)) return;
+                                            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                                                targetRef, fStore,
+                                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(fEntityRef),
+                                                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL,
+                                                    finalDmg));
+                                        } catch (Exception ignored3) {}
+                                    }, t2 -> t2.getIndex() != casterIdx);
+                            }
+                        } catch (Exception ignored2) {}
+                    }), 650, java.util.concurrent.TimeUnit.MILLISECONDS);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.berserker.AssautBestialSkill.SKILL_ID);
+        notifySkill(uuid, "Assaut Bestial");
+        return true;
+    }
+
+    public boolean tryCastDechiquetage(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBerserker(acc)) return false;
+        if (!isHoldingAxe(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.berserker.DechiquetageSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.berserker.DechiquetageSkill.SKILL_ID, fr.varyon.vrpg.classes.berserker.DechiquetageSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.berserker.DechiquetageSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        berserkerState.armEvisc(uuid, fr.varyon.vrpg.classes.berserker.DechiquetageSkill.armedWindowMs(), rank);
+        try {
+            ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, new org.joml.Vector3d(), null);
+        } catch (Exception ignored) {}
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.berserker.DechiquetageSkill.SKILL_ID);
+        notifySkill(uuid, "Déchiquetage");
+        return true;
+    }
+
+    public boolean tryCastCriRalliement(@Nonnull UUID uuid,
+                                         @Nonnull PlayerRef playerRef,
+                                         @Nonnull Ref<EntityStore> entityRef,
+                                         @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBerserker(acc)) return false;
+        if (!isHoldingAxe(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.berserker.CriRalliementSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.berserker.CriRalliementSkill.SKILL_ID, fr.varyon.vrpg.classes.berserker.CriRalliementSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.berserker.CriRalliementSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        float bonus = fr.varyon.vrpg.classes.berserker.CriRalliementSkill.damageBonusForRank(rank);
+        long duration = fr.varyon.vrpg.classes.berserker.CriRalliementSkill.durationMsForRank(rank);
+        berserkerState.startCriRalliement(uuid, duration, bonus);
+
+        // Appliquer aux alliés proches
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                double radius = fr.varyon.vrpg.classes.berserker.CriRalliementSkill.allyRadius();
+                long casterIdx = entityRef.getIndex();
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                    store, tc.getPosition(), radius, nearRef -> {
+                        try {
+                            if (nearRef.getIndex() == casterIdx) return;
+                            com.hypixel.hytale.server.core.universe.PlayerRef nearPlayer =
+                                store.getComponent(nearRef, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType());
+                            if (nearPlayer == null) return;
+                            berserkerState.startCriRalliement(nearPlayer.getUuid(), duration, bonus);
+                        } catch (Exception ignored) {}
+                    }, ref -> ref.getIndex() != casterIdx);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.berserker.CriRalliementSkill.SKILL_ID);
+        notifySkill(uuid, "Cri de Ralliement");
+        return true;
+    }
+
+    public boolean tryCastExecutionSauvage(@Nonnull UUID uuid,
+                                            @Nonnull PlayerRef playerRef,
+                                            @Nonnull Ref<EntityStore> entityRef,
+                                            @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBerserker(acc)) return false;
+        if (!isHoldingAxe(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.SKILL_ID, fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 2.0);
+            if (targeted == null) return false;
+
+            int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            float axeMult = (float) fr.varyon.vrpg.classes.WeaponCategory.HACHE.getMultiplierFor(fr.varyon.vrpg.classes.PlayerSpecialization.BERSERKER);
+            float base = (weaponDmg > 0 ? (float) weaponDmg : 1f) * axeMult;
+            float mult = fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.baseDamagePctForRank(rank);
+
+            com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
+                store.getComponent(targeted, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+            if (sm != null) {
+                try {
+                    int hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth();
+                    var hpStat = sm.get(hIdx);
+                    if (hpStat != null && hpStat.getMax() > 0
+                            && (hpStat.get() / hpStat.getMax()) < fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.lowHpThreshold()) {
+                        mult += fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.lowHpBonusPctForRank(rank);
+                    }
+                } catch (Exception ignored2) {}
+            }
+
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, base * mult));
+
+            TransformComponent targetTc = store.getComponent(targeted, TransformComponent.getComponentType());
+            if (targetTc != null) {
+                final org.joml.Vector3d impactPos = new org.joml.Vector3d(targetTc.getPosition());
+                final PlayerRef fpr2 = playerRef;
+                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "berserker-axe-impact"); t.setDaemon(true); return t; })
+                    .schedule(() -> ClassSkillSounds.playSkillSound("SFX_Vrpg_AxeImpact", fpr2, impactPos, null),
+                        250, java.util.concurrent.TimeUnit.MILLISECONDS);
+            }
+
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "SwingRight", true, store);
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                final org.joml.Vector3d swingPos = new org.joml.Vector3d(tc.getPosition());
+                final PlayerRef fpr = playerRef;
+                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "berserker-axe-sound"); t.setDaemon(true); return t; })
+                    .schedule(() -> ClassSkillSounds.playSkillSound("SFX_Vrpg_AxeSwing", fpr, swingPos, null),
+                        150, java.util.concurrent.TimeUnit.MILLISECONDS);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.SKILL_ID);
+        notifySkill(uuid, "Exécution Sauvage");
+        return true;
+    }
+
+    public boolean tryCastDixPourSang(@Nonnull UUID uuid,
+                                       @Nonnull PlayerRef playerRef,
+                                       @Nonnull Ref<EntityStore> entityRef,
+                                       @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBerserker(acc)) return false;
+        if (!isHoldingAxe(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.cooldownMsForRank(rank))) return false;
+
+        try {
+            // Consommer 10% HP
+            Integer hIdx = null;
+            try { hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth(); } catch (Exception e) { hIdx = -1; }
+            if (hIdx >= 0) {
+                com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap selfStats =
+                    store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+                if (selfStats != null) {
+                    var hp = selfStats.get(hIdx);
+                    if (hp != null && hp.get() <= hp.getMax() * fr.varyon.vrpg.classes.berserker.DixPourSangSkill.selfHpCostPct() + 1f) return false;
+                    if (hp != null) selfStats.addStatValue(hIdx, -hp.getMax() * fr.varyon.vrpg.classes.berserker.DixPourSangSkill.selfHpCostPct());
+                }
+            }
+
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float dmg = (weaponDmg > 0 ? (float) weaponDmg : 1f) * fr.varyon.vrpg.classes.berserker.DixPourSangSkill.damagePctForRank(rank);
+                org.joml.Vector3d casterPos = tc.getPosition();
+                long casterIdx = entityRef.getIndex();
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                    store, casterPos, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.hitRadius(), targetRef -> {
+                        try {
+                            if (targetRef.getIndex() == casterIdx) return;
+                            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targetRef, store,
+                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+                            TransformComponent targetTc = store.getComponent(targetRef, TransformComponent.getComponentType());
+                            com.hypixel.hytale.server.core.modules.physics.component.Velocity targetVel =
+                                store.getComponent(targetRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                            if (targetTc != null && targetVel != null) {
+                                org.joml.Vector3d diff = new org.joml.Vector3d(
+                                    targetTc.getPosition().x - casterPos.x,
+                                    0,
+                                    targetTc.getPosition().z - casterPos.z);
+                                double len = diff.length();
+                                if (len > 1e-6) diff.div(len); else diff.set(0, 0, 1);
+                                targetVel.getInstructions().clear();
+                                targetVel.addInstruction(
+                                    new org.joml.Vector3d(diff.x * 8.0, 5.0, diff.z * 8.0),
+                                    null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                            }
+                        } catch (Exception ignored2) {}
+                    }, ref -> ref.getIndex() != casterIdx);
+                ClassSkillSounds.playSkillSound("SFX_Club_Steel_Impact", playerRef, casterPos, null);
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Club", "SwingDownCharged", true, store);
+            }
+        } catch (Exception ignored) {}
+
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID);
+        notifySkill(uuid, "Dix pour Sang");
+        return true;
+    }
+
+    public boolean tryCastCorDeGuerre(@Nonnull UUID uuid,
+                                       @Nonnull PlayerRef playerRef,
+                                       @Nonnull Ref<EntityStore> entityRef,
+                                       @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBerserker(acc)) return false;
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID, fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        long durationMs = fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.durationMsForRank(rank);
+        berserkerState.startCor(uuid, durationMs);
+
+        // Boost vitesse de déplacement pendant la durée
+        try {
+            com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager mm =
+                playerRef.getComponent(com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager.getComponentType());
+            if (mm == null) mm = store.getComponent(entityRef,
+                com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager.getComponentType());
+            if (mm != null) {
+                float spdBoost = fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.speedBonusForRank(rank);
+                float target = mm.getDefaultSettings().baseSpeed * (1f + spdBoost);
+                mm.getSettings().baseSpeed = target;
+                mm.update(playerRef.getPacketHandler());
+                final com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager finalMm = mm;
+                final long dur = durationMs;
+                final com.hypixel.hytale.server.core.universe.PlayerRef finalRef = playerRef;
+                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                    Thread t = new Thread(r, "berserker-cor"); t.setDaemon(true); return t;
+                }).schedule(() -> {
+                    try {
+                        finalMm.resetDefaultsAndUpdate(entityRef, store);
+                        finalMm.update(finalRef.getPacketHandler());
+                    } catch (Exception ignored2) {}
+                }, dur, java.util.concurrent.TimeUnit.MILLISECONDS);
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID);
+        notifySkill(uuid, "Cor de Guerre");
+        return true;
     }
 
     public void cleanup(@Nonnull UUID uuid) {

@@ -3,6 +3,8 @@ package fr.varyon.vrpg.classes.ability;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.classes.ability.AssautEclairSkill;
+import fr.varyon.vrpg.classes.ability.ExpertEnDuelSkill;
 import fr.varyon.vrpg.classes.duelliste.AssautBretteurSkill;
 import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
 import fr.varyon.vrpg.classes.duelliste.DuellistePassifs;
@@ -65,6 +67,23 @@ public final class ClassSkillRegistry {
                 case 9  -> PasDeLOmbreSkill.SKILL_ID;            // Actif
                 case 10 -> OmbrePassifs.INSTINCT_SURVIE_NODE;    // Passif
                 case 11 -> ChaseOuverteSkill.SKILL_ID;           // Actif
+                default -> null;
+            };
+        }
+        if (activeClass == PlayerClass.BARBARE && spec == PlayerSpecialization.BERSERKER) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.berserker.AssautBestialSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.CARNAGE_NODE;
+                case 2  -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FUREUR_NODE;
+                case 3  -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FRENESIE_NODE;
+                case 4  -> fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID;
+                case 5  -> fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID;
+                case 6  -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.BLESSURES_NODE;
+                case 7  -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FERVEUR_NODE;
+                case 8  -> fr.varyon.vrpg.classes.berserker.CriRalliementSkill.SKILL_ID;
+                case 9  -> fr.varyon.vrpg.classes.berserker.DechiquetageSkill.SKILL_ID;
+                case 10 -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.DERNIER_SOUFFLE_NODE;
+                case 11 -> fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.SKILL_ID;
                 default -> null;
             };
         }
