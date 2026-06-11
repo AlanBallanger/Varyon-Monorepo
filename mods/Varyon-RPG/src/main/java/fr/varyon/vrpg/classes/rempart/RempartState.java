@@ -15,6 +15,9 @@ public final class RempartState {
     private final ConcurrentHashMap<UUID, Integer> contreOffensifRank    = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long>    gardeImpExpiry        = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Integer> gardeImpRank          = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Long>    shieldRaisedAt        = new ConcurrentHashMap<>();
+
+    private static final long PERFECT_BLOCK_WINDOW_MS = 300L;
 
     public RempartState() {}
 
@@ -70,6 +73,17 @@ public final class RempartState {
         return false;
     }
 
+    // --- Parade Parfaite ---
+
+    public void markShieldRaised(@Nonnull UUID uuid) {
+        shieldRaisedAt.put(uuid, System.currentTimeMillis());
+    }
+
+    public boolean isPerfectBlock(@Nonnull UUID uuid) {
+        Long t = shieldRaisedAt.get(uuid);
+        return t != null && (System.currentTimeMillis() - t) <= PERFECT_BLOCK_WINDOW_MS;
+    }
+
     // --- Contre Offensif ---
 
     public void armContreOffensif(@Nonnull UUID uuid, long windowMs, int rank) {
@@ -111,5 +125,6 @@ public final class RempartState {
         contreOffensifRank.remove(uuid);
         gardeImpExpiry.remove(uuid);
         gardeImpRank.remove(uuid);
+        shieldRaisedAt.remove(uuid);
     }
 }

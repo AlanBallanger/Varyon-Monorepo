@@ -40,7 +40,7 @@ public final class RempartPassifs {
     public static long gardeDurationMs() { return GARDE_DURATION_MS; }
 
     public static String gardeImpenetrableStatLine(int rank) {
-        return "-" + Math.round(gardeReductionForRank(rank) * 100) + "% dégâts reçus pendant " + (GARDE_DURATION_MS / 1000) + "s après blocage";
+        return "-" + Math.round(gardeReductionForRank(rank) * 100) + "% dégâts reçus pendant " + (GARDE_DURATION_MS / 1000) + "s après blocage parfait";
     }
 
     // --- Infatigable (node 7) — soin après blocage ---
@@ -52,7 +52,7 @@ public final class RempartPassifs {
     }
 
     public static String infatigableStatLine(int rank) {
-        return "Chaque blocage restaure " + Math.round(infatigableHealPctForRank(rank) * 100) + "% HP max";
+        return "Les blocages parfaits restaurent " + Math.round(infatigableHealPctForRank(rank) * 100) + "% HP max";
     }
 
     // --- Contre Offensif (node 8) — bonus dégâts après blocage ---
@@ -67,7 +67,7 @@ public final class RempartPassifs {
     public static long contreWindowMs() { return CONTRE_WINDOW_MS; }
 
     public static String contreOffensifStatLine(int rank) {
-        return "+" + Math.round(contreDamageBonusForRank(rank) * 100) + "% dégâts sur le prochain coup après blocage";
+        return "+" + Math.round(contreDamageBonusForRank(rank) * 100) + "% dégâts sur le prochain coup après blocage parfait";
     }
 
     // --- Dernier Bastion (node 10) — réduction sous 30% HP ---

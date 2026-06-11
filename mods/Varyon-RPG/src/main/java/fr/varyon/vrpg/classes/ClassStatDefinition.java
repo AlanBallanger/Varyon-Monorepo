@@ -79,12 +79,20 @@ public final class ClassStatDefinition {
     }
 
     public static ClassPlayerStats compute(int level, @Nullable PlayerSpecialization spec) {
+        return compute(level, spec, 0);
+    }
+
+    public static ClassPlayerStats compute(int level, @Nullable PlayerSpecialization spec, int constitutionRank) {
         double hpMult      = spec != null ? spec.getHpMult()         : 1.0;
         double atkMult     = spec != null ? spec.getAtkMult()        : 1.0;
         double armorMult   = spec != null ? spec.getArmorMult()      : 1.0;
         double staminaMult = spec != null ? spec.getStaminaMult()    : 1.0;
         double critCMult   = spec != null ? spec.getCritChanceMult() : 1.0;
         double critDMult   = spec != null ? spec.getCritDamageMult() : 1.0;
+
+        if (constitutionRank > 0) {
+            hpMult *= (1.0 + fr.varyon.vrpg.classes.rempart.RempartPassifs.constitutionHpBonusForRank(constitutionRank));
+        }
 
         double combinedHpMult = hpLevelMult(level) * hpMult;
 

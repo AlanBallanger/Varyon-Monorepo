@@ -5,7 +5,7 @@ public final class SecondSouffleSkill {
     public static final String SKILL_ID       = "second_souffle_rempart";
     public static final String TALENT_NODE_ID = "rempart_6";
 
-    private static final float[] HEAL_PCT    = {0.20f, 0.25f, 0.30f, 0.35f, 0.45f};
+    private static final float[] HEAL_PCT    = {0.10f, 0.15f, 0.20f, 0.25f, 0.30f};
     private static final long[]  COOLDOWN_MS = {45000, 42000, 38000, 34000, 30000};
     private static final float[] STAMINA_COST = {10f, 11f, 12f, 13f, 14f};
 

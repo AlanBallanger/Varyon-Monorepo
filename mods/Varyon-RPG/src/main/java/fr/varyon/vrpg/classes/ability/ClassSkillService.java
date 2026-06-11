@@ -967,29 +967,51 @@ public final class ClassSkillService {
                 double dx = dir.x, dz = dir.z;
                 double len = Math.sqrt(dx*dx + dz*dz);
                 if (len > 1e-6) { dx /= len; dz /= len; }
-                double dist = fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.dashDistanceForRank(rank);
-                org.joml.Vector3d newPos = new org.joml.Vector3d(tc.getPosition().x + dx * dist, tc.getPosition().y, tc.getPosition().z + dz * dist);
-                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
-                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(curRot.pitch(), curRot.yaw(), curRot.roll());
-                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
-                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(newPos, keepRot);
-                tele.withoutVelocityReset();
-                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
-                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    vel.getInstructions().clear();
+                    vel.addInstruction(
+                        new org.joml.Vector3d(dx * 22.0, 0.5, dz * 22.0),
+                        null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
 
                 int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
                 float dmg = (weaponDmg > 0 ? weaponDmg : 1f) * fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.damagePctForRank(rank);
                 long casterIdx = entityRef.getIndex();
-                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
-                    store, tc.getPosition(), 2.5, targetRef -> {
-                        try {
-                            if (targetRef.getIndex() == casterIdx) return;
-                            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targetRef, store,
-                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
-                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
-                                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
-                        } catch (Exception ignored) {}
-                    }, ref -> ref.getIndex() != casterIdx);
+                double dist = fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.dashDistanceForRank(rank);
+                org.joml.Vector3d startPos = tc.getPosition();
+                java.util.HashSet<Long> hitSet = new java.util.HashSet<>();
+
+                for (double t = 0.5; t <= dist; t += 0.8) {
+                    org.joml.Vector3d sample = new org.joml.Vector3d(
+                        startPos.x + dx * t,
+                        startPos.y + 0.5,
+                        startPos.z + dz * t);
+                    final double fx = dx, fz = dz;
+                    com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                        store, sample, 1.8, targetRef -> {
+                            try {
+                                long tidx = targetRef.getIndex();
+                                if (tidx == casterIdx || !hitSet.add(tidx)) return;
+                                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targetRef, store,
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+                                com.hypixel.hytale.server.core.modules.physics.component.Velocity targetVel =
+                                    store.getComponent(targetRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                                if (targetVel != null) {
+                                    targetVel.getInstructions().clear();
+                                    targetVel.addInstruction(
+                                        new org.joml.Vector3d(fx * 12.0, 6.0, fz * 12.0),
+                                        null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                                }
+                            } catch (Exception ignored) {}
+                        }, ref -> ref.getIndex() != casterIdx);
+                }
 
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "StabDashCharged", true, commandBuffer != null ? commandBuffer : store);
                 ClassSkillSounds.playSkillSound("SFX_Sword_T2_Lunge_Local", playerRef, tc.getPosition(), commandBuffer);
@@ -1016,32 +1038,33 @@ public final class ClassSkillService {
         float staminaCost = fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.staminaCostForRank(rank);
         if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
-        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store);
-        if (targeted == null) return false;
-
         try {
-            int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-            float dmg = (weaponDmg > 0 ? weaponDmg : 1f) * fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.damagePctForRank(rank);
-            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
-                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
-                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
-                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
-
-            float stunSec = fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.stunMsForRank(rank) / 1000f;
-            int stunIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex("Vrpg_Ombre_Stun");
-            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect stunEffect =
-                (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
-                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(stunIdx);
-            if (stunEffect != null) {
-                com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
-                    store.getComponent(targeted, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
-                if (ec != null) ec.addEffect(targeted, stunEffect, stunSec,
-                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
-            }
-
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
-            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Combat_Parry_Success", playerRef, tc.getPosition(), null);
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Status, "Sword", "Guard", true, store);
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "SwingRight", true, store);
+            if (tc != null) ClassSkillSounds.playSkillSound("Shield_T1_Impact_01", playerRef, tc.getPosition(), null);
+
+            Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store);
+            if (targeted != null) {
+                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float dmg = (weaponDmg > 0 ? weaponDmg : 1f) * fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.damagePctForRank(rank);
+                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+
+                float stunSec = fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.stunMsForRank(rank) / 1000f;
+                int stunIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex("Vrpg_Ombre_Stun");
+                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect stunEffect =
+                    (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(stunIdx);
+                if (stunEffect != null) {
+                    com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                        store.getComponent(targeted, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                    if (ec != null) ec.addEffect(targeted, stunEffect, stunSec,
+                        com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+                }
+            }
         } catch (Exception ignored) {}
 
         ClassSkillStamina.consume(playerRef, staminaCost);
@@ -1180,22 +1203,7 @@ public final class ClassSkillService {
                             if (npc == null) return;
                             com.hypixel.hytale.server.npc.role.Role role = npc.getRole();
                             if (role == null) return;
-                            try {
-                                java.lang.reflect.Field targetsField = role.getClass().getSuperclass() != null ?
-                                    getFieldRecursive(role.getClass(), "entityTargets") : null;
-                                java.lang.reflect.Field slotField = getFieldRecursive(role.getClass(), "defaultTargetSlot");
-                                if (targetsField != null && slotField != null) {
-                                    targetsField.setAccessible(true);
-                                    slotField.setAccessible(true);
-                                    int slot = slotField.getInt(role);
-                                    if (slot >= 0) {
-                                        Ref<EntityStore>[] targets = (Ref<EntityStore>[]) targetsField.get(role);
-                                        if (targets != null && slot < targets.length) {
-                                            targets[slot] = casterRef;
-                                        }
-                                    }
-                                }
-                            } catch (Exception ignored) {}
+                            fr.varyon.vrpg.classes.ombre.OmbreStealthAggroResetSystem.forceTarget(role, casterRef);
                         } catch (Exception ignored) {}
                     }, ref -> ref.getIndex() != casterIdx);
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
@@ -1206,14 +1214,6 @@ public final class ClassSkillService {
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID);
         notifySkill(uuid, "Provocation");
         return true;
-    }
-
-    private static java.lang.reflect.Field getFieldRecursive(Class<?> clazz, String name) {
-        while (clazz != null) {
-            try { java.lang.reflect.Field f = clazz.getDeclaredField(name); f.setAccessible(true); return f; }
-            catch (NoSuchFieldException e) { clazz = clazz.getSuperclass(); }
-        }
-        return null;
     }
 
     public long getCooldownTotalMs(@Nonnull String skillId, @Nonnull ClassAccount acc, @Nonnull PlayerClass cls) {

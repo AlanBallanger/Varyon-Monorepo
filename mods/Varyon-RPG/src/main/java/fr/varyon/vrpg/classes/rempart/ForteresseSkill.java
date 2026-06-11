@@ -7,7 +7,7 @@ public final class ForteresseSkill {
 
     private static final float[] DAMAGE_REDUCTION = {0.40f, 0.45f, 0.50f, 0.55f, 0.65f};
     private static final long[]  DURATION_MS      = {3000, 3500, 4000, 4500, 5000};
-    private static final long[]  COOLDOWN_MS      = {30000, 28000, 26000, 24000, 20000};
+    private static final long[]  COOLDOWN_MS      = {29000, 27000, 25000, 23000, 19000};
     private static final float[] STAMINA_COST     = {8f, 9f, 10f, 11f, 12f};
 
     private ForteresseSkill() {}

@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.rempart;
 public final class ProvocationSkill {
 
     public static final String SKILL_ID       = "provocation";
-    public static final String TALENT_NODE_ID = "rempart_11";
+    public static final String TALENT_NODE_ID = "rempart_9";
 
     private static final double  TAUNT_RADIUS = 8.0;
     private static final long[]  DURATION_MS  = {4000, 5000, 6000, 7000, 8000};

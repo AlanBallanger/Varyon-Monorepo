@@ -60,7 +60,7 @@ public final class ClassTalentTreeLogic {
     public static int pendingRemainingPoints(@Nonnull RpgClassUiState state,
                                              @Nonnull ClassAccount acc,
                                              @Nonnull PlayerClass activeClass) {
-        int available = acc.availableTalentPoints(activeClass);
+        int available = acc.availableTalentPoints(activeClass, acc.getActiveSpec(activeClass));
         if (!state.classEditMode || state.pendingClassRanks == null || state.savedClassRanks == null) {
             return available;
         }

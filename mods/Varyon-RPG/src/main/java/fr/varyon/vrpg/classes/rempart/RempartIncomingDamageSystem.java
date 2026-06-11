@@ -68,8 +68,10 @@ public final class RempartIncomingDamageSystem extends DamageEventSystem {
 
             boolean debug = VrpgConfig.isDebugCombat();
 
-            // Détection de blocage bouclier : damage already cancelled + bouclier en main
-            if (damage.isCancelled() && hasShield(playerRef)) {
+            // Parade parfaite : blocage dans les 200ms après lever du bouclier
+            boolean isBlocked = damage.hasMetaObject(com.hypixel.hytale.server.core.modules.entity.damage.Damage.BLOCKED)
+                && Boolean.TRUE.equals(damage.getMetaObject(com.hypixel.hytale.server.core.modules.entity.damage.Damage.BLOCKED));
+            if (isBlocked && rempartState.isPerfectBlock(uuid)) {
                 onBlock(uuid, acc, playerRef, chunk, index, store, debug);
                 return;
             }

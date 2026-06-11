@@ -194,7 +194,7 @@ public final class ClassManager {
             ClassAccount acc = getOrLoad(uuid);
             int currentRank = acc.getTalentRank(playerClass, nodeId);
             if (currentRank >= nodeMax) return false;
-            if (acc.availableTalentPoints(playerClass) <= 0) return false;
+            if (acc.availableTalentPoints(playerClass, acc.getActiveSpec(playerClass)) <= 0) return false;
             acc.setTalentRank(playerClass, nodeId, currentRank + 1);
             dirty.add(uuid);
             return true;

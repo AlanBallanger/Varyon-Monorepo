@@ -128,7 +128,7 @@ public final class ClassUiEvents {
                         if (idx >= 0 && idx < nodes.length) {
                             state.selectedClassNode = idx;
                             if (!state.classEditMode) {
-                                if (accRight.availableTalentPoints(activeClassRight) > 0) {
+                                if (accRight.availableTalentPoints(activeClassRight, accRight.getActiveSpec(activeClassRight)) > 0) {
                                     ClassTalentTreeLogic.enterEditMode(state, accRight, activeClassRight, nodes);
                                 }
                             } else {

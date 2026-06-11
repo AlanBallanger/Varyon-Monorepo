@@ -58,35 +58,40 @@ public final class OmbreStealthAggroResetSystem {
             TransformComponent tc = store.getComponent(playerRef, TransformComponent.getComponentType());
             if (tc == null) return;
             final long playerIdx = playerRef.getIndex();
-
-            final int[] found = {0};
             com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
                 .selectNearbyEntities(store, tc.getPosition(), 30.0, npcRef -> {
                     try {
                         if (npcRef.getIndex() == playerIdx) return;
-                        found[0]++;
                         NPCEntity npc = store.getComponent(npcRef, NPCEntity.getComponentType());
-                        if (npc == null) { LOG.atInfo().log("[StealthAggro] entity found but no NPCEntity"); return; }
+                        if (npc == null) return;
                         com.hypixel.hytale.server.npc.role.Role role = npc.getRole();
-                        if (role == null) { LOG.atInfo().log("[StealthAggro] role=null"); return; }
+                        if (role == null) return;
                         Object support = markedEntitySupportField.get(role);
-                        if (support == null) { LOG.atInfo().log("[StealthAggro] support=null"); return; }
+                        if (support == null) return;
                         int slot = defaultTargetSlotField.getInt(support);
-                        LOG.atInfo().log("[StealthAggro] slot=" + slot);
                         if (slot < 0) return;
                         Ref<EntityStore>[] targets = (Ref<EntityStore>[]) entityTargetsField.get(support);
-                        if (targets == null || slot >= targets.length) { LOG.atInfo().log("[StealthAggro] targets oob"); return; }
+                        if (targets == null || slot >= targets.length) return;
                         Ref<EntityStore> target = targets[slot];
-                        LOG.atInfo().log("[StealthAggro] target=" + (target == null ? "null" : target.getIndex()));
                         if (target == null || !target.isValid()) return;
                         if (target.getIndex() != playerIdx) return;
                         targets[slot] = null;
-                        LOG.atInfo().log("[StealthAggro] RESET aggro");
-                    } catch (Exception e) { LOG.atWarning().log("[StealthAggro] err: " + e.getMessage()); }
+                    } catch (Exception ignored) {}
                 }, ref -> ref.getIndex() != playerIdx);
-            LOG.atInfo().log("[StealthAggro] scan done, entities near player=" + found[0]);
-        } catch (Exception e) {
-            LOG.atWarning().log("[StealthAggro] resetAggroAround error: " + e.getMessage());
-        }
+        } catch (Exception ignored) {}
+    }
+
+    public static void forceTarget(@Nonnull com.hypixel.hytale.server.npc.role.Role role,
+                                   @Nonnull Ref<EntityStore> targetRef) {
+        if (entityTargetsField == null || defaultTargetSlotField == null || markedEntitySupportField == null) return;
+        try {
+            Object support = markedEntitySupportField.get(role);
+            if (support == null) return;
+            int slot = defaultTargetSlotField.getInt(support);
+            if (slot < 0) return;
+            Ref<EntityStore>[] targets = (Ref<EntityStore>[]) entityTargetsField.get(support);
+            if (targets == null || slot >= targets.length) return;
+            targets[slot] = targetRef;
+        } catch (Exception ignored) {}
     }
 }

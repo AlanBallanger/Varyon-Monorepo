@@ -242,7 +242,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.ombreSpeedSystem = new OmbreSpeedSystem(classManager, ombreState);
             this.rempartState = new fr.varyon.vrpg.classes.rempart.RempartState();
             this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState);
-            this.classSkillKeyFilter = new ClassSkillKeyFilter();
+            this.classSkillKeyFilter = new ClassSkillKeyFilter(classManager, rempartState);
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
             this.mobParticipantsTracker = new MobParticipantsTracker();

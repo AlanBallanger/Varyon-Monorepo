@@ -79,9 +79,9 @@ public final class ClassSkillRegistry {
                 case 6  -> fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID;
                 case 7  -> fr.varyon.vrpg.classes.rempart.RempartPassifs.INFATIGABLE_NODE;
                 case 8  -> fr.varyon.vrpg.classes.rempart.RempartPassifs.CONTRE_OFFENSIF_NODE;
-                case 9  -> fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID;
+                case 9  -> fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID;
                 case 10 -> fr.varyon.vrpg.classes.rempart.RempartPassifs.DERNIER_BASTION_NODE;
-                case 11 -> fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID;
+                case 11 -> fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID;
                 default -> null;
             };
         }

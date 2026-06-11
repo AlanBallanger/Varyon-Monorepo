@@ -124,9 +124,9 @@ public final class ClassTalentTree {
             new Node("Second Souffle",        "Actif",  "Tant qu'il respire, il se bat.",                                            "Restaure instantanément une partie des points de vie.",                             RI + "Second_Souffle.png",         5),
             new Node("Infatigable",           "Passif", "Chaque coup arrêté est une force regagnée.",                                "Chaque blocage réussi restaure une partie des points de vie.",                      RI + "Infatigable.png",            5),
             new Node("Contre Offensif",       "Passif", "La meilleure défense, c'est de frapper fort après.",                        "Après un blocage réussi, la prochaine attaque inflige davantage de dégâts.",        RI + "Contre_Offensif.png",        5),
-            new Node("Garde Rapprochée",      "Actif",  "Aucun allié ne tombera tant qu'il sera là.",                                "Réduit les dégâts subis par toi et les alliés proches pendant quelques secondes.",  RI + "Garde Rapprochée.png",       5),
-            new Node("Dernier Bastion",       "Passif", "Sous 30 %, le rempart ne cède pas — il résiste.",                           "Sous 30 % de points de vie, subis moins de dégâts.",                               RI + "Dernier_Bastion.png",        5),
             new Node("Provocation",           "Actif",  "Attire la haine pour protéger les siens.",                                  "Force les ennemis proches à t'attaquer pendant quelques secondes.",                 RI + "Provocation.png",            5),
+            new Node("Dernier Bastion",       "Passif", "Sous 30 %, le rempart ne cède pas — il résiste.",                           "Sous 30 % de points de vie, subis moins de dégâts.",                               RI + "Dernier_Bastion.png",        5),
+            new Node("Garde Rapprochée",      "Actif",  "Aucun allié ne tombera tant qu'il sera là.",                                "Réduit les dégâts subis par toi et les alliés proches pendant quelques secondes.",  RI + "Garde Rapprochée.png",       5),
         });
     }
 

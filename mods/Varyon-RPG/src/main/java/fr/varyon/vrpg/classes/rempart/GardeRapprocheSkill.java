@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.rempart;
 public final class GardeRapprocheSkill {
 
     public static final String SKILL_ID       = "garde_rapprochee";
-    public static final String TALENT_NODE_ID = "rempart_9";
+    public static final String TALENT_NODE_ID = "rempart_11";
 
     private static final float[] DAMAGE_REDUCTION = {0.15f, 0.18f, 0.21f, 0.24f, 0.30f};
     private static final double  ALLY_RADIUS      = 6.0;

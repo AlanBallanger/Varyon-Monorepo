@@ -30,7 +30,6 @@ public final class OmbreStealthAttitudeProvider implements IAttitudeProvider {
             PlayerRef playerRef = accessor.getComponent(targetRef, PlayerRef.getComponentType());
             if (playerRef == null) return null;
             boolean inStealth = ombreState.isInStealth(playerRef.getUuid());
-            LOG.atInfo().log("[StealthProvider] player=" + playerRef.getUuid() + " inStealth=" + inStealth);
             if (inStealth) {
                 return Attitude.IGNORE;
             }

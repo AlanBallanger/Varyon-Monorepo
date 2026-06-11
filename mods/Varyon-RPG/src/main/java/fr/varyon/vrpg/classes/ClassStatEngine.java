@@ -59,7 +59,8 @@ public final class ClassStatEngine {
         int level = progress.getLevel();
         PlayerSpecialization spec = progress.getActiveSpec();
 
-        ClassPlayerStats stats = ClassStatDefinition.compute(level, spec);
+        int constitutionRank = acc.getTalentRank(activeClass, fr.varyon.vrpg.classes.rempart.RempartPassifs.CONSTITUTION_NODE);
+        ClassPlayerStats stats = ClassStatDefinition.compute(level, spec, constitutionRank);
         cache.put(uuid, stats);
 
         applyEntityStats(playerRef, stats);
