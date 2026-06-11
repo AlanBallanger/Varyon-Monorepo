@@ -47,14 +47,17 @@ public final class ClassSkillService {
     private final ClassManager classManager;
     private final DuellisteState duellisteState;
     private final OmbreState ombreState;
+    private final fr.varyon.vrpg.classes.rempart.RempartState rempartState;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
 
     public ClassSkillService(@Nonnull ClassManager classManager,
                              @Nonnull DuellisteState duellisteState,
-                             @Nonnull OmbreState ombreState) {
+                             @Nonnull OmbreState ombreState,
+                             @Nonnull fr.varyon.vrpg.classes.rempart.RempartState rempartState) {
         this.classManager = classManager;
         this.duellisteState = duellisteState;
         this.ombreState = ombreState;
+        this.rempartState = rempartState;
     }
 
     public boolean tryCast(@Nonnull String skillId,
@@ -98,6 +101,24 @@ public final class ClassSkillService {
         }
         if (ChaseOuverteSkill.SKILL_ID.equals(skillId)) {
             return tryCastChaseOuverte(uuid, playerRef, entityRef, store, commandBuffer);
+        }
+        if (fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID.equals(skillId)) {
+            return tryCastChargeLourde(uuid, playerRef, entityRef, store, commandBuffer);
+        }
+        if (fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID.equals(skillId)) {
+            return tryCastCoupDeBouclier(uuid, playerRef, entityRef, store);
+        }
+        if (fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID.equals(skillId)) {
+            return tryCastForteresse(uuid, playerRef);
+        }
+        if (fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID.equals(skillId)) {
+            return tryCastSecondSouffleRempart(uuid, playerRef, entityRef, store);
+        }
+        if (fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID.equals(skillId)) {
+            return tryCastGardeRapprochee(uuid, playerRef, entityRef, store);
+        }
+        if (fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID.equals(skillId)) {
+            return tryCastProvocation(uuid, playerRef, entityRef, store);
         }
         return false;
     }
@@ -907,6 +928,294 @@ public final class ClassSkillService {
         }
     }
 
+    private boolean isRempart(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.GUERRIER
+            && acc.getActiveSpec(PlayerClass.GUERRIER) == PlayerSpecialization.REMPART;
+    }
+
+    private boolean isHoldingOneHanded(@Nonnull PlayerRef playerRef) {
+        String id = getHeldItemId(playerRef);
+        if (id == null) return false;
+        fr.varyon.vrpg.classes.WeaponCategory cat = fr.varyon.vrpg.classes.WeaponCategory.fromItemId(id);
+        return cat == fr.varyon.vrpg.classes.WeaponCategory.EPEE
+            || cat == fr.varyon.vrpg.classes.WeaponCategory.DAGUE
+            || cat == fr.varyon.vrpg.classes.WeaponCategory.HACHE;
+    }
+
+    public boolean tryCastChargeLourde(@Nonnull UUID uuid,
+                                        @Nonnull PlayerRef playerRef,
+                                        @Nonnull Ref<EntityStore> entityRef,
+                                        @Nonnull Store<EntityStore> store,
+                                        @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRempart(acc)) return false;
+        if (!isHoldingOneHanded(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID, fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = hr.getDirection();
+                double dx = dir.x, dz = dir.z;
+                double len = Math.sqrt(dx*dx + dz*dz);
+                if (len > 1e-6) { dx /= len; dz /= len; }
+                double dist = fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.dashDistanceForRank(rank);
+                org.joml.Vector3d newPos = new org.joml.Vector3d(tc.getPosition().x + dx * dist, tc.getPosition().y, tc.getPosition().z + dz * dist);
+                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
+                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(curRot.pitch(), curRot.yaw(), curRot.roll());
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(newPos, keepRot);
+                tele.withoutVelocityReset();
+                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+
+                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float dmg = (weaponDmg > 0 ? weaponDmg : 1f) * fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.damagePctForRank(rank);
+                long casterIdx = entityRef.getIndex();
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                    store, tc.getPosition(), 2.5, targetRef -> {
+                        try {
+                            if (targetRef.getIndex() == casterIdx) return;
+                            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targetRef, store,
+                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+                        } catch (Exception ignored) {}
+                    }, ref -> ref.getIndex() != casterIdx);
+
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "StabDashCharged", true, commandBuffer != null ? commandBuffer : store);
+                ClassSkillSounds.playSkillSound("SFX_Sword_T2_Lunge_Local", playerRef, tc.getPosition(), commandBuffer);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID);
+        notifySkill(uuid, "Charge Lourde");
+        return true;
+    }
+
+    public boolean tryCastCoupDeBouclier(@Nonnull UUID uuid,
+                                          @Nonnull PlayerRef playerRef,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRempart(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID, fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store);
+        if (targeted == null) return false;
+
+        try {
+            int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            float dmg = (weaponDmg > 0 ? weaponDmg : 1f) * fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.damagePctForRank(rank);
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+
+            float stunSec = fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.stunMsForRank(rank) / 1000f;
+            int stunIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex("Vrpg_Ombre_Stun");
+            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect stunEffect =
+                (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(stunIdx);
+            if (stunEffect != null) {
+                com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                    store.getComponent(targeted, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                if (ec != null) ec.addEffect(targeted, stunEffect, stunSec,
+                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+            }
+
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Combat_Parry_Success", playerRef, tc.getPosition(), null);
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "SwingRight", true, store);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID);
+        notifySkill(uuid, "Coup de Bouclier");
+        return true;
+    }
+
+    public boolean tryCastForteresse(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRempart(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, fr.varyon.vrpg.classes.rempart.ForteresseSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID, fr.varyon.vrpg.classes.rempart.ForteresseSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rempart.ForteresseSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        rempartState.startForteresse(uuid, fr.varyon.vrpg.classes.rempart.ForteresseSkill.durationMsForRank(rank), fr.varyon.vrpg.classes.rempart.ForteresseSkill.damageReductionForRank(rank));
+        try {
+            ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, new org.joml.Vector3d(), null);
+        } catch (Exception ignored) {}
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID);
+        notifySkill(uuid, "Forteresse");
+        return true;
+    }
+
+    public boolean tryCastSecondSouffleRempart(@Nonnull UUID uuid,
+                                                @Nonnull PlayerRef playerRef,
+                                                @Nonnull Ref<EntityStore> entityRef,
+                                                @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRempart(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID, fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            Ref<EntityStore> ref = entityRef;
+            com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap stats =
+                store.getComponent(ref, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+            if (stats != null) {
+                int hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth();
+                var hp = stats.get(hIdx);
+                if (hp != null && hp.getMax() > 0) {
+                    float heal = hp.getMax() * fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.healPctForRank(rank);
+                    stats.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + heal));
+                }
+            }
+            ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, new org.joml.Vector3d(), null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID);
+        notifySkill(uuid, "Second Souffle");
+        return true;
+    }
+
+    public boolean tryCastGardeRapprochee(@Nonnull UUID uuid,
+                                           @Nonnull PlayerRef playerRef,
+                                           @Nonnull Ref<EntityStore> entityRef,
+                                           @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRempart(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID, fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        float reduction = fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.damageReductionForRank(rank);
+        long durationMs = fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.durationMsForRank(rank);
+        rempartState.startGardeRapprochee(uuid, durationMs, reduction);
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                double radius = fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.allyRadius();
+                long casterIdx = entityRef.getIndex();
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                    store, tc.getPosition(), radius, nearRef -> {
+                        try {
+                            if (nearRef.getIndex() == casterIdx) return;
+                            PlayerRef nearPlayer = store.getComponent(nearRef, PlayerRef.getComponentType());
+                            if (nearPlayer == null) return;
+                            rempartState.startGardeRapprochee(nearPlayer.getUuid(), durationMs, reduction);
+                        } catch (Exception ignored) {}
+                    }, ref -> ref.getIndex() != casterIdx);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID);
+        notifySkill(uuid, "Garde Rapprochée");
+        return true;
+    }
+
+    public boolean tryCastProvocation(@Nonnull UUID uuid,
+                                       @Nonnull PlayerRef playerRef,
+                                       @Nonnull Ref<EntityStore> entityRef,
+                                       @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRempart(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.GUERRIER, fr.varyon.vrpg.classes.rempart.ProvocationSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID, fr.varyon.vrpg.classes.rempart.ProvocationSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rempart.ProvocationSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        rempartState.startProvocation(uuid, fr.varyon.vrpg.classes.rempart.ProvocationSkill.durationMsForRank(rank));
+        fr.varyon.vrpg.classes.ombre.OmbreStealthAggroResetSystem.resetAggroAround(entityRef, store);
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                double radius = fr.varyon.vrpg.classes.rempart.ProvocationSkill.tauntRadius();
+                long casterIdx = entityRef.getIndex();
+                final Ref<EntityStore> casterRef = entityRef;
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                    store, tc.getPosition(), radius, npcRef -> {
+                        try {
+                            if (npcRef.getIndex() == casterIdx) return;
+                            com.hypixel.hytale.server.npc.entities.NPCEntity npc =
+                                store.getComponent(npcRef, com.hypixel.hytale.server.npc.entities.NPCEntity.getComponentType());
+                            if (npc == null) return;
+                            com.hypixel.hytale.server.npc.role.Role role = npc.getRole();
+                            if (role == null) return;
+                            try {
+                                java.lang.reflect.Field targetsField = role.getClass().getSuperclass() != null ?
+                                    getFieldRecursive(role.getClass(), "entityTargets") : null;
+                                java.lang.reflect.Field slotField = getFieldRecursive(role.getClass(), "defaultTargetSlot");
+                                if (targetsField != null && slotField != null) {
+                                    targetsField.setAccessible(true);
+                                    slotField.setAccessible(true);
+                                    int slot = slotField.getInt(role);
+                                    if (slot >= 0) {
+                                        Ref<EntityStore>[] targets = (Ref<EntityStore>[]) targetsField.get(role);
+                                        if (targets != null && slot < targets.length) {
+                                            targets[slot] = casterRef;
+                                        }
+                                    }
+                                }
+                            } catch (Exception ignored) {}
+                        } catch (Exception ignored) {}
+                    }, ref -> ref.getIndex() != casterIdx);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID);
+        notifySkill(uuid, "Provocation");
+        return true;
+    }
+
+    private static java.lang.reflect.Field getFieldRecursive(Class<?> clazz, String name) {
+        while (clazz != null) {
+            try { java.lang.reflect.Field f = clazz.getDeclaredField(name); f.setAccessible(true); return f; }
+            catch (NoSuchFieldException e) { clazz = clazz.getSuperclass(); }
+        }
+        return null;
+    }
+
     public long getCooldownTotalMs(@Nonnull String skillId, @Nonnull ClassAccount acc, @Nonnull PlayerClass cls) {
         if (AssautEclairSkill.SKILL_ID.equals(skillId))
             return AssautEclairSkill.cooldownMsForRank(acc.getTalentRank(cls, AssautEclairSkill.TALENT_NODE_ID));
@@ -932,6 +1241,18 @@ public final class ClassSkillService {
             return PasDeLOmbreSkill.cooldownMsForRank(acc.getTalentRank(cls, PasDeLOmbreSkill.TALENT_NODE_ID));
         if (ChaseOuverteSkill.SKILL_ID.equals(skillId))
             return ChaseOuverteSkill.cooldownMsForRank(acc.getTalentRank(cls, ChaseOuverteSkill.TALENT_NODE_ID));
+        if (fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID.equals(skillId))
+            return fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.TALENT_NODE_ID));
+        if (fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID.equals(skillId))
+            return fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.TALENT_NODE_ID));
+        if (fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID.equals(skillId))
+            return fr.varyon.vrpg.classes.rempart.ForteresseSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ForteresseSkill.TALENT_NODE_ID));
+        if (fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID.equals(skillId))
+            return fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.TALENT_NODE_ID));
+        if (fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID.equals(skillId))
+            return fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.TALENT_NODE_ID));
+        if (fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID.equals(skillId))
+            return fr.varyon.vrpg.classes.rempart.ProvocationSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ProvocationSkill.TALENT_NODE_ID));
         return 0L;
     }
 

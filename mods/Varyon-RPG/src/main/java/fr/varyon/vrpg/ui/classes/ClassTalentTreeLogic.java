@@ -74,8 +74,8 @@ public final class ClassTalentTreeLogic {
     @Nonnull
     public static String nodeKey(@Nonnull ClassAccount acc, @Nonnull PlayerClass activeClass, int nodeIndex) {
         fr.varyon.vrpg.classes.PlayerSpecialization spec = acc.getActiveSpec(activeClass);
-        if (spec == fr.varyon.vrpg.classes.PlayerSpecialization.OMBRE) {
-            return "ombre_" + nodeIndex;
+        if (spec != null) {
+            return spec.getId() + "_" + nodeIndex;
         }
         return String.valueOf(nodeIndex);
     }

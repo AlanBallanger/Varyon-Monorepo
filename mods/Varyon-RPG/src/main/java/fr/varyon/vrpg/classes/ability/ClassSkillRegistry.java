@@ -68,6 +68,23 @@ public final class ClassSkillRegistry {
                 default -> null;
             };
         }
+        if (activeClass == PlayerClass.GUERRIER && spec == PlayerSpecialization.REMPART) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.rempart.RempartPassifs.MAITRE_BOUCLIER_NODE;
+                case 2  -> fr.varyon.vrpg.classes.rempart.RempartPassifs.CONSTITUTION_NODE;
+                case 3  -> fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID;
+                case 5  -> fr.varyon.vrpg.classes.rempart.RempartPassifs.GARDE_IMPENETRABLE_NODE;
+                case 6  -> fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID;
+                case 7  -> fr.varyon.vrpg.classes.rempart.RempartPassifs.INFATIGABLE_NODE;
+                case 8  -> fr.varyon.vrpg.classes.rempart.RempartPassifs.CONTRE_OFFENSIF_NODE;
+                case 9  -> fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID;
+                case 10 -> fr.varyon.vrpg.classes.rempart.RempartPassifs.DERNIER_BASTION_NODE;
+                case 11 -> fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID;
+                default -> null;
+            };
+        }
         return null;
     }
 }

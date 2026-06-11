@@ -85,6 +85,16 @@ public final class ClassAccount {
         return sum;
     }
 
+    public int totalTalentRanksForTree(@Nonnull PlayerClass c, @Nullable PlayerSpecialization spec) {
+        String prefix = spec != null ? spec.getId() + "_" : null;
+        int sum = 0;
+        for (Map.Entry<String, Integer> e : talents.get(c).entrySet()) {
+            boolean inTree = prefix != null ? e.getKey().startsWith(prefix) : !e.getKey().contains("_");
+            if (inTree) sum += e.getValue();
+        }
+        return sum;
+    }
+
     public void resetTalents(@Nonnull PlayerClass c) {
         talents.get(c).clear();
     }
@@ -117,8 +127,12 @@ public final class ClassAccount {
     }
 
     public int availableTalentPoints(@Nonnull PlayerClass c) {
+        return availableTalentPoints(c, getActiveSpec(c));
+    }
+
+    public int availableTalentPoints(@Nonnull PlayerClass c, @Nullable PlayerSpecialization spec) {
         int earned = ClassXpCurve.talentPointsAtLevel(progress.get(c).getLevel());
-        return Math.max(0, earned - totalTalentRanks(c));
+        return Math.max(0, earned - totalTalentRanksForTree(c, spec));
     }
 
     @Nonnull

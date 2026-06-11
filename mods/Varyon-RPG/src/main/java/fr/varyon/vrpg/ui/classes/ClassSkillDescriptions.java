@@ -64,6 +64,18 @@ public final class ClassSkillDescriptions {
             case OmbrePassifs.EMBUSCADE_NODE         -> OmbrePassifs.embuscadeStatLine(rank);
             case OmbrePassifs.OMBRE_INSAISISSABLE_NODE -> OmbrePassifs.ombreInsaisissableStatLine(rank);
             case OmbrePassifs.INSTINCT_SURVIE_NODE   -> OmbrePassifs.instinctSurvieStatLine(rank);
+            case fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID      -> fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID    -> fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID        -> fr.varyon.vrpg.classes.rempart.ForteresseSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID     -> fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID    -> fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID       -> fr.varyon.vrpg.classes.rempart.ProvocationSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rempart.RempartPassifs.MAITRE_BOUCLIER_NODE     -> fr.varyon.vrpg.classes.rempart.RempartPassifs.maitreBouclierStatLine(rank);
+            case fr.varyon.vrpg.classes.rempart.RempartPassifs.CONSTITUTION_NODE        -> fr.varyon.vrpg.classes.rempart.RempartPassifs.constitutionStatLine(rank);
+            case fr.varyon.vrpg.classes.rempart.RempartPassifs.GARDE_IMPENETRABLE_NODE  -> fr.varyon.vrpg.classes.rempart.RempartPassifs.gardeImpenetrableStatLine(rank);
+            case fr.varyon.vrpg.classes.rempart.RempartPassifs.INFATIGABLE_NODE         -> fr.varyon.vrpg.classes.rempart.RempartPassifs.infatigableStatLine(rank);
+            case fr.varyon.vrpg.classes.rempart.RempartPassifs.CONTRE_OFFENSIF_NODE     -> fr.varyon.vrpg.classes.rempart.RempartPassifs.contreOffensifStatLine(rank);
+            case fr.varyon.vrpg.classes.rempart.RempartPassifs.DERNIER_BASTION_NODE     -> fr.varyon.vrpg.classes.rempart.RempartPassifs.dernierBastionStatLine(rank);
             default -> null;
         };
     }

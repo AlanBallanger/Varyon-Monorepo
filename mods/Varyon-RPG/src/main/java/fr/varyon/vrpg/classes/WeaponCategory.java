@@ -10,6 +10,7 @@ public enum WeaponCategory {
     DEUX_MAINS,
     DISTANCE,
     MAGIE,
+    BOUCLIER,
     AUTRE;
 
     @Nullable
@@ -23,6 +24,7 @@ public enum WeaponCategory {
         if (id.startsWith("weapon_axe")) return HACHE;
         if (id.startsWith("weapon_shortbow") || id.startsWith("weapon_crossbow") || id.startsWith("weapon_bow")) return DISTANCE;
         if (id.startsWith("weapon_staff") || id.startsWith("weapon_wand") || id.startsWith("weapon_spellbook")) return MAGIE;
+        if (id.startsWith("weapon_shield")) return BOUCLIER;
 
         return AUTRE;
     }
@@ -60,6 +62,7 @@ public enum WeaponCategory {
             case DEUX_MAINS -> spec.getWeaponDeuxMainsMult();
             case DISTANCE   -> spec.getWeaponDistanceMult();
             case MAGIE      -> spec.getWeaponMagieMult();
+            case BOUCLIER   -> 1.0;
             case AUTRE      -> 1.0;
         };
     }

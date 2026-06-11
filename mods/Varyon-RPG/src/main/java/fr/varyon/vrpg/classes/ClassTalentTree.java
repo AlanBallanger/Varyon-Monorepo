@@ -112,6 +112,22 @@ public final class ClassTalentTree {
             new Node("Instinct de Survie",    "Passif", "Sous 30 %, l'ombre ne meurt pas — elle s'adapte.",                          "Sous 30 % de points de vie, les chances d'esquive sont fortement augmentées.",       OI + "Instict_De_Survie.png",     5),
             new Node("Chasse Ouverte",        "Actif",  "Marquer une proie, c'est déjà la posséder.",                                "Marque une cible — toutes les attaques contre elle sont des coups critiques.",       OI + "Chasse_Ouverte.png",        5),
         });
+
+        final String RI = "Classes_Icons/Rampart/";
+        SPEC_TREES.put(PlayerSpecialization.REMPART, new Node[]{
+            new Node("Charge Lourde",         "Actif",  "Quand l'acier avance, rien ne résiste.",                                    "Charge en ligne droite en repoussant et frappant les ennemis sur le passage.",     RI + "Charge_Lourde.png",         5),
+            new Node("Maître du Bouclier",    "Passif", "Le bouclier est son arme autant que son épée.",                             "Gain d'expérience de classe augmenté lorsqu'un bouclier est équipé.",               RI + "Maitre_Du_Bouclier.png",     5),
+            new Node("Constitution de Fer",   "Passif", "Son corps est forgé dans la même matière que son armure.",                  "Augmente les points de vie maximum.",                                               RI + "Constitution_De_Fer.png",    5),
+            new Node("Coup de Bouclier",      "Actif",  "Un choc bien placé, et l'ennemi voit trente-six chandelles.",               "Frappe la cible avec le bouclier, l'étourdissant brièvement.",                      RI + "Coup_De_Bouclier.png",       5),
+            new Node("Forteresse",            "Actif",  "Debout. Immovable. Indestructible.",                                        "Réduit massivement les dégâts reçus pendant quelques secondes.",                    RI + "Forteresse.png",             5),
+            new Node("Garde Impénétrable",    "Passif", "Bloquer, c'est préparer la riposte.",                                       "Après un blocage réussi, les dégâts reçus sont réduits pendant quelques secondes.", RI + "Garde_Impénétrable.png",     5),
+            new Node("Second Souffle",        "Actif",  "Tant qu'il respire, il se bat.",                                            "Restaure instantanément une partie des points de vie.",                             RI + "Second_Souffle.png",         5),
+            new Node("Infatigable",           "Passif", "Chaque coup arrêté est une force regagnée.",                                "Chaque blocage réussi restaure une partie des points de vie.",                      RI + "Infatigable.png",            5),
+            new Node("Contre Offensif",       "Passif", "La meilleure défense, c'est de frapper fort après.",                        "Après un blocage réussi, la prochaine attaque inflige davantage de dégâts.",        RI + "Contre_Offensif.png",        5),
+            new Node("Garde Rapprochée",      "Actif",  "Aucun allié ne tombera tant qu'il sera là.",                                "Réduit les dégâts subis par toi et les alliés proches pendant quelques secondes.",  RI + "Garde Rapprochée.png",       5),
+            new Node("Dernier Bastion",       "Passif", "Sous 30 %, le rempart ne cède pas — il résiste.",                           "Sous 30 % de points de vie, subis moins de dégâts.",                               RI + "Dernier_Bastion.png",        5),
+            new Node("Provocation",           "Actif",  "Attire la haine pour protéger les siens.",                                  "Force les ennemis proches à t'attaquer pendant quelques secondes.",                 RI + "Provocation.png",            5),
+        });
     }
 
     @Nonnull

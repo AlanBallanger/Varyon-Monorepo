@@ -134,6 +134,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private OmbreState ombreState;
     private OmbrePoisonSystem ombrePoisonSystem;
     private OmbreSpeedSystem ombreSpeedSystem;
+    private fr.varyon.vrpg.classes.rempart.RempartState rempartState;
     private MiningHelmet miningHelmet;
     private GuardianStoneManager guardianManager;
     private MinerComboTracker comboTracker;
@@ -239,7 +240,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.ombreState = new OmbreState();
             this.ombrePoisonSystem = new OmbrePoisonSystem();
             this.ombreSpeedSystem = new OmbreSpeedSystem(classManager, ombreState);
-            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState);
+            this.rempartState = new fr.varyon.vrpg.classes.rempart.RempartState();
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState);
             this.classSkillKeyFilter = new ClassSkillKeyFilter();
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
@@ -464,6 +466,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 }
                 if (ref != null && ombreState != null) {
                     ombreState.cleanup(ref.getUuid());
+                }
+                if (ref != null && rempartState != null) {
+                    rempartState.cleanup(ref.getUuid());
                 }
                 if (ref != null && ombreSpeedSystem != null) {
                     ombreSpeedSystem.removePlayer(ref.getUuid());
@@ -810,6 +815,21 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     event -> injectOmbreStealthProvider(event.getWorld(), stealthProvider));
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register StartWorldEvent for OmbreStealthAttitudeProvider");
+            }
+        }
+
+        if (rempartState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(
+                    new fr.varyon.vrpg.classes.rempart.RempartIncomingDamageSystem(classManager, rempartState));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RempartIncomingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(
+                    new fr.varyon.vrpg.classes.rempart.RempartOutgoingDamageSystem(classManager, rempartState));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RempartOutgoingDamageSystem");
             }
         }
 
