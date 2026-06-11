@@ -193,6 +193,7 @@ public final class AdminUiEvents {
             if (mgr == null) return UiEventResult.NONE;
             PlayerClass playerClass = CLASS_ORDER[state.adminClassIndex];
             mgr.resetTalents(target.getUuid(), playerClass);
+            mgr.pruneInvalidSkillSlots(mgr.getOrLoad(target.getUuid()), playerClass);
             mgr.applyStats(target.getUuid(), target);
             return UiEventResult.REBUILD;
         }

@@ -182,6 +182,8 @@ public final class ClassUiEvents {
                 PlayerClass activeClass3 = acc3 != null ? acc3.getActiveClass() : null;
                 if (activeClass3 != null) {
                     classManager3.resetTalents(playerRef.getUuid(), activeClass3);
+                    ClassAccount acc3After = classManager3.getOrLoad(playerRef.getUuid());
+                    classManager3.pruneInvalidSkillSlots(acc3After, activeClass3);
                     classManager3.applyStats(playerRef.getUuid(), playerRef);
                 }
             }
