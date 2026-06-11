@@ -31,7 +31,7 @@ public final class OmbreIncomingDamageSystem extends DamageEventSystem {
 
     private final ClassManager classManager;
     private final OmbreState ombreState;
-    private int healthIdx = Integer.MIN_VALUE;
+    private Integer healthIdx = null;
 
     public OmbreIncomingDamageSystem(@Nonnull ClassManager classManager,
                                      @Nonnull OmbreState ombreState) {
@@ -111,7 +111,7 @@ public final class OmbreIncomingDamageSystem extends DamageEventSystem {
                               @Nonnull Store<EntityStore> store,
                               @Nonnull CommandBuffer<EntityStore> commandBuffer,
                               @Nonnull ArchetypeChunk<EntityStore> chunk, int index) {
-        if (healthIdx == Integer.MIN_VALUE) {
+        if (healthIdx == null) {
             try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
         }
         if (healthIdx < 0) return 1f;

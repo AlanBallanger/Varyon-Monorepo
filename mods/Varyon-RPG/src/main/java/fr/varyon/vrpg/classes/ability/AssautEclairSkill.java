@@ -36,8 +36,6 @@ public final class AssautEclairSkill {
     private static final double  DASH_DISTANCE = 5.0;
     private static final double  HIT_RADIUS    = 1.8;
 
-    private static int healthIdx = Integer.MIN_VALUE;
-
     private AssautEclairSkill() {}
 
     public static int   maxRank()                  { return DAMAGE_FACTOR.length; }

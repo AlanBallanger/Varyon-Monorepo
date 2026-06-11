@@ -37,6 +37,8 @@ import com.hypixel.hytale.server.core.util.NotificationUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public final class ClassSkillService {
@@ -44,11 +46,21 @@ public final class ClassSkillService {
     private static final com.hypixel.hytale.logger.HytaleLogger LOG =
         com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
 
+    @FunctionalInterface
+    private interface SkillCaster {
+        boolean cast(@Nonnull UUID uuid,
+                     @Nonnull PlayerRef playerRef,
+                     @Nonnull Ref<EntityStore> entityRef,
+                     @Nonnull Store<EntityStore> store,
+                     @Nullable CommandBuffer<EntityStore> commandBuffer);
+    }
+
     private final ClassManager classManager;
     private final DuellisteState duellisteState;
     private final OmbreState ombreState;
     private final fr.varyon.vrpg.classes.rempart.RempartState rempartState;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
+    private final Map<String, SkillCaster> casters = new HashMap<>();
 
     public ClassSkillService(@Nonnull ClassManager classManager,
                              @Nonnull DuellisteState duellisteState,
@@ -58,6 +70,46 @@ public final class ClassSkillService {
         this.duellisteState = duellisteState;
         this.ombreState = ombreState;
         this.rempartState = rempartState;
+        registerCasters();
+    }
+
+    private void registerCasters() {
+        casters.put(AssautEclairSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastAssautEclair(uuid, pr, er, st, cb));
+        casters.put(AssautBretteurSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastAssautBretteur(uuid, pr));
+        casters.put(DesarmementSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastDesarmement(uuid, pr, er, st));
+        casters.put(CoupEstocSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastCoupEstoc(uuid, pr, er, st));
+        casters.put(FeintSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastFeinte(uuid, pr, er, st));
+        casters.put(RiposteParfaiteSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastRiposte(uuid, pr, er, st));
+        casters.put(PasDesTenebresSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastPasDesTenebres(uuid, pr, er, st, cb));
+        casters.put(EcranDeFumeeSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastEcranDeFumee(uuid, pr));
+        casters.put(FrappeFataleSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastFrappeFatale(uuid, pr));
+        casters.put(DelugeDeGamesSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastDelugeDeGames(uuid, pr, er, st));
+        casters.put(PasDeLOmbreSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastPasDeLOmbre(uuid, pr, er, st));
+        casters.put(ChaseOuverteSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastChaseOuverte(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastChargeLourde(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastCoupDeBouclier(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastForteresse(uuid, pr));
+        casters.put(fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastSecondSouffleRempart(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastGardeRapprochee(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastProvocation(uuid, pr, er, st));
     }
 
     public boolean tryCast(@Nonnull String skillId,
@@ -66,61 +118,8 @@ public final class ClassSkillService {
                            @Nonnull Ref<EntityStore> entityRef,
                            @Nonnull Store<EntityStore> store,
                            @Nullable CommandBuffer<EntityStore> commandBuffer) {
-        if (AssautEclairSkill.SKILL_ID.equals(skillId)) {
-            return tryCastAssautEclair(uuid, playerRef, entityRef, store, commandBuffer);
-        }
-        if (AssautBretteurSkill.SKILL_ID.equals(skillId)) {
-            return tryCastAssautBretteur(uuid, playerRef);
-        }
-        if (DesarmementSkill.SKILL_ID.equals(skillId)) {
-            return tryCastDesarmement(uuid, playerRef, entityRef, store);
-        }
-        if (CoupEstocSkill.SKILL_ID.equals(skillId)) {
-            return tryCastCoupEstoc(uuid, playerRef, entityRef, store);
-        }
-        if (FeintSkill.SKILL_ID.equals(skillId)) {
-            return tryCastFeinte(uuid, playerRef, entityRef, store);
-        }
-        if (RiposteParfaiteSkill.SKILL_ID.equals(skillId)) {
-            return tryCastRiposte(uuid, playerRef, entityRef, store);
-        }
-        if (PasDesTenebresSkill.SKILL_ID.equals(skillId)) {
-            return tryCastPasDesTenebres(uuid, playerRef, entityRef, store, commandBuffer);
-        }
-        if (EcranDeFumeeSkill.SKILL_ID.equals(skillId)) {
-            return tryCastEcranDeFumee(uuid, playerRef);
-        }
-        if (FrappeFataleSkill.SKILL_ID.equals(skillId)) {
-            return tryCastFrappeFatale(uuid, playerRef);
-        }
-        if (DelugeDeGamesSkill.SKILL_ID.equals(skillId)) {
-            return tryCastDelugeDeGames(uuid, playerRef, entityRef, store);
-        }
-        if (PasDeLOmbreSkill.SKILL_ID.equals(skillId)) {
-            return tryCastPasDeLOmbre(uuid, playerRef, entityRef, store);
-        }
-        if (ChaseOuverteSkill.SKILL_ID.equals(skillId)) {
-            return tryCastChaseOuverte(uuid, playerRef, entityRef, store, commandBuffer);
-        }
-        if (fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID.equals(skillId)) {
-            return tryCastChargeLourde(uuid, playerRef, entityRef, store, commandBuffer);
-        }
-        if (fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID.equals(skillId)) {
-            return tryCastCoupDeBouclier(uuid, playerRef, entityRef, store);
-        }
-        if (fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID.equals(skillId)) {
-            return tryCastForteresse(uuid, playerRef);
-        }
-        if (fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID.equals(skillId)) {
-            return tryCastSecondSouffleRempart(uuid, playerRef, entityRef, store);
-        }
-        if (fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID.equals(skillId)) {
-            return tryCastGardeRapprochee(uuid, playerRef, entityRef, store);
-        }
-        if (fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID.equals(skillId)) {
-            return tryCastProvocation(uuid, playerRef, entityRef, store);
-        }
-        return false;
+        SkillCaster caster = casters.get(skillId);
+        return caster != null && caster.cast(uuid, playerRef, entityRef, store, commandBuffer);
     }
 
     public boolean tryCastAssautEclair(@Nonnull UUID uuid,
@@ -1216,44 +1215,54 @@ public final class ClassSkillService {
         return true;
     }
 
+    private interface CooldownResolver {
+        long resolve(@Nonnull ClassAccount acc, @Nonnull PlayerClass cls);
+    }
+
+    private static final Map<String, CooldownResolver> COOLDOWN_RESOLVERS = new HashMap<>();
+
+    static {
+        COOLDOWN_RESOLVERS.put(AssautEclairSkill.SKILL_ID,
+            (acc, cls) -> AssautEclairSkill.cooldownMsForRank(acc.getTalentRank(cls, AssautEclairSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(AssautBretteurSkill.SKILL_ID,
+            (acc, cls) -> AssautBretteurSkill.cooldownMsForRank(acc.getTalentRank(cls, AssautBretteurSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(DesarmementSkill.SKILL_ID,
+            (acc, cls) -> DesarmementSkill.cooldownMsForRank(acc.getTalentRank(cls, DesarmementSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(CoupEstocSkill.SKILL_ID,
+            (acc, cls) -> CoupEstocSkill.cooldownMsForRank(acc.getTalentRank(cls, CoupEstocSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(FeintSkill.SKILL_ID,
+            (acc, cls) -> FeintSkill.cooldownMsForRank(acc.getTalentRank(cls, FeintSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(RiposteParfaiteSkill.SKILL_ID,
+            (acc, cls) -> RiposteParfaiteSkill.cooldownMsForRank(acc.getTalentRank(cls, RiposteParfaiteSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(PasDesTenebresSkill.SKILL_ID,
+            (acc, cls) -> PasDesTenebresSkill.cooldownMsForRank(acc.getTalentRank(cls, PasDesTenebresSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(EcranDeFumeeSkill.SKILL_ID,
+            (acc, cls) -> EcranDeFumeeSkill.cooldownMsForRank(acc.getTalentRank(cls, EcranDeFumeeSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(FrappeFataleSkill.SKILL_ID,
+            (acc, cls) -> FrappeFataleSkill.cooldownMsForRank(acc.getTalentRank(cls, FrappeFataleSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(DelugeDeGamesSkill.SKILL_ID,
+            (acc, cls) -> DelugeDeGamesSkill.cooldownMsForRank(acc.getTalentRank(cls, DelugeDeGamesSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(PasDeLOmbreSkill.SKILL_ID,
+            (acc, cls) -> PasDeLOmbreSkill.cooldownMsForRank(acc.getTalentRank(cls, PasDeLOmbreSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(ChaseOuverteSkill.SKILL_ID,
+            (acc, cls) -> ChaseOuverteSkill.cooldownMsForRank(acc.getTalentRank(cls, ChaseOuverteSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rempart.ForteresseSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ForteresseSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rempart.ProvocationSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ProvocationSkill.TALENT_NODE_ID)));
+    }
+
     public long getCooldownTotalMs(@Nonnull String skillId, @Nonnull ClassAccount acc, @Nonnull PlayerClass cls) {
-        if (AssautEclairSkill.SKILL_ID.equals(skillId))
-            return AssautEclairSkill.cooldownMsForRank(acc.getTalentRank(cls, AssautEclairSkill.TALENT_NODE_ID));
-        if (AssautBretteurSkill.SKILL_ID.equals(skillId))
-            return AssautBretteurSkill.cooldownMsForRank(acc.getTalentRank(cls, AssautBretteurSkill.TALENT_NODE_ID));
-        if (DesarmementSkill.SKILL_ID.equals(skillId))
-            return DesarmementSkill.cooldownMsForRank(acc.getTalentRank(cls, DesarmementSkill.TALENT_NODE_ID));
-        if (CoupEstocSkill.SKILL_ID.equals(skillId))
-            return CoupEstocSkill.cooldownMsForRank(acc.getTalentRank(cls, CoupEstocSkill.TALENT_NODE_ID));
-        if (FeintSkill.SKILL_ID.equals(skillId))
-            return FeintSkill.cooldownMsForRank(acc.getTalentRank(cls, FeintSkill.TALENT_NODE_ID));
-        if (RiposteParfaiteSkill.SKILL_ID.equals(skillId))
-            return RiposteParfaiteSkill.cooldownMsForRank(acc.getTalentRank(cls, RiposteParfaiteSkill.TALENT_NODE_ID));
-        if (PasDesTenebresSkill.SKILL_ID.equals(skillId))
-            return PasDesTenebresSkill.cooldownMsForRank(acc.getTalentRank(cls, PasDesTenebresSkill.TALENT_NODE_ID));
-        if (EcranDeFumeeSkill.SKILL_ID.equals(skillId))
-            return EcranDeFumeeSkill.cooldownMsForRank(acc.getTalentRank(cls, EcranDeFumeeSkill.TALENT_NODE_ID));
-        if (FrappeFataleSkill.SKILL_ID.equals(skillId))
-            return FrappeFataleSkill.cooldownMsForRank(acc.getTalentRank(cls, FrappeFataleSkill.TALENT_NODE_ID));
-        if (DelugeDeGamesSkill.SKILL_ID.equals(skillId))
-            return DelugeDeGamesSkill.cooldownMsForRank(acc.getTalentRank(cls, DelugeDeGamesSkill.TALENT_NODE_ID));
-        if (PasDeLOmbreSkill.SKILL_ID.equals(skillId))
-            return PasDeLOmbreSkill.cooldownMsForRank(acc.getTalentRank(cls, PasDeLOmbreSkill.TALENT_NODE_ID));
-        if (ChaseOuverteSkill.SKILL_ID.equals(skillId))
-            return ChaseOuverteSkill.cooldownMsForRank(acc.getTalentRank(cls, ChaseOuverteSkill.TALENT_NODE_ID));
-        if (fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID.equals(skillId))
-            return fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.TALENT_NODE_ID));
-        if (fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.SKILL_ID.equals(skillId))
-            return fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.CoupDeBouclierSkill.TALENT_NODE_ID));
-        if (fr.varyon.vrpg.classes.rempart.ForteresseSkill.SKILL_ID.equals(skillId))
-            return fr.varyon.vrpg.classes.rempart.ForteresseSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ForteresseSkill.TALENT_NODE_ID));
-        if (fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.SKILL_ID.equals(skillId))
-            return fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.SecondSouffleSkill.TALENT_NODE_ID));
-        if (fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.SKILL_ID.equals(skillId))
-            return fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.GardeRapprocheSkill.TALENT_NODE_ID));
-        if (fr.varyon.vrpg.classes.rempart.ProvocationSkill.SKILL_ID.equals(skillId))
-            return fr.varyon.vrpg.classes.rempart.ProvocationSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rempart.ProvocationSkill.TALENT_NODE_ID));
-        return 0L;
+        CooldownResolver resolver = COOLDOWN_RESOLVERS.get(skillId);
+        return resolver != null ? resolver.resolve(acc, cls) : 0L;
     }
 
     public long getCooldownRemainingMs(@Nonnull UUID uuid, @Nonnull String skillId,

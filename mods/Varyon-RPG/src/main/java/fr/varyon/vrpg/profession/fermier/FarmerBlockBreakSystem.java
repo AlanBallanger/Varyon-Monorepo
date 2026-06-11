@@ -11,28 +11,23 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.command.system.CommandManager;
+import com.hypixel.hytale.server.core.console.ConsoleSender;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
-import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
-import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
-import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
-import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
-import com.hypixel.hytale.server.core.command.system.CommandManager;
-import com.hypixel.hytale.server.core.console.ConsoleSender;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.npc.NPCPlugin;
 import fr.varyon.vrpg.audio.TalentProcSounds;
 import fr.varyon.vrpg.config.VrpgConfig;
+import fr.varyon.vrpg.profession.BlockUtil;
 import fr.varyon.vrpg.rpg.PlayerAccount;
 import fr.varyon.vrpg.rpg.Profession;
 import fr.varyon.vrpg.rpg.ProfessionManager;
+import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -91,14 +86,14 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
         if (id.startsWith("*")) id = id.substring(1);
 
         if (!FarmerXpTable.isCrop(id)) {
-            if (dbg) LOGGER.atInfo().log("[Fermier-DBG] bloc ignorÃ© (pas une culture) id=" + id);
+            if (dbg) LOGGER.atInfo().log("[Fermier-DBG] bloc ignoré (pas une culture) id=" + id);
             return;
         }
         if (id.toLowerCase().contains("eternal")) return;
 
         String dbgId = dbg ? "[" + uuid.toString().substring(0, 8) + "|" + id + "] " : null;
 
-        // Node 6 â€” C-C-Combo : XP et loot bonus par combo (1%/combo au rang 1, +0.5% par rang)
+        // Node 6 – C-C-Combo : XP et loot bonus par combo (1%/combo au rang 1, +0.5% par rang)
         int comboRank = acc.getTalentRank(Profession.FERMIER, "6");
         int comboCount = comboTracker.onCropHarvested(uuid);
         double comboPercent = comboRank > 0 ? (0.01 + (comboRank - 1) * 0.005) : 0.0;
@@ -111,13 +106,8 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
             try {
                 ref = archetypeChunk.getReferenceTo(index);
                 if (ref != null && ref.isValid()) {
-                    Vector3d blockCenter = new Vector3d(
-                        event.getTargetBlock().x + 0.5,
-                        event.getTargetBlock().y + 0.5,
-                        event.getTargetBlock().z + 0.5
-                    );
                     TalentProcSounds.playCombo(acc, Profession.FERMIER, comboRank, comboCount,
-                        playerRef, ref, commandBuffer, blockCenter);
+                        playerRef, ref, commandBuffer, BlockUtil.blockCenter(event));
                 }
             } catch (Exception ignored) {}
         }
@@ -127,24 +117,20 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
         double baseXp = FarmerXpTable.getXp(id);
         double finalXp = baseXp * xpMult;
         if (dbg) LOGGER.atInfo().log(dbgId + "XP +" + finalXp
-            + " (base=" + baseXp + " Ã— " + String.format("%.3f", xpMult) + ")"
+            + " (base=" + baseXp + " × " + String.format("%.3f", xpMult) + ")"
             + (xpRank > 0 ? " [N1 MainsTerreuses rank=" + xpRank + "]" : ""));
         professionManager.addXp(uuid, Profession.FERMIER, finalXp, playerRef);
 
-        // Node 0 â€” Paniers Trop Pleins : chance de doubler les rÃ©coltes (5% par rang, max 25%)
+        // Node 0 – Paniers Trop Pleins : chance de doubler les récoltes (5% par rang, max 25%)
         int lootRank = acc.getTalentRank(Profession.FERMIER, "0");
         if (lootRank > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < lootRank * 0.05) {
             String extraItemId = FarmerXpTable.resolveCropItemId(id);
-            if (dbg) LOGGER.atInfo().log(dbgId + "N0 PaniersTropPleins PROC â€” item=" + extraItemId);
+            if (dbg) LOGGER.atInfo().log(dbgId + "N0 PaniersTropPleins PROC – item=" + extraItemId);
             if (extraItemId != null) {
                 try {
                     if (ref == null) ref = archetypeChunk.getReferenceTo(index);
                     if (ref != null && ref.isValid()) {
-                        Vector3d blockCenter = new Vector3d(
-                            event.getTargetBlock().x + 0.5,
-                            event.getTargetBlock().y + 0.5,
-                            event.getTargetBlock().z + 0.5
-                        );
+                        Vector3d blockCenter = BlockUtil.blockCenter(event);
                         TalentProcSounds.playLootDouble(acc, Profession.FERMIER, playerRef, ref, commandBuffer, blockCenter);
                         dropItemAtBlock(commandBuffer, extraItemId, blockCenter);
                     } else {
@@ -156,21 +142,16 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
             }
         }
 
-        // Node 6 â€” C-C-Combo loot : drop bonus proportionnel au combo
+        // Node 6 – C-C-Combo loot : drop bonus proportionnel au combo
         if (comboRank > 0 && comboCount > 0 && event.getTargetBlock() != null
                 && RANDOM.nextDouble() < comboBonus) {
             String comboItemId = FarmerXpTable.resolveCropItemId(id);
-            if (dbg) LOGGER.atInfo().log(dbgId + "N6 CCombo loot PROC â€” item=" + comboItemId);
+            if (dbg) LOGGER.atInfo().log(dbgId + "N6 CCombo loot PROC – item=" + comboItemId);
             if (comboItemId != null) {
                 try {
                     if (ref == null) ref = archetypeChunk.getReferenceTo(index);
                     if (ref != null && ref.isValid()) {
-                        Vector3d blockCenter = new Vector3d(
-                            event.getTargetBlock().x + 0.5,
-                            event.getTargetBlock().y + 0.5,
-                            event.getTargetBlock().z + 0.5
-                        );
-                        dropItemAtBlock(commandBuffer, comboItemId, blockCenter);
+                        dropItemAtBlock(commandBuffer, comboItemId, BlockUtil.blockCenter(event));
                     }
                 } catch (Exception e) {
                     LOGGER.atWarning().withCause(e).log(dbgId + "N6 CCombo loot drop ERREUR item=" + comboItemId);
@@ -178,22 +159,18 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
             }
         }
 
-        // Node 5 â€” Grains Sans Fin : chance d'obtenir une graine Ã©ternelle (0.5/0.75/1/1.25/1.5% par rang)
+        // Node 5 – Grains Sans Fin : chance d'obtenir une graine éternelle (0.5/0.75/1/1.25/1.5% par rang)
         int grainRank = acc.getTalentRank(Profession.FERMIER, "5");
         if (grainRank > 0 && event.getTargetBlock() != null) {
             double chance = ETERNAL_SEED_CHANCES[Math.min(grainRank, ETERNAL_SEED_CHANCES.length) - 1];
             if (RANDOM.nextDouble() < chance) {
                 String eternalSeedId = FarmerXpTable.resolveEternalSeedId(id);
-                if (dbg) LOGGER.atInfo().log(dbgId + "N5 GrainsSansFin PROC â€” item=" + eternalSeedId);
+                if (dbg) LOGGER.atInfo().log(dbgId + "N5 GrainsSansFin PROC – item=" + eternalSeedId);
                 if (eternalSeedId != null) {
                     try {
                         if (ref == null) ref = archetypeChunk.getReferenceTo(index);
                         if (ref != null && ref.isValid()) {
-                            Vector3d blockCenter = new Vector3d(
-                                event.getTargetBlock().x + 0.5,
-                                event.getTargetBlock().y + 0.5,
-                                event.getTargetBlock().z + 0.5
-                            );
+                            Vector3d blockCenter = BlockUtil.blockCenter(event);
                             TalentProcSounds.playTalent(acc, Profession.FERMIER, "5", TalentProcSounds.IMMORTEL_SOUND_ID,
                                 playerRef, ref, commandBuffer, blockCenter);
                             dropItemAtBlock(commandBuffer, eternalSeedId, blockCenter);
@@ -207,27 +184,27 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
             }
         }
 
-        // Node 11 â€” Gardiens des Champs : chance de faire apparaÃ®tre un gardien (5% par rang)
+        // Node 11 – Gardiens des Champs : chance de faire apparaître un gardien (5% par rang)
         int guardianRank = acc.getTalentRank(Profession.FERMIER, "11");
         if (guardianRank > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < guardianRank * 0.05) {
             int bx = event.getTargetBlock().x;
             int by = event.getTargetBlock().y;
             int bz = event.getTargetBlock().z;
-            if (dbg) LOGGER.atInfo().log(dbgId + "N11 GardienDesChamps PROC â€” pos(" + bx + "," + by + "," + bz + ")");
-            Vector3d spawnPos = new Vector3d(bx + 0.5, by, bz + 0.5);
+            if (dbg) LOGGER.atInfo().log(dbgId + "N11 GardienDesChamps PROC – pos(" + bx + "," + by + "," + bz + ")");
             try {
                 Player player = playerRef.getComponent(Player.getComponentType());
                 World world = player != null ? player.getWorld() : null;
                 if (world != null) {
                     boolean soundOn = acc.isTalentSoundEnabled(Profession.FERMIER, "11");
-                    FarmerGuardianSpawner.scheduleSpawn(guardianCropManager, world, spawnPos, soundOn);
+                    FarmerGuardianSpawner.scheduleSpawn(guardianCropManager, world,
+                        new Vector3d(bx + 0.5, by, bz + 0.5), soundOn);
                 }
             } catch (Exception e) {
                 if (dbg) LOGGER.atWarning().withCause(e).log(dbgId + "N11 GardienDesChamps schedule ERREUR");
             }
         }
 
-        // Node 9 â€” Casse-CroÃ»te Fermier : chance de restaurer faim ou soif (1/1.25/1.5/1.75/2% par rang)
+        // Node 9 – Casse-Croûte Fermier : chance de restaurer faim ou soif (1/1.25/1.5/1.75/2% par rang)
         int snackRank = acc.getTalentRank(Profession.FERMIER, "9");
         if (snackRank > 0) {
             double snackChance = SNACK_CHANCES[Math.min(snackRank, SNACK_CHANCES.length) - 1];
@@ -235,17 +212,12 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
                 String username = playerRef.getUsername();
                 if (username != null) {
                     String cmd = RANDOM.nextBoolean() ? "hset " + username + " 100" : "wset " + username + " 100";
-                    if (dbg) LOGGER.atInfo().log(dbgId + "N9 CasseCroute PROC â€” cmd=" + cmd);
+                    if (dbg) LOGGER.atInfo().log(dbgId + "N9 CasseCroute PROC – cmd=" + cmd);
                     try {
                         if (ref == null) ref = archetypeChunk.getReferenceTo(index);
                         if (ref != null && ref.isValid() && event.getTargetBlock() != null) {
-                            Vector3d blockCenter = new Vector3d(
-                                event.getTargetBlock().x + 0.5,
-                                event.getTargetBlock().y + 0.5,
-                                event.getTargetBlock().z + 0.5
-                            );
                             TalentProcSounds.playTalent(acc, Profession.FERMIER, "9", TalentProcSounds.REFEED_SOUND_ID,
-                                playerRef, ref, commandBuffer, blockCenter);
+                                playerRef, ref, commandBuffer, BlockUtil.blockCenter(event));
                         }
                         CommandManager.get().handleCommand(ConsoleSender.INSTANCE, cmd);
                     } catch (Exception e) {
@@ -256,19 +228,18 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
         }
     }
 
-    private void handleGuardianCropBreak(@Nonnull BreakBlockEvent event,
-                                          @Nonnull PlayerRef playerRef,
-                                          @Nonnull Store<EntityStore> store,
-                                          int bx, int by, int bz) {
-        LOGGER.atInfo().log("[GardienChamps] handleGuardianCropBreak â€” pos(" + bx + "," + by + "," + bz + ")");
+    void handleGuardianCropBreak(@Nonnull BreakBlockEvent event,
+                                  @Nonnull PlayerRef playerRef,
+                                  @Nonnull Store<EntityStore> store,
+                                  int bx, int by, int bz) {
+        LOGGER.atInfo().log("[GardienChamps] handleGuardianCropBreak – pos(" + bx + "," + by + "," + bz + ")");
         try {
             Player player = playerRef.getComponent(Player.getComponentType());
             World world = player != null ? player.getWorld() : null;
             if (world == null) {
-                LOGGER.atWarning().log("[GardienChamps] world null â€” abandon spawn");
+                LOGGER.atWarning().log("[GardienChamps] world null – abandon spawn");
                 return;
             }
-
             FarmerGuardianSpawner.scheduleSpawn(guardianCropManager, world, new Vector3d(bx + 0.5, by, bz + 0.5), true);
             try {
                 world.setBlock(bx, by, bz, "Empty");
@@ -289,7 +260,8 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
         if (stack.isEmpty() || !stack.isValid()) return;
         float vx = (RANDOM.nextFloat() - 0.5f) * 2.5f;
         float vz = (RANDOM.nextFloat() - 0.5f) * 2.5f;
-        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, 3.25f, vz);
+        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position,
+            com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, 3.25f, vz);
         if (holder == null) return;
         accessor.addEntity(holder, AddReason.SPAWN);
     }

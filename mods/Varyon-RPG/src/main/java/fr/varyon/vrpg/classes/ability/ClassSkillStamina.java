@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 
 public final class ClassSkillStamina {
 
-    private static int staminaIdx = Integer.MIN_VALUE;
+    private static Integer staminaIdx = null;
 
     private ClassSkillStamina() {}
 
@@ -35,7 +35,7 @@ public final class ClassSkillStamina {
     }
 
     private static int staminaIndex() {
-        if (staminaIdx == Integer.MIN_VALUE) {
+        if (staminaIdx == null) {
             try {
                 staminaIdx = DefaultEntityStatTypes.getStamina();
             } catch (Exception e) {

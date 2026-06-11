@@ -36,7 +36,7 @@ public final class ClassKillXpSystem {
     private final ClassManager classManager;
     private final MobParticipantsTracker participantsTracker;
     private final Map<UUID, Map<String, KillTracker>> killTrackers = new ConcurrentHashMap<>();
-    private int healthStatIndex = Integer.MIN_VALUE;
+    private Integer healthStatIndex = null;
 
     public ClassKillXpSystem(@Nonnull ClassManager classManager,
                              @Nonnull MobParticipantsTracker participantsTracker) {
@@ -222,7 +222,7 @@ public final class ClassKillXpSystem {
     }
 
     private int healthStatIndex() {
-        if (healthStatIndex == Integer.MIN_VALUE) {
+        if (healthStatIndex == null) {
             try {
                 healthStatIndex = DefaultEntityStatTypes.getHealth();
             } catch (Exception e) {

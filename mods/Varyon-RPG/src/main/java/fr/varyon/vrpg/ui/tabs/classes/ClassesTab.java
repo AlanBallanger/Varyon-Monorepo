@@ -223,18 +223,18 @@ public final class ClassesTab {
         }
     }
 
-    private static int hIdx = Integer.MIN_VALUE;
-    private static int sIdx = Integer.MIN_VALUE;
+    private static Integer hIdx = null;
+    private static Integer sIdx = null;
 
     private static int healthIndex() {
-        if (hIdx == Integer.MIN_VALUE) {
+        if (hIdx == null) {
             try { hIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { hIdx = -1; }
         }
         return hIdx;
     }
 
     private static int staminaIndex() {
-        if (sIdx == Integer.MIN_VALUE) {
+        if (sIdx == null) {
             try { sIdx = DefaultEntityStatTypes.getStamina(); } catch (Exception e) { sIdx = -1; }
         }
         return sIdx;

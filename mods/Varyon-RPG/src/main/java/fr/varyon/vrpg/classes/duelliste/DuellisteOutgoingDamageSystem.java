@@ -34,7 +34,7 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
     private final ClassManager classManager;
     private final DuellisteState state;
     private final DuellisteBleedSystem bleedSystem;
-    private int healthIdx = Integer.MIN_VALUE;
+    private Integer healthIdx = null;
 
     public DuellisteOutgoingDamageSystem(@Nonnull ClassManager classManager,
                                          @Nonnull DuellisteState state,
@@ -206,7 +206,7 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
     }
 
     private float getMaxHp(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
-        if (healthIdx == Integer.MIN_VALUE) {
+        if (healthIdx == null) {
             try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
         }
         if (healthIdx < 0) return 0f;

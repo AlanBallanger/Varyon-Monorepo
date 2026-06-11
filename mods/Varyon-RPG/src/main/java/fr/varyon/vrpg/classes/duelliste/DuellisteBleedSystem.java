@@ -25,7 +25,7 @@ public final class DuellisteBleedSystem extends EntityTickingSystem<EntityStore>
     private static final int    TICKS_TOTAL      = (int) (DuellistePassifs.BLEED_DURATION_MS / TICK_INTERVAL_MS);
 
     private final ConcurrentHashMap<Integer, BleedState> bleeds = new ConcurrentHashMap<>();
-    private int healthIdx = Integer.MIN_VALUE;
+    private Integer healthIdx = null;
 
     private static final class BleedState {
         final float damagePerTick;
@@ -86,7 +86,7 @@ public final class DuellisteBleedSystem extends EntityTickingSystem<EntityStore>
     }
 
     private int healthIndex() {
-        if (healthIdx == Integer.MIN_VALUE) {
+        if (healthIdx == null) {
             try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
         }
         return healthIdx;

@@ -34,6 +34,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import fr.varyon.vrpg.audio.TalentProcSounds;
 import fr.varyon.vrpg.config.VrpgConfig;
+import fr.varyon.vrpg.profession.BlockUtil;
 import fr.varyon.vrpg.rpg.PlayerAccount;
 import fr.varyon.vrpg.rpg.Profession;
 import fr.varyon.vrpg.rpg.ProfessionManager;
@@ -105,7 +106,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
 
         String rawId = String.valueOf(blockType.getId());
         String xpKey = MinerXpTable.resolveXpKey(rawId);
-        long baseXp = MinerXpTable.getXp(xpKey);
+        double baseXp = MinerXpTable.getXp(xpKey);
         boolean isOre = baseXp > 0;
         boolean isRock = rawId.toLowerCase().contains("rock");
         if (!isOre && !isRock) return;
@@ -118,15 +119,17 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
         if (acc == null) return;
         if (acc.getActiveSlot0() != Profession.MINEUR && acc.getActiveSlot1() != Profession.MINEUR) return;
 
+        boolean dbg = VrpgConfig.isDebugTalents();
+        String dbgId = dbg ? "[" + playerUuid.toString().substring(0, 8) + "|" + rawId + "] " : null;
+
+        if (acc.getActiveSlot0() != Profession.MINEUR && acc.getActiveSlot1() != Profession.MINEUR) return;
+
         Player player = null;
         InventoryComponent.Hotbar hotbar = null;
         try {
             player = playerRef.getComponent(Player.getComponentType());
             hotbar = playerRef.getComponent(InventoryComponent.Hotbar.getComponentType());
         } catch (Exception ignored) {}
-
-        boolean dbg = VrpgConfig.isDebugTalents();
-        String dbgId = dbg ? "[" + playerUuid.toString().substring(0, 8) + "|" + rawId + "] " : null;
 
         if (isOre) {
             // Node 0 -- Poches Pleines : chance de doubler les ressources (5% par rang, max 25%)
@@ -138,11 +141,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                     try {
                         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
                         if (ref != null && ref.isValid()) {
-                            Vector3d blockCenter = new Vector3d(
-                                event.getTargetBlock().x + 0.5,
-                                event.getTargetBlock().y + 0.5,
-                                event.getTargetBlock().z + 0.5
-                            );
+                            Vector3d blockCenter = BlockUtil.blockCenter(event);
                             TalentProcSounds.playLootDouble(acc, Profession.MINEUR, playerRef, ref, commandBuffer, blockCenter);
                             dropOreAtBlock(commandBuffer, extraItemId, blockCenter);
                         } else {
@@ -162,11 +161,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                     try {
                         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
                         if (ref != null && ref.isValid()) {
-                            Vector3d blockCenter = new Vector3d(
-                                event.getTargetBlock().x + 0.5,
-                                event.getTargetBlock().y + 0.5,
-                                event.getTargetBlock().z + 0.5
-                            );
+                            Vector3d blockCenter = BlockUtil.blockCenter(event);
                             TalentProcSounds.playFantomatique(acc, Profession.MINEUR, playerRef, ref, commandBuffer, blockCenter);
                             dropOreAtBlock(commandBuffer, "Ore_Corrupted", blockCenter);
                         }
@@ -194,11 +189,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                 try {
                     Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
                     if (ref != null && ref.isValid()) {
-                        Vector3d blockCenter = new Vector3d(
-                            event.getTargetBlock().x + 0.5,
-                            event.getTargetBlock().y + 0.5,
-                            event.getTargetBlock().z + 0.5
-                        );
+                        Vector3d blockCenter = BlockUtil.blockCenter(event);
                         TalentProcSounds.playCombo(acc, Profession.MINEUR, comboRank, comboCount,
                             playerRef, ref, commandBuffer, blockCenter);
                     }
@@ -219,11 +210,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                     try {
                         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
                         if (ref != null && ref.isValid()) {
-                            Vector3d blockCenter = new Vector3d(
-                                event.getTargetBlock().x + 0.5,
-                                event.getTargetBlock().y + 0.5,
-                                event.getTargetBlock().z + 0.5
-                            );
+                            Vector3d blockCenter = BlockUtil.blockCenter(event);
                             dropOreAtBlock(commandBuffer, extraItemId, blockCenter);
                         } else {
                             if (dbg) LOGGER.atWarning().log(dbgId + "N5 CCombo loot ref null/invalid");
@@ -248,7 +235,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
                         if (dbg) LOGGER.atInfo().log(dbgId + "N8 ChantVeine PROC -- " + vein.size() + " blocs");
                         if (vein.size() > 1) {
                             Ref<EntityStore> playerEntityRef = archetypeChunk.getReferenceTo(index);
-                            Vector3d blockCenter = new Vector3d(bx + 0.5, by + 0.5, bz + 0.5);
+                            Vector3d blockCenter = BlockUtil.blockCenter(bx, by, bz);
                             if (playerEntityRef != null && playerEntityRef.isValid()
                                     && acc.isTalentSoundEnabled(Profession.MINEUR, CHANT_VEINE_NODE_ID)) {
                                 playTalentProcSound(CHANT_VEINE_SOUND_ID, playerRef, playerEntityRef, commandBuffer,
@@ -470,7 +457,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
     private void applyVeinBlockDrops(@Nonnull PlayerAccount acc, @Nonnull UUID playerUuid,
             @Nonnull PlayerRef playerRef, @Nullable Ref<EntityStore> playerEntityRef,
             @Nonnull CommandBuffer<EntityStore> buffer, @Nullable Player player,
-            @Nonnull String rawId, long baseXp, double xpRankMult, int comboRank,
+            @Nonnull String rawId, double baseXp, double xpRankMult, int comboRank,
             int[] pos, boolean dbg, @Nullable String dbgId) {
         int comboCount = comboTracker.onOreMined(playerUuid);
         double comboPercent = comboRank > 0 ? (0.005 + (comboRank - 1) * 0.005) : 0.0;

@@ -34,7 +34,7 @@ public final class PerceeSkill {
     private static final double  DASH_DISTANCE     = 5.0;
     private static final double  HIT_RADIUS        = 1.8;
 
-    private static int healthIdx = Integer.MIN_VALUE;
+    private static Integer healthIdx = null;
 
     private PerceeSkill() {}
 
@@ -107,7 +107,7 @@ public final class PerceeSkill {
 
     private static float getHpPercent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
         try {
-            if (healthIdx == Integer.MIN_VALUE) {
+            if (healthIdx == null) {
                 try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
             }
             if (healthIdx < 0) return 0f;

@@ -21,11 +21,11 @@ public final class ClassStatEngine {
 
     private final ConcurrentHashMap<UUID, ClassPlayerStats> cache = new ConcurrentHashMap<>();
 
-    private int healthIdx  = Integer.MIN_VALUE;
-    private int staminaIdx = Integer.MIN_VALUE;
+    private Integer healthIdx  = null;
+    private Integer staminaIdx = null;
 
     private int getHealthIdx() {
-        if (healthIdx == Integer.MIN_VALUE) {
+        if (healthIdx == null) {
             try { healthIdx = DefaultEntityStatTypes.getHealth(); }
             catch (Exception e) { healthIdx = -1; }
         }
@@ -33,7 +33,7 @@ public final class ClassStatEngine {
     }
 
     private int getStaminaIdx() {
-        if (staminaIdx == Integer.MIN_VALUE) {
+        if (staminaIdx == null) {
             try { staminaIdx = DefaultEntityStatTypes.getStamina(); }
             catch (Exception e) { staminaIdx = -1; }
         }

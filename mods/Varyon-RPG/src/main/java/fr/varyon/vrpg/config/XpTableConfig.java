@@ -18,11 +18,11 @@ public final class XpTableConfig {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-    private static Map<String, Long> minerXp = Collections.emptyMap();
+    private static Map<String, Double> minerXp = Collections.emptyMap();
 
     private XpTableConfig() {}
 
-    public static Map<String, Long> getMinerXp() { return minerXp; }
+    public static Map<String, Double> getMinerXp() { return minerXp; }
 
     public static void load(Path dataDir) {
         Path file = dataDir.resolve("profession_profession_xp_tables.toml");
@@ -34,9 +34,9 @@ public final class XpTableConfig {
             Map<String, Map<String, String>> sections = parseSections(lines);
 
             // [mineur]
-            Map<String, Long> miner = new HashMap<>();
+            Map<String, Double> miner = new HashMap<>();
             for (Map.Entry<String, String> e : sections.getOrDefault("mineur", Collections.emptyMap()).entrySet()) {
-                miner.put(e.getKey(), parseLong(e.getValue(), 0L));
+                miner.put(e.getKey(), parseDouble(e.getValue(), 0.0));
             }
             minerXp = Collections.unmodifiableMap(miner);
 

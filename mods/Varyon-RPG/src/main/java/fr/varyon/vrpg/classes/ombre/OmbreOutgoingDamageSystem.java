@@ -33,7 +33,7 @@ public final class OmbreOutgoingDamageSystem extends DamageEventSystem {
     private final ClassManager classManager;
     private final OmbreState ombreState;
     private final OmbrePoisonSystem poisonSystem;
-    private int healthIdx = Integer.MIN_VALUE;
+    private Integer healthIdx = null;
 
     public OmbreOutgoingDamageSystem(@Nonnull ClassManager classManager,
                                      @Nonnull OmbreState ombreState,
@@ -203,7 +203,7 @@ public final class OmbreOutgoingDamageSystem extends DamageEventSystem {
     }
 
     private float getMaxHp(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
-        if (healthIdx == Integer.MIN_VALUE) {
+        if (healthIdx == null) {
             try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
         }
         if (healthIdx < 0) return 0f;
@@ -214,7 +214,7 @@ public final class OmbreOutgoingDamageSystem extends DamageEventSystem {
     }
 
     public float getTargetHpRatio(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
-        if (healthIdx == Integer.MIN_VALUE) {
+        if (healthIdx == null) {
             try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
         }
         if (healthIdx < 0) return 1f;

@@ -54,7 +54,7 @@ public final class MinerXpTable {
         return null;
     }
 
-    public static long getXp(String xpKey) {
-        return XpTableConfig.getMinerXp().getOrDefault(xpKey, 0L);
+    public static double getXp(String xpKey) {
+        return XpTableConfig.getMinerXp().getOrDefault(xpKey, 0.0);
     }
 }

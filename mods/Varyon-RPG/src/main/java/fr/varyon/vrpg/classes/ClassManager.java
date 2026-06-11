@@ -4,152 +4,72 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
+import fr.varyon.vrpg.rpg.AbstractPlayerManager;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-public final class ClassManager {
+public final class ClassManager extends AbstractPlayerManager<ClassAccount, PlayerClass> {
 
     private static final HytaleLogger LOGGER = HytaleLogger.getLogger().getSubLogger("VaryonRPG-Classes");
-    private static final long AUTOSAVE_SECONDS = 30L;
     private static final long XP_NOTIF_DEBOUNCE_MS = 1500L;
 
     private final SqliteClassStorage storage;
     private final ClassStatEngine statEngine = new ClassStatEngine();
-    private final ConcurrentHashMap<UUID, ClassAccount> cache = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, ReentrantLock> locks = new ConcurrentHashMap<>();
-    private final Set<UUID> dirty = ConcurrentHashMap.newKeySet();
-    private final ConcurrentHashMap<UUID, Map<PlayerClass, Double>> xpFractionBank = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler;
 
     public ClassManager(@Nonnull Path dataDirectory) {
+        super(LOGGER, "VaryonRPG-Classes-AutoSave");
         this.storage = new SqliteClassStorage(dataDirectory);
         this.storage.initialize().join();
-        this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "VaryonRPG-Classes-AutoSave");
-            t.setDaemon(false);
-            return t;
-        });
-        this.scheduler.scheduleAtFixedRate(this::flushDirty, AUTOSAVE_SECONDS, AUTOSAVE_SECONDS, TimeUnit.SECONDS);
         LOGGER.at(Level.INFO).log("ClassManager ready (auto-save %ds)", AUTOSAVE_SECONDS);
     }
 
-    private ReentrantLock lockFor(UUID uuid) {
-        return locks.computeIfAbsent(uuid, k -> new ReentrantLock());
+    @Override
+    protected ClassAccount loadAccount(@Nonnull UUID uuid) {
+        return storage.loadPlayer(uuid).join();
     }
 
-    public void ensureAccount(@Nonnull UUID uuid, @Nullable String playerName) {
-        cache.computeIfAbsent(uuid, k -> storage.loadPlayer(k).join());
-        if (playerName != null) {
-            ReentrantLock lock = lockFor(uuid);
-            lock.lock();
-            try {
-                ClassAccount acc = cache.get(uuid);
-                if (acc != null && !playerName.equals(acc.getPlayerName())) {
-                    acc.setPlayerName(playerName);
-                    dirty.add(uuid);
-                }
-            } finally {
-                lock.unlock();
-            }
-        }
+    @Override
+    protected String getPlayerName(@Nonnull ClassAccount account) {
+        return account.getPlayerName();
     }
 
-    @Nullable
-    public ClassAccount getAccount(@Nonnull UUID uuid) {
-        return cache.get(uuid);
+    @Override
+    protected void setPlayerName(@Nonnull ClassAccount account, @Nonnull String name) {
+        account.setPlayerName(name);
     }
 
-    @Nonnull
-    public ClassAccount getOrLoad(@Nonnull UUID uuid) {
-        return cache.computeIfAbsent(uuid, k -> storage.loadPlayer(k).join());
+    @Override
+    protected int applyWholeXp(@Nonnull ClassAccount account, @Nonnull PlayerClass key, long wholeXp) {
+        return account.getProgress(key).addXp(wholeXp);
     }
 
-    public void markDirty(@Nonnull UUID uuid) {
-        dirty.add(uuid);
-    }
-
-    public int addXp(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, double amount) {
-        if (amount <= 0.0) return 0;
-        ReentrantLock lock = lockFor(uuid);
-        lock.lock();
-        try {
-            Map<PlayerClass, Double> bank = xpFractionBank.computeIfAbsent(uuid, k -> new HashMap<>());
-            double banked = bank.getOrDefault(playerClass, 0.0) + amount;
-            long wholeXp = (long) banked;
-            bank.put(playerClass, banked - wholeXp);
-            ClassAccount acc = getOrLoad(uuid);
-            int levelsGained = wholeXp > 0 ? acc.getProgress(playerClass).addXp(wholeXp) : 0;
-            dirty.add(uuid);
-            return levelsGained;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public int addXp(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, double amount,
-                     @Nonnull PlayerRef playerRef) {
-        int levelsGained = addXp(uuid, playerClass, amount);
-        if (amount > 0) scheduleXpNotif(uuid, playerRef, playerClass, amount);
-        return levelsGained;
-    }
-
-    private static final class NotifState {
-        double total;
-        PlayerRef playerRef;
-        ScheduledFuture<?> pending;
-    }
-
-    private final ConcurrentHashMap<UUID, ConcurrentHashMap<PlayerClass, NotifState>> xpNotifMap = new ConcurrentHashMap<>();
-
-    private void scheduleXpNotif(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef,
-                                  @Nonnull PlayerClass playerClass, double amount) {
-        ConcurrentHashMap<PlayerClass, NotifState> byClass = xpNotifMap.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
-        NotifState state = byClass.computeIfAbsent(playerClass, k -> new NotifState());
-        synchronized (state) {
-            state.total += amount;
-            state.playerRef = playerRef;
-            if (state.pending != null) state.pending.cancel(false);
-            state.pending = scheduler.schedule(() -> flushXpNotif(uuid, playerClass), XP_NOTIF_DEBOUNCE_MS, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    private void flushXpNotif(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass) {
-        ConcurrentHashMap<PlayerClass, NotifState> byClass = xpNotifMap.get(uuid);
-        if (byClass == null) return;
-        NotifState state = byClass.get(playerClass);
-        if (state == null) return;
-        double toSend;
-        PlayerRef playerRef;
-        synchronized (state) {
-            toSend = state.total;
-            state.total = 0.0;
-            state.pending = null;
-            playerRef = state.playerRef;
-        }
-        if (toSend <= 0 || playerRef == null) return;
-        String xpStr = (toSend == Math.floor(toSend))
-            ? String.valueOf((long) toSend)
-            : String.valueOf(Math.round(toSend * 10.0) / 10.0);
+    @Override
+    protected void sendXpNotification(@Nonnull PlayerRef playerRef, @Nonnull PlayerClass playerClass, @Nonnull String xpStr) {
         try {
             Message msg = Message.raw("+" + xpStr + " XP").color(new Color(0xFFD700));
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), msg, null, (String) null);
         } catch (Exception ignored) {}
+    }
+
+    public int addXp(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, double amount) {
+        return addXpInternal(uuid, playerClass, amount);
+    }
+
+    public int addXp(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, double amount,
+                     @Nonnull PlayerRef playerRef) {
+        int levelsGained = addXpInternal(uuid, playerClass, amount);
+        if (amount > 0) scheduleXpNotif(uuid, playerRef, playerClass, amount, XP_NOTIF_DEBOUNCE_MS);
+        return levelsGained;
     }
 
     public void setLevel(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, int level) {
@@ -207,8 +127,7 @@ public final class ClassManager {
         ReentrantLock lock = lockFor(uuid);
         lock.lock();
         try {
-            ClassAccount acc = getOrLoad(uuid);
-            acc.resetTalents(playerClass);
+            getOrLoad(uuid).resetTalents(playerClass);
             dirty.add(uuid);
         } finally {
             lock.unlock();
@@ -276,8 +195,7 @@ public final class ClassManager {
         ReentrantLock lock = lockFor(uuid);
         lock.lock();
         try {
-            ClassAccount acc = getOrLoad(uuid);
-            acc.switchProfile(profileIndex);
+            getOrLoad(uuid).switchProfile(profileIndex);
             dirty.add(uuid);
         } finally {
             lock.unlock();
@@ -294,25 +212,19 @@ public final class ClassManager {
         return statEngine.computeAndApply(uuid, playerRef, acc);
     }
 
-    public void onPlayerDisconnect(@Nonnull UUID uuid) {
-        ClassAccount acc = cache.get(uuid);
-        if (acc != null) {
-            storage.savePlayer(uuid, acc).join();
-            dirty.remove(uuid);
-        }
-        statEngine.cleanup(uuid);
-        locks.remove(uuid);
-        cache.remove(uuid);
-        xpFractionBank.remove(uuid);
-        ConcurrentHashMap<PlayerClass, NotifState> notifByClass = xpNotifMap.remove(uuid);
-        if (notifByClass != null) {
-            for (NotifState s : notifByClass.values()) {
-                synchronized (s) { if (s.pending != null) s.pending.cancel(false); }
-            }
-        }
+    @Override
+    protected void saveAccountOnDisconnect(@Nonnull UUID uuid, @Nonnull ClassAccount account) {
+        storage.savePlayer(uuid, account).join();
     }
 
-    private void flushDirty() {
+    @Override
+    public void onPlayerDisconnect(@Nonnull UUID uuid) {
+        super.onPlayerDisconnect(uuid);
+        statEngine.cleanup(uuid);
+    }
+
+    @Override
+    protected void flushDirty() {
         if (dirty.isEmpty()) return;
         Set<UUID> snapshot = new HashSet<>(dirty);
         dirty.clear();

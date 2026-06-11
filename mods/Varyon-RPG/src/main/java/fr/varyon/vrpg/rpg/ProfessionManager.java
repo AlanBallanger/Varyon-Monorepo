@@ -15,38 +15,21 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-public final class ProfessionManager {
+public final class ProfessionManager extends AbstractPlayerManager<PlayerAccount, Profession> {
 
     private static final HytaleLogger LOGGER = HytaleLogger.getLogger().getSubLogger("VaryonRPG");
-    private static final long AUTOSAVE_SECONDS = 30L;
     public static final long RECONVERT_COOLDOWN_MS = 12L * 60L * 60L * 1000L;
 
     private final ProfessionStorage storage;
 
-    private final ConcurrentHashMap<UUID, PlayerAccount> cache = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, ReentrantLock> locks = new ConcurrentHashMap<>();
-    private final Set<UUID> dirty = ConcurrentHashMap.newKeySet();
-    private final ConcurrentHashMap<UUID, Map<Profession, Double>> xpFractionBank = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler;
-
     public ProfessionManager(@Nonnull Path dataDirectory) {
+        super(LOGGER, "VaryonRPG-AutoSave");
         this.storage = new SqliteProfessionStorage(dataDirectory);
         this.storage.initialize().join();
-        this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "VaryonRPG-AutoSave");
-            t.setDaemon(false);
-            return t;
-        });
-        this.scheduler.scheduleAtFixedRate(this::flushDirty,
-            AUTOSAVE_SECONDS, AUTOSAVE_SECONDS, TimeUnit.SECONDS);
         LOGGER.at(Level.INFO).log("ProfessionManager ready (%s, auto-save %ds)",
             storage.getName(), AUTOSAVE_SECONDS);
     }
@@ -56,65 +39,45 @@ public final class ProfessionManager {
         return storage;
     }
 
-    private ReentrantLock lockFor(UUID uuid) {
-        return locks.computeIfAbsent(uuid, k -> new ReentrantLock());
+    @Override
+    protected PlayerAccount loadAccount(@Nonnull UUID uuid) {
+        return storage.loadPlayer(uuid).join();
     }
 
-    public void ensureAccount(@Nonnull UUID uuid, @Nullable String playerName) {
-        cache.computeIfAbsent(uuid, k -> storage.loadPlayer(k).join());
-        if (playerName != null) {
-            ReentrantLock lock = lockFor(uuid);
-            lock.lock();
-            try {
-                PlayerAccount acc = cache.get(uuid);
-                if (acc != null && !playerName.equals(acc.getPlayerName())) {
-                    acc.setPlayerName(playerName);
-                    dirty.add(uuid);
-                }
-            } finally {
-                lock.unlock();
-            }
-        }
+    @Override
+    protected String getPlayerName(@Nonnull PlayerAccount account) {
+        return account.getPlayerName();
     }
 
-    @Nullable
-    public PlayerAccount getAccount(@Nonnull UUID uuid) {
-        return cache.get(uuid);
+    @Override
+    protected void setPlayerName(@Nonnull PlayerAccount account, @Nonnull String name) {
+        account.setPlayerName(name);
     }
 
-    @Nonnull
-    public PlayerAccount getOrLoad(@Nonnull UUID uuid) {
-        return cache.computeIfAbsent(uuid, k -> storage.loadPlayer(k).join());
+    @Override
+    protected int applyWholeXp(@Nonnull PlayerAccount account, @Nonnull Profession key, long wholeXp) {
+        return account.getProgress(key).addXp(wholeXp);
     }
 
-    public void markDirty(@Nonnull UUID uuid) {
-        dirty.add(uuid);
+    @Override
+    protected void sendXpNotification(@Nonnull PlayerRef playerRef, @Nonnull Profession profession, @Nonnull String xpStr) {
+        LOGGER.at(Level.INFO).log("[XpNotif] %s %s +%s XP", playerRef.getUsername(), profession.name(), xpStr);
+        try {
+            Message msg = Message.raw("+" + xpStr + " XP").color(new Color(0x5BFF7F));
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), msg, null, profession.getIconPath());
+        } catch (Exception ignored) {}
     }
 
     public int addXp(@Nonnull UUID uuid, @Nonnull Profession profession, double amount) {
-        if (amount <= 0.0) return 0;
-        ReentrantLock lock = lockFor(uuid);
-        lock.lock();
-        try {
-            Map<Profession, Double> bank = xpFractionBank.computeIfAbsent(uuid, k -> new HashMap<>());
-            double banked = bank.getOrDefault(profession, 0.0) + amount;
-            long wholeXp = (long) banked;
-            bank.put(profession, banked - wholeXp);
-            PlayerAccount acc = getOrLoad(uuid);
-            int levelsGained = wholeXp > 0 ? acc.getProgress(profession).addXp(wholeXp) : 0;
-            dirty.add(uuid);
-            return levelsGained;
-        } finally {
-            lock.unlock();
-        }
+        return addXpInternal(uuid, profession, amount);
     }
 
     public int addXp(@Nonnull UUID uuid, @Nonnull Profession profession, double amount, @Nonnull PlayerRef playerRef) {
         double multiplier = slotMultiplier(uuid, profession);
         double effective = amount * multiplier;
-        int levelsGained = addXp(uuid, profession, effective);
+        int levelsGained = addXpInternal(uuid, profession, effective);
         if (effective > 0) {
-            scheduleXpNotif(uuid, playerRef, profession, effective);
+            scheduleXpNotif(uuid, playerRef, profession, effective, profession.getDebounceMs());
             ProfessionXpHud.refreshIfPresent(uuid);
         }
         return levelsGained;
@@ -126,50 +89,6 @@ public final class ProfessionManager {
         if (profession == acc.getActiveSlot0()) return 1.0;
         if (profession == acc.getActiveSlot1()) return 0.7;
         return 1.0;
-    }
-
-    private static final class NotifState {
-        double total;
-        PlayerRef playerRef;
-        ScheduledFuture<?> pending;
-    }
-
-    private final ConcurrentHashMap<UUID, ConcurrentHashMap<Profession, NotifState>> xpNotifMap = new ConcurrentHashMap<>();
-
-    private void scheduleXpNotif(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef,
-                                  @Nonnull Profession profession, double amount) {
-        ConcurrentHashMap<Profession, NotifState> byProf = xpNotifMap.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
-        NotifState state = byProf.computeIfAbsent(profession, k -> new NotifState());
-        synchronized (state) {
-            state.total += amount;
-            state.playerRef = playerRef;
-            if (state.pending != null) state.pending.cancel(false);
-            state.pending = scheduler.schedule(() -> flushXpNotif(uuid, profession), profession.getDebounceMs(), TimeUnit.MILLISECONDS);
-        }
-    }
-
-    private void flushXpNotif(@Nonnull UUID uuid, @Nonnull Profession profession) {
-        ConcurrentHashMap<Profession, NotifState> byProf = xpNotifMap.get(uuid);
-        if (byProf == null) return;
-        NotifState state = byProf.get(profession);
-        if (state == null) return;
-        double toSend;
-        PlayerRef playerRef;
-        synchronized (state) {
-            toSend = state.total;
-            state.total = 0.0;
-            state.pending = null;
-            playerRef = state.playerRef;
-        }
-        if (toSend <= 0 || playerRef == null) return;
-        String xpStr = (toSend == Math.floor(toSend))
-            ? String.valueOf((long) toSend)
-            : String.valueOf(Math.round(toSend * 10.0) / 10.0);
-        LOGGER.at(Level.INFO).log("[XpNotif] %s %s +%s XP", playerRef.getUsername(), profession.name(), xpStr);
-        try {
-            Message msg = Message.raw("+" + xpStr + " XP").color(new Color(0x5BFF7F));
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), msg, null, profession.getIconPath());
-        } catch (Exception ignored) {}
     }
 
     public void setLevel(@Nonnull UUID uuid, @Nonnull Profession profession, int level) {
@@ -237,8 +156,7 @@ public final class ProfessionManager {
         ReentrantLock lock = lockFor(uuid);
         lock.lock();
         try {
-            PlayerAccount acc = getOrLoad(uuid);
-            acc.resetTalents(profession);
+            getOrLoad(uuid).resetTalents(profession);
             dirty.add(uuid);
         } finally {
             lock.unlock();
@@ -276,12 +194,10 @@ public final class ProfessionManager {
             if (newProfession == current) return ReconvertResult.NO_CHANGE;
 
             long now = System.currentTimeMillis();
-
             Profession leaving = current;
             if (leaving != null && newProfession != null && leaving != newProfession) {
                 acc.resetTalents(leaving);
             }
-
             if (slotIndex == 0) acc.setActiveSlot0(newProfession);
             else                acc.setActiveSlot1(newProfession);
             acc.setLastReconvertAt(now);
@@ -300,24 +216,13 @@ public final class ProfessionManager {
         return Math.max(0L, left);
     }
 
-    public void onPlayerDisconnect(@Nonnull UUID uuid) {
-        PlayerAccount acc = cache.get(uuid);
-        if (acc != null) {
-            storage.savePlayer(uuid, acc);
-            dirty.remove(uuid);
-        }
-        locks.remove(uuid);
-        cache.remove(uuid);
-        xpFractionBank.remove(uuid);
-        ConcurrentHashMap<Profession, NotifState> notifByProf = xpNotifMap.remove(uuid);
-        if (notifByProf != null) {
-            for (NotifState s : notifByProf.values()) {
-                synchronized (s) { if (s.pending != null) s.pending.cancel(false); }
-            }
-        }
+    @Override
+    protected void saveAccountOnDisconnect(@Nonnull UUID uuid, @Nonnull PlayerAccount account) {
+        storage.savePlayer(uuid, account);
     }
 
-    private void flushDirty() {
+    @Override
+    protected void flushDirty() {
         if (dirty.isEmpty()) return;
         Set<UUID> snapshot = new HashSet<>(dirty);
         dirty.clear();

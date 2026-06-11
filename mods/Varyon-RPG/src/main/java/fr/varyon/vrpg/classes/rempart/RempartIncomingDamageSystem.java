@@ -33,7 +33,7 @@ public final class RempartIncomingDamageSystem extends DamageEventSystem {
 
     private final ClassManager classManager;
     private final RempartState rempartState;
-    private int healthIdx = Integer.MIN_VALUE;
+    private Integer healthIdx = null;
 
     public RempartIncomingDamageSystem(@Nonnull ClassManager classManager,
                                        @Nonnull RempartState rempartState) {
@@ -149,7 +149,7 @@ public final class RempartIncomingDamageSystem extends DamageEventSystem {
                             @Nonnull ArchetypeChunk<EntityStore> chunk, int index,
                             @Nonnull Store<EntityStore> store, float pct) {
         try {
-            if (healthIdx == Integer.MIN_VALUE) {
+            if (healthIdx == null) {
                 try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
             }
             if (healthIdx < 0) return;
@@ -166,7 +166,7 @@ public final class RempartIncomingDamageSystem extends DamageEventSystem {
     private float getHpRatio(@Nonnull ArchetypeChunk<EntityStore> chunk, int index,
                              @Nonnull Store<EntityStore> store) {
         try {
-            if (healthIdx == Integer.MIN_VALUE) {
+            if (healthIdx == null) {
                 try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
             }
             if (healthIdx < 0) return 1f;

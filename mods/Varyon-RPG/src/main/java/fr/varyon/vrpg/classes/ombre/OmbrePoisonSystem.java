@@ -22,7 +22,7 @@ public final class OmbrePoisonSystem extends EntityTickingSystem<EntityStore> {
     private static final int  TICKS_TOTAL = (int)(OmbrePassifs.POISON_DURATION_MS / TICK_INTERVAL_MS);
 
     private final ConcurrentHashMap<Integer, PoisonState> poisons = new ConcurrentHashMap<>();
-    private int healthIdx = Integer.MIN_VALUE;
+    private Integer healthIdx = null;
 
     private static final class PoisonState {
         final float damagePerTick;
@@ -79,7 +79,7 @@ public final class OmbrePoisonSystem extends EntityTickingSystem<EntityStore> {
     }
 
     private int healthIndex() {
-        if (healthIdx == Integer.MIN_VALUE) {
+        if (healthIdx == null) {
             try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }
         }
         return healthIdx;

@@ -12,7 +12,6 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
 import org.joml.Vector3d;
-import org.joml.Vector3f;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
@@ -24,6 +23,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.vrpg.audio.TalentProcSounds;
 import fr.varyon.vrpg.config.VrpgConfig;
+import fr.varyon.vrpg.profession.BlockUtil;
 import fr.varyon.vrpg.rpg.PlayerAccount;
 import fr.varyon.vrpg.rpg.Profession;
 import fr.varyon.vrpg.rpg.ProfessionManager;
@@ -123,14 +123,7 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
         boolean dbg = VrpgConfig.isDebugTalents();
         String dbgId = dbg ? "[" + uuid.toString().substring(0, 8) + "|" + rawId + "] " : null;
 
-        Vector3d blockCenter = null;
-        if (event.getTargetBlock() != null) {
-            blockCenter = new Vector3d(
-                event.getTargetBlock().x + 0.5,
-                event.getTargetBlock().y + 0.5,
-                event.getTargetBlock().z + 0.5
-            );
-        }
+        Vector3d blockCenter = BlockUtil.blockCenter(event);
 
         Ref<EntityStore> entityRef = null;
 
@@ -385,18 +378,6 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
         }
     }
 
-    private static void dropItemAtBlock(@Nonnull ComponentAccessor<EntityStore> accessor,
-                                        @Nonnull String itemId,
-                                        @Nonnull Vector3d position) {
-        ItemStack stack = new ItemStack(itemId, 1);
-        if (stack.isEmpty() || !stack.isValid()) return;
-        float vx = (RANDOM.nextFloat() - 0.5f) * 2.5f;
-        float vz = (RANDOM.nextFloat() - 0.5f) * 2.5f;
-        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position, com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, 3.25f, vz);
-        if (holder == null) return;
-        accessor.addEntity(holder, AddReason.SPAWN);
-    }
-
     /**
      * Depuis les blocs ancrs au sol (baseAnchors), vrifie si on peut atteindre
      * un bloc  y > cutY en traversant treeBlocks sans passer par brokenKey.
@@ -528,5 +509,18 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
         int y = (int)((key >> 21) & 0x1FFFFFL) - 1048576;
         int z = (int)(key & 0x1FFFFFL) - 1048576;
         return new int[]{x, y, z};
+    }
+
+    private static void dropItemAtBlock(@Nonnull ComponentAccessor<EntityStore> accessor,
+                                        @Nonnull String itemId,
+                                        @Nonnull Vector3d position) {
+        ItemStack stack = new ItemStack(itemId, 1);
+        if (stack.isEmpty() || !stack.isValid()) return;
+        float vx = (RANDOM.nextFloat() - 0.5f) * 2.5f;
+        float vz = (RANDOM.nextFloat() - 0.5f) * 2.5f;
+        Holder<EntityStore> holder = ItemComponent.generateItemDrop(accessor, stack, position,
+            com.hypixel.hytale.math.vector.Rotation3f.ZERO, vx, 3.25f, vz);
+        if (holder == null) return;
+        accessor.addEntity(holder, AddReason.SPAWN);
     }
 }
