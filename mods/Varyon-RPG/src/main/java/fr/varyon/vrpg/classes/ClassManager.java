@@ -263,7 +263,7 @@ public final class ClassManager {
                 acc.getProgress(c).setLevel(1, 0L);
                 acc.getProgress(c).setActiveSpec(null);
                 acc.resetTalents(c);
-                acc.clearSkillSlots(c);
+                acc.getSkillSlots(c).clear();
             }
             acc.setActiveClass(null);
             dirty.add(uuid);

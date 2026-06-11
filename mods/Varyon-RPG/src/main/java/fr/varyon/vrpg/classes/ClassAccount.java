@@ -99,31 +99,62 @@ public final class ClassAccount {
         talents.get(c).clear();
     }
 
+    private static String slotKey(@Nullable PlayerSpecialization spec, @Nonnull String slotId) {
+        return spec != null ? spec.getId() + ":" + slotId : slotId;
+    }
+
     @Nonnull
     public Map<String, String> getSkillSlots(@Nonnull PlayerClass c) {
         return skillSlots.get(c);
     }
 
+    @Nonnull
+    public Map<String, String> getSkillSlotsForSpec(@Nonnull PlayerClass c, @Nullable PlayerSpecialization spec) {
+        String prefix = spec != null ? spec.getId() + ":" : "";
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, String> e : skillSlots.get(c).entrySet()) {
+            if (spec != null) {
+                if (e.getKey().startsWith(prefix)) {
+                    result.put(e.getKey().substring(prefix.length()), e.getValue());
+                }
+            } else {
+                if (!e.getKey().contains(":")) {
+                    result.put(e.getKey(), e.getValue());
+                }
+            }
+        }
+        return result;
+    }
+
     @Nullable
     public String getSkillSlot(@Nonnull PlayerClass c, @Nonnull String slotId) {
-        return skillSlots.get(c).get(slotId);
+        PlayerSpecialization spec = getActiveSpec(c);
+        return skillSlots.get(c).get(slotKey(spec, slotId));
     }
 
     public void setSkillSlot(@Nonnull PlayerClass c, @Nonnull String slotId, @Nonnull String itemId) {
-        skillSlots.get(c).put(slotId, itemId);
+        PlayerSpecialization spec = getActiveSpec(c);
+        skillSlots.get(c).put(slotKey(spec, slotId), itemId);
     }
 
     public void clearSkillSlot(@Nonnull PlayerClass c, @Nonnull String slotId) {
-        skillSlots.get(c).remove(slotId);
+        PlayerSpecialization spec = getActiveSpec(c);
+        skillSlots.get(c).remove(slotKey(spec, slotId));
     }
 
     public void clearSkillSlots(@Nonnull PlayerClass c) {
-        skillSlots.get(c).clear();
+        PlayerSpecialization spec = getActiveSpec(c);
+        if (spec != null) {
+            String prefix = spec.getId() + ":";
+            skillSlots.get(c).keySet().removeIf(k -> k.startsWith(prefix));
+        } else {
+            skillSlots.get(c).keySet().removeIf(k -> !k.contains(":"));
+        }
     }
 
     @Nonnull
     public Map<String, String> copySkillSlots(@Nonnull PlayerClass c) {
-        return Collections.unmodifiableMap(new HashMap<>(skillSlots.get(c)));
+        return Collections.unmodifiableMap(getSkillSlotsForSpec(c, getActiveSpec(c)));
     }
 
     public int availableTalentPoints(@Nonnull PlayerClass c) {
