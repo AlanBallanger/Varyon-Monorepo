@@ -168,7 +168,7 @@ public final class OmbreOutgoingDamageSystem extends DamageEventSystem {
         try {
             float durationSec = durationMs / 1000f;
             int idx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap()
-                .getIndex("Vrpg_Ombre_Stun");
+                .getIndex("Vrpg_Stun");
             com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect effect =
                 (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
                 com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(idx);

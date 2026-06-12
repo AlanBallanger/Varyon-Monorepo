@@ -89,6 +89,19 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.CARNAGE_NODE     -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.carnageStatLine(rank);
             case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.BLESSURES_NODE   -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.blessuresStatLine(rank);
             case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FRENESIE_NODE    -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.frenesieStatLine(rank);
+            // Ravageur
+            case fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.SKILL_ID          -> fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.ravageur.PeauDeFerSkill.SKILL_ID             -> fr.varyon.vrpg.classes.ravageur.PeauDeFerSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.ravageur.DechainementSkill.SKILL_ID          -> fr.varyon.vrpg.classes.ravageur.DechainementSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.ravageur.PremierAssautSkill.SKILL_ID         -> fr.varyon.vrpg.classes.ravageur.PremierAssautSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.ravageur.MarteauPilonSkill.SKILL_ID          -> fr.varyon.vrpg.classes.ravageur.MarteauPilonSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.ravageur.RabattageSkill.SKILL_ID             -> fr.varyon.vrpg.classes.ravageur.RabattageSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.MOISSONNEUR_NODE    -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.moissonneurStatLine(rank);
+            case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.ARME_LOURDE_NODE    -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.armeLourdeStatLine(rank);
+            case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.EXECUTEUR_NODE      -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.executeurStatLine(rank);
+            case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.CHASSEUR_GEANT_NODE -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.chasseurGeantStatLine(rank);
+            case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.COMBATTANT_INFATIGABLE_NODE -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.combattantInfatigableStatLine(rank);
+            case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.ELAN_DESTRUCTEUR_NODE -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.elanDestructeurStatLine(rank);
             default -> null;
         };
     }

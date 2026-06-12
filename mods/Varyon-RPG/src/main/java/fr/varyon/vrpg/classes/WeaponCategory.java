@@ -19,7 +19,7 @@ public enum WeaponCategory {
         String id = itemId.toLowerCase();
 
         if (id.startsWith("weapon_daggers") || id.startsWith("weapon_dagger")) return DAGUE;
-        if (id.startsWith("weapon_longsword") || id.startsWith("weapon_greatsword") || id.startsWith("weapon_leaf_spear") || id.startsWith("weapon_spear")) return DEUX_MAINS;
+        if (id.startsWith("weapon_longsword") || id.startsWith("weapon_greatsword") || id.startsWith("weapon_leaf_spear") || id.startsWith("weapon_spear") || id.startsWith("weapon_club")) return DEUX_MAINS;
         if (id.startsWith("weapon_sword")) return EPEE;
         if (id.startsWith("weapon_axe")) return HACHE;
         if (id.startsWith("weapon_shortbow") || id.startsWith("weapon_crossbow") || id.startsWith("weapon_bow")) return DISTANCE;

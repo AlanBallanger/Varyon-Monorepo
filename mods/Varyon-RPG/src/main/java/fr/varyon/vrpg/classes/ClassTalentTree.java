@@ -129,6 +129,22 @@ public final class ClassTalentTree {
             new Node("Exécution Sauvage",     "Actif",  "Pour les blessés, chaque coup est le dernier.",                           "Frappe dévastatrice infligeant davantage de dégâts aux ennemis déjà affaiblis.",                        BI + "Exécution_Sauvage.png",      5),
         });
 
+        final String RVI = "Classes_Icons/Ravager/";
+        SPEC_TREES.put(PlayerSpecialization.RAVAGEUR, new Node[]{
+            new Node("Bond Écrasant",          "Actif",  "Il ne court pas vers ses ennemis — il s'abat sur eux.",                    "Bond en avant et s'écrase au sol, infligeant des dégâts en zone à l'atterrissage.",               RVI + "Bond_Ecrasant.png",              5),
+            new Node("Moissonneur",            "Passif", "Chaque mort est une graine d'expérience.",                                  "Gain d'expérience augmenté lors des séries d'éliminations (max 5 cumuls).",                       RVI + "Moisonneur.png",                 5),
+            new Node("Arme Lourde",            "Passif", "Un coup critique qui laisse des traces durables.",                          "Les coups critiques réduisent la vitesse de déplacement de la cible pendant 3 secondes.",          RVI + "Arme_Lourde.png",               5),
+            new Node("Peau de Fer",            "Actif",  "Sa peau est moins une chair qu'une armure forgée au combat.",               "Réduit les dégâts subis pendant quelques secondes.",                                              RVI + "Peau_De_Fer.png",               5),
+            new Node("Exécuteur",              "Passif", "Les blessés ne méritent que la grâce du dernier coup.",                     "Inflige davantage de dégâts aux ennemis ayant moins de 30 % de points de vie.",                   RVI + "Exécuteur.png",                 5),
+            new Node("Déchaînement",           "Actif",  "Quand la rage prend le dessus, les retenues disparaissent.",                "Augmente les dégâts infligés pendant quelques secondes.",                                         RVI + "Dechainement.png",              5),
+            new Node("Chasseur de Géant",      "Passif", "Il préfère les proies grandes. Elles offrent plus de résistance.",          "Inflige davantage de dégâts aux ennemis ayant plus de points de vie que vous.",                   RVI + "Chasseur_De_Géant.png",         5),
+            new Node("Élan Destructeur",       "Passif", "Un kill n'est qu'un tremplin vers le suivant.",                              "Après avoir éliminé un ennemi, la prochaine attaque inflige davantage de dégâts.",               RVI + "Elan_Destructeur.png",          5),
+            new Node("Premier Assaut",         "Actif",  "Frapper fort d'emblée pour ne jamais laisser l'ennemi reprendre son souffle.", "Frappe dévastatrice infligeant davantage de dégâts aux ennemis ayant plus de 70 % de vie.",    RVI + "Premier_Assaut.png",            5),
+            new Node("Marteau-Pilon",          "Actif",  "Deux coups, une sentence.",                                                  "Enchaîne deux frappes lourdes. Le second coup étourdit la cible.",                               RVI + "Marteau_Pilon.png",             5),
+            new Node("Combattant Infatigable", "Passif", "Chaque blessure reçue avive la flamme plutôt qu'elle ne l'éteint.",         "Les dégâts augmentent en fonction des points de vie manquants.",                                  RVI + "Combattant_Infatigable.png",    5),
+            new Node("Rabattage",              "Actif",  "Il ne chasse pas — il ramène le troupeau à lui.",                            "Balayage en arc devant soi, attirant les ennemis touchés et les étourdissant brièvement.",        RVI + "Rabattage.png",                 5),
+        });
+
         final String RI = "Classes_Icons/Rampart/";
         SPEC_TREES.put(PlayerSpecialization.REMPART, new Node[]{
             new Node("Charge Lourde",         "Actif",  "Quand l'acier avance, rien ne résiste.",                                    "Charge en ligne droite en repoussant et frappant les ennemis sur le passage.",     RI + "Charge_Lourde.png",         5),

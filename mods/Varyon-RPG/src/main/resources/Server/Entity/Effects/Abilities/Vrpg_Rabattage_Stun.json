@@ -1,0 +1,13 @@
+{
+  "Duration": 2.0,
+  "Infinite": false,
+  "Debuff": true,
+  "OverlapBehavior": "Overwrite",
+  "RemovalBehavior": "Duration",
+  "ApplicationEffects": {
+    "EntityBottomTint": "#FF8C00",
+    "EntityTopTint": "#CC5500",
+    "HorizontalSpeedMultiplier": 0.0,
+    "KnockbackMultiplier": 0
+  }
+}

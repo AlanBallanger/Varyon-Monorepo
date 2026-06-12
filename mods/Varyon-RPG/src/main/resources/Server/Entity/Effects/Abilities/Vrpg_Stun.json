@@ -10,9 +10,8 @@
         "TargetNodeName": "Head"
       }
     ],
-    "MovementEffects": {
-      "DisableAll": true
-    },
+    "HorizontalSpeedMultiplier": 0.0,
+    "KnockbackMultiplier": 0,
     "AbilityEffects": {
       "Disabled": [
         "Primary",

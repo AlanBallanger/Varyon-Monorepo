@@ -21,6 +21,8 @@ import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import fr.varyon.vrpg.classes.ability.ExpertEnDuelSkill;
 import fr.varyon.vrpg.classes.berserker.BerserkerPassifs;
 import fr.varyon.vrpg.classes.berserker.BerserkerState;
+import fr.varyon.vrpg.classes.ravageur.RavageurPassifs;
+import fr.varyon.vrpg.classes.ravageur.RavageurState;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.combat.MobKillXpResolver;
 import fr.varyon.vrpg.combat.MobParticipantsTracker;
@@ -39,15 +41,18 @@ public final class ClassKillXpSystem {
     private final ClassManager classManager;
     private final MobParticipantsTracker participantsTracker;
     private final BerserkerState berserkerState;
+    private final RavageurState ravageurState;
     private final Map<UUID, Map<String, KillTracker>> killTrackers = new ConcurrentHashMap<>();
     private Integer healthStatIndex = null;
 
     public ClassKillXpSystem(@Nonnull ClassManager classManager,
                              @Nonnull MobParticipantsTracker participantsTracker,
-                             @Nonnull BerserkerState berserkerState) {
+                             @Nonnull BerserkerState berserkerState,
+                             @Nonnull RavageurState ravageurState) {
         this.classManager = classManager;
         this.participantsTracker = participantsTracker;
         this.berserkerState = berserkerState;
+        this.ravageurState = ravageurState;
     }
 
     public void cleanup(@Nonnull UUID playerId) {
@@ -97,6 +102,7 @@ public final class ClassKillXpSystem {
             NPCEntity npc = store.getComponent(victimRef, NPCEntity.getComponentType());
             if (npc == null) return;
 
+            onKill(playerRef);
             grantKillXp(playerRef, attackerRef, npc, store);
             participantsTracker.markHandledByPrediction(victimRef, playerRef.getUuid());
         }
@@ -133,6 +139,7 @@ public final class ClassKillXpSystem {
                 if (playerRef == null) continue;
 
                 try {
+                    onKill(playerRef);
                     grantKillXp(playerRef, entry.playerRef(), npc, (Store<EntityStore>) store);
                 } catch (Exception e) {
                     LOGGER.atWarning().log("[ClassKillXp] XP error for %s: %s",
@@ -164,6 +171,17 @@ public final class ClassKillXpSystem {
         String multReason = null;
 
         PlayerSpecialization spec = acc.getActiveSpec(activeClass);
+        if (spec == PlayerSpecialization.RAVAGEUR) {
+            int moissonneurRank = acc.getTalentRank(activeClass, RavageurPassifs.MOISSONNEUR_NODE);
+            if (moissonneurRank > 0) {
+                int stacks = ravageurState.getMoissonneurStacks(uuid);
+                if (stacks > 0) {
+                    double bonus = stacks * RavageurPassifs.moissonneurXpBonusPerStack(moissonneurRank);
+                    mult = 1.0 + bonus;
+                    multReason = "Moissonneur(" + stacks + "x)=+" + String.format("%.0f", bonus * 100) + "%";
+                }
+            }
+        }
         if (spec == PlayerSpecialization.DUELLISTE) {
             int rank = acc.getTalentRank(activeClass, ExpertEnDuelSkill.TALENT_NODE_ID);
             if (rank > 0) {
@@ -182,9 +200,26 @@ public final class ClassKillXpSystem {
             + ") class=" + activeClass + " mob=" + MobKillXpResolver.npcRoleKey(npc));
 
         classManager.addXp(uuid, activeClass, finalXp, playerRef);
+    }
 
-        if (activeClass == PlayerClass.BARBARE
-                && acc.getActiveSpec(activeClass) == PlayerSpecialization.BERSERKER) {
+    private void onKill(@Nonnull PlayerRef playerRef) {
+        UUID uuid = playerRef.getUuid();
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        PlayerClass activeClass = acc.getActiveClass();
+        if (activeClass == null) return;
+
+        PlayerSpecialization spec = acc.getActiveSpec(activeClass);
+        if (activeClass == PlayerClass.BARBARE && spec == PlayerSpecialization.RAVAGEUR) {
+            int moissonneurRank = acc.getTalentRank(activeClass, RavageurPassifs.MOISSONNEUR_NODE);
+            if (moissonneurRank > 0) {
+                ravageurState.onKillMoissonneur(uuid, RavageurPassifs.MOISSONNEUR_MAX_STACKS, 10000L);
+            }
+            int elanRank = acc.getTalentRank(activeClass, RavageurPassifs.ELAN_DESTRUCTEUR_NODE);
+            if (elanRank > 0) {
+                ravageurState.armElan(uuid, elanRank);
+            }
+        }
+        if (activeClass == PlayerClass.BARBARE && spec == PlayerSpecialization.BERSERKER) {
             int frenesieRank = acc.getTalentRank(activeClass, BerserkerPassifs.FRENESIE_NODE);
             if (frenesieRank > 0) {
                 berserkerState.onKillFrenesie(uuid,

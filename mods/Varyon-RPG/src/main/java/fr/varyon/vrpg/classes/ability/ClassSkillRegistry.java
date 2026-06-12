@@ -104,6 +104,23 @@ public final class ClassSkillRegistry {
                 default -> null;
             };
         }
+        if (activeClass == PlayerClass.BARBARE && spec == PlayerSpecialization.RAVAGEUR) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.MOISSONNEUR_NODE;
+                case 2  -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.ARME_LOURDE_NODE;
+                case 3  -> fr.varyon.vrpg.classes.ravageur.PeauDeFerSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.EXECUTEUR_NODE;
+                case 5  -> fr.varyon.vrpg.classes.ravageur.DechainementSkill.SKILL_ID;
+                case 6  -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.CHASSEUR_GEANT_NODE;
+                case 7  -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.ELAN_DESTRUCTEUR_NODE;
+                case 8  -> fr.varyon.vrpg.classes.ravageur.PremierAssautSkill.SKILL_ID;
+                case 9  -> fr.varyon.vrpg.classes.ravageur.MarteauPilonSkill.SKILL_ID;
+                case 10 -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.COMBATTANT_INFATIGABLE_NODE;
+                case 11 -> fr.varyon.vrpg.classes.ravageur.RabattageSkill.SKILL_ID;
+                default -> null;
+            };
+        }
         return null;
     }
 }

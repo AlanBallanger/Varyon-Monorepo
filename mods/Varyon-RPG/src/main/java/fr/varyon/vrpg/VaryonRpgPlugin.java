@@ -136,6 +136,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.berserker.BerserkerTickSystem berserkerTickSystem;
     private fr.varyon.vrpg.classes.berserker.BerserkerOutgoingDamageSystem berserkerOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.berserker.BerserkerIncomingDamageSystem berserkerIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.ravageur.RavageurState ravageurState;
+    private fr.varyon.vrpg.classes.ravageur.RavageurOutgoingDamageSystem ravageurOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.ravageur.RavageurIncomingDamageSystem ravageurIncomingDamageSystem;
     private OmbreState ombreState;
     private OmbrePoisonSystem ombrePoisonSystem;
     private OmbreSpeedSystem ombreSpeedSystem;
@@ -251,12 +254,15 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.berserkerTickSystem = new fr.varyon.vrpg.classes.berserker.BerserkerTickSystem(classManager, berserkerState, berserkerCombatTracker);
             this.berserkerOutgoingDamageSystem = new fr.varyon.vrpg.classes.berserker.BerserkerOutgoingDamageSystem(classManager, berserkerState, berserkerCombatTracker, duellisteBleedSystem);
             this.berserkerIncomingDamageSystem = new fr.varyon.vrpg.classes.berserker.BerserkerIncomingDamageSystem(classManager, berserkerState, berserkerCombatTracker, new fr.varyon.vrpg.classes.ability.ClassSkillCooldowns());
-            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState);
+            this.ravageurState = new fr.varyon.vrpg.classes.ravageur.RavageurState();
+            this.ravageurOutgoingDamageSystem = new fr.varyon.vrpg.classes.ravageur.RavageurOutgoingDamageSystem(classManager, ravageurState);
+            this.ravageurIncomingDamageSystem = new fr.varyon.vrpg.classes.ravageur.RavageurIncomingDamageSystem(classManager, ravageurState);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState);
             this.classSkillKeyFilter = new ClassSkillKeyFilter(classManager, rempartState);
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
             this.mobParticipantsTracker = new MobParticipantsTracker();
-            this.classKillXpSystem = new ClassKillXpSystem(classManager, mobParticipantsTracker, berserkerState);
+            this.classKillXpSystem = new ClassKillXpSystem(classManager, mobParticipantsTracker, berserkerState, ravageurState);
         } catch (Exception e) {
             LOGGER.atSevere().withCause(e).log("[VaryonRPG] Failed to initialize ClassManager");
         }
@@ -867,6 +873,19 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 getEntityStoreRegistry().registerSystem(berserkerTickSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register BerserkerTickSystem");
+            }
+        }
+
+        if (ravageurState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(ravageurOutgoingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RavageurOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(ravageurIncomingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RavageurIncomingDamageSystem");
             }
         }
 
