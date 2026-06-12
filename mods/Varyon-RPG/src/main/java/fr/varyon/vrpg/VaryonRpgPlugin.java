@@ -139,6 +139,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.ravageur.RavageurState ravageurState;
     private fr.varyon.vrpg.classes.ravageur.RavageurOutgoingDamageSystem ravageurOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.ravageur.RavageurIncomingDamageSystem ravageurIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.bagarreur.BagarreurState bagarreurState;
+    private fr.varyon.vrpg.classes.bagarreur.BagarreurOutgoingDamageSystem bagarreurOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.bagarreur.BagarreurIncomingDamageSystem bagarreurIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.bagarreur.BagarreurSpeedSystem bagarreurSpeedSystem;
     private OmbreState ombreState;
     private OmbrePoisonSystem ombrePoisonSystem;
     private OmbreSpeedSystem ombreSpeedSystem;
@@ -257,7 +261,11 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.ravageurState = new fr.varyon.vrpg.classes.ravageur.RavageurState();
             this.ravageurOutgoingDamageSystem = new fr.varyon.vrpg.classes.ravageur.RavageurOutgoingDamageSystem(classManager, ravageurState);
             this.ravageurIncomingDamageSystem = new fr.varyon.vrpg.classes.ravageur.RavageurIncomingDamageSystem(classManager, ravageurState);
-            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState);
+            this.bagarreurState = new fr.varyon.vrpg.classes.bagarreur.BagarreurState();
+            this.bagarreurOutgoingDamageSystem = new fr.varyon.vrpg.classes.bagarreur.BagarreurOutgoingDamageSystem(classManager, bagarreurState);
+            this.bagarreurIncomingDamageSystem = new fr.varyon.vrpg.classes.bagarreur.BagarreurIncomingDamageSystem(classManager, bagarreurState);
+            this.bagarreurSpeedSystem = new fr.varyon.vrpg.classes.bagarreur.BagarreurSpeedSystem(classManager, bagarreurState);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState);
             this.classSkillKeyFilter = new ClassSkillKeyFilter(classManager, rempartState);
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
@@ -458,6 +466,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     if (chasseurComboTracker != null) chasseurComboTracker.remove(ref.getUuid());
                     if (rodeurDunesTickSystem != null) rodeurDunesTickSystem.removePlayer(ref.getUuid());
                     if (secondSouffleTickSystem != null) secondSouffleTickSystem.removePlayer(ref.getUuid());
+                    if (bagarreurSpeedSystem != null) bagarreurSpeedSystem.removePlayer(ref.getUuid());
                     if (farmerPickupHarvestSystem != null) farmerPickupHarvestSystem.removePlayer(ref.getUuid());
                     if (farmerAnimalDropSystem != null) farmerAnimalDropSystem.removePlayer(ref.getUuid());
                     if (veinCooldownTracker != null) veinCooldownTracker.remove(ref.getUuid());
@@ -886,6 +895,24 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 getEntityStoreRegistry().registerSystem(ravageurIncomingDamageSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RavageurIncomingDamageSystem");
+            }
+        }
+
+        if (bagarreurState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(bagarreurOutgoingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register BagarreurOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(bagarreurIncomingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register BagarreurIncomingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(bagarreurSpeedSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register BagarreurSpeedSystem");
             }
         }
 

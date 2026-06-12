@@ -182,6 +182,17 @@ public final class ClassKillXpSystem {
                 }
             }
         }
+        if (spec == PlayerSpecialization.BAGARREUR) {
+            int jusquRank = acc.getTalentRank(activeClass, fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.JUSQUAU_BOUT_NODE);
+            if (jusquRank > 0) {
+                double hpPct = getPlayerHpPercent(attackerRef, store);
+                if (hpPct > 0 && hpPct < fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.JUSQUAU_BOUT_THRESHOLD) {
+                    double bonus = fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.jusquAuBoutBonusForRank(jusquRank);
+                    mult = 1.0 + bonus;
+                    multReason = "JusquAuBout(hp=" + String.format("%.0f", hpPct * 100) + "%)=+" + String.format("%.0f", bonus * 100) + "%";
+                }
+            }
+        }
         if (spec == PlayerSpecialization.DUELLISTE) {
             int rank = acc.getTalentRank(activeClass, ExpertEnDuelSkill.TALENT_NODE_ID);
             if (rank > 0) {

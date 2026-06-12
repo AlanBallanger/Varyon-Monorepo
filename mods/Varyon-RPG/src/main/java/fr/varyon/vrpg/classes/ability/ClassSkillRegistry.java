@@ -121,6 +121,23 @@ public final class ClassSkillRegistry {
                 default -> null;
             };
         }
+        if (activeClass == PlayerClass.BARBARE && spec == PlayerSpecialization.BAGARREUR) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.JUSQUAU_BOUT_NODE;
+                case 2  -> fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.SKILL_ID;
+                case 3  -> fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.GARDE_BOXEUR_NODE;
+                case 5  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ADRENALINE_NODE;
+                case 6  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ACHARNEMENT_NODE;
+                case 7  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ESPRIT_COMBATIF_NODE;
+                case 8  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.POINGS_ACIER_NODE;
+                case 9  -> fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID;
+                case 10 -> fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID;
+                case 11 -> fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID;
+                default -> null;
+            };
+        }
         return null;
     }
 }

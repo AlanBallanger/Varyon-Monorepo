@@ -102,6 +102,19 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.CHASSEUR_GEANT_NODE -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.chasseurGeantStatLine(rank);
             case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.COMBATTANT_INFATIGABLE_NODE -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.combattantInfatigableStatLine(rank);
             case fr.varyon.vrpg.classes.ravageur.RavageurPassifs.ELAN_DESTRUCTEUR_NODE -> fr.varyon.vrpg.classes.ravageur.RavageurPassifs.elanDestructeurStatLine(rank);
+            // Bagarreur
+            case fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.SKILL_ID           -> fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.SKILL_ID     -> fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.SKILL_ID         -> fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID        -> fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID         -> fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID              -> fr.varyon.vrpg.classes.bagarreur.UppercutSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.JUSQUAU_BOUT_NODE  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.jusquAuBoutStatLine(rank);
+            case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ADRENALINE_NODE    -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.adrenalineStatLine(rank);
+            case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.GARDE_BOXEUR_NODE  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.gardeBoxeurStatLine(rank);
+            case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ACHARNEMENT_NODE    -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.acharnementStatLine(rank);
+            case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ESPRIT_COMBATIF_NODE -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.espritCombatifStatLine(rank);
+            case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.POINGS_ACIER_NODE  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.poingsAcierStatLine(rank);
             default -> null;
         };
     }

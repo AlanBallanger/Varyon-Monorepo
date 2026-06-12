@@ -78,6 +78,14 @@ public final class ClassStatDefinition {
         return CRIT_DMG_LVL1 + CRIT_DMG_RANGE * Math.pow(t, LEVEL_EASE);
     }
 
+    private static final double BAGARREUR_BARE_FIST_MAX = 50.0;
+
+    public static double bagarreurBareFistMultiplier(int level) {
+        int L = clamp(level);
+        double t = (L - 1) / 29.0;
+        return 1.0 + (BAGARREUR_BARE_FIST_MAX - 1.0) * Math.pow(t, LEVEL_EASE);
+    }
+
     public static ClassPlayerStats compute(int level, @Nullable PlayerSpecialization spec) {
         return compute(level, spec, 0);
     }

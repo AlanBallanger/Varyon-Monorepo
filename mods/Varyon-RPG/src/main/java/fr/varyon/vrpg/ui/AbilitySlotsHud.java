@@ -109,8 +109,13 @@ public final class AbilitySlotsHud extends CustomUIHud {
 
     public void refreshSlots() {
         PlayerRef ref = getPlayerRef();
-        boolean weaponOk = resolveActiveSpec() != null
-            && WeaponCategory.specCanUseHeldWeapon(resolveActiveSpec(), ref);
+        PlayerSpecialization spec = resolveActiveSpec();
+        boolean weaponOk;
+        if (spec == PlayerSpecialization.BAGARREUR) {
+            weaponOk = WeaponCategory.heldCategory(ref) == null;
+        } else {
+            weaponOk = spec != null && WeaponCategory.specCanUseHeldWeapon(spec, ref);
+        }
 
         UICommandBuilder cmd = new UICommandBuilder();
         for (String slotId : SLOT_IDS) {

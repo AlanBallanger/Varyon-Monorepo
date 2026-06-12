@@ -145,6 +145,22 @@ public final class ClassTalentTree {
             new Node("Rabattage",              "Actif",  "Il ne chasse pas — il ramène le troupeau à lui.",                            "Balayage en arc devant soi, attirant les ennemis touchés et les étourdissant brièvement.",        RVI + "Rabattage.png",                 5),
         });
 
+        final String FI = "Classes_Icons/Fighter/";
+        SPEC_TREES.put(PlayerSpecialization.BAGARREUR, new Node[]{
+            new Node("Jeu de Jambes",        "Actif",  "Esquiver, c'est déjà gagner.",                                                "Dash rapide sur le côté droit pour éviter les attaques.",                                    FI + "Jeu_De_Jambes.png",              5),
+            new Node("Jusqu'au bout",        "Passif", "Plus il saigne, plus il se bat.",                                              "Gain d'expérience augmenté lorsque les points de vie sont inférieurs à 80 %.",               FI + "Jusqu'au bout.png",              5),
+            new Node("Direct du Droit",      "Actif",  "Un seul coup bien placé suffit à tout changer.",                              "Coup puissant qui étourdit brièvement la cible.",                                            FI + "Direct_Du_Droit.png",            5),
+            new Node("Montée d'Adrénaline",  "Actif",  "Il sent l'intensité du combat lui fouetter le sang.",                         "Augmente les dégâts infligés pendant quelques secondes.",                                    FI + "Montée_D_Adrenaline.png",        5),
+            new Node("Garde du Boxeur",      "Passif", "La meilleure défense, c'est de voir venir le coup.",                          "Réduit les dégâts reçus lorsque l'attaquant est dans le cône frontal.",                      FI + "Garde_Du_Boxeur.png",            5),
+            new Node("Adrénaline",           "Passif", "La douleur est un carburant.",                                                "Recevoir des dégâts augmente légèrement la vitesse de déplacement pendant quelques secondes.", FI + "Adrénaline.png",                 5),
+            new Node("Acharnement",          "Passif", "Chaque coup porte un peu plus que le précédent.",                             "Les dégâts augmentent progressivement à chaque frappe sur la même cible.",                    FI + "Acharnement.png",                5),
+            new Node("Esprit Combatif",      "Passif", "Le danger aiguise ses sens.",                                                 "Inflige davantage de dégâts lorsque ses points de vie sont inférieurs à 50 %.",              FI + "Esprit_Combatif.png",            5),
+            new Node("Poings d'Acier",       "Passif", "Ses poings sont ses armes, et ses armes ne pardonnent pas.",                  "Les coups critiques ont une chance d'étourdir brièvement la cible.",                         FI + "Frappes_Répétées.png",           5),
+            new Node("Déluge de Coups",      "Actif",  "Pas le temps de souffler — pas le temps de répondre.",                       "Enchaîne rapidement cinq frappes successives sur la cible.",                                  FI + "Déluge_De_Coups.png",            5),
+            new Node("Second Souffle",       "Actif",  "Quand tout semble perdu, il trouve une réserve cachée.",                     "Restaure une partie des points de vie et de l'endurance.",                                   FI + "Second_Souffle.png",             5),
+            new Node("Uppercut",             "Actif",  "Un uppercut qui envoie l'ennemi vers le ciel.",                              "Coup ascendant qui inflige des dégâts et projette la cible en l'air.",                       FI + "Uppercut.png",                   5),
+        });
+
         final String RI = "Classes_Icons/Rampart/";
         SPEC_TREES.put(PlayerSpecialization.REMPART, new Node[]{
             new Node("Charge Lourde",         "Actif",  "Quand l'acier avance, rien ne résiste.",                                    "Charge en ligne droite en repoussant et frappant les ennemis sur le passage.",     RI + "Charge_Lourde.png",         5),

@@ -61,6 +61,7 @@ public final class ClassSkillService {
     private final fr.varyon.vrpg.classes.rempart.RempartState rempartState;
     private final fr.varyon.vrpg.classes.berserker.BerserkerState berserkerState;
     private final fr.varyon.vrpg.classes.ravageur.RavageurState ravageurState;
+    private final fr.varyon.vrpg.classes.bagarreur.BagarreurState bagarreurState;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
     private final Map<String, SkillCaster> casters = new HashMap<>();
 
@@ -69,13 +70,15 @@ public final class ClassSkillService {
                              @Nonnull OmbreState ombreState,
                              @Nonnull fr.varyon.vrpg.classes.rempart.RempartState rempartState,
                              @Nonnull fr.varyon.vrpg.classes.berserker.BerserkerState berserkerState,
-                             @Nonnull fr.varyon.vrpg.classes.ravageur.RavageurState ravageurState) {
+                             @Nonnull fr.varyon.vrpg.classes.ravageur.RavageurState ravageurState,
+                             @Nonnull fr.varyon.vrpg.classes.bagarreur.BagarreurState bagarreurState) {
         this.classManager = classManager;
         this.duellisteState = duellisteState;
         this.ombreState = ombreState;
         this.rempartState = rempartState;
         this.berserkerState = berserkerState;
         this.ravageurState = ravageurState;
+        this.bagarreurState = bagarreurState;
         registerCasters();
     }
 
@@ -129,6 +132,19 @@ public final class ClassSkillService {
             (uuid, pr, er, st, cb) -> tryCastDixPourSang(uuid, pr, er, st));
         casters.put(fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastCorDeGuerre(uuid, pr, er, st));
+        // Bagarreur
+        casters.put(fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastJeuDeJambes(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastMonteeAdrenaline(uuid, pr));
+        casters.put(fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastDirectDuDroit(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastDelugeDeCoups2(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastSecondSouffleBagarreur(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastUppercut(uuid, pr, er, st));
         // Ravageur
         casters.put(fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastBondEcrasant(uuid, pr, er, st, cb));
@@ -2144,6 +2160,315 @@ public final class ClassSkillService {
         ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.ravageur.RabattageSkill.SKILL_ID);
         notifySkill(uuid, "Rabattage");
+        return true;
+    }
+
+    // ========== BAGARREUR ==========
+
+    private boolean isBagarreur(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.BARBARE
+            && acc.getActiveSpec(PlayerClass.BARBARE) == fr.varyon.vrpg.classes.PlayerSpecialization.BAGARREUR;
+    }
+
+    private boolean isHoldingNothing(@Nonnull PlayerRef playerRef) {
+        String held = getHeldItemId(playerRef);
+        return held == null || held.isBlank();
+    }
+
+    private float getBaseDamage(@Nonnull PlayerRef playerRef) {
+        int w = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+        return w > 0 ? (float) w : 5f;
+    }
+
+    public boolean tryCastJeuDeJambes(@Nonnull UUID uuid,
+                                       @Nonnull PlayerRef playerRef,
+                                       @Nonnull Ref<EntityStore> entityRef,
+                                       @Nonnull Store<EntityStore> store,
+                                       @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBagarreur(acc)) return false;
+        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = hr.getDirection();
+                double dx = dir.x, dz = dir.z;
+                double len = Math.sqrt(dx*dx + dz*dz);
+                if (len > 1e-6) { dx /= len; dz /= len; }
+                double rightX = dz, rightZ = -dx;
+
+                double dist = fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.dashDistanceForRank(rank);
+                double dashSpeed = dist * 3.0;
+
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(rightX * dashSpeed, 2.0, rightZ * dashSpeed);
+                    vel.setClient(dashVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Daggers", "DashBackward", true,
+                    commandBuffer != null ? commandBuffer : store);
+                ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, tc.getPosition(), commandBuffer);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.SKILL_ID);
+        notifySkill(uuid, "Jeu de Jambes");
+        return true;
+    }
+
+    public boolean tryCastMonteeAdrenaline(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBagarreur(acc)) return false;
+        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        bagarreurState.startMonteeAdrenaline(uuid,
+            fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.durationMsForRank(rank),
+            fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.damageBonusForRank(rank));
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.SKILL_ID);
+        notifySkill(uuid, "Montée d'Adrénaline");
+        return true;
+    }
+
+    public boolean tryCastDirectDuDroit(@Nonnull UUID uuid,
+                                         @Nonnull PlayerRef playerRef,
+                                         @Nonnull Ref<EntityStore> entityRef,
+                                         @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBagarreur(acc)) return false;
+        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 3.5);
+        if (targeted == null) return false;
+
+        try {
+            float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.damagePctForRank(rank);
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+
+            float stunSec = fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.stunMsForRank(rank) / 1000f;
+            int stunIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex("Vrpg_Stun");
+            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect stunEffect =
+                (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(stunIdx);
+            if (stunEffect != null) {
+                com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                    store.getComponent(targeted, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                if (ec != null) ec.addEffect(targeted, stunEffect, stunSec,
+                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+            }
+
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", playerRef, tc.getPosition(), null);
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Club", "SwingRight", true, store);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.SKILL_ID);
+        notifySkill(uuid, "Direct du Droit");
+        return true;
+    }
+
+    public boolean tryCastDelugeDeCoups2(@Nonnull UUID uuid,
+                                          @Nonnull PlayerRef playerRef,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBagarreur(acc)) return false;
+        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID,
+                fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 3.5);
+        if (targeted == null) return false;
+
+        try {
+            float dmgPerHit = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.damagePerHitForRank(rank);
+            final int fRank = rank;
+            final Ref<EntityStore> fTargeted = targeted;
+            final Ref<EntityStore> fEntityRef = entityRef;
+            final PlayerRef fPlayerRef = playerRef;
+
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmgPerHit));
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Club", "SwingLeft", true, store);
+            TransformComponent tcDeluge = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tcDeluge != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", playerRef, tcDeluge.getPosition(), null);
+
+            int totalHits = fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.hitCountForRank(rank);
+            com.hypixel.hytale.server.core.universe.world.World world = null;
+            try {
+                java.util.UUID wUuid = playerRef.getWorldUuid();
+                if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+            } catch (Exception ignored2) {}
+            if (world != null) {
+                final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                final Store<EntityStore> fStore = store;
+                final float fDmg = dmgPerHit;
+                final int fTotalHits = totalHits;
+                java.util.concurrent.ScheduledExecutorService exec =
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread t = new Thread(r, "deluge-bagarreur"); t.setDaemon(true); return t;
+                    });
+                java.util.concurrent.atomic.AtomicInteger hitNum = new java.util.concurrent.atomic.AtomicInteger(1);
+                String[] anims = {"SwingRight", "SwingLeft", "SwingRight", "SwingLeft", "SwingRight", "SwingLeft"};
+                exec.scheduleAtFixedRate(() -> fw.execute(() -> {
+                    int h = hitNum.incrementAndGet();
+                    if (h > fTotalHits) { exec.shutdown(); return; }
+                    try {
+                        com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                            fTargeted, fStore,
+                            new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(fEntityRef),
+                                com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, fDmg));
+                        AnimationUtils.playAnimation(fEntityRef, AnimationSlot.Action, "Club",
+                            anims[(h - 2) % anims.length], true, fStore);
+                        TransformComponent tc2 = fStore.getComponent(fEntityRef, TransformComponent.getComponentType());
+                        if (tc2 != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", fPlayerRef, tc2.getPosition(), null);
+                    } catch (Exception ignored3) { exec.shutdown(); }
+                }), fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.HIT_DELAY_MS,
+                   fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.HIT_DELAY_MS,
+                   java.util.concurrent.TimeUnit.MILLISECONDS);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID);
+        notifySkill(uuid, "Déluge de Coups");
+        return true;
+    }
+
+    public boolean tryCastSecondSouffleBagarreur(@Nonnull UUID uuid,
+                                                   @Nonnull PlayerRef playerRef,
+                                                   @Nonnull Ref<EntityStore> entityRef,
+                                                   @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBagarreur(acc)) return false;
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.cooldownMsForRank(rank))) return false;
+
+        try {
+            Integer hIdx = null;
+            try { hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth(); }
+            catch (Exception e) { hIdx = -1; }
+            Integer sIdx = null;
+            try { sIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getStamina(); }
+            catch (Exception e) { sIdx = -1; }
+
+            com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap stats =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+            if (stats != null) {
+                if (hIdx != null && hIdx >= 0) {
+                    var hp = stats.get(hIdx);
+                    if (hp != null) {
+                        float heal = hp.getMax() * fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.hpRestorePctForRank(rank);
+                        stats.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + heal));
+                    }
+                }
+                if (sIdx != null && sIdx >= 0) {
+                    var sta = stats.get(sIdx);
+                    if (sta != null) {
+                        float staminaRestore = sta.getMax() * fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.staminaRestorePctForRank(rank);
+                        stats.setStatValue(sIdx, Math.min(sta.getMax(), sta.get() + staminaRestore));
+                    }
+                }
+            }
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Status, "Club", "Guard", true, store);
+        } catch (Exception ignored) {}
+
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID);
+        notifySkill(uuid, "Second Souffle");
+        return true;
+    }
+
+    public boolean tryCastUppercut(@Nonnull UUID uuid,
+                                    @Nonnull PlayerRef playerRef,
+                                    @Nonnull Ref<EntityStore> entityRef,
+                                    @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isBagarreur(acc)) return false;
+        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.UppercutSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.bagarreur.UppercutSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.bagarreur.UppercutSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 3.0);
+        if (targeted == null) return false;
+
+        try {
+            float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.bagarreur.UppercutSkill.damagePctForRank(rank);
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+
+            com.hypixel.hytale.server.core.modules.physics.component.Velocity targetVel =
+                store.getComponent(targeted, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+            if (targetVel != null) {
+                targetVel.getInstructions().clear();
+                targetVel.addInstruction(
+                    new org.joml.Vector3d(0, fr.varyon.vrpg.classes.bagarreur.UppercutSkill.launchY(), 0),
+                    null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+            }
+
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", playerRef, tc.getPosition(), null);
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Club", "SwingRight", true, store);
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Club", "Swing_Up_Left", true, store);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID);
+        notifySkill(uuid, "Uppercut");
         return true;
     }
 }
