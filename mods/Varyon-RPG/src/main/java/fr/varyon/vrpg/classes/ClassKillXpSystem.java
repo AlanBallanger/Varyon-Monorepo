@@ -42,6 +42,7 @@ public final class ClassKillXpSystem {
     private final MobParticipantsTracker participantsTracker;
     private final BerserkerState berserkerState;
     private final RavageurState ravageurState;
+    private fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState;
     private final Map<UUID, Map<String, KillTracker>> killTrackers = new ConcurrentHashMap<>();
     private Integer healthStatIndex = null;
 
@@ -53,6 +54,10 @@ public final class ClassKillXpSystem {
         this.participantsTracker = participantsTracker;
         this.berserkerState = berserkerState;
         this.ravageurState = ravageurState;
+    }
+
+    public void setArcanistState(@Nonnull fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState) {
+        this.arcanistState = arcanistState;
     }
 
     public void cleanup(@Nonnull UUID playerId) {
@@ -229,6 +234,14 @@ public final class ClassKillXpSystem {
             if (elanRank > 0) {
                 ravageurState.armElan(uuid, elanRank);
             }
+        }
+        if (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.ARCANISTE && arcanistState != null) {
+            int drainRank = acc.getTalentRank(activeClass, fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.DRAIN_MYSTIQUE_NODE);
+            if (drainRank > 0) {
+                float pct = fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.drainMystiqueBonusForRank(drainRank);
+                fr.varyon.vrpg.classes.ability.ClassSkillMana.restoreByPct(playerRef, pct);
+            }
+            arcanistState.setPouvoirGrandissant(uuid, true);
         }
         if (activeClass == PlayerClass.BARBARE && spec == PlayerSpecialization.BERSERKER) {
             int frenesieRank = acc.getTalentRank(activeClass, BerserkerPassifs.FRENESIE_NODE);

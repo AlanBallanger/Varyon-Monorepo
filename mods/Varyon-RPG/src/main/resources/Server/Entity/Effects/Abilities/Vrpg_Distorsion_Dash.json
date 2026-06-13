@@ -1,0 +1,50 @@
+{
+  "Duration": 0.3,
+  "OverlapBehavior": "Extend",
+  "Invulnerable": false,
+  "DamageResistance": {
+    "Physical": [
+      {
+        "CalculationType": "Percent",
+        "Amount": 100
+      }
+    ],
+    "Projectile": [
+      {
+        "CalculationType": "Percent",
+        "Amount": 100
+      }
+    ],
+    "Elemental": [
+      {
+        "CalculationType": "Percent",
+        "Amount": 100
+      }
+    ],
+    "Slashing": [
+      {
+        "CalculationType": "Percent",
+        "Amount": 100
+      }
+    ],
+    "Bludgeoning": [
+      {
+        "CalculationType": "Percent",
+        "Amount": 100
+      }
+    ]
+  },
+  "ApplicationEffects": {
+    "Particles": [
+      {
+        "SystemId": "Daggers_Dash_Straight",
+        "TargetEntityPart": "Entity",
+        "TargetNodeName": "Hip",
+        "PositionOffset": {
+          "Y": 1.0
+        },
+        "Color": "#a8c8ff"
+      }
+    ]
+  }
+}

@@ -161,6 +161,22 @@ public final class ClassTalentTree {
             new Node("Uppercut",             "Actif",  "Un uppercut qui envoie l'ennemi vers le ciel.",                              "Coup ascendant qui inflige des dégâts et projette la cible en l'air.",                       FI + "Uppercut.png",                   5),
         });
 
+        final String AI = "Classes_Icons/Arcanist/";
+        SPEC_TREES.put(PlayerSpecialization.ARCANISTE, new Node[]{
+            new Node("Distorsion",          "Actif",  "La magie plie l'espace — et lui permet de disparaître.",              "Téléportation magique en arrière.",                                                         AI + "Distorsion.png",           5),
+            new Node("Talent Inné",         "Passif", "La distance est son terrain naturel.",                                  "Gain d'expérience augmenté lorsque tu es à plus de 8 blocs de la cible.",                   AI + "Talent_Inné.png",          5),
+            new Node("Boule de Feu",        "Actif",  "Une sphère de flamme qui consume tout ce qu'elle touche.",             "Lance une boule de feu qui explose à l'impact.",                                            AI + "Boule_De_Feu.png",         5),
+            new Node("Écho Temporel",       "Passif", "Le temps ralentit pour lui, jamais pour ses ennemis.",                 "Réduit le temps de recharge des compétences actives.",                                      AI + "Echo_Temporel.png",        5),
+            new Node("Météore",             "Actif",  "Il appelle l'extinction depuis les cieux.",                            "Lance un projectile explosif qui s'abat sur une zone.",                                     AI + "Météore.png",              5),
+            new Node("Puits de Mana",       "Passif", "Son mana est un océan que peu peuvent égaler.",                        "Augmente le mana maximum.",                                                                  AI + "Puits_De_Mana.png",        5),
+            new Node("Nova de Givre",       "Actif",  "Le froid jaillit de lui comme une explosion silencieuse.",             "Inflige des dégâts aux ennemis proches et les ralentit.",                                   AI + "Nova_De_Givre.png",        5),
+            new Node("Drain Mystique",      "Passif", "Chaque mort nourrit sa réserve arcanique.",                            "Les éliminations restaurent une partie du mana.",                                           AI + "Drain_Mystique.png",       5),
+            new Node("Surcharge",           "Actif",  "Trop de pouvoir — et pourtant jamais assez.",                          "Restaure du mana et augmente temporairement les dégâts des sorts.",                        AI + "Surcharge.png",            5),
+            new Node("Écho Arcanique",      "Passif", "Parfois, le sort ne consomme rien — comme si la magie se répétait.", "Les sorts ont une chance de ne pas déclencher leur temps de recharge.",                     AI + "Echo_Arcanique.png",       5),
+            new Node("Salve de Givre",      "Actif",  "Une tempête de glace qui laisse ses ennemis figés sur place.",        "Lance plusieurs projectiles glacés qui ralentissent les cibles touchées.",                   AI + "Salve_De_Givre.png",       5),
+            new Node("Pouvoir Grandissant", "Passif", "L'inviolabilité forge une puissance silencieuse.",                     "Les dégâts des sorts augmentent tant que tu n'as pas subi de dégâts.",                      AI + "Pouvoir_Grandissant.png",  5),
+        });
+
         final String RI = "Classes_Icons/Rampart/";
         SPEC_TREES.put(PlayerSpecialization.REMPART, new Node[]{
             new Node("Charge Lourde",         "Actif",  "Quand l'acier avance, rien ne résiste.",                                    "Charge en ligne droite en repoussant et frappant les ennemis sur le passage.",     RI + "Charge_Lourde.png",         5),

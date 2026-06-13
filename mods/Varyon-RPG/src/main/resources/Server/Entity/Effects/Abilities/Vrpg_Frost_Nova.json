@@ -1,0 +1,9 @@
+{
+  "Duration": 0.5,
+  "Infinite": false,
+  "Debuff": false,
+  "ApplicationEffects": {
+    "EntityBottomTint": "#a0d8ef",
+    "EntityTopTint": "#d0f0ff"
+  }
+}

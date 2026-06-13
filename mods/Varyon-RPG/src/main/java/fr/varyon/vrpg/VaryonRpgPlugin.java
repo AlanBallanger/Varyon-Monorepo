@@ -143,6 +143,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.bagarreur.BagarreurOutgoingDamageSystem bagarreurOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.bagarreur.BagarreurIncomingDamageSystem bagarreurIncomingDamageSystem;
     private fr.varyon.vrpg.classes.bagarreur.BagarreurSpeedSystem bagarreurSpeedSystem;
+    private fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState;
+    private fr.varyon.vrpg.classes.arcaniste.ArcanistOutgoingDamageSystem arcanistOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.arcaniste.ArcanistIncomingDamageSystem arcanistIncomingDamageSystem;
     private OmbreState ombreState;
     private OmbrePoisonSystem ombrePoisonSystem;
     private OmbreSpeedSystem ombreSpeedSystem;
@@ -201,6 +204,11 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
     public ClassSkillService getClassSkillService() {
         return classSkillService;
+    }
+
+    @javax.annotation.Nullable
+    public fr.varyon.vrpg.classes.arcaniste.ArcanistState getArcanistState() {
+        return arcanistState;
     }
 
     public java.nio.file.Path getPluginDataDirectory() {
@@ -265,12 +273,16 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.bagarreurOutgoingDamageSystem = new fr.varyon.vrpg.classes.bagarreur.BagarreurOutgoingDamageSystem(classManager, bagarreurState);
             this.bagarreurIncomingDamageSystem = new fr.varyon.vrpg.classes.bagarreur.BagarreurIncomingDamageSystem(classManager, bagarreurState);
             this.bagarreurSpeedSystem = new fr.varyon.vrpg.classes.bagarreur.BagarreurSpeedSystem(classManager, bagarreurState);
-            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState);
+            this.arcanistState = new fr.varyon.vrpg.classes.arcaniste.ArcanistState();
+            this.arcanistOutgoingDamageSystem = new fr.varyon.vrpg.classes.arcaniste.ArcanistOutgoingDamageSystem(classManager, arcanistState);
+            this.arcanistIncomingDamageSystem = new fr.varyon.vrpg.classes.arcaniste.ArcanistIncomingDamageSystem(classManager, arcanistState);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState);
             this.classSkillKeyFilter = new ClassSkillKeyFilter(classManager, rempartState);
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
             this.mobParticipantsTracker = new MobParticipantsTracker();
             this.classKillXpSystem = new ClassKillXpSystem(classManager, mobParticipantsTracker, berserkerState, ravageurState);
+            if (arcanistState != null) this.classKillXpSystem.setArcanistState(arcanistState);
         } catch (Exception e) {
             LOGGER.atSevere().withCause(e).log("[VaryonRPG] Failed to initialize ClassManager");
         }
@@ -913,6 +925,19 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 getEntityStoreRegistry().registerSystem(bagarreurSpeedSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register BagarreurSpeedSystem");
+            }
+        }
+
+        if (arcanistState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(arcanistOutgoingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ArcanistOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(arcanistIncomingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ArcanistIncomingDamageSystem");
             }
         }
 

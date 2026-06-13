@@ -18,11 +18,14 @@ public final class ClassStatEngine {
 
     private static final String MOD_KEY_HP      = "vrpg.class.hp";
     private static final String MOD_KEY_STAMINA = "vrpg.class.stamina";
+    private static final String MOD_KEY_MANA    = "vrpg.class.mana";
+    private static final float  MAGE_MANA_MULT  = 2.0f;
 
     private final ConcurrentHashMap<UUID, ClassPlayerStats> cache = new ConcurrentHashMap<>();
 
     private Integer healthIdx  = null;
     private Integer staminaIdx = null;
+    private Integer manaIdx    = null;
 
     private int getHealthIdx() {
         if (healthIdx == null) {
@@ -38,6 +41,14 @@ public final class ClassStatEngine {
             catch (Exception e) { staminaIdx = -1; }
         }
         return staminaIdx;
+    }
+
+    private int getManaIdx() {
+        if (manaIdx == null) {
+            try { manaIdx = DefaultEntityStatTypes.getMana(); }
+            catch (Exception e) { manaIdx = -1; }
+        }
+        return manaIdx;
     }
 
     @Nullable
@@ -60,10 +71,20 @@ public final class ClassStatEngine {
         PlayerSpecialization spec = progress.getActiveSpec();
 
         int constitutionRank = acc.getTalentRank(activeClass, fr.varyon.vrpg.classes.rempart.RempartPassifs.CONSTITUTION_NODE);
+        int puitsManaRank = (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.ARCANISTE)
+            ? acc.getTalentRank(activeClass, fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.PUITS_MANA_NODE) : 0;
         ClassPlayerStats stats = ClassStatDefinition.compute(level, spec, constitutionRank);
         cache.put(uuid, stats);
 
-        applyEntityStats(playerRef, stats);
+        applyEntityStats(playerRef, stats, activeClass, puitsManaRank);
+
+        if (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.ARCANISTE) {
+            fr.varyon.vrpg.VaryonRpgPlugin plugin = fr.varyon.vrpg.VaryonRpgPlugin.getInstance();
+            if (plugin != null) {
+                fr.varyon.vrpg.classes.arcaniste.ArcanistState as = plugin.getArcanistState();
+                if (as != null) as.setPouvoirGrandissant(uuid, true);
+            }
+        }
 
         LOGGER.at(Level.INFO).log("[ClassStatEngine] %s class=%s spec=%s Nv.%d → HP=%d ATK=%d ARM=%d%% STA=%d crit=%d%% critDmg=+%d%%",
             uuid.toString().substring(0, 8),
@@ -74,7 +95,7 @@ public final class ClassStatEngine {
         return stats;
     }
 
-    private void applyEntityStats(PlayerRef playerRef, ClassPlayerStats stats) {
+    private void applyEntityStats(PlayerRef playerRef, ClassPlayerStats stats, PlayerClass activeClass, int puitsManaRank) {
         try {
             if (playerRef == null || !playerRef.isValid()) return;
             EntityStatMap statMap = playerRef.getComponent(EntityStatMap.getComponentType());
@@ -83,8 +104,10 @@ public final class ClassStatEngine {
             int hIdx = getHealthIdx();
             int sIdx = getStaminaIdx();
 
+            int mIdx = getManaIdx();
             clearModifier(statMap, hIdx, MOD_KEY_HP);
             clearModifier(statMap, sIdx, MOD_KEY_STAMINA);
+            clearModifier(statMap, mIdx, MOD_KEY_MANA);
 
             // HP: multiplicateur VRPG appliqué sur le max HP actuel du joueur (base + équipement).
             // combinedHpMult = hpLevelMult(level) * specHpMult
@@ -103,6 +126,17 @@ public final class ClassStatEngine {
                         statMap.setStatValue(EntityStatMap.Predictable.ALL, hIdx, newMax);
                     }
                 }
+            }
+
+            // Mana x2 pour les mages + bonus Puits de Mana
+            if (mIdx >= 0 && activeClass == PlayerClass.MAGE) {
+                float manaMult = MAGE_MANA_MULT;
+                if (puitsManaRank > 0) {
+                    manaMult *= (1f + fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.puitsManaBonus(puitsManaRank));
+                }
+                statMap.putModifier(EntityStatMap.Predictable.ALL, mIdx, MOD_KEY_MANA,
+                    new StaticModifier(Modifier.ModifierTarget.MAX,
+                        StaticModifier.CalculationType.MULTIPLICATIVE, manaMult));
             }
 
             // Stamina: VRPG définit la stamina complète (remplace la base de 100)
@@ -139,6 +173,7 @@ public final class ClassStatEngine {
             if (statMap == null) return;
             clearModifier(statMap, getHealthIdx(), MOD_KEY_HP);
             clearModifier(statMap, getStaminaIdx(), MOD_KEY_STAMINA);
+            clearModifier(statMap, getManaIdx(), MOD_KEY_MANA);
         } catch (Exception ignored) {}
     }
 

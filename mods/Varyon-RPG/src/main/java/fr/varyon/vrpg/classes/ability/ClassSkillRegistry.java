@@ -138,6 +138,23 @@ public final class ClassSkillRegistry {
                 default -> null;
             };
         }
+        if (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.ARCANISTE) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.TALENT_INNE_NODE;
+                case 2  -> fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID;
+                case 3  -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.ECHO_TEMPOREL_NODE;
+                case 4  -> fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID;
+                case 5  -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.PUITS_MANA_NODE;
+                case 6  -> fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SKILL_ID;
+                case 7  -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.DRAIN_MYSTIQUE_NODE;
+                case 8  -> fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID;
+                case 9  -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.ECHO_ARCANIQUE_NODE;
+                case 10 -> fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID;
+                case 11 -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.POUVOIR_GRANDISSANT_NODE;
+                default -> null;
+            };
+        }
         return null;
     }
 }

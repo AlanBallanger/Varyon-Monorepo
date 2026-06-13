@@ -115,6 +115,19 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ACHARNEMENT_NODE    -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.acharnementStatLine(rank);
             case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ESPRIT_COMBATIF_NODE -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.espritCombatifStatLine(rank);
             case fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.POINGS_ACIER_NODE  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.poingsAcierStatLine(rank);
+            // Arcaniste
+            case fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID       -> fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID       -> fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID          -> fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SKILL_ID      -> fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID        -> fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID     -> fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.TALENT_INNE_NODE         -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.talentInneStatLine(rank);
+            case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.ECHO_TEMPOREL_NODE       -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.echoTemporelStatLine(rank);
+            case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.PUITS_MANA_NODE          -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.puitsManaStatLine(rank);
+            case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.DRAIN_MYSTIQUE_NODE      -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.drainMystiqueStatLine(rank);
+            case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.ECHO_ARCANIQUE_NODE      -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.echoArcanicStatLine(rank);
+            case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.POUVOIR_GRANDISSANT_NODE -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.pouvoirGrandissantStatLine(rank);
             default -> null;
         };
     }

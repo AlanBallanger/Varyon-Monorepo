@@ -1,0 +1,44 @@
+{
+  "Animations": {
+    "DashForward": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Forward.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Forward_FPS.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Forward.blockyanim",
+      "ClipsGeometry": true,
+      "BlendingDuration": 0.25
+    },
+    "DashBackward": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Backward.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Backward_FPS.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Backward.blockyanim",
+      "ClipsGeometry": true,
+      "BlendingDuration": 0.25
+    },
+    "DashLeft": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Left.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Left_FPS.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Left.blockyanim",
+      "ClipsGeometry": true,
+      "BlendingDuration": 0.25
+    },
+    "DashRight": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Right.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Right_FPS.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Dash/Dash_Right.blockyanim",
+      "ClipsGeometry": true,
+      "BlendingDuration": 0.25
+    }
+  },
+  "WiggleWeights": {
+    "Pitch": 2.5,
+    "PitchDeceleration": 0.1,
+    "Roll": 0.1,
+    "RollDeceleration": 0.1,
+    "X": 2.5,
+    "XDeceleration": 0.1,
+    "Y": 0.1,
+    "YDeceleration": 0.1,
+    "Z": 0.1,
+    "ZDeceleration": 0.1
+  }
+}
