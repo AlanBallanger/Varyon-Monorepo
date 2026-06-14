@@ -1,0 +1,11 @@
+{
+  "Spawners": [
+    { "SpawnerId": "Fire_AoE_Grow_Glow",       "PositionOffset": { "Y": 0.12 }, "Scale": 1.6 },
+    { "SpawnerId": "Fire_AoE_Grow2_Circle",    "PositionOffset": { "Y": 0.12 }, "StartDelay": 0.2, "Scale": 1.6 },
+    { "SpawnerId": "Fire_AoE_Grow_FloorFire",  "PositionOffset": { "Y": 0.12 }, "StartDelay": 0.4, "Scale": 1.6 },
+    { "SpawnerId": "Fire_AoE_Grow_Sparks",     "PositionOffset": { "Y": 0.18 }, "StartDelay": 0.6, "Scale": 1.6 }
+  ],
+  "LifeSpan": 2.5,
+  "BoundingRadius": 16.0,
+  "CullDistance": 80.0
+}

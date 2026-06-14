@@ -46,9 +46,22 @@ Group {
 
     Group #ClassProfile0Card {
       FlexWeight: 1;
-      LayoutMode: Top;
+      LayoutMode: Full;
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-      Padding: (Full: 10);
+
+      Button #ClassProfile0HoverButton {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.0))),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10))
+        );
+      }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Top;
+        Padding: (Full: 10);
 
       Group {
         Anchor: (Left: 0, Right: 0, Height: 20);
@@ -98,16 +111,24 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+      }
 
-      Group { FlexWeight: 1; }
+      Group #ClassProfile0ConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
 
-      Button #ClassProfile0SelectButton {
-        Anchor: (Left: 0, Right: 0, Height: 28);
-        Style: $P.@PlusButtonStyle;
-        LayoutMode: Left;
-        Group { FlexWeight: 1; }
-        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
-        Group { FlexWeight: 1; }
+        Button #ClassProfile0ConfirmButton {
+          Anchor: (Width: 120, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
       }
     }
 
@@ -115,9 +136,22 @@ Group {
 
     Group #ClassProfile1Card {
       FlexWeight: 1;
-      LayoutMode: Top;
+      LayoutMode: Full;
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-      Padding: (Full: 10);
+
+      Button #ClassProfile1HoverButton {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.0))),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10))
+        );
+      }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Top;
+        Padding: (Full: 10);
 
       Group {
         Anchor: (Left: 0, Right: 0, Height: 20);
@@ -167,16 +201,24 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+      }
 
-      Group { FlexWeight: 1; }
+      Group #ClassProfile1ConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
 
-      Button #ClassProfile1SelectButton {
-        Anchor: (Left: 0, Right: 0, Height: 28);
-        Style: $P.@PlusButtonStyle;
-        LayoutMode: Left;
-        Group { FlexWeight: 1; }
-        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
-        Group { FlexWeight: 1; }
+        Button #ClassProfile1ConfirmButton {
+          Anchor: (Width: 120, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
       }
     }
 
@@ -184,9 +226,22 @@ Group {
 
     Group #ClassProfile2Card {
       FlexWeight: 1;
-      LayoutMode: Top;
+      LayoutMode: Full;
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-      Padding: (Full: 10);
+
+      Button #ClassProfile2HoverButton {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.0))),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10))
+        );
+      }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Top;
+        Padding: (Full: 10);
 
       Group {
         Anchor: (Left: 0, Right: 0, Height: 20);
@@ -236,16 +291,24 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+      }
 
-      Group { FlexWeight: 1; }
+      Group #ClassProfile2ConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
 
-      Button #ClassProfile2SelectButton {
-        Anchor: (Left: 0, Right: 0, Height: 28);
-        Style: $P.@PlusButtonStyle;
-        LayoutMode: Left;
-        Group { FlexWeight: 1; }
-        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
-        Group { FlexWeight: 1; }
+        Button #ClassProfile2ConfirmButton {
+          Anchor: (Width: 120, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
       }
     }
 
@@ -253,9 +316,22 @@ Group {
 
     Group #ClassProfile3Card {
       FlexWeight: 1;
-      LayoutMode: Top;
+      LayoutMode: Full;
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-      Padding: (Full: 10);
+
+      Button #ClassProfile3HoverButton {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.0))),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10))
+        );
+      }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Top;
+        Padding: (Full: 10);
 
       Group {
         Anchor: (Left: 0, Right: 0, Height: 20);
@@ -305,16 +381,24 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+      }
 
-      Group { FlexWeight: 1; }
+      Group #ClassProfile3ConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
 
-      Button #ClassProfile3SelectButton {
-        Anchor: (Left: 0, Right: 0, Height: 28);
-        Style: $P.@PlusButtonStyle;
-        LayoutMode: Left;
-        Group { FlexWeight: 1; }
-        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
-        Group { FlexWeight: 1; }
+        Button #ClassProfile3ConfirmButton {
+          Anchor: (Width: 120, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
       }
     }
 
@@ -322,9 +406,22 @@ Group {
 
     Group #ClassProfile4Card {
       FlexWeight: 1;
-      LayoutMode: Top;
+      LayoutMode: Full;
       Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
-      Padding: (Full: 10);
+
+      Button #ClassProfile4HoverButton {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.0))),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10))
+        );
+      }
+
+      Group {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Top;
+        Padding: (Full: 10);
 
       Group {
         Anchor: (Left: 0, Right: 0, Height: 20);
@@ -374,16 +471,24 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+      }
 
-      Group { FlexWeight: 1; }
+      Group #ClassProfile4ConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
 
-      Button #ClassProfile4SelectButton {
-        Anchor: (Left: 0, Right: 0, Height: 28);
-        Style: $P.@PlusButtonStyle;
-        LayoutMode: Left;
-        Group { FlexWeight: 1; }
-        Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Choisir"; }
-        Group { FlexWeight: 1; }
+        Button #ClassProfile4ConfirmButton {
+          Anchor: (Width: 120, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
       }
     }
   }

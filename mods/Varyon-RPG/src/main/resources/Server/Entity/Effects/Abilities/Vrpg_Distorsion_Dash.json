@@ -43,7 +43,8 @@
         "PositionOffset": {
           "Y": 1.0
         },
-        "Color": "#a8c8ff"
+        "Color": "#a8c8ff",
+        "Scale": 1.0
       }
     ]
   }

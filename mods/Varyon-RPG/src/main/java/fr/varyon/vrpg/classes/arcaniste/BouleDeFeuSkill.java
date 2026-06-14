@@ -4,8 +4,9 @@ public final class BouleDeFeuSkill {
 
     public static final String SKILL_ID       = "boule_de_feu";
     public static final String TALENT_NODE_ID = "arcaniste_2";
+    public static final String PROJECTILE_CONFIG = "Vrpg_Fireball";
 
-    private static final float[] DAMAGE_PCT  = {1.2f, 1.6f, 2.1f, 2.8f, 3.8f};
+    private static final float[] DAMAGE_PCT  = {1.0f, 1.4f, 1.8f, 2.3f, 3.0f};
     private static final float   DAMAGE_RADIUS = 3.0f;
     private static final long[]  COOLDOWN_MS = {10000, 9000, 8000, 7000, 6000};
     private static final float[] MANA_COST   = {10f, 12f, 14f, 16f, 18f};

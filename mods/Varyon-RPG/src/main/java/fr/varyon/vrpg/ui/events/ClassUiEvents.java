@@ -68,7 +68,15 @@ public final class ClassUiEvents {
             return UiEventResult.REBUILD;
         }
 
-        if ("switchProfile".equals(data.action) && data.index != null) {
+        if ("pendingProfile".equals(data.action) && data.index != null) {
+            int idx;
+            try { idx = Integer.parseInt(data.index); } catch (NumberFormatException e) { return UiEventResult.NONE; }
+            state.pendingProfileIndex = state.pendingProfileIndex != null && state.pendingProfileIndex == idx ? null : idx;
+            return UiEventResult.REBUILD;
+        }
+
+        if ("selectProfile".equals(data.action) && data.index != null) {
+            state.pendingProfileIndex = null;
             int idx;
             try { idx = Integer.parseInt(data.index); } catch (NumberFormatException e) { return UiEventResult.NONE; }
             ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();

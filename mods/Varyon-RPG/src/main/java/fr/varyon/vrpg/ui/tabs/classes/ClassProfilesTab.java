@@ -12,6 +12,7 @@ import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.ClassProfile;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.ui.classes.RpgClassUiState;
 
 import javax.annotation.Nonnull;
 
@@ -20,6 +21,7 @@ public final class ClassProfilesTab {
     private ClassProfilesTab() {}
 
     public static void build(@Nonnull PlayerRef playerRef,
+                             @Nonnull RpgClassUiState state,
                              @Nonnull UICommandBuilder uiBuilder,
                              @Nonnull UIEventBuilder eventBuilder) {
         eventBuilder.addEventBinding(
@@ -60,15 +62,24 @@ public final class ClassProfilesTab {
                 uiBuilder.set("#ClassProfile" + s + "SpecName.TextSpans", Message.raw(""));
             }
 
-            if (!isActive) {
+            boolean isPending = state.pendingProfileIndex != null && state.pendingProfileIndex == i;
+            uiBuilder.set("#ClassProfile" + s + "ConfirmPanel.Visible", isPending);
+            uiBuilder.set("#ClassProfile" + s + "HoverButton.Visible", !isActive && !isPending);
+            if (!isActive && !isPending) {
                 eventBuilder.addEventBinding(
                     CustomUIEventBindingType.Activating,
-                    "#ClassProfile" + s + "SelectButton",
-                    EventData.of("Action", "switchProfile").append("Index", s),
+                    "#ClassProfile" + s + "HoverButton",
+                    EventData.of("Action", "pendingProfile").append("Index", s),
                     false
                 );
-            } else {
-                uiBuilder.set("#ClassProfile" + s + "SelectButton.Visible", false);
+            }
+            if (isPending) {
+                eventBuilder.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    "#ClassProfile" + s + "ConfirmButton",
+                    EventData.of("Action", "selectProfile").append("Index", s),
+                    false
+                );
             }
         }
     }

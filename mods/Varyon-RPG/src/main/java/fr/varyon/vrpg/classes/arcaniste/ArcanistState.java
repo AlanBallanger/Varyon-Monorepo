@@ -16,6 +16,9 @@ public final class ArcanistState {
     // --- Écho Arcanique (dernier skill utilisé pour bypass CD) ---
     private final ConcurrentHashMap<UUID, String> echoPending = new ConcurrentHashMap<>();
 
+    // --- Dernier sort lancé (Fire vs Ice pour le tag de dégâts projectile) ---
+    private final ConcurrentHashMap<UUID, Boolean> lastCastFire = new ConcurrentHashMap<>();
+
     public ArcanistState() {}
 
     // ---- Surcharge ----
@@ -61,6 +64,16 @@ public final class ArcanistState {
         return false;
     }
 
+    // ---- Dernier sort lancé ----
+
+    public void setLastCastFire(@Nonnull UUID uuid, boolean fire) {
+        lastCastFire.put(uuid, fire);
+    }
+
+    public boolean isLastCastFire(@Nonnull UUID uuid) {
+        return Boolean.TRUE.equals(lastCastFire.get(uuid));
+    }
+
     // ---- Cleanup ----
 
     public void cleanup(@Nonnull UUID uuid) {
@@ -68,5 +81,6 @@ public final class ArcanistState {
         surchargeBonus.remove(uuid);
         pouvoirActive.remove(uuid);
         echoPending.remove(uuid);
+        lastCastFire.remove(uuid);
     }
 }

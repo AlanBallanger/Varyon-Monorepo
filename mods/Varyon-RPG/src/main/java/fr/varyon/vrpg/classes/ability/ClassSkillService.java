@@ -165,15 +165,15 @@ public final class ClassSkillService {
         casters.put(fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastDistorsion(uuid, pr, er, st, cb));
         casters.put(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID,
-            (uuid, pr, er, st, cb) -> tryCastBouleDeFeu(uuid, pr, er, st));
+            (uuid, pr, er, st, cb) -> tryCastBouleDeFeu(uuid, pr, er, st, cb));
         casters.put(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID,
-            (uuid, pr, er, st, cb) -> tryCastMeteore(uuid, pr, er, st));
+            (uuid, pr, er, st, cb) -> tryCastMeteore(uuid, pr, er, st, cb));
         casters.put(fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SKILL_ID,
-            (uuid, pr, er, st, cb) -> tryCastNovaDeGivre(uuid, pr, er, st));
+            (uuid, pr, er, st, cb) -> tryCastNovaDeGivre(uuid, pr, er, st, cb));
         casters.put(fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastSurcharge(uuid, pr, er, st));
         casters.put(fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID,
-            (uuid, pr, er, st, cb) -> tryCastSalveDeGivre(uuid, pr, er, st));
+            (uuid, pr, er, st, cb) -> tryCastSalveDeGivre(uuid, pr, er, st, cb));
     }
 
     public boolean tryCast(@Nonnull String skillId,
@@ -2206,7 +2206,7 @@ public final class ClassSkillService {
 
     private float getBaseDamage(@Nonnull PlayerRef playerRef) {
         int w = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-        return w > 0 ? (float) w : 5f;
+        return w > 0 ? (float) w : 1f;
     }
 
     public boolean tryCastJeuDeJambes(@Nonnull UUID uuid,
@@ -2511,8 +2511,8 @@ public final class ClassSkillService {
         int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.TALENT_NODE_ID);
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
-        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID,
-                fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.cooldownMsForRank(rank))) return false;
+        long cd = applyEchoTemporel(acc, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.cooldownMsForRank(rank));
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID, cd)) return false;
         float manaCost = fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.manaCostForRank(rank);
         if (!fr.varyon.vrpg.classes.ability.ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
 
@@ -2527,34 +2527,7 @@ public final class ClassSkillService {
                 double fwdLen = Math.sqrt(fwdX * fwdX + fwdZ * fwdZ);
                 if (fwdLen > 1e-6) { fwdX /= fwdLen; fwdZ /= fwdLen; }
 
-                com.hypixel.hytale.server.core.modules.physics.component.Velocity velRead =
-                    commandBuffer != null
-                        ? commandBuffer.getComponent(entityRef,
-                            com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
-                        : store.getComponent(entityRef,
-                            com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
-
-                double dashX, dashZ;
-                boolean dashForward = false, dashLeft = false, dashRight = false;
-                if (velRead != null) {
-                    org.joml.Vector3d cv = velRead.getClientVelocity();
-                    double cvLen = Math.sqrt(cv.x * cv.x + cv.z * cv.z);
-                    if (cvLen > 0.1) {
-                        dashX = cv.x / cvLen;
-                        dashZ = cv.z / cvLen;
-                        double dot   = dashX * fwdX + dashZ * fwdZ;
-                        double cross = dashX * fwdZ - dashZ * fwdX;
-                        dashForward = dot > 0.5;
-                        dashLeft    = !dashForward && cross > 0.3;
-                        dashRight   = !dashForward && cross < -0.3;
-                    } else {
-                        dashX = -fwdX; dashZ = -fwdZ;
-                    }
-                } else {
-                    dashX = -fwdX; dashZ = -fwdZ;
-                }
-                double dashLen = Math.sqrt(dashX * dashX + dashZ * dashZ);
-                if (dashLen > 1e-6) { dashX /= dashLen; dashZ /= dashLen; }
+                double dashX = -fwdX, dashZ = -fwdZ;
 
                 double baseForce = 12.0 + fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.dashDistanceForRank(rank) * 0.875;
                 com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig dashConfig =
@@ -2568,10 +2541,8 @@ public final class ClassSkillService {
 
                 com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
                     commandBuffer != null
-                        ? commandBuffer.getComponent(entityRef,
-                            com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
-                        : store.getComponent(entityRef,
-                            com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
                 if (vel != null) {
                     org.joml.Vector3d dashVel = new org.joml.Vector3d(dashX * baseForce, 0.2, dashZ * baseForce);
                     vel.setClient(dashVel);
@@ -2580,10 +2551,7 @@ public final class ClassSkillService {
                 }
 
                 try {
-                    String animName = dashForward ? "DashForward"
-                        : dashLeft ? "DashLeft"
-                        : dashRight ? "DashRight"
-                        : "DashBackward";
+                    String animName = "DashBackward";
                     com.hypixel.hytale.server.core.asset.type.itemanimation.config.ItemPlayerAnimations dashAnims =
                         com.hypixel.hytale.server.core.asset.type.itemanimation.config.ItemPlayerAnimations
                             .getAssetMap().getAsset("Vrpg_Arcaniste_Dash");
@@ -2613,9 +2581,23 @@ public final class ClassSkillService {
                 } catch (Exception ignored3) {}
 
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_OmbreVanish", playerRef, tc.getPosition(), commandBuffer);
+
+                try {
+                    int rootIdx = com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction
+                        .getAssetMap().getIndex("Root_Distorsion_Trail");
+                    if (rootIdx >= 0) {
+                        String heldItemId = getHeldItemId(playerRef);
+                        com.hypixel.hytale.protocol.packets.interaction.PlayInteractionFor trailPacket =
+                            new com.hypixel.hytale.protocol.packets.interaction.PlayInteractionFor(
+                                (int) entityRef.getIndex(), 0, null, 0, rootIdx,
+                                heldItemId, com.hypixel.hytale.protocol.InteractionType.Primary, false);
+                        playerRef.getPacketHandler().write(trailPacket);
+                    }
+                } catch (Exception ignored4) {}
             }
         } catch (Exception ignored) {}
 
+        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID, bypass);
         fr.varyon.vrpg.classes.ability.ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID);
         notifySkill(uuid, "Distorsion");
@@ -2652,7 +2634,8 @@ public final class ClassSkillService {
     public boolean tryCastBouleDeFeu(@Nonnull UUID uuid,
                                       @Nonnull PlayerRef playerRef,
                                       @Nonnull Ref<EntityStore> entityRef,
-                                      @Nonnull Store<EntityStore> store) {
+                                      @Nonnull Store<EntityStore> store,
+                                      @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArcaniste(acc)) return false;
         if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
@@ -2670,9 +2653,10 @@ public final class ClassSkillService {
             if (tc != null && hr != null) {
                 float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.damagePctForRank(rank);
                 org.joml.Vector3d spawnPos = new org.joml.Vector3d(tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
+                arcanistState.setLastCastFire(uuid, true);
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Staff_Flame_Fireball_Launch", playerRef, tc.getPosition(), null);
-                spawnMagicProjectile("Projectile_Config_Fireball", spawnPos, hr.getDirection(), entityRef, playerRef, store, null, dmg, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.damageRadius(), null, 0f);
+                spawnMagicProjectile(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.PROJECTILE_CONFIG, spawnPos, hr.getDirection(), entityRef, playerRef, store, commandBuffer, dmg, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.damageRadius(), null, 0f);
             }
         } catch (Exception ignored) {}
         maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID, bypass);
@@ -2685,7 +2669,8 @@ public final class ClassSkillService {
     public boolean tryCastMeteore(@Nonnull UUID uuid,
                                    @Nonnull PlayerRef playerRef,
                                    @Nonnull Ref<EntityStore> entityRef,
-                                   @Nonnull Store<EntityStore> store) {
+                                   @Nonnull Store<EntityStore> store,
+                                   @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArcaniste(acc)) return false;
         if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
@@ -2700,32 +2685,49 @@ public final class ClassSkillService {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
                 store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
-            if (tc != null && hr != null) {
-                org.joml.Vector3d eyePos = new org.joml.Vector3d(tc.getPosition().x, tc.getPosition().y + 1.6, tc.getPosition().z);
-                final org.joml.Vector3d fImpact = new org.joml.Vector3d(eyePos).add(new org.joml.Vector3d(hr.getDirection()).mul(20.0));
-                final float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.damagePctForRank(rank);
-                final float radius = fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.impactRadius();
-                final long dropDelay = fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.dropDelayMs();
-                com.hypixel.hytale.server.core.universe.world.World world = null;
-                try { java.util.UUID wUuid = playerRef.getWorldUuid(); if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid); } catch (Exception ignored2) {}
-                if (world != null) {
-                    final com.hypixel.hytale.server.core.universe.world.World fw = world;
-                    final Ref<EntityStore> fRef = entityRef;
-                    final Store<EntityStore> fStore = store;
-                    final PlayerRef fPr = playerRef;
-                    applyZoneTelegraph(fImpact, radius, fRef, fStore);
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "meteore"); t.setDaemon(true); return t; })
-                        .schedule(() -> fw.execute(() -> {
-                            try {
-                                ClassSkillSounds.playSkillSound("SFX_Fireball_Death", fPr, fImpact, null);
-                                damageNearby(fImpact, radius, fRef, fStore, dmg, com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL);
-                            } catch (Exception ignored3) {}
-                        }), dropDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
+            com.hypixel.hytale.server.core.universe.world.World world = store.getExternalData().getWorld();
+            if (tc == null || hr == null || world == null) return false;
+
+            org.joml.Vector3d casterPos = tc.getPosition();
+            org.joml.Vector3d direction = new org.joml.Vector3d(hr.getDirection()).normalize();
+            org.joml.Vector3d eyePos = new org.joml.Vector3d(casterPos.x, casterPos.y + 1.6, casterPos.z);
+            org.joml.Vector3d zoneCenter = BlockRaystep.hitPosition(
+                world, eyePos, direction, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.maxTargetDistance(), 0.5);
+            zoneCenter.y += fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.groundYOffset();
+
+            final float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.damagePctForRank(rank);
+            final float radius = fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.impactRadius();
+            final long dropDelay = fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.dropDelayMs();
+            final org.joml.Vector3d fImpact = new org.joml.Vector3d(zoneCenter);
+            final Ref<EntityStore> fRef = entityRef;
+            final PlayerRef fPr = playerRef;
+            final com.hypixel.hytale.server.core.universe.world.World fw = world;
+            final java.util.concurrent.atomic.AtomicReference<java.util.UUID> meteorProjectileId =
+                new java.util.concurrent.atomic.AtomicReference<>();
+
+            spawnMeteorParticle(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.TELEGRAPH_PARTICLE, fImpact, store);
+            spawnMeteorFalling(fRef, fImpact, fw, meteorProjectileId);
+            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "meteore"); t.setDaemon(true); return t;
+            }).schedule(() -> fw.execute(() -> {
+                try {
+                    Store<EntityStore> ws = fw.getEntityStore().getStore();
+                    removeMeteorProjectile(ws, meteorProjectileId.get(), fImpact);
+                    if (!fRef.isValid()) return;
+                    spawnMeteorParticle(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.IMPACT_PARTICLE, fImpact, ws);
+                    ClassSkillSounds.playSkillSound(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.IMPACT_SOUND, fPr, fImpact, null);
+                    damageNearby(fImpact, radius, fRef, ws, dmg, resolveFireDamageCause());
+                } catch (Exception e) {
+                    LOG.atWarning().log("[Meteore] impact failed: " + e.getMessage());
                 }
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
-                ClassSkillSounds.playSkillSound("SFX_Staff_Flame_Fireball_Launch", playerRef, tc.getPosition(), null);
-            }
-        } catch (Exception ignored) {}
+            }), dropDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
+
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+            ClassSkillSounds.playSkillSound("SFX_Staff_Flame_Fireball_Launch", playerRef, casterPos, commandBuffer);
+        } catch (Exception e) {
+            LOG.atWarning().log("[Meteore] cast failed: " + e.getMessage());
+            return false;
+        }
         maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID, bypass);
         ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID);
@@ -2736,7 +2738,8 @@ public final class ClassSkillService {
     public boolean tryCastNovaDeGivre(@Nonnull UUID uuid,
                                        @Nonnull PlayerRef playerRef,
                                        @Nonnull Ref<EntityStore> entityRef,
-                                       @Nonnull Store<EntityStore> store) {
+                                       @Nonnull Store<EntityStore> store,
+                                       @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArcaniste(acc)) return false;
         if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
@@ -2754,32 +2757,21 @@ public final class ClassSkillService {
                 float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.damagePctForRank(rank);
                 float radius = fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.radius();
                 float slowSec = fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.slowMsForRank(rank) / 1000f;
-                long casterIdx = entityRef.getIndex();
                 int slowIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex(fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SLOW_EFFECT);
                 com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect slowEff = slowIdx >= 0
                     ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect) com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(slowIdx) : null;
-                // Visuel nova
-                try {
-                    java.util.List<Ref<EntityStore>> viewers = new java.util.ArrayList<>();
-                    com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
-                        .selectNearbyEntities(store, center, 40.0, nearRef -> {
-                            if (store.getComponent(nearRef, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType()) != null) viewers.add(nearRef);
-                        }, t -> true);
-                    if (viewers.isEmpty()) viewers.add(entityRef);
-                    com.hypixel.hytale.server.core.universe.world.ParticleUtil.spawnParticleEffect(
-                        "IceBall_Explosion", center.x, center.y, center.z, 0f, 0f, 0f, 2.5f, null, null, viewers, store);
-                } catch (Exception ignored2) {}
+                final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fSlowEff = slowEff;
+                final float fSlowSec = slowSec;
+                damageNearby(center, radius, entityRef, store, dmg, resolveIceDamageCause());
+                // Slow séparé
+                long casterIdx = entityRef.getIndex();
                 com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
                     .selectNearbyEntities(store, center, radius, targetRef -> {
                         try {
                             if (targetRef.getIndex() == casterIdx) return;
-                            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targetRef, store,
-                                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
-                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
-                                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
                             com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
                                 store.getComponent(targetRef, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
-                            if (ec != null && slowEff != null) ec.addEffect(targetRef, slowEff, slowSec,
+                            if (ec != null && fSlowEff != null) ec.addEffect(targetRef, fSlowEff, fSlowSec,
                                 com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
                         } catch (Exception ignored2) {}
                     }, t -> t.getIndex() != casterIdx);
@@ -2824,7 +2816,8 @@ public final class ClassSkillService {
     public boolean tryCastSalveDeGivre(@Nonnull UUID uuid,
                                         @Nonnull PlayerRef playerRef,
                                         @Nonnull Ref<EntityStore> entityRef,
-                                        @Nonnull Store<EntityStore> store) {
+                                        @Nonnull Store<EntityStore> store,
+                                        @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArcaniste(acc)) return false;
         if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
@@ -2848,43 +2841,26 @@ public final class ClassSkillService {
                 int slowIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex(fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SLOW_EFFECT);
                 com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect slowEff = slowIdx >= 0
                     ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect) com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(slowIdx) : null;
-                double spreadAngle = Math.toRadians(12.0);
                 org.joml.Vector3d baseDir = hr.getDirection();
-                double baseYaw = Math.atan2(baseDir.x, -baseDir.z);
-                com.hypixel.hytale.server.core.universe.world.World world = null;
-                try { java.util.UUID wUuid = playerRef.getWorldUuid(); if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid); } catch (Exception ignored2) {}
+                arcanistState.setLastCastFire(uuid, false);
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Skeleton_Mage_Spellbook_Charge", playerRef, tc.getPosition(), null);
+                final org.joml.Vector3d fDir = new org.joml.Vector3d(baseDir).normalize();
+                final float fDmg = dmg; final float fSlowSec = slowSec;
+                final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fSlowEff = slowEff;
+                final Ref<EntityStore> fRef = entityRef;
+                final Store<EntityStore> fStore = store;
+                final org.joml.Vector3d fPos = new org.joml.Vector3d(chestPos);
+                final PlayerRef fPlayerRef = playerRef;
                 for (int i = 0; i < bolts; i++) {
-                    double yaw = baseYaw + (i - (bolts - 1) / 2.0) * spreadAngle;
-                    final org.joml.Vector3d fDir = new org.joml.Vector3d(Math.sin(yaw), baseDir.y, -Math.cos(yaw)).normalize();
-                    final float fDmg = dmg; final float fSlowSec = slowSec;
-                    final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fSlowEff = slowEff;
-                    final Ref<EntityStore> fRef = entityRef;
-                    final Store<EntityStore> fStore = store;
-                    final org.joml.Vector3d fPos = new org.joml.Vector3d(chestPos);
                     if (i == 0) {
-                        spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, playerRef, fStore, null, fDmg, 1.5f, fSlowEff, fSlowSec);
-                    } else if (world != null) {
-                        final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                        spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, playerRef, fStore, commandBuffer, fDmg, 1.5f, fSlowEff, fSlowSec);
+                    } else {
                         final long fDelay = delayMs * i;
                         final int fi = i;
                         java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "salve-" + fi); t.setDaemon(true); return t; })
-                            .schedule(() -> fw.execute(() -> {
-                                try {
-                                    TransformComponent tc2 = fStore.getComponent(fRef, TransformComponent.getComponentType());
-                                    org.joml.Vector3d pos2 = tc2 != null ? new org.joml.Vector3d(tc2.getPosition().x, tc2.getPosition().y + 1.2, tc2.getPosition().z) : fPos;
-                                    Store<EntityStore> ws = fw.getEntityStore().getStore();
-                                    java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
-                                    takeCmd.setAccessible(true);
-                                    @SuppressWarnings("unchecked") CommandBuffer<EntityStore> cb2 = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
-                                    try {
-                                        spawnMagicProjectile("Projectile_Config_Ice_Bolt", pos2, fDir, fRef, playerRef, fStore, cb2, fDmg, 1.5f, fSlowEff, fSlowSec);
-                                    } finally {
-                                        try { java.lang.reflect.Method c = cb2.getClass().getDeclaredMethod("consume"); c.setAccessible(true); c.invoke(cb2); } catch (Exception ignored3) {}
-                                    }
-                                } catch (Exception ignored3) {}
-                            }), fDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
+                            .schedule(() -> spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, fPlayerRef, fStore, null, fDmg, 1.5f, fSlowEff, fSlowSec),
+                                fDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
                     }
                 }
             }
@@ -2939,28 +2915,141 @@ public final class ClassSkillService {
         } catch (Exception ignored) {}
     }
 
-    private void applyZoneTelegraph(@Nonnull org.joml.Vector3d center, float radius,
-                                     @Nonnull Ref<EntityStore> casterRef, @Nonnull Store<EntityStore> store) {
+    private static com.hypixel.hytale.server.core.modules.entity.damage.DamageCause resolveFireDamageCause() {
+        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause fire =
+            (com.hypixel.hytale.server.core.modules.entity.damage.DamageCause)
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.getAssetMap().getAsset("Fire");
+        return fire != null ? fire : com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL;
+    }
+
+    private static com.hypixel.hytale.server.core.modules.entity.damage.DamageCause resolveIceDamageCause() {
+        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause ice =
+            (com.hypixel.hytale.server.core.modules.entity.damage.DamageCause)
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.getAssetMap().getAsset("Ice");
+        return ice != null ? ice : com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL;
+    }
+
+    private void spawnMeteorParticle(@Nonnull String particleId,
+                                     @Nonnull org.joml.Vector3d at,
+                                     @Nonnull Store<EntityStore> store) {
         try {
-            int idx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex("Vrpg_Arme_Lourde");
-            if (idx < 0) return;
-            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect eff =
-                (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
-                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(idx);
-            if (eff == null) return;
-            final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fEff = eff;
-            final long ci = casterRef.getIndex();
-            com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
-                .selectNearbyEntities(store, center, radius, t -> {
+            com.hypixel.hytale.server.core.universe.world.ParticleUtil.spawnParticleEffect(particleId, at, store);
+        } catch (Exception e) {
+            LOG.atFine().log("[Meteore] particle " + particleId + " failed: " + e.getMessage());
+        }
+    }
+
+    private void spawnMeteorFalling(@Nonnull Ref<EntityStore> casterRef,
+                                    @Nonnull org.joml.Vector3d zoneCenter,
+                                    @Nonnull com.hypixel.hytale.server.core.universe.world.World world,
+                                    @Nonnull java.util.concurrent.atomic.AtomicReference<java.util.UUID> outProjectileId) {
+        try {
+            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap()
+                    .getAsset(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.FALLING_PROJECTILE);
+            if (cfg == null) return;
+            double dropHeight = fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.dropHeight();
+            org.joml.Vector3d spawnPos = new org.joml.Vector3d(zoneCenter.x, zoneCenter.y + dropHeight, zoneCenter.z);
+            org.joml.Vector3d downDir = new org.joml.Vector3d(0.0, -1.0, 0.0);
+            final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
+            final org.joml.Vector3d fPos = spawnPos;
+            final org.joml.Vector3d fDir = downDir;
+            final Ref<EntityStore> fRef = casterRef;
+            world.execute(() -> {
+                try {
+                    if (!fRef.isValid()) return;
+                    Store<EntityStore> ws = world.getEntityStore().getStore();
+                    java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
+                    takeCmd.setAccessible(true);
+                    @SuppressWarnings("unchecked")
+                    CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
+                    if (cb == null) return;
                     try {
-                        if (t.getIndex() == ci) return;
-                        com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
-                            store.getComponent(t, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
-                        if (ec != null) ec.addEffect(t, fEff, 2.5f,
-                            com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
-                    } catch (Exception ignored2) {}
-                }, t -> t.getIndex() != ci);
+                        java.util.UUID projectileId = java.util.UUID.randomUUID();
+                        Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                            .spawnProjectile(projectileId, fRef, cb, fCfg, fPos, fDir);
+                        if (projectileRef != null) {
+                            outProjectileId.set(projectileId);
+                        }
+                    } finally {
+                        try {
+                            java.lang.reflect.Method c = cb.getClass().getDeclaredMethod("consume");
+                            c.setAccessible(true);
+                            c.invoke(cb);
+                        } catch (Exception ignored) {}
+                    }
+                } catch (Exception e) {
+                    LOG.atWarning().log("[Meteore] falling projectile failed: " + e.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            LOG.atFine().log("[Meteore] falling projectile failed: " + e.getMessage());
+        }
+    }
+
+    @Nullable
+    private Ref<EntityStore> findMeteorProjectileRef(@Nonnull Store<EntityStore> store,
+                                                     @Nullable java.util.UUID projectileId,
+                                                     @Nonnull org.joml.Vector3d impactCenter) {
+        final Ref<EntityStore>[] found = new Ref[1];
+        if (projectileId != null) {
+            try {
+                store.forEachChunk(com.hypixel.hytale.component.query.Query.any(), (chunk, commandBuffer) -> {
+                    if (found[0] != null) return;
+                    if (!chunk.getArchetype().contains(com.hypixel.hytale.server.core.entity.UUIDComponent.getComponentType())) return;
+                    for (int i = 0; i < chunk.size(); i++) {
+                        Ref<EntityStore> ref = chunk.getReferenceTo(i);
+                        if (ref == null || !ref.isValid()) continue;
+                        com.hypixel.hytale.server.core.entity.UUIDComponent uuidComponent =
+                            store.getComponent(ref, com.hypixel.hytale.server.core.entity.UUIDComponent.getComponentType());
+                        if (uuidComponent != null && projectileId.equals(uuidComponent.getUuid())) {
+                            found[0] = ref;
+                            return;
+                        }
+                    }
+                });
+            } catch (Exception ignored) {}
+        }
+        if (found[0] != null) return found[0];
+        try {
+            com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                .selectNearbyEntities(store, impactCenter, 4.0, ref -> {
+                    if (found[0] != null) return;
+                    if (store.getComponent(ref, com.hypixel.hytale.server.core.modules.projectile.component.Projectile.getComponentType()) == null) return;
+                    found[0] = ref;
+                }, ref -> store.getComponent(ref, com.hypixel.hytale.server.core.modules.projectile.component.Projectile.getComponentType()) != null);
         } catch (Exception ignored) {}
+        return found[0];
+    }
+
+    private void removeMeteorProjectile(@Nonnull Store<EntityStore> store,
+                                        @Nullable java.util.UUID projectileId,
+                                        @Nonnull org.joml.Vector3d impactCenter) {
+        Ref<EntityStore> projectileRef = findMeteorProjectileRef(store, projectileId, impactCenter);
+        if (projectileRef == null || !projectileRef.isValid()) return;
+        try {
+            java.lang.reflect.Method takeCmd = store.getClass().getDeclaredMethod("takeCommandBuffer");
+            takeCmd.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(store);
+            if (cb != null) {
+                try {
+                    cb.removeEntity(projectileRef, com.hypixel.hytale.component.RemoveReason.REMOVE);
+                } finally {
+                    try {
+                        java.lang.reflect.Method c = cb.getClass().getDeclaredMethod("consume");
+                        c.setAccessible(true);
+                        c.invoke(cb);
+                    } catch (Exception ignored) {}
+                }
+                return;
+            }
+        } catch (Exception ignored) {}
+        try {
+            store.removeEntity(projectileRef, com.hypixel.hytale.component.RemoveReason.REMOVE);
+        } catch (Exception e) {
+            LOG.atFine().log("[Meteore] projectile cleanup failed: " + e.getMessage());
+        }
     }
 
     private void damageNearby(@Nonnull org.joml.Vector3d center, float radius,

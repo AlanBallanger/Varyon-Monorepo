@@ -22,7 +22,7 @@ public final class ArcanistPassifs {
     }
 
     // --- Écho Temporel (node 3) — réduit les cooldowns ---
-    public static final String ECHO_TEMPOREL_NODE    = "arcaniste_3";
+    public static final String ECHO_TEMPOREL_NODE    = "arcaniste_6";
     private static final float[] ECHO_TEMPOREL_REDUC = {0.05f, 0.08f, 0.11f, 0.15f, 0.20f};
 
     public static float echoTemporelReducForRank(int rank) {
@@ -46,7 +46,7 @@ public final class ArcanistPassifs {
     }
 
     // --- Drain Mystique (node 7) — éliminations → mana restauré ---
-    public static final String DRAIN_MYSTIQUE_NODE    = "arcaniste_7";
+    public static final String DRAIN_MYSTIQUE_NODE    = "arcaniste_9";
     private static final float[] DRAIN_MYSTIQUE_BONUS = {0.05f, 0.08f, 0.11f, 0.15f, 0.20f};
 
     public static float drainMystiqueBonusForRank(int rank) {
@@ -58,7 +58,7 @@ public final class ArcanistPassifs {
     }
 
     // --- Écho Arcanique (node 9) — chance de ne pas déclencher le CD ---
-    public static final String ECHO_ARCANIQUE_NODE     = "arcaniste_9";
+    public static final String ECHO_ARCANIQUE_NODE     = "arcaniste_3";
     private static final float[] ECHO_ARCANIQUE_CHANCE = {0.05f, 0.08f, 0.11f, 0.15f, 0.20f};
 
     public static float echoArcanicChanceForRank(int rank) {

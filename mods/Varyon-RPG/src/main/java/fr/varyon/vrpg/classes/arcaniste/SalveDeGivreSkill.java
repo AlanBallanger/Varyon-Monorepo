@@ -3,11 +3,11 @@ package fr.varyon.vrpg.classes.arcaniste;
 public final class SalveDeGivreSkill {
 
     public static final String SKILL_ID       = "salve_de_givre";
-    public static final String TALENT_NODE_ID = "arcaniste_10";
+    public static final String TALENT_NODE_ID = "arcaniste_4";
     public static final String SLOW_EFFECT    = "Vrpg_Arme_Lourde";
 
     private static final int[]   BOLT_COUNTS     = {3, 3, 4, 4, 5};
-    private static final float[] DAMAGE_PCT_HIT  = {0.5f, 0.7f, 0.9f, 1.2f, 1.6f};
+    private static final float[] DAMAGE_PCT_HIT  = {0.7f, 1.0f, 1.3f, 1.7f, 2.2f};
     private static final long    BOLT_DELAY_MS   = 120L;
     private static final long[]  SLOW_MS         = {2000, 2000, 2500, 2500, 3000};
     private static final long[]  COOLDOWN_MS     = {12000, 11000, 10000, 9000, 8000};

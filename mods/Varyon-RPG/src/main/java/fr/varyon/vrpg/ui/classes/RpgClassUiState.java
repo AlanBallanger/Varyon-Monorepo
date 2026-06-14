@@ -6,6 +6,7 @@ import java.util.Map;
 public final class RpgClassUiState {
 
     public String pendingSpecId = null;
+    public Integer pendingProfileIndex = null;
     public String classTreeSubTab = "talents";
     public String skillFilter = "all";
     public String selectedSkillSlot = null;

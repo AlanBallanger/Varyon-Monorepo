@@ -122,7 +122,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         } else if ("classselect".equals(activeTab)) {
             ClassSelectTab.build(uiBuilder, eventBuilder);
         } else if ("classprofiles".equals(activeTab)) {
-            ClassProfilesTab.build(playerRef, uiBuilder, eventBuilder);
+            ClassProfilesTab.build(playerRef, classUi, uiBuilder, eventBuilder);
         } else if ("classement".equals(activeTab)) {
             ClassementTab.build(professionUi, uiBuilder, eventBuilder);
         } else if ("admin".equals(activeTab) && isAdmin) {

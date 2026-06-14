@@ -75,7 +75,8 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
             float amount = base;
 
             // Crit VRPG — s'applique à tous les joueurs avec une spec active
-            if (spec != null) {
+            // Sauf Arcaniste qui gère son propre crit + couleur dans ArcanistOutgoingDamageSystem
+            if (spec != null && spec != fr.varyon.vrpg.classes.PlayerSpecialization.ARCANISTE) {
                 ClassPlayerStats stats = classManager.getStatEngine().getStats(uuid);
                 if (stats == null && activeClass != null) {
                     stats = ClassStatDefinition.compute(

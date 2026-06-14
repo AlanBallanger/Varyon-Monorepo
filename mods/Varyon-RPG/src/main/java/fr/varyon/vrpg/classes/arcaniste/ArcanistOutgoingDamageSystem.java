@@ -78,6 +78,14 @@ public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
             boolean debug = VrpgConfig.isDebugCombat();
             StringBuilder log = debug ? new StringBuilder(String.format("[ArcanisteDmg] base=%.1f", base)) : null;
 
+            // Staff : x8 appliqué ici sauf pour COMMAND (Nova de Givre l'a déjà intégré dans le cast)
+            if (fr.varyon.vrpg.classes.WeaponCategory.heldCategory(playerRef)
+                    == fr.varyon.vrpg.classes.WeaponCategory.MAGIE
+                    && damage.getCause() != com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.COMMAND) {
+                amount *= 8f;
+                if (log != null) log.append(" Staff=x8");
+            }
+
             // Surcharge — bonus dégâts sorts actif
             float surchargeBonus = arcanistState.getSurchargeBonus(uuid);
             if (surchargeBonus > 0f) {
@@ -93,7 +101,37 @@ public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
                 if (log != null) log.append(String.format(" PouvoirGrandissant=+%.0f%%", bonus * 100));
             }
 
-            if (amount != base) damage.setAmount(amount);
+            // Détermine le type d'élément selon la cause
+            // Fire : Météore (cause Fire) + BouleDeFeu (cause PROJECTILE = feu)
+            // Ice  : Nova (cause Ice) + Salve (cause PROJECTILE = glace) -> on distingue via l'état actif
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageCause fireCause =
+                (com.hypixel.hytale.server.core.modules.entity.damage.DamageCause)
+                com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.getAssetMap().getAsset("Fire");
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageCause iceCause =
+                (com.hypixel.hytale.server.core.modules.entity.damage.DamageCause)
+                com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.getAssetMap().getAsset("Ice");
+            boolean isFire = (fireCause != null && damage.getCause() == fireCause)
+                || (damage.getCause() == com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PROJECTILE
+                    && arcanistState.isLastCastFire(uuid))
+                || (damage.getCause() == com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.ENVIRONMENT
+                    && arcanistState.isLastCastFire(uuid));
+            String kindNormal = isFire ? "BURN" : "ICE";
+            String kindCrit   = isFire ? "BURN_CRITICAL" : "ICE_CRITICAL";
+
+            fr.varyon.vrpg.classes.ClassPlayerStats stats = classManager.getStatEngine().getStats(uuid);
+            if (stats != null && stats.critChancePct() > 0
+                    && Math.random() < stats.critChancePct() / 100.0) {
+                float critMult = 1.0f + stats.critDamagePct() / 100.0f;
+                float finalAmt = amount * critMult;
+                damage.setAmount(finalAmt);
+                fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
+                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, chunk.getReferenceTo(index), finalAmt, kindCrit);
+            } else {
+                if (amount != base) damage.setAmount(amount);
+                fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
+                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, chunk.getReferenceTo(index), amount, kindNormal);
+            }
+
             if (log != null) {
                 log.append(String.format(" -> %.1f", amount));
                 LOG.atInfo().log(log.toString());

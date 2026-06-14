@@ -1,0 +1,13 @@
+{
+  "Spawners": [
+    { "SpawnerId": "Explosion_Big_Flash_Glow", "Scale": 1.35 },
+    { "SpawnerId": "Explosion_Big_Shockwave_Ground", "StartDelay": 0.05, "Scale": 1.4 },
+    { "SpawnerId": "Explosion_Big_Sparks_Out",       "StartDelay": 0.10, "Scale": 1.35 },
+    { "SpawnerId": "Explosion_Big_Smoke_Main",       "StartDelay": 0.15, "Scale": 1.35 },
+    { "SpawnerId": "Explosion_Big_Fires",            "StartDelay": 0.20, "Scale": 1.35 },
+    { "SpawnerId": "Fire_AoE_Spawn_Spawn",           "StartDelay": 0.25, "Scale": 1.5 }
+  ],
+  "LifeSpan": 2.0,
+  "BoundingRadius": 16.0,
+  "CullDistance": 100.0
+}

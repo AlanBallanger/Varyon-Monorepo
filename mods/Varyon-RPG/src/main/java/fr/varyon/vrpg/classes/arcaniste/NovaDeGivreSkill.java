@@ -3,10 +3,10 @@ package fr.varyon.vrpg.classes.arcaniste;
 public final class NovaDeGivreSkill {
 
     public static final String SKILL_ID       = "nova_de_givre";
-    public static final String TALENT_NODE_ID = "arcaniste_6";
+    public static final String TALENT_NODE_ID = "arcaniste_7";
     public static final String SLOW_EFFECT    = "Vrpg_Arme_Lourde";
 
-    private static final float[] DAMAGE_PCT  = {0.8f, 1.1f, 1.5f, 2.0f, 2.8f};
+    private static final float[] DAMAGE_PCT  = {2.4f, 3.3f, 4.5f, 6.0f, 8.4f};
     private static final float   RADIUS      = 6.0f;
     private static final long[]  SLOW_MS     = {2000, 2500, 3000, 3500, 4000};
     private static final long[]  COOLDOWN_MS = {14000, 13000, 12000, 11000, 10000};
