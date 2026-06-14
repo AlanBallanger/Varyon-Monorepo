@@ -216,7 +216,7 @@ public final class DamageNumbers {
             return;
         }
         KindStyle fallback = parseKindEntry(
-                "CRITICAL|label=|format={amount}|color=#FFFFFF|ui=SocketReforge_CombatText_Critical|"
+                "CRITICAL|label=|format={amount}|color=#FFFFFF|ui=CombatText_Critical|"
                         + "particleFont=FloatingDamage_CRITICAL|particleIcon=FloatingDamage_Icon_Critical");
         if (fallback != null) {
             registerKind(fallback);

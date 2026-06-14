@@ -43,16 +43,16 @@ public class DamageNumberConfig {
     // Supported keys: label, icon, iconBg, iconOverlay, format, color, ui, uiAlt, vfx,
     // particleFont, particleIcon, particleBackground, dot, rounding, precision, min, style, labelByDefault
     private String[] kindEntries = new String[] {
-            "FLAT|label=|format={amount}|color=#FFFFFF|ui=SocketReforge_CombatText_Flat|particleFont=FloatingDamage_FLAT",
-            "CRITICAL|label=|format={amount}|color=#FFFFFF|ui=SocketReforge_CombatText_Critical|particleFont=FloatingDamage_CRITICAL|particleIcon=FloatingDamage_Icon_Critical",
-            "ICE|label=|format={amount}|color=#55FFFF|ui=SocketReforge_CombatText_Ice|particleFont=FloatingDamage_ICE|particleIcon=FloatingDamage_Icon_Ice",
-            "BURN|label=|format={amount}|color=#FFAA00|ui=SocketReforge_CombatText_Burn|uiAlt=SocketReforge_CombatText_Burn_Alt|dot=true|particleFont=FloatingDamage_BURN|particleIcon=FloatingDamage_Icon_Fire",
-            "BLEED|label=|format={amount}|color=#AA55FF|ui=SocketReforge_CombatText_Bleed|uiAlt=SocketReforge_CombatText_Bleed_Alt|dot=true|particleFont=FloatingDamage_BLEED|particleIcon=FloatingDamage_Icon_Bleed",
-            "POISON|label=|format={amount}|color=#008700|ui=SocketReforge_CombatText_Poison|uiAlt=SocketReforge_CombatText_Poison_Alt|dot=true|particleFont=FloatingDamage_POISON|particleIcon=FloatingDamage_Icon_Poison",
-            "SHOCK|label=|format={amount}|color=#FFFF55|ui=SocketReforge_CombatText_Shock|particleFont=FloatingDamage_SHOCK|particleIcon=FloatingDamage_Icon_Shock",
-            "WATER|label=|format={amount}|color=#5555FF|ui=SocketReforge_CombatText_Water|particleFont=FloatingDamage_WATER",
-            "VOID|label=|format={amount}|color=#8000FF|ui=SocketReforge_CombatText_Void|particleFont=FloatingDamage_VOID|particleIcon=FloatingDamage_Icon_Void",
-            "HEAL|label=|format={amount}|color=#55FF55|ui=SocketReforge_CombatText_Heal|particleFont=FloatingDamage_HEAL|particleIcon=FloatingDamage_Icon_Heal"
+            "FLAT|label=|format={amount}|color=#FFFFFF|ui=CombatText_Flat|particleFont=FloatingDamage_FLAT",
+            "CRITICAL|label=|format={amount}|color=#FFFFFF|ui=CombatText_Critical|particleFont=FloatingDamage_CRITICAL|particleIcon=FloatingDamage_Icon_Critical",
+            "ICE|label=|format={amount}|color=#55FFFF|ui=CombatText_Ice|particleFont=FloatingDamage_ICE|particleIcon=FloatingDamage_Icon_Ice",
+            "BURN|label=|format={amount}|color=#FFAA00|ui=CombatText_Burn|uiAlt=CombatText_Burn_Alt|dot=true|particleFont=FloatingDamage_BURN|particleIcon=FloatingDamage_Icon_Fire",
+            "BLEED|label=|format={amount}|color=#AA55FF|ui=CombatText_Bleed|uiAlt=CombatText_Bleed_Alt|dot=true|particleFont=FloatingDamage_BLEED|particleIcon=FloatingDamage_Icon_Bleed",
+            "POISON|label=|format={amount}|color=#008700|ui=CombatText_Poison|uiAlt=CombatText_Poison_Alt|dot=true|particleFont=FloatingDamage_POISON|particleIcon=FloatingDamage_Icon_Poison",
+            "SHOCK|label=|format={amount}|color=#FFFF55|ui=CombatText_Shock|particleFont=FloatingDamage_SHOCK|particleIcon=FloatingDamage_Icon_Shock",
+            "WATER|label=|format={amount}|color=#5555FF|ui=CombatText_Water|particleFont=FloatingDamage_WATER",
+            "VOID|label=|format={amount}|color=#8000FF|ui=CombatText_Void|particleFont=FloatingDamage_VOID|particleIcon=FloatingDamage_Icon_Void",
+            "HEAL|label=|format={amount}|color=#55FF55|ui=CombatText_Heal|particleFont=FloatingDamage_HEAL|particleIcon=FloatingDamage_Icon_Heal"
     };
 
     // Format: "alias=KIND"
