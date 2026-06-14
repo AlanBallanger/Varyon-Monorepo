@@ -219,6 +219,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     protected void setup() {
         instance = this;
 
+        registerArcanistDamageKinds();
+
         VrpgConfig.load(getDataDirectory());
         XpTableConfig.load(getDataDirectory());
         MobCategoriesConfig.load(getDataDirectory());
@@ -1010,5 +1012,22 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         if (forestierComboTracker != null) forestierComboTracker.clear();
         if (chasseurComboTracker != null) chasseurComboTracker.clear();
         instance = null;
+    }
+
+    private static void registerArcanistDamageKinds() {
+        try {
+            Class<?> dn = Class.forName("irai.mod.DynamicFloatingDamageFormatter.DamageNumbers");
+            java.lang.reflect.Method kindMethod = dn.getMethod("kind", String.class);
+
+            Object iceBuilder = kindMethod.invoke(null, "ICE_CRITICAL");
+            iceBuilder = iceBuilder.getClass().getMethod("particleFont", String.class).invoke(iceBuilder, "FloatingDamage_CRITICAL");
+            iceBuilder = iceBuilder.getClass().getMethod("particleIcon", String.class).invoke(iceBuilder, "FloatingDamage_Icon_Ice");
+            iceBuilder.getClass().getMethod("register").invoke(iceBuilder);
+
+            Object burnBuilder = kindMethod.invoke(null, "BURN_CRITICAL");
+            burnBuilder = burnBuilder.getClass().getMethod("particleFont", String.class).invoke(burnBuilder, "FloatingDamage_CRITICAL");
+            burnBuilder = burnBuilder.getClass().getMethod("particleIcon", String.class).invoke(burnBuilder, "FloatingDamage_Icon_Fire");
+            burnBuilder.getClass().getMethod("register").invoke(burnBuilder);
+        } catch (Exception ignored) {}
     }
 }

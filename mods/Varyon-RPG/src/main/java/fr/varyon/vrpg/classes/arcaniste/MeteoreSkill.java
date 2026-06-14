@@ -10,7 +10,7 @@ public final class MeteoreSkill {
     public static final String FALLING_PROJECTILE = "Vrpg_Meteor_Falling";
     public static final String IMPACT_SOUND         = "SFX_Goblin_Lobber_Bomb_Death";
 
-    private static final float[] DAMAGE_PCT  = {2.5f, 3.5f, 5.0f, 7.0f, 10.0f};
+    private static final float[] DAMAGE_PCT  = {5.0f, 6.0f, 7.5f, 8.5f, 10.0f};
     private static final float   IMPACT_RADIUS = 8.0f;
     private static final long    DROP_DELAY_MS = 2500L;
     private static final float   DROP_HEIGHT   = 45.0f;

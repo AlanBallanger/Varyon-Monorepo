@@ -183,7 +183,10 @@ public final class ClassSkillService {
                            @Nonnull Store<EntityStore> store,
                            @Nullable CommandBuffer<EntityStore> commandBuffer) {
         SkillCaster caster = casters.get(skillId);
-        return caster != null && caster.cast(uuid, playerRef, entityRef, store, commandBuffer);
+        if (caster == null) return false;
+        if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
+            LOG.atInfo().log("[SkillCast] uuid=" + uuid.toString().substring(0, 8) + " skill=" + skillId);
+        return caster.cast(uuid, playerRef, entityRef, store, commandBuffer);
     }
 
     public boolean tryCastAssautEclair(@Nonnull UUID uuid,
@@ -384,21 +387,14 @@ public final class ClassSkillService {
                                           @Nonnull Store<EntityStore> store,
                                           @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
-        LOG.atInfo().log("[PasDesTenebres] cast attempt uuid=" + uuid + " class=" + acc.getActiveClass() + " spec=" + (acc.getActiveClass() != null ? acc.getActiveSpec(acc.getActiveClass()) : "null"));
-        if (!isOmbre(acc)) { LOG.atInfo().log("[PasDesTenebres] BLOCKED not ombre"); return false; }
-        if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); LOG.atInfo().log("[PasDesTenebres] BLOCKED no dagger"); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.GUERRIER, PasDesTenebresSkill.TALENT_NODE_ID);
-        LOG.atInfo().log("[PasDesTenebres] rank=" + rank + " bypass=" + bypass);
-        if (rank <= 0 && !bypass) { LOG.atInfo().log("[PasDesTenebres] BLOCKED rank=0"); return false; }
         if (rank <= 0) rank = 1;
         long cdMs = PasDesTenebresSkill.cooldownMsForRank(rank);
         boolean onCd = !bypass && cooldowns.isOnCooldown(uuid, PasDesTenebresSkill.SKILL_ID, cdMs);
-        LOG.atInfo().log("[PasDesTenebres] onCooldown=" + onCd);
         if (onCd) return false;
         float staminaCost = PasDesTenebresSkill.staminaCostForRank(rank);
         boolean hasStamina = ClassSkillStamina.hasEnough(playerRef, staminaCost);
-        LOG.atInfo().log("[PasDesTenebres] staminaCost=" + staminaCost + " hasStamina=" + hasStamina);
         if (!hasStamina) return false;
 
         try {
@@ -452,7 +448,6 @@ public final class ClassSkillService {
         } catch (Exception ignored) {}
 
         long stealthMs = PasDesTenebresSkill.stealthDurationMs(rank);
-        LOG.atInfo().log("[PasDesTenebres] stealth started durationMs=" + stealthMs);
         ombreState.startStealth(uuid, stealthMs);
         fr.varyon.vrpg.classes.ombre.OmbreStealthAggroResetSystem.resetAggroAround(entityRef, store);
         int embRank = acc.getTalentRank(PlayerClass.GUERRIER, OmbrePassifs.EMBUSCADE_NODE);
@@ -466,20 +461,13 @@ public final class ClassSkillService {
 
     public boolean tryCastEcranDeFumee(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
         ClassAccount acc = classManager.getOrLoad(uuid);
-        LOG.atInfo().log("[EcranDeFumee] cast attempt uuid=" + uuid + " class=" + acc.getActiveClass() + " spec=" + (acc.getActiveClass() != null ? acc.getActiveSpec(acc.getActiveClass()) : "null"));
-        if (!isOmbre(acc)) { LOG.atInfo().log("[EcranDeFumee] BLOCKED not ombre"); return false; }
-        if (!isHoldingDagger(playerRef)) { notifyNoWeapon(playerRef); LOG.atInfo().log("[EcranDeFumee] BLOCKED no dagger"); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.GUERRIER, EcranDeFumeeSkill.TALENT_NODE_ID);
-        LOG.atInfo().log("[EcranDeFumee] rank=" + rank + " bypass=" + bypass);
-        if (rank <= 0 && !bypass) { LOG.atInfo().log("[EcranDeFumee] BLOCKED rank=0"); return false; }
         if (rank <= 0) rank = 1;
         boolean onCd = !bypass && cooldowns.isOnCooldown(uuid, EcranDeFumeeSkill.SKILL_ID, EcranDeFumeeSkill.cooldownMsForRank(rank));
-        LOG.atInfo().log("[EcranDeFumee] onCooldown=" + onCd);
         if (onCd) return false;
 
         long durationMs = EcranDeFumeeSkill.durationMsForRank(rank);
-        LOG.atInfo().log("[EcranDeFumee] stealth started durationMs=" + durationMs);
         ombreState.startEcranFumee(uuid, durationMs);
         try {
             Ref<EntityStore> ecranRef = playerRef.getReference();
@@ -757,7 +745,6 @@ public final class ClassSkillService {
 
         Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 7.0);
         if (targeted == null) {
-            LOG.atInfo().log("[ChaseOuverte] BLOCKED no target in range");
             return false;
         }
 
@@ -774,7 +761,6 @@ public final class ClassSkillService {
                         com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig kunaiConfig =
                             com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap()
                                 .getAsset("Projectile_Config_Kunai");
-                        LOG.atInfo().log("[Kunai] config=" + kunaiConfig);
                         if (kunaiConfig != null) {
                             org.joml.Vector3d casterPos = casterTc.getPosition();
                             org.joml.Vector3d targetPos2 = targetTc.getPosition();
@@ -791,7 +777,6 @@ public final class ClassSkillService {
                             if (commandBuffer != null) {
                                 com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
                                     .spawnProjectile(entityRef, commandBuffer, kunaiConfig, spawnPos, direction);
-                                LOG.atInfo().log("[Kunai] spawned via commandBuffer!");
                             } else {
                                 com.hypixel.hytale.server.core.universe.world.World kunaiWorld = null;
                                 try {
@@ -815,29 +800,22 @@ public final class ClassSkillService {
                                             try {
                                                 com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
                                                     .spawnProjectile(fEntityRef, cb, fConfig, fSpawnPos, fDir);
-                                                LOG.atInfo().log("[Kunai] spawnProjectile OK");
                                             } catch (Exception e3) {
                                                 spawnEx = e3;
-                                                LOG.atWarning().log("[Kunai] spawnProjectile EXCEPTION: " + e3 + " cause=" + e3.getCause());
                                             }
                                             try {
                                                 java.lang.reflect.Method consume = cb.getClass().getDeclaredMethod("consume");
                                                 consume.setAccessible(true);
                                                 consume.invoke(cb);
-                                                LOG.atInfo().log("[Kunai] commandBuffer consumed OK");
                                             } catch (Exception e4) {
-                                                LOG.atWarning().log("[Kunai] consume EXCEPTION: " + e4 + " cause=" + e4.getCause());
                                             }
-                                            if (spawnEx == null) LOG.atInfo().log("[Kunai] fully spawned!");
                                         } catch (Exception e2) {
-                                            LOG.atWarning().log("[Kunai] reflection EXCEPTION: " + e2 + " cause=" + e2.getCause());
                                         }
                                     });
                                 }
                             }
                         }
                     } catch (Exception ignoredProj) {
-                        LOG.atWarning().log("[Kunai] EXCEPTION: " + ignoredProj.getMessage());
                     }
                 }
             }
@@ -857,7 +835,6 @@ public final class ClassSkillService {
                         com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
                 }
             }
-            LOG.atInfo().log("[ChaseOuverte] target marked rank=" + rank + " durationMs=" + durationMs);
         } catch (Exception ignored) {}
 
         ClassSkillStamina.consume(playerRef, staminaCost);
@@ -1337,17 +1314,25 @@ public final class ClassSkillService {
             (acc, cls) -> fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.TALENT_NODE_ID)));
         // Arcaniste
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID,
-            (acc, cls) -> fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.TALENT_NODE_ID)));
+            (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.TALENT_NODE_ID))));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID,
-            (acc, cls) -> fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.TALENT_NODE_ID)));
+            (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.TALENT_NODE_ID))));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID,
-            (acc, cls) -> fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.TALENT_NODE_ID)));
+            (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.TALENT_NODE_ID))));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SKILL_ID,
-            (acc, cls) -> fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.TALENT_NODE_ID)));
+            (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.TALENT_NODE_ID))));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID,
-            (acc, cls) -> fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.TALENT_NODE_ID)));
+            (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.TALENT_NODE_ID))));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID,
-            (acc, cls) -> fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.TALENT_NODE_ID)));
+            (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.TALENT_NODE_ID))));
+    }
+
+    private static long echoTemporelCd(@Nonnull ClassAccount acc, @Nonnull PlayerClass cls,
+                                        @Nonnull String nodeId, long baseMs) {
+        int rank = acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.ECHO_TEMPOREL_NODE);
+        if (rank <= 0) return baseMs;
+        float reduc = fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.echoTemporelReducForRank(rank);
+        return Math.round(baseMs * (1.0 - reduc));
     }
 
     public long getCooldownTotalMs(@Nonnull String skillId, @Nonnull ClassAccount acc, @Nonnull PlayerClass cls) {
@@ -2082,9 +2067,6 @@ public final class ClassSkillService {
                     (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
                     com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(stunIdx);
 
-                LOG.atInfo().log("[Rabattage] stunIdx=%d stunEffect=%s stunSec=%.2f radius=%.1f",
-                    stunIdx, stunEffect != null ? "OK" : "NULL", stunSec, radius);
-
                 for (int i = 0; i < 16; i++) {
                     double angle = 2.0 * Math.PI * i / 16.0;
                     org.joml.Vector3d sample = new org.joml.Vector3d(
@@ -2099,7 +2081,6 @@ public final class ClassSkillService {
                                 long tidx = targetRef.getIndex();
                                 if (tidx == casterIdx || !hitSet.add(tidx)) return;
 
-                                LOG.atInfo().log("[Rabattage] hit entity idx=%d", tidx);
 
                                 com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
                                     targetRef, store,
@@ -2163,11 +2144,9 @@ public final class ClassSkillService {
                                             try {
                                                 com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
                                                     fStore.getComponent(fTargetRef, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
-                                                LOG.atInfo().log("[Rabattage] delayed stun ec=%s", ec != null ? "OK" : "NULL");
                                                 if (ec != null) {
                                                     ec.addEffect(fTargetRef, fStunEffect, fStunSec,
                                                         com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, fStore);
-                                                    LOG.atInfo().log("[Rabattage] delayed stun applied for %.2fs", fStunSec);
                                                 }
                                             } catch (Exception ignored4) {}
                                         }), 280, java.util.concurrent.TimeUnit.MILLISECONDS);
@@ -2597,9 +2576,9 @@ public final class ClassSkillService {
             }
         } catch (Exception ignored) {}
 
-        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID, bypass);
         fr.varyon.vrpg.classes.ability.ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID);
+        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID, bypass);
         notifySkill(uuid, "Distorsion");
         return true;
     }
@@ -2627,8 +2606,10 @@ public final class ClassSkillService {
         if (bypass) return;
         int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.ECHO_ARCANIQUE_NODE);
         if (rank <= 0) return;
-        if (Math.random() < fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.echoArcanicChanceForRank(rank))
+        if (Math.random() < fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.echoArcanicChanceForRank(rank)) {
             cooldowns.clearCooldown(uuid, skillId);
+            notifySkill(uuid, "Écho Arcanique !");
+        }
     }
 
     public boolean tryCastBouleDeFeu(@Nonnull UUID uuid,
@@ -2654,14 +2635,15 @@ public final class ClassSkillService {
                 float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.damagePctForRank(rank);
                 org.joml.Vector3d spawnPos = new org.joml.Vector3d(tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
                 arcanistState.setLastCastFire(uuid, true);
+                arcanistState.setPendingProjectileDmg(uuid, dmg, 1);
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Staff_Flame_Fireball_Launch", playerRef, tc.getPosition(), null);
                 spawnMagicProjectile(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.PROJECTILE_CONFIG, spawnPos, hr.getDirection(), entityRef, playerRef, store, commandBuffer, dmg, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.damageRadius(), null, 0f);
             }
         } catch (Exception ignored) {}
-        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID, bypass);
         ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID);
+        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID, bypass);
         notifySkill(uuid, "Boule de Feu");
         return true;
     }
@@ -2728,9 +2710,9 @@ public final class ClassSkillService {
             LOG.atWarning().log("[Meteore] cast failed: " + e.getMessage());
             return false;
         }
-        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID, bypass);
         ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID);
+        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.SKILL_ID, bypass);
         notifySkill(uuid, "Meteore");
         return true;
     }
@@ -2779,9 +2761,9 @@ public final class ClassSkillService {
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", playerRef, center, null);
             }
         } catch (Exception ignored) {}
-        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SKILL_ID, bypass);
         ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SKILL_ID);
+        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SKILL_ID, bypass);
         notifySkill(uuid, "Nova de Givre");
         return true;
     }
@@ -2806,9 +2788,9 @@ public final class ClassSkillService {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             if (tc != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_Combo_3", playerRef, tc.getPosition(), null);
         } catch (Exception ignored) {}
-        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID, bypass);
         ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID);
+        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID, bypass);
         notifySkill(uuid, "Surcharge");
         return true;
     }
@@ -2843,8 +2825,8 @@ public final class ClassSkillService {
                     ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect) com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(slowIdx) : null;
                 org.joml.Vector3d baseDir = hr.getDirection();
                 arcanistState.setLastCastFire(uuid, false);
+                arcanistState.setPendingProjectileDmg(uuid, dmg, bolts);
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
-                ClassSkillSounds.playSkillSound("SFX_Skeleton_Mage_Spellbook_Charge", playerRef, tc.getPosition(), null);
                 final org.joml.Vector3d fDir = new org.joml.Vector3d(baseDir).normalize();
                 final float fDmg = dmg; final float fSlowSec = slowSec;
                 final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fSlowEff = slowEff;
@@ -2854,20 +2836,23 @@ public final class ClassSkillService {
                 final PlayerRef fPlayerRef = playerRef;
                 for (int i = 0; i < bolts; i++) {
                     if (i == 0) {
+                        ClassSkillSounds.playSkillSound("SFX_Vrpg_Salve_Launch", playerRef, tc.getPosition(), null);
                         spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, playerRef, fStore, commandBuffer, fDmg, 1.5f, fSlowEff, fSlowSec);
                     } else {
                         final long fDelay = delayMs * i;
                         final int fi = i;
                         java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "salve-" + fi); t.setDaemon(true); return t; })
-                            .schedule(() -> spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, fPlayerRef, fStore, null, fDmg, 1.5f, fSlowEff, fSlowSec),
-                                fDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
+                            .schedule(() -> {
+                                ClassSkillSounds.playSkillSound("SFX_Vrpg_Salve_Launch", fPlayerRef, fPos, null);
+                                spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, fPlayerRef, fStore, null, fDmg, 1.5f, fSlowEff, fSlowSec);
+                            }, fDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
                     }
                 }
             }
         } catch (Exception ignored) {}
-        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID, bypass);
         ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID);
+        maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID, bypass);
         notifySkill(uuid, "Salve de Givre");
         return true;
     }

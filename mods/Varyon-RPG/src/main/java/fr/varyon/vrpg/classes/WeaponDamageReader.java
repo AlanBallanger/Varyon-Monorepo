@@ -44,7 +44,8 @@ public final class WeaponDamageReader {
             }
 
             int dmg = readFromDisk(itemId, 0);
-            LOG.atInfo().log("[WeaponDamageReader] itemId=" + itemId + " dmg=" + dmg);
+            if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
+                LOG.atInfo().log("[WeaponDamageReader] itemId=" + itemId + " dmg=" + dmg);
             if (dmg >= 0) CACHE.put(itemId, dmg);
             return dmg;
         } catch (Exception e) {

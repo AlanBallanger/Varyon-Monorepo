@@ -261,7 +261,7 @@ public final class ClassesTab {
             int base;
             if (fr.varyon.vrpg.classes.WeaponCategory.heldCategory(playerRef)
                     == fr.varyon.vrpg.classes.WeaponCategory.MAGIE) {
-                base = 8;
+                base = (int) Math.round(50.0 * atkMult);
             } else {
                 int weaponDmg = WeaponDamageReader.readHeldWeaponDamage(playerRef);
                 base = weaponDmg > 0 ? weaponDmg : 1;

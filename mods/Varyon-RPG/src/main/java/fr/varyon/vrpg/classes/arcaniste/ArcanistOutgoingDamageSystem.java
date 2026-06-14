@@ -73,17 +73,37 @@ public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
             if (acc.getActiveClass() != PlayerClass.MAGE) return;
             if (acc.getActiveSpec(PlayerClass.MAGE) != PlayerSpecialization.ARCANISTE) return;
 
+            // Pour les projectiles arcaniste, remplacer les dégâts vanilla par nos dégâts calculés
+            {
+                float pending = arcanistState.consumePendingProjectileDmg(uuid);
+                if (pending > 0f) {
+                    damage.setAmount(pending);
+                    // Son d'impact Salve de Givre (projectile glace qui touche)
+                    if (!arcanistState.isLastCastFire(uuid)) {
+                        try {
+                            com.hypixel.hytale.server.core.modules.entity.component.TransformComponent victimTc =
+                                store.getComponent(chunk.getReferenceTo(index),
+                                    com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+                            if (victimTc != null)
+                                fr.varyon.vrpg.audio.ClassSkillSounds.playSkillSound(
+                                    "SFX_Vrpg_Salve_Impact", playerRef, victimTc.getPosition(), commandBuffer);
+                        } catch (Exception ignored2) {}
+                    }
+                }
+            }
+
             float base   = damage.getAmount();
             float amount = base;
             boolean debug = VrpgConfig.isDebugCombat();
-            StringBuilder log = debug ? new StringBuilder(String.format("[ArcanisteDmg] base=%.1f", base)) : null;
+            String causeId = damage.getCause() != null ? damage.getCause().getId() : "?";
+            StringBuilder log = debug ? new StringBuilder(String.format("[ArcanisteDmg] cause=%s base=%.1f", causeId, base)) : null;
 
-            // Staff : x8 appliqué ici sauf pour COMMAND (Nova de Givre l'a déjà intégré dans le cast)
+            // Multiplicateur de base mage : x50 (le LevelMult est appliqué par SpecWeaponMasteryDamageSystem)
             if (fr.varyon.vrpg.classes.WeaponCategory.heldCategory(playerRef)
                     == fr.varyon.vrpg.classes.WeaponCategory.MAGIE
                     && damage.getCause() != com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.COMMAND) {
-                amount *= 8f;
-                if (log != null) log.append(" Staff=x8");
+                amount *= 50f;
+                if (log != null) log.append(" Staff=x50");
             }
 
             // Surcharge — bonus dégâts sorts actif

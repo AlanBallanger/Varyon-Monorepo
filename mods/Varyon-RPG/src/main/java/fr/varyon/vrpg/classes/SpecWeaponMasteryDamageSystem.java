@@ -95,6 +95,18 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
                 }
             }
 
+            // Multiplicateur de niveau — s'applique à toutes les classes
+            if (spec != null && activeClass != null) {
+                try {
+                    int level = acc.getProgress(activeClass).getLevel();
+                    double levelMult = ClassStatDefinition.atkDisplayMultiplier(level, spec);
+                    amount *= (float) levelMult;
+                    if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
+                        LOG.atInfo().log(String.format("[LevelMult] spec=%s level=%d mult=x%.2f", spec.getId(), level, levelMult));
+                    }
+                } catch (Exception ignored2) {}
+            }
+
             // Maîtrise d'armes — multiplicateur selon type d'arme
             if (spec != null) {
                 String itemId = getHeldItemId(playerRef);

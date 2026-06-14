@@ -19,6 +19,10 @@ public final class ArcanistState {
     // --- Dernier sort lancé (Fire vs Ice pour le tag de dégâts projectile) ---
     private final ConcurrentHashMap<UUID, Boolean> lastCastFire = new ConcurrentHashMap<>();
 
+    // --- Dégâts attendus des projectiles arcaniste (dmg par hit + nombre de hits restants) ---
+    private final ConcurrentHashMap<UUID, Float>    pendingProjectileDmg  = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Integer>  pendingProjectileHits = new ConcurrentHashMap<>();
+
     public ArcanistState() {}
 
     // ---- Surcharge ----
@@ -74,6 +78,24 @@ public final class ArcanistState {
         return Boolean.TRUE.equals(lastCastFire.get(uuid));
     }
 
+    // ---- Dégâts projectile ----
+
+    public void setPendingProjectileDmg(@Nonnull UUID uuid, float dmg, int hits) {
+        pendingProjectileDmg.put(uuid, dmg);
+        pendingProjectileHits.put(uuid, hits);
+    }
+
+    public float consumePendingProjectileDmg(@Nonnull UUID uuid) {
+        Float dmg = pendingProjectileDmg.get(uuid);
+        if (dmg == null) return -1f;
+        int remaining = pendingProjectileHits.merge(uuid, -1, Integer::sum);
+        if (remaining <= 0) {
+            pendingProjectileDmg.remove(uuid);
+            pendingProjectileHits.remove(uuid);
+        }
+        return dmg;
+    }
+
     // ---- Cleanup ----
 
     public void cleanup(@Nonnull UUID uuid) {
@@ -82,5 +104,7 @@ public final class ArcanistState {
         pouvoirActive.remove(uuid);
         echoPending.remove(uuid);
         lastCastFire.remove(uuid);
+        pendingProjectileDmg.remove(uuid);
+        pendingProjectileHits.remove(uuid);
     }
 }
