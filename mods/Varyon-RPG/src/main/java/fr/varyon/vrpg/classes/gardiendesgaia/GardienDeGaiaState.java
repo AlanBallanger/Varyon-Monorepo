@@ -134,6 +134,16 @@ public final class GardienDeGaiaState {
         return 1f;
     }
 
+    @Nullable
+    public UUID getOwnerForTreantRef(
+            @Nonnull com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> attackerRef) {
+        for (var entry : treantRef.entrySet()) {
+            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> stored = entry.getValue();
+            if (stored.getIndex() == attackerRef.getIndex()) return entry.getKey();
+        }
+        return null;
+    }
+
     public UUID getTreant(@Nonnull UUID playerUuid) {
         return treantSummon.get(playerUuid);
     }
@@ -148,12 +158,16 @@ public final class GardienDeGaiaState {
 
     // ---- Cycle de Vie ----
 
+    private static final long CYCLE_COOLDOWN_MS = 3000L;
+
     public void notifyHeal(@Nonnull UUID uuid) {
         lastHealForCycle.put(uuid, System.currentTimeMillis());
     }
 
     public boolean consumeCycleHeal(@Nonnull UUID uuid) {
-        return lastHealForCycle.remove(uuid) != null;
+        Long ts = lastHealForCycle.remove(uuid);
+        if (ts == null) return false;
+        return System.currentTimeMillis() - ts < CYCLE_COOLDOWN_MS;
     }
 
     // ---- Cleanup ----

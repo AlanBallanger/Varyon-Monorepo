@@ -24,8 +24,8 @@ public final class GardienDeGaiaPassifs {
     // --- Souffle de la Nature (node 10) — regen HP + endurance alliés proches ---
     public static final String  SOUFFLE_NODE      = "gardien_de_gaia_10";
     public static final double  SOUFFLE_RADIUS    = 8.0;
-    private static final float[] SOUFFLE_HP_REGEN  = {1.0f, 1.5f, 2.0f, 2.5f, 3.5f};
-    private static final float[] SOUFFLE_STA_REGEN = {0.5f, 0.8f, 1.0f, 1.3f, 1.8f};
+    private static final float[] SOUFFLE_HP_REGEN  = {0.5f, 0.8f, 1.1f, 1.5f, 2.0f};
+    private static final float[] SOUFFLE_STA_REGEN = {0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
 
     public static float souffleHpRegenForRank(int rank) {
         return SOUFFLE_HP_REGEN[idx(rank, SOUFFLE_HP_REGEN.length)];
@@ -39,7 +39,7 @@ public final class GardienDeGaiaPassifs {
 
     // --- Lien Spirituel (node 5) — dégâts invocations → soin joueur ---
     public static final String LIEN_NODE     = "gardien_de_gaia_5";
-    private static final float[] LIEN_RATIO  = {0.05f, 0.08f, 0.12f, 0.16f, 0.22f};
+    private static final float[] LIEN_RATIO  = {0.04f, 0.045f, 0.05f, 0.055f, 0.06f};
 
     public static float lienRatioForRank(int rank) {
         return LIEN_RATIO[idx(rank, LIEN_RATIO.length)];

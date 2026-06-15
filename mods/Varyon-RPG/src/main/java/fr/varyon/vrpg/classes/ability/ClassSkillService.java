@@ -3325,12 +3325,25 @@ public final class ClassSkillService {
         float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.manaCostForRank(rank);
         if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
 
-        gardienState.armMarque(uuid, fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.durationMsForRank(rank));
+        // Ciblage : joueur dans le regard dans les 8 blocs, sinon soi-même
+        Ref<EntityStore> targetEntityRef = findTargetedAllyEntityRef(entityRef, store, 8.0);
+        UUID targetUuid = uuid;
+        Ref<EntityStore> visualTargetRef = entityRef;
+        Store<EntityStore> visualTargetStore = store;
+        if (targetEntityRef != null) {
+            PlayerRef targetPlayer = store.getComponent(targetEntityRef, PlayerRef.getComponentType());
+            if (targetPlayer != null) {
+                targetUuid = targetPlayer.getUuid();
+                visualTargetRef = targetEntityRef;
+                visualTargetStore = targetEntityRef.getStore() != null ? targetEntityRef.getStore() : store;
+            }
+        }
+
+        gardienState.armMarque(targetUuid, fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.durationMsForRank(rank));
 
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             if (tc != null) {
-                // Effet visuel vert sur le joueur
                 int effIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect
                     .getAssetMap().getIndex("Vrpg_Marque_Renaissance");
                 com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect eff = effIdx >= 0
@@ -3338,13 +3351,14 @@ public final class ClassSkillService {
                       com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(effIdx)
                     : null;
                 if (eff != null) {
+                    Store<EntityStore> vs = visualTargetStore;
+                    Ref<EntityStore> vr = visualTargetRef;
                     com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
-                        store.getComponent(entityRef,
-                            com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                        vs.getComponent(vr, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
                     if (ec != null)
-                        ec.addEffect(entityRef, eff,
+                        ec.addEffect(vr, eff,
                             fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.durationMsForRank(rank) / 1000f,
-                            com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+                            com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, vs);
                 }
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
@@ -3373,20 +3387,68 @@ public final class ClassSkillService {
         float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.manaCostForRank(rank);
         if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
 
-        // Armer le rank pour que le OutgoingDamageSystem applique AoE + root à l'impact
-        gardienState.armEtreinte(uuid, rank);
-
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
                 store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
-            if (tc != null && hr != null) {
-                org.joml.Vector3d spawnPos = new org.joml.Vector3d(
-                    tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
-                spawnMagicProjectile(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_CONFIG,
-                    spawnPos, hr.getDirection(), entityRef, playerRef, store, commandBuffer, 0f, 0f, null, 0f);
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
-            }
+            com.hypixel.hytale.server.core.universe.world.World world = null;
+            try {
+                java.util.UUID wUuid = playerRef.getWorldUuid();
+                if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+            } catch (Exception ignored2) {}
+            if (tc == null || hr == null || world == null) return false;
+
+            org.joml.Vector3d eyePos = new org.joml.Vector3d(
+                tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
+            org.joml.Vector3d dir = new org.joml.Vector3d(hr.getDirection()).normalize();
+            org.joml.Vector3d impactPos = BlockRaystep.hitPosition(
+                world, eyePos, dir, fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.CAST_RANGE, 0.3);
+
+            double dist = impactPos.distance(eyePos);
+            long delayMs = (long) (dist / fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_SPEED * 1000.0);
+
+            spawnMagicProjectile(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_CONFIG,
+                eyePos, dir, entityRef, playerRef, store, commandBuffer, 0f, 0f, null, 0f);
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+
+            final int fRank = rank;
+            final org.joml.Vector3d fImpact = new org.joml.Vector3d(impactPos);
+            final Ref<EntityStore> fCasterRef = entityRef;
+            final com.hypixel.hytale.server.core.universe.world.World fw = world;
+
+            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "etreinte"); t.setDaemon(true); return t;
+            }).schedule(() -> fw.execute(() -> {
+                try {
+                    if (!fCasterRef.isValid()) return;
+                    Store<EntityStore> ws = fw.getEntityStore().getStore();
+                    float rootRadius = (float) fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.rootRadius();
+                    float rootSec    = fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.rootDurationMs(fRank) / 1000f;
+                    int rootEffIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect
+                        .getAssetMap().getIndex("Vrpg_Etreinte_Root");
+                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect rootEff = rootEffIdx >= 0
+                        ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                          com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(rootEffIdx)
+                        : null;
+                    if (rootEff == null) return;
+                    spawnMeteorParticle(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.IMPACT_PARTICLE, fImpact, ws);
+                    long casterIdx = fCasterRef.getIndex();
+                    final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fRootEff = rootEff;
+                    com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                        .selectNearbyEntities(ws, fImpact, rootRadius, targetRef -> {
+                            try {
+                                if (targetRef.getIndex() == casterIdx) return;
+                                com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                                    ws.getComponent(targetRef,
+                                        com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                                if (ec != null)
+                                    ec.addEffect(targetRef, fRootEff, rootSec,
+                                        com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, ws);
+                            } catch (Exception ignored2) {}
+                        }, t -> t.getIndex() != casterIdx);
+                } catch (Exception ignored) {}
+            }), delayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+
         } catch (Exception ignored) {}
 
         ClassSkillMana.consume(playerRef, manaCost);

@@ -17,4 +17,5 @@ public final class RpgClassUiState {
     public int skillPickerOffset = 0;
     public int[] pendingClassRanks = null;
     public int[] savedClassRanks = null;
+    public String treeKeybindPickingItemId = null;
 }

@@ -13,6 +13,7 @@ import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.ClassTalentTree;
 import fr.varyon.vrpg.classes.PlayerClass;
+import fr.varyon.vrpg.classes.ability.ClassSkillSlotIds;
 import fr.varyon.vrpg.ui.classes.ClassSkillDescriptions;
 import fr.varyon.vrpg.ui.classes.ClassTalentTreeLogic;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
@@ -104,6 +105,7 @@ public final class ClassTalentsTab {
 
         cmd.set("#ClassTreeAttribuerButton.Visible", state.classEditMode);
 
+        applyKeybindPanel(cmd, null, state, acc, activeClass, panelTalent, -1);
     }
 
     private static void renderNodes(@Nonnull UICommandBuilder uiBuilder,
@@ -221,6 +223,116 @@ public final class ClassTalentsTab {
                 "#ClassTreeResetButton",
                 EventData.of("Action", "classtreeReset"), false);
         }
+
+        applyKeybindPanel(uiBuilder, eventBuilder, state, acc, activeClass, panelTalent, effectiveHov >= 0 ? -1 : effectiveSel);
+    }
+
+    private static final String[] SLOT_ORDER = {
+        ClassSkillSlotIds.E,
+        ClassSkillSlotIds.R,
+        ClassSkillSlotIds.A,
+        ClassSkillSlotIds.CROUCH_E,
+        ClassSkillSlotIds.CROUCH_R,
+        ClassSkillSlotIds.CROUCH_A
+    };
+
+    private static final java.util.Map<String, String> SLOT_LABELS = java.util.Map.of(
+        ClassSkillSlotIds.E, "E",
+        ClassSkillSlotIds.R, "R",
+        ClassSkillSlotIds.A, "A",
+        ClassSkillSlotIds.CROUCH_E, "Crouch+E",
+        ClassSkillSlotIds.CROUCH_R, "Crouch+R",
+        ClassSkillSlotIds.CROUCH_A, "Crouch+A"
+    );
+
+    private static final java.util.Map<String, String> SLOT_SHORT_LABELS = java.util.Map.of(
+        ClassSkillSlotIds.E, "E",
+        ClassSkillSlotIds.R, "R",
+        ClassSkillSlotIds.A, "A",
+        ClassSkillSlotIds.CROUCH_E, "E2",
+        ClassSkillSlotIds.CROUCH_R, "R2",
+        ClassSkillSlotIds.CROUCH_A, "A2"
+    );
+
+    private static void applyKeybindPanel(@Nonnull UICommandBuilder ui,
+                                          @Nullable UIEventBuilder eventBuilder,
+                                          @Nonnull RpgClassUiState state,
+                                          @Nullable ClassAccount acc,
+                                          @Nullable PlayerClass activeClass,
+                                          @Nonnull ClassTalentTree.Node panelTalent,
+                                          int selectedActiveNode) {
+        boolean isActif = "Actif".equals(panelTalent.type());
+        ui.set("#ClassTreeKeybindPanel.Visible", isActif);
+        if (!isActif) return;
+
+        String nodeItemId = panelTalent.itemId();
+
+        String currentSlot = null;
+        for (String slotId : SLOT_ORDER) {
+            if (nodeItemId.equals(state.skillSlotAssignments.get(slotId))) {
+                currentSlot = slotId;
+                break;
+            }
+        }
+
+        boolean picking = nodeItemId.equals(state.treeKeybindPickingItemId);
+
+        boolean isBound = currentSlot != null;
+        String slotShortText = isBound ? SLOT_SHORT_LABELS.get(currentSlot) : "";
+        String slotFullText  = isBound ? SLOT_LABELS.get(currentSlot) : "";
+        ui.set("#ClassTreeKbSlotLabel.Visible", isBound);
+        ui.set("#ClassTreeKbSlotLabel.TextSpans", isBound ? Message.raw(slotShortText) : Message.raw(""));
+        ui.set("#ClassTreeKbSlotBorder.Visible", isBound);
+        ui.set("#ClassTreeKbCurrentLabel.TextSpans", isBound
+            ? Message.raw("Assigné : " + slotFullText)
+            : Message.raw("Non assigné"));
+
+        ui.set("#ClassTreeKbPickerPanel.Visible", picking);
+        ui.set("#ClassTreeKbSlotButton.Visible", true);
+
+        if (eventBuilder != null) {
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#ClassTreeKbSlotButton",
+                EventData.of("Action", "treeKeybindPick").append("Node", nodeItemId), false);
+        }
+
+        // Panneau de sélection des 6 slots
+        for (String slotId : SLOT_ORDER) {
+            boolean isCurrentSlot = slotId.equals(currentSlot);
+            String otherItemId = state.skillSlotAssignments.get(slotId);
+            boolean hasOther = otherItemId != null && !otherItemId.equals(nodeItemId);
+
+            String suffix = hasOther ? " (occupé)" : "";
+            ui.set("#ClassTreeKb" + slotId + "Label.TextSpans", Message.raw(SLOT_LABELS.get(slotId) + suffix));
+
+            String borderHex = isCurrentSlot ? "#6BCB7A" : "#555555";
+            ui.setObject("#ClassTreeKb" + slotId + "Border.Background",
+                new PatchStyle().setColor(Value.of(borderHex)));
+
+            if (eventBuilder != null && picking) {
+                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                    "#ClassTreeKb" + slotId,
+                    EventData.of("Action", "treeKeybindAssign")
+                        .append("Slot", slotId).append("Node", nodeItemId), false);
+            }
+        }
+
+        // Bouton Désassigner dans le picker (seulement si un slot est assigné)
+        ui.set("#ClassTreeKbClearButton.Visible", picking && isBound);
+        if (eventBuilder != null && picking && isBound) {
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#ClassTreeKbClearButton",
+                EventData.of("Action", "skillSlotClear").append("Slot", currentSlot), false);
+        }
+    }
+
+    @Nullable
+    private static String resolveIconForItemId(@Nonnull String itemId, @Nonnull ClassAccount acc) {
+        ClassTalentTree.Node[] nodes = ClassTalentTreeLayouts.talentNodes(acc);
+        for (ClassTalentTree.Node n : nodes) {
+            if (itemId.equals(n.itemId())) return n.itemId();
+        }
+        return null;
     }
 
     private static void applyTalentDetail(@Nonnull UICommandBuilder ui,

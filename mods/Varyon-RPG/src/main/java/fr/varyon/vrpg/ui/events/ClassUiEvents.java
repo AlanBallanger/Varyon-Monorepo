@@ -116,6 +116,7 @@ public final class ClassUiEvents {
                         if (idx >= 0 && idx < nodes.length) {
                             state.selectedClassNode = idx;
                             state.hoveredClassNode = -1;
+                            state.treeKeybindPickingItemId = null;
                             ClassTalentTreeLogic.enterEditMode(state, accSkill, activeClassSkill, nodes);
                             ClassTalentTreeLogic.tryPendingAdd(state, accSkill, activeClassSkill, idx, nodes);
                         }
@@ -196,6 +197,43 @@ public final class ClassUiEvents {
                 }
             }
             state.selectedClassNode = 0;
+            return UiEventResult.REBUILD;
+        }
+
+        if ("treeKeybindPick".equals(data.action) && data.node != null) {
+            state.treeKeybindPickingItemId = data.node.equals(state.treeKeybindPickingItemId) ? null : data.node;
+            return UiEventResult.REBUILD;
+        }
+        if ("treeKeybindAssign".equals(data.action) && data.slot != null && data.node != null) {
+            ClassManager classManager5 = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManager5 != null) {
+                classManager5.ensureAccount(playerRef.getUuid(), playerRef.getUsername());
+                ClassAccount acc5 = classManager5.getOrLoad(playerRef.getUuid());
+                PlayerClass activeClass5 = acc5.getActiveClass();
+                boolean admin5 = fr.varyon.vrpg.ui.RpgUiAdmin.isAdmin(playerRef) && fr.varyon.vrpg.ui.RpgUiAdmin.isCreative(playerRef);
+                if (activeClass5 != null) {
+                    String existing = state.skillSlotAssignments.get(data.slot);
+                    if (data.node.equals(existing)) {
+                        // Toggle off : désassigner
+                        classManager5.clearSkillSlot(playerRef.getUuid(), activeClass5, data.slot);
+                        state.skillSlotAssignments.remove(data.slot);
+                    } else if (admin5 || ClassUnlockedActiveSkills.isUnlockedActive(acc5, data.node)) {
+                        // Libérer l'ancien slot de ce sort si besoin
+                        for (String s : fr.varyon.vrpg.classes.ability.ClassSkillSlotIds.ALL) {
+                            if (data.node.equals(state.skillSlotAssignments.get(s))) {
+                                classManager5.clearSkillSlot(playerRef.getUuid(), activeClass5, s);
+                                state.skillSlotAssignments.remove(s);
+                                break;
+                            }
+                        }
+                        classManager5.setSkillSlot(playerRef.getUuid(), activeClass5, data.slot, data.node);
+                        state.skillSlotAssignments.put(data.slot, data.node);
+                    }
+                    AbilitySlotsHud hud5 = AbilitySlotsHud.get(playerRef.getUuid());
+                    if (hud5 != null) hud5.refreshSlots();
+                }
+            }
+            state.treeKeybindPickingItemId = null;
             return UiEventResult.REBUILD;
         }
 

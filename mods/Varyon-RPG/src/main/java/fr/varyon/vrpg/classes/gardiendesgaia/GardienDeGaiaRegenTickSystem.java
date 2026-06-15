@@ -64,24 +64,25 @@ public final class GardienDeGaiaRegenTickSystem extends EntityTickingSystem<Enti
         // --- Souffle de la Nature : regen HP + endurance aux alliés proches ---
         int souffleRank = acc.getTalentRank(PlayerClass.MAGE, GardienDeGaiaPassifs.SOUFFLE_NODE);
         if (souffleRank > 0) {
+            int graceRankSouffle = acc.getTalentRank(PlayerClass.MAGE, GardienDeGaiaPassifs.GRACE_NODE);
             float hpRegen  = GardienDeGaiaPassifs.souffleHpRegenForRank(souffleRank);
             float staRegen = GardienDeGaiaPassifs.souffleStaRegenForRank(souffleRank);
-            applyRegenToNearbyAllies(uuid, playerRef, chunk, index, store, hpRegen, staRegen);
+            applyRegenToNearbyAllies(uuid, playerRef, chunk, index, store, hpRegen, staRegen, graceRankSouffle);
         }
 
         // --- Écorce Protectrice : soin par tick sur la cible (1x/seconde) ---
         float ecorceHeal = state.getEcorceHealPerSec(uuid);
         if (ecorceHeal > 0f && tc % HEAL_INTERVAL == 0) {
-            float healTick = ecorceHeal;
+            int graceRank = acc.getTalentRank(PlayerClass.MAGE, GardienDeGaiaPassifs.GRACE_NODE);
             com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> targetRef =
                 state.getEcorceTargetRef(uuid);
             UUID ecorceTarget = state.getEcorceTarget(uuid);
             if (targetRef != null && targetRef.isValid()) {
-                applyHealToEntityRef(targetRef, healTick);
+                applyHealToEntityRef(targetRef, ecorceHeal, graceRank);
             } else if (ecorceTarget == null || ecorceTarget.equals(uuid)) {
-                applyHealToSelf(chunk, index, store, healTick);
+                applyHealToSelf(chunk, index, store, ecorceHeal, graceRank);
             } else {
-                applyHealToTarget(ecorceTarget, healTick);
+                applyHealToTarget(ecorceTarget, ecorceHeal, graceRank);
             }
         }
 
@@ -99,44 +100,77 @@ public final class GardienDeGaiaRegenTickSystem extends EntityTickingSystem<Enti
     private void applyRegenToNearbyAllies(UUID uuid, PlayerRef casterRef,
                                           ArchetypeChunk<EntityStore> chunk, int index,
                                           Store<EntityStore> store,
-                                          float hpRegen, float staRegen) {
+                                          float hpRegen, float staRegen, int graceRank) {
         try {
+            int hIdx;
+            int sIdx;
+            try { hIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { return; }
+            try { sIdx = DefaultEntityStatTypes.getStamina(); } catch (Exception e) { sIdx = -1; }
+            final int staminaIdx = sIdx;
+
+            // Soin sur le caster lui-même
+            applyHealToSelf(chunk, index, store, hpRegen, graceRank);
+            if (staminaIdx >= 0) {
+                try {
+                    EntityStatMap selfSm = store.getComponent(chunk.getReferenceTo(index), EntityStatMap.getComponentType());
+                    if (selfSm != null) {
+                        var sta = selfSm.get(staminaIdx);
+                        if (sta != null) selfSm.setStatValue(staminaIdx, Math.min(sta.getMax(), sta.get() + staRegen));
+                    }
+                } catch (Exception ignored) {}
+            }
+
             com.hypixel.hytale.server.core.modules.entity.component.TransformComponent casterTc =
                 store.getComponent(chunk.getReferenceTo(index),
                     com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
             if (casterTc == null) return;
             org.joml.Vector3d pos = casterTc.getPosition();
-            double radius = GardienDeGaiaPassifs.SOUFFLE_RADIUS;
-            int hIdx;
-            try { hIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { return; }
 
             com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
-                .selectNearbyEntities(store, pos, radius, ref -> {
+                .selectNearbyEntities(store, pos, GardienDeGaiaPassifs.SOUFFLE_RADIUS, ref -> {
                     try {
                         PlayerRef pRef = store.getComponent(ref, PlayerRef.getComponentType());
                         if (pRef == null || pRef.getUuid().equals(uuid)) return;
                         EntityStatMap sm = store.getComponent(ref, EntityStatMap.getComponentType());
                         if (sm == null) return;
                         var hp = sm.get(hIdx);
-                        if (hp != null) sm.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + hpRegen));
+                        if (hp != null) {
+                            float regen = withGrace(hpRegen, (float) hp.get(), (float) hp.getMax(), graceRank);
+                            sm.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + regen));
+                        }
+                        if (staminaIdx >= 0) {
+                            var sta = sm.get(staminaIdx);
+                            if (sta != null) sm.setStatValue(staminaIdx, Math.min(sta.getMax(), sta.get() + staRegen));
+                        }
                     } catch (Exception ignored) {}
                 }, ref -> true);
         } catch (Exception ignored) {}
     }
 
+    private static float withGrace(float amount, float currentHp, float maxHp, int graceRank) {
+        if (graceRank <= 0 || maxHp <= 0f) return amount;
+        if (currentHp / maxHp < GardienDeGaiaPassifs.GRACE_HP_SEUIL) {
+            amount *= 1f + GardienDeGaiaPassifs.graceBonusForRank(graceRank);
+        }
+        return amount;
+    }
+
     private void applyHealToSelf(ArchetypeChunk<EntityStore> chunk, int index,
-                                  Store<EntityStore> store, float amount) {
+                                  Store<EntityStore> store, float amount, int graceRank) {
         try {
             int hIdx = DefaultEntityStatTypes.getHealth();
             EntityStatMap sm = store.getComponent(chunk.getReferenceTo(index), EntityStatMap.getComponentType());
             if (sm != null) {
                 var hp = sm.get(hIdx);
-                if (hp != null) sm.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + amount));
+                if (hp != null) {
+                    float final_ = withGrace(amount, (float) hp.get(), (float) hp.getMax(), graceRank);
+                    sm.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + final_));
+                }
             }
         } catch (Exception ignored) {}
     }
 
-    private void applyHealToTarget(@Nonnull UUID targetUuid, float amount) {
+    private void applyHealToTarget(@Nonnull UUID targetUuid, float amount, int graceRank) {
         try {
             int hIdx = DefaultEntityStatTypes.getHealth();
             com.hypixel.hytale.server.core.universe.PlayerRef targetRef =
@@ -145,7 +179,10 @@ public final class GardienDeGaiaRegenTickSystem extends EntityTickingSystem<Enti
                 EntityStatMap sm = targetRef.getComponent(EntityStatMap.getComponentType());
                 if (sm != null) {
                     var hp = sm.get(hIdx);
-                    if (hp != null) sm.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + amount));
+                    if (hp != null) {
+                        float final_ = withGrace(amount, (float) hp.get(), (float) hp.getMax(), graceRank);
+                        sm.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + final_));
+                    }
                 }
             }
         } catch (Exception ignored) {}
@@ -153,7 +190,7 @@ public final class GardienDeGaiaRegenTickSystem extends EntityTickingSystem<Enti
 
     private void applyHealToEntityRef(
             @Nonnull com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> targetRef,
-            float amount) {
+            float amount, int graceRank) {
         try {
             int hIdx = DefaultEntityStatTypes.getHealth();
             com.hypixel.hytale.component.Store<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> refStore = targetRef.getStore();
@@ -161,7 +198,10 @@ public final class GardienDeGaiaRegenTickSystem extends EntityTickingSystem<Enti
             EntityStatMap statMap = refStore.getComponent(targetRef, EntityStatMap.getComponentType());
             if (statMap != null) {
                 var hp = statMap.get(hIdx);
-                if (hp != null) statMap.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + amount));
+                if (hp != null) {
+                    float final_ = withGrace(amount, (float) hp.get(), (float) hp.getMax(), graceRank);
+                    statMap.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + final_));
+                }
             }
         } catch (Exception ignored) {}
     }

@@ -1,0 +1,10 @@
+{
+  "Spawners": [
+    { "SpawnerId": "Etreinte_AoE_Glow",   "PositionOffset": { "Y": 0.12 }, "Scale": 3.2 },
+    { "SpawnerId": "Etreinte_AoE_Circle", "PositionOffset": { "Y": 0.12 }, "StartDelay": 0.2, "Scale": 3.2 },
+    { "SpawnerId": "Fire_Sparks_Green",   "PositionOffset": { "Y": 0.18 }, "StartDelay": 0.4, "Scale": 2.0 }
+  ],
+  "LifeSpan": 2.5,
+  "BoundingRadius": 24.0,
+  "CullDistance": 80.0
+}
