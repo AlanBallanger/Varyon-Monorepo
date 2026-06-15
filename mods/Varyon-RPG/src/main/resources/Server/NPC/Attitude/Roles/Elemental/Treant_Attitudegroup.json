@@ -1,0 +1,15 @@
+{
+  "Groups": {
+    "Hostile": [
+      "Trork",
+      "Undead",
+      "Void"
+    ],
+    "Neutral": [
+      "Player"
+    ],
+    "Friendly": [
+      "Kweebec"
+    ]
+  }
+}

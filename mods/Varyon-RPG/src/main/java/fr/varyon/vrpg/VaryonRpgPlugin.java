@@ -146,6 +146,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState;
     private fr.varyon.vrpg.classes.arcaniste.ArcanistOutgoingDamageSystem arcanistOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.arcaniste.ArcanistIncomingDamageSystem arcanistIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienDeGaiaState;
+    private fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaOutgoingDamageSystem gardienDeGaiaOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaIncomingDamageSystem gardienDeGaiaIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaRegenTickSystem gardienDeGaiaRegenTickSystem;
     private OmbreState ombreState;
     private OmbrePoisonSystem ombrePoisonSystem;
     private OmbreSpeedSystem ombreSpeedSystem;
@@ -278,7 +282,11 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.arcanistState = new fr.varyon.vrpg.classes.arcaniste.ArcanistState();
             this.arcanistOutgoingDamageSystem = new fr.varyon.vrpg.classes.arcaniste.ArcanistOutgoingDamageSystem(classManager, arcanistState);
             this.arcanistIncomingDamageSystem = new fr.varyon.vrpg.classes.arcaniste.ArcanistIncomingDamageSystem(classManager, arcanistState);
-            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState);
+            this.gardienDeGaiaState = new fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState();
+            this.gardienDeGaiaOutgoingDamageSystem = new fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaOutgoingDamageSystem(classManager, gardienDeGaiaState);
+            this.gardienDeGaiaIncomingDamageSystem = new fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaIncomingDamageSystem(classManager, gardienDeGaiaState);
+            this.gardienDeGaiaRegenTickSystem = new fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaRegenTickSystem(classManager, gardienDeGaiaState);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState, gardienDeGaiaState);
             this.classSkillKeyFilter = new ClassSkillKeyFilter(classManager, rempartState);
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
@@ -940,6 +948,24 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 getEntityStoreRegistry().registerSystem(arcanistIncomingDamageSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ArcanistIncomingDamageSystem");
+            }
+        }
+
+        if (gardienDeGaiaState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(gardienDeGaiaOutgoingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register GardienDeGaiaOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(gardienDeGaiaIncomingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register GardienDeGaiaIncomingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(gardienDeGaiaRegenTickSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register GardienDeGaiaRegenTickSystem");
             }
         }
 

@@ -1,0 +1,74 @@
+{
+  "Model": "Rubble_Default",
+  "LaunchForce": 35,
+  "LaunchWorldSoundEventId": "SFX_Staff_Ice_Shoot",
+  "Physics": {
+    "Type": "Standard",
+    "Gravity": 8,
+    "TerminalVelocityAir": 50,
+    "TerminalVelocityWater": 15,
+    "RotationMode": "VelocityDamped",
+    "Bounciness": 0.0,
+    "SticksVertically": true
+  },
+  "SpawnOffset": {
+    "X": 0.15,
+    "Y": -0.25,
+    "Z": -0.5
+  },
+  "Interactions": {
+    "ProjectileHit": {
+      "Cooldown": {
+        "Cooldown": 0
+      },
+      "Interactions": [
+        {
+          "Type": "DamageEntity",
+          "Entity": "Target",
+          "DamageCalculator": {
+            "Type": "Absolute",
+            "BaseDamage": {
+              "Physical": 1
+            },
+            "RandomPercentageModifier": 0
+          },
+          "DamageEffects": {
+            "WorldSoundEventId": "SFX_Ice_Ball_Death",
+            "WorldParticles": [
+              {
+                "SystemId": "IceBall_Explosion"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "RemoveEntity",
+          "Entity": "User"
+        }
+      ]
+    },
+    "ProjectileMiss": {
+      "Cooldown": {
+        "Cooldown": 0
+      },
+      "Interactions": [
+        {
+          "Type": "Simple",
+          "RunTime": 0,
+          "Effects": {
+            "WorldSoundEventId": "SFX_Ice_Ball_Death",
+            "WorldParticles": [
+              {
+                "SystemId": "IceBall_Explosion"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "RemoveEntity",
+          "Entity": "User"
+        }
+      ]
+    }
+  }
+}

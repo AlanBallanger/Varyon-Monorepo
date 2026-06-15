@@ -258,14 +258,12 @@ public final class ClassesTab {
     private static int readLiveAtk(@Nonnull PlayerRef playerRef, int level, @Nullable PlayerSpecialization spec) {
         double atkMult = ClassStatDefinition.atkDisplayMultiplier(level, spec);
         try {
-            int base;
             if (fr.varyon.vrpg.classes.WeaponCategory.heldCategory(playerRef)
                     == fr.varyon.vrpg.classes.WeaponCategory.MAGIE) {
-                base = (int) Math.round(50.0 * atkMult);
-            } else {
-                int weaponDmg = WeaponDamageReader.readHeldWeaponDamage(playerRef);
-                base = weaponDmg > 0 ? weaponDmg : 1;
+                return (int) Math.max(1, Math.round(50.0 * atkMult));
             }
+            int weaponDmg = WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            int base = weaponDmg > 0 ? weaponDmg : 1;
             return (int) Math.max(1, Math.round(base * atkMult));
         } catch (Exception ignored) {}
         return (int) Math.max(1, Math.round(atkMult));

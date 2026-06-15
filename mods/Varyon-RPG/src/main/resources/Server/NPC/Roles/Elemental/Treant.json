@@ -1,0 +1,30 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Summoned_Ally",
+  "Modify": {
+    "MaxHealth": 560,
+    "ViewRange": 15,
+    "HearingRange": 8,
+    "Appearance": "KweebecTreant_Model",
+    "Weapons": [],
+    "OffHand": [],
+    "DefaultOffHandSlot": -1,
+    "DropDeathItemsInstantly": false,
+    "FlockArray": ["Treant"],
+    "Attack": "Root_NPC_Golem_Crystal_Attack",
+    "AttackDistance": 5,
+    "TargetRange": 7,
+    "DesiredAttackDistanceRange": [2, 2.6],
+    "AttackPauseRange": [1.0, 1.5],
+    "CombatAttackPreDelay": [0.1, 0.3],
+    "CombatAttackPostDelay": [1.0, 1.2],
+    "CombatBackOffAfterAttack": false,
+    "CombatRelativeTurnSpeed": 0.25,
+    "MaxSpeed": 8,
+    "ApplySeparation": true,
+    "BlockProbability": 0,
+    "DespawnTimer": 60,
+    "SummonerLeashRange": 30,
+    "NameTranslationKey": "server.npcRoles.Treant.name"
+  }
+}

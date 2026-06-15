@@ -18,6 +18,13 @@ import fr.varyon.vrpg.classes.ombre.DelugeDeGamesSkill;
 import fr.varyon.vrpg.classes.ombre.PasDeLOmbreSkill;
 import fr.varyon.vrpg.classes.ombre.ChaseOuverteSkill;
 import fr.varyon.vrpg.classes.ombre.OmbrePassifs;
+import fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill;
+import fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill;
+import fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill;
+import fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill;
+import fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill;
+import fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill;
+import fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -135,6 +142,23 @@ public final class ClassSkillRegistry {
                 case 9  -> fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID;
                 case 10 -> fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID;
                 case 11 -> fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID;
+                default -> null;
+            };
+        }
+        if (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.GARDIEN_DE_GAIA) {
+            return switch (nodeIndex) {
+                case 0  -> EvasionSylvestreSkill.SKILL_ID;
+                case 1  -> GardienDeGaiaPassifs.HARMONIE_NODE;
+                case 2  -> BenedictionDeGaiaSkill.SKILL_ID;
+                case 3  -> EcorceProtectriceSkill.SKILL_ID;
+                case 4  -> AppelDuTreantSkill.SKILL_ID;
+                case 5  -> GardienDeGaiaPassifs.LIEN_NODE;
+                case 6  -> EtreinteDeGaiaSkill.SKILL_ID;
+                case 7  -> GardienDeGaiaPassifs.GARDIEN_NODE;
+                case 8  -> GardienDeGaiaPassifs.CYCLE_NODE;
+                case 9  -> GardienDeGaiaPassifs.GRACE_NODE;
+                case 10 -> GardienDeGaiaPassifs.SOUFFLE_NODE;
+                case 11 -> MarqueDeRenaissanceSkill.SKILL_ID;
                 default -> null;
             };
         }

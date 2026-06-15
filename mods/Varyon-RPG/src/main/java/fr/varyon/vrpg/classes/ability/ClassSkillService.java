@@ -63,6 +63,7 @@ public final class ClassSkillService {
     private final fr.varyon.vrpg.classes.ravageur.RavageurState ravageurState;
     private final fr.varyon.vrpg.classes.bagarreur.BagarreurState bagarreurState;
     private final fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState;
+    private final fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienState;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
     private final Map<String, SkillCaster> casters = new HashMap<>();
 
@@ -73,7 +74,8 @@ public final class ClassSkillService {
                              @Nonnull fr.varyon.vrpg.classes.berserker.BerserkerState berserkerState,
                              @Nonnull fr.varyon.vrpg.classes.ravageur.RavageurState ravageurState,
                              @Nonnull fr.varyon.vrpg.classes.bagarreur.BagarreurState bagarreurState,
-                             @Nonnull fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState) {
+                             @Nonnull fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState,
+                             @Nonnull fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienState) {
         this.classManager = classManager;
         this.duellisteState = duellisteState;
         this.ombreState = ombreState;
@@ -82,6 +84,7 @@ public final class ClassSkillService {
         this.ravageurState = ravageurState;
         this.bagarreurState = bagarreurState;
         this.arcanistState = arcanistState;
+        this.gardienState = gardienState;
         registerCasters();
     }
 
@@ -161,6 +164,19 @@ public final class ClassSkillService {
             (uuid, pr, er, st, cb) -> tryCastMarteauPilon(uuid, pr, er, st));
         casters.put(fr.varyon.vrpg.classes.ravageur.RabattageSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastRabattage(uuid, pr, er, st));
+        // Gardien de Gaïa
+        casters.put(fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastEvasionSylvestre(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastBenedictionDeGaia(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastMarqueDeRenaissance(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastEtreinteDeGaia(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastAppelDuTreant(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastEcorceProtectrice(uuid, pr, er, st));
         // Arcaniste
         casters.put(fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastDistorsion(uuid, pr, er, st, cb));
@@ -926,6 +942,96 @@ public final class ClassSkillService {
         }
     }
 
+    @Nullable
+    private PlayerRef findTargetedAllyRef(
+            @Nonnull PlayerRef casterRef,
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            double maxRange) {
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc == null) return null;
+            org.joml.Vector3d pos = tc.getPosition();
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            org.joml.Vector3d dir = hr != null ? hr.getDirection() : new org.joml.Vector3d(0, 0, 1);
+            UUID casterUuid = casterRef.getUuid();
+
+            double[] bestDist = {maxRange * maxRange + 1};
+            PlayerRef[] bestRef = new PlayerRef[]{null};
+
+            // Chercher parmi les joueurs
+            for (PlayerRef ally : com.hypixel.hytale.server.core.universe.Universe.get().getPlayers()) {
+                try {
+                    if (ally.getUuid().equals(casterUuid)) continue;
+                    Ref<EntityStore> allyEntityRef = ally.getReference();
+                    if (allyEntityRef == null || !allyEntityRef.isValid()) continue;
+                    Store<EntityStore> allyStore = allyEntityRef.getStore();
+                    if (allyStore == null) continue;
+                    TransformComponent allyTc = allyStore.getComponent(allyEntityRef, TransformComponent.getComponentType());
+                    if (allyTc == null) continue;
+                    org.joml.Vector3d tp = allyTc.getPosition();
+                    double dx = tp.x - pos.x, dy = tp.y + 0.8 - pos.y, dz = tp.z - pos.z;
+                    double dot = dx * dir.x + dy * dir.y + dz * dir.z;
+                    if (dot <= 0) continue;
+                    double distSq = dx * dx + dy * dy + dz * dz;
+                    if (distSq <= maxRange * maxRange && distSq < bestDist[0]) {
+                        bestDist[0] = distSq;
+                        bestRef[0] = ally;
+                    }
+                } catch (Exception ignored2) {}
+            }
+            return bestRef[0];
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Cherche l'entité alliée (joueur OU NPC non-hostile) la plus proche dans le regard
+    @Nullable
+    private Ref<EntityStore> findTargetedAllyEntityRef(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            double maxRange) {
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc == null) return null;
+            org.joml.Vector3d pos = tc.getPosition();
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            org.joml.Vector3d dir = hr != null ? hr.getDirection() : new org.joml.Vector3d(0, 0, 1);
+            long casterIdx = entityRef.getIndex();
+
+            double[] bestDist = {maxRange * maxRange + 1};
+            Ref<EntityStore>[] bestRef = new Ref[]{null};
+
+            org.joml.Vector3d searchCenter = new org.joml.Vector3d(
+                pos.x + dir.x * 3.0, pos.y + dir.y * 3.0 + 1.0, pos.z + dir.z * 3.0);
+
+            com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                .selectNearbyEntities(store, searchCenter, maxRange, targetRef -> {
+                    try {
+                        if (targetRef.getIndex() == casterIdx) return;
+                        TransformComponent ttc = store.getComponent(targetRef, TransformComponent.getComponentType());
+                        if (ttc == null) return;
+                        org.joml.Vector3d tp = ttc.getPosition();
+                        double dx = tp.x - pos.x, dy = tp.y + 0.8 - pos.y, dz = tp.z - pos.z;
+                        double dot = dx * dir.x + dy * dir.y + dz * dir.z;
+                        if (dot <= 0) return;
+                        double distSq = dx * dx + dy * dy + dz * dz;
+                        if (distSq < bestDist[0]) {
+                            bestDist[0] = distSq;
+                            bestRef[0] = targetRef;
+                        }
+                    } catch (Exception ignored2) {}
+                }, t -> t.getIndex() != casterIdx);
+
+            return bestRef[0];
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private void notifySkill(@Nonnull UUID uuid, @Nonnull String name) {
         try {
             ClassAccount acc = classManager.getOrLoad(uuid);
@@ -1325,6 +1431,19 @@ public final class ClassSkillService {
             (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.TALENT_NODE_ID))));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID,
             (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.TALENT_NODE_ID))));
+        // Gardien de Gaïa
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.TALENT_NODE_ID)));
     }
 
     private static long echoTemporelCd(@Nonnull ClassAccount acc, @Nonnull PlayerClass cls,
@@ -3035,6 +3154,345 @@ public final class ClassSkillService {
         } catch (Exception e) {
             LOG.atFine().log("[Meteore] projectile cleanup failed: " + e.getMessage());
         }
+    }
+
+    // =====================================================================
+    // Gardien de Gaïa
+    // =====================================================================
+
+    private boolean isGardienDeGaia(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.MAGE
+            && acc.getActiveSpec(PlayerClass.MAGE) == PlayerSpecialization.GARDIEN_DE_GAIA;
+    }
+
+    public boolean tryCastEvasionSylvestre(@Nonnull UUID uuid,
+                                            @Nonnull PlayerRef playerRef,
+                                            @Nonnull Ref<EntityStore> entityRef,
+                                            @Nonnull Store<EntityStore> store,
+                                            @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isGardienDeGaia(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        long cd = fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID, cd)) return false;
+        float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d lookDir = hr.getDirection();
+                double fwdX = lookDir.x, fwdZ = lookDir.z;
+                double fwdLen = Math.sqrt(fwdX * fwdX + fwdZ * fwdZ);
+                if (fwdLen > 1e-6) { fwdX /= fwdLen; fwdZ /= fwdLen; }
+                double dashX = -fwdX, dashZ = -fwdZ;
+                double baseForce = 12.0 + fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.dashDistanceForRank(rank) * 0.875;
+                com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig dashConfig =
+                    new com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig();
+                dashConfig.setAirResistance(0.97f);
+                dashConfig.setAirResistanceMax(0.96f);
+                dashConfig.setGroundResistance(0.94f);
+                dashConfig.setGroundResistanceMax(0.82f);
+                dashConfig.setThreshold(5.0f);
+                dashConfig.setStyle(com.hypixel.hytale.protocol.VelocityThresholdStyle.Exp);
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(dashX * baseForce, 0.2, dashZ * baseForce);
+                    vel.setClient(dashVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(dashVel, dashConfig, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_OmbreVanish", playerRef, tc.getPosition(), commandBuffer);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID);
+        notifySkill(uuid, "Évasion Sylvestre");
+        return true;
+    }
+
+    public boolean tryCastBenedictionDeGaia(@Nonnull UUID uuid,
+                                             @Nonnull PlayerRef playerRef,
+                                             @Nonnull Ref<EntityStore> entityRef,
+                                             @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isGardienDeGaia(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        long cd = fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.SKILL_ID, cd)) return false;
+        float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        float baseHeal = fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.healAmountForRank(rank);
+        double radius  = fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.HEAL_RADIUS;
+        int graceRank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.GRACE_NODE);
+        float graceBonus = graceRank > 0 ? fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.graceBonusForRank(graceRank) : 0f;
+        float graceSeuil = fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.GRACE_HP_SEUIL;
+        boolean doCycle = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.CYCLE_NODE) > 0;
+        int hIdx;
+        try { hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth(); }
+        catch (Exception e) { hIdx = -1; }
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null && hIdx >= 0) {
+                org.joml.Vector3d center = tc.getPosition();
+                final int fHIdx = hIdx;
+                final float fBaseHeal = baseHeal;
+                final float fGraceBonus = graceBonus;
+                final float fGraceSeuil = graceSeuil;
+                boolean[] healed = {false};
+
+                // Healer toutes les entités proches (joueurs + NPCs alliés + dummies)
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                    .selectNearbyEntities(store, center, (float) radius, ref -> {
+                        try {
+                            com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
+                                store.getComponent(ref, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+                            if (sm == null) return;
+                            var hp = sm.get(fHIdx);
+                            if (hp == null || hp.getMax() <= 0) return;
+                            float heal = fBaseHeal;
+                            if (fGraceBonus > 0f && hp.get() / hp.getMax() < fGraceSeuil)
+                                heal *= (1f + fGraceBonus);
+                            sm.setStatValue(fHIdx, Math.min(hp.getMax(), hp.get() + heal));
+                            healed[0] = true;
+                        } catch (Exception ignored2) {}
+                    }, ref -> true);
+
+                // Aussi healer les joueurs du serveur dans le rayon (ils peuvent ne pas être dans le même Store)
+                for (PlayerRef ally : com.hypixel.hytale.server.core.universe.Universe.get().getPlayers()) {
+                    try {
+                        Ref<EntityStore> allyRef = ally.getReference();
+                        if (allyRef == null || !allyRef.isValid()) continue;
+                        Store<EntityStore> allyStore = allyRef.getStore();
+                        if (allyStore == null || allyStore == store) continue; // déjà traité par selectNearbyEntities
+                        TransformComponent allyTc = allyStore.getComponent(allyRef, TransformComponent.getComponentType());
+                        if (allyTc == null) continue;
+                        double dx = allyTc.getPosition().x - center.x;
+                        double dy = allyTc.getPosition().y - center.y;
+                        double dz = allyTc.getPosition().z - center.z;
+                        if (dx * dx + dy * dy + dz * dz > radius * radius) continue;
+                        com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
+                            ally.getComponent(com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+                        if (sm == null) continue;
+                        var hp = sm.get(fHIdx);
+                        if (hp == null || hp.getMax() <= 0) continue;
+                        float heal = fBaseHeal;
+                        if (fGraceBonus > 0f && hp.get() / hp.getMax() < fGraceSeuil)
+                            heal *= (1f + fGraceBonus);
+                        sm.setStatValue(fHIdx, Math.min(hp.getMax(), hp.get() + heal));
+                        healed[0] = true;
+                    } catch (Exception ignored2) {}
+                }
+
+                if (healed[0] && doCycle) gardienState.notifyHeal(uuid);
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_TreeRegrowth", playerRef, center, null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.SKILL_ID);
+        notifySkill(uuid, "Bénédiction de Gaïa");
+        return true;
+    }
+
+    public boolean tryCastMarqueDeRenaissance(@Nonnull UUID uuid,
+                                               @Nonnull PlayerRef playerRef,
+                                               @Nonnull Ref<EntityStore> entityRef,
+                                               @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isGardienDeGaia(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        long cd = fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.SKILL_ID, cd)) return false;
+        float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        gardienState.armMarque(uuid, fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.durationMsForRank(rank));
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                // Effet visuel vert sur le joueur
+                int effIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect
+                    .getAssetMap().getIndex("Vrpg_Marque_Renaissance");
+                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect eff = effIdx >= 0
+                    ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                      com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(effIdx)
+                    : null;
+                if (eff != null) {
+                    com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                        store.getComponent(entityRef,
+                            com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                    if (ec != null)
+                        ec.addEffect(entityRef, eff,
+                            fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.durationMsForRank(rank) / 1000f,
+                            com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+                }
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.SKILL_ID);
+        notifySkill(uuid, "Marque de Renaissance");
+        return true;
+    }
+
+    public boolean tryCastEtreinteDeGaia(@Nonnull UUID uuid,
+                                          @Nonnull PlayerRef playerRef,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull Store<EntityStore> store,
+                                          @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isGardienDeGaia(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        long cd = fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.SKILL_ID, cd)) return false;
+        float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        // Armer le rank pour que le OutgoingDamageSystem applique AoE + root à l'impact
+        gardienState.armEtreinte(uuid, rank);
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                    tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
+                spawnMagicProjectile(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_CONFIG,
+                    spawnPos, hr.getDirection(), entityRef, playerRef, store, commandBuffer, 0f, 0f, null, 0f);
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.SKILL_ID);
+        notifySkill(uuid, "Étreinte de Gaïa");
+        return true;
+    }
+
+    public boolean tryCastAppelDuTreant(@Nonnull UUID uuid,
+                                         @Nonnull PlayerRef playerRef,
+                                         @Nonnull Ref<EntityStore> entityRef,
+                                         @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isGardienDeGaia(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        long cd = fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.SKILL_ID, cd)) return false;
+        float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        int playerLevel = acc.getProgress(PlayerClass.MAGE).getLevel();
+        float skillFactor = fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.hpFactorForRank(rank);
+
+        // HP : hpLevelMult × specHpMult × skillFactor
+        float hpFactor = (float)(fr.varyon.vrpg.classes.ClassStatDefinition.hpLevelMult(playerLevel)
+            * PlayerSpecialization.GARDIEN_DE_GAIA.getHpMult()) * skillFactor;
+        int gardienRank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.GARDIEN_NODE);
+        if (gardienRank > 0) {
+            hpFactor *= (1f + fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.gardienHpBonusForRank(gardienRank));
+        }
+        final float finalHpFactor = hpFactor;
+
+        // DMG : atkLevelMult × specAtkMult × skillFactor × 5 (base JSON = 10, on vise ×5)
+        float dmgFactor = (float)(fr.varyon.vrpg.classes.ClassStatDefinition.atkLevelMultiplier(playerLevel)
+            * PlayerSpecialization.GARDIEN_DE_GAIA.getAtkMult()) * skillFactor * 5f;
+        final float finalDmgFactor = dmgFactor;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                com.hypixel.hytale.server.core.entity.entities.Player player =
+                    store.getComponent(entityRef, com.hypixel.hytale.server.core.entity.entities.Player.getComponentType());
+                com.hypixel.hytale.server.core.universe.world.World world =
+                    player != null ? player.getWorld() : null;
+                if (world != null) {
+                    org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                        tc.getPosition().x + 1.5, tc.getPosition().y, tc.getPosition().z + 1.5);
+                    fr.varyon.vrpg.classes.gardiendesgaia.TreantSpawner.scheduleSpawn(
+                        world, spawnPos, finalHpFactor, finalDmgFactor, uuid, gardienState);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.SKILL_ID);
+        notifySkill(uuid, "Appel du Tréant");
+        return true;
+    }
+
+    public boolean tryCastEcorceProtectrice(@Nonnull UUID uuid,
+                                             @Nonnull PlayerRef playerRef,
+                                             @Nonnull Ref<EntityStore> entityRef,
+                                             @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isGardienDeGaia(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        long cd = fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.SKILL_ID, cd)) return false;
+        float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        // Ciblage : entité dans le regard (joueur ou NPC allié/dummy) dans les 8 blocs, sinon soi-même
+        Ref<EntityStore> targetEntityRef = findTargetedAllyEntityRef(entityRef, store, 8.0);
+        UUID targetUuid = uuid;
+        if (targetEntityRef != null) {
+            PlayerRef targetPlayer = store.getComponent(targetEntityRef, PlayerRef.getComponentType());
+            if (targetPlayer != null) targetUuid = targetPlayer.getUuid();
+        }
+
+        gardienState.startEcorce(uuid, targetUuid, targetEntityRef,
+            fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.durationMsForRank(rank),
+            fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.damageReductionForRank(rank),
+            fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.healPerSecForRank(rank));
+
+        // Cycle de Vie
+        int cycleRank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.CYCLE_NODE);
+        if (cycleRank > 0) gardienState.notifyHeal(uuid);
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_TreeRegrowth", playerRef, tc.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.SKILL_ID);
+        notifySkill(uuid, "Écorce Protectrice");
+        return true;
     }
 
     private void damageNearby(@Nonnull org.joml.Vector3d center, float radius,

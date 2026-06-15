@@ -128,6 +128,19 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.DRAIN_MYSTIQUE_NODE      -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.drainMystiqueStatLine(rank);
             case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.ECHO_ARCANIQUE_NODE      -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.echoArcanicStatLine(rank);
             case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.POUVOIR_GRANDISSANT_NODE -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.pouvoirGrandissantStatLine(rank);
+            // Gardien de Gaïa
+            case fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID      -> fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.SKILL_ID     -> fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.SKILL_ID   -> fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.SKILL_ID        -> fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.SKILL_ID         -> fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.SKILL_ID     -> fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.HARMONIE_NODE  -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.harmonieStatLine(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.SOUFFLE_NODE   -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.souffleStatLine(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.LIEN_NODE      -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.lienStatLine(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.GARDIEN_NODE   -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.gardienStatLine(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.GRACE_NODE     -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.graceStatLine(rank);
+            case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.CYCLE_NODE     -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.cycleStatLine(rank);
             default -> null;
         };
     }

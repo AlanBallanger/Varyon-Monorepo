@@ -161,6 +161,22 @@ public final class ClassTalentTree {
             new Node("Uppercut",             "Actif",  "Un uppercut qui envoie l'ennemi vers le ciel.",                              "Coup ascendant qui inflige des dégâts et projette la cible en l'air.",                       FI + "Uppercut.png",                   5),
         });
 
+        final String GGI = "Classes_Icons/Guardian/";
+        SPEC_TREES.put(PlayerSpecialization.GARDIEN_DE_GAIA, new Node[]{
+            new Node("Évasion Sylvestre",     "Actif",  "La forêt s'ouvre pour laisser passage — et se referme aussitôt.",        "Téléportation magique en arrière.",                                                         GGI + "Evasion_Sylvestre.png",          5),
+            new Node("Harmonie Naturelle",    "Passif", "La nature récompense ceux qui restent en bonne santé.",                  "Gain d'expérience augmenté lorsque les PV sont supérieurs à 80 %.",                         GGI + "Harmonie_Naturelle.png",         5),
+            new Node("Bénédiction de Gaïa",  "Actif",  "La terre s'éveille et verse sa vie sur ceux qui la servent.",            "Soigne instantanément les alliés dans une zone.",                                           GGI + "Bénédiction_De_Gaia.png",       5),
+            new Node("Écorce Protectrice",   "Actif",  "La vie de la forêt enveloppe la cible comme une armure vivante.",        "Réduit les dégâts reçus par la cible pendant quelques secondes et la soigne.",              GGI + "Ecorce_Protectrice.png",         5),
+            new Node("Appel du Tréant",      "Actif",  "D'une graine plantée dans le sol naît un gardien millénaire.",           "Invoque un gardien végétal qui combat à vos côtés.",                                        GGI + "Appel_Du_Tréant.png",           5),
+            new Node("Lien Spirituel",       "Passif", "Ce que fait l'invocation résonne dans l'âme du druide.",                  "Une partie des dégâts infligés par les invocations vous soigne.",                           GGI + "Lien_Spirituel.png",             5),
+            new Node("Étreinte de Gaïa",     "Actif",  "La terre elle-même saisit les ennemis pour les retenir.",                "Lance un projectile qui en explosant immobilise les ennemis dans une zone.",                 GGI + "Etreinte_De_Gaia.png",           5),
+            new Node("Gardien de la Nature", "Passif", "Les créatures de la forêt sont plus robustes sous sa protection.",       "Augmente les points de vie des invocations.",                                                GGI + "Gardien_De_La_Nature.png",       5),
+            new Node("Cycle de Vie",         "Passif", "Soigner, c'est recevoir en retour — le cycle ne s'arrête jamais.",       "Soigner un allié restaure une petite quantité de mana.",                                    GGI + "Cycle_De_Vie.png",              5),
+            new Node("Grâce de Gaïa",        "Passif", "Gaïa donne plus à ceux qui en ont le plus besoin.",                      "Les soins sont plus efficaces sur les cibles ayant peu de points de vie.",                   GGI + "Grace_De_Gaia.png",              5),
+            new Node("Souffle de la Nature", "Passif", "Un vent tiède qui redonne forces et vigueur à ceux qui l'écoutent.",     "Régénère la vie et l'endurance des alliés proches en permanence.",                          GGI + "Souffle_De_La_Nature.png",       5),
+            new Node("Marque de Renaissance","Actif",  "La mort elle-même hésite devant le sceau de Gaïa.",                      "Protège la cible de la mort pendant une courte durée et lui octroie de la jauge spéciale.",  GGI + "Marque_De_Renaissance.png",      5),
+        });
+
         final String AI = "Classes_Icons/Arcanist/";
         SPEC_TREES.put(PlayerSpecialization.ARCANISTE, new Node[]{
             new Node("Distorsion",          "Actif",  "La magie plie l'espace — et lui permet de disparaître.",              "Téléportation magique en arrière.",                                                         AI + "Distorsion.png",           5),
