@@ -162,6 +162,23 @@ public final class ClassSkillRegistry {
                 default -> null;
             };
         }
+        if (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.VAUDOU) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.FETICHEUR_NODE;
+                case 2  -> fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.SKILL_ID;
+                case 3  -> fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.SKILL_ID;
+                case 5  -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.TOXINES_NODE;
+                case 6  -> fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.SKILL_ID;
+                case 7  -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.PARASITE_NODE;
+                case 8  -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ANCRAGE_NODE;
+                case 9  -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.RITUEL_NODE;
+                case 10 -> fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.SKILL_ID;
+                case 11 -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.PRESENCE_NODE;
+                default -> null;
+            };
+        }
         if (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.ARCANISTE) {
             return switch (nodeIndex) {
                 case 0  -> fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID;

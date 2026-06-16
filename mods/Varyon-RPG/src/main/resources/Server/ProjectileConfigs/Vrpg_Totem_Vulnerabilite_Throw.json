@@ -1,0 +1,75 @@
+{
+  "Model": "Slowness_Totem",
+  "Physics": {
+    "Type": "Standard",
+    "Gravity": 15.0,
+    "TerminalVelocityAir": 50,
+    "TerminalVelocityWater": 15,
+    "RotationMode": "None",
+    "Bounciness": 0.0,
+    "SticksVertically": true,
+    "BounceCount": 0,
+    "BounceLimit": 0.0
+  },
+  "LaunchForce": 10.0,
+  "SpawnOffset": {
+    "X": 0.0,
+    "Y": 1.2,
+    "Z": 0.0
+  },
+  "Interactions": {
+    "ProjectileHit": {
+      "Interactions": [
+        {
+          "Type": "RemoveEntity",
+          "Entity": "User"
+        }
+      ]
+    },
+    "ProjectileMiss": {
+      "Interactions": [
+        {
+          "Type": "SpawnDeployableAtLocation",
+          "OriginSource": "Entity",
+          "Offset": { "X": 0.0, "Y": 0.0, "Z": 0.0 },
+          "RotationYaw": "None",
+          "OffsetRotationMode": "None",
+          "DeployableRotationMode": "None",
+          "Config": {
+            "Type": "Aoe",
+            "Id": "Vulnerability_Totem",
+            "LiveDuration": 10,
+            "Model": "Slowness_Totem",
+            "ModelScale": 1.0,
+            "StartRadius": 0.1,
+            "EndRadius": 10,
+            "Height": 2,
+            "RadiusChangeTime": 2,
+            "DeploySoundEventId": "SFX_Deployable_Totem_Slowing_Spawn",
+            "DespawnSoundEventId": "SFX_Deployable_Totem_Slowing_Despawn",
+            "ApplyEffects": [],
+            "DamageInterval": 0.5,
+            "DamageAmount": 0.0,
+            "HitboxCollisionConfig": "HardCollision",
+            "SpawnParticles": [
+              {
+                "SystemId": "Explosion_Medium",
+                "TargetEntityPart": "Entity"
+              }
+            ],
+            "DespawnParticles": [
+              {
+                "SystemId": "Explosion_Medium",
+                "TargetEntityPart": "Entity"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "RemoveEntity",
+          "Entity": "User"
+        }
+      ]
+    }
+  }
+}

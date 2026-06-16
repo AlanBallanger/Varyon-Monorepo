@@ -128,6 +128,19 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.DRAIN_MYSTIQUE_NODE      -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.drainMystiqueStatLine(rank);
             case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.ECHO_ARCANIQUE_NODE      -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.echoArcanicStatLine(rank);
             case fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.POUVOIR_GRANDISSANT_NODE -> fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.pouvoirGrandissantStatLine(rank);
+            // Vaudou
+            case fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.SKILL_ID      -> fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.SKILL_ID       -> fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.SKILL_ID       -> fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.SKILL_ID     -> fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.SKILL_ID -> fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.SKILL_ID      -> fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.FETICHEUR_NODE     -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.feticheurStatLine(rank);
+            case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.PRESENCE_NODE      -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.presenceStatLine(rank);
+            case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.TOXINES_NODE       -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.toxinesStatLine(rank);
+            case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ANCRAGE_NODE       -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ancrageStatLine(rank);
+            case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.RITUEL_NODE        -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.rituelStatLine(rank);
+            case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.PARASITE_NODE      -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.parasiteStatLine(rank);
             // Gardien de Gaïa
             case fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID      -> fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.statLineForRank(rank);
             case fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.SKILL_ID     -> fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.statLineForRank(rank);

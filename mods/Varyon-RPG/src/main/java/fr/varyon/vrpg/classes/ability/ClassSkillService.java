@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.inventory.ItemStack;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
+import fr.varyon.vrpg.classes.ClassStatDefinition;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.duelliste.AssautBretteurSkill;
 import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
@@ -64,6 +65,8 @@ public final class ClassSkillService {
     private final fr.varyon.vrpg.classes.bagarreur.BagarreurState bagarreurState;
     private final fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState;
     private final fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienState;
+    private final fr.varyon.vrpg.classes.vaudou.VaudouState vaudouState;
+    private fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem vaudouPoisonSystem;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
     private final Map<String, SkillCaster> casters = new HashMap<>();
 
@@ -75,7 +78,8 @@ public final class ClassSkillService {
                              @Nonnull fr.varyon.vrpg.classes.ravageur.RavageurState ravageurState,
                              @Nonnull fr.varyon.vrpg.classes.bagarreur.BagarreurState bagarreurState,
                              @Nonnull fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState,
-                             @Nonnull fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienState) {
+                             @Nonnull fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienState,
+                             @Nonnull fr.varyon.vrpg.classes.vaudou.VaudouState vaudouState) {
         this.classManager = classManager;
         this.duellisteState = duellisteState;
         this.ombreState = ombreState;
@@ -85,7 +89,12 @@ public final class ClassSkillService {
         this.bagarreurState = bagarreurState;
         this.arcanistState = arcanistState;
         this.gardienState = gardienState;
+        this.vaudouState = vaudouState;
         registerCasters();
+    }
+
+    public void setVaudouPoisonSystem(@Nonnull fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem sys) {
+        this.vaudouPoisonSystem = sys;
     }
 
     private void registerCasters() {
@@ -178,6 +187,19 @@ public final class ClassSkillService {
         casters.put(fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastEcorceProtectrice(uuid, pr, er, st));
         // Arcaniste
+        // Vaudou
+        casters.put(fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastPassageEthere(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastFleauToxique(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastTotemEntrave(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastAttaquePerfide(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastTotemVulnerabilite(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastExtractionAme(uuid, pr, er, st));
         casters.put(fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastDistorsion(uuid, pr, er, st, cb));
         casters.put(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID,
@@ -1444,6 +1466,19 @@ public final class ClassSkillService {
             (acc, cls) -> fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.TALENT_NODE_ID)));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.SKILL_ID,
             (acc, cls) -> fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.gardiendesgaia.MarqueDeRenaissanceSkill.TALENT_NODE_ID)));
+        // Vaudou
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.TALENT_NODE_ID)));
     }
 
     private static long echoTemporelCd(@Nonnull ClassAccount acc, @Nonnull PlayerClass cls,
@@ -3554,6 +3589,397 @@ public final class ClassSkillService {
         ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill.SKILL_ID);
         notifySkill(uuid, "Écorce Protectrice");
+        return true;
+    }
+
+    private boolean isVaudou(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.MAGE
+            && acc.getActiveSpec(PlayerClass.MAGE) == PlayerSpecialization.VAUDOU;
+    }
+
+
+    public boolean tryCastPassageEthere(@Nonnull UUID uuid,
+                                        @Nonnull PlayerRef playerRef,
+                                        @Nonnull Ref<EntityStore> entityRef,
+                                        @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isVaudou(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.cooldownMsForRank(rank))) return false;
+        float manaCost = fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store,
+            fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.rangeForRank(rank));
+        if (targeted == null) return false;
+
+        try {
+            TransformComponent tc    = store.getComponent(entityRef, TransformComponent.getComponentType());
+            TransformComponent ttc   = store.getComponent(targeted, TransformComponent.getComponentType());
+            if (tc != null && ttc != null) {
+                org.joml.Vector3d targetPos = ttc.getPosition();
+                org.joml.Vector3d playerPos = tc.getPosition();
+                org.joml.Vector3d destPos = new org.joml.Vector3d(
+                    2.0 * targetPos.x - playerPos.x,
+                    targetPos.y,
+                    2.0 * targetPos.z - playerPos.z);
+                double facingDx = targetPos.x - destPos.x;
+                double facingDz = targetPos.z - destPos.z;
+                float facingYaw = (float) Math.atan2(-facingDx, -facingDz);
+                com.hypixel.hytale.math.vector.Rotation3f faceRot = new com.hypixel.hytale.math.vector.Rotation3f(0f, facingYaw, 0f);
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(destPos, faceRot);
+                tele.withoutVelocityReset();
+                store.addComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, targetPos, null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.vaudou.PassageEthereSkill.SKILL_ID);
+        notifySkill(uuid, "Passage Éthéré");
+        return true;
+    }
+
+    public boolean tryCastFleauToxique(@Nonnull UUID uuid,
+                                       @Nonnull PlayerRef playerRef,
+                                       @Nonnull Ref<EntityStore> entityRef,
+                                       @Nonnull Store<EntityStore> store,
+                                       @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isVaudou(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.cooldownMsForRank(rank))) return false;
+        float manaCost = fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        int toxinesRank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.VaudouPassifs.TOXINES_NODE);
+        float durationBonus = toxinesRank > 0
+            ? fr.varyon.vrpg.classes.vaudou.VaudouPassifs.toxinesDurationBonusForRank(toxinesRank)
+            : 0f;
+        long durationMs = (long)(fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.BASE_POISON_DURATION_MS * (1f + durationBonus));
+
+        float weaponPct = fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.poisonWeaponPctForRank(rank);
+        int level = acc.getProgress(PlayerClass.MAGE).getLevel();
+        float vaudouMageMult = (float) (ClassStatDefinition.atkDisplayMultiplier(level, PlayerSpecialization.VAUDOU)
+            * PlayerSpecialization.VAUDOU.getWeaponMagieMult());
+        float dpt = 50f * vaudouMageMult * weaponPct;
+
+        vaudouState.setPendingFleau(uuid, dpt, durationMs, rank);
+
+        try {
+            TransformComponent casterTc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (casterTc != null) {
+                com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                    store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+                org.joml.Vector3d dir = hr != null ? hr.getDirection() : new org.joml.Vector3d(0, 0, 1);
+                org.joml.Vector3d casterPos = casterTc.getPosition();
+                org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                    casterPos.x + dir.x * 0.5,
+                    casterPos.y + 1.5,
+                    casterPos.z + dir.z * 0.5);
+                try {
+                    com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                        com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap().getAsset("Vrpg_Fleau_Toxique");
+                    if (cfg != null && commandBuffer != null) {
+                        com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                            .spawnProjectile(entityRef, commandBuffer, cfg, spawnPos, dir);
+                    } else if (cfg != null) {
+                        com.hypixel.hytale.server.core.universe.world.World w = null;
+                        try { java.util.UUID wId = playerRef.getWorldUuid(); if (wId != null) w = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wId); } catch (Exception ignored2) {}
+                        if (w != null) {
+                            final com.hypixel.hytale.server.core.universe.world.World fw = w;
+                            final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fc = cfg;
+                            final org.joml.Vector3d fPos = spawnPos, fDir = dir;
+                            final Ref<EntityStore> fRef = entityRef;
+                            fw.execute(() -> {
+                                try {
+                                    Store<EntityStore> ws = fw.getEntityStore().getStore();
+                                    java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
+                                    takeCmd.setAccessible(true);
+                                    @SuppressWarnings("unchecked") CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
+                                    try { com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get().spawnProjectile(fRef, cb, fc, fPos, fDir); }
+                                    finally { try { java.lang.reflect.Method c = cb.getClass().getDeclaredMethod("consume"); c.setAccessible(true); c.invoke(cb); } catch (Exception ignored3) {} }
+                                } catch (Exception ignored2) {}
+                            });
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.vaudou.FleauToxiqueSkill.SKILL_ID);
+        notifySkill(uuid, "Fléau Toxique");
+        return true;
+    }
+
+    public boolean tryCastTotemEntrave(@Nonnull UUID uuid,
+                                       @Nonnull PlayerRef playerRef,
+                                       @Nonnull Ref<EntityStore> entityRef,
+                                       @Nonnull Store<EntityStore> store,
+                                       @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isVaudou(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.cooldownMsForRank(rank))) return false;
+        float manaCost = fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        int ancrageRank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ANCRAGE_NODE);
+        float durBonus = ancrageRank > 0 ? fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ancrageTotemBonusForRank(ancrageRank) : 0f;
+        long durationMs = (long)(fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.baseDurationMsForRank(rank) * (1f + durBonus));
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d pos = tc.getPosition();
+                org.joml.Vector3d dir = hr.getDirection();
+                org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                    pos.x + dir.x * 1.2,
+                    pos.y + 1.4,
+                    pos.z + dir.z * 1.2
+                );
+                fr.varyon.vrpg.classes.vaudou.VaudouTotemHelper.deploySlownessTotem(pos, durationMs);
+                final long fDurEntrave = durationMs;
+                final org.joml.Vector3d fSpawnPosEntrave = spawnPos, fDirEntrave = dir;
+                final com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fRefEntrave = entityRef;
+                final com.hypixel.hytale.server.core.universe.PlayerRef fPrEntrave = playerRef;
+                final com.hypixel.hytale.component.Store<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fStoreEntrave = store;
+                final com.hypixel.hytale.component.CommandBuffer<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fCbEntrave = commandBuffer;
+                fr.varyon.vrpg.classes.vaudou.VaudouTotemHelper.patchAndRun("Slowness_Totem", fDurEntrave,
+                    () -> spawnMagicProjectile("Vrpg_Totem_Throw", fSpawnPosEntrave, fDirEntrave, fRefEntrave, fPrEntrave, fStoreEntrave, fCbEntrave, 0f, 0f, null, 0f));
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, pos, null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill.SKILL_ID);
+        notifySkill(uuid, "Totem d'Entrave");
+        return true;
+    }
+
+    public boolean tryCastAttaquePerfide(@Nonnull UUID uuid,
+                                         @Nonnull PlayerRef playerRef,
+                                         @Nonnull Ref<EntityStore> entityRef,
+                                         @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isVaudou(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.cooldownMsForRank(rank))) return false;
+        float manaCost = fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 4.0);
+        if (targeted == null) return false;
+
+        try {
+            TransformComponent tc   = store.getComponent(entityRef, TransformComponent.getComponentType());
+            TransformComponent ttc  = store.getComponent(targeted, TransformComponent.getComponentType());
+            if (tc != null && ttc != null) {
+                float skillDmg = 50f * fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.damagePctForRank(rank);
+
+                org.joml.Vector3d playerPos = tc.getPosition();
+                org.joml.Vector3d targetPos = ttc.getPosition();
+                com.hypixel.hytale.server.core.modules.entity.component.HeadRotation targetHR =
+                    store.getComponent(targeted, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+                if (targetHR != null) {
+                    org.joml.Vector3d targetFacing = targetHR.getDirection();
+                    double dx = playerPos.x - targetPos.x;
+                    double dz = playerPos.z - targetPos.z;
+                    double dot = dx * targetFacing.x + dz * targetFacing.z;
+                    if (dot < 0) skillDmg *= (1f + fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.behindBonus());
+                }
+
+                int rituelRank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.VaudouPassifs.RITUEL_NODE);
+                if (rituelRank > 0 && vaudouState.isNpcCursed(targeted.getIndex())) {
+                    skillDmg *= (1f + fr.varyon.vrpg.classes.vaudou.VaudouPassifs.rituelBonusForRank(rituelRank));
+                }
+
+                float hpCostPct = fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.hpCostPctForRank(rank);
+                try {
+                    com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
+                        store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+                    if (sm != null) {
+                        int hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth();
+                        var hpStat = sm.get(hIdx);
+                        if (hpStat != null) sm.addStatValue(hIdx, -(hpStat.getMax() * hpCostPct));
+                    }
+                } catch (Exception ignored2) {}
+
+                final float finalDmg = skillDmg;
+                final Ref<EntityStore> skillTarget = targeted;
+                final Ref<EntityStore> skillCaster = entityRef;
+                final UUID fUuid = uuid;
+                com.hypixel.hytale.server.core.universe.world.World dmgWorld = null;
+                try { java.util.UUID wId = playerRef.getWorldUuid(); if (wId != null) dmgWorld = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wId); } catch (Exception ignored2) {}
+                if (dmgWorld != null) {
+                    final com.hypixel.hytale.server.core.universe.world.World fw = dmgWorld;
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "vaudou-perfide"); t.setDaemon(true); return t; })
+                        .schedule(() -> fw.execute(() -> {
+                            try {
+                                vaudouState.setPendingSkillDmg(fUuid, finalDmg);
+                                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                                    skillTarget, fw.getEntityStore().getStore(),
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(skillCaster),
+                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, finalDmg));
+                            } catch (Exception ignored3) { vaudouState.consumePendingSkillDmg(fUuid); }
+                        }), 50, java.util.concurrent.TimeUnit.MILLISECONDS);
+                }
+
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+                ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, targetPos, null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.vaudou.AttaquePerfideSkill.SKILL_ID);
+        notifySkill(uuid, "Attaque Perfide");
+        return true;
+    }
+
+    public boolean tryCastTotemVulnerabilite(@Nonnull UUID uuid,
+                                             @Nonnull PlayerRef playerRef,
+                                             @Nonnull Ref<EntityStore> entityRef,
+                                             @Nonnull Store<EntityStore> store,
+                                             @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isVaudou(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.cooldownMsForRank(rank))) return false;
+        float manaCost = fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        int ancrageRank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ANCRAGE_NODE);
+        float durBonus = ancrageRank > 0 ? fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ancrageTotemBonusForRank(ancrageRank) : 0f;
+        long durationMs = (long)(fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.baseDurationMsForRank(rank) * (1f + durBonus));
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d pos = tc.getPosition();
+                org.joml.Vector3d dir = hr.getDirection();
+                org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                    pos.x + dir.x * 1.2,
+                    pos.y + 1.4,
+                    pos.z + dir.z * 1.2
+                );
+                float mag = fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.damageTakenBonusForRank(rank);
+                fr.varyon.vrpg.classes.vaudou.VaudouTotemHelper.deployVulnerabilityTotem(pos, durationMs, mag);
+                final long fDurVuln = durationMs;
+                final org.joml.Vector3d fSpawnPosVuln = spawnPos, fDirVuln = dir;
+                final com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fRefVuln = entityRef;
+                final com.hypixel.hytale.server.core.universe.PlayerRef fPrVuln = playerRef;
+                final com.hypixel.hytale.component.Store<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fStoreVuln = store;
+                final com.hypixel.hytale.component.CommandBuffer<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fCbVuln = commandBuffer;
+                fr.varyon.vrpg.classes.vaudou.VaudouTotemHelper.patchAndRun("Vulnerability_Totem", fDurVuln,
+                    () -> spawnMagicProjectile("Vrpg_Totem_Vulnerabilite_Throw", fSpawnPosVuln, fDirVuln, fRefVuln, fPrVuln, fStoreVuln, fCbVuln, 0f, 0f, null, 0f));
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, pos, null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.SKILL_ID);
+        notifySkill(uuid, "Totem de Vulnérabilité");
+        return true;
+    }
+
+    public boolean tryCastExtractionAme(@Nonnull UUID uuid,
+                                        @Nonnull PlayerRef playerRef,
+                                        @Nonnull Ref<EntityStore> entityRef,
+                                        @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isVaudou(acc)) return false;
+        if (!isHoldingStaff(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.cooldownMsForRank(rank))) return false;
+        float manaCost = fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.manaCostForRank(rank);
+        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 4.0);
+        if (targeted == null) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                float skillDmg = 50f * fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.damagePctForRank(rank);
+
+                int rituelRank = acc.getTalentRank(PlayerClass.MAGE, fr.varyon.vrpg.classes.vaudou.VaudouPassifs.RITUEL_NODE);
+                if (rituelRank > 0 && vaudouState.isNpcCursed(targeted.getIndex())) {
+                    skillDmg *= (1f + fr.varyon.vrpg.classes.vaudou.VaudouPassifs.rituelBonusForRank(rituelRank));
+                }
+
+                final float healAmt = skillDmg * fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.lifestealPctForRank(rank);
+                final Ref<EntityStore> skillTarget = targeted;
+                final Ref<EntityStore> skillCaster = entityRef;
+                final UUID fUuid = uuid;
+                com.hypixel.hytale.server.core.universe.world.World dmgWorld = null;
+                try { java.util.UUID wId = playerRef.getWorldUuid(); if (wId != null) dmgWorld = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wId); } catch (Exception ignored2) {}
+                if (dmgWorld != null) {
+                    final com.hypixel.hytale.server.core.universe.world.World fw = dmgWorld;
+                    final float finalDmg = skillDmg;
+                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "vaudou-ame"); t.setDaemon(true); return t; })
+                        .schedule(() -> fw.execute(() -> {
+                            try {
+                                vaudouState.setPendingSkillDmg(fUuid, finalDmg);
+                                Store<EntityStore> liveStore = fw.getEntityStore().getStore();
+                                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                                    skillTarget, liveStore,
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(skillCaster),
+                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, finalDmg));
+                                com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap casterSm =
+                                    liveStore.getComponent(skillCaster, com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+                                if (casterSm != null) {
+                                    int hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth();
+                                    casterSm.addStatValue(hIdx, healAmt);
+                                }
+                            } catch (Exception ignored3) { vaudouState.consumePendingSkillDmg(fUuid); }
+                        }), 50, java.util.concurrent.TimeUnit.MILLISECONDS);
+                }
+
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillMana.consume(playerRef, manaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.SKILL_ID);
+        notifySkill(uuid, "Extraction d'Âme");
         return true;
     }
 

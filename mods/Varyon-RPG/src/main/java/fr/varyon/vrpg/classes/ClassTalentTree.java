@@ -177,6 +177,22 @@ public final class ClassTalentTree {
             new Node("Marque de Renaissance","Actif",  "La mort elle-même hésite devant le sceau de Gaïa.",                      "Protège la cible de la mort pendant une courte durée et lui octroie de la jauge spéciale.",  GGI + "Marque_De_Renaissance.png",      5),
         });
 
+        final String VI = "Classes_Icons/Voodoo/";
+        SPEC_TREES.put(PlayerSpecialization.VAUDOU, new Node[]{
+            new Node("Passage Éthéré",        "Actif",  "L'âme quitte le corps — et le retrouve de l'autre côté.",          "Se téléporte à la position symétrique de la cible par rapport à soi, face à elle.",  VI + "Passage_Ethere.png",           5),
+            new Node("Féticheur",             "Passif", "La mort dans les bras, l'expérience afflue.",                       "Gain d'expérience augmenté si la cible meurt à moins de 5 blocs.",                  VI + "Feticheur.png",                5),
+            new Node("Fléau Toxique",         "Actif",  "Un venin lent, mais inexorable.",                                  "Empoisonne la cible et réduit ses dégâts infligés.",                                 VI + "Fleau_Toxique.png",            5),
+            new Node("Totem d'Entrave",       "Actif",  "Le totem chuchote — et les jambes refusent d'avancer.",            "Déploie un totem qui ralentit les ennemis dans sa zone.",                            VI + "Totem_Entrave.png",            5),
+            new Node("Attaque Perfide",       "Actif",  "L'honnêteté est pour ceux qui perdent.",                           "Frappe de mêlée — bonus de 50 % si dans le dos de la cible.",                       VI + "Attaque_Perfide.png",          5),
+            new Node("Toxines",               "Passif", "Ses poisons résistent au temps mieux qu'à la chair.",              "Le poison dure plus longtemps.",                                                     VI + "Toxines.png",                  5),
+            new Node("Totem de Vulnérabilité","Actif",  "Sous l'influence du totem, chaque coup résonne plus fort.",        "Déploie un totem qui augmente les dégâts subis par les ennemis dans la zone.",      VI + "Totem_Vulnerabilite.png",      5),
+            new Node("Parasite Spirituel",    "Passif", "Les malédictions ne font pas que blesser — elles nourrissent.",    "Frapper une cible maudite restaure des PV.",                                         VI + "Parasite_Spirituel.png",       5),
+            new Node("Ancrage Rituel",        "Passif", "Le rituel gravé dans le sol tient plus longtemps.",                "Les totems restent actifs plus longtemps.",                                          VI + "Ancrage_Rituel.png",           5),
+            new Node("Rituel Interdit",       "Passif", "Les anciens avaient raison d'interdire cela.",                     "Inflige davantage de dégâts aux cibles affectées par une malédiction.",              VI + "Rituel_Interdit.png",          5),
+            new Node("Extraction d'Âme",     "Actif",  "Arracher un fragment d'âme — et s'en nourrir.",                   "Frappe de mêlée qui récupère une partie des dégâts infligés en points de vie.",     VI + "Extraction_Ame.png",           5),
+            new Node("Présence Oppressante",  "Passif", "Simplement être là suffit à briser la confiance de l'adversaire.", "Les ennemis proches infligent moins de dégâts.",                                     VI + "Presence_Oppressante.png",     5),
+        });
+
         final String AI = "Classes_Icons/Arcanist/";
         SPEC_TREES.put(PlayerSpecialization.ARCANISTE, new Node[]{
             new Node("Distorsion",          "Actif",  "La magie plie l'espace — et lui permet de disparaître.",              "Téléportation magique en arrière.",                                                         AI + "Distorsion.png",           5),

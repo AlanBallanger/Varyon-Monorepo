@@ -67,7 +67,7 @@ public final class ClassTalentsTab {
         ClassTalentTreeLogic.syncDisplayRanks(state, acc, activeClass, talentNodes.length);
 
         int effectiveSel = (state.selectedClassNode >= 0 && state.selectedClassNode < talentNodes.length)
-            ? state.selectedClassNode : 0;
+            ? state.selectedClassNode : -1;
         int effectiveHov = (state.hoveredClassNode >= 0 && state.hoveredClassNode < talentNodes.length)
             ? state.hoveredClassNode : -1;
 
@@ -84,7 +84,7 @@ public final class ClassTalentsTab {
         PlayerClass activeClass = acc != null ? acc.getActiveClass() : null;
 
         int effectiveSel = (state.selectedClassNode >= 0 && state.selectedClassNode < talentNodes.length)
-            ? state.selectedClassNode : 0;
+            ? state.selectedClassNode : -1;
         int effectiveHov = (state.hoveredClassNode >= 0 && state.hoveredClassNode < talentNodes.length)
             ? state.hoveredClassNode : -1;
 
@@ -92,7 +92,7 @@ public final class ClassTalentsTab {
             applyNodeChrome(cmd, state, i, i == effectiveSel, i == effectiveHov);
         }
 
-        int panelNode = effectiveHov >= 0 ? effectiveHov : effectiveSel;
+        int panelNode = effectiveHov >= 0 ? effectiveHov : (effectiveSel >= 0 ? effectiveSel : 0);
         ClassTalentTree.Node panelTalent = talentNodes[panelNode];
         int panelRank = state.pendingClassRanks != null && panelNode < state.pendingClassRanks.length
             ? state.pendingClassRanks[panelNode] : 0;
@@ -197,7 +197,7 @@ public final class ClassTalentsTab {
                                           PlayerClass activeClass,
                                           int effectiveSel,
                                           int effectiveHov) {
-        int panelNode = effectiveHov >= 0 ? effectiveHov : effectiveSel;
+        int panelNode = effectiveHov >= 0 ? effectiveHov : (effectiveSel >= 0 ? effectiveSel : 0);
         ClassTalentTree.Node panelTalent = talentNodes[panelNode];
         int panelRank = state.pendingClassRanks != null && panelNode < state.pendingClassRanks.length
             ? state.pendingClassRanks[panelNode] : 0;

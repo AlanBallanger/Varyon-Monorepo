@@ -11,7 +11,7 @@ public final class RpgClassUiState {
     public String skillFilter = "all";
     public String selectedSkillSlot = null;
     public final Map<String, String> skillSlotAssignments = new HashMap<>();
-    public int selectedClassNode = 0;
+    public int selectedClassNode = -1;
     public int hoveredClassNode = -1;
     public boolean classEditMode = false;
     public int skillPickerOffset = 0;

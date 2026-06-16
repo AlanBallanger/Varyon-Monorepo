@@ -108,7 +108,7 @@ public final class ClassKillXpSystem {
             if (npc == null) return;
 
             onKill(playerRef);
-            grantKillXp(playerRef, attackerRef, npc, store);
+            grantKillXp(playerRef, attackerRef, victimRef, npc, store);
             participantsTracker.markHandledByPrediction(victimRef, playerRef.getUuid());
         }
     }
@@ -145,7 +145,7 @@ public final class ClassKillXpSystem {
 
                 try {
                     onKill(playerRef);
-                    grantKillXp(playerRef, entry.playerRef(), npc, (Store<EntityStore>) store);
+                    grantKillXp(playerRef, entry.playerRef(), victimRef, npc, (Store<EntityStore>) store);
                 } catch (Exception e) {
                     LOGGER.atWarning().log("[ClassKillXp] XP error for %s: %s",
                         entry.playerUuid(), e.getMessage());
@@ -157,6 +157,12 @@ public final class ClassKillXpSystem {
     // XP bonus factors sourced from ExpertEnDuelSkill
 
     private void grantKillXp(@Nonnull PlayerRef playerRef, @Nonnull Ref<EntityStore> attackerRef,
+                             @Nonnull NPCEntity npc, @Nonnull Store<EntityStore> store) {
+        grantKillXp(playerRef, attackerRef, null, npc, store);
+    }
+
+    private void grantKillXp(@Nonnull PlayerRef playerRef, @Nonnull Ref<EntityStore> attackerRef,
+                             @Nullable Ref<EntityStore> victimRef,
                              @Nonnull NPCEntity npc, @Nonnull Store<EntityStore> store) {
         UUID uuid = playerRef.getUuid();
         ClassAccount acc = classManager.getOrLoad(uuid);
@@ -206,6 +212,17 @@ public final class ClassKillXpSystem {
                     double bonus = ExpertEnDuelSkill.xpBonusForRank(rank);
                     mult = 1.0 + bonus;
                     multReason = "ExpertEnDuel(rank=" + rank + ", hp=" + String.format("%.0f", hpPct * 100) + "%)=+" + String.format("%.0f", bonus * 100) + "%";
+                }
+            }
+        }
+        if (spec == PlayerSpecialization.VAUDOU) {
+            int feticheurRank = acc.getTalentRank(activeClass, fr.varyon.vrpg.classes.vaudou.VaudouPassifs.FETICHEUR_NODE);
+            if (feticheurRank > 0 && victimRef != null) {
+                double dist = getDistanceBetween(attackerRef, victimRef, store);
+                if (dist >= 0 && dist <= fr.varyon.vrpg.classes.vaudou.VaudouPassifs.FETICHEUR_RANGE) {
+                    double bonus = fr.varyon.vrpg.classes.vaudou.VaudouPassifs.feticheurXpBonusForRank(feticheurRank);
+                    mult = 1.0 + bonus;
+                    multReason = "Feticheur(dist=" + String.format("%.1f", dist) + ")=+" + String.format("%.0f", bonus * 100) + "%";
                 }
             }
         }
@@ -274,6 +291,21 @@ public final class ClassKillXpSystem {
         float max = hp.getMax();
         if (max <= 0f) return 0.0;
         return current / max;
+    }
+
+    private double getDistanceBetween(@Nonnull Ref<EntityStore> refA, @Nonnull Ref<EntityStore> refB,
+                                       @Nonnull Store<EntityStore> store) {
+        try {
+            com.hypixel.hytale.server.core.modules.entity.component.TransformComponent tcA =
+                store.getComponent(refA, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.TransformComponent tcB =
+                store.getComponent(refB, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+            if (tcA == null || tcB == null) return -1;
+            org.joml.Vector3d pa = tcA.getPosition();
+            org.joml.Vector3d pb = tcB.getPosition();
+            double dx = pa.x - pb.x, dy = pa.y - pb.y, dz = pa.z - pb.z;
+            return Math.sqrt(dx * dx + dy * dy + dz * dz);
+        } catch (Exception e) { return -1; }
     }
 
     private boolean checkAntiFarm(@Nonnull UUID playerId, @Nonnull String mobKey) {

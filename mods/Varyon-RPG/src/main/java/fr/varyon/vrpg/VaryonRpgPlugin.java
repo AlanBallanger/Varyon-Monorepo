@@ -150,6 +150,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaOutgoingDamageSystem gardienDeGaiaOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaIncomingDamageSystem gardienDeGaiaIncomingDamageSystem;
     private fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaRegenTickSystem gardienDeGaiaRegenTickSystem;
+    private fr.varyon.vrpg.classes.vaudou.VaudouState vaudouState;
+    private fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem vaudouPoisonSystem;
+    private fr.varyon.vrpg.classes.vaudou.VaudouOutgoingDamageSystem vaudouOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.vaudou.VaudouIncomingDamageSystem vaudouIncomingDamageSystem;
     private OmbreState ombreState;
     private OmbrePoisonSystem ombrePoisonSystem;
     private OmbreSpeedSystem ombreSpeedSystem;
@@ -286,7 +290,13 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.gardienDeGaiaOutgoingDamageSystem = new fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaOutgoingDamageSystem(classManager, gardienDeGaiaState);
             this.gardienDeGaiaIncomingDamageSystem = new fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaIncomingDamageSystem(classManager, gardienDeGaiaState);
             this.gardienDeGaiaRegenTickSystem = new fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaRegenTickSystem(classManager, gardienDeGaiaState);
-            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState, gardienDeGaiaState);
+            this.vaudouState = new fr.varyon.vrpg.classes.vaudou.VaudouState();
+            this.vaudouPoisonSystem = new fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem();
+            this.vaudouOutgoingDamageSystem = new fr.varyon.vrpg.classes.vaudou.VaudouOutgoingDamageSystem(classManager, vaudouState);
+            this.vaudouOutgoingDamageSystem.setVaudouPoisonSystem(vaudouPoisonSystem);
+            this.vaudouIncomingDamageSystem = new fr.varyon.vrpg.classes.vaudou.VaudouIncomingDamageSystem(classManager);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState, gardienDeGaiaState, vaudouState);
+            this.classSkillService.setVaudouPoisonSystem(vaudouPoisonSystem);
             this.classSkillKeyFilter = new ClassSkillKeyFilter(classManager, rempartState);
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
@@ -528,6 +538,9 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 }
                 if (ref != null && ombreSpeedSystem != null) {
                     ombreSpeedSystem.removePlayer(ref.getUuid());
+                }
+                if (ref != null && vaudouState != null) {
+                    vaudouState.cleanup(ref.getUuid());
                 }
                 if (ref != null && classKillXpSystem != null) {
                     classKillXpSystem.cleanup(ref.getUuid());
@@ -969,6 +982,24 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             }
         }
 
+        if (vaudouState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(vaudouOutgoingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VaudouOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(vaudouIncomingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VaudouIncomingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(vaudouPoisonSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VaudouPoisonSystem");
+            }
+        }
+
         if (classManager != null) {
             try {
                 getEntityStoreRegistry().registerSystem(new SpecWeaponMasteryDamageSystem(classManager));
@@ -1054,6 +1085,15 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             burnBuilder = burnBuilder.getClass().getMethod("particleFont", String.class).invoke(burnBuilder, "FloatingDamage_CRITICAL");
             burnBuilder = burnBuilder.getClass().getMethod("particleIcon", String.class).invoke(burnBuilder, "FloatingDamage_Icon_Fire");
             burnBuilder.getClass().getMethod("register").invoke(burnBuilder);
+
+            Object shadowBuilder = kindMethod.invoke(null, "SHADOW");
+            shadowBuilder = shadowBuilder.getClass().getMethod("particleFont", String.class).invoke(shadowBuilder, "FloatingDamage_FLAT");
+            shadowBuilder.getClass().getMethod("register").invoke(shadowBuilder);
+
+            Object shadowCritBuilder = kindMethod.invoke(null, "SHADOW_CRITICAL");
+            shadowCritBuilder = shadowCritBuilder.getClass().getMethod("particleFont", String.class).invoke(shadowCritBuilder, "FloatingDamage_CRITICAL");
+            shadowCritBuilder = shadowCritBuilder.getClass().getMethod("particleIcon", String.class).invoke(shadowCritBuilder, "FloatingDamage_Icon_Critical");
+            shadowCritBuilder.getClass().getMethod("register").invoke(shadowCritBuilder);
         } catch (Exception ignored) {}
     }
 }

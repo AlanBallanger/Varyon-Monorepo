@@ -60,41 +60,39 @@ public final class GardienDeGaiaOutgoingDamageSystem extends DamageEventSystem {
             Ref<EntityStore> attackerRef = entitySource.getRef();
             if (attackerRef == null || !attackerRef.isValid()) return;
 
-            // Dégâts du tréant : multiplier par le dmgFactor calculé au spawn
-            float treantDmg = state.getTreantDmgFactorForRef(attackerRef);
-            if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
-                LOG.atInfo().log(String.format("[TreantLookup] attackerIdx=%d treantDmg=%.2f", attackerRef.getIndex(), treantDmg));
-            }
-            if (treantDmg != 1f && damage.getAmount() > 0f) {
-                float baseDmg = damage.getAmount();
-                float finalDmg = baseDmg * treantDmg;
-                damage.setAmount(finalDmg);
-                if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
-                    LOG.atInfo().log(String.format("[TreantHit] base=%.1f factor=%.2f final=%.1f", baseDmg, treantDmg, finalDmg));
-                fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
-                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, chunk.getReferenceTo(index), finalDmg, "NATURE");
+            // Dégâts du tréant — seulement si l'attaquant est un tréant enregistré
+            if (state.isKnownTreantRef(attackerRef)) {
+                float treantDmg = state.getTreantDmgFactorForRef(attackerRef);
+                if (damage.getAmount() > 0f) {
+                    float baseDmg = damage.getAmount();
+                    float finalDmg = baseDmg * treantDmg;
+                    damage.setAmount(finalDmg);
+                    if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
+                        LOG.atInfo().log(String.format("[TreantHit] base=%.1f factor=%.2f final=%.1f", baseDmg, treantDmg, finalDmg));
+                    fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
+                    fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, chunk.getReferenceTo(index), finalDmg, "NATURE");
 
-                // Lien Spirituel : une part des dégâts du tréant soigne son propriétaire
-                UUID ownerUuid = state.getOwnerForTreantRef(attackerRef);
-                if (ownerUuid != null) {
-                    try {
-                        ClassAccount ownerAcc = classManager.getOrLoad(ownerUuid);
-                        int lienRank = ownerAcc.getTalentRank(PlayerClass.MAGE, GardienDeGaiaPassifs.LIEN_NODE);
-                        if (lienRank > 0) {
-                            float healAmt = finalDmg * GardienDeGaiaPassifs.lienRatioForRank(lienRank);
-                            com.hypixel.hytale.server.core.universe.PlayerRef ownerRef =
-                                com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(ownerUuid);
-                            if (ownerRef != null) {
-                                int hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth();
-                                com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
-                                    ownerRef.getComponent(com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
-                                if (sm != null) {
-                                    var hp = sm.get(hIdx);
-                                    if (hp != null) sm.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + healAmt));
+                    UUID ownerUuid = state.getOwnerForTreantRef(attackerRef);
+                    if (ownerUuid != null) {
+                        try {
+                            ClassAccount ownerAcc = classManager.getOrLoad(ownerUuid);
+                            int lienRank = ownerAcc.getTalentRank(PlayerClass.MAGE, GardienDeGaiaPassifs.LIEN_NODE);
+                            if (lienRank > 0) {
+                                float healAmt = finalDmg * GardienDeGaiaPassifs.lienRatioForRank(lienRank);
+                                com.hypixel.hytale.server.core.universe.PlayerRef ownerRef =
+                                    com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(ownerUuid);
+                                if (ownerRef != null) {
+                                    int hIdx = com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes.getHealth();
+                                    com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap sm =
+                                        ownerRef.getComponent(com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap.getComponentType());
+                                    if (sm != null) {
+                                        var hp = sm.get(hIdx);
+                                        if (hp != null) sm.setStatValue(hIdx, Math.min(hp.getMax(), hp.get() + healAmt));
+                                    }
                                 }
                             }
-                        }
-                    } catch (Exception ignored2) {}
+                        } catch (Exception ignored2) {}
+                    }
                 }
                 return;
             }

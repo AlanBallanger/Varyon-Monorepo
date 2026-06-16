@@ -120,13 +120,18 @@ public final class GardienDeGaiaState {
         treantRef.put(playerUuid, entityRef);
     }
 
+    public boolean isKnownTreantRef(
+            @Nonnull com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> attackerRef) {
+        for (var stored : treantRef.values()) {
+            if (stored.getIndex() == attackerRef.getIndex()) return true;
+        }
+        return false;
+    }
+
     public float getTreantDmgFactorForRef(
             @Nonnull com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> attackerRef) {
         for (var entry : treantRef.entrySet()) {
             com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> stored = entry.getValue();
-            com.hypixel.hytale.logger.HytaleLogger.getLogger().getSubLogger("TreantState")
-                .atInfo().log(String.format("[TreantRefCheck] stored idx=%d attacker idx=%d match=%b",
-                    stored.getIndex(), attackerRef.getIndex(), stored.getIndex() == attackerRef.getIndex()));
             if (stored == attackerRef || stored.getIndex() == attackerRef.getIndex()) {
                 return treantDmgFactor.getOrDefault(entry.getKey(), 1f);
             }
