@@ -67,6 +67,9 @@ public final class ClassSkillService {
     private final fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienState;
     private final fr.varyon.vrpg.classes.vaudou.VaudouState vaudouState;
     private fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem vaudouPoisonSystem;
+    private final fr.varyon.vrpg.classes.rodeur.RodeurState rodeurState;
+    private final fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
+    private fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem rodeurPoisonSystem;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
     private final Map<String, SkillCaster> casters = new HashMap<>();
 
@@ -79,7 +82,9 @@ public final class ClassSkillService {
                              @Nonnull fr.varyon.vrpg.classes.bagarreur.BagarreurState bagarreurState,
                              @Nonnull fr.varyon.vrpg.classes.arcaniste.ArcanistState arcanistState,
                              @Nonnull fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienState,
-                             @Nonnull fr.varyon.vrpg.classes.vaudou.VaudouState vaudouState) {
+                             @Nonnull fr.varyon.vrpg.classes.vaudou.VaudouState vaudouState,
+                             @Nonnull fr.varyon.vrpg.classes.rodeur.RodeurState rodeurState,
+                             @Nonnull fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState) {
         this.classManager = classManager;
         this.duellisteState = duellisteState;
         this.ombreState = ombreState;
@@ -90,11 +95,21 @@ public final class ClassSkillService {
         this.arcanistState = arcanistState;
         this.gardienState = gardienState;
         this.vaudouState = vaudouState;
+        this.rodeurState = rodeurState;
+        this.arbaState = arbaState;
         registerCasters();
     }
 
     public void setVaudouPoisonSystem(@Nonnull fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem sys) {
         this.vaudouPoisonSystem = sys;
+    }
+
+    public void setRodeurPoisonSystem(@Nonnull fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem sys) {
+        this.rodeurPoisonSystem = sys;
+    }
+
+    public ClassSkillCooldowns getCooldowns() {
+        return cooldowns;
     }
 
     private void registerCasters() {
@@ -212,6 +227,32 @@ public final class ClassSkillService {
             (uuid, pr, er, st, cb) -> tryCastSurcharge(uuid, pr, er, st));
         casters.put(fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastSalveDeGivre(uuid, pr, er, st, cb));
+        // Rôdeur
+        casters.put(fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastReculStrategique(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastPluieDesFleches(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastMarqueDuChasseur(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastFlecheDeRecul(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastFlecheEntravante(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.rodeur.RafaleSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastRafale(uuid, pr, er, st));
+        // Arbalétrier
+        casters.put(fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastReculTactique(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastCarreauLourd(uuid, pr));
+        casters.put(fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastCarreauExplosif(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastCarreauTranspercant(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastCoupDeBotte(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastMiseEnJou(uuid, pr));
     }
 
     public boolean tryCast(@Nonnull String skillId,
@@ -964,6 +1005,50 @@ public final class ClassSkillService {
         }
     }
 
+    @Nonnull
+    private java.util.List<Ref<EntityStore>> findPiercingNpcRefs(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            double maxRange,
+            double hitRadius,
+            int maxCount) {
+        java.util.List<Ref<EntityStore>> results = new java.util.ArrayList<>();
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc == null) return results;
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (hr == null) return results;
+            org.joml.Vector3d origin = new org.joml.Vector3d(tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
+            org.joml.Vector3d dir = new org.joml.Vector3d(hr.getDirection()).normalize();
+            long casterIdx = entityRef.getIndex();
+            java.util.List<long[]> hits = new java.util.ArrayList<>();
+            double searchR = maxRange + hitRadius;
+            org.joml.Vector3d rayCenter = new org.joml.Vector3d(origin).add(new org.joml.Vector3d(dir).mul(maxRange * 0.5));
+            com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                store, rayCenter, searchR, targetRef -> {
+                    try {
+                        if (targetRef.getIndex() == casterIdx) return;
+                        if (store.getComponent(targetRef, com.hypixel.hytale.server.npc.entities.NPCEntity.getComponentType()) == null) return;
+                        TransformComponent ttc = store.getComponent(targetRef, TransformComponent.getComponentType());
+                        if (ttc == null) return;
+                        org.joml.Vector3d tp = new org.joml.Vector3d(ttc.getPosition().x, ttc.getPosition().y + 1.0, ttc.getPosition().z);
+                        org.joml.Vector3d toTarget = new org.joml.Vector3d(tp).sub(origin);
+                        double along = toTarget.dot(dir);
+                        if (along < 0 || along > maxRange) return;
+                        org.joml.Vector3d proj = new org.joml.Vector3d(dir).mul(along);
+                        double perpDist = new org.joml.Vector3d(toTarget).sub(proj).length();
+                        if (perpDist > hitRadius) return;
+                        hits.add(new long[]{targetRef.getIndex(), Double.doubleToLongBits(along)});
+                        results.add(targetRef);
+                    } catch (Exception ignored) {}
+                }, t2 -> t2.getIndex() != casterIdx);
+            hits.sort((a, b) -> Double.compare(Double.longBitsToDouble(a[1]), Double.longBitsToDouble(b[1])));
+            if (results.size() > maxCount) results.subList(maxCount, results.size()).clear();
+        } catch (Exception ignored) {}
+        return results;
+    }
+
     @Nullable
     private PlayerRef findTargetedAllyRef(
             @Nonnull PlayerRef casterRef,
@@ -1479,6 +1564,32 @@ public final class ClassSkillService {
             (acc, cls) -> fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill.TALENT_NODE_ID)));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.SKILL_ID,
             (acc, cls) -> fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.vaudou.ExtractionAmeSkill.TALENT_NODE_ID)));
+        // Rôdeur
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.rodeur.RafaleSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.rodeur.RafaleSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.rodeur.RafaleSkill.TALENT_NODE_ID)));
+        // Arbalétrier
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.TALENT_NODE_ID)));
     }
 
     private static long echoTemporelCd(@Nonnull ClassAccount acc, @Nonnull PlayerClass cls,
@@ -3983,6 +4094,676 @@ public final class ClassSkillService {
         return true;
     }
 
+    // ========== RÔDEUR ==========
+
+    private boolean isRodeur(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.TIREUR
+            && acc.getActiveSpec(PlayerClass.TIREUR) == PlayerSpecialization.RODEUR;
+    }
+
+    private boolean isArbaletrier(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.TIREUR
+            && acc.getActiveSpec(PlayerClass.TIREUR) == PlayerSpecialization.ARBALETRIER;
+    }
+
+    private boolean isHoldingDistance(@Nonnull PlayerRef playerRef) {
+        return fr.varyon.vrpg.classes.WeaponCategory.fromItemId(getHeldItemId(playerRef))
+            == fr.varyon.vrpg.classes.WeaponCategory.DISTANCE;
+    }
+
+    public boolean tryCastReculStrategique(@Nonnull UUID uuid,
+                                           @Nonnull PlayerRef playerRef,
+                                           @Nonnull Ref<EntityStore> entityRef,
+                                           @Nonnull Store<EntityStore> store,
+                                           @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRodeur(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = hr.getDirection();
+                double dx = dir.x, dz = dir.z;
+                double len = Math.sqrt(dx*dx + dz*dz);
+                if (len > 1e-6) { dx /= len; dz /= len; }
+
+                double dist = fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.dashDistanceForRank(rank);
+                org.joml.Vector3d newPos = new org.joml.Vector3d(
+                    tc.getPosition().x - dx * dist,
+                    tc.getPosition().y,
+                    tc.getPosition().z - dz * dist);
+                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
+                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(
+                    curRot.pitch(), curRot.yaw(), curRot.roll());
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(newPos, keepRot);
+                tele.withoutVelocityReset();
+                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(-dx * 30.0, 0.2, -dz * 30.0);
+                    vel.setClient(dashVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_PasDeLOmbre_Dash", playerRef, tc.getPosition(), commandBuffer);
+            }
+        } catch (Exception ignored) {}
+
+        long speedMs = fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.speedDurationMsForRank(rank);
+        float speedBonus = fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.speedBonusForRank(rank);
+        rodeurState.startSpeedBoost(uuid, speedBonus, speedMs);
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.SKILL_ID);
+        notifySkill(uuid, "Recul Stratégique");
+        return true;
+    }
+
+    public boolean tryCastPluieDesFleches(@Nonnull UUID uuid,
+                                          @Nonnull PlayerRef playerRef,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRodeur(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) {
+                float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float dmgPerArrow = weaponDmg * fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.damagePctForRank(rank);
+                if (dmgPerArrow < 1f) dmgPerArrow = 1f;
+                int arrows = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.arrowCountForRank(rank);
+                long durationMs = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.durationMs();
+                double radius = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.radius();
+                com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrPluie =
+                    store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+                org.joml.Vector3d dirPluie = hrPluie != null ? hrPluie.getDirection() : new org.joml.Vector3d(0, 0, 1);
+                org.joml.Vector3d pluieBase = tc.getPosition();
+                org.joml.Vector3d center;
+                {
+                    Ref<EntityStore> pluieTarget = findTargetedNpcRef(playerRef, entityRef, store, 20.0);
+                    org.joml.Vector3d aimed = null;
+                    if (pluieTarget != null) {
+                        TransformComponent tcPluieTarget = store.getComponent(pluieTarget, TransformComponent.getComponentType());
+                        if (tcPluieTarget != null) {
+                            org.joml.Vector3d tp = tcPluieTarget.getPosition();
+                            org.joml.Vector3d toTarget = new org.joml.Vector3d(tp).sub(pluieBase).normalize();
+                            double cosAngle = toTarget.dot(dirPluie);
+                            if (cosAngle > Math.cos(Math.toRadians(15.0))) aimed = new org.joml.Vector3d(tp);
+                        }
+                    }
+                    if (aimed == null) {
+                        double eyeY = pluieBase.y + 1.6;
+                        double t;
+                        if (dirPluie.y < -1e-4) {
+                            t = Math.min(20.0 / Math.max(1e-6, Math.sqrt(dirPluie.x*dirPluie.x + dirPluie.z*dirPluie.z)),
+                                         -eyeY / dirPluie.y);
+                        } else {
+                            t = 20.0 / Math.max(1e-6, Math.sqrt(dirPluie.x*dirPluie.x + dirPluie.z*dirPluie.z));
+                        }
+                        aimed = new org.joml.Vector3d(
+                            pluieBase.x + dirPluie.x * t,
+                            pluieBase.y,
+                            pluieBase.z + dirPluie.z * t);
+                    }
+                    center = aimed;
+                }
+
+                com.hypixel.hytale.server.core.universe.world.World world = null;
+                try {
+                    java.util.UUID wUuid = playerRef.getWorldUuid();
+                    if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+                } catch (Exception ignored2) {}
+                ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, tc.getPosition(), null);
+                if (world != null) {
+                    final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                    final Ref<EntityStore> fEntityRef = entityRef;
+                    final float fDmg = dmgPerArrow;
+                    final int fArrows = arrows;
+                    final double fRadius = radius;
+                    final org.joml.Vector3d fCenter = center;
+                    long tickInterval = durationMs / Math.max(1, fArrows - 1);
+                    java.util.concurrent.ScheduledExecutorService exec =
+                        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                            Thread t = new Thread(r, "pluie-fleches"); t.setDaemon(true); return t;
+                        });
+                    int[] ticks = {0};
+                    exec.scheduleAtFixedRate(() -> {
+                        try {
+                            if (ticks[0] >= fArrows) { exec.shutdown(); return; }
+                            ticks[0]++;
+                            double rndX = fCenter.x + (Math.random() * 2 - 1) * 1.0;
+                            double rndZ = fCenter.z + (Math.random() * 2 - 1) * 1.0;
+                            org.joml.Vector3d spawnAbove = new org.joml.Vector3d(rndX, fCenter.y + 10.0, rndZ);
+                            org.joml.Vector3d landPos    = new org.joml.Vector3d(rndX, fCenter.y,        rndZ);
+                            spawnProjectileToward("Vrpg_Fleche_Pluie", spawnAbove, landPos, fEntityRef, playerRef, null);
+                            fw.execute(() -> {
+                                try {
+                                    Store<EntityStore> liveStore = fw.getEntityStore().getStore();
+                                    damageNearby(landPos, 1.5f, fEntityRef, liveStore, fDmg,
+                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL);
+                                    ClassSkillSounds.playSkillSound("SFX_Arrow_Fire_Miss", playerRef, landPos, null);
+                                } catch (Exception ignored3) {}
+                            });
+                        } catch (Exception ignored4) { exec.shutdown(); }
+                    }, 0L, tickInterval, java.util.concurrent.TimeUnit.MILLISECONDS);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.SKILL_ID);
+        notifySkill(uuid, "Pluie de Flèches");
+        return true;
+    }
+
+    public boolean tryCastMarqueDuChasseur(@Nonnull UUID uuid,
+                                           @Nonnull PlayerRef playerRef,
+                                           @Nonnull Ref<EntityStore> entityRef,
+                                           @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRodeur(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        long durationMs = fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.durationMsForRank(rank);
+        int maxConsumes = fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.maxConsumesForRank(rank);
+        try {
+            TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tcCaster == null) return false;
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrMarque =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            org.joml.Vector3d dirMarque = hrMarque != null ? hrMarque.getDirection() : new org.joml.Vector3d(0, 0, 1);
+            org.joml.Vector3d casterPos = tcCaster.getPosition();
+            org.joml.Vector3d aimFar = new org.joml.Vector3d(
+                casterPos.x + dirMarque.x * 20.0,
+                casterPos.y + dirMarque.y * 20.0,
+                casterPos.z + dirMarque.z * 20.0);
+            rodeurState.setPendingMarquage(uuid, rank, durationMs, maxConsumes);
+            spawnProjectileToward("Vrpg_Fleche_Marquage", casterPos, aimFar, entityRef, playerRef, null);
+            ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPos, null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.SKILL_ID);
+        notifySkill(uuid, "Marque du Chasseur");
+        return true;
+    }
+
+    public boolean tryCastFlecheDeRecul(@Nonnull UUID uuid,
+                                        @Nonnull PlayerRef playerRef,
+                                        @Nonnull Ref<EntityStore> entityRef,
+                                        @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRodeur(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            float dmg = weaponDmg * fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.damagePctForRank(rank);
+            if (dmg < 1f) dmg = 1f;
+            double kb = fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.knockbackForRank(rank);
+
+            TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tcCaster == null) return false;
+
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrRecul =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            org.joml.Vector3d dirRecul = hrRecul != null ? hrRecul.getDirection() : new org.joml.Vector3d(0, 0, 1);
+            org.joml.Vector3d casterPos = tcCaster.getPosition();
+            org.joml.Vector3d aimFar = new org.joml.Vector3d(
+                casterPos.x + dirRecul.x * 20.0,
+                casterPos.y + dirRecul.y * 20.0,
+                casterPos.z + dirRecul.z * 20.0);
+            rodeurState.setPendingArrow(uuid, fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_RECUL, dmg, kb, 0L);
+            spawnProjectileToward("Vrpg_Fleche_Recul", casterPos, aimFar, entityRef, playerRef, null);
+            ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPos, null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.SKILL_ID);
+        notifySkill(uuid, "Flèche de Recul");
+        return true;
+    }
+
+    public boolean tryCastFlecheEntravante(@Nonnull UUID uuid,
+                                           @Nonnull PlayerRef playerRef,
+                                           @Nonnull Ref<EntityStore> entityRef,
+                                           @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRodeur(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            float dmg = weaponDmg * fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.damagePctForRank(rank);
+            if (dmg < 1f) dmg = 1f;
+            long rootMs = fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.rootMsForRank(rank);
+
+            TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tcCaster == null) return false;
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrEnt =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            org.joml.Vector3d dirEnt = hrEnt != null ? hrEnt.getDirection() : new org.joml.Vector3d(0, 0, 1);
+            org.joml.Vector3d casterPosEnt = tcCaster.getPosition();
+            org.joml.Vector3d aimFarEnt = new org.joml.Vector3d(
+                casterPosEnt.x + dirEnt.x * 20.0,
+                casterPosEnt.y + dirEnt.y * 20.0,
+                casterPosEnt.z + dirEnt.z * 20.0);
+            rodeurState.setPendingArrow(uuid, fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_ENTRAVANTE, dmg, 0.0, rootMs);
+            spawnProjectileToward("Vrpg_Fleche_Recul", casterPosEnt, aimFarEnt, entityRef, playerRef, null);
+            ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPosEnt, null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID);
+        notifySkill(uuid, "Flèche Entravante");
+        return true;
+    }
+
+    public boolean tryCastRafale(@Nonnull UUID uuid,
+                                 @Nonnull PlayerRef playerRef,
+                                 @Nonnull Ref<EntityStore> entityRef,
+                                 @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isRodeur(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.RafaleSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.rodeur.RafaleSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.rodeur.RafaleSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.rodeur.RafaleSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            float dmgPerArrow = weaponDmg * fr.varyon.vrpg.classes.rodeur.RafaleSkill.damagePctForRank(rank);
+            if (dmgPerArrow < 1f) dmgPerArrow = 1f;
+            int arrowCount = fr.varyon.vrpg.classes.rodeur.RafaleSkill.arrowCountForRank(rank);
+            long delayMs = fr.varyon.vrpg.classes.rodeur.RafaleSkill.delayMsBetween(rank);
+
+            TransformComponent tcRafale = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tcRafale == null) return false;
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrRafale =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            org.joml.Vector3d dirRafale = hrRafale != null ? hrRafale.getDirection() : new org.joml.Vector3d(0, 0, 1);
+            org.joml.Vector3d casterPosRafale = tcRafale.getPosition();
+            org.joml.Vector3d aimFarRafale = new org.joml.Vector3d(
+                casterPosRafale.x + dirRafale.x * 25.0,
+                casterPosRafale.y + dirRafale.y * 25.0,
+                casterPosRafale.z + dirRafale.z * 25.0);
+
+            ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPosRafale, null);
+
+            final Ref<EntityStore> fEntityRef = entityRef;
+            final float fDmg = dmgPerArrow;
+            final int fCount = arrowCount;
+            java.util.concurrent.ScheduledExecutorService rafaleExec =
+                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                    Thread t = new Thread(r, "rafale-arrow"); t.setDaemon(true); return t;
+                });
+            int[] shots = {0};
+            rafaleExec.scheduleAtFixedRate(() -> {
+                try {
+                    if (shots[0] >= fCount) { rafaleExec.shutdown(); return; }
+                    shots[0]++;
+                    rodeurState.setPendingArrow(uuid, fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_RAFALE, fDmg, 0.0, 0L);
+                    spawnProjectileToward("Vrpg_Fleche_Recul", casterPosRafale, aimFarRafale, fEntityRef, playerRef, null);
+                } catch (Exception ignored4) { rafaleExec.shutdown(); }
+            }, 0L, delayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rodeur.RafaleSkill.SKILL_ID);
+        notifySkill(uuid, "Rafale");
+        return true;
+    }
+
+    // ========== ARBALÉTRIER ==========
+
+    public boolean tryCastReculTactique(@Nonnull UUID uuid,
+                                        @Nonnull PlayerRef playerRef,
+                                        @Nonnull Ref<EntityStore> entityRef,
+                                        @Nonnull Store<EntityStore> store,
+                                        @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isArbaletrier(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = hr.getDirection();
+                double dx = dir.x, dz = dir.z;
+                double len = Math.sqrt(dx*dx + dz*dz);
+                if (len > 1e-6) { dx /= len; dz /= len; }
+
+                double dist = fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.dashDistanceForRank(rank);
+                org.joml.Vector3d newPos = new org.joml.Vector3d(
+                    tc.getPosition().x - dx * dist,
+                    tc.getPosition().y,
+                    tc.getPosition().z - dz * dist);
+                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
+                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(
+                    curRot.pitch(), curRot.yaw(), curRot.roll());
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(newPos, keepRot);
+                tele.withoutVelocityReset();
+                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(-dx * 30.0, 0.2, -dz * 30.0);
+                    vel.setClient(dashVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_PasDeLOmbre_Dash", playerRef, tc.getPosition(), commandBuffer);
+            }
+        } catch (Exception ignored) {}
+
+        float dmgBonus = fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.damageBonusForRank(rank);
+        arbaState.armReculBonus(uuid, dmgBonus, fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.armedWindowMs());
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.SKILL_ID);
+        notifySkill(uuid, "Recul Tactique");
+        return true;
+    }
+
+    public boolean tryCastCarreauLourd(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isArbaletrier(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        arbaState.armCarreauLourd(uuid, rank, fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.armedWindowMs());
+        try {
+            ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, new org.joml.Vector3d(), null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.SKILL_ID);
+        notifySkill(uuid, "Carreau Lourd");
+        return true;
+    }
+
+    public boolean tryCastCarreauExplosif(@Nonnull UUID uuid,
+                                          @Nonnull PlayerRef playerRef,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isArbaletrier(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 25.0);
+        if (targeted == null) return false;
+
+        try {
+            TransformComponent tcTarget = store.getComponent(targeted, TransformComponent.getComponentType());
+            if (tcTarget != null) {
+                float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+                float dmg = weaponDmg * fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.damagePctForRank(rank);
+                if (dmg < 1f) dmg = 1f;
+                double radius = fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.radius();
+                damageNearby(tcTarget.getPosition(), (float) radius, entityRef, store, dmg,
+                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL);
+                ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, new org.joml.Vector3d(), null);
+                ClassSkillSounds.playSkillSound("SFX_Arrow_FullCharge_Hit", playerRef, tcTarget.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.SKILL_ID);
+        notifySkill(uuid, "Carreau Explosif");
+        return true;
+    }
+
+    public boolean tryCastCarreauTranspercant(@Nonnull UUID uuid,
+                                              @Nonnull PlayerRef playerRef,
+                                              @Nonnull Ref<EntityStore> entityRef,
+                                              @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isArbaletrier(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        int pierceCount = fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.pierceCountForRank(rank);
+        java.util.List<Ref<EntityStore>> targets = findPiercingNpcRefs(entityRef, store, 25.0, 1.2, pierceCount);
+        if (targets.isEmpty()) return false;
+
+        try {
+            float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            float dmg = weaponDmg * fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.damagePctForRank(rank);
+            if (dmg < 1f) dmg = 1f;
+            float slowFactor = fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.slowFactorForRank(rank);
+            long slowMs = fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.slowMsForRank(rank);
+
+            com.hypixel.hytale.server.core.universe.world.World world = null;
+            try {
+                java.util.UUID wUuid = playerRef.getWorldUuid();
+                if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+            } catch (Exception ignored2) {}
+
+            int slowEffIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex("Vrpg_Frost_Slow");
+            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect slowEffect = slowEffIdx >= 0
+                ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(slowEffIdx) : null;
+
+            for (Ref<EntityStore> targeted : targets) {
+                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+
+                // entity effect slow visuel
+                if (slowEffect != null) {
+                    try {
+                        com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                            store.getComponent(targeted, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                        if (ec != null) ec.addEffect(targeted, slowEffect, slowMs / 1000f,
+                            com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+                    } catch (Exception ignored2b) {}
+                }
+
+                TransformComponent tcHit = store.getComponent(targeted, TransformComponent.getComponentType());
+                if (tcHit != null)
+                    ClassSkillSounds.playSkillSound("SFX_Arrow_FullCharge_Hit", playerRef, tcHit.getPosition(), null);
+
+                if (world != null && slowFactor > 0f) {
+                    final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                    final Ref<EntityStore> fTarget = targeted;
+                    final float fSlow = slowFactor;
+                    fw.execute(() -> {
+                        try {
+                            Store<EntityStore> liveStore = fw.getEntityStore().getStore();
+                            com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                                liveStore.getComponent(fTarget, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                            if (vel != null) {
+                                org.joml.Vector3d cur = vel.getVelocity();
+                                if (cur != null) {
+                                    org.joml.Vector3d slowed = new org.joml.Vector3d(cur.x * (1 - fSlow), cur.y, cur.z * (1 - fSlow));
+                                    vel.setClient(slowed);
+                                    vel.getInstructions().clear();
+                                    vel.addInstruction(slowed, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                                }
+                            }
+                        } catch (Exception ignored3) {}
+                    });
+                }
+            }
+            ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, new org.joml.Vector3d(), null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.SKILL_ID);
+        notifySkill(uuid, "Carreau Transpercant");
+        return true;
+    }
+
+    public boolean tryCastCoupDeBotte(@Nonnull UUID uuid,
+                                      @Nonnull PlayerRef playerRef,
+                                      @Nonnull Ref<EntityStore> entityRef,
+                                      @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isArbaletrier(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 3.0);
+        if (targeted == null) return false;
+
+        try {
+            float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
+            float dmg = weaponDmg * fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.damagePctForRank(rank);
+            if (dmg < 1f) dmg = 1f;
+            double kb = fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.knockbackForRank(rank);
+
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+
+            TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
+            TransformComponent tcTarget = store.getComponent(targeted, TransformComponent.getComponentType());
+            if (tcCaster != null && tcTarget != null) {
+                org.joml.Vector3d diff = new org.joml.Vector3d(tcTarget.getPosition()).sub(tcCaster.getPosition());
+                diff.y = 0;
+                double len = diff.length();
+                if (len > 1e-6) diff.mul(1.0 / len);
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    store.getComponent(targeted, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    org.joml.Vector3d kbVel = new org.joml.Vector3d(diff.x * kb, 8.0, diff.z * kb);
+                    vel.setClient(kbVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(kbVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", playerRef, tcTarget.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.SKILL_ID);
+        notifySkill(uuid, "Coup de Botte");
+        return true;
+    }
+
+    public boolean tryCastMiseEnJou(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isArbaletrier(acc)) return false;
+        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.TALENT_NODE_ID);
+        if (rank <= 0 && !bypass) return false;
+        if (rank <= 0) rank = 1;
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID,
+                fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        arbaState.armMiseEnJou(uuid, rank, fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.armedWindowMs());
+        try {
+            ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, new org.joml.Vector3d(), null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID);
+        notifySkill(uuid, "Mise en Joue");
+        return true;
+    }
+
     private void damageNearby(@Nonnull org.joml.Vector3d center, float radius,
                                @Nonnull Ref<EntityStore> casterRef, @Nonnull Store<EntityStore> store,
                                float dmg, @Nonnull com.hypixel.hytale.server.core.modules.entity.damage.DamageCause cause) {
@@ -3998,5 +4779,82 @@ public final class ClassSkillService {
                             new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(casterRef), cause, dmg));
                 } catch (Exception ignored2) {}
             }, t -> t.getIndex() != ci);
+    }
+
+    private void spawnProjectileToward(
+            @Nonnull String configId,
+            @Nonnull org.joml.Vector3d fromPos,
+            @Nonnull org.joml.Vector3d toPos,
+            @Nonnull Ref<EntityStore> casterRef,
+            @Nonnull PlayerRef playerRef,
+            @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        try {
+            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap().getAsset(configId);
+            if (cfg == null) return;
+            double dx = toPos.x - fromPos.x;
+            double dy = (toPos.y + 0.5) - (fromPos.y + 1.5);
+            double dz = toPos.z - fromPos.z;
+            double len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+            if (len < 1e-6) return;
+            org.joml.Vector3d dir = new org.joml.Vector3d(dx/len, dy/len, dz/len);
+            org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                fromPos.x + dir.x * 0.5,
+                fromPos.y + 1.5,
+                fromPos.z + dir.z * 0.5);
+            if (commandBuffer != null) {
+                com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(casterRef, commandBuffer, cfg, spawnPos, dir);
+            } else {
+                java.util.UUID wUuid = playerRef.getWorldUuid();
+                if (wUuid == null) return;
+                com.hypixel.hytale.server.core.universe.world.World world =
+                    com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+                if (world == null) return;
+                final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                final org.joml.Vector3d fSpawnPos = spawnPos;
+                final org.joml.Vector3d fDir = dir;
+                final Ref<EntityStore> fRef = casterRef;
+                final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
+                fw.execute(() -> {
+                    try {
+                        Store<EntityStore> ws = fw.getEntityStore().getStore();
+                        java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
+                        takeCmd.setAccessible(true);
+                        @SuppressWarnings("unchecked")
+                        CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
+                        try {
+                            com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                                .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
+                        } finally {
+                            try {
+                                java.lang.reflect.Method consume = cb.getClass().getDeclaredMethod("consume");
+                                consume.setAccessible(true);
+                                consume.invoke(cb);
+                            } catch (Exception ignored3) {}
+                        }
+                    } catch (Exception ignored2) {}
+                });
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void applyEntityEffect(
+            @Nonnull String effectId,
+            float durationSec,
+            @Nonnull Ref<EntityStore> targetRef,
+            @Nonnull Store<EntityStore> store) {
+        try {
+            int idx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex(effectId);
+            if (idx < 0) return;
+            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect effect =
+                (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(idx);
+            if (effect == null) return;
+            com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                store.getComponent(targetRef, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+            if (ec != null) ec.addEffect(targetRef, effect, durationSec,
+                com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+        } catch (Exception ignored) {}
     }
 }

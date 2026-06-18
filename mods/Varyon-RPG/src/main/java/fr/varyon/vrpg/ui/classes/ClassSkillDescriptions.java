@@ -141,6 +141,32 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ANCRAGE_NODE       -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.ancrageStatLine(rank);
             case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.RITUEL_NODE        -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.rituelStatLine(rank);
             case fr.varyon.vrpg.classes.vaudou.VaudouPassifs.PARASITE_NODE      -> fr.varyon.vrpg.classes.vaudou.VaudouPassifs.parasiteStatLine(rank);
+            // Rôdeur
+            case fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.SKILL_ID    -> fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.SKILL_ID     -> fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.SKILL_ID    -> fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.SKILL_ID      -> fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID     -> fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rodeur.RafaleSkill.SKILL_ID              -> fr.varyon.vrpg.classes.rodeur.RafaleSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.OEIL_CHASSEUR_NODE  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.oeilStatLine(rank);
+            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.FLECHES_TOXIQUES_NODE -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.poisonStatLine(rank);
+            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.INSTINCT_SURVIE_NODE  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.instinctStatLine(rank);
+            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.PRECISION_MORTELLE_NODE -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.precisionStatLine(rank);
+            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.TRAQUE_MOBILE_NODE    -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.traqueMobileStatLine(rank);
+            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.TRAQUE_SANS_FIN_NODE  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.traqueSansFinStatLine(rank);
+            // Arbalétrier
+            case fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.SKILL_ID      -> fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.SKILL_ID       -> fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.SKILL_ID    -> fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.SKILL_ID -> fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.SKILL_ID        -> fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID          -> fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.TIREUR_ELITE_NODE      -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.eliteStatLine(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.CHASSEUR_COLOSSES_NODE -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.colossesStatLine(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.TIREUR_EMBUSQUE_NODE   -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.embusqueStatLine(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.VISEUR_NODE             -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.viseurStatLine(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.CARREAUX_LACERANTS_NODE -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.bleedStatLine(rank);
+            case fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.REFLEXES_AFFUTES_NODE  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.reflexesStatLine(rank);
             // Gardien de Gaïa
             case fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID      -> fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.statLineForRank(rank);
             case fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.SKILL_ID     -> fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill.statLineForRank(rank);

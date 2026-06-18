@@ -179,6 +179,40 @@ public final class ClassSkillRegistry {
                 default -> null;
             };
         }
+        if (activeClass == PlayerClass.TIREUR && spec == PlayerSpecialization.RODEUR) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.rodeur.ReculStrategiqueSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.OEIL_CHASSEUR_NODE;
+                case 2  -> fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.SKILL_ID;
+                case 3  -> fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.SKILL_ID;
+                case 5  -> fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID;
+                case 6  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.FLECHES_TOXIQUES_NODE;
+                case 7  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.INSTINCT_SURVIE_NODE;
+                case 8  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.PRECISION_MORTELLE_NODE;
+                case 9  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.TRAQUE_MOBILE_NODE;
+                case 10 -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.TRAQUE_SANS_FIN_NODE;
+                case 11 -> fr.varyon.vrpg.classes.rodeur.RafaleSkill.SKILL_ID;
+                default -> null;
+            };
+        }
+        if (activeClass == PlayerClass.TIREUR && spec == PlayerSpecialization.ARBALETRIER) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.TIREUR_ELITE_NODE;
+                case 2  -> fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.SKILL_ID;
+                case 3  -> fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.SKILL_ID;
+                case 5  -> fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.SKILL_ID;
+                case 6  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.CHASSEUR_COLOSSES_NODE;
+                case 7  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.TIREUR_EMBUSQUE_NODE;
+                case 8  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.VISEUR_NODE;
+                case 9  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.CARREAUX_LACERANTS_NODE;
+                case 10 -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.REFLEXES_AFFUTES_NODE;
+                case 11 -> fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID;
+                default -> null;
+            };
+        }
         if (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.ARCANISTE) {
             return switch (nodeIndex) {
                 case 0  -> fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID;

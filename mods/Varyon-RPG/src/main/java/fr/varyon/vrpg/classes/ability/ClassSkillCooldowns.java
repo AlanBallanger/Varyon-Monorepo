@@ -30,6 +30,12 @@ public final class ClassSkillCooldowns {
             .put(skillId, System.currentTimeMillis());
     }
 
+    public void reduceCooldownBy(@Nonnull UUID playerId, @Nonnull String skillId, long reduceMs) {
+        Map<String, Long> cds = lastUse.get(playerId);
+        if (cds == null) return;
+        cds.computeIfPresent(skillId, (k, ts) -> ts - reduceMs);
+    }
+
     public void clearCooldown(@Nonnull UUID playerId, @Nonnull String skillId) {
         Map<String, Long> cds = lastUse.get(playerId);
         if (cds != null) cds.remove(skillId);

@@ -1,0 +1,12 @@
+{
+  "Duration": 16,
+  "Infinite": false,
+  "Debuff": true,
+  "OverlapBehavior": "Overwrite",
+  "RemovalBehavior": "Duration",
+  "ApplicationEffects": {
+    "EntityTopTint": "#ff8800",
+    "EntityBottomTint": "#cc5500",
+    "ModelVFXId": "Dagger_Signature"
+  }
+}

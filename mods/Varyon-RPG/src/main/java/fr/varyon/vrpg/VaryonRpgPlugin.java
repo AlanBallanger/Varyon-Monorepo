@@ -154,6 +154,16 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem vaudouPoisonSystem;
     private fr.varyon.vrpg.classes.vaudou.VaudouOutgoingDamageSystem vaudouOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.vaudou.VaudouIncomingDamageSystem vaudouIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.rodeur.RodeurState rodeurState;
+    private fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem rodeurPoisonSystem;
+    private fr.varyon.vrpg.classes.rodeur.RodeurSpeedSystem rodeurSpeedSystem;
+    private fr.varyon.vrpg.classes.rodeur.RodeurOutgoingDamageSystem rodeurOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.rodeur.RodeurIncomingDamageSystem rodeurIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
+    private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierBleedSystem arbaBleedSystem;
+    private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierImmobilityTickSystem arbaImmobilitySystem;
+    private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierOutgoingDamageSystem arbaOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierIncomingDamageSystem arbaIncomingDamageSystem;
     private OmbreState ombreState;
     private OmbrePoisonSystem ombrePoisonSystem;
     private OmbreSpeedSystem ombreSpeedSystem;
@@ -295,8 +305,19 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.vaudouOutgoingDamageSystem = new fr.varyon.vrpg.classes.vaudou.VaudouOutgoingDamageSystem(classManager, vaudouState);
             this.vaudouOutgoingDamageSystem.setVaudouPoisonSystem(vaudouPoisonSystem);
             this.vaudouIncomingDamageSystem = new fr.varyon.vrpg.classes.vaudou.VaudouIncomingDamageSystem(classManager);
-            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState, gardienDeGaiaState, vaudouState);
+            this.rodeurState = new fr.varyon.vrpg.classes.rodeur.RodeurState();
+            this.rodeurPoisonSystem = new fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem();
+            this.rodeurSpeedSystem = new fr.varyon.vrpg.classes.rodeur.RodeurSpeedSystem(classManager, rodeurState);
+            this.rodeurIncomingDamageSystem = new fr.varyon.vrpg.classes.rodeur.RodeurIncomingDamageSystem(classManager);
+            this.arbaState = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState();
+            this.arbaBleedSystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierBleedSystem();
+            this.arbaImmobilitySystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierImmobilityTickSystem(classManager, arbaState);
+            this.arbaOutgoingDamageSystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierOutgoingDamageSystem(classManager, arbaState, arbaBleedSystem);
+            this.arbaIncomingDamageSystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierIncomingDamageSystem(classManager, arbaState);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState, gardienDeGaiaState, vaudouState, rodeurState, arbaState);
             this.classSkillService.setVaudouPoisonSystem(vaudouPoisonSystem);
+            this.classSkillService.setRodeurPoisonSystem(rodeurPoisonSystem);
+            this.rodeurOutgoingDamageSystem = new fr.varyon.vrpg.classes.rodeur.RodeurOutgoingDamageSystem(classManager, rodeurState, rodeurPoisonSystem, classSkillService.getCooldowns());
             this.classSkillKeyFilter = new ClassSkillKeyFilter(classManager, rempartState);
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
             ClassSkillInteractionInjector.register();
@@ -541,6 +562,18 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 }
                 if (ref != null && vaudouState != null) {
                     vaudouState.cleanup(ref.getUuid());
+                }
+                if (ref != null && rodeurState != null) {
+                    rodeurState.cleanup(ref.getUuid());
+                }
+                if (ref != null && rodeurSpeedSystem != null) {
+                    rodeurSpeedSystem.removePlayer(ref.getUuid());
+                }
+                if (ref != null && arbaState != null) {
+                    arbaState.cleanup(ref.getUuid());
+                }
+                if (ref != null && arbaImmobilitySystem != null) {
+                    arbaImmobilitySystem.removePlayer(ref.getUuid());
                 }
                 if (ref != null && classKillXpSystem != null) {
                     classKillXpSystem.cleanup(ref.getUuid());
@@ -997,6 +1030,52 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 getEntityStoreRegistry().registerSystem(vaudouPoisonSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VaudouPoisonSystem");
+            }
+        }
+
+        if (rodeurState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(rodeurPoisonSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurPoisonSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(rodeurSpeedSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurSpeedSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(rodeurOutgoingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(rodeurIncomingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurIncomingDamageSystem");
+            }
+        }
+
+        if (arbaState != null && classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(arbaBleedSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ArbaietrierBleedSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(arbaImmobilitySystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ArbaietrierImmobilityTickSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(arbaOutgoingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ArbaietrierOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(arbaIncomingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ArbaietrierIncomingDamageSystem");
             }
         }
 
