@@ -5,10 +5,11 @@ public final class UppercutSkill {
     public static final String SKILL_ID       = "uppercut";
     public static final String TALENT_NODE_ID = "bagarreur_11";
 
-    private static final float[] DAMAGE_PCT   = {0.7f, 0.9f, 1.1f, 1.4f, 1.8f};
-    private static final float   LAUNCH_Y     = 40.0f;
-    private static final long[]  COOLDOWN_MS  = {16000, 14000, 12000, 10000, 8000};
-    private static final float[] STAMINA_COST = {7f, 8f, 9f, 10f, 10f};
+    private static final float[] DAMAGE_PCT        = {0.7f, 0.9f, 1.1f, 1.4f, 1.8f};
+    private static final float   LAUNCH_Y          = 40.0f;
+    private static final double  KNOCKBACK_H       = 5.0;
+    private static final long[]  COOLDOWN_MS       = {16000, 14000, 12000, 10000, 8000};
+    private static final float[] STAMINA_COST      = {7f, 8f, 9f, 10f, 10f};
 
     private UppercutSkill() {}
 
@@ -17,6 +18,7 @@ public final class UppercutSkill {
 
     public static float  damagePctForRank(int rank)   { return DAMAGE_PCT[idx(rank)]; }
     public static float  launchY()                    { return LAUNCH_Y; }
+    public static double knockbackH()                 { return KNOCKBACK_H; }
     public static long   cooldownMsForRank(int rank)  { return COOLDOWN_MS[idx(rank)]; }
     public static float  staminaCostForRank(int rank) { return STAMINA_COST[idx(rank)]; }
 

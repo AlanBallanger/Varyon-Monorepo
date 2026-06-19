@@ -12,7 +12,18 @@ public final class ArbaietrierState {
     private final ConcurrentHashMap<UUID, Integer> carreauLourdRank   = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long>    miseEnJouExpiry    = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Integer> miseEnJouRank      = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Long>    miseEnJouViseeUntil = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long>    immobileStart      = new ConcurrentHashMap<>();
+
+    // Types de carreaux en vol
+    public static final int CARREAU_TYPE_LOURD        = 1;
+    public static final int CARREAU_TYPE_EXPLOSIF     = 2;
+    public static final int CARREAU_TYPE_TRANSPERCANT = 3;
+
+    private final ConcurrentHashMap<UUID, Integer> pendingCarreauType     = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Float>   pendingCarreauDmg      = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Integer> pendingCarreauRank     = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Boolean> pendingMiseEnJouActive = new ConcurrentHashMap<>();
 
     public ArbaietrierState() {}
 
@@ -73,6 +84,66 @@ public final class ArbaietrierState {
         return exp != null && System.currentTimeMillis() < exp;
     }
 
+    public void startMiseEnJouVisee(@Nonnull UUID uuid, long durationMs) {
+        miseEnJouViseeUntil.put(uuid, System.currentTimeMillis() + durationMs);
+    }
+
+    public boolean isMiseEnJouVisant(@Nonnull UUID uuid) {
+        Long until = miseEnJouViseeUntil.get(uuid);
+        return until != null && System.currentTimeMillis() < until;
+    }
+
+    public void clearMiseEnJouVisee(@Nonnull UUID uuid) {
+        miseEnJouViseeUntil.remove(uuid);
+    }
+
+    // --- Carreaux en vol (Lourd, Explosif, Transpercant) ---
+
+    public void setPendingCarreau(@Nonnull UUID uuid, int type, float dmg, int rank, boolean miseEnJouActive) {
+        pendingCarreauType.put(uuid, type);
+        pendingCarreauDmg.put(uuid, dmg);
+        pendingCarreauRank.put(uuid, rank);
+        pendingMiseEnJouActive.put(uuid, miseEnJouActive);
+    }
+
+
+    public int getPendingCarreauType(@Nonnull UUID uuid) {
+        return pendingCarreauType.getOrDefault(uuid, 0);
+    }
+
+    public float consumePendingCarreauDmg(@Nonnull UUID uuid) {
+        pendingCarreauType.remove(uuid);
+        Float dmg = pendingCarreauDmg.remove(uuid);
+        return dmg != null ? dmg : 0f;
+    }
+
+    public int getPendingCarreauRank(@Nonnull UUID uuid) {
+        return pendingCarreauRank.getOrDefault(uuid, 1);
+    }
+
+    public boolean isPendingMiseEnJouActive(@Nonnull UUID uuid) {
+        return Boolean.TRUE.equals(pendingMiseEnJouActive.getOrDefault(uuid, false));
+    }
+
+    public void clearPendingCarreau(@Nonnull UUID uuid) {
+        pendingCarreauType.remove(uuid);
+        pendingCarreauDmg.remove(uuid);
+        pendingCarreauRank.remove(uuid);
+        pendingMiseEnJouActive.remove(uuid);
+    }
+
+    // --- Coup de Botte — knockback pending ---
+
+    private final ConcurrentHashMap<UUID, double[]> coupDeBotteKb = new ConcurrentHashMap<>();
+
+    public void setPendingCoupDeBotteKb(@Nonnull UUID uuid, double vx, double vz) {
+        coupDeBotteKb.put(uuid, new double[]{vx, vz});
+    }
+
+    public double[] consumePendingCoupDeBotteKb(@Nonnull UUID uuid) {
+        return coupDeBotteKb.remove(uuid);
+    }
+
     // --- Détection d'immobilité (pour Ancrage + Tireur Embusqué) ---
 
     public void markMoving(@Nonnull UUID uuid) {
@@ -101,5 +172,7 @@ public final class ArbaietrierState {
         miseEnJouExpiry.remove(uuid);
         miseEnJouRank.remove(uuid);
         immobileStart.remove(uuid);
+        clearPendingCarreau(uuid);
+        miseEnJouViseeUntil.remove(uuid);
     }
 }

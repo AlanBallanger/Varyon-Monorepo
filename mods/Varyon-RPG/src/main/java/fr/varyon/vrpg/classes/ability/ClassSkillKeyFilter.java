@@ -30,6 +30,7 @@ public final class ClassSkillKeyFilter implements PlayerPacketFilter {
         if (!(packet instanceof SyncInteractionChains sync)) return false;
         if (sync.updates == null || sync.updates.length == 0) return false;
 
+        boolean blockPacket = false;
         for (SyncInteractionChain chain : sync.updates) {
             if (chain == null || !chain.initial) continue;
 
@@ -41,8 +42,20 @@ public final class ClassSkillKeyFilter implements PlayerPacketFilter {
             InteractionType type = toAbilityType(chain);
             if (type == null) continue;
             ClassSkillSlots.tryCastAbility(playerRef, type);
+            if (isArbaletrier(playerRef)) blockPacket = true;
         }
-        return false;
+        return blockPacket;
+    }
+
+    private boolean isArbaletrier(@Nonnull PlayerRef playerRef) {
+        try {
+            java.util.UUID uuid = playerRef.getUuid();
+            if (uuid == null) return false;
+            ClassAccount acc = classManager.getAccount(uuid);
+            if (acc == null) return false;
+            return acc.getActiveClass() == PlayerClass.TIREUR
+                && acc.getActiveSpec(PlayerClass.TIREUR) == PlayerSpecialization.ARBALETRIER;
+        } catch (Exception e) { return false; }
     }
 
     private void onSecondary(@Nonnull PlayerRef playerRef) {

@@ -82,6 +82,18 @@ public final class BagarreurState {
         return stacks != null ? stacks.getOrDefault(targetIdx, 0) : 0;
     }
 
+    // ---- Uppercut knockback pending ----
+
+    private final ConcurrentHashMap<UUID, double[]> uppercutKb = new ConcurrentHashMap<>();
+
+    public void setPendingUppercutKb(@Nonnull UUID uuid, double vx, double vy, double vz) {
+        uppercutKb.put(uuid, new double[]{vx, vy, vz});
+    }
+
+    public double[] consumePendingUppercutKb(@Nonnull UUID uuid) {
+        return uppercutKb.remove(uuid);
+    }
+
     // ---- Cleanup ----
 
     public void cleanup(@Nonnull UUID uuid) {

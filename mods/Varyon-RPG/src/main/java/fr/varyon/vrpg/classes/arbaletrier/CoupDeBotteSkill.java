@@ -6,7 +6,7 @@ public final class CoupDeBotteSkill {
     public static final String TALENT_NODE_ID = "arbaletrier_5";
 
     private static final float[]  DAMAGE_PCT    = {0.60f, 0.70f, 0.80f, 0.90f, 1.00f};
-    private static final double[] KNOCKBACK     = {6.0, 7.0, 8.0, 9.0, 10.0};
+    private static final double[] KNOCKBACK     = {20.0, 27.5, 35.0, 42.5, 50.0};
     private static final long[]   COOLDOWN_MS   = {12000, 11000, 10000, 9000, 8000};
     private static final float[]  STAMINA_COST  = {4f, 4f, 5f, 5f, 5f};
 
