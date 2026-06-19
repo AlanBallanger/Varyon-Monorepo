@@ -1,4 +1,4 @@
-$P = "CharacterPage.ui";
+﻿$P = "CharacterPage.ui";
 
 Group {
   Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
@@ -111,6 +111,19 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile0ResetButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+        );
+        LayoutMode: Middle;
+        Label { Style: (FontSize: 12, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser le profil"; }
+      }
       }
 
       Group #ClassProfile0ConfirmPanel {
@@ -128,6 +141,24 @@ Group {
           );
           LayoutMode: Middle;
           Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
+      }
+
+      Group #ClassProfile0ResetConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
+
+        Button #ClassProfile0ResetConfirmButton {
+          Anchor: (Width: 140, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 13, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer reset"; }
         }
       }
     }
@@ -201,6 +232,19 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile1ResetButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+        );
+        LayoutMode: Middle;
+        Label { Style: (FontSize: 12, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser le profil"; }
+      }
       }
 
       Group #ClassProfile1ConfirmPanel {
@@ -218,6 +262,24 @@ Group {
           );
           LayoutMode: Middle;
           Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
+      }
+
+      Group #ClassProfile1ResetConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
+
+        Button #ClassProfile1ResetConfirmButton {
+          Anchor: (Width: 140, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 13, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer reset"; }
         }
       }
     }
@@ -291,6 +353,19 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile2ResetButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+        );
+        LayoutMode: Middle;
+        Label { Style: (FontSize: 12, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser le profil"; }
+      }
       }
 
       Group #ClassProfile2ConfirmPanel {
@@ -308,6 +383,24 @@ Group {
           );
           LayoutMode: Middle;
           Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
+      }
+
+      Group #ClassProfile2ResetConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
+
+        Button #ClassProfile2ResetConfirmButton {
+          Anchor: (Width: 140, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 13, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer reset"; }
         }
       }
     }
@@ -381,6 +474,19 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile3ResetButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+        );
+        LayoutMode: Middle;
+        Label { Style: (FontSize: 12, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser le profil"; }
+      }
       }
 
       Group #ClassProfile3ConfirmPanel {
@@ -398,6 +504,24 @@ Group {
           );
           LayoutMode: Middle;
           Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
+      }
+
+      Group #ClassProfile3ResetConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
+
+        Button #ClassProfile3ResetConfirmButton {
+          Anchor: (Width: 140, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 13, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer reset"; }
         }
       }
     }
@@ -471,6 +595,19 @@ Group {
         Style: (FontSize: 12, TextColor: #6BCB7A, HorizontalAlignment: Center);
         Text: "";
       }
+
+      Group { FlexWeight: 1; }
+
+      Button #ClassProfile4ResetButton {
+        Anchor: (Left: 0, Right: 0, Height: 28);
+        Style: (
+          Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+          Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+          Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+        );
+        LayoutMode: Middle;
+        Label { Style: (FontSize: 12, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser le profil"; }
+      }
       }
 
       Group #ClassProfile4ConfirmPanel {
@@ -488,6 +625,24 @@ Group {
           );
           LayoutMode: Middle;
           Label { Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer"; }
+        }
+      }
+
+      Group #ClassProfile4ResetConfirmPanel {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        LayoutMode: Middle;
+        Background: #000000(0.72);
+        Visible: false;
+
+        Button #ClassProfile4ResetConfirmButton {
+          Anchor: (Width: 140, Height: 36);
+          Style: (
+            Default: (Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10)),
+            Hovered: (Background: PatchStyle(TexturePath: "Elements/HudPanelHovered.png", Border: 10)),
+            Pressed: (Background: PatchStyle(TexturePath: "Elements/HudPanelActive.png", Border: 10))
+          );
+          LayoutMode: Middle;
+          Label { Style: (FontSize: 13, TextColor: #FF4444, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Confirmer reset"; }
         }
       }
     }

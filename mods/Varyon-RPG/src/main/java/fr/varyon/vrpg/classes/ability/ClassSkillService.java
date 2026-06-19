@@ -70,6 +70,7 @@ public final class ClassSkillService {
     private final fr.varyon.vrpg.classes.rodeur.RodeurState rodeurState;
     private final fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
     private fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem rodeurPoisonSystem;
+    @Nullable private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
     private final Map<String, SkillCaster> casters = new HashMap<>();
 
@@ -106,6 +107,10 @@ public final class ClassSkillService {
 
     public void setRodeurPoisonSystem(@Nonnull fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem sys) {
         this.rodeurPoisonSystem = sys;
+    }
+
+    public void setCarreauExplosifGroundSystem(@Nonnull fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem sys) {
+        this.carreauExplosifGroundSystem = sys;
     }
 
     public ClassSkillCooldowns getCooldowns() {
@@ -4600,7 +4605,12 @@ public final class ClassSkillService {
         if (dmg < 1f) dmg = 1f;
 
         arbaState.setPendingCarreau(uuid, fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState.CARREAU_TYPE_EXPLOSIF, dmg, rank, false);
-        spawnProjectileToward("Vrpg_Carreau_Explosif", casterPos, aimFar, entityRef, playerRef, null);
+        if (carreauExplosifGroundSystem != null) {
+            spawnProjectileTowardTracked("Vrpg_Carreau_Explosif", casterPos, aimFar, entityRef, playerRef, uuid, carreauExplosifGroundSystem);
+        } else {
+            spawnProjectileToward("Vrpg_Carreau_Explosif", casterPos, aimFar, entityRef, playerRef, null);
+            LOG.atWarning().log("[CarreauExplosif] groundSystem null, no ground explosion");
+        }
         ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPos, null);
 
         ClassSkillStamina.consume(playerRef, staminaCost);
@@ -4857,6 +4867,58 @@ public final class ClassSkillService {
                     } catch (Exception ignored2) {}
                 });
             }
+        } catch (Exception ignored) {}
+    }
+
+    private void spawnProjectileTowardTracked(
+            @Nonnull String configId,
+            @Nonnull org.joml.Vector3d fromPos,
+            @Nonnull org.joml.Vector3d toPos,
+            @Nonnull Ref<EntityStore> casterRef,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull UUID creatorUuid,
+            @Nonnull fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem groundSystem) {
+        try {
+            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap().getAsset(configId);
+            if (cfg == null) return;
+            double dx = toPos.x - fromPos.x;
+            double dy = (toPos.y + 0.5) - (fromPos.y + 1.5);
+            double dz = toPos.z - fromPos.z;
+            double len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+            if (len < 1e-6) return;
+            org.joml.Vector3d dir = new org.joml.Vector3d(dx/len, dy/len, dz/len);
+            org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                fromPos.x + dir.x * 0.5,
+                fromPos.y + 1.5,
+                fromPos.z + dir.z * 0.5);
+            java.util.UUID wUuid = playerRef.getWorldUuid();
+            if (wUuid == null) return;
+            com.hypixel.hytale.server.core.universe.world.World world =
+                com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+            if (world == null) return;
+            final com.hypixel.hytale.server.core.universe.world.World fw = world;
+            final org.joml.Vector3d fSpawnPos = spawnPos;
+            final org.joml.Vector3d fDir = dir;
+            final Ref<EntityStore> fRef = casterRef;
+            final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
+            fw.execute(() -> {
+                try {
+                    Store<EntityStore> ws = fw.getEntityStore().getStore();
+                    java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
+                    takeCmd.setAccessible(true);
+                    @SuppressWarnings("unchecked")
+                    CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
+                    Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                        .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
+                    try {
+                        java.lang.reflect.Method consume = cb.getClass().getDeclaredMethod("consume");
+                        consume.setAccessible(true);
+                        consume.invoke(cb);
+                    } catch (Exception ignored3) {}
+                    groundSystem.trackProjectile(projRef, creatorUuid);
+                } catch (Exception ignored2) {}
+            });
         } catch (Exception ignored) {}
     }
 

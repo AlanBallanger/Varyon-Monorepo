@@ -160,6 +160,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.rodeur.RodeurOutgoingDamageSystem rodeurOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.rodeur.RodeurIncomingDamageSystem rodeurIncomingDamageSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
+    private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierBleedSystem arbaBleedSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierImmobilityTickSystem arbaImmobilitySystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierOutgoingDamageSystem arbaOutgoingDamageSystem;
@@ -214,6 +215,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
     public ProfessionManager getProfessionManager() {
         return professionManager;
+    }
+
+    public fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState getArbaState() {
+        return arbaState;
     }
 
     public ClassManager getClassManager() {
@@ -271,6 +276,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ClassSkillTriggerInteraction");
         }
+
 
         try {
             this.classManager = new ClassManager(getDataDirectory());
@@ -1076,6 +1082,13 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 getEntityStoreRegistry().registerSystem(arbaIncomingDamageSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ArbaietrierIncomingDamageSystem");
+            }
+            try {
+                this.carreauExplosifGroundSystem = new fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem(arbaState);
+                getEntityStoreRegistry().registerSystem(carreauExplosifGroundSystem);
+                if (classSkillService != null) classSkillService.setCarreauExplosifGroundSystem(carreauExplosifGroundSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register CarreauExplosifGroundSystem");
             }
         }
 

@@ -63,9 +63,12 @@ public final class ClassProfilesTab {
             }
 
             boolean isPending = state.pendingProfileIndex != null && state.pendingProfileIndex == i;
+            boolean isPendingReset = state.pendingResetProfileIndex != null && state.pendingResetProfileIndex == i;
             uiBuilder.set("#ClassProfile" + s + "ConfirmPanel.Visible", isPending);
-            uiBuilder.set("#ClassProfile" + s + "HoverButton.Visible", !isActive && !isPending);
-            if (!isActive && !isPending) {
+            uiBuilder.set("#ClassProfile" + s + "ResetConfirmPanel.Visible", isPendingReset);
+            uiBuilder.set("#ClassProfile" + s + "HoverButton.Visible", !isActive && !isPending && !isPendingReset);
+            uiBuilder.set("#ClassProfile" + s + "ResetButton.Visible", !isPending && !isPendingReset);
+            if (!isActive && !isPending && !isPendingReset) {
                 eventBuilder.addEventBinding(
                     CustomUIEventBindingType.Activating,
                     "#ClassProfile" + s + "HoverButton",
@@ -78,6 +81,22 @@ public final class ClassProfilesTab {
                     CustomUIEventBindingType.Activating,
                     "#ClassProfile" + s + "ConfirmButton",
                     EventData.of("Action", "selectProfile").append("Index", s),
+                    false
+                );
+            }
+            if (!isPending && !isPendingReset) {
+                eventBuilder.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    "#ClassProfile" + s + "ResetButton",
+                    EventData.of("Action", "pendingReset").append("Index", s),
+                    false
+                );
+            }
+            if (isPendingReset) {
+                eventBuilder.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    "#ClassProfile" + s + "ResetConfirmButton",
+                    EventData.of("Action", "confirmReset").append("Index", s),
                     false
                 );
             }

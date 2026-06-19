@@ -28,13 +28,6 @@
           }
         },
         {
-          "Type": "Simple",
-          "Effects": {
-            "LocalSoundEventId": "SFX_Arrow_FullCharge_Hit",
-            "WorldSoundEventId": "SFX_Arrow_FullCharge_Hit"
-          }
-        },
-        {
           "Type": "RemoveEntity",
           "Entity": "User"
         }
@@ -43,6 +36,10 @@
     "ProjectileMiss": {
       "Cooldown": { "Cooldown": 0 },
       "Interactions": [
+        {
+          "Type": "Simple",
+          "RunTime": 5
+        },
         {
           "Type": "RemoveEntity",
           "Entity": "User"

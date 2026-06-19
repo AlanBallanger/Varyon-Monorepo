@@ -85,6 +85,29 @@ public final class ClassUiEvents {
             return UiEventResult.REBUILD;
         }
 
+        if ("pendingReset".equals(data.action) && data.index != null) {
+            int idx;
+            try { idx = Integer.parseInt(data.index); } catch (NumberFormatException e) { return UiEventResult.NONE; }
+            state.pendingResetProfileIndex = state.pendingResetProfileIndex != null && state.pendingResetProfileIndex == idx ? null : idx;
+            state.pendingProfileIndex = null;
+            return UiEventResult.REBUILD;
+        }
+
+        if ("confirmReset".equals(data.action) && data.index != null) {
+            state.pendingResetProfileIndex = null;
+            int idx;
+            try { idx = Integer.parseInt(data.index); } catch (NumberFormatException e) { return UiEventResult.NONE; }
+            ClassManager classManager = VaryonRpgPlugin.getInstance().getClassManager();
+            if (classManager != null) {
+                classManager.resetProfile(playerRef.getUuid(), idx);
+                int activeIdx = -1;
+                ClassAccount accAfter = classManager.getAccount(playerRef.getUuid());
+                if (accAfter != null) activeIdx = accAfter.getActiveProfileIndex();
+                if (activeIdx == idx) classManager.applyStats(playerRef.getUuid(), playerRef);
+            }
+            return UiEventResult.REBUILD;
+        }
+
         if ("classTab".equals(data.action) && data.classId != null) {
             PlayerClass c = PlayerClass.fromId(data.classId);
             if (c != null) {

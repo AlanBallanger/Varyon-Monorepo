@@ -17,7 +17,10 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.protocol.SoundCategory;
+import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import fr.varyon.vrpg.classes.ClassAccount;
@@ -37,6 +40,9 @@ public final class ArbaietrierOutgoingDamageSystem extends DamageEventSystem {
 
     private static final Set<Dependency<EntityStore>> DEPENDENCIES =
         Set.of(new SystemDependency<>(Order.BEFORE, DamageSystems.ApplyDamage.class));
+
+    private static final String EXPLOSION_SOUND_ID = "SFX_Goblin_Lobber_Bomb_Death";
+    private static int explosionSoundIndex = 0;
 
     private final ClassManager classManager;
     private final ArbaietrierState arbaState;
@@ -186,11 +192,17 @@ public final class ArbaietrierOutgoingDamageSystem extends DamageEventSystem {
                         final float aoeAmount = amount;
                         final Ref<EntityStore> fAttackerRef = attackerRef;
                         try {
-                            int sndIdx = com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent.getAssetMap().getIndex("SFX_Vrpg_Explosion");
-                            LOG.atInfo().log("[CarreauExplosif] sndIdx=" + sndIdx);
-                            if (sndIdx > 0) com.hypixel.hytale.server.core.universe.world.SoundUtil.playSoundEvent3d(
-                                sndIdx, com.hypixel.hytale.protocol.SoundCategory.SFX, center.x, center.y, center.z, commandBuffer);
-                        } catch (Exception e2) { LOG.atWarning().log("[CarreauExplosif] sound error: " + e2.getMessage()); }
+                            com.hypixel.hytale.server.core.universe.world.ParticleUtil.spawnParticleEffect(
+                                "Explosion_Medium", center, store);
+                        } catch (Exception ignored2) {}
+                        try {
+                            if (explosionSoundIndex == 0) {
+                                explosionSoundIndex = SoundEvent.getAssetMap().getIndex(EXPLOSION_SOUND_ID);
+                            }
+                            if (explosionSoundIndex != 0) {
+                                SoundUtil.playSoundEvent3d(explosionSoundIndex, SoundCategory.SFX, center.x, center.y, center.z, commandBuffer);
+                            }
+                        } catch (Exception ignored2) {}
                         try {
                             java.util.HashSet<Integer> hit = new java.util.HashSet<>();
                             hit.add(victimRef.getIndex());

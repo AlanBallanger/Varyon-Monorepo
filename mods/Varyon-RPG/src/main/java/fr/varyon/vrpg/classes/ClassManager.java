@@ -191,6 +191,24 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         }
     }
 
+    public void resetProfile(@Nonnull UUID uuid, int profileIndex) {
+        ReentrantLock lock = lockFor(uuid);
+        lock.lock();
+        try {
+            ClassAccount acc = getOrLoad(uuid);
+            ClassProfile profile = acc.getProfiles()[profileIndex];
+            profile.setActiveClass(null);
+            for (PlayerClass c : PlayerClass.values()) {
+                profile.setSpec(c, null);
+                profile.resetTalents(c);
+                profile.clearSkillSlots(c);
+            }
+            dirty.add(uuid);
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public void switchProfile(@Nonnull UUID uuid, int profileIndex, @Nonnull PlayerRef playerRef) {
         ReentrantLock lock = lockFor(uuid);
         lock.lock();
