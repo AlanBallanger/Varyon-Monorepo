@@ -5,6 +5,7 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import fr.varyon.vrpg.rpg.AbstractPlayerManager;
+import fr.varyon.vrpg.ui.ClassXpHud;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 
 import javax.annotation.Nonnull;
@@ -62,13 +63,18 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
     }
 
     public int addXp(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, double amount) {
-        return addXpInternal(uuid, playerClass, amount);
+        int levelsGained = addXpInternal(uuid, playerClass, amount);
+        if (amount > 0) ClassXpHud.refreshIfPresent(uuid);
+        return levelsGained;
     }
 
     public int addXp(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, double amount,
                      @Nonnull PlayerRef playerRef) {
         int levelsGained = addXpInternal(uuid, playerClass, amount);
-        if (amount > 0) scheduleXpNotif(uuid, playerRef, playerClass, amount, XP_NOTIF_DEBOUNCE_MS);
+        if (amount > 0) {
+            scheduleXpNotif(uuid, playerRef, playerClass, amount, XP_NOTIF_DEBOUNCE_MS);
+            ClassXpHud.refreshIfPresent(uuid);
+        }
         return levelsGained;
     }
 
@@ -81,6 +87,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         } finally {
             lock.unlock();
         }
+        ClassXpHud.refreshIfPresent(uuid);
     }
 
     public void setActiveClass(@Nonnull UUID uuid, @Nullable PlayerClass playerClass) {
@@ -92,6 +99,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         } finally {
             lock.unlock();
         }
+        ClassXpHud.refreshIfPresent(uuid);
     }
 
     public void setActiveSpec(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass,
@@ -104,6 +112,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         } finally {
             lock.unlock();
         }
+        ClassXpHud.refreshIfPresent(uuid);
     }
 
     public boolean allocateTalent(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass,
@@ -117,6 +126,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
             if (acc.availableTalentPoints(playerClass, acc.getActiveSpec(playerClass)) <= 0) return false;
             acc.setTalentRank(playerClass, nodeId, currentRank + 1);
             dirty.add(uuid);
+            ClassXpHud.refreshIfPresent(uuid);
             return true;
         } finally {
             lock.unlock();
@@ -132,6 +142,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         } finally {
             lock.unlock();
         }
+        ClassXpHud.refreshIfPresent(uuid);
     }
 
     public void setSkillSlot(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass,

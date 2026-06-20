@@ -108,6 +108,7 @@ import fr.varyon.vrpg.rpg.ProfessionManager;
 import fr.varyon.vrpg.item.ProfessionXpBoostInteraction;
 import fr.varyon.vrpg.item.ProfessionXpPotionInteraction;
 import fr.varyon.vrpg.ui.AbilitySlotsHud;
+import fr.varyon.vrpg.ui.ClassXpHud;
 import fr.varyon.vrpg.ui.ProfessionXpHud;
 import fr.varyon.vrpg.ui.XpNotifHud;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
@@ -427,6 +428,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 world.execute(() -> {
                     try {
                         if (!readyRef.isValid()) return;
+                        ClassXpHud.getOrCreate(readyPlayer, readyRef);
                         ProfessionXpHud.getOrCreate(readyPlayer, readyRef);
                         XpNotifHud.getOrCreate(readyPlayer, readyRef);
                         AbilitySlotsHud.getOrCreate(readyPlayer, readyRef).refreshSlots();
@@ -519,6 +521,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 PlayerRef ref = event.getPlayerRef();
                 if (ref != null) {
                     pendingProfessionHudInit.remove(ref.getUuid());
+                    ClassXpHud.cleanup(ref.getUuid());
                     ProfessionXpHud.cleanup(ref.getUuid());
                     XpNotifHud.cleanup(ref.getUuid());
                     AbilitySlotsHud.cleanup(ref.getUuid());

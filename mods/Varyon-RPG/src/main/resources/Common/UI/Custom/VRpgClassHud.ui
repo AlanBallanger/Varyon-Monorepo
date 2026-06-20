@@ -1,0 +1,85 @@
+Group {
+  Group #ClassXPPanel {
+    Anchor: (Top: 57, Left: 12, Width: 240, Height: 68);
+    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+    LayoutMode: Full;
+
+    Group #ClassHudBorder {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      LayoutMode: Full;
+
+      Group #ClassCornerTL {
+        Anchor: (Left: 2, Top: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border.png", Border: 0);
+      }
+      Group #ClassCornerTR {
+        Anchor: (Right: 2, Top: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_TR.png", Border: 0);
+      }
+      Group #ClassCornerBL {
+        Anchor: (Left: 2, Bottom: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_BL.png", Border: 0);
+      }
+      Group #ClassCornerBR {
+        Anchor: (Right: 2, Bottom: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_BR.png", Border: 0);
+      }
+    }
+
+    Group #ClassHudContent {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      LayoutMode: Top;
+      Padding: (Horizontal: 12, Vertical: 8);
+
+      Group #ClassRow {
+        Anchor: (Height: 26);
+        LayoutMode: Left;
+
+        Group #ClassLevelBg {
+          Anchor: (Width: 50, Height: 26);
+          LayoutMode: Middle;
+          Label #ClassLevel {
+            Text: " ";
+            Style: (FontSize: 14, TextColor: #E8C84A, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+          }
+        }
+
+        Group { Anchor: (Width: 5); }
+
+        Group {
+          FlexWeight: 1;
+          Anchor: (Height: 24);
+          Label #ClassName {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Text: " ";
+            Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+          }
+        }
+
+        Group {
+          Anchor: (Height: 24, Width: 80);
+          LayoutMode: Left;
+          Padding: (Left: 5);
+
+          Label #ClassXPText {
+            Anchor: (Height: 24, Width: 75);
+            Text: " ";
+            Style: (FontSize: 11, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 5); }
+
+      Group #ClassProgBar {
+        Anchor: (Left: 0, Right: 0, Height: 17);
+        Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+        ProgressBar #ClassProgBarFill {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Value: 0.0;
+          BarTexturePath: "Elements/Gauge_Fill.png";
+        }
+      }
+    }
+  }
+}
