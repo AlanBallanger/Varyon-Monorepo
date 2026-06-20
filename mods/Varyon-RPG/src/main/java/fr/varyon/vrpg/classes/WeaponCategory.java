@@ -8,6 +8,7 @@ public enum WeaponCategory {
     DAGUE,
     HACHE,
     DEUX_MAINS,
+    LANCE,
     DISTANCE,
     MAGIE,
     BOUCLIER,
@@ -19,7 +20,8 @@ public enum WeaponCategory {
         String id = itemId.toLowerCase();
 
         if (id.startsWith("weapon_daggers") || id.startsWith("weapon_dagger")) return DAGUE;
-        if (id.startsWith("weapon_longsword") || id.startsWith("weapon_greatsword") || id.startsWith("weapon_leaf_spear") || id.startsWith("weapon_spear") || id.startsWith("weapon_club")) return DEUX_MAINS;
+        if (id.startsWith("weapon_spear") || id.startsWith("weapon_leaf_spear")) return LANCE;
+        if (id.startsWith("weapon_longsword") || id.startsWith("weapon_greatsword") || id.startsWith("weapon_club")) return DEUX_MAINS;
         if (id.startsWith("weapon_sword")) return EPEE;
         if (id.startsWith("weapon_axe")) return HACHE;
         if (id.startsWith("weapon_shortbow") || id.startsWith("weapon_crossbow") || id.startsWith("weapon_bow")) return DISTANCE;
@@ -60,6 +62,7 @@ public enum WeaponCategory {
             case DAGUE      -> spec.getWeaponDagueMult();
             case HACHE      -> spec.getWeaponHacheMult();
             case DEUX_MAINS -> spec.getWeaponDeuxMainsMult();
+            case LANCE      -> spec.getWeaponLanceMult();
             case DISTANCE   -> spec.getWeaponDistanceMult();
             case MAGIE      -> spec.getWeaponMagieMult();
             case BOUCLIER   -> 1.0;

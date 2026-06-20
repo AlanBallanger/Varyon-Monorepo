@@ -165,6 +165,11 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierImmobilityTickSystem arbaImmobilitySystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierOutgoingDamageSystem arbaOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierIncomingDamageSystem arbaIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.lancier.LancierState lancierState;
+    private fr.varyon.vrpg.classes.lancier.LancierBleedSystem lancierBleedSystem;
+    private fr.varyon.vrpg.classes.lancier.LancierOutgoingDamageSystem lancierOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.lancier.LancierIncomingDamageSystem lancierIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.lancier.FormationDePiquesZoneSystem formationDePiquesZoneSystem;
     private OmbreState ombreState;
     private OmbrePoisonSystem ombrePoisonSystem;
     private OmbreSpeedSystem ombreSpeedSystem;
@@ -320,9 +325,15 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.arbaImmobilitySystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierImmobilityTickSystem(classManager, arbaState);
             this.arbaOutgoingDamageSystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierOutgoingDamageSystem(classManager, arbaState, arbaBleedSystem);
             this.arbaIncomingDamageSystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierIncomingDamageSystem(classManager, arbaState);
-            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState, gardienDeGaiaState, vaudouState, rodeurState, arbaState);
+            this.lancierState = new fr.varyon.vrpg.classes.lancier.LancierState();
+            this.lancierBleedSystem = new fr.varyon.vrpg.classes.lancier.LancierBleedSystem();
+            this.lancierOutgoingDamageSystem = new fr.varyon.vrpg.classes.lancier.LancierOutgoingDamageSystem(classManager, lancierState, lancierBleedSystem);
+            this.lancierIncomingDamageSystem = new fr.varyon.vrpg.classes.lancier.LancierIncomingDamageSystem(classManager, lancierState);
+            this.formationDePiquesZoneSystem = new fr.varyon.vrpg.classes.lancier.FormationDePiquesZoneSystem(lancierState);
+            this.classSkillService = new ClassSkillService(classManager, duellisteState, ombreState, rempartState, berserkerState, ravageurState, bagarreurState, arcanistState, gardienDeGaiaState, vaudouState, rodeurState, arbaState, lancierState, lancierBleedSystem);
             this.classSkillService.setVaudouPoisonSystem(vaudouPoisonSystem);
             this.classSkillService.setRodeurPoisonSystem(rodeurPoisonSystem);
+            this.classSkillService.setFormationDePiquesZoneSystem(formationDePiquesZoneSystem);
             this.rodeurOutgoingDamageSystem = new fr.varyon.vrpg.classes.rodeur.RodeurOutgoingDamageSystem(classManager, rodeurState, rodeurPoisonSystem, classSkillService.getCooldowns());
             this.classSkillKeyFilter = new ClassSkillKeyFilter(classManager, rempartState);
             this.classSkillPacketFilter = PacketAdapters.registerInbound(classSkillKeyFilter);
@@ -1089,6 +1100,26 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 if (classSkillService != null) classSkillService.setCarreauExplosifGroundSystem(carreauExplosifGroundSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register CarreauExplosifGroundSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(lancierBleedSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register LancierBleedSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(lancierOutgoingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register LancierOutgoingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(lancierIncomingDamageSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register LancierIncomingDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(formationDePiquesZoneSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register FormationDePiquesZoneSystem");
             }
         }
 

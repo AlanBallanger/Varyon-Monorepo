@@ -7,22 +7,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum PlayerSpecialization {
-    //                                                                                                                                             hp    atk   armor stamina critC critD  epee  dague hache 2main dist  magie
-    DUELLISTE("duelliste", "Duelliste",         PlayerClass.GUERRIER, "Weapon_Sword_Mithril",           "Mobilité - Ripostes - Critiques", "Expert des duels et des contre-attaques.",       0.95, 1.10, 0.90, 1.00, 1.05, 1.10,  1.50, 1.00, 1.00, 1.00, 1.00, 0.75),
-    OMBRE    ("ombre",     "Ombre",             PlayerClass.GUERRIER, "Weapon_Daggers_Doomed",          "Furtivité - Poisons - Assassinat","Frappe dans l'ombre, insaisissable et mortel.",  0.90, 1.15, 0.80, 1.10, 1.15, 1.20,  1.00, 1.50, 1.00, 0.75, 1.00, 1.00),
-    REMPART  ("rempart",   "Rempart",           PlayerClass.GUERRIER, "Weapon_Shield_Orbis_Knight",     "Tank - Bouclier - Protection",   "Maître de la défense et de la résilience.",      1.20, 0.85, 1.15, 1.10, 0.75, 0.75,  1.25, 0.75, 1.25, 1.00, 1.00, 1.00),
+    //                                                                                                                                             hp    atk   armor stamina critC critD  epee  dague hache 2main lance dist  magie
+    DUELLISTE("duelliste", "Duelliste",         PlayerClass.GUERRIER, "Weapon_Sword_Mithril",           "Mobilité - Ripostes - Critiques", "Expert des duels et des contre-attaques.",       0.95, 1.10, 0.90, 1.00, 1.05, 1.10,  1.50, 1.00, 1.00, 1.00, 0.75, 1.00, 0.75),
+    OMBRE    ("ombre",     "Ombre",             PlayerClass.GUERRIER, "Weapon_Daggers_Doomed",          "Furtivité - Poisons - Assassinat","Frappe dans l'ombre, insaisissable et mortel.",  0.90, 1.15, 0.80, 1.10, 1.15, 1.20,  1.00, 1.50, 1.00, 0.75, 0.75, 1.00, 1.00),
+    REMPART  ("rempart",   "Rempart",           PlayerClass.GUERRIER, "Weapon_Shield_Orbis_Knight",     "Tank - Bouclier - Protection",   "Maître de la défense et de la résilience.",      1.20, 0.85, 1.15, 1.10, 0.75, 0.75,  1.25, 0.75, 1.25, 1.00, 0.75, 1.00, 1.00),
 
-    BERSERKER("berserker", "Berserker",         PlayerClass.BARBARE,  "Weapon_Axe_Adamantite",          "Rage - Vitesse - Frénétique",    "Plus il est blessé, plus il devient dangereux.", 1.05, 1.25, 0.85, 0.90, 1.05, 1.15,  1.00, 0.75, 1.50, 1.00, 1.00, 0.75),
-    RAVAGEUR ("ravageur",  "Ravageur",          PlayerClass.BARBARE,  "Weapon_Longsword_Adamantite",    "Arme à deux mains - Exécutions - Dégâts","Frappes puissantes et dégâts massifs.", 1.10, 1.30, 1.00, 1.10, 0.90, 0.90,  1.00, 0.75, 1.00, 1.50, 1.00, 0.75),
-    BAGARREUR("bagarreur", "Bagarreur",         PlayerClass.BARBARE,  "Armor_Cloth_Cindercloth_Hands",  "Corps à corps - Étourdissements - Tenace","Combat brutal à mains nues ou en mêlée.", 1.15, 1.50, 1.10, 0.90, 0.80, 0.50,  0.10, 0.10, 0.10, 0.10, 0.10, 0.10),
+    BERSERKER("berserker", "Berserker",         PlayerClass.BARBARE,  "Weapon_Axe_Adamantite",          "Rage - Vitesse - Frénétique",    "Plus il est blessé, plus il devient dangereux.", 1.05, 1.25, 0.85, 0.90, 1.05, 1.15,  1.00, 0.75, 1.50, 1.00, 0.75, 1.00, 0.75),
+    RAVAGEUR ("ravageur",  "Ravageur",          PlayerClass.BARBARE,  "Weapon_Longsword_Adamantite",    "Arme à deux mains - Exécutions - Dégâts","Frappes puissantes et dégâts massifs.", 1.10, 1.30, 1.00, 1.10, 0.90, 0.90,  1.00, 0.75, 1.00, 1.50, 0.75, 1.00, 0.75),
+    BAGARREUR("bagarreur", "Bagarreur",         PlayerClass.BARBARE,  "Armor_Cloth_Cindercloth_Hands",  "Corps à corps - Étourdissements - Tenace","Combat brutal à mains nues ou en mêlée.", 1.15, 1.50, 1.10, 0.90, 0.80, 0.50,  0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10),
 
-    ARCANISTE      ("arcaniste",       "Arcaniste",       PlayerClass.MAGE, "Weapon_Staff_Crystal_Flame",  "Magie - Sorts - Puissance",      "Lance des sorts dévastateurs depuis la distance.", 0.90, 1.20, 0.85, 0.85, 0.90, 1.05,  1.00, 1.00, 1.00, 0.75, 1.00, 1.50),
-    GARDIEN_DE_GAIA("gardien_de_gaia", "Gardien de Gaïa", PlayerClass.MAGE, "Weapon_Staff_Wood",           "Nature - Soin - Invocation",     "Puise dans la nature pour soigner et invoquer.",   0.90, 0.65, 0.90, 1.25, 0.70, 0.70,  1.00, 1.00, 1.00, 0.75, 1.00, 1.50),
-    VAUDOU         ("vaudou",          "Vaudou",          PlayerClass.MAGE, "Weapon_Spellbook_Frost",      "Malédictions - Debuffs - Zones", "Affaiblit les ennemis par des malédictions.",      1.10, 0.85, 1.15, 1.20, 0.90, 0.90,  1.00, 0.75, 1.00, 1.00, 1.00, 1.50),
+    ARCANISTE      ("arcaniste",       "Arcaniste",       PlayerClass.MAGE, "Weapon_Staff_Crystal_Flame",  "Magie - Sorts - Puissance",      "Lance des sorts dévastateurs depuis la distance.", 0.90, 1.20, 0.85, 0.85, 0.90, 1.05,  1.00, 1.00, 1.00, 0.75, 0.75, 1.00, 1.50),
+    GARDIEN_DE_GAIA("gardien_de_gaia", "Gardien de Gaïa", PlayerClass.MAGE, "Weapon_Staff_Wood",           "Nature - Soin - Invocation",     "Puise dans la nature pour soigner et invoquer.",   0.90, 0.65, 0.90, 1.25, 0.70, 0.70,  1.00, 1.00, 1.00, 0.75, 0.75, 1.00, 1.50),
+    VAUDOU         ("vaudou",          "Vaudou",          PlayerClass.MAGE, "Weapon_Spellbook_Frost",      "Malédictions - Debuffs - Zones", "Affaiblit les ennemis par des malédictions.",      1.10, 0.85, 1.15, 1.20, 0.90, 0.90,  1.00, 0.75, 1.00, 1.00, 0.75, 1.00, 1.50),
 
-    RODEUR     ("rodeur",      "Rodeur",      PlayerClass.TIREUR, "Weapon_Shortbow_Thorium",     "Arc - Traque - Mobilité",        "Traque ses proies avec agilité et précision.",      0.90, 1.15, 0.85, 1.30, 1.05, 1.10,  1.00, 1.00, 1.00, 0.75, 1.50, 0.75),
-    ARBALETRIER("arbaletrier", "Arbalétrier", PlayerClass.TIREUR, "Weapon_Crossbow_Iron",        "Arbalète - Pénétration - Lent",  "Tirs lents mais dévastateurs à longue portée.",    0.90, 1.05, 0.85, 1.25, 1.15, 1.20,  1.00, 1.00, 1.00, 0.75, 1.50, 0.75),
-    LANCIER    ("lancier",     "Lancier",     PlayerClass.TIREUR, "Weapon_Leaf_Spear",           "Lance - Zone - Charge",          "Combat avec une lance, efficace en zone et en charge.", 1.15, 1.15, 1.00, 1.15, 1.10, 0.90,  1.00, 1.00, 1.00, 1.00, 1.00, 0.75);
+    RODEUR     ("rodeur",      "Rodeur",      PlayerClass.TIREUR, "Weapon_Shortbow_Thorium",     "Arc - Traque - Mobilité",        "Traque ses proies avec agilité et précision.",      0.90, 1.15, 0.85, 1.30, 1.05, 1.10,  1.00, 1.00, 1.00, 0.75, 0.75, 1.50, 0.75),
+    ARBALETRIER("arbaletrier", "Arbalétrier", PlayerClass.TIREUR, "Weapon_Crossbow_Iron",        "Arbalète - Pénétration - Lent",  "Tirs lents mais dévastateurs à longue portée.",    0.90, 1.05, 0.85, 1.25, 1.15, 1.20,  1.00, 1.00, 1.00, 0.75, 0.75, 1.50, 0.75),
+    LANCIER    ("lancier",     "Lancier",     PlayerClass.TIREUR, "Weapon_Spear_Iron",           "Lance - Zone - Charge",          "Combat avec une lance, efficace en zone et en charge.", 1.15, 1.15, 1.00, 1.15, 1.10, 0.90,  1.00, 1.00, 1.00, 0.75, 1.50, 1.00, 0.75);
 
     private final String id;
     private final String displayName;
@@ -40,6 +40,7 @@ public enum PlayerSpecialization {
     private final double weaponDagueMult;
     private final double weaponHacheMult;
     private final double weaponDeuxMainsMult;
+    private final double weaponLanceMult;
     private final double weaponDistanceMult;
     private final double weaponMagieMult;
 
@@ -59,6 +60,7 @@ public enum PlayerSpecialization {
                          double weaponDagueMult,
                          double weaponHacheMult,
                          double weaponDeuxMainsMult,
+                         double weaponLanceMult,
                          double weaponDistanceMult,
                          double weaponMagieMult) {
         this.id = id;
@@ -77,6 +79,7 @@ public enum PlayerSpecialization {
         this.weaponDagueMult = weaponDagueMult;
         this.weaponHacheMult = weaponHacheMult;
         this.weaponDeuxMainsMult = weaponDeuxMainsMult;
+        this.weaponLanceMult = weaponLanceMult;
         this.weaponDistanceMult = weaponDistanceMult;
         this.weaponMagieMult = weaponMagieMult;
     }
@@ -97,6 +100,7 @@ public enum PlayerSpecialization {
     public double getWeaponDagueMult()      { return weaponDagueMult; }
     public double getWeaponHacheMult()      { return weaponHacheMult; }
     public double getWeaponDeuxMainsMult()  { return weaponDeuxMainsMult; }
+    public double getWeaponLanceMult()      { return weaponLanceMult; }
     public double getWeaponDistanceMult()   { return weaponDistanceMult; }
     public double getWeaponMagieMult()      { return weaponMagieMult; }
 

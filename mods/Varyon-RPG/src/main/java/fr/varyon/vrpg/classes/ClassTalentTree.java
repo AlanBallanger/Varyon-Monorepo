@@ -241,6 +241,22 @@ public final class ClassTalentTree {
             new Node("Mise en Joue",         "Actif",  "Prendre le temps d'ajuster — pour ne jamais manquer.",               "Prend le temps d'ajuster son tir. Le prochain carreau est garanti critique et inflige des dégâts considérablement augmentés.",     ABI + "Mise_En_Joue.png",         5),
         });
 
+        final String LCI = "Classes_Icons/Lancer/";
+        SPEC_TREES.put(PlayerSpecialization.LANCIER, new Node[]{
+            new Node("Percée",                "Actif",  "Reculer pour mieux piquer.",                                          "Ruée vers l'arrière.",                                                                       LCI + "Percée.png",                5),
+            new Node("Discipline",            "Passif", "L'expérience forge ceux qui restent debout.",                          "Gain d'expérience augmenté lorsque les PV sont supérieurs à 50 %.",                          LCI + "Discipline.png",            5),
+            new Node("Charge Héroïque",       "Actif",  "Il ne charge pas — il renverse.",                                     "Charge une cible et l'étourdit brièvement.",                                                 LCI + "Charge_Héroique.png",       5),
+            new Node("Garde du Lancier",      "Actif",  "Un instant de calme avant la tempête.",                               "Adopte une posture défensive. La prochaine attaque reçue dans les 3 secondes est annulée et arme un coup dévastateur.", LCI + "Garde_Du_Lancier.png", 5),
+            new Node("Harponnage",            "Actif",  "La lance revient toujours à son lanceur — avec la proie.",            "Lance sa lance, inflige des dégâts et attire la cible vers soi.",                            LCI + "Harponnage.png",            5),
+            new Node("Formation de Piques",   "Actif",  "Un mur de pointes que l'ennemi doit traverser.",                     "Crée une zone devant soi. Les ennemis qui la traversent subissent des dégâts et sont ralentis.", LCI + "Formation_De_Piques.png",   5),
+            new Node("Posture Dominante",     "Passif", "Toucher d'abord, c'est dicter les règles du combat.",                 "Après avoir touché un ennemi en mêlée, les dégâts reçus sont réduits pendant quelques secondes.", LCI + "Posture_Dominante.png",    5),
+            new Node("Perce-Cœur",            "Passif", "Un coup critique bien placé laisse une blessure qui dure.",           "Les coups critiques infligent un saignement.",                                               LCI + "Perce_Coeur.png",           5),
+            new Node("Chasseur de Géants",    "Passif", "La taille est un avantage — jusqu'à ce que tu te retrouves face à lui.", "Inflige davantage de dégâts aux ennemis ayant plus de PV maximum que vous.",             LCI + "Chasseur_De_Géants.png",    5),
+            new Node("Briseur de Ligne",      "Passif", "Repousser, attirer, étourdir — puis frapper.",                       "Les ennemis repoussés, attirés ou étourdis subissent davantage de dégâts pendant quelques secondes.", LCI + "Controle_De_L_Espace.png", 5),
+            new Node("Portée Maîtrisée",      "Passif", "La lance a deux portées idéales — et toutes les deux font mal.",     "Inflige davantage de dégâts aux ennemis à moins de 3 mètres ou à plus de 10 mètres.",       LCI + "Portée_Maitrisée.png",      5),
+            new Node("Empalement",            "Actif",  "La lance entre, la proie ne sort plus.",                              "Coup de lance précis qui inflige un saignement et immobilise brièvement la cible.",           LCI + "Empalement.png",            5),
+        });
+
         final String RI = "Classes_Icons/Rampart/";
         SPEC_TREES.put(PlayerSpecialization.REMPART, new Node[]{
             new Node("Collision",              "Actif",  "Mieux vaut ne pas être sur son passage.",                                   "Charge en ligne droite en repoussant et frappant les ennemis sur le passage.",     RI + "Charge_Lourde.png",         5),

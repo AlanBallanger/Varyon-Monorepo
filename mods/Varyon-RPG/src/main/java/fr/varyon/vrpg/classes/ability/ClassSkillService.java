@@ -71,6 +71,9 @@ public final class ClassSkillService {
     private final fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
     private fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem rodeurPoisonSystem;
     @Nullable private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
+    private final fr.varyon.vrpg.classes.lancier.LancierState lancierState;
+    private final fr.varyon.vrpg.classes.lancier.LancierBleedSystem lancierBleedSystem;
+    @Nullable private fr.varyon.vrpg.classes.lancier.FormationDePiquesZoneSystem formationZoneSystem;
     private final ClassSkillCooldowns cooldowns = new ClassSkillCooldowns();
     private final Map<String, SkillCaster> casters = new HashMap<>();
 
@@ -85,7 +88,9 @@ public final class ClassSkillService {
                              @Nonnull fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaState gardienState,
                              @Nonnull fr.varyon.vrpg.classes.vaudou.VaudouState vaudouState,
                              @Nonnull fr.varyon.vrpg.classes.rodeur.RodeurState rodeurState,
-                             @Nonnull fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState) {
+                             @Nonnull fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState,
+                             @Nonnull fr.varyon.vrpg.classes.lancier.LancierState lancierState,
+                             @Nonnull fr.varyon.vrpg.classes.lancier.LancierBleedSystem lancierBleedSystem) {
         this.classManager = classManager;
         this.duellisteState = duellisteState;
         this.ombreState = ombreState;
@@ -98,6 +103,8 @@ public final class ClassSkillService {
         this.vaudouState = vaudouState;
         this.rodeurState = rodeurState;
         this.arbaState = arbaState;
+        this.lancierState = lancierState;
+        this.lancierBleedSystem = lancierBleedSystem;
         registerCasters();
     }
 
@@ -111,6 +118,10 @@ public final class ClassSkillService {
 
     public void setCarreauExplosifGroundSystem(@Nonnull fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem sys) {
         this.carreauExplosifGroundSystem = sys;
+    }
+
+    public void setFormationDePiquesZoneSystem(@Nonnull fr.varyon.vrpg.classes.lancier.FormationDePiquesZoneSystem sys) {
+        this.formationZoneSystem = sys;
     }
 
     public ClassSkillCooldowns getCooldowns() {
@@ -258,6 +269,19 @@ public final class ClassSkillService {
             (uuid, pr, er, st, cb) -> tryCastCoupDeBotte(uuid, pr, er, st, cb));
         casters.put(fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID,
             (uuid, pr, er, st, cb) -> tryCastMiseEnJou(uuid, pr));
+        // Lancier
+        casters.put(fr.varyon.vrpg.classes.lancier.PerceeSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastPercee(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastChargeHeroique(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastGardeDuLancier(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.lancier.HarponnageSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastHarponnage(uuid, pr, er, st, cb));
+        casters.put(fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastFormationDePiques(uuid, pr, er, st));
+        casters.put(fr.varyon.vrpg.classes.lancier.EmpalementSkill.SKILL_ID,
+            (uuid, pr, er, st, cb) -> tryCastEmpalement(uuid, pr, er, st));
     }
 
     public boolean tryCast(@Nonnull String skillId,
@@ -1597,6 +1621,19 @@ public final class ClassSkillService {
             (acc, cls) -> fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.TALENT_NODE_ID)));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID,
             (acc, cls) -> fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.TALENT_NODE_ID)));
+
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.lancier.PerceeSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.lancier.PerceeSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.lancier.PerceeSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.lancier.HarponnageSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.lancier.HarponnageSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.lancier.HarponnageSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.lancier.EmpalementSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.lancier.EmpalementSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.lancier.EmpalementSkill.TALENT_NODE_ID)));
     }
 
     private static long echoTemporelCd(@Nonnull ClassAccount acc, @Nonnull PlayerClass cls,
@@ -4792,6 +4829,333 @@ public final class ClassSkillService {
         ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID);
         notifySkill(uuid, "Mise en Joue");
+        return true;
+    }
+
+    // =====================================================================
+    // Lancier
+    // =====================================================================
+
+    private boolean isLancier(@Nonnull ClassAccount acc) {
+        return acc.getActiveClass() == PlayerClass.TIREUR
+            && acc.getActiveSpec(PlayerClass.TIREUR) == PlayerSpecialization.LANCIER;
+    }
+
+    public boolean tryCastPercee(@Nonnull UUID uuid,
+                                  @Nonnull PlayerRef playerRef,
+                                  @Nonnull Ref<EntityStore> entityRef,
+                                  @Nonnull Store<EntityStore> store,
+                                  @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.PerceeSkill.TALENT_NODE_ID);
+        if (rank <= 0) rank = 1;
+        long cdMs = fr.varyon.vrpg.classes.lancier.PerceeSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.lancier.PerceeSkill.SKILL_ID, cdMs)) return false;
+        float staminaCost = fr.varyon.vrpg.classes.lancier.PerceeSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = hr.getDirection();
+                double dx = dir.x, dz = dir.z;
+                double len = Math.sqrt(dx*dx + dz*dz);
+                if (len > 1e-6) { dx /= len; dz /= len; }
+
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "DashBackward", true,
+                    commandBuffer != null ? commandBuffer : store);
+                ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, tc.getPosition(), commandBuffer);
+
+                double dist = fr.varyon.vrpg.classes.lancier.PerceeSkill.dashDistanceForRank(rank);
+                org.joml.Vector3d newPos = new org.joml.Vector3d(
+                    tc.getPosition().x - dx * dist,
+                    tc.getPosition().y,
+                    tc.getPosition().z - dz * dist);
+                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
+                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(
+                    curRot.pitch(), curRot.yaw(), curRot.roll());
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(newPos, keepRot);
+                tele.withoutVelocityReset();
+                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(-dx * 30.0, 0.2, -dz * 30.0);
+                    vel.setClient(dashVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.lancier.PerceeSkill.SKILL_ID);
+        notifySkill(uuid, "Percée");
+        return true;
+    }
+
+    public boolean tryCastChargeHeroique(@Nonnull UUID uuid,
+                                          @Nonnull PlayerRef playerRef,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull Store<EntityStore> store,
+                                          @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isLancier(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        long cdMs = fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.SKILL_ID, cdMs)) return false;
+        float staminaCost = fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = hr.getDirection();
+                double dx = dir.x, dz = dir.z;
+                double len = Math.sqrt(dx*dx + dz*dz);
+                if (len > 1e-6) { dx /= len; dz /= len; }
+
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "DashForward", true,
+                    commandBuffer != null ? commandBuffer : store);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", playerRef, tc.getPosition(), commandBuffer);
+
+                double dist = fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.chargeDistance();
+                org.joml.Vector3d startPos = tc.getPosition();
+                float dmg = fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.computeDamage(rank, playerRef);
+                long stunMs = fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.stunMsForRank(rank);
+                double hitRadius = fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.hitRadius();
+                long casterIdx = entityRef.getIndex();
+                java.util.HashSet<Long> hitSet = new java.util.HashSet<>();
+
+                double teleportDist = 2.0;
+                org.joml.Vector3d newPos = new org.joml.Vector3d(
+                    startPos.x + dx * teleportDist, startPos.y, startPos.z + dz * teleportDist);
+                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
+                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(
+                    curRot.pitch(), curRot.yaw(), curRot.roll());
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(newPos, keepRot);
+                tele.withoutVelocityReset();
+                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+
+                for (double t = 0.5; t <= dist; t += 0.8) {
+                    org.joml.Vector3d sample = new org.joml.Vector3d(
+                        startPos.x + dx * t, startPos.y + 0.8, startPos.z + dz * t);
+                    com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                        .selectNearbyEntities(store, sample, hitRadius, targetRef -> {
+                            try {
+                                long tidx = targetRef.getIndex();
+                                if (tidx == casterIdx || !hitSet.add(tidx)) return;
+                                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
+                                    targetRef, store,
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+                                applyEntityEffect("Vrpg_Stun", stunMs / 1000f, targetRef, store);
+                                lancierState.armCcDamage(uuid, acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE),
+                                    fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_DURATION_MS);
+                            } catch (Exception ignored) {}
+                        }, ref -> ref.getIndex() != casterIdx);
+                }
+
+                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
+                    commandBuffer != null
+                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
+                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                if (vel != null) {
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(dx * 36.0, 0.5, dz * 36.0);
+                    vel.setClient(dashVel);
+                    vel.getInstructions().clear();
+                    vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.SKILL_ID);
+        notifySkill(uuid, "Charge Héroïque");
+        return true;
+    }
+
+    public boolean tryCastGardeDuLancier(@Nonnull UUID uuid,
+                                          @Nonnull PlayerRef playerRef,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isLancier(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        long cdMs = fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.SKILL_ID, cdMs)) return false;
+        float staminaCost = fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        lancierState.armGarde(uuid, rank, fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.windowMsForRank(rank));
+        try {
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "Guard", true, store);
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Sword_T1_Block_Local", playerRef, tc.getPosition(), null);
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.SKILL_ID);
+        notifySkill(uuid, "Garde du Lancier");
+        return true;
+    }
+
+    public boolean tryCastHarponnage(@Nonnull UUID uuid,
+                                      @Nonnull PlayerRef playerRef,
+                                      @Nonnull Ref<EntityStore> entityRef,
+                                      @Nonnull Store<EntityStore> store,
+                                      @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isLancier(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.HarponnageSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        long cdMs = fr.varyon.vrpg.classes.lancier.HarponnageSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.lancier.HarponnageSkill.SKILL_ID, cdMs)) return false;
+        float staminaCost = fr.varyon.vrpg.classes.lancier.HarponnageSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store,
+            fr.varyon.vrpg.classes.lancier.HarponnageSkill.range());
+        if (targeted == null) return false;
+
+        try {
+            TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
+            TransformComponent tcTarget = store.getComponent(targeted, TransformComponent.getComponentType());
+            if (tcCaster != null && tcTarget != null) {
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "Throw", true,
+                    commandBuffer != null ? commandBuffer : store);
+                ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, tcCaster.getPosition(), commandBuffer);
+
+                float dmg = fr.varyon.vrpg.classes.lancier.HarponnageSkill.computeDamage(rank, playerRef);
+                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+
+                org.joml.Vector3d toPlayer = new org.joml.Vector3d(tcCaster.getPosition()).sub(tcTarget.getPosition());
+                double pullLen = toPlayer.length();
+                if (pullLen > 1e-6) toPlayer.mul(1.0 / pullLen);
+                double pullStrength = fr.varyon.vrpg.classes.lancier.HarponnageSkill.pullStrength();
+                com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent kbComp =
+                    new com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent();
+                kbComp.setVelocity(new org.joml.Vector3d(toPlayer.x * pullStrength, 0.3, toPlayer.z * pullStrength));
+                kbComp.setVelocityType(com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                kbComp.setDuration(0.0f);
+                (commandBuffer != null ? commandBuffer : store).putComponent(targeted,
+                    com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent.getComponentType(), kbComp);
+
+                int controleRank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE);
+                if (controleRank > 0) lancierState.armCcDamage(uuid, controleRank, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_DURATION_MS);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.lancier.HarponnageSkill.SKILL_ID);
+        notifySkill(uuid, "Harponnage");
+        return true;
+    }
+
+    public boolean tryCastFormationDePiques(@Nonnull UUID uuid,
+                                             @Nonnull PlayerRef playerRef,
+                                             @Nonnull Ref<EntityStore> entityRef,
+                                             @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isLancier(acc)) return false;
+        if (formationZoneSystem == null) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        long cdMs = fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.SKILL_ID, cdMs)) return false;
+        float staminaCost = fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        try {
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null && hr != null) {
+                org.joml.Vector3d dir = new org.joml.Vector3d(hr.getDirection());
+                dir.y = 0;
+                double len = dir.length();
+                if (len > 1e-6) dir.mul(1.0 / len);
+                org.joml.Vector3d zoneStart = new org.joml.Vector3d(tc.getPosition()).add(new org.joml.Vector3d(dir).mul(1.5));
+                float dmgPerTick = fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.computeDamagePerTick(rank, playerRef);
+                formationZoneSystem.createZone(uuid, entityRef, zoneStart, dir, rank, dmgPerTick);
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "Guard", true, store);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.SKILL_ID);
+        notifySkill(uuid, "Formation de Piques");
+        return true;
+    }
+
+    public boolean tryCastEmpalement(@Nonnull UUID uuid,
+                                      @Nonnull PlayerRef playerRef,
+                                      @Nonnull Ref<EntityStore> entityRef,
+                                      @Nonnull Store<EntityStore> store) {
+        ClassAccount acc = classManager.getOrLoad(uuid);
+        if (!isLancier(acc)) return false;
+        boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
+        int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.EmpalementSkill.TALENT_NODE_ID);
+        if (rank <= 0) return false;
+        long cdMs = fr.varyon.vrpg.classes.lancier.EmpalementSkill.cooldownMsForRank(rank);
+        if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.lancier.EmpalementSkill.SKILL_ID, cdMs)) return false;
+        float staminaCost = fr.varyon.vrpg.classes.lancier.EmpalementSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+
+        Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store,
+            fr.varyon.vrpg.classes.lancier.EmpalementSkill.range());
+
+        try {
+            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "DashForward", true, store);
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Sword_T2_Swing", playerRef, tc.getPosition(), null);
+
+            if (targeted != null) {
+                float dmg = fr.varyon.vrpg.classes.lancier.EmpalementSkill.computeDamage(rank, playerRef);
+                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store,
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
+                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+
+                long rootMs = fr.varyon.vrpg.classes.lancier.EmpalementSkill.rootDurationMsForRank(rank);
+                long bleedMs = fr.varyon.vrpg.classes.lancier.EmpalementSkill.bleedDurationMsForRank(rank);
+                float bleedPct = fr.varyon.vrpg.classes.lancier.EmpalementSkill.bleedPctPerSForRank(rank);
+                int ticks = (int)(bleedMs / 1000L);
+                float dpt = dmg * bleedPct;
+                lancierBleedSystem.applyBleed(targeted, dpt, ticks, store);
+                lancierState.rootEntity(targeted.getIndex(), rootMs);
+
+                int controleRank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE);
+                if (controleRank > 0) lancierState.armCcDamage(uuid, controleRank, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_DURATION_MS);
+            }
+        } catch (Exception ignored) {}
+
+        ClassSkillStamina.consume(playerRef, staminaCost);
+        if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.lancier.EmpalementSkill.SKILL_ID);
+        notifySkill(uuid, "Empalement");
         return true;
     }
 

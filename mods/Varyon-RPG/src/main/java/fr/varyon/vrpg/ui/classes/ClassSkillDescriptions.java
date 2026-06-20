@@ -180,6 +180,19 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.GARDIEN_NODE   -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.gardienStatLine(rank);
             case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.GRACE_NODE     -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.graceStatLine(rank);
             case fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.CYCLE_NODE     -> fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs.cycleStatLine(rank);
+            // Lancier
+            case fr.varyon.vrpg.classes.lancier.PerceeSkill.SKILL_ID              -> fr.varyon.vrpg.classes.lancier.PerceeSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.SKILL_ID      -> fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.SKILL_ID      -> fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.lancier.HarponnageSkill.SKILL_ID          -> fr.varyon.vrpg.classes.lancier.HarponnageSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.SKILL_ID   -> fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.lancier.EmpalementSkill.SKILL_ID          -> fr.varyon.vrpg.classes.lancier.EmpalementSkill.statLineForRank(rank);
+            case fr.varyon.vrpg.classes.lancier.LancierPassifs.DISCIPLINE_NODE    -> fr.varyon.vrpg.classes.lancier.LancierPassifs.disciplineStatLine(rank);
+            case fr.varyon.vrpg.classes.lancier.LancierPassifs.POSTURE_NODE       -> fr.varyon.vrpg.classes.lancier.LancierPassifs.postureStatLine(rank);
+            case fr.varyon.vrpg.classes.lancier.LancierPassifs.PERCE_COEUR_NODE   -> fr.varyon.vrpg.classes.lancier.LancierPassifs.perceCoeurStatLine(rank);
+            case fr.varyon.vrpg.classes.lancier.LancierPassifs.CHASSEUR_GEANTS_NODE -> fr.varyon.vrpg.classes.lancier.LancierPassifs.geantsStatLine(rank);
+            case fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE      -> fr.varyon.vrpg.classes.lancier.LancierPassifs.controleStatLine(rank);
+            case fr.varyon.vrpg.classes.lancier.LancierPassifs.PORTEE_NODE        -> fr.varyon.vrpg.classes.lancier.LancierPassifs.porteeStatLine(rank);
             default -> null;
         };
     }

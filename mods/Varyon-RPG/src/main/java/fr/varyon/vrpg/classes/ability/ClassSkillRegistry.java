@@ -213,6 +213,23 @@ public final class ClassSkillRegistry {
                 default -> null;
             };
         }
+        if (activeClass == PlayerClass.TIREUR && spec == PlayerSpecialization.LANCIER) {
+            return switch (nodeIndex) {
+                case 0  -> fr.varyon.vrpg.classes.lancier.PerceeSkill.SKILL_ID;
+                case 1  -> fr.varyon.vrpg.classes.lancier.LancierPassifs.DISCIPLINE_NODE;
+                case 2  -> fr.varyon.vrpg.classes.lancier.ChargeHeroiqueSkill.SKILL_ID;
+                case 3  -> fr.varyon.vrpg.classes.lancier.GardeDuLancierSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.lancier.HarponnageSkill.SKILL_ID;
+                case 5  -> fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.SKILL_ID;
+                case 6  -> fr.varyon.vrpg.classes.lancier.LancierPassifs.POSTURE_NODE;
+                case 7  -> fr.varyon.vrpg.classes.lancier.LancierPassifs.PERCE_COEUR_NODE;
+                case 8  -> fr.varyon.vrpg.classes.lancier.LancierPassifs.CHASSEUR_GEANTS_NODE;
+                case 9  -> fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE;
+                case 10 -> fr.varyon.vrpg.classes.lancier.LancierPassifs.PORTEE_NODE;
+                case 11 -> fr.varyon.vrpg.classes.lancier.EmpalementSkill.SKILL_ID;
+                default -> null;
+            };
+        }
         if (activeClass == PlayerClass.MAGE && spec == PlayerSpecialization.ARCANISTE) {
             return switch (nodeIndex) {
                 case 0  -> fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID;
