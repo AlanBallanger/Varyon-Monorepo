@@ -56,6 +56,9 @@ public class UICommand extends AbstractAsyncCommand {
 
             SimpleUIPage uiPage = new SimpleUIPage(playerRefComponent, tab, isAdmin);
             playerComponent.getPageManager().openCustomPage(playerRef, store, uiPage);
+            playerComponent.getHudManager().getCustomHuds().values().forEach(
+                com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud::show
+            );
         }, world);
     }
 }

@@ -162,7 +162,7 @@ $Sounds = "Sounds.ui";
             Background: (Color: #232d42);
             Padding: (Top: 7, Bottom: 7);
 
-            Group #MenuGenXPPanel {
+            Group #MenuSpePanel {
               LayoutMode: Top;
               Anchor: (Left: 0, Right: 0);
               Padding: (Bottom: 3);
@@ -171,25 +171,25 @@ $Sounds = "Sounds.ui";
                 LayoutMode: Left;
                 Anchor: (Height: 18);
 
-                Group #MenuGenLevelBg {
+                Group #MenuSpeLevelBg {
                   Anchor: (Width: 52, Height: 18);
                   Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
                   Background: PatchStyle(Color: #2a1a00e0);
                   LayoutMode: Middle;
-                  Label #MenuGenLevel {
+                  Label #MenuSpeLevel {
                     Text: "";
                     Style: (FontSize: 11, TextColor: #FFD866, RenderBold: true, VerticalAlignment: Center);
                   }
                 }
 
-                Label #MenuGenLevelLabel {
+                Label #MenuSpeName {
                   Text: "";
                   Anchor: (Height: 18);
                   FlexWeight: 1;
                   Style: (FontSize: 11, TextColor: #b8c8d8, VerticalAlignment: Center);
                 }
 
-                Label #MenuGenXPText {
+                Label #MenuSpeXPText {
                   Text: "";
                   Anchor: (Height: 18);
                   Style: (FontSize: 10, TextColor: #8899aa, VerticalAlignment: Center);
@@ -200,33 +200,14 @@ $Sounds = "Sounds.ui";
                 LayoutMode: Left;
                 Anchor: (Height: 12, Left: 0, Right: 0);
 
-                Group #MenuGenXPTrack {
+                Group #MenuSpeXPTrack {
                   FlexWeight: 1;
                   Anchor: (Height: 12);
-                  Background: PatchStyle(TexturePath: "Common/ProgressBarEmpty.png", Border: 4);
-                  ProgressBar #MenuGenXP {
-                    Anchor: (Top: 1, Left: 2, Right: 2, Bottom: 1);
+                  Background: PatchStyle(TexturePath: "Common/Gauge.png", Border: 0);
+                  ProgressBar #MenuSpeXP {
+                    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
                     Value: 0.0;
-                    BarTexturePath: "Common/ProgressBarFill.png";
-                  }
-                }
-
-                Group { Anchor: (Width: 4); }
-
-                Button #MenuGenDetailBtn {
-                  Anchor: (Width: 54, Height: 14);
-                  Style: ButtonStyle(
-                    Default: (Background: (Color: #2a3545)),
-                    Hovered: (Background: (Color: #4a6ea8)),
-                    Pressed: (Background: (Color: #2a3545)),
-                    Sounds: $Sounds.@ButtonsLight
-                  );
-                  Group {
-                    LayoutMode: Middle;
-                    Label { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-                      Text: "Details";
-                      Style: (FontSize: 11, TextColor: #dceeff, VerticalAlignment: Center, HorizontalAlignment: Center);
-                    }
+                    BarTexturePath: "Common/Gauge_Fill.png";
                   }
                 }
               }
@@ -273,11 +254,11 @@ $Sounds = "Sounds.ui";
                 Group #MenuJob1XPTrack {
                   FlexWeight: 1;
                   Anchor: (Height: 11);
-                  Background: PatchStyle(TexturePath: "Common/ProgressBarEmpty.png", Border: 4);
+                  Background: PatchStyle(TexturePath: "Common/Gauge.png", Border: 0);
                   ProgressBar #MenuJob1XP {
-                    Anchor: (Top: 1, Left: 2, Right: 2, Bottom: 1);
+                    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
                     Value: 0.0;
-                    BarTexturePath: "Common/ProgressBarFill.png";
+                    BarTexturePath: "Common/Gauge_Fill.png";
                   }
                 }
 
@@ -342,11 +323,11 @@ $Sounds = "Sounds.ui";
                 Group #MenuJob2XPTrack {
                   FlexWeight: 1;
                   Anchor: (Height: 11);
-                  Background: PatchStyle(TexturePath: "Common/ProgressBarEmpty.png", Border: 4);
+                  Background: PatchStyle(TexturePath: "Common/Gauge.png", Border: 0);
                   ProgressBar #MenuJob2XP {
-                    Anchor: (Top: 1, Left: 2, Right: 2, Bottom: 1);
+                    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
                     Value: 0.0;
-                    BarTexturePath: "Common/ProgressBarFill.png";
+                    BarTexturePath: "Common/Gauge_Fill.png";
                   }
                 }
 

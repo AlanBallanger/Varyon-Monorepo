@@ -233,11 +233,6 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
 
         eventBuilder.addEventBinding(
             CustomUIEventBindingType.Activating,
-            "#MenuGenDetailBtn",
-            EventData.of("Action", "command").append("Command", "/vrpg")
-        );
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
             "#MenuJob1DetailBtn",
             EventData.of("Action", "command").append("Command", "/vp")
         );
@@ -317,6 +312,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
                 HytlSkinPreview.applyPlaytimeHeadFromAvatarPng(cb, uuid, avatarPng,
                         VaryonUIPlugin.getInstance(), "#PlaytimeHeadPreview");
                 sendUpdate(cb, eb, false);
+                restoreHuds();
             } catch (Throwable t) {
                 LOG.log(Level.WARNING, "[PortraitPlaytime] async menu refresh failed uuid=" + uuid, t);
             } finally {
@@ -1253,7 +1249,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         } else if ("close".equals(data.action)) {
             Player player = store.getComponent(ref, Player.getComponentType());
             if (player != null) {
-                player.getPageManager().setPage(ref, store, Page.None);
+                closeAndRestoreHuds(ref, store, player);
             }
         } else if ("accueilshortcut".equals(data.action) && data.shortcutMode != null) {
             PlayerRef playerRefComp = store.getComponent(ref, PlayerRef.getComponentType());
@@ -1314,14 +1310,14 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             Player player = store.getComponent(ref, Player.getComponentType());
             PlayerRef playerRefComponent = store.getComponent(ref, PlayerRef.getComponentType());
             if (player != null && playerRefComponent != null) {
-                player.getPageManager().setPage(ref, store, Page.None);
+                closeAndRestoreHuds(ref, store, player);
                 playerRefComponent.getPacketHandler().write(new OpenChatWithCommand(data.command));
             }
         } else if ("command".equals(data.action) && data.command != null) {
             Player player = store.getComponent(ref, Player.getComponentType());
             PlayerRef playerRefComponent = store.getComponent(ref, PlayerRef.getComponentType());
             if (player != null && playerRefComponent != null) {
-                player.getPageManager().setPage(ref, store, Page.None);
+                closeAndRestoreHuds(ref, store, player);
                 String command = data.command.startsWith("/") ? data.command.substring(1) : data.command;
                 String cmd = command;
                 PlayerRef pref = playerRefComponent;
@@ -1338,6 +1334,39 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
                 }
             }
         }
+    }
+
+    @Override
+    public void onDismiss(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
+        super.onDismiss(ref, store);
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player != null) {
+            player.getHudManager().getCustomHuds().values().forEach(
+                com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud::show
+            );
+        }
+    }
+
+    private void closeAndRestoreHuds(@Nonnull Ref<EntityStore> ref,
+                                     @Nonnull Store<EntityStore> store,
+                                     @Nonnull Player player) {
+        player.getPageManager().setPage(ref, store, Page.None);
+    }
+
+    private void restoreHuds() {
+        Ref<EntityStore> ref = (Ref<EntityStore>) playerRef.getReference();
+        if (ref == null || !ref.isValid()) return;
+        Store<EntityStore> store = ref.getStore();
+        World world = store.getExternalData().getWorld();
+        if (world == null) return;
+        world.execute(() -> {
+            Player player = store.getComponent(ref, Player.getComponentType());
+            if (player != null) {
+                player.getHudManager().getCustomHuds().values().forEach(
+                    com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud::show
+                );
+            }
+        });
     }
 
     public static class EventDataClass {
