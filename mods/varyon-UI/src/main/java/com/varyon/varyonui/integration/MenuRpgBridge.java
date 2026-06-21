@@ -22,6 +22,8 @@ public final class MenuRpgBridge {
     private static final String CLASS_PROGRESS    = "fr.varyon.vrpg.classes.ClassProgress";
     private static final String PLAYER_CLASS      = "fr.varyon.vrpg.classes.PlayerClass";
     private static final String PLAYER_SPEC       = "fr.varyon.vrpg.classes.PlayerSpecialization";
+    private static final String CLASS_STAT_ENGINE = "fr.varyon.vrpg.classes.ClassStatEngine";
+    private static final String CLASS_PLAYER_STATS = "fr.varyon.vrpg.classes.ClassPlayerStats";
     private static final String PROF_MANAGER      = "fr.varyon.vrpg.rpg.ProfessionManager";
     private static final String PLAYER_ACCOUNT    = "fr.varyon.vrpg.rpg.PlayerAccount";
     private static final String PROFESSION        = "fr.varyon.vrpg.rpg.Profession";
@@ -35,6 +37,13 @@ public final class MenuRpgBridge {
             new PatchStyle().setTexturePath(Value.of("Common/Gauge.png")).setBorder(Value.of(0));
     private static final PatchStyle CLEAR =
             new PatchStyle().setColor(Value.of("#00000000"));
+
+    private static final PatchStyle ICON_HP          = new PatchStyle().setTexturePath(Value.of("Icons/health.png"));
+    private static final PatchStyle ICON_ARM         = new PatchStyle().setTexturePath(Value.of("Icons/defense.png"));
+    private static final PatchStyle ICON_STA         = new PatchStyle().setTexturePath(Value.of("Icons/stamina.png"));
+    private static final PatchStyle ICON_ATK         = new PatchStyle().setTexturePath(Value.of("Icons/attack.png"));
+    private static final PatchStyle ICON_CRIT_CHANCE = new PatchStyle().setTexturePath(Value.of("Icons/taux_crit.png"));
+    private static final PatchStyle ICON_CRIT_DAMAGE = new PatchStyle().setTexturePath(Value.of("Icons/degat_crit.png"));
 
     private MenuRpgBridge() {}
 
@@ -53,6 +62,7 @@ public final class MenuRpgBridge {
 
             applyClassSection(ui, plugin, pluginClass, ldr, playerId);
             applyJobSection(ui, plugin, pluginClass, ldr, playerId);
+            applyStatsSection(ui, plugin, pluginClass, ldr, playerId);
         } catch (Throwable e) {
             LOG.log(Level.WARNING, "[MenuRpgBridge] erreur XP menu", unwrap(e));
             applyFallback(ui);
@@ -170,10 +180,62 @@ public final class MenuRpgBridge {
         ui.set(p + "XP.Value", 0.0);
     }
 
+    private static void applyStatsSection(UICommandBuilder ui, Object plugin, Class<?> pluginClass,
+                                           ClassLoader ldr, UUID uuid) throws ReflectiveOperationException {
+        Object classManager = access(pluginClass.getMethod("getClassManager")).invoke(plugin);
+        if (classManager == null) { emptyStats(ui); return; }
+
+        Class<?> cmClass = Class.forName(CLASS_MANAGER, true, ldr);
+        Class<?> statEngineClass = Class.forName(CLASS_STAT_ENGINE, true, ldr);
+        Class<?> statsClass = Class.forName(CLASS_PLAYER_STATS, true, ldr);
+
+        Object statEngine = access(cmClass.getMethod("getStatEngine")).invoke(classManager);
+        if (statEngine == null) { emptyStats(ui); return; }
+
+        Object stats = access(statEngineClass.getMethod("getStats", UUID.class)).invoke(statEngine, uuid);
+        if (stats == null) { emptyStats(ui); return; }
+
+        int maxHp        = ((Number) access(statsClass.getMethod("maxHp")).invoke(stats)).intValue();
+        int atk          = ((Number) access(statsClass.getMethod("atk")).invoke(stats)).intValue();
+        int armorPct     = ((Number) access(statsClass.getMethod("armorPct")).invoke(stats)).intValue();
+        int maxStamina   = ((Number) access(statsClass.getMethod("maxStamina")).invoke(stats)).intValue();
+        int critChancePct = ((Number) access(statsClass.getMethod("critChancePct")).invoke(stats)).intValue();
+        int critDamagePct = ((Number) access(statsClass.getMethod("critDamagePct")).invoke(stats)).intValue();
+
+        ui.setObject("#SidebarStatHPIcon.Background",         ICON_HP);
+        ui.setObject("#SidebarStatArmorIcon.Background",      ICON_ARM);
+        ui.setObject("#SidebarStatStaminaIcon.Background",    ICON_STA);
+        ui.setObject("#SidebarStatATKIcon.Background",        ICON_ATK);
+        ui.setObject("#SidebarStatCritChanceIcon.Background", ICON_CRIT_CHANCE);
+        ui.setObject("#SidebarStatCritDamageIcon.Background", ICON_CRIT_DAMAGE);
+        ui.set("#SidebarStatHPValueMain.TextSpans",         Message.raw(String.valueOf(maxHp)));
+        ui.set("#SidebarStatArmorValueMain.TextSpans",      Message.raw(armorPct + "%"));
+        ui.set("#SidebarStatStaminaValueMain.TextSpans",    Message.raw(String.valueOf(maxStamina)));
+        ui.set("#SidebarStatATKValueMain.TextSpans",        Message.raw(String.valueOf(atk)));
+        ui.set("#SidebarStatCritChanceValueMain.TextSpans", Message.raw(critChancePct + "%"));
+        ui.set("#SidebarStatCritDamageValueMain.TextSpans", Message.raw("+" + critDamagePct + "%"));
+    }
+
+    private static void emptyStats(UICommandBuilder ui) {
+        ui.setObject("#SidebarStatHPIcon.Background",         ICON_HP);
+        ui.setObject("#SidebarStatArmorIcon.Background",      ICON_ARM);
+        ui.setObject("#SidebarStatStaminaIcon.Background",    ICON_STA);
+        ui.setObject("#SidebarStatATKIcon.Background",        ICON_ATK);
+        ui.setObject("#SidebarStatCritChanceIcon.Background", ICON_CRIT_CHANCE);
+        ui.setObject("#SidebarStatCritDamageIcon.Background", ICON_CRIT_DAMAGE);
+        ui.set("#SidebarStatHPValueMain.TextSpans",         Message.raw("—"));
+        ui.set("#SidebarStatArmorValueMain.TextSpans",      Message.raw("—"));
+        ui.set("#SidebarStatStaminaValueMain.TextSpans",    Message.raw("—"));
+        ui.set("#SidebarStatATKValueMain.TextSpans",        Message.raw("—"));
+        ui.set("#SidebarStatCritChanceValueMain.TextSpans", Message.raw("—"));
+        ui.set("#SidebarStatCritDamageValueMain.TextSpans", Message.raw("—"));
+    }
+
     private static void applyFallback(UICommandBuilder ui) {
         emptyClassSlot(ui);
         emptyJobSlot(ui, 1);
         emptyJobSlot(ui, 2);
+        emptyStats(ui);
     }
 
     private static Method access(Method m) {

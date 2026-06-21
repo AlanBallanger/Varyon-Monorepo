@@ -600,7 +600,6 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
             }
             playerRef.getPacketHandler().writeNoCache(
                     (ToClientPacket) new PlaySoundEvent2D(idx, SoundCategory.SFX, 1.0f, 1.0f));
-            SoundUtil.playSoundEvent3d(idx, SoundCategory.SFX, at.x, at.y, at.z, commandBuffer);
             if (dbg) LOGGER.atInfo().log((dbgId != null ? dbgId : "")
                     + dbgLabel + " son jouÃ© idx=" + idx);
         } catch (Exception e) {

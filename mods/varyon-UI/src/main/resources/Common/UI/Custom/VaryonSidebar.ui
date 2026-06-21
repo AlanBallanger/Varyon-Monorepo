@@ -210,6 +210,25 @@ $Sounds = "Sounds.ui";
                     BarTexturePath: "Common/Gauge_Fill.png";
                   }
                 }
+
+                Group { Anchor: (Width: 4); }
+
+                Button #MenuGenDetailBtn {
+                  Anchor: (Width: 54, Height: 13);
+                  Style: ButtonStyle(
+                    Default: (Background: (Color: #2a3545)),
+                    Hovered: (Background: (Color: #4a6ea8)),
+                    Pressed: (Background: (Color: #2a3545)),
+                    Sounds: $Sounds.@ButtonsLight
+                  );
+                  Group {
+                    LayoutMode: Middle;
+                    Label { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                      Text: "Details";
+                      Style: (FontSize: 11, TextColor: #dceeff, VerticalAlignment: Center, HorizontalAlignment: Center);
+                    }
+                  }
+                }
               }
             }
 

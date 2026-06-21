@@ -1,14 +1,12 @@
 package fr.varyon.vrpg.audio;
 
 import com.hypixel.hytale.component.CommandBuffer;
-import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.protocol.ToClientPacket;
 import com.hypixel.hytale.protocol.packets.world.PlaySoundEvent2D;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
 
@@ -37,9 +35,6 @@ public final class ClassSkillSounds {
             if (idx <= 0) return;
             playerRef.getPacketHandler().writeNoCache(
                 (ToClientPacket) new PlaySoundEvent2D(idx, SoundCategory.SFX, 1.0f, 1.0f));
-            if (commandBuffer != null) {
-                SoundUtil.playSoundEvent3d(idx, SoundCategory.SFX, position.x, position.y, position.z, commandBuffer);
-            }
         } catch (Exception e) {
             LOG.atWarning().log("[ClassSkillSounds] son ERREUR id=" + soundId + " : " + e.getMessage());
         }
