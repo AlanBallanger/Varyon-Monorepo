@@ -43,8 +43,8 @@ Group {
       }
       Group { Anchor: (Width: 8); }
       Label #AdminClassName {
-        Anchor: (Width: 120, Height: 28);
-        Style: (FontSize: 14, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+        Anchor: (Width: 220, Height: 28);
+        Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center);
         Text: "—";
       }
       Group { Anchor: (Width: 8); }

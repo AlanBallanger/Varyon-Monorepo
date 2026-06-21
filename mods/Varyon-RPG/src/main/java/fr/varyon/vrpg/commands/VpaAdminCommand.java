@@ -9,6 +9,9 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncC
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import fr.varyon.vrpg.VaryonRpgPlugin;
+import fr.varyon.vrpg.classes.ClassAccount;
+import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.config.VrpgConfig;
 import fr.varyon.vrpg.rpg.PlayerAccount;
 import fr.varyon.vrpg.rpg.Profession;
@@ -30,6 +33,7 @@ public final class VpaAdminCommand extends AbstractAsyncCommand {
 
         this.addSubCommand(new SetLevelSub());
         this.addSubCommand(new AddXpSub());
+        this.addSubCommand(new AddClassLevelSub());
         this.addSubCommand(new ResetSub());
         this.addSubCommand(new SaveSub());
         this.addSubCommand(new ReloadSub());
@@ -41,6 +45,7 @@ public final class VpaAdminCommand extends AbstractAsyncCommand {
         ctx.sendMessage(Message.raw("=== Varyon RPG Admin ===").color(new Color(255, 215, 0)));
         ctx.sendMessage(Message.raw("  /vpa setlevel <player> <profession> <level>").color(Color.GRAY));
         ctx.sendMessage(Message.raw("  /vpa addxp <player> <profession> <amount>").color(Color.GRAY));
+        ctx.sendMessage(Message.raw("  /vpa addclasslevel <player> <amount>").color(Color.GRAY));
         ctx.sendMessage(Message.raw("  /vpa reset <player> <profession|all>").color(Color.GRAY));
         ctx.sendMessage(Message.raw("  /vpa save").color(Color.GRAY));
         ctx.sendMessage(Message.raw("  /vpa reload").color(Color.GRAY));
@@ -181,6 +186,65 @@ public final class VpaAdminCommand extends AbstractAsyncCommand {
                     Message.raw(playerName).color(Color.WHITE),
                     Message.raw(" (Nv " + lvl + ", " + xp + " XP)").color(Color.GRAY),
                     Message.raw(lvUp > 0 ? "  [+" + lvUp + " niveau(x)]" : "").color(new Color(255, 215, 0))
+                ));
+            });
+        }
+    }
+
+    private static class AddClassLevelSub extends AbstractAsyncCommand {
+        private final RequiredArg<String> playerArg;
+        private final RequiredArg<String> amountArg;
+
+        AddClassLevelSub() {
+            super("addclasslevel", "Ajoute N niveaux à la classe active du joueur");
+            this.playerArg = withRequiredArg("player", "Player name", ArgTypes.STRING);
+            this.amountArg = withRequiredArg("amount", "Nombre de niveaux (1-5)", ArgTypes.STRING);
+        }
+
+        @NonNullDecl
+        @Override
+        protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
+            CommandSender sender = ctx.sender();
+            String playerName = playerArg.get(ctx);
+            String amountStr = amountArg.get(ctx);
+            int amount;
+            try {
+                amount = Integer.parseInt(amountStr);
+            } catch (NumberFormatException e) {
+                sender.sendMessage(Message.raw("Nombre de niveaux invalide : " + amountStr).color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+            if (amount < 1 || amount > 100) {
+                sender.sendMessage(Message.raw("Nombre de niveaux hors limites (1-100) : " + amount).color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+
+            return CompletableFuture.runAsync(() -> {
+                ClassManager cm = VaryonRpgPlugin.getInstance().getClassManager();
+                if (cm == null) {
+                    sender.sendMessage(Message.raw("ClassManager indisponible.").color(Color.RED));
+                    return;
+                }
+                UUID target = resolveTarget(sender, playerName);
+                if (target == null) return;
+
+                ClassAccount acc = cm.getOrLoad(target);
+                PlayerClass activeClass = acc.getActiveClass();
+                if (activeClass == null) {
+                    sender.sendMessage(Message.raw(playerName + " n'a pas de classe active.").color(Color.RED));
+                    return;
+                }
+
+                int currentLevel = acc.getProgress(activeClass).getLevel();
+                int newLevel = currentLevel + amount;
+                cm.setLevel(target, activeClass, newLevel);
+                int actualNew = cm.getOrLoad(target).getProgress(activeClass).getLevel();
+                sender.sendMessage(Message.join(
+                    Message.raw("+" + amount + " niveau(x) ").color(new Color(50, 205, 50)),
+                    Message.raw(activeClass.getDisplayName()).color(Color.WHITE),
+                    Message.raw(" pour ").color(Color.GRAY),
+                    Message.raw(playerName).color(Color.WHITE),
+                    Message.raw(" (Nv " + currentLevel + " → " + actualNew + ")").color(Color.GRAY)
                 ));
             });
         }

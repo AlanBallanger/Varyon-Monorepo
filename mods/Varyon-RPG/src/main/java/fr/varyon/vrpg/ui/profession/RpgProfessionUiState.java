@@ -18,6 +18,6 @@ public final class RpgProfessionUiState {
     public int talentTreeSlotIndex = 0;
     public int adminPlayerIndex = 0;
     public int adminProfIndex = 0;
-    public int adminClassIndex = 0;
+    public int adminProfileIndex = 0;
     public String adminSubTab = "professions";
 }

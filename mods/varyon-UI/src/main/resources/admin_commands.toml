@@ -275,6 +275,37 @@ command = "/lp editor"
 type = "execute"
 
 ##################################################
+# CLASSE XP
+##################################################
+[[category]]
+name = "Classe XP"
+
+[[category.buttons]]
+label = "+1 niveau classe"
+command = "/vpa addclasslevel nom 1"
+type = "chat"
+
+[[category.buttons]]
+label = "+2 niveaux classe"
+command = "/vpa addclasslevel nom 2"
+type = "chat"
+
+[[category.buttons]]
+label = "+3 niveaux classe"
+command = "/vpa addclasslevel nom 3"
+type = "chat"
+
+[[category.buttons]]
+label = "+4 niveaux classe"
+command = "/vpa addclasslevel nom 4"
+type = "chat"
+
+[[category.buttons]]
+label = "+5 niveaux classe"
+command = "/vpa addclasslevel nom 5"
+type = "chat"
+
+##################################################
 # NPC
 ##################################################
 [[category]]

@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.ClassProfile;
 import fr.varyon.vrpg.classes.ClassProgress;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
@@ -19,44 +20,58 @@ import javax.annotation.Nonnull;
 
 public final class ClassAdminTab {
 
-    private static final PlayerClass[] CLASS_ORDER = PlayerClass.values();
-
     private ClassAdminTab() {}
 
     public static void buildPanel(@Nonnull RpgProfessionUiState state,
                                   @Nonnull UICommandBuilder ui,
                                   @Nonnull UIEventBuilder ev) {
         PlayerRef target = RpgUiAdmin.adminTargetRef(state);
-        PlayerClass playerClass = CLASS_ORDER[state.adminClassIndex];
-        ui.set("#AdminClassName.TextSpans", Message.raw(playerClass.getDisplayName()));
+        int profileIdx = Math.floorMod(state.adminProfileIndex, ClassProfile.COUNT);
 
         ClassManager mgr = VaryonRpgPlugin.getInstance().getClassManager();
         if (mgr != null && target != null) {
             mgr.ensureAccount(target.getUuid(), target.getUsername());
             ClassAccount acc = mgr.getAccount(target.getUuid());
             if (acc != null) {
-                ClassProgress prog = acc.getProgress(playerClass);
-                ui.set("#AdminClassLevel.TextSpans", Message.raw(String.valueOf(prog.getLevel())));
-                ui.set("#AdminClassXp.TextSpans", Message.raw(prog.getXpInLevel() + " / " + prog.getXpToNextLevel()));
+                ClassProfile profile = acc.getProfiles()[profileIdx];
+                PlayerClass profileClass = profile.getActiveClass();
+
+                String profileLabel = profile.getName();
+                if (profileClass != null) profileLabel += " : " + profileClass.getDisplayName();
+                ui.set("#AdminClassName.TextSpans", Message.raw(profileLabel));
+
+                if (profileClass != null) {
+                    ClassProgress prog = acc.getProgress(profileClass);
+                    ui.set("#AdminClassLevel.TextSpans", Message.raw(String.valueOf(prog.getLevel())));
+                    ui.set("#AdminClassXp.TextSpans", Message.raw(prog.getXpInLevel() + " / " + prog.getXpToNextLevel()));
+                } else {
+                    ui.set("#AdminClassLevel.TextSpans", Message.raw("—"));
+                    ui.set("#AdminClassXp.TextSpans", Message.raw("Aucune classe assignée"));
+                }
 
                 ui.set("#AdminClassStatsContainer.Visible", true);
                 ui.clear("#AdminClassStatsContainer");
-                for (int i = 0; i < CLASS_ORDER.length; i++) {
-                    PlayerClass c = CLASS_ORDER[i];
-                    ClassProgress cp = acc.getProgress(c);
-                    PlayerSpecialization spec = cp.getActiveSpec();
-                    String specLabel = spec != null ? " — " + spec.getDisplayName() : "";
+                ClassProfile[] profiles = acc.getProfiles();
+                for (int i = 0; i < profiles.length; i++) {
+                    ClassProfile p = profiles[i];
+                    PlayerClass pc = p.getActiveClass();
+                    String classLabel = pc != null ? pc.getDisplayName() : "Vide";
+                    String levelLabel = pc != null ? "Nv " + acc.getProgress(pc).getLevel() : "—";
+                    PlayerSpecialization spec = pc != null ? p.getSpec(pc) : null;
+                    if (spec != null) classLabel += " — " + spec.getDisplayName();
                     ui.append("#AdminClassStatsContainer", "CharacterTabAdminStatRow.ui");
                     ui.set("#AdminClassStatsContainer[" + i + "] #AdminStatRowName.TextSpans",
-                        Message.raw(c.getDisplayName() + specLabel));
+                        Message.raw(p.getName() + " : " + classLabel));
                     ui.set("#AdminClassStatsContainer[" + i + "] #AdminStatRowLevel.TextSpans",
-                        Message.raw("Nv " + cp.getLevel()));
+                        Message.raw(levelLabel));
                 }
             } else {
+                ui.set("#AdminClassName.TextSpans", Message.raw("—"));
                 ui.set("#AdminClassLevel.TextSpans", Message.raw("—"));
                 ui.set("#AdminClassXp.TextSpans", Message.raw("—"));
             }
         } else {
+            ui.set("#AdminClassName.TextSpans", Message.raw("—"));
             ui.set("#AdminClassLevel.TextSpans", Message.raw("—"));
             ui.set("#AdminClassXp.TextSpans", Message.raw("—"));
         }

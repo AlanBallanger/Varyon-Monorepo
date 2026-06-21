@@ -254,7 +254,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
         @Override
         protected CompletableFuture<Void> executeAsync(CommandContext context) {
             CommandSender sender = context.sender();
-            if (!(sender instanceof Player player)) {
+            if (!(sender instanceof PlayerRef)) {
                 context.sendMessage(Message.raw("Commande joueur uniquement.").color(Color.RED));
                 return CompletableFuture.completedFuture(null);
             }
