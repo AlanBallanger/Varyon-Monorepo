@@ -18,7 +18,6 @@ import com.hypixel.hytale.server.core.universe.world.worldmap.markers.user.UserM
 import com.hypixel.hytale.server.core.universe.world.worldmap.markers.worldstore.WorldMarkersResource;
 import fr.varyon.mapmarker.commands.MapMarkerRootCommand;
 import fr.varyon.mapmarker.assets.MapMarkerAssetPublisher;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -27,7 +26,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -121,11 +119,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                     .log("[Varyon-MapMarker] Échec résolution PNG %s", imageName);
             return null;
         }
-        for (String bundled : getDefaultBundledImageNames()) {
-            if (matchesPngRequest(request, bundled)) {
-                return getImagesDir().resolve(bundled);
-            }
-        }
         return null;
     }
 
@@ -137,17 +130,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             } catch (Exception e) {
                 ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
                         .log("[Varyon-MapMarker] Échec lecture PNG %s", fileName);
-                return null;
-            }
-        }
-        for (String bundled : getDefaultBundledImageNames()) {
-            if (bundled.equalsIgnoreCase(fileName)) {
-                try (InputStream in = getClass().getClassLoader().getResourceAsStream("default-images/" + bundled)) {
-                    if (in != null) return in.readAllBytes();
-                } catch (Exception e) {
-                    ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                            .log("[Varyon-MapMarker] Échec lecture PNG bundlé %s", fileName);
-                }
                 return null;
             }
         }
@@ -324,9 +306,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         ensureDirectories();
         java.util.TreeSet<String> seen = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         ArrayList<String> result = new ArrayList<>();
-        for (String name : getDefaultBundledImageNames()) {
-            if (seen.add(name)) result.add(name);
-        }
         try (Stream<Path> stream = Files.list(getImagesDir())) {
             stream.filter(path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".png"))
                     .map(path -> path.getFileName().toString())
@@ -949,28 +928,6 @@ commands_help:
         return players;
     }
 
-    private List<String> getDefaultBundledImageNames() {
-        return Arrays.asList(
-                "Campfire.png",
-                "Coordinate.png",
-                "Death.png",
-                "Homestead.png",
-                "Player.png",
-                "PlayerAbove.png",
-                "PlayerBelow.png",
-                "Portal.png",
-                "PortalInvasion.png",
-                "Prefab.png",
-                "Spawn.png",
-                "Temple_Gateway.png",
-                "UserA.png",
-                "UserB.png",
-                "UserC.png",
-                "UserD.png",
-                "UserE.png",
-                "UserF.png",
-                "Warp.png");
-    }
 
     public void debug(String message, Object... args) {
         if (!debugLogging) {
