@@ -1,19 +1,7 @@
 ﻿Group #VaryonMenuHud {
-  LayoutMode: Top;
+  LayoutMode: Full;
 
-  Label #VaryonMenuTitle {
-    Text: "Menu Varyon";
-    Anchor: (Width: 128, Height: 24, Top: 0);
-    Style: (
-      FontSize: 12,
-      RenderBold: true,
-      TextColor: #FFFFFF,
-      VerticalAlignment: Center,
-      HorizontalAlignment: Center
-    );
-  }
-
-  Group #VaryonMenuStack {
+Group #VaryonMenuStack {
     Group #VaryonButtonBase {
       Background: "button_background.png";
     }
@@ -30,5 +18,11 @@
         HorizontalAlignment: Center
       );
     }
+  }
+}
+
+Group #VaryonDividerGroup {
+  Group #VaryonHotbarDivider {
+    Background: "HotbarDivider.png";
   }
 }
