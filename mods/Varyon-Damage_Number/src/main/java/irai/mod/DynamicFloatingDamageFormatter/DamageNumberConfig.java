@@ -12,7 +12,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 public class DamageNumberConfig {
 
     public static final BuilderCodec<DamageNumberConfig> CODEC =
-            BuilderCodec.<DamageNumberConfig>builder(DamageNumberConfig.class, DamageNumberConfig::new)
+            BuilderCodec.builder(DamageNumberConfig.class, DamageNumberConfig::new)
                     .append(
                             new KeyedCodec<>("DEFAULTS", STRING_ARRAY),
                             (cfg, v) -> cfg.defaultsEntries = v,
@@ -46,6 +46,7 @@ public class DamageNumberConfig {
             "FLAT|label=|format={amount}|color=#FFFFFF|ui=CombatText_Flat|particleFont=FloatingDamage_FLAT",
             "CRITICAL|label=|format={amount}|color=#FFFFFF|ui=CombatText_Critical|particleFont=FloatingDamage_CRITICAL|particleIcon=FloatingDamage_Icon_Critical",
             "ICE|label=|format={amount}|color=#55FFFF|ui=CombatText_Ice|particleFont=FloatingDamage_ICE|particleIcon=FloatingDamage_Icon_Ice",
+            "ICE_CRITICAL|label=|format={amount}|color=#55FFFF|ui=CombatText_Ice_Critical|particleFont=FloatingDamage_CRITICAL|particleIcon=FloatingDamage_Icon_Critical",
             "BURN|label=|format={amount}|color=#FFAA00|ui=CombatText_Burn|uiAlt=CombatText_Burn_Alt|dot=true|particleFont=FloatingDamage_BURN|particleIcon=FloatingDamage_Icon_Fire",
             "BLEED|label=|format={amount}|color=#AA55FF|ui=CombatText_Bleed|uiAlt=CombatText_Bleed_Alt|dot=true|particleFont=FloatingDamage_BLEED|particleIcon=FloatingDamage_Icon_Bleed",
             "POISON|label=|format={amount}|color=#008700|ui=CombatText_Poison|uiAlt=CombatText_Poison_Alt|dot=true|particleFont=FloatingDamage_POISON|particleIcon=FloatingDamage_Icon_Poison",
@@ -57,8 +58,6 @@ public class DamageNumberConfig {
 
     // Format: "alias=KIND"
     private String[] aliasEntries = new String[] {
-            "crit=CRITICAL",
-            "critical=CRITICAL",
             "burn=BURN",
             "fire=BURN",
             "poison=POISON",

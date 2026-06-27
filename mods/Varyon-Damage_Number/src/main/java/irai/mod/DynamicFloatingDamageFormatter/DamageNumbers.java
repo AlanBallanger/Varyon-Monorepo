@@ -176,6 +176,18 @@ public final class DamageNumbers {
         DamageNumberMeta.markCritical(damage);
     }
 
+    public static void clearCritical(Damage damage) {
+        DamageNumberMeta.clearCritical(damage);
+    }
+
+    public static void resetForNewEvent(Damage damage) {
+        DamageNumberMeta.resetForNewEvent(damage);
+    }
+
+    public static boolean isCritical(Damage damage) {
+        return DamageNumberMeta.isCritical(damage);
+    }
+
     public static void markSkipCombatText(Damage damage) {
         DamageNumberMeta.markSkipCombatText(damage);
     }
@@ -281,12 +293,6 @@ public final class DamageNumbers {
             if (!KIND_FLAT.equals(e)) {
                 return e;
             }
-        }
-        if (DamageNumberMeta.inferCriticalFromImpactVfx(damage)) {
-            return "CRITICAL";
-        }
-        if (DamageNumberMeta.inferCriticalFromMetaStringScan(damage)) {
-            return "CRITICAL";
         }
         DamageCause cause = damage.getCause();
         if (cause == null || cause.getId() == null) {

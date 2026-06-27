@@ -233,14 +233,7 @@ public final class FloatingDamageParticles {
         if (!font.contains(FONT_FLAT)) {
             return font;
         }
-        if (damage != null) {
-            if (DamageNumberMeta.isCritical(damage)
-                    || DamageNumberMeta.inferCriticalFromImpactVfx(damage)
-                    || DamageNumberMeta.inferCriticalFromMetaStringScan(damage)) {
-                return FONT_CRITICAL;
-            }
-        }
-        if (iconSystem != null && iconSystem.contains("Icon_Critical")) {
+        if (damage != null && DamageNumberMeta.isCritical(damage)) {
             return FONT_CRITICAL;
         }
         return font;

@@ -1,4 +1,4 @@
-{
+﻿{
     "DEFAULTS":  [
                      "format={label} {amount}",
                      "rounding=ROUND",

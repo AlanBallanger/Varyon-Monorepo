@@ -18,5 +18,8 @@
     "Duration":  0.8,
     "HitAngleModifierStrength":  1.0,
     "FontSize":  64.0,
-    "TextColor":  "#55FFFF"
+    "TextColor":  "#55FFFF",
+    "AnimationEvents":  [
+
+                        ]
 }

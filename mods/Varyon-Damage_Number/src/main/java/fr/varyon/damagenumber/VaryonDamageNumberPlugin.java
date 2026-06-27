@@ -18,12 +18,14 @@ public final class VaryonDamageNumberPlugin extends JavaPlugin {
     protected void setup() {
         try {
             DamageNumbers.applyConfig(new DamageNumberConfig());
-            System.out.println("[VaryonDamageNumber] DamageNumberConfig appliquée depuis les defaults intégrés.");
+            System.out.println("[VaryonDamageNumber] DamageNumberConfig chargee.");
         } catch (Throwable t) {
-            System.err.println("[VaryonDamageNumber] Échec chargement DamageNumberConfig: " + t.getMessage());
+            System.err.println("[VaryonDamageNumber] Echec chargement DamageNumberConfig: " + t.getMessage());
             t.printStackTrace();
         }
 
+        tryRegisterDamageSystem("irai.mod.reforge.Entity.Events.DamageCritResetSystem");
+        tryRegisterDamageSystem("irai.mod.reforge.Entity.Events.ImpactCriticalSanitizerSystem");
         tryRegisterDamageSystem("irai.mod.reforge.Entity.Events.DamageNumberEST");
         tryRegisterDamageSystem("irai.mod.reforge.Entity.Events.HealingFloatTickSystem");
     }
@@ -45,11 +47,11 @@ public final class VaryonDamageNumberPlugin extends JavaPlugin {
                 return;
             }
             register.invoke(registry, system);
-            System.out.println("[VaryonDamageNumber] Système enregistré: " + className);
+            System.out.println("[VaryonDamageNumber] Systeme enregistre: " + className);
         } catch (ClassNotFoundException e) {
             System.out.println("[VaryonDamageNumber] Adapter absent (" + className + ").");
         } catch (Throwable t) {
-            System.err.println("[VaryonDamageNumber] Échec enregistrement: " + t.getMessage());
+            System.err.println("[VaryonDamageNumber] Echec enregistrement: " + t.getMessage());
             t.printStackTrace();
         }
     }

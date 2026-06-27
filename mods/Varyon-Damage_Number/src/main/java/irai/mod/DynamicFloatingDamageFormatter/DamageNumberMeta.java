@@ -1,7 +1,12 @@
 package irai.mod.DynamicFloatingDamageFormatter;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelParticle;
@@ -13,6 +18,9 @@ import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import irai.mod.reforge.Util.DamageNumberFormatter;
 
 public final class DamageNumberMeta {
+    private static final Map<Damage, Boolean> CRITICAL_BY_DAMAGE =
+            Collections.synchronizedMap(new WeakHashMap<>());
+
     public static final MetaKey<String> META_DAMAGE_KIND =
             Damage.META_REGISTRY.registerMetaObject(d -> "", false, "socketreforge:damage_kind", Codec.STRING);
     public static final MetaKey<Boolean> META_CRITICAL =
@@ -21,6 +29,19 @@ public final class DamageNumberMeta {
             Damage.META_REGISTRY.registerMetaObject(d -> Boolean.FALSE, false, "socketreforge:damage_skip_text", Codec.BOOLEAN);
 
     private DamageNumberMeta() {}
+
+    public static void resetForNewEvent(Damage damage) {
+        if (damage == null) {
+            return;
+        }
+        CRITICAL_BY_DAMAGE.remove(damage);
+        damage.putMetaObject(META_CRITICAL, Boolean.FALSE);
+        damage.putMetaObject(META_SKIP_COMBAT_TEXT, Boolean.FALSE);
+        String kind = readKindId(damage);
+        if (kind != null && kind.toUpperCase(Locale.ROOT).contains("CRITICAL")) {
+            damage.putMetaObject(META_DAMAGE_KIND, "");
+        }
+    }
 
     public static void markKind(Damage damage, String kindId) {
         if (damage == null || kindId == null || kindId.isBlank()) {
@@ -63,14 +84,81 @@ public final class DamageNumberMeta {
         if (damage == null) {
             return;
         }
+        CRITICAL_BY_DAMAGE.put(damage, Boolean.TRUE);
         damage.putMetaObject(META_CRITICAL, Boolean.TRUE);
+    }
+
+    public static void clearCritical(Damage damage) {
+        if (damage == null) {
+            return;
+        }
+        CRITICAL_BY_DAMAGE.remove(damage);
+        damage.putMetaObject(META_CRITICAL, Boolean.FALSE);
     }
 
     public static boolean isCritical(Damage damage) {
         if (damage == null) {
             return false;
         }
+        Boolean sidecar = CRITICAL_BY_DAMAGE.get(damage);
+        if (sidecar != null) {
+            return sidecar;
+        }
         return Boolean.TRUE.equals(damage.getIfPresentMetaObject(META_CRITICAL));
+    }
+
+    public static void stripImpactCriticalParticles(Damage damage) {
+        if (damage == null) {
+            return;
+        }
+        try {
+            Object raw = damage.getIfPresentMetaObject(Damage.IMPACT_PARTICLES);
+            if (!(raw instanceof Damage.Particles particles)) {
+                return;
+            }
+            ModelParticle[] models = filterNonCriticalParticles(particles.getModelParticles());
+            WorldParticle[] worlds = filterNonCriticalWorldParticles(particles.getWorldParticles());
+            if (models == particles.getModelParticles() && worlds == particles.getWorldParticles()) {
+                return;
+            }
+            particles.setModelParticles(models);
+            particles.setWorldParticles(worlds);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private static ModelParticle[] filterNonCriticalParticles(ModelParticle[] models) {
+        if (models == null || models.length == 0) {
+            return models;
+        }
+        List<ModelParticle> kept = new ArrayList<>(models.length);
+        for (ModelParticle model : models) {
+            if (model == null || systemIdImpliesCritical(model.getSystemId())) {
+                continue;
+            }
+            kept.add(model);
+        }
+        if (kept.size() == models.length) {
+            return models;
+        }
+        return kept.toArray(new ModelParticle[0]);
+    }
+
+    private static WorldParticle[] filterNonCriticalWorldParticles(WorldParticle[] worlds) {
+        if (worlds == null || worlds.length == 0) {
+            return worlds;
+        }
+        List<WorldParticle> kept = new ArrayList<>(worlds.length);
+        for (WorldParticle world : worlds) {
+            if (world == null || systemIdImpliesCritical(world.getSystemId())) {
+                continue;
+            }
+            kept.add(world);
+        }
+        if (kept.size() == worlds.length) {
+            return worlds;
+        }
+        return kept.toArray(new WorldParticle[0]);
     }
 
     public static boolean inferCriticalFromImpactVfx(Damage damage) {

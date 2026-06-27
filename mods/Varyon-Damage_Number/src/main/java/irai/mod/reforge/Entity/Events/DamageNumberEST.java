@@ -168,6 +168,12 @@ public class DamageNumberEST extends DamageEventSystem {
         }
 
         String kindId = DamageNumbers.resolveKindId(damage);
+        if (Boolean.getBoolean("varyon.damagenumbers.debug")) {
+            System.out.println("[DmgNum] amt=" + displayAmount
+                    + " kind=" + kindId
+                    + " crit=" + DamageNumberMeta.isCritical(damage)
+                    + " impactCrit=" + DamageNumberMeta.inferCriticalFromImpactVfx(damage));
+        }
         List<Ref<EntityStore>> viewerRefs = collectViewerRefs(visible);
         if (FloatingDamageParticles.trySpawn(store, commandBuffer, targetRef, displayAmount, kindId,
                 viewerRefs, damage)) {
@@ -175,6 +181,7 @@ public class DamageNumberEST extends DamageEventSystem {
             if ("HEAL".equalsIgnoreCase(kindId)) {
                 HealFloatCoordinator.markFromDamageEvent(targetRef);
             }
+            DamageNumberMeta.markSkipCombatText(damage);
             damage.setAmount(0f);
             DBG_ZEROED.incrementAndGet();
             return;
@@ -196,6 +203,7 @@ public class DamageNumberEST extends DamageEventSystem {
         if ("HEAL".equalsIgnoreCase(kindId)) {
             HealFloatCoordinator.markFromDamageEvent(targetRef);
         }
+        DamageNumberMeta.markSkipCombatText(damage);
         damage.setAmount(0f);
         DBG_ZEROED.incrementAndGet();
     }
