@@ -17,12 +17,12 @@ import com.hypixel.hytale.server.core.universe.world.worldmap.WorldMapManager;
 import com.hypixel.hytale.server.core.universe.world.worldmap.markers.user.UserMapMarker;
 import com.hypixel.hytale.server.core.universe.world.worldmap.markers.worldstore.WorldMarkersResource;
 import fr.varyon.mapmarker.commands.MapMarkerRootCommand;
+import fr.varyon.mapmarker.assets.MapMarkerAssetPack;
 import fr.varyon.mapmarker.assets.MapMarkerAssetPublisher;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
@@ -45,11 +45,10 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
     private static final String MARKERS_STATE_FILE = "markers.json";
     private static final String MARKERS_LEGACY_FILE = "markers.db";
     private static final String CONFIG_FILE = "config.yml";
-    private static final String MAP_MARKER_CLIENT_TEXTURE_PREFIX = "UI/WorldMap/MapMarkers/";
     private static final Pattern DEBUG_PATTERN = Pattern.compile("(?m)^\\s*debug\\s*:\\s*(true|false)\\s*$", Pattern.CASE_INSENSITIVE);
     private static VaryonMapMarkerPlugin instance;
     private final List<SavedMarker> savedMarkers = Collections.synchronizedList(new ArrayList<>());
-    private volatile boolean debugLogging = true;
+    private volatile boolean debugLogging = false;
 
     public VaryonMapMarkerPlugin(@Nonnull JavaPluginInit init) {
         super(init);
@@ -71,6 +70,8 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         ensureDirectories();
         ensureConfigFile();
         loadConfig();
+        MapMarkerAssetPack.init();
+        syncAllMarkerImagesToAssetPack();
         loadSavedMarkers();
         importSavedMarkers();
         registerMarkerTextureWarmupEvents();
@@ -123,17 +124,107 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
     }
 
     private byte[] readPngBytes(String fileName) {
-        Path file = getImagesDir().resolve(fileName);
-        if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
-            try {
-                return Files.readAllBytes(file);
-            } catch (Exception e) {
-                ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                        .log("[Varyon-MapMarker] Échec lecture PNG %s", fileName);
-                return null;
+        Path file = resolvePngInImages(fileName);
+        if (file == null) {
+            return null;
+        }
+        try {
+            return Files.readAllBytes(file);
+        } catch (Exception e) {
+            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
+                    .log("[Varyon-MapMarker] Échec lecture PNG %s", fileName);
+            return null;
+        }
+    }
+
+    private void publishMarkerTexture(String fileName, byte[] bytes) {
+        if (fileName == null || fileName.isBlank() || bytes == null || bytes.length == 0) {
+            return;
+        }
+        Path packFile = MapMarkerAssetPack.publishMarkerImage(fileName, bytes);
+        if (packFile == null) {
+            debug("PNG marqueur non publié pack=%s", fileName);
+            return;
+        }
+        String clientPath = MapMarkerAssetPack.toUiAssetPath(fileName);
+        String hudPath = MapMarkerAssetPack.toHudAssetPath(fileName);
+        byte[] normalizedBytes = readNormalizedPngBytes(fileName);
+        if (normalizedBytes == null) {
+            normalizedBytes = bytes;
+        }
+        Universe universe = Universe.get();
+        if (universe == null) {
+            return;
+        }
+        int ok = 0;
+        for (World w : universe.getWorlds().values()) {
+            for (PlayerRef ref : w.getPlayerRefs()) {
+                if (deliverMarkerTexture(ref, clientPath, hudPath, normalizedBytes)) {
+                    ok++;
+                }
             }
         }
-        return null;
+        if (ok > 0) {
+            MapMarkerAssetPack.requestClientRebuild();
+        }
+        debug("PNG marqueur publié icon=%s chemin=%s pack=%s livraisons=%s octets=%s",
+                MapMarkerAssetPack.normalizeIconFileName(fileName), clientPath, packFile, ok, normalizedBytes.length);
+    }
+
+    private byte[] readNormalizedPngBytes(String fileName) {
+        byte[] bytes = readPngBytes(fileName);
+        if (bytes == null) {
+            return null;
+        }
+        return MapMarkerAssetPack.normalizeMarkerPng(bytes);
+    }
+
+    private boolean deliverMarkerTexture(PlayerRef viewer, String worldMapPath, String hudPath, byte[] bytes) {
+        if (viewer == null || bytes == null || bytes.length == 0) {
+            return false;
+        }
+        boolean delivered = false;
+        if (worldMapPath != null && !worldMapPath.isBlank()) {
+            delivered |= MapMarkerAssetPublisher.deliver(viewer, worldMapPath, bytes, false);
+        }
+        if (hudPath != null && !hudPath.isBlank()) {
+            delivered |= MapMarkerAssetPublisher.deliver(viewer, hudPath, bytes, false);
+        }
+        return delivered;
+    }
+
+    private void syncAllMarkerImagesToAssetPack() {
+        int synced = 0;
+        for (String name : listAvailablePngs()) {
+            byte[] bytes = readPngBytes(name);
+            if (bytes == null) {
+                continue;
+            }
+            if (MapMarkerAssetPack.publishMarkerImage(name, bytes) != null) {
+                synced++;
+            }
+        }
+        debug("syncAllMarkerImagesToAssetPack fichiers=%s", synced);
+    }
+
+    private void pushMapMarkerPngToAllOnlinePlayers(String pngBaseFileName) {
+        try {
+            Path source = resolvePngInImages(pngBaseFileName);
+            if (source == null) {
+                debug("pushMapMarkerPng PNG introuvable %s", pngBaseFileName);
+                return;
+            }
+            String fileName = source.getFileName().toString();
+            byte[] bytes = readPngBytes(fileName);
+            if (bytes == null) {
+                debug("pushMapMarkerPng lecture échouée %s", fileName);
+                return;
+            }
+            publishMarkerTexture(fileName, bytes);
+        } catch (Exception e) {
+            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
+                    .log("[Varyon-MapMarker] Échec push texture marqueur %s", pngBaseFileName);
+        }
     }
 
     private static boolean matchesPngRequest(String requestedBase, String fileName) {
@@ -151,44 +242,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
     private static boolean hasPngExtension(String name) {
         int len = name.length();
         return len >= 4 && name.substring(len - 4).toLowerCase(Locale.ROOT).equals(".png");
-    }
-
-    private static String mapMarkerClientTexturePath(String imageBaseName) {
-        if (imageBaseName == null || imageBaseName.isBlank()) {
-            return imageBaseName;
-        }
-        String normalized = imageBaseName.trim().replace('\\', '/');
-        if (normalized.contains("/")) {
-            return normalized;
-        }
-        return MAP_MARKER_CLIENT_TEXTURE_PREFIX + normalized;
-    }
-
-    private void pushMapMarkerPngToAllOnlinePlayers(String pngBaseFileName) {
-        try {
-            byte[] bytes = readPngBytes(pngBaseFileName);
-            if (bytes == null) {
-                debug("pushMapMarkerPng PNG introuvable %s", pngBaseFileName);
-                return;
-            }
-            String clientPath = mapMarkerClientTexturePath(pngBaseFileName);
-            Universe universe = Universe.get();
-            if (universe == null) {
-                return;
-            }
-            int ok = 0;
-            for (World w : universe.getWorlds().values()) {
-                for (PlayerRef ref : w.getPlayerRefs()) {
-                    if (MapMarkerAssetPublisher.deliver(ref, clientPath, bytes, true)) {
-                        ok++;
-                    }
-                }
-            }
-            debug("PNG marqueur poussé clients chemin=%s livraisons=%s octets=%s", clientPath, ok, bytes.length);
-        } catch (Exception e) {
-            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                    .log("[Varyon-MapMarker] Échec push texture marqueur %s", pngBaseFileName);
-        }
     }
 
     private void registerMarkerTextureWarmupEvents() {
@@ -210,6 +263,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             return;
         }
         pushAllMapMarkerTexturesToPlayer(playerRef);
+        MapMarkerAssetPack.requestClientRebuild();
         Player player = event.getPlayer();
         if (player != null) {
             try {
@@ -228,21 +282,24 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         int delivered = 0;
         for (String name : listAvailablePngs()) {
             byte[] bytes = readPngBytes(name);
-            if (bytes == null) continue;
+            if (bytes == null) {
+                continue;
+            }
+            String clientPath = MapMarkerAssetPack.toUiAssetPath(name);
+            String hudPath = MapMarkerAssetPack.toHudAssetPath(name);
+            byte[] normalizedBytes = readNormalizedPngBytes(name);
+            if (normalizedBytes == null) {
+                continue;
+            }
             try {
-                if (MapMarkerAssetPublisher.deliver(playerRef, mapMarkerClientTexturePath(name), bytes, false)) {
+                MapMarkerAssetPack.publishMarkerImage(name, bytes);
+                if (deliverMarkerTexture(playerRef, clientPath, hudPath, normalizedBytes)) {
                     delivered++;
                 }
             } catch (Exception e) {
                 ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
                         .log("[Varyon-MapMarker] Échec push PNG joueur %s fichier=%s", playerRef.getUuid(), name);
             }
-        }
-        if (delivered > 0) {
-            try {
-                playerRef.getPacketHandler().writeNoCache(
-                    new com.hypixel.hytale.protocol.packets.setup.RequestCommonAssetsRebuild());
-            } catch (Exception ignored) {}
         }
         debug("Warm-up textures marqueur joueur uuid=%s fichiers_livrés=%s", playerRef.getUuid(), delivered);
     }
@@ -258,22 +315,10 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         pushMapMarkerPngToAllOnlinePlayers(fileName);
         debug("Création marqueur monde=%s joueur=%s image=%s nom=%s", world.getName(), playerRef.getUsername(), fileName, markerName);
         try {
-            org.joml.Vector3d position = playerRef.getTransform().getPosition();
+            Vector3d position = playerRef.getTransform().getPosition();
             UUID playerUuid = playerRef.getUuid();
             String displayName = playerRef.getUsername();
-            WorldMarkersResource resource = getWorldMarkersResource(world);
-            if (resource == null) {
-                playerRef.sendMessage(Message.raw("Erreur : échec de la création du marqueur sur la carte."));
-                return;
-            }
-            UserMapMarker marker = new UserMapMarker();
             String markerId = SHARED_MARKER_ID_PREFIX + UUID.randomUUID();
-            marker.setId(markerId);
-            marker.setPosition((float) position.x, (float) position.z);
-            marker.setName(markerName);
-            marker.setIcon(mapMarkerClientTexturePath(fileName));
-            marker.withCreatedByName(displayName);
-            marker.withCreatedByUuid(playerUuid);
             upsertSavedMarker(new SavedMarker(
                     markerId,
                     world.getName(),
@@ -284,6 +329,10 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                     playerUuid,
                     displayName,
                     null));
+            if (getWorldMarkersResource(world) == null) {
+                playerRef.sendMessage(Message.raw("Erreur : échec de la création du marqueur sur la carte."));
+                return;
+            }
             rebuildManagedMarkersForWorld(world);
             refreshWorldMapTrackers(world);
             debug(
@@ -590,7 +639,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 
     private void ensureDirectories() {
         ensureDirectory(getImagesDir());
-        debug("Dossier prêt images=%s", getImagesDir());
     }
 
     private void ensureDirectory(Path dir) {
@@ -633,19 +681,19 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
     private void loadConfig() {
         Path configFile = getConfigFilePath();
         if (!Files.exists(configFile, LinkOption.NOFOLLOW_LINKS)) {
-            debugLogging = true;
+            debugLogging = false;
             return;
         }
         try {
             String yml = Files.readString(configFile, StandardCharsets.UTF_8);
             Matcher debugMatcher = DEBUG_PATTERN.matcher(yml);
-            debugLogging = debugMatcher.find() ? Boolean.parseBoolean(debugMatcher.group(1)) : true;
+            debugLogging = debugMatcher.find() && Boolean.parseBoolean(debugMatcher.group(1));
             debug(
                     "Config chargée debug=%s path=%s",
                     debugLogging,
                     configFile);
         } catch (Exception e) {
-            debugLogging = true;
+            debugLogging = false;
             ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
                     .log("[Varyon-MapMarker] Échec chargement config.yml");
         }
@@ -657,14 +705,16 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 # Varyon-MapMarker — marqueurs personnalisés sur la carte Hytale
 #
 # Dossier du mod : Varyon-MapMarker/
-#   images/              → tes PNG (c’est là que tu ajoutes des fichiers)
-#   markers.db           → positions, mondes, noms + nom de fichier d’icône uniquement (pas les octets du PNG)
-#   Common/UI/WorldMap/MapMarkers/ → Copie des PNG ; le mod les envoie aussi au client (pipeline CommonAsset),
-#     comme les avatars PlayerMarker, afin que l’UI carte résolve la texture sans croix rouge.
+#   images/       → tes PNG (ajoute tes fichiers ici)
+#   markers.json  → positions, mondes, noms + nom de fichier d’icône
 #
-# Commandes (anglais) : /mapmarker … ou /mm …
-#   Noms d’images : extension .png facultative, casse ignorée. Évite le fichier « Home.png » : le client le traite
-#     souvent comme l’icône « maison » système ; utilise plutôt Homestead.png (inclus dans le mod) ou un autre nom.
+# Les PNG de images/ sont publiés dans le pack runtime Varyon-MapMarkerAssets
+# (UI/WorldMap/MapMarkers/ + UI/MapMarkers/) puis livrés aux clients.
+# setIcon utilise le nom de fichier seul, ex. MonIcone.png.
+#
+# Commandes : /mapmarker … ou /mm …
+#   Noms d’images : extension .png facultative, casse ignorée. Évite « Home.png » :
+#     le client le confond souvent avec l’icône maison système.
 #   Noms de marqueurs (clear) : casse ignorée ; /clear <nom> uniquement.
 #   Sous-commandes : list (marqueurs du monde courant), info, tp, set, clear, import, reload
 #
@@ -673,7 +723,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 # (ClearWorldMap côté client) pour que les icônes et la liste des pins se resynchronisent.
 ####################################################################################################
 
-debug: true
+debug: false
 
 # Référence rapide (exemples)
 commands_help:
@@ -790,7 +840,7 @@ commands_help:
                 marker.setId(savedMarker.id());
                 marker.setPosition(savedMarker.x(), savedMarker.z());
                 marker.setName(savedMarker.markerName());
-                marker.setIcon(mapMarkerClientTexturePath(savedMarker.imageName()));
+                marker.setIcon(MapMarkerAssetPack.normalizeIconFileName(savedMarker.imageName()));
                 marker.withCreatedByUuid(savedMarker.createdByUuid());
                 marker.withCreatedByName(savedMarker.createdByName());
                 updated.add(marker);

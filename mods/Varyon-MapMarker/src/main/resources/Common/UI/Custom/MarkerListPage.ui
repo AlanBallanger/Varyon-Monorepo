@@ -56,7 +56,7 @@ $C.@PageOverlay {
         Anchor: (Bottom: 8);
 
         Label {
-          Text: "Image (nom du fichier PNG, ex: Campfire.png)";
+          Text: "Image (nom du fichier PNG dans images/, ex: MonIcone.png)";
           Style: (FontSize: 12, TextColor: #96a9be);
           Anchor: (Bottom: 3);
         }

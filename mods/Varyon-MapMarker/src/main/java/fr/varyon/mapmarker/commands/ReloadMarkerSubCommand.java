@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 public final class ReloadMarkerSubCommand extends OperatorCommandBase {
 
     public ReloadMarkerSubCommand() {
-        super("reload", "Recopier les PNG de images/ vers le dossier d’assets carte puis réimporter");
+        super("reload", "Repousser les PNG de images/ aux clients et réimporter les marqueurs");
     }
 
     @Override
@@ -26,6 +26,6 @@ public final class ReloadMarkerSubCommand extends OperatorCommandBase {
             return;
         }
         context.sendMessage(
-                Message.raw("Rechargement terminé sans nouvelles images copiées, ou erreur pendant le traitement."));
+                Message.raw("Rechargement échoué ou aucun marqueur à importer."));
     }
 }

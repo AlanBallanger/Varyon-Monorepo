@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 public final class ImportMarkersSubCommand extends OperatorCommandBase {
 
     public ImportMarkersSubCommand() {
-        super("import", "Réimporter tous les marqueurs depuis markers.db");
+        super("import", "Réimporter tous les marqueurs depuis markers.json");
     }
 
     @Override
