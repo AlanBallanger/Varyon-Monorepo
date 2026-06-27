@@ -18,11 +18,16 @@ import fr.varyon.vrpg.classes.ombre.PasDeLOmbreSkill;
 import fr.varyon.vrpg.classes.ombre.ChaseOuverteSkill;
 import fr.varyon.vrpg.classes.ombre.OmbrePassifs;
 
+import com.hypixel.hytale.server.core.Message;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Locale;
 
 public final class ClassSkillDescriptions {
+
+    private static final String TOOLTIP_TITLE_COLOR = "#ffffff";
+    private static final String TOOLTIP_BODY_COLOR = "#96a9be";
 
     private ClassSkillDescriptions() {}
 
@@ -34,6 +39,17 @@ public final class ClassSkillDescriptions {
     @Nonnull
     public static String effectText(@Nullable String skillId, @Nonnull String baseDescription) {
         return baseDescription.trim();
+    }
+
+    @Nonnull
+    public static Message tooltipMessage(@Nonnull String name,
+                                         @Nullable String skillId,
+                                         @Nonnull String baseDescription) {
+        return Message.raw(name.trim())
+            .color(TOOLTIP_TITLE_COLOR)
+            .bold(true)
+            .insert("\n\n")
+            .insert(Message.raw(effectText(skillId, baseDescription)).color(TOOLTIP_BODY_COLOR));
     }
 
     @Nullable

@@ -23,6 +23,7 @@ import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.WeaponCategory;
 import fr.varyon.vrpg.classes.WeaponDamageReader;
 import fr.varyon.vrpg.ui.RpgUiStyles;
+import fr.varyon.vrpg.ui.classes.ClassSkillDescriptions;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 import fr.varyon.vrpg.ui.classes.RpgClassUiState;
 import fr.varyon.vrpg.ui.classes.layout.ClassTalentTreeLayouts;
@@ -178,9 +179,11 @@ public final class ClassesTab {
             String assigned = state.skillSlotAssignments.get(slotId);
             boolean shown = false;
             if (assigned != null) {
-                for (ClassTalentTree.Node n : talentNodes) {
+                for (int ni = 0; ni < talentNodes.length; ni++) {
+                    ClassTalentTree.Node n = talentNodes[ni];
                     if (n.itemId().equals(assigned)) {
                         applySkillSlotIcon(uiBuilder, slotId, n.itemId());
+                        applySkillTooltip(uiBuilder, "#SkillSlot" + slotId, acc, n, ni);
                         shown = true;
                         break;
                     }
@@ -191,6 +194,8 @@ public final class ClassesTab {
                 uiBuilder.set("#SkillSlot" + slotId + "Border.Visible", false);
                 uiBuilder.set("#SkillSlot" + slotId + "Icon.Visible", false);
                 uiBuilder.set("#SkillSlot" + slotId + "CustomIcon.Visible", false);
+                uiBuilder.set("#SkillSlot" + slotId + ".TooltipText", "");
+                uiBuilder.set("#SkillSlot" + slotId + ".TooltipTextSpans", Message.raw(""));
             }
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 "#SkillSlot" + slotId,
@@ -200,10 +205,12 @@ public final class ClassesTab {
         uiBuilder.clear("#ClassesSkillPickerList");
         uiBuilder.set("#ClassesSkillPickerLabel.TextSpans", Message.raw("Compétences disponibles"));
         for (int i = 0; i < unlockedActives.size(); i++) {
-            ClassTalentTree.Node n = unlockedActives.get(i).node();
+            ClassUnlockedActiveSkills.Entry entry = unlockedActives.get(i);
+            ClassTalentTree.Node n = entry.node();
             uiBuilder.append("#ClassesSkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
             applySkillEntryIcon(uiBuilder, "#ClassesSkillPickerList[" + i + "]", n.itemId());
             uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
+            applySkillTooltip(uiBuilder, "#ClassesSkillPickerList[" + i + "]", acc, n, entry.nodeIndex());
             uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", state.selectedSkillSlot != null);
             if (state.selectedSkillSlot != null) {
                 eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
@@ -310,6 +317,17 @@ public final class ClassesTab {
             uiBuilder.set(prefix + " #SkillEntryCustomIcon.Visible", false);
             uiBuilder.set(prefix + " #SkillEntryIcon.ItemId", iconRef);
         }
+    }
+
+    private static void applySkillTooltip(@Nonnull UICommandBuilder uiBuilder,
+                                          @Nonnull String selector,
+                                          @Nullable ClassAccount acc,
+                                          @Nonnull ClassTalentTree.Node node,
+                                          int nodeIndex) {
+        String skillId = ClassSkillDescriptions.skillIdForNode(acc, nodeIndex);
+        uiBuilder.set(selector + ".TooltipText", "");
+        uiBuilder.set(selector + ".TooltipTextSpans",
+            ClassSkillDescriptions.tooltipMessage(node.name(), skillId, node.description()));
     }
 
     private static Message weaponMasteryMsg(@Nullable PlayerSpecialization spec, @Nonnull WeaponCategory category) {

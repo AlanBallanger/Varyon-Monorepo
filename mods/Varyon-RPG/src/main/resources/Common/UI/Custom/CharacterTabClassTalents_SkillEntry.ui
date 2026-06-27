@@ -1,6 +1,10 @@
+$P = "CharacterPage.ui";
+
 Group {
   Anchor: (Left: 0, Right: 0, Height: 36);
   LayoutMode: Left;
+  TextTooltipStyle: $P.@SkillTooltipStyle;
+  TooltipText: "";
 
   Group {
     Anchor: (Width: 32, Height: 32);

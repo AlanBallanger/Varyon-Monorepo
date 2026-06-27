@@ -640,7 +640,7 @@ Group {
               Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 1"; }
               Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "E"; }
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
-                Button #SkillSlotE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full;
+                Button #SkillSlotE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full; TextTooltipStyle: $P.@SkillTooltipStyle; TooltipText: "";
                   Group #SkillSlotEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
                   Group #SkillSlotEBorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
                   ItemIcon #SkillSlotEIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
@@ -653,7 +653,7 @@ Group {
               Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 2"; }
               Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "R"; }
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
-                Button #SkillSlotR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full;
+                Button #SkillSlotR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full; TextTooltipStyle: $P.@SkillTooltipStyle; TooltipText: "";
                   Group #SkillSlotRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
                   Group #SkillSlotRBorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
                   ItemIcon #SkillSlotRIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
@@ -666,7 +666,7 @@ Group {
               Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 6"; }
               Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "A"; }
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
-                Button #SkillSlotA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full;
+                Button #SkillSlotA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full; TextTooltipStyle: $P.@SkillTooltipStyle; TooltipText: "";
                   Group #SkillSlotABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
                   Group #SkillSlotABorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
                   ItemIcon #SkillSlotAIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
@@ -685,7 +685,7 @@ Group {
               Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 3"; }
               Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "Crouch+A"; }
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
-                Button #SkillSlotCrouchA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full;
+                Button #SkillSlotCrouchA { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full; TextTooltipStyle: $P.@SkillTooltipStyle; TooltipText: "";
                   Group #SkillSlotCrouchABg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
                   Group #SkillSlotCrouchABorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
                   ItemIcon #SkillSlotCrouchAIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
@@ -698,7 +698,7 @@ Group {
               Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 4"; }
               Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "Crouch+E"; }
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
-                Button #SkillSlotCrouchE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full;
+                Button #SkillSlotCrouchE { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full; TextTooltipStyle: $P.@SkillTooltipStyle; TooltipText: "";
                   Group #SkillSlotCrouchEBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
                   Group #SkillSlotCrouchEBorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
                   ItemIcon #SkillSlotCrouchEIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
@@ -711,7 +711,7 @@ Group {
               Label { Anchor: (Left: 0, Right: 0, Height: 14); Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center); Text: "Sort 5"; }
               Label { Anchor: (Left: 0, Right: 0, Height: 12); Style: (FontSize: 10, TextColor: #A89E90, HorizontalAlignment: Center); Text: "Crouch+R"; }
               Group { Anchor: (Left: 0, Right: 0, Height: 42); LayoutMode: Middle;
-                Button #SkillSlotCrouchR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full;
+                Button #SkillSlotCrouchR { Anchor: (Width: 36, Height: 36); Style: (Default: (Background: PatchStyle(TexturePath: "Elements/Add_Skill.png", Border: 0)), Hovered: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0)), Pressed: (Background: PatchStyle(TexturePath: "Elements/Add_Skill_Hovered.png", Border: 0))); LayoutMode: Full; TextTooltipStyle: $P.@SkillTooltipStyle; TooltipText: "";
                   Group #SkillSlotCrouchRBg { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); }
                   Group #SkillSlotCrouchRBorder { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); Background: #443C23FF; Visible: false; }
                   ItemIcon #SkillSlotCrouchRIcon { Anchor: (Left: 2, Right: 2, Top: 2, Bottom: 2); Visible: false; }
