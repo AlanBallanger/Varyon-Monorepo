@@ -26,6 +26,6 @@ public final class DechiquetageSkill {
         int pct = Math.round(damagePctForRank(rank) * 100);
         int ls  = Math.round(lifestealPctForRank(rank) * 100);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return pct + "% dégâts arme, récupère " + ls + "% des dégâts en HP, CD " + cd + "s";
+        return pct + "% dégâts arme, récupère " + ls + "% des dégâts en HP, Délai " + cd + "s";
     }
 }

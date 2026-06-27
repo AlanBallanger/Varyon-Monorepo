@@ -24,6 +24,6 @@ public final class CarreauLourdSkill {
     public static String statLineForRank(int rank) {
         int bonus = Math.round(damageBonusForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "Prochain carreau +" + bonus + "% dégâts, CD " + cd + "s";
+        return "Prochain carreau +" + bonus + "% dégâts, Délai " + cd + "s";
     }
 }

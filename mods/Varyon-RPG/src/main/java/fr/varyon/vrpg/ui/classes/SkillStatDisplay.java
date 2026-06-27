@@ -1,39 +1,23 @@
 package fr.varyon.vrpg.ui.classes;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public record SkillStatDisplay(
-    @Nullable Integer weaponDamagePct,
-    @Nullable String cooldown,
-    @Nullable Integer staminaCost,
-    @Nullable Integer manaCost,
+    List<SkillStatEntry> entries,
     @Nullable String fallbackText
 ) {
+    public static final int MAX_SLOTS = 6;
+
+    public static SkillStatDisplay of(List<SkillStatEntry> entries) {
+        return new SkillStatDisplay(entries, null);
+    }
+
     public static SkillStatDisplay fallback(@Nullable String text) {
-        return new SkillStatDisplay(null, null, null, null, text);
+        return new SkillStatDisplay(List.of(), text);
     }
 
     public boolean usesIconLayout() {
-        if (fallbackText != null && weaponDamagePct == null && cooldown == null
-            && staminaCost == null && manaCost == null) {
-            return false;
-        }
-        return cooldown != null && (weaponDamagePct != null || staminaCost != null || manaCost != null);
-    }
-
-    public boolean showDamage() {
-        return weaponDamagePct != null;
-    }
-
-    public boolean showCooldown() {
-        return cooldown != null && !cooldown.isBlank();
-    }
-
-    public boolean showStamina() {
-        return staminaCost != null && manaCost == null;
-    }
-
-    public boolean showMana() {
-        return manaCost != null;
+        return entries != null && !entries.isEmpty();
     }
 }

@@ -26,6 +26,6 @@ public final class ExtractionAmeSkill {
         int life = Math.round(lifestealPctForRank(rank) * 100);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mn   = Math.round(manaCostForRank(rank));
-        return dmg + "% dégâts arme, " + life + "% vol de vie, " + mn + " mana, CD " + cd + "s";
+        return dmg + "% dégâts arme, " + life + "% vol de vie, " + mn + " mana, Délai " + cd + "s";
     }
 }

@@ -28,6 +28,6 @@ public final class NovaDeGivreSkill {
         int slow = (int) (slowMsForRank(rank) / 1000);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mana = Math.round(manaCostForRank(rank));
-        return pct + "% dégâts arme, ralentit " + slow + "s (rayon " + (int) RADIUS + " blocs), " + mana + " mana, CD " + cd + "s";
+        return pct + "% dégâts arme, ralentit " + slow + "s (rayon " + (int) RADIUS + " blocs), " + mana + " mana, Délai " + cd + "s";
     }
 }

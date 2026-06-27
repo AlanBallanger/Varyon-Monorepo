@@ -21,6 +21,6 @@ public final class JeuDeJambesSkill {
     public static String statLineForRank(int rank) {
         int dist = (int) dashDistanceForRank(rank);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
-        return "Dash latéral droit " + dist + " blocs, CD " + cd + "s";
+        return "Dash latéral droit " + dist + " blocs, Délai " + cd + "s";
     }
 }

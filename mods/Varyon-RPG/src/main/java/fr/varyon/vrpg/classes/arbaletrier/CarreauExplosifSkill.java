@@ -24,6 +24,6 @@ public final class CarreauExplosifSkill {
     public static String statLineForRank(int rank) {
         int dmg = Math.round(damagePctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, rayon " + (int)radius() + "m, CD " + cd + "s";
+        return dmg + "% dégâts, rayon " + (int)radius() + "m, Délai " + cd + "s";
     }
 }

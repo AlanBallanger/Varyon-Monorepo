@@ -28,6 +28,6 @@ public final class MarteauPilonSkill {
         int p2  = Math.round(damagePct2ForRank(rank) * 100);
         int st  = (int) (stunMsForRank(rank) / 1000);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return "2 frappes : " + p1 + "% puis " + p2 + "% dégâts arme, 2e frappe étourdit " + st + "s, CD " + cd + "s";
+        return "2 frappes : " + p1 + "% puis " + p2 + "% dégâts arme, 2e frappe étourdit " + st + "s, Délai " + cd + "s";
     }
 }

@@ -57,7 +57,7 @@ public final class ArcanistPassifs {
         return "+" + pct + "% mana restauré par élimination";
     }
 
-    // --- Écho Arcanique (node 9) — chance de ne pas déclencher le CD ---
+    // --- Écho Arcanique (node 9) — chance de ne pas déclencher le Délai ---
     public static final String ECHO_ARCANIQUE_NODE     = "arcaniste_3";
     private static final float[] ECHO_ARCANIQUE_CHANCE = {0.05f, 0.08f, 0.11f, 0.15f, 0.20f};
 

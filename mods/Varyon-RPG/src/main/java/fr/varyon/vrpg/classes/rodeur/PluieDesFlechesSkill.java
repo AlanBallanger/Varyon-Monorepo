@@ -29,6 +29,6 @@ public final class PluieDesFlechesSkill {
         int dmg = Math.round(damagePctForRank(rank) * 100);
         int arrows = arrowCountForRank(rank);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return arrows + " flèches, " + dmg + "% dégâts/flèche, " + (DURATION_MS / 1000f) + "s, CD " + cd + "s";
+        return arrows + " flèches, " + dmg + "% dégâts/flèche, " + (DURATION_MS / 1000f) + "s, Délai " + cd + "s";
     }
 }

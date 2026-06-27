@@ -24,6 +24,6 @@ public final class BenedictionDeGaiaSkill {
         int heal = Math.round(healAmountForRank(rank));
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mana = Math.round(manaCostForRank(rank));
-        return "+" + heal + " PV aux alliés à " + (int) HEAL_RADIUS + " blocs, " + mana + " mana, CD " + cd + "s";
+        return "+" + heal + " PV aux alliés à " + (int) HEAL_RADIUS + " blocs, " + mana + " mana, Délai " + cd + "s";
     }
 }

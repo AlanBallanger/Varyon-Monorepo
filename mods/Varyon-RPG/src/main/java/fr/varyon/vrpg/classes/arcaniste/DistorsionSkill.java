@@ -22,6 +22,6 @@ public final class DistorsionSkill {
         int dist = (int) dashDistanceForRank(rank);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mana = Math.round(manaCostForRank(rank));
-        return dist + " blocs en arrière, " + mana + " mana, CD " + cd + "s";
+        return dist + " blocs en arrière, " + mana + " mana, Délai " + cd + "s";
     }
 }

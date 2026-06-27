@@ -191,7 +191,7 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                     rodeurState.consumeMarque(uuid);
                     if (debug) log.append(String.format(" Marque=+%.0f%%", bonus * 100));
 
-                    // Traque sans fin — si ce coup tue la cible, réduire le CD de Marque
+                    // Traque sans fin — si ce coup tue la cible, réduire le Délai de Marque
                     int traqueSansFinRank = acc.getTalentRank(PlayerClass.TIREUR, RodeurPassifs.TRAQUE_SANS_FIN_NODE);
                     if (traqueSansFinRank > 0 && willKill(victimRef, amount, store)) {
                         float reduction = RodeurPassifs.traqueCdReductionForRank(traqueSansFinRank);

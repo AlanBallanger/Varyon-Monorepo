@@ -20,6 +20,6 @@ public final class EcranDeFumeeSkill {
     public static String statLineForRank(int rank) {
         float sec = durationMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "Invisibilité " + sec + "s, CD " + cd + "s";
+        return "Invisibilité " + sec + "s, Délai " + cd + "s";
     }
 }

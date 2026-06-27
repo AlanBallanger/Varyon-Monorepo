@@ -23,6 +23,6 @@ public final class DixPourSangSkill {
     public static String statLineForRank(int rank) {
         int pct = Math.round(damagePctForRank(rank) * 100);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return "Frappe puissante qui consomme 10% de tes PV — " + pct + "% dégâts arme (zone), CD " + cd + "s";
+        return "Frappe puissante qui consomme 10% de tes PV — " + pct + "% dégâts arme (zone), Délai " + cd + "s";
     }
 }

@@ -6,20 +6,24 @@ public final class DuellistePassifs {
 
     // --- Blessure Ouverte (node 2) ---
     public static final String BLESSURE_NODE   = "duelliste_2";
-    private static final float[]  BLEED_CHANCE  = {0.08f, 0.12f, 0.16f, 0.20f, 0.25f};
-    public static final float  BLEED_WEAPON_PCT  = 0.30f;
-    public static final long   BLEED_DURATION_MS = 5_000L;
+    private static final float[]  BLEED_CHANCE     = {0.08f, 0.12f, 0.16f, 0.20f, 0.25f};
+    private static final float[]  BLEED_WEAPON_PCT = {0.50f, 0.60f, 0.70f, 0.80f, 1.00f};
+    public static final long      BLEED_DURATION_MS = 5_000L;
 
     public static float bleedChanceForRank(int rank) {
         return BLEED_CHANCE[Math.max(0, Math.min(rank - 1, BLEED_CHANCE.length - 1))];
     }
 
+    public static float bleedWeaponPctForRank(int rank) {
+        return BLEED_WEAPON_PCT[Math.max(0, Math.min(rank - 1, BLEED_WEAPON_PCT.length - 1))];
+    }
+
     public static int bleedMaxRank() { return BLEED_CHANCE.length; }
 
     public static String bleedStatLine(int rank) {
-        int pct = Math.round(bleedChanceForRank(rank) * 100);
-        int weaponPct = Math.round(BLEED_WEAPON_PCT * 100);
-        return pct + "% chance, " + weaponPct + "% dégâts arme/s pendant 5s";
+        int chance = Math.round(bleedChanceForRank(rank) * 100);
+        int weaponPct = Math.round(bleedWeaponPctForRank(rank) * 100);
+        return chance + "% chance, " + weaponPct + "% dégâts arme/s pendant 5s";
     }
 
     // --- Frappe Précise (node 8) ---
@@ -39,6 +43,7 @@ public final class DuellistePassifs {
 
     // --- Contre-Attaque (node 5) ---
     public static final String CONTRE_NODE      = "duelliste_5";
+    public static final long   CONTRE_WINDOW_MS = 8_000L;
     private static final float[] CONTRE_BONUS   = {0.10f, 0.20f, 0.30f, 0.40f, 0.50f};
 
     public static float contreBonusForRank(int rank) {

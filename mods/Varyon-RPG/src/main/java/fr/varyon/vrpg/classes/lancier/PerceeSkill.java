@@ -22,6 +22,6 @@ public final class PerceeSkill {
     public static String statLineForRank(int rank) {
         int dist = (int) dashDistanceForRank(rank);
         int cd   = (int)(cooldownMsForRank(rank) / 1000);
-        return dist + " blocs vers l'arrière, CD " + cd + "s";
+        return dist + " blocs vers l'arrière, Délai " + cd + "s";
     }
 }

@@ -23,6 +23,6 @@ public final class ProvocationSkill {
     public static String statLineForRank(int rank) {
         float dur = durationMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "Force les ennemis à " + (int)TAUNT_RADIUS + " blocs à attaquer, " + dur + "s, CD " + cd + "s";
+        return "Force les ennemis à " + (int)TAUNT_RADIUS + " blocs à attaquer, " + dur + "s, Délai " + cd + "s";
     }
 }

@@ -27,6 +27,6 @@ public final class ExecutionSauvageSkill {
         int bonus  = Math.round(lowHpBonusPctForRank(rank) * 100);
         int thres  = Math.round(LOW_HP_THRESHOLD * 100);
         int cd     = (int) (cooldownMsForRank(rank) / 1000);
-        return pct + "% dégâts arme (+" + bonus + "% si cible < " + thres + "% HP), CD " + cd + "s";
+        return pct + "% dégâts arme (+" + bonus + "% si cible < " + thres + "% HP), Délai " + cd + "s";
     }
 }

@@ -25,6 +25,6 @@ public final class PasDesTenebresSkill {
         int dist = (int) dashDistanceForRank(rank);
         float sec = stealthDurationMs(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return dist + " blocs, invisibilité " + sec + "s, CD " + cd + "s";
+        return dist + " blocs, invisibilité " + sec + "s, Délai " + cd + "s";
     }
 }

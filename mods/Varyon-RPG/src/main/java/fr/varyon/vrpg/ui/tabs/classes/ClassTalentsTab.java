@@ -16,6 +16,7 @@ import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.ability.ClassSkillSlotIds;
 import fr.varyon.vrpg.ui.classes.ClassSkillDescriptions;
 import fr.varyon.vrpg.ui.classes.SkillStatDisplay;
+import fr.varyon.vrpg.ui.classes.SkillStatEntry;
 import fr.varyon.vrpg.ui.classes.ClassTalentTreeLogic;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
 import fr.varyon.vrpg.ui.classes.RpgClassUiState;
@@ -378,43 +379,43 @@ public final class ClassTalentsTab {
     private static void applySkillStatDisplay(@Nonnull UICommandBuilder ui,
                                               @Nonnull String rowPrefix,
                                               @Nullable SkillStatDisplay display) {
-        boolean iconLayout = display != null && display.usesIconLayout();
-        ui.set("#" + rowPrefix + "BonusIcons.Visible", iconLayout);
-        ui.set("#" + rowPrefix + "BonusValue.Visible",
-            !iconLayout && display != null && display.fallbackText() != null);
+        hideStatSlots(ui, rowPrefix);
 
-        if (!iconLayout) {
+        if (display == null || !display.usesIconLayout()) {
+            ui.set("#" + rowPrefix + "BonusIcons.Visible", false);
+            ui.set("#" + rowPrefix + "BonusValue.Visible",
+                display != null && display.fallbackText() != null);
             if (display != null && display.fallbackText() != null) {
                 ui.set("#" + rowPrefix + "BonusValue.TextSpans", Message.raw(display.fallbackText()));
             }
-            ui.set("#" + rowPrefix + "StatDmg.Visible", false);
-            ui.set("#" + rowPrefix + "StatCd.Visible", false);
-            ui.set("#" + rowPrefix + "StatStamina.Visible", false);
-            ui.set("#" + rowPrefix + "StatMana.Visible", false);
             return;
         }
 
-        ui.set("#" + rowPrefix + "StatDmg.Visible", display.showDamage());
-        if (display.showDamage()) {
-            ui.set("#" + rowPrefix + "StatDmgValue.TextSpans",
-                Message.raw(display.weaponDamagePct() + "%"));
-        }
+        ui.set("#" + rowPrefix + "BonusIcons.Visible", true);
+        ui.set("#" + rowPrefix + "BonusValue.Visible", false);
 
-        ui.set("#" + rowPrefix + "StatCd.Visible", display.showCooldown());
-        if (display.showCooldown()) {
-            ui.set("#" + rowPrefix + "StatCdValue.TextSpans", Message.raw(display.cooldown()));
+        var entries = display.entries();
+        for (int i = 0; i < SkillStatDisplay.MAX_SLOTS; i++) {
+            String base = "#" + rowPrefix + "Stat" + i;
+            if (i < entries.size()) {
+                SkillStatEntry entry = entries.get(i);
+                ui.set(base + ".Visible", true);
+                ui.set(base + "Label.TextSpans", Message.raw(entry.label()));
+                ui.set(base + "Value.TextSpans", Message.raw(entry.value()));
+                ui.setObject(base + "Icon.Background",
+                    new PatchStyle().setTexturePath(Value.of(entry.kind().iconPath())));
+            } else {
+                ui.set(base + ".Visible", false);
+            }
         }
+        ui.set("#" + rowPrefix + "StatRow1.Visible", entries.size() > 3);
+    }
 
-        ui.set("#" + rowPrefix + "StatStamina.Visible", display.showStamina());
-        ui.set("#" + rowPrefix + "StatMana.Visible", display.showMana());
-        if (display.showStamina()) {
-            ui.set("#" + rowPrefix + "StatStaminaValue.TextSpans",
-                Message.raw(String.valueOf(display.staminaCost())));
+    private static void hideStatSlots(@Nonnull UICommandBuilder ui, @Nonnull String rowPrefix) {
+        for (int i = 0; i < SkillStatDisplay.MAX_SLOTS; i++) {
+            ui.set("#" + rowPrefix + "Stat" + i + ".Visible", false);
         }
-        if (display.showMana()) {
-            ui.set("#" + rowPrefix + "StatManaValue.TextSpans",
-                Message.raw(String.valueOf(display.manaCost())));
-        }
+        ui.set("#" + rowPrefix + "StatRow1.Visible", false);
     }
 
 }

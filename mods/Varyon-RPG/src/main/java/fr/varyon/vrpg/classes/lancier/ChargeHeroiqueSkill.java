@@ -37,6 +37,6 @@ public final class ChargeHeroiqueSkill {
         int dmg = Math.round(damageFactor(rank) * 100);
         int stun = (int)(stunMsForRank(rank) / 100) * 100 / 1000;
         int cd   = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, étourdissement " + stun + "s, CD " + cd + "s";
+        return dmg + "% dégâts, étourdissement " + stun + "s, Délai " + cd + "s";
     }
 }

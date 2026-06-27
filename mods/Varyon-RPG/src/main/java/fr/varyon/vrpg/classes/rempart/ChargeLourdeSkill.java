@@ -24,6 +24,6 @@ public final class ChargeLourdeSkill {
         int dist = (int) dashDistanceForRank(rank);
         int pct = Math.round(damagePctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "Charge " + dist + " blocs, " + pct + "% dégâts arme, CD " + cd + "s";
+        return "Charge " + dist + " blocs, " + pct + "% dégâts arme, Délai " + cd + "s";
     }
 }

@@ -31,6 +31,6 @@ public final class CarreauTranspercantSkill {
         float dur = slowMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
         int pierce = pierceCountForRank(rank);
-        return dmg + "% dégâts, traverse " + pierce + " cibles, ralentit " + slow + "% pendant " + dur + "s, CD " + cd + "s";
+        return dmg + "% dégâts, traverse " + pierce + " cibles, ralentit " + slow + "% pendant " + dur + "s, Délai " + cd + "s";
     }
 }

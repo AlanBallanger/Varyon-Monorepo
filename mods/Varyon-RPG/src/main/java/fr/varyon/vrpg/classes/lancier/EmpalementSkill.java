@@ -41,6 +41,6 @@ public final class EmpalementSkill {
         int bleedDur = (int)(bleedDurationMsForRank(rank) / 1000);
         int root   = (int)(rootDurationMsForRank(rank) / 100) * 100 / 1000;
         int cd     = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, saignement " + bleedPct + "%/s " + bleedDur + "s, immob. " + root + "s, CD " + cd + "s";
+        return dmg + "% dégâts, saignement " + bleedPct + "%/s " + bleedDur + "s, immob. " + root + "s, Délai " + cd + "s";
     }
 }

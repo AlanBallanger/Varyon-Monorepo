@@ -26,6 +26,6 @@ public final class GardeRapprocheSkill {
         int pct = Math.round(damageReductionForRank(rank) * 100);
         float dur = durationMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "-" + pct + "% dégâts (toi + alliés à " + (int)ALLY_RADIUS + " blocs), " + dur + "s, CD " + cd + "s";
+        return "-" + pct + "% dégâts (toi + alliés à " + (int)ALLY_RADIUS + " blocs), " + dur + "s, Délai " + cd + "s";
     }
 }

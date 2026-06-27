@@ -42,6 +42,6 @@ public final class FormationDePiquesSkill {
         int slow = Math.round(slowFactor(rank) * 100);
         int dur  = (int)(durationMsForRank(rank) / 1000);
         int cd   = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts/s, -" + slow + "% vitesse, " + dur + "s, CD " + cd + "s";
+        return dmg + "% dégâts/s, -" + slow + "% vitesse, " + dur + "s, Délai " + cd + "s";
     }
 }

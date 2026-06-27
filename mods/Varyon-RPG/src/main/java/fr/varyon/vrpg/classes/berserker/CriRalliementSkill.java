@@ -26,6 +26,6 @@ public final class CriRalliementSkill {
         int pct = Math.round(damageBonusForRank(rank) * 100);
         int dur = (int) (durationMsForRank(rank) / 1000);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return "+" + pct + "% dégâts alliés (" + ALLY_RADIUS + " blocs) pendant " + dur + "s, CD " + cd + "s";
+        return "+" + pct + "% dégâts alliés (" + ALLY_RADIUS + " blocs) pendant " + dur + "s, Délai " + cd + "s";
     }
 }

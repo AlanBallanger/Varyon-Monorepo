@@ -27,6 +27,6 @@ public final class RabattageSkill {
         int pct = Math.round(damagePctForRank(rank) * 100);
         int st  = (int) (stunMsForRank(rank) / 1000);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return "Balayage " + (int) SWEEP_RADIUS + " blocs, " + pct + "% dégâts, attire et étourdit " + st + "s, CD " + cd + "s";
+        return "Balayage " + (int) SWEEP_RADIUS + " blocs, " + pct + "% dégâts, attire et étourdit " + st + "s, Délai " + cd + "s";
     }
 }

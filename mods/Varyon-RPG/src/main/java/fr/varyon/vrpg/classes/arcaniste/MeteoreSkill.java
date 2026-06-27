@@ -39,6 +39,6 @@ public final class MeteoreSkill {
         int pct  = Math.round(damagePctForRank(rank) * 100);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mana = Math.round(manaCostForRank(rank));
-        return pct + "% dégâts arme (rayon " + (int) IMPACT_RADIUS + " blocs), " + mana + " mana, CD " + cd + "s";
+        return pct + "% dégâts arme (rayon " + (int) IMPACT_RADIUS + " blocs), " + mana + " mana, Délai " + cd + "s";
     }
 }

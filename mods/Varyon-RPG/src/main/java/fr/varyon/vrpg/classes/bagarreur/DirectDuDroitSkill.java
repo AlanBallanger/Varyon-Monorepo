@@ -24,6 +24,6 @@ public final class DirectDuDroitSkill {
         int pct = Math.round(damagePctForRank(rank) * 100);
         int st  = (int) (stunMsForRank(rank) / 1000);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return pct + "% dégâts arme, étourdit " + st + "s, CD " + cd + "s";
+        return pct + "% dégâts arme, étourdit " + st + "s, Délai " + cd + "s";
     }
 }

@@ -49,7 +49,7 @@ public final class PerceeSkill {
         int base  = (int) baseDamageForRank(rank);
         int bonus = Math.round(FULL_HP_BONUS * 100);
         int cd    = (int) (cooldownMsForRank(rank) / 1000);
-        return base + " dégâts, +" + bonus + "% si cible > 80% PV, CD " + cd + "s";
+        return base + " dégâts, +" + bonus + "% si cible > 80% PV, Délai " + cd + "s";
     }
 
     public static boolean execute(@Nonnull PlayerRef playerRef,

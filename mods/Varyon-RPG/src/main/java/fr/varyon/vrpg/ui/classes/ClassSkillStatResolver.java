@@ -1,6 +1,9 @@
 package fr.varyon.vrpg.ui.classes;
 
 import fr.varyon.vrpg.classes.ability.AssautEclairSkill;
+import fr.varyon.vrpg.classes.ability.ExpertEnDuelSkill;
+import fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs;
+import fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs;
 import fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill;
 import fr.varyon.vrpg.classes.arcaniste.DistorsionSkill;
 import fr.varyon.vrpg.classes.arcaniste.MeteoreSkill;
@@ -13,11 +16,26 @@ import fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill;
 import fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill;
 import fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill;
 import fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill;
+import fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs;
 import fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill;
 import fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill;
 import fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill;
 import fr.varyon.vrpg.classes.bagarreur.UppercutSkill;
+import fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs;
+import fr.varyon.vrpg.classes.lancier.LancierPassifs;
+import fr.varyon.vrpg.classes.ombre.OmbrePassifs;
+import fr.varyon.vrpg.classes.ravageur.RavageurPassifs;
+import fr.varyon.vrpg.classes.rempart.RempartPassifs;
+import fr.varyon.vrpg.classes.rodeur.RodeurPassifs;
+import fr.varyon.vrpg.classes.vaudou.VaudouPassifs;
 import fr.varyon.vrpg.classes.berserker.AssautBestialSkill;
+import fr.varyon.vrpg.classes.berserker.BerserkerPassifs;
+import fr.varyon.vrpg.classes.duelliste.AssautBretteurSkill;
+import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
+import fr.varyon.vrpg.classes.duelliste.DesarmementSkill;
+import fr.varyon.vrpg.classes.duelliste.DuellistePassifs;
+import fr.varyon.vrpg.classes.duelliste.FeintSkill;
+import fr.varyon.vrpg.classes.duelliste.RiposteParfaiteSkill;
 import fr.varyon.vrpg.classes.gardiendesgaia.AppelDuTreantSkill;
 import fr.varyon.vrpg.classes.gardiendesgaia.BenedictionDeGaiaSkill;
 import fr.varyon.vrpg.classes.gardiendesgaia.EcorceProtectriceSkill;
@@ -53,6 +71,8 @@ import fr.varyon.vrpg.classes.vaudou.TotemEntraveSkill;
 import fr.varyon.vrpg.classes.vaudou.TotemVulnerabiliteSkill;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +82,7 @@ public final class ClassSkillStatResolver {
     private static final Pattern DMG_PATTERN =
         Pattern.compile("(\\d+)%\\s*d[ée]g[aâ]ts\\s*arme", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     private static final Pattern CD_PATTERN =
-        Pattern.compile("CD\\s*([\\d.]+s)", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("(?:CD|D[eé]lai)\\s*([\\d.]+s)", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     private static final Pattern STAMINA_PATTERN =
         Pattern.compile("(\\d+)\\s*endurance", Pattern.CASE_INSENSITIVE);
     private static final Pattern MANA_PATTERN =
@@ -72,8 +92,185 @@ public final class ClassSkillStatResolver {
 
     @Nullable
     public static SkillStatDisplay resolve(@Nullable String skillId, int rank, @Nullable String statLine) {
-        if (skillId == null || rank < 1 || statLine == null || statLine.isBlank()) return null;
+        if (skillId == null || rank < 1) return null;
 
+        List<SkillStatEntry> specific = buildSpecific(skillId, rank);
+        if (specific != null && !specific.isEmpty()) {
+            return SkillStatDisplay.of(specific);
+        }
+
+        if (statLine == null || statLine.isBlank()) return null;
+
+        List<SkillStatEntry> generic = parseGeneric(skillId, rank, statLine);
+        if (!generic.isEmpty()) {
+            return SkillStatDisplay.of(generic);
+        }
+        return SkillStatDisplay.fallback(statLine);
+    }
+
+    @Nullable
+    private static List<SkillStatEntry> buildSpecific(String skillId, int rank) {
+        return switch (skillId) {
+            case CoupEstocSkill.SKILL_ID -> coupEstocStats(rank);
+            case AssautBretteurSkill.SKILL_ID -> assautBretteurStats(rank);
+            case FeintSkill.SKILL_ID -> feintStats(rank);
+            case DesarmementSkill.SKILL_ID -> desarmementStats(rank);
+            case RiposteParfaiteSkill.SKILL_ID -> riposteStats(rank);
+            case DuellistePassifs.BLESSURE_NODE -> entailleStats(rank);
+            case DuellistePassifs.CONTRE_NODE -> ascendantStats(rank);
+            case DuellistePassifs.FRAPPE_NODE -> frappePreciseStats(rank);
+            case DuellistePassifs.MOMENTUM_NODE -> momentumStats(rank);
+            case DuellistePassifs.ESQUIVE_NODE -> esquiveStats(rank);
+            case ExpertEnDuelSkill.SKILL_ID -> xpOnlyStats(
+                (int) Math.round(ExpertEnDuelSkill.xpBonusForRank(rank) * 100));
+            case OmbrePassifs.EXECUTION_RAPIDE_NODE -> List.of(
+                xpEntry(Math.round(OmbrePassifs.executionXpBonusForRank(rank) * 100)),
+                new SkillStatEntry(SkillStatKind.DURATION,
+                    formatDurationMs(OmbrePassifs.executionWindowMs())));
+            case BerserkerPassifs.CARNAGE_NODE -> xpStackStats(
+                Math.round(BerserkerPassifs.carnageXpBonusPerStack(rank) * 100));
+            case RempartPassifs.MAITRE_BOUCLIER_NODE -> xpOnlyStats(
+                Math.round(RempartPassifs.bouclierXpBonusForRank(rank) * 100));
+            case RavageurPassifs.MOISSONNEUR_NODE -> xpStackStats(
+                Math.round(RavageurPassifs.moissonneurXpBonusPerStack(rank) * 100));
+            case BagarreurPassifs.JUSQUAU_BOUT_NODE -> xpOnlyStats(
+                Math.round(BagarreurPassifs.jusquAuBoutBonusForRank(rank) * 100));
+            case GardienDeGaiaPassifs.HARMONIE_NODE -> xpOnlyStats(
+                Math.round(GardienDeGaiaPassifs.harmonieBonusForRank(rank) * 100));
+            case VaudouPassifs.FETICHEUR_NODE -> xpOnlyStats(
+                Math.round(VaudouPassifs.feticheurXpBonusForRank(rank) * 100));
+            case RodeurPassifs.OEIL_CHASSEUR_NODE -> xpOnlyStats(
+                Math.round(RodeurPassifs.oeilXpBonusForRank(rank) * 100));
+            case ArbaietrierPassifs.TIREUR_ELITE_NODE -> xpOnlyStats(
+                Math.round(ArbaietrierPassifs.eliteXpBonusForRank(rank) * 100));
+            case LancierPassifs.DISCIPLINE_NODE -> xpOnlyStats(
+                Math.round(LancierPassifs.disciplineBonusForRank(rank) * 100));
+            case ArcanistPassifs.TALENT_INNE_NODE -> xpOnlyStats(
+                Math.round(ArcanistPassifs.talentInneBonusForRank(rank) * 100));
+            default -> null;
+        };
+    }
+
+    private static List<SkillStatEntry> entailleStats(int rank) {
+        int chance = Math.round(DuellistePassifs.bleedChanceForRank(rank) * 100);
+        int bleed = Math.round(DuellistePassifs.bleedWeaponPctForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, bleed + "%"),
+            new SkillStatEntry(SkillStatKind.RATE, chance + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(DuellistePassifs.BLEED_DURATION_MS))
+        );
+    }
+
+    private static List<SkillStatEntry> ascendantStats(int rank) {
+        int pct = Math.round(DuellistePassifs.contreBonusForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(DuellistePassifs.CONTRE_WINDOW_MS))
+        );
+    }
+
+    private static List<SkillStatEntry> frappePreciseStats(int rank) {
+        int pct = Math.round(DuellistePassifs.critBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"));
+    }
+
+    private static List<SkillStatEntry> momentumStats(int rank) {
+        float raw = DuellistePassifs.momentumBonusPerStack(rank) * 100f;
+        String pctStr = raw == Math.floor(raw) ? String.valueOf((int) raw) : String.valueOf(raw);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pctStr + "%", "Cumul"));
+    }
+
+    private static List<SkillStatEntry> esquiveStats(int rank) {
+        int pct = Math.round(DuellistePassifs.dodgeChanceForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DODGE, pct + "%"));
+    }
+
+    private static List<SkillStatEntry> xpOnlyStats(int pct) {
+        return List.of(xpEntry(pct));
+    }
+
+    private static List<SkillStatEntry> xpStackStats(int pct) {
+        return List.of(xpEntry(pct, "Cumul"));
+    }
+
+    private static SkillStatEntry xpEntry(int pct) {
+        return new SkillStatEntry(SkillStatKind.XP, "+" + pct + "%");
+    }
+
+    private static SkillStatEntry xpEntry(int pct, String label) {
+        return new SkillStatEntry(SkillStatKind.XP, "+" + pct + "%", label);
+    }
+
+    private static List<SkillStatEntry> coupEstocStats(int rank) {
+        int pct = Math.round(CoupEstocSkill.castDamageFactorForRank(rank) * 100);
+        int next = Math.round((CoupEstocSkill.nextHitMultForRank(rank) - 1f) * 100);
+        int stamina = Math.round(CoupEstocSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(CoupEstocSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina)),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(CoupEstocSkill.armedWindowMs())),
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + next + "%", "Proch.")
+        );
+    }
+
+    private static List<SkillStatEntry> assautBretteurStats(int rank) {
+        int dmg = Math.round(AssautBretteurSkill.damageBonusForRank(rank) * 100);
+        int spd = Math.round(AssautBretteurSkill.speedBonusForRank(rank) * 100);
+        int stamina = Math.round(AssautBretteurSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + dmg + "%"),
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, "+" + spd + "%"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(AssautBretteurSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina)),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(AssautBretteurSkill.durationMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> feintStats(int rank) {
+        int stamina = Math.round(FeintSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DURATION, formatDurationMs(FeintSkill.windowMs())),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(FeintSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> riposteStats(int rank) {
+        int dmg = Math.round(RiposteParfaiteSkill.dmgBonusForRank(rank) * 100);
+        int stamina = Math.round(RiposteParfaiteSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + dmg + "%", "Contre"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(RiposteParfaiteSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina)),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(RiposteParfaiteSkill.windowMsForRank(rank)), "Posture")
+        );
+    }
+
+    private static List<SkillStatEntry> desarmementStats(int rank) {
+        int red = Math.round(DesarmementSkill.reductionForRank(rank) * 100);
+        int stamina = Math.round(DesarmementSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "-" + red + "%"),
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, "-50%"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(DesarmementSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina)),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(DesarmementSkill.durationMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> parseGeneric(String skillId, int rank, String statLine) {
         Integer dmg = matchInt(DMG_PATTERN, statLine);
         String cd = matchString(CD_PATTERN, statLine);
         Integer stamina = matchInt(STAMINA_PATTERN, statLine);
@@ -82,9 +279,6 @@ public final class ClassSkillStatResolver {
         if (cd == null) {
             Long ms = cooldownMsFromSkill(skillId, rank);
             if (ms != null) cd = formatCooldown(ms);
-        }
-        if (dmg == null) {
-            dmg = damagePctFromSkill(skillId, rank);
         }
         if (stamina == null && mana == null) {
             Float s = staminaCostFromSkill(skillId, rank);
@@ -97,17 +291,12 @@ public final class ClassSkillStatResolver {
         }
         if (mana != null) stamina = null;
 
-        SkillStatDisplay display = new SkillStatDisplay(dmg, cd, stamina, mana, null);
-        if (display.usesIconLayout()) return display;
-        return SkillStatDisplay.fallback(statLine);
-    }
-
-    @Nullable
-    private static Integer damagePctFromSkill(String skillId, int rank) {
-        if (AssautEclairSkill.SKILL_ID.equals(skillId)) {
-            return Math.round(AssautEclairSkill.damageFactor(rank) * 100);
-        }
-        return null;
+        List<SkillStatEntry> entries = new ArrayList<>(3);
+        if (dmg != null) entries.add(new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, dmg + "%"));
+        if (cd != null) entries.add(new SkillStatEntry(SkillStatKind.COOLDOWN, cd));
+        if (stamina != null) entries.add(new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina)));
+        else if (mana != null) entries.add(new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)));
+        return entries;
     }
 
     @Nullable
@@ -119,6 +308,11 @@ public final class ClassSkillStatResolver {
     private static Float staminaCostFromSkill(String skillId, int rank) {
         return switch (skillId) {
             case AssautEclairSkill.SKILL_ID -> AssautEclairSkill.staminaCostForRank(rank);
+            case CoupEstocSkill.SKILL_ID -> CoupEstocSkill.staminaCostForRank(rank);
+            case FeintSkill.SKILL_ID -> FeintSkill.staminaCostForRank(rank);
+            case DesarmementSkill.SKILL_ID -> DesarmementSkill.staminaCostForRank(rank);
+            case AssautBretteurSkill.SKILL_ID -> AssautBretteurSkill.staminaCostForRank(rank);
+            case RiposteParfaiteSkill.SKILL_ID -> RiposteParfaiteSkill.staminaCostForRank(rank);
             case PasDesTenebresSkill.SKILL_ID -> PasDesTenebresSkill.staminaCostForRank(rank);
             case PasDeLOmbreSkill.SKILL_ID -> PasDeLOmbreSkill.staminaCostForRank(rank);
             case ChaseOuverteSkill.SKILL_ID -> ChaseOuverteSkill.staminaCostForRank(rank);
@@ -197,5 +391,9 @@ public final class ClassSkillStatResolver {
             return (cooldownMs / 1000L) + "s";
         }
         return String.format(Locale.ROOT, "%.1fs", cooldownMs / 1000.0);
+    }
+
+    static String formatDurationMs(long durationMs) {
+        return formatCooldown(durationMs);
     }
 }

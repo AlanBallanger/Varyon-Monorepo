@@ -29,6 +29,6 @@ public final class PasDeLOmbreSkill {
         int range = (int) rangeForRank(rank);
         int pct = Math.round(damagePctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "Portée " + range + " blocs, " + pct + "% dégâts arme (+50% si cible <30% HP), CD " + cd + "s";
+        return "Portée " + range + " blocs, " + pct + "% dégâts arme (+50% si cible <30% HP), Délai " + cd + "s";
     }
 }

@@ -24,6 +24,6 @@ public final class ForteresseSkill {
         int pct = Math.round(damageReductionForRank(rank) * 100);
         float dur = durationMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "-" + pct + "% dégâts reçus pendant " + dur + "s, CD " + cd + "s";
+        return "-" + pct + "% dégâts reçus pendant " + dur + "s, Délai " + cd + "s";
     }
 }

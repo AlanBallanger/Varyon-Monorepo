@@ -25,6 +25,6 @@ public final class MarqueDeRenaissanceSkill {
         int gauge = Math.round(specialGaugeBonusForRank(rank));
         int cd    = (int) (cooldownMsForRank(rank) / 1000);
         int mana  = Math.round(manaCostForRank(rank));
-        return "Protection mort " + dur + "s, +" + gauge + " jauge spéciale, " + mana + " mana, CD " + cd + "s";
+        return "Protection mort " + dur + "s, +" + gauge + " jauge spéciale, " + mana + " mana, Délai " + cd + "s";
     }
 }

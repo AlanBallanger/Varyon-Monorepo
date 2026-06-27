@@ -163,7 +163,7 @@ public final class BerserkerOutgoingDamageSystem extends DamageEventSystem {
                 Ref<EntityStore> victimRef = chunk.getReferenceTo(index);
                 int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
                 float weaponBase = weaponDmg > 0 ? (float) weaponDmg : 1f;
-                bleedSystem.applyBleed(victimRef, weaponBase, store);
+                bleedSystem.applyBleed(victimRef, weaponBase, BerserkerPassifs.BLEED_WEAPON_PCT, store);
                 if (debug) LOG.atInfo().log("[BerserkerDmg] BlessuresProfondes saignement dpt=" +
                     String.format("%.1f", weaponBase * BerserkerPassifs.BLEED_WEAPON_PCT) + "/s");
             }

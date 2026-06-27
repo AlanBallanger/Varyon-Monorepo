@@ -24,6 +24,6 @@ public final class BondEcrasantSkill {
         int dist = (int) dashDistanceForRank(rank);
         int pct  = Math.round(damagePctForRank(rank) * 100);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
-        return "Bond " + dist + " blocs, " + pct + "% dégâts arme à l'atterrissage, CD " + cd + "s";
+        return "Bond " + dist + " blocs, " + pct + "% dégâts arme à l'atterrissage, Délai " + cd + "s";
     }
 }

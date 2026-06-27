@@ -26,6 +26,6 @@ public final class DelugeDeCoups2Skill {
     public static String statLineForRank(int rank) {
         int pct = Math.round(damagePerHitForRank(rank) * 100);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return hitCountForRank(rank) + " frappes de " + pct + "% dégâts arme, CD " + cd + "s";
+        return hitCountForRank(rank) + " frappes de " + pct + "% dégâts arme, Délai " + cd + "s";
     }
 }

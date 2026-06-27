@@ -1,4 +1,4 @@
-﻿$C = "Common.ui";
+$C = "Common.ui";
 
 @Ink = #E8DCC8;
 @InkStrong = #F2E8D8;
@@ -277,7 +277,7 @@ Group {
             Visible: false;
           }
           Group { FlexWeight: 1; }
-          Label { Style: @TabLabelStyle; Text: "Compétences"; }
+          Label { Style: @TabLabelStyle; Text: "Comp�tences"; }
           Group { FlexWeight: 1; }
         }
       }
@@ -345,13 +345,13 @@ Group {
       }
 
       Group #ClassTreeSpecializationWipRect { Anchor: (Left: 0, Top: 0, Width: 720, Height: 34); Background: @CardShade; Visible: false; }
-      Label #ClassTreeSpecializationWipLabel { Anchor: (Left: 0, Top: 0, Width: 720, Height: 34); Style: (...@MetaStyle, FontSize: 14, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Spécialisation (à venir)"; Visible: false; }
+      Label #ClassTreeSpecializationWipLabel { Anchor: (Left: 0, Top: 0, Width: 720, Height: 34); Style: (...@MetaStyle, FontSize: 14, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sp�cialisation (� venir)"; Visible: false; }
 
       Button #ClassTreeAttribuerButton { Anchor: (Right: 8, Top: 4, Width: 118, Height: 28); Style: @PlusButtonStyle; LayoutMode: Middle;
         Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Attribuer"; }
       }
       Button #ClassTreeResetButton { Anchor: (Right: 8, Bottom: 8, Width: 88, Height: 26); Style: @PlusButtonStyle; LayoutMode: Middle;
-        Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser"; }
+        Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "R�initialiser"; }
       }
 
 
@@ -1538,36 +1538,33 @@ Group {
         }
 
         Group #ClassTreeCurrentBonusIcons {
-          LayoutMode: Left;
+          LayoutMode: Top;
           Anchor: (Top: 6);
           Visible: false;
 
-          Group #ClassTreeCurrentStatDmg {
+          Group #ClassTreeCurrentStatRow0 {
+            LayoutMode: Left;
+
+          Group #ClassTreeCurrentStat0 {
             LayoutMode: Left;
             Visible: false;
-
             Group {
               Anchor: (Width: 36, Height: 36);
               Background: #000000(0.35);
               LayoutMode: Middle;
-
-              Group {
+              Group #ClassTreeCurrentStat0Icon {
                 Anchor: (Width: 26, Height: 26);
                 Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
               }
             }
-
             Group { Anchor: (Width: 6); }
-
             Group {
               LayoutMode: Top;
-
-              Label {
+              Label #ClassTreeCurrentStat0Label {
                 Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-                Text: "Dégâts";
+                Text: "";
               }
-
-              Label #ClassTreeCurrentStatDmgValue {
+              Label #ClassTreeCurrentStat0Value {
                 Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
                 Text: "";
               }
@@ -1576,32 +1573,26 @@ Group {
 
           Group { Anchor: (Width: 10); }
 
-          Group #ClassTreeCurrentStatCd {
+          Group #ClassTreeCurrentStat1 {
             LayoutMode: Left;
             Visible: false;
-
             Group {
               Anchor: (Width: 36, Height: 36);
               Background: #000000(0.35);
               LayoutMode: Middle;
-
-              Group {
+              Group #ClassTreeCurrentStat1Icon {
                 Anchor: (Width: 26, Height: 26);
-                Background: PatchStyle(TexturePath: "Icons/cooldown.png", Border: 0);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
               }
             }
-
             Group { Anchor: (Width: 6); }
-
             Group {
               LayoutMode: Top;
-
-              Label {
+              Label #ClassTreeCurrentStat1Label {
                 Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-                Text: "CD";
+                Text: "";
               }
-
-              Label #ClassTreeCurrentStatCdValue {
+              Label #ClassTreeCurrentStat1Value {
                 Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
                 Text: "";
               }
@@ -1610,68 +1601,120 @@ Group {
 
           Group { Anchor: (Width: 10); }
 
-          Group #ClassTreeCurrentStatStamina {
+          Group #ClassTreeCurrentStat2 {
             LayoutMode: Left;
             Visible: false;
-
             Group {
               Anchor: (Width: 36, Height: 36);
               Background: #000000(0.35);
               LayoutMode: Middle;
-
-              Group {
+              Group #ClassTreeCurrentStat2Icon {
                 Anchor: (Width: 26, Height: 26);
-                Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
               }
             }
-
             Group { Anchor: (Width: 6); }
-
             Group {
               LayoutMode: Top;
-
-              Label {
+              Label #ClassTreeCurrentStat2Label {
                 Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-                Text: "Endu";
+                Text: "";
               }
+              Label #ClassTreeCurrentStat2Value {
+                Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+          }
 
-              Label #ClassTreeCurrentStatStaminaValue {
+          Group { Anchor: (Height: 4); }
+
+          Group #ClassTreeCurrentStatRow1 {
+            LayoutMode: Left;
+            Visible: false;
+
+          Group #ClassTreeCurrentStat3 {
+            LayoutMode: Left;
+            Visible: false;
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+              Group #ClassTreeCurrentStat3Icon {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
+              }
+            }
+            Group { Anchor: (Width: 6); }
+            Group {
+              LayoutMode: Top;
+              Label #ClassTreeCurrentStat3Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+              Label #ClassTreeCurrentStat3Value {
                 Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
                 Text: "";
               }
             }
           }
 
-          Group #ClassTreeCurrentStatMana {
+          Group { Anchor: (Width: 10); }
+
+          Group #ClassTreeCurrentStat4 {
             LayoutMode: Left;
             Visible: false;
-
             Group {
               Anchor: (Width: 36, Height: 36);
               Background: #000000(0.35);
               LayoutMode: Middle;
-
-              Group {
+              Group #ClassTreeCurrentStat4Icon {
                 Anchor: (Width: 26, Height: 26);
-                Background: PatchStyle(TexturePath: "Icons/mana.png", Border: 0);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
               }
             }
-
             Group { Anchor: (Width: 6); }
-
             Group {
               LayoutMode: Top;
-
-              Label {
+              Label #ClassTreeCurrentStat4Label {
                 Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-                Text: "Coût mana";
+                Text: "";
               }
-
-              Label #ClassTreeCurrentStatManaValue {
+              Label #ClassTreeCurrentStat4Value {
                 Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
                 Text: "";
               }
             }
+          }
+
+          Group { Anchor: (Width: 10); }
+
+          Group #ClassTreeCurrentStat5 {
+            LayoutMode: Left;
+            Visible: false;
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+              Group #ClassTreeCurrentStat5Icon {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
+              }
+            }
+            Group { Anchor: (Width: 6); }
+            Group {
+              LayoutMode: Top;
+              Label #ClassTreeCurrentStat5Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+              Label #ClassTreeCurrentStat5Value {
+                Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
           }
         }
 
@@ -1694,36 +1737,33 @@ Group {
         }
 
         Group #ClassTreeNextBonusIcons {
-          LayoutMode: Left;
+          LayoutMode: Top;
           Anchor: (Top: 6);
           Visible: false;
 
-          Group #ClassTreeNextStatDmg {
+          Group #ClassTreeNextStatRow0 {
+            LayoutMode: Left;
+
+          Group #ClassTreeNextStat0 {
             LayoutMode: Left;
             Visible: false;
-
             Group {
               Anchor: (Width: 36, Height: 36);
               Background: #000000(0.35);
               LayoutMode: Middle;
-
-              Group {
+              Group #ClassTreeNextStat0Icon {
                 Anchor: (Width: 26, Height: 26);
                 Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
               }
             }
-
             Group { Anchor: (Width: 6); }
-
             Group {
               LayoutMode: Top;
-
-              Label {
+              Label #ClassTreeNextStat0Label {
                 Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-                Text: "Dégâts";
+                Text: "";
               }
-
-              Label #ClassTreeNextStatDmgValue {
+              Label #ClassTreeNextStat0Value {
                 Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
                 Text: "";
               }
@@ -1732,32 +1772,26 @@ Group {
 
           Group { Anchor: (Width: 10); }
 
-          Group #ClassTreeNextStatCd {
+          Group #ClassTreeNextStat1 {
             LayoutMode: Left;
             Visible: false;
-
             Group {
               Anchor: (Width: 36, Height: 36);
               Background: #000000(0.35);
               LayoutMode: Middle;
-
-              Group {
+              Group #ClassTreeNextStat1Icon {
                 Anchor: (Width: 26, Height: 26);
-                Background: PatchStyle(TexturePath: "Icons/cooldown.png", Border: 0);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
               }
             }
-
             Group { Anchor: (Width: 6); }
-
             Group {
               LayoutMode: Top;
-
-              Label {
+              Label #ClassTreeNextStat1Label {
                 Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-                Text: "CD";
+                Text: "";
               }
-
-              Label #ClassTreeNextStatCdValue {
+              Label #ClassTreeNextStat1Value {
                 Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
                 Text: "";
               }
@@ -1766,68 +1800,120 @@ Group {
 
           Group { Anchor: (Width: 10); }
 
-          Group #ClassTreeNextStatStamina {
+          Group #ClassTreeNextStat2 {
             LayoutMode: Left;
             Visible: false;
-
             Group {
               Anchor: (Width: 36, Height: 36);
               Background: #000000(0.35);
               LayoutMode: Middle;
-
-              Group {
+              Group #ClassTreeNextStat2Icon {
                 Anchor: (Width: 26, Height: 26);
-                Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
               }
             }
-
             Group { Anchor: (Width: 6); }
-
             Group {
               LayoutMode: Top;
-
-              Label {
+              Label #ClassTreeNextStat2Label {
                 Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-                Text: "Endu";
+                Text: "";
               }
+              Label #ClassTreeNextStat2Value {
+                Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+          }
 
-              Label #ClassTreeNextStatStaminaValue {
+          Group { Anchor: (Height: 4); }
+
+          Group #ClassTreeNextStatRow1 {
+            LayoutMode: Left;
+            Visible: false;
+
+          Group #ClassTreeNextStat3 {
+            LayoutMode: Left;
+            Visible: false;
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+              Group #ClassTreeNextStat3Icon {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
+              }
+            }
+            Group { Anchor: (Width: 6); }
+            Group {
+              LayoutMode: Top;
+              Label #ClassTreeNextStat3Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+              Label #ClassTreeNextStat3Value {
                 Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
                 Text: "";
               }
             }
           }
 
-          Group #ClassTreeNextStatMana {
+          Group { Anchor: (Width: 10); }
+
+          Group #ClassTreeNextStat4 {
             LayoutMode: Left;
             Visible: false;
-
             Group {
               Anchor: (Width: 36, Height: 36);
               Background: #000000(0.35);
               LayoutMode: Middle;
-
-              Group {
+              Group #ClassTreeNextStat4Icon {
                 Anchor: (Width: 26, Height: 26);
-                Background: PatchStyle(TexturePath: "Icons/mana.png", Border: 0);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
               }
             }
-
             Group { Anchor: (Width: 6); }
-
             Group {
               LayoutMode: Top;
-
-              Label {
+              Label #ClassTreeNextStat4Label {
                 Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-                Text: "Coût mana";
+                Text: "";
               }
-
-              Label #ClassTreeNextStatManaValue {
+              Label #ClassTreeNextStat4Value {
                 Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
                 Text: "";
               }
             }
+          }
+
+          Group { Anchor: (Width: 10); }
+
+          Group #ClassTreeNextStat5 {
+            LayoutMode: Left;
+            Visible: false;
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+              Group #ClassTreeNextStat5Icon {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
+              }
+            }
+            Group { Anchor: (Width: 6); }
+            Group {
+              LayoutMode: Top;
+              Label #ClassTreeNextStat5Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+              Label #ClassTreeNextStat5Value {
+                Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
           }
         }
 
@@ -1883,7 +1969,7 @@ Group {
           Label #ClassTreeKbCurrentLabel {
             Anchor: (Left: 8);
             Style: (...@MetaStyle, FontSize: 12, TextColor: #A89E90, VerticalAlignment: Center);
-            Text: "Non assigné";
+            Text: "Non assign�";
           }
         }
 
@@ -1968,7 +2054,7 @@ Group {
             Label {
               Anchor: (Left: 8);
               Style: (...@MetaStyle, FontSize: 12, TextColor: #FF8888, VerticalAlignment: Center);
-              Text: "Désassigner";
+              Text: "D�sassigner";
             }
           }
         }
@@ -1988,7 +2074,7 @@ Group {
 
           Label #UnlockClassTreeButtonLabel {
             Style: (...@MetaStyle, FontSize: 14, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "Débloquer";
+            Text: "D�bloquer";
           }
         }
 
@@ -2001,7 +2087,7 @@ Group {
 
           Label #UnlockClassTreeButtonDisabledLabel {
             Style: (...@MetaStyle, FontSize: 14, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "Débloqué";
+            Text: "D�bloqu�";
           }
         }
       }
@@ -2044,7 +2130,7 @@ Group {
       Label {
         Anchor: (Left: 0, Right: 0, Height: 20);
         Style: @SectionTitleStyle;
-        Text: "Compétences actives";
+        Text: "Comp�tences actives";
       }
 
       Group { Anchor: (Height: 10); }
@@ -2143,7 +2229,7 @@ Group {
           Style: @PlusButtonStyle;
           LayoutMode: Left;
           Group { FlexWeight: 1; }
-          Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser"; }
+          Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "R�initialiser"; }
           Group { FlexWeight: 1; }
         }
       }
@@ -2164,7 +2250,7 @@ Group {
           Label {
             Anchor: (Height: 20);
             Style: (FontSize: 13, TextColor: #C8A96E, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-            Text: "Assignation des compétences";
+            Text: "Assignation des comp�tences";
           }
         }
 
@@ -2173,7 +2259,7 @@ Group {
         Label {
           Anchor: (Left: 0, Right: 0, Height: 48);
           Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Start, VerticalAlignment: Center, Wrap: true);
-          Text: "Assignez vos compétences débloquées à la touche de votre choix. Vous disposez de 2 touches non attribuées (E et R) + A qui exécute déjà l'attaque spéciale, ainsi que leurs variantes en vous accroupissant + touche.";
+          Text: "Assignez vos comp�tences d�bloqu�es � la touche de votre choix. Vous disposez de 2 touches non attribu�es (E et R) + A qui ex�cute d�j� l'attaque sp�ciale, ainsi que leurs variantes en vous accroupissant + touche.";
         }
       }
     }
@@ -2187,7 +2273,7 @@ Group {
       Label {
         Anchor: (Left: 0, Right: 0, Height: 20);
         Style: @SectionTitleStyle;
-        Text: "Compétences disponibles";
+        Text: "Comp�tences disponibles";
       }
 
       Group { Anchor: (Height: 10); }
@@ -2234,7 +2320,7 @@ Group {
             Visible: false;
           }
           Group { FlexWeight: 1; }
-          Label { Style: @TabLabelStyle; Text: "Défense"; }
+          Label { Style: @TabLabelStyle; Text: "D�fense"; }
           Group { FlexWeight: 1; }
         }
         Group { Anchor: (Width: 4); }
@@ -2262,7 +2348,7 @@ Group {
             Visible: false;
           }
           Group { FlexWeight: 1; }
-          Label { Style: @TabLabelStyle; Text: "Mobilité"; }
+          Label { Style: @TabLabelStyle; Text: "Mobilit�"; }
           Group { FlexWeight: 1; }
         }
       }
@@ -2277,7 +2363,7 @@ Group {
         Label #SkillPickerSlotLabel {
           Anchor: (Left: 0, Right: 0, Height: 16);
           Style: (...@MetaStyle, FontSize: 12, TextColor: @InkMuted, RenderBold: true);
-          Text: "Sélectionnez pour :";
+          Text: "S�lectionnez pour :";
         }
         Group { Anchor: (Height: 6); }
         Group #SkillPickerList {

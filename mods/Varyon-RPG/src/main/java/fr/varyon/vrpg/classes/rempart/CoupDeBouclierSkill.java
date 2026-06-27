@@ -24,6 +24,6 @@ public final class CoupDeBouclierSkill {
         int pct = Math.round(damagePctForRank(rank) * 100);
         float stun = stunMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return pct + "% dégâts arme, étourdissement " + stun + "s, CD " + cd + "s";
+        return pct + "% dégâts arme, étourdissement " + stun + "s, Délai " + cd + "s";
     }
 }

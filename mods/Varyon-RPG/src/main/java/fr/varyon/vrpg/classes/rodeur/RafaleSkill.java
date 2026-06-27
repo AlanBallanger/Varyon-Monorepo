@@ -27,6 +27,6 @@ public final class RafaleSkill {
         int arrows = arrowCountForRank(rank);
         int dmg = Math.round(damagePctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return arrows + " flèches à " + dmg + "% dégâts, CD " + cd + "s";
+        return arrows + " flèches à " + dmg + "% dégâts, Délai " + cd + "s";
     }
 }

@@ -28,6 +28,6 @@ public final class SurchargeSkill {
         int dur     = (int) (durationMsForRank(rank) / 1000);
         int cd      = (int) (cooldownMsForRank(rank) / 1000);
         int mana    = Math.round(manaCostForRank(rank));
-        return "+" + dmg + "% dégâts sorts, +" + manaRst + "% mana restauré, " + dur + "s, " + mana + " mana, CD " + cd + "s";
+        return "+" + dmg + "% dégâts sorts, +" + manaRst + "% mana restauré, " + dur + "s, " + mana + " mana, Délai " + cd + "s";
     }
 }

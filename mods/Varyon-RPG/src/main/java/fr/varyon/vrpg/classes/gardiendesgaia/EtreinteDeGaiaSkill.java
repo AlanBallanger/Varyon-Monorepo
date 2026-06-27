@@ -28,6 +28,6 @@ public final class EtreinteDeGaiaSkill {
         int root = (int) (rootDurationMs(rank) / 1000);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mana = Math.round(manaCostForRank(rank));
-        return "Immobilise " + root + "s (rayon " + (int) ROOT_RADIUS + " blocs), " + mana + " mana, CD " + cd + "s";
+        return "Immobilise " + root + "s (rayon " + (int) ROOT_RADIUS + " blocs), " + mana + " mana, Délai " + cd + "s";
     }
 }

@@ -28,6 +28,6 @@ public final class ReculStrategiqueSkill {
         int spd = Math.round(speedBonusForRank(rank) * 100);
         float sec = speedDurationMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return dist + " blocs, +" + spd + "% vitesse " + sec + "s, CD " + cd + "s";
+        return dist + " blocs, +" + spd + "% vitesse " + sec + "s, Délai " + cd + "s";
     }
 }

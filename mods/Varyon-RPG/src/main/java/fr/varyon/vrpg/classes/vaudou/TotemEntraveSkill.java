@@ -23,6 +23,6 @@ public final class TotemEntraveSkill {
         int dur = (int) (baseDurationMsForRank(rank) / 1000);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
         int mn  = Math.round(manaCostForRank(rank));
-        return "Ralentit les ennemis " + dur + "s, " + mn + " mana, CD " + cd + "s";
+        return "Ralentit les ennemis " + dur + "s, " + mn + " mana, Délai " + cd + "s";
     }
 }

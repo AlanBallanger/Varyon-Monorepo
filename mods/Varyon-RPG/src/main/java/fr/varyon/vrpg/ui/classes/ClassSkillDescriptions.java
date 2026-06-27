@@ -205,7 +205,7 @@ public final class ClassSkillDescriptions {
         int pct     = Math.round(AssautEclairSkill.damageFactor(rank) * 100);
         String cd   = formatCooldownShort(AssautEclairSkill.cooldownMsForRank(rank));
         int stamina = Math.round(AssautEclairSkill.staminaCostForRank(rank));
-        return pct + "% dégâts arme, CD " + cd + " - " + stamina + " endurance";
+        return pct + "% dégâts arme, Délai " + cd + " - " + stamina + " endurance";
     }
 
     private static String formatCooldownShort(long cooldownMs) {

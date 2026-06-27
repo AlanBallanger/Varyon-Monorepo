@@ -39,9 +39,9 @@ public final class DuellisteBleedSystem extends EntityTickingSystem<EntityStore>
         }
     }
 
-    public void applyBleed(@Nonnull Ref<EntityStore> victimRef, float weaponDamage,
+    public void applyBleed(@Nonnull Ref<EntityStore> victimRef, float weaponDamage, float weaponPct,
                            @Nonnull Store<EntityStore> store) {
-        float dpt = weaponDamage * DuellistePassifs.BLEED_WEAPON_PCT;
+        float dpt = weaponDamage * weaponPct;
         bleeds.put(victimRef.getIndex(), new BleedState(dpt));
         DamageFloatBridge.emit(store, victimRef, dpt, "BLEED");
         if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())

@@ -24,6 +24,6 @@ public final class AssautBestialSkill {
         int dist = (int) dashDistanceForRank(rank);
         int pct  = Math.round(damagePctForRank(rank) * 100);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
-        return "Bond " + dist + " blocs, " + pct + "% dégâts arme, CD " + cd + "s";
+        return "Bond " + dist + " blocs, " + pct + "% dégâts arme, Délai " + cd + "s";
     }
 }

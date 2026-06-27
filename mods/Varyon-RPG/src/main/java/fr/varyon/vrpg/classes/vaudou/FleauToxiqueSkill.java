@@ -27,6 +27,6 @@ public final class FleauToxiqueSkill {
         int red = Math.round(damageReduceForRank(rank) * 100);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
         int mn  = Math.round(manaCostForRank(rank));
-        return pct + "% arme/s (5s poison), -" + red + "% dégâts cible, " + mn + " mana, CD " + cd + "s";
+        return pct + "% arme/s (5s poison), -" + red + "% dégâts cible, " + mn + " mana, Délai " + cd + "s";
     }
 }

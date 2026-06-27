@@ -339,6 +339,9 @@ public final class ClassSkillService {
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         if (!bypass && cooldowns.isOnCooldown(uuid, AssautBretteurSkill.SKILL_ID, AssautBretteurSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = AssautBretteurSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+        ClassSkillStamina.consume(playerRef, staminaCost);
         duellisteState.startAssautBretteur(uuid, AssautBretteurSkill.durationMsForRank(rank));
         if (!bypass) cooldowns.markUsed(uuid, AssautBretteurSkill.SKILL_ID);
         try {
@@ -367,8 +370,11 @@ public final class ClassSkillService {
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         if (!bypass && cooldowns.isOnCooldown(uuid, DesarmementSkill.SKILL_ID, DesarmementSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = DesarmementSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
         Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store);
         if (targeted == null) return false;
+        ClassSkillStamina.consume(playerRef, staminaCost);
         try {
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "SwingRight", true, store);
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
@@ -416,6 +422,9 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         long cd = CoupEstocSkill.cooldownMsForRank(rank);
         if (!bypass && cooldowns.isOnCooldown(uuid, CoupEstocSkill.SKILL_ID, cd)) return false;
+        float staminaCost = CoupEstocSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+        ClassSkillStamina.consume(playerRef, staminaCost);
         // AoE au cast
         try {
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "Stab", true, store);
@@ -455,6 +464,9 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         long cd = FeintSkill.cooldownMsForRank(rank);
         if (!bypass && cooldowns.isOnCooldown(uuid, FeintSkill.SKILL_ID, cd)) return false;
+        float staminaCost = FeintSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+        ClassSkillStamina.consume(playerRef, staminaCost);
         duellisteState.startFeinte(uuid, FeintSkill.windowMs());
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
@@ -478,6 +490,9 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         long cd = RiposteParfaiteSkill.cooldownMsForRank(rank);
         if (!bypass && cooldowns.isOnCooldown(uuid, RiposteParfaiteSkill.SKILL_ID, cd)) return false;
+        float staminaCost = RiposteParfaiteSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
+        ClassSkillStamina.consume(playerRef, staminaCost);
         duellisteState.startRiposteWindow(uuid, RiposteParfaiteSkill.windowMsForRank(rank), rank);
         try {
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "Guard", true, store);

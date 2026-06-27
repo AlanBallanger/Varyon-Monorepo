@@ -14,7 +14,7 @@ public final class BerserkerPassifs {
     public static final long   DERNIER_SOUFFLE_COOLDOWN_MS = 90_000L;
 
     public static String dernierSouffleStatLine() {
-        return "Ignore la mort pendant " + (DERNIER_SOUFFLE_DURATION_MS / 1000) + "s (CD 90s)";
+        return "Ignore la mort pendant " + (DERNIER_SOUFFLE_DURATION_MS / 1000) + "s (Délai 90s)";
     }
 
     // --- Ferveur Guerrière (node 7) ---

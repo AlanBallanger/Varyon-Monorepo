@@ -23,6 +23,6 @@ public final class PassageEthereSkill {
         int range = (int) rangeForRank(rank);
         int cd    = (int) (cooldownMsForRank(rank) / 1000);
         int mana  = Math.round(manaCostForRank(rank));
-        return "Portée " + range + " blocs, " + mana + " mana, CD " + cd + "s";
+        return "Portée " + range + " blocs, " + mana + " mana, Délai " + cd + "s";
     }
 }

@@ -34,6 +34,6 @@ public final class HarponnageSkill {
     public static String statLineForRank(int rank) {
         int dmg = Math.round(damageFactor(rank) * 100);
         int cd  = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, attire la cible, portée " + (int)RANGE + "m, CD " + cd + "s";
+        return dmg + "% dégâts, attire la cible, portée " + (int)RANGE + "m, Délai " + cd + "s";
     }
 }

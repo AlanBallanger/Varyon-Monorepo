@@ -29,6 +29,6 @@ public final class DelugeDeGamesSkill {
         int strikes = strikeCountForRank(rank);
         int pct = Math.round(damagePctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return strikes + " frappes × " + pct + "% arme (+30% si cible <30% HP), CD " + cd + "s";
+        return strikes + " frappes × " + pct + "% arme (+30% si cible <30% HP), Délai " + cd + "s";
     }
 }

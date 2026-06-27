@@ -28,6 +28,6 @@ public final class MarqueDuChasseurSkill {
         float dur = durationMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
         int consumes = maxConsumesForRank(rank);
-        return "+" + dmg + "% dégâts sur cible, " + consumes + " hits, " + dur + "s, CD " + cd + "s";
+        return "+" + dmg + "% dégâts sur cible, " + consumes + " hits, " + dur + "s, Délai " + cd + "s";
     }
 }

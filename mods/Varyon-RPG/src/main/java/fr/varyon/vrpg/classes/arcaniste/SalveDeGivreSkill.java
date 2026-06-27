@@ -31,6 +31,6 @@ public final class SalveDeGivreSkill {
         int slow  = (int) (slowMsForRank(rank) / 1000);
         int cd    = (int) (cooldownMsForRank(rank) / 1000);
         int mana  = Math.round(manaCostForRank(rank));
-        return bolts + " projectiles de " + pct + "% dégâts arme, ralentit " + slow + "s, " + mana + " mana, CD " + cd + "s";
+        return bolts + " projectiles de " + pct + "% dégâts arme, ralentit " + slow + "s, " + mana + " mana, Délai " + cd + "s";
     }
 }

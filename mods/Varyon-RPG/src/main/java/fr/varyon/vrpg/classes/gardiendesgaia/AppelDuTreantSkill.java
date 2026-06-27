@@ -27,6 +27,6 @@ public final class AppelDuTreantSkill {
         int pct  = Math.round(damageFactor(rank) * 100);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mana = Math.round(manaCostForRank(rank));
-        return "Tréant " + dur + "s, " + pct + "% stats lanceur, " + mana + " mana, CD " + cd + "s";
+        return "Tréant " + dur + "s, " + pct + "% stats lanceur, " + mana + " mana, Délai " + cd + "s";
     }
 }

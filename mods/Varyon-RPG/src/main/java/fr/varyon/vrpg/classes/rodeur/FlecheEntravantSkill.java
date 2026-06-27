@@ -25,6 +25,6 @@ public final class FlecheEntravantSkill {
         int dmg = Math.round(damagePctForRank(rank) * 100);
         float root = rootMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, immobilise " + root + "s, CD " + cd + "s";
+        return dmg + "% dégâts, immobilise " + root + "s, Délai " + cd + "s";
     }
 }

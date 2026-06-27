@@ -93,7 +93,7 @@ public final class ClassTalentTree {
             new Node("Jeu de Jambes",          "Passif", "Une lame ne touche que ce qu'elle peut atteindre.",                      "Augmente les chances d'esquive.",                                   DI + "Esquive_du_bretteur.png",    5),
             new Node("Frappe Précise",          "Passif", "Il suffit parfois d'un seul coup bien placé.",                            "Les coups critiques infligent des dégâts supplémentaires.",          DI + "Frappe_Précise.png",         5),
             new Node("Désarmement",           "Actif",  "Ôter l'arme, c'est ôter la menace avant même qu'elle frappe.",           "Réduit temporairement les dégâts infligés par la cible.",           DI + "Désarmement.png",            5),
-            new Node("Momentum",              "Passif", "Chaque coup sans en recevoir rend le suivant un peu plus dévastateur.",   "Chaque coup consécutif sans en recevoir augmente légèrement les dégâts.", DI + "Momentum.png",           5),
+            new Node("Momentum",              "Passif", "Chaque coup sans en recevoir rend le suivant un peu plus dévastateur.",   "Chaque coup consécutif sans en recevoir augmente les dégâts.", DI + "Momentum.png",           5),
             new Node("Déferlante",             "Actif",  "Une fois lancé, rien ne l'arrête.",                                       "Augmente les dégâts d'attaque et la vitesse de déplacement pendant quelques secondes.", DI + "Assaut_Du_Bretteur.png", 5),
         });
 
@@ -125,7 +125,7 @@ public final class ClassTalentTree {
             new Node("Ferveur Guerrière",     "Passif", "Plus la bataille dure, plus la rage se cristallise.",                     "Les dégâts augmentent d'un cran chaque seconde passée en combat (max 15 cumuls).",                      BI + "Ferveur_Guerrière.png",      5),
             new Node("Cri de Ralliement",     "Actif",  "Un hurlement qui fait oublier la peur et décuple la hargne.",             "Augmente temporairement les dégâts de toi et des alliés proches.",                                      BI + "Cri_De_Ralliement.png",      5),
             new Node("Déchiquetage",          "Actif",  "La chair cède, et avec elle une partie de son énergie vitale.",           "Le prochain coup tranche profondément et récupère une partie des dégâts infligés en HP.",               BI + "Eviscération.png",           5),
-            new Node("Dernier Souffle",       "Passif", "La mort attendra — il a encore des ennemis à abattre.",                   "Ignore temporairement la mort pendant 4 secondes (CD 90s).",                                            BI + "Dernier_Souffle.png",        5),
+            new Node("Dernier Souffle",       "Passif", "La mort attendra — il a encore des ennemis à abattre.",                   "Ignore temporairement la mort pendant 4 secondes (Délai 90s).",                                            BI + "Dernier_Souffle.png",        5),
             new Node("Exécution Sauvage",     "Actif",  "Pour les blessés, chaque coup est le dernier.",                           "Frappe dévastatrice infligeant davantage de dégâts aux ennemis déjà affaiblis.",                        BI + "Exécution_Sauvage.png",      5),
         });
 
@@ -221,7 +221,7 @@ public final class ClassTalentTree {
             new Node("Instinct de Survie",   "Passif", "Le chasseur sent le danger avant qu'il arrive.",                     "Augmente les chances d'esquiver les attaques.",                                         ROI + "Instinct_De_Survie.png",   5),
             new Node("Précision Mortelle",   "Passif", "Les blessés tombent plus vite.",                                     "Inflige plus de dégâts aux ennemis ayant moins de 50 % de PV.",                        ROI + "Précision_Mortelle.png",   5),
             new Node("Traque Mobile",        "Passif", "Il ne s'arrête jamais — et ses dégâts non plus.",                    "Augmente les dégâts lorsque le personnage est en déplacement.",                         ROI + "Traque_Mobile.png",        5),
-            new Node("Traque sans Fin",      "Passif", "Une proie tuée libère la chasse pour une autre.",                    "Tuer une cible marquée réinitialise le CD de Marque du Chasseur.",                     ROI + "Traque_Sans_Fin.png",      5),
+            new Node("Traque sans Fin",      "Passif", "Une proie tuée libère la chasse pour une autre.",                    "Tuer une cible marquée réinitialise le Délai de Marque du Chasseur.",                     ROI + "Traque_Sans_Fin.png",      5),
             new Node("Rafale",               "Actif",  "Quand le moment est venu, on ne tire qu'une seule fois — plusieurs.", "Tire plusieurs flèches en succession rapide.",                                         ROI + "Rafale.png",               5),
         });
 

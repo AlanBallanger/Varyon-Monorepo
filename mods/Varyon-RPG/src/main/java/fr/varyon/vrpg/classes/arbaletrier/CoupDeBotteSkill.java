@@ -25,6 +25,6 @@ public final class CoupDeBotteSkill {
         int dmg = Math.round(damagePctForRank(rank) * 100);
         int kb = (int) knockbackForRank(rank);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, recul " + kb + "u, CD " + cd + "s";
+        return dmg + "% dégâts, recul " + kb + "u, Délai " + cd + "s";
     }
 }

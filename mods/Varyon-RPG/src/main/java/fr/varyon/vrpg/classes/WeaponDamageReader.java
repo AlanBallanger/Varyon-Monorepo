@@ -4,6 +4,7 @@ import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,11 +31,7 @@ public final class WeaponDamageReader {
     public static int readHeldWeaponDamage(@Nullable PlayerRef playerRef) {
         if (playerRef == null) return -1;
         try {
-            var hotbar = playerRef.getComponent(
-                com.hypixel.hytale.server.core.inventory.InventoryComponent.Hotbar.getComponentType());
-            if (hotbar == null) return -1;
-            byte slot = hotbar.getActiveSlot();
-            ItemStack held = hotbar.getInventory().getItemStack((short) slot);
+            ItemStack held = readHeldItemStack(playerRef);
             if (held == null || held.isEmpty()) return -1;
             String itemId = held.getItemId();
             if (itemId == null || itemId.isEmpty()) return -1;
@@ -51,6 +48,47 @@ public final class WeaponDamageReader {
         } catch (Exception e) {
             LOG.atWarning().log("[WeaponDamageReader] exception: " + e.getMessage());
             return -1;
+        }
+    }
+
+    public static float readScaledHeldWeaponDamage(@Nullable PlayerRef playerRef, @Nonnull ClassAccount acc) {
+        int weaponDmg = readHeldWeaponDamage(playerRef);
+        float amount = weaponDmg > 0 ? weaponDmg : 1f;
+
+        PlayerClass activeClass = acc.getActiveClass();
+        if (activeClass == null) return amount;
+        PlayerSpecialization spec = acc.getActiveSpec(activeClass);
+        if (spec == null) return amount;
+
+        int level = acc.getProgress(activeClass).getLevel();
+        amount *= (float) ClassStatDefinition.atkDisplayMultiplier(level, spec);
+
+        if (playerRef != null) {
+            ItemStack held = readHeldItemStack(playerRef);
+            if (held != null && !held.isEmpty()) {
+                String itemId = held.getItemId();
+                if (itemId != null && !itemId.isEmpty()) {
+                    WeaponCategory category = WeaponCategory.fromItemId(itemId);
+                    if (category != null && category != WeaponCategory.AUTRE) {
+                        amount *= (float) category.getMultiplierFor(spec);
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+
+    @Nullable
+    private static ItemStack readHeldItemStack(@Nullable PlayerRef playerRef) {
+        if (playerRef == null) return null;
+        try {
+            var hotbar = playerRef.getComponent(
+                com.hypixel.hytale.server.core.inventory.InventoryComponent.Hotbar.getComponentType());
+            if (hotbar == null) return null;
+            byte slot = hotbar.getActiveSlot();
+            return hotbar.getInventory().getItemStack((short) slot);
+        } catch (Exception e) {
+            return null;
         }
     }
 

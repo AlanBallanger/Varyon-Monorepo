@@ -22,6 +22,6 @@ public final class FrappeFataleSkill {
     public static String statLineForRank(int rank) {
         int pct = Math.round(damageBonusForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "+" + pct + "% dégâts prochain coup, CD " + cd + "s";
+        return "+" + pct + "% dégâts prochain coup, Délai " + cd + "s";
     }
 }

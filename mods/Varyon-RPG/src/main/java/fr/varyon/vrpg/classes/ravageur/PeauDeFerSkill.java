@@ -24,6 +24,6 @@ public final class PeauDeFerSkill {
         int red = Math.round(damageReductionForRank(rank) * 100);
         int dur = (int) (durationMsForRank(rank) / 1000);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return "-" + red + "% dégâts subis pendant " + dur + "s, CD " + cd + "s";
+        return "-" + red + "% dégâts subis pendant " + dur + "s, Délai " + cd + "s";
     }
 }

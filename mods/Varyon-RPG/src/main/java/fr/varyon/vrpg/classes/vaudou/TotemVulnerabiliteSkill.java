@@ -26,6 +26,6 @@ public final class TotemVulnerabiliteSkill {
         int dur   = (int) (baseDurationMsForRank(rank) / 1000);
         int cd    = (int) (cooldownMsForRank(rank) / 1000);
         int mn    = Math.round(manaCostForRank(rank));
-        return "+" + bonus + "% dégâts subis (zone) " + dur + "s, " + mn + " mana, CD " + cd + "s";
+        return "+" + bonus + "% dégâts subis (zone) " + dur + "s, " + mn + " mana, Délai " + cd + "s";
     }
 }

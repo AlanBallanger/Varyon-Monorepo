@@ -21,6 +21,6 @@ public final class SecondSouffleSkill {
     public static String statLineForRank(int rank) {
         int pct = Math.round(healPctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return "Restaure " + pct + "% HP max, CD " + cd + "s";
+        return "Restaure " + pct + "% HP max, Délai " + cd + "s";
     }
 }

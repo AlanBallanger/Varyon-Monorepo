@@ -24,6 +24,6 @@ public final class CorDeGuerreSkill {
         int spdPct = Math.round(speedBonusForRank(rank) * 100);
         int dur    = (int) (durationMsForRank(rank) / 1000);
         int cd     = (int) (cooldownMsForRank(rank) / 1000);
-        return "+" + spdPct + "% vitesse de déplacement pendant " + dur + "s, CD " + cd + "s";
+        return "+" + spdPct + "% vitesse de déplacement pendant " + dur + "s, Délai " + cd + "s";
     }
 }

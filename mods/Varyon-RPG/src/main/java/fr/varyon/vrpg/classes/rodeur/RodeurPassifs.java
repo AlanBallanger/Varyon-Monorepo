@@ -69,7 +69,7 @@ public final class RodeurPassifs {
         return "+" + Math.round(traqueBonusForRank(rank) * 100) + "% dégâts en déplacement";
     }
 
-    // --- Traque sans fin (node 10) — réduit CD marque après kill ---
+    // --- Traque sans fin (node 10) — réduit Délai marque après kill ---
     public static final String TRAQUE_SANS_FIN_NODE   = "rodeur_10";
     private static final float[] TRAQUE_CD_REDUCTION  = {0.30f, 0.40f, 0.50f, 0.60f, 0.80f};
 
@@ -79,7 +79,7 @@ public final class RodeurPassifs {
 
     public static String traqueSansFinStatLine(int rank) {
         int pct = Math.round(traqueCdReductionForRank(rank) * 100);
-        return "Tuer une cible marquée réduit le CD de Marque du Chasseur de " + pct + "%";
+        return "Tuer une cible marquée réduit le Délai de Marque du Chasseur de " + pct + "%";
     }
 
     private static int idx(int rank, int len) {

@@ -169,12 +169,13 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
             int bleedRank = acc.getTalentRank(PlayerClass.GUERRIER, DuellistePassifs.BLESSURE_NODE);
             if (bleedRank > 0 && Math.random() < DuellistePassifs.bleedChanceForRank(bleedRank)) {
                 Ref<EntityStore> victimRef = chunk.getReferenceTo(index);
-                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-                float weaponBase = weaponDmg > 0 ? (float) weaponDmg : 1f;
-                bleedSystem.applyBleed(victimRef, weaponBase, store);
+                float scaledWeapon = fr.varyon.vrpg.classes.WeaponDamageReader
+                    .readScaledHeldWeaponDamage(playerRef, acc);
+                float bleedPct = DuellistePassifs.bleedWeaponPctForRank(bleedRank);
+                bleedSystem.applyBleed(victimRef, scaledWeapon, bleedPct, store);
                 if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
                     LOG.atInfo().log("[Dmg] BlessureOuverte dpt=" +
-                        String.format("%.1f", weaponBase * DuellistePassifs.BLEED_WEAPON_PCT) + "/s");
+                        String.format("%.1f", scaledWeapon * bleedPct) + "/s");
             }
 
         } catch (Exception ignored) {}

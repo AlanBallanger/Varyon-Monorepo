@@ -27,6 +27,6 @@ public final class ReculTactiqueSkill {
         int dist = (int) dashDistanceForRank(rank);
         int bonus = Math.round(damageBonusForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return dist + " blocs, prochain tir +" + bonus + "% dégâts, CD " + cd + "s";
+        return dist + " blocs, prochain tir +" + bonus + "% dégâts, Délai " + cd + "s";
     }
 }

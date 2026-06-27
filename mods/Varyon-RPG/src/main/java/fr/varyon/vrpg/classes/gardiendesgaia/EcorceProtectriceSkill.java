@@ -28,6 +28,6 @@ public final class EcorceProtectriceSkill {
         int dur  = (int) (durationMsForRank(rank) / 1000);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mana = Math.round(manaCostForRank(rank));
-        return "-" + reduc + "% dégâts + " + heal + " PV/s, " + dur + "s, " + mana + " mana, CD " + cd + "s";
+        return "-" + reduc + "% dégâts + " + heal + " PV/s, " + dur + "s, " + mana + " mana, Délai " + cd + "s";
     }
 }

@@ -28,6 +28,6 @@ public final class AttaquePerfideSkill {
         int hp   = Math.round(hpCostPctForRank(rank) * 100);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mn   = Math.round(manaCostForRank(rank));
-        return pct + "% dégâts arme (+50% dos), " + hp + "% HP max, " + mn + " mana, CD " + cd + "s";
+        return pct + "% dégâts arme (+50% dos), " + hp + "% HP max, " + mn + " mana, Délai " + cd + "s";
     }
 }

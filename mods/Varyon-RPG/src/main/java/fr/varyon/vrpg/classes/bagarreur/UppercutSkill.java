@@ -25,6 +25,6 @@ public final class UppercutSkill {
     public static String statLineForRank(int rank) {
         int pct = Math.round(damagePctForRank(rank) * 100);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return pct + "% dégâts arme, projette la cible en l'air, CD " + cd + "s";
+        return pct + "% dégâts arme, projette la cible en l'air, Délai " + cd + "s";
     }
 }

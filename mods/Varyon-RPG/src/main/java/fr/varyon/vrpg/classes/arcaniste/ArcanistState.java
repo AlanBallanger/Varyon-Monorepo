@@ -13,7 +13,7 @@ public final class ArcanistState {
     // --- Pouvoir Grandissant (bonus si pas touché) ---
     private final ConcurrentHashMap<UUID, Boolean> pouvoirActive = new ConcurrentHashMap<>();
 
-    // --- Écho Arcanique (dernier skill utilisé pour bypass CD) ---
+    // --- Écho Arcanique (dernier skill utilisé pour bypass délai) ---
     private final ConcurrentHashMap<UUID, String> echoPending = new ConcurrentHashMap<>();
 
     // --- Dernier sort lancé (Fire vs Ice pour le tag de dégâts projectile) ---
