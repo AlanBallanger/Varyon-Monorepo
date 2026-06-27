@@ -1,5 +1,6 @@
 package fr.varyon.ecotale.coins.commands;
 
+import fr.varyon.ecotale.coins.BankPermissionHelper;
 import fr.varyon.ecotale.coins.currency.BankManager;
 import fr.varyon.ecotale.coins.currency.CoinManager;
 import fr.varyon.ecotale.coins.transaction.SecureTransaction;
@@ -57,7 +58,7 @@ public class BankCommand extends AbstractAsyncCommand {
                 return;
             }
 
-            if (!playerRef.hasPermission("ecotale.ecotalecoins.command.bank")) {
+            if (!BankPermissionHelper.canUseBankUi(playerRef)) {
                 ctx.sendMessage(Message.raw("You don't have permission to use the bank.").color(Color.RED));
                 future.complete(null);
                 return;
@@ -99,10 +100,10 @@ public class BankCommand extends AbstractAsyncCommand {
 
             if (player == null || playerRef == null) return CompletableFuture.completedFuture(null);
 
-            if (!playerRef.hasPermission("ecotale.ecotalecoins.command.bank")) {
+            if (!BankPermissionHelper.canDeposit(playerRef)) {
                 CompletableFuture<Void> denied = new CompletableFuture<>();
                 world.execute(() -> {
-                    ctx.sendMessage(Message.raw("You don't have permission to use the bank.").color(Color.RED));
+                    ctx.sendMessage(Message.raw("You don't have permission to deposit to the bank.").color(Color.RED));
                     denied.complete(null);
                 });
                 return denied;
@@ -186,10 +187,10 @@ public class BankCommand extends AbstractAsyncCommand {
 
             if (player == null || playerRef == null) return CompletableFuture.completedFuture(null);
 
-            if (!playerRef.hasPermission("ecotale.ecotalecoins.command.bank")) {
+            if (!BankPermissionHelper.canWithdraw(playerRef)) {
                 CompletableFuture<Void> denied = new CompletableFuture<>();
                 world.execute(() -> {
-                    ctx.sendMessage(Message.raw("You don't have permission to use the bank.").color(Color.RED));
+                    ctx.sendMessage(Message.raw("You don't have permission to withdraw from the bank.").color(Color.RED));
                     denied.complete(null);
                 });
                 return denied;

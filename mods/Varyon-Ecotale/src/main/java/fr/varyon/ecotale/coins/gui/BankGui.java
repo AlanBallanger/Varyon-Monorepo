@@ -2,6 +2,7 @@ package fr.varyon.ecotale.coins.gui;
 
 import fr.varyon.ecotale.shared.EconomyBridge;
 import fr.varyon.ecotale.VaryonEcotalePlugin;
+import fr.varyon.ecotale.coins.BankPermissionHelper;
 import fr.varyon.ecotale.coins.currency.BankManager;
 import fr.varyon.ecotale.coins.currency.CoinManager;
 import fr.varyon.ecotale.coins.currency.CoinType;
@@ -588,7 +589,26 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
       return (this.specialTokenIndex + delta + len) % len;
    }
 
+   private boolean isDepositAllowed() {
+      if (BankPermissionHelper.canDeposit(this.playerRef)) {
+         return true;
+      }
+      this.playerRef.sendMessage(Message.raw(this.t("error.no_permission", "You don't have permission")).color(Color.RED));
+      return false;
+   }
+
+   private boolean isWithdrawAllowed() {
+      if (BankPermissionHelper.canWithdraw(this.playerRef)) {
+         return true;
+      }
+      this.playerRef.sendMessage(Message.raw(this.t("error.no_permission", "You don't have permission")).color(Color.RED));
+      return false;
+   }
+
    private void executeSpecialDeposit(Player player, UUID playerUuid) {
+      if (!this.isDepositAllowed()) {
+         return;
+      }
       TokenType type = this.tokenTypes[this.specialTokenIndex];
       int pocket = TokenManager.countTokens(player, type);
       long amount = this.parseAmount(this.amountInput, pocket);
@@ -646,6 +666,9 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    }
 
    private void executeSpecialWithdraw(Player player, UUID playerUuid) {
+      if (!this.isWithdrawAllowed()) {
+         return;
+      }
       TokenType type = this.tokenTypes[this.specialTokenIndex];
       EconomyManager economy = VaryonEcotalePlugin.getInstance().getEconomyManager();
       if (economy == null) {
@@ -695,6 +718,9 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    }
 
    private void executeDeposit(Player player, UUID playerUuid) {
+      if (!this.isDepositAllowed()) {
+         return;
+      }
       long pocketBalance = CoinManager.countCoins(player);
       long amount = this.parseAmount(this.amountInput, pocketBalance);
       if (amount <= 0L) {
@@ -713,6 +739,9 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    }
 
    private void executeWithdraw(Player player, UUID playerUuid) {
+      if (!this.isWithdrawAllowed()) {
+         return;
+      }
       long bankBalance = BankManager.getBankBalance(playerUuid);
       long amount = this.parseAmount(this.amountInput, bankBalance);
       if (amount <= 0L) {
@@ -731,6 +760,9 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    }
 
    private void executeDepositAll(Player player, UUID playerUuid) {
+      if (!this.isDepositAllowed()) {
+         return;
+      }
       long pocketBalance = CoinManager.countCoins(player);
       if (pocketBalance <= 0L) {
          this.playerRef.sendMessage(Message.raw(this.t("gui.bank.error.no_pocket_coins", "No coins in pocket to deposit")).color(Color.YELLOW));
@@ -745,6 +777,9 @@ public class BankGui extends InteractiveCustomUIPage<BankGui.BankGuiData> {
    }
 
    private void executeWithdrawAll(Player player, UUID playerUuid) {
+      if (!this.isWithdrawAllowed()) {
+         return;
+      }
       long bankBalance = BankManager.getBankBalance(playerUuid);
       if (bankBalance <= 0L) {
          this.playerRef.sendMessage(Message.raw(this.t("gui.bank.error.no_bank_coins", "No coins in bank to withdraw")).color(Color.YELLOW));
