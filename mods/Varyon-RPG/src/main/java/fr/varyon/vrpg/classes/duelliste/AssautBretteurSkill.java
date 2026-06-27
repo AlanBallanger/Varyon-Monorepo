@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.duelliste;
 public final class AssautBretteurSkill {
 
     public static final String SKILL_ID      = "assaut_bretteur";
-    public static final String TALENT_NODE_ID = "11";
+    public static final String TALENT_NODE_ID = "duelliste_11";
 
     private static final float[]  DMG_BONUS    = {0.08f, 0.10f, 0.12f, 0.15f, 0.20f};
     private static final float[]  SPEED_BONUS  = {0.08f, 0.10f, 0.12f, 0.15f, 0.20f};

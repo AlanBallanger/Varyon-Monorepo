@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.duelliste;
 public final class RiposteParfaiteSkill {
 
     public static final String SKILL_ID       = "riposte_parfaite";
-    public static final String TALENT_NODE_ID = "4";
+    public static final String TALENT_NODE_ID = "duelliste_4";
 
     private static final long[]  WINDOW_MS    = {3000, 3000, 4000, 4000, 5000};
     private static final float[] DMG_BONUS    = {0.50f, 0.75f, 1.00f, 1.25f, 1.50f};

@@ -27,7 +27,7 @@ import java.util.HashSet;
 public final class AssautEclairSkill {
 
     public static final String SKILL_ID       = "assaut_eclair";
-    public static final String TALENT_NODE_ID = "0";
+    public static final String TALENT_NODE_ID = "duelliste_0";
 
     private static final float[] DAMAGE_FACTOR = {1.8f, 2.3f, 2.8f, 3.5f, 4.2f};
     private static final long[]  COOLDOWN_MS = {28000, 26000, 24000, 22000, 18000};

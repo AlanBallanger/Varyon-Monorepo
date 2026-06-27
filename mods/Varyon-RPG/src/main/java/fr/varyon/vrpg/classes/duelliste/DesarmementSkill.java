@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.duelliste;
 public final class DesarmementSkill {
 
     public static final String SKILL_ID       = "desarmement";
-    public static final String TALENT_NODE_ID = "9";
+    public static final String TALENT_NODE_ID = "duelliste_9";
 
     private static final float[]  REDUCTION   = {0.10f, 0.12f, 0.15f, 0.18f, 0.20f};
     private static final long[]   DURATION_MS = {4000, 4000, 5000, 5000, 6000};

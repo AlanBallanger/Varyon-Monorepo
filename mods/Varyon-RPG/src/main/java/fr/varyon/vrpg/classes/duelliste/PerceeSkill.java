@@ -24,7 +24,7 @@ import java.util.HashSet;
 public final class PerceeSkill {
 
     public static final String SKILL_ID       = "percee";
-    public static final String TALENT_NODE_ID = "3";
+    public static final String TALENT_NODE_ID = "duelliste_3";
 
     private static final float[] BASE_DAMAGE  = {60f, 75f, 90f, 110f, 130f};
     private static final long[]  COOLDOWN_MS  = {20000, 19000, 18000, 17000, 15000};

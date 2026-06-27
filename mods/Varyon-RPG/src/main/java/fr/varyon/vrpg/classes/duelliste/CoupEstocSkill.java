@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.duelliste;
 public final class CoupEstocSkill {
 
     public static final String SKILL_ID       = "coup_estoc";
-    public static final String TALENT_NODE_ID = "3";
+    public static final String TALENT_NODE_ID = "duelliste_3";
 
     // Cast AoE damage : facteur × dégâts arme tenue
     private static final float[] CAST_DAMAGE_FACTOR = {1.2f, 1.6f, 2.0f, 2.6f, 3.2f};

@@ -19,16 +19,31 @@ public enum WeaponCategory {
         if (itemId == null) return null;
         String id = itemId.toLowerCase();
 
-        if (id.startsWith("weapon_daggers") || id.startsWith("weapon_dagger")) return DAGUE;
-        if (id.startsWith("weapon_spear") || id.startsWith("weapon_leaf_spear")) return LANCE;
-        if (id.startsWith("weapon_longsword") || id.startsWith("weapon_greatsword") || id.startsWith("weapon_club")) return DEUX_MAINS;
-        if (id.startsWith("weapon_sword")) return EPEE;
-        if (id.startsWith("weapon_axe")) return HACHE;
-        if (id.startsWith("weapon_shortbow") || id.startsWith("weapon_crossbow") || id.startsWith("weapon_bow")) return DISTANCE;
-        if (id.startsWith("weapon_staff") || id.startsWith("weapon_wand") || id.startsWith("weapon_spellbook")) return MAGIE;
-        if (id.startsWith("weapon_shield")) return BOUCLIER;
+        if (matchesAny(id, "daggers", "dagger")) return DAGUE;
+        if (matchesAny(id, "leaf_spear", "spear")) return LANCE;
+        if (matchesAny(id, "longsword", "greatsword", "club", "battleaxe")) return DEUX_MAINS;
+        if (matchesAny(id, "sword")) return EPEE;
+        if (matchesAny(id, "axe")) return HACHE;
+        if (matchesAny(id, "shortbow", "crossbow", "bow")) return DISTANCE;
+        if (matchesAny(id, "staff", "wand", "spellbook")) return MAGIE;
+        if (matchesAny(id, "shield")) return BOUCLIER;
 
         return AUTRE;
+    }
+
+    private static boolean matchesAny(String id, String... keywords) {
+        for (String keyword : keywords) {
+            if (matchesKeyword(id, keyword)) return true;
+        }
+        return false;
+    }
+
+    private static boolean matchesKeyword(String id, String keyword) {
+        if (id.equals(keyword)) return true;
+        if (id.startsWith(keyword + "_")) return true;
+        if (id.endsWith("_" + keyword)) return true;
+        if (id.contains("_" + keyword + "_")) return true;
+        return id.contains(keyword);
     }
 
     @Nullable

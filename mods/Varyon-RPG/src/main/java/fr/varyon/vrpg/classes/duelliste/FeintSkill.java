@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.duelliste;
 public final class FeintSkill {
 
     public static final String SKILL_ID       = "feinte";
-    public static final String TALENT_NODE_ID = "6";
+    public static final String TALENT_NODE_ID = "duelliste_6";
 
     private static final long[] COOLDOWN_MS = {20000, 19000, 18000, 16000, 14000};
     private static final long   WINDOW_MS   = 3_000L;
