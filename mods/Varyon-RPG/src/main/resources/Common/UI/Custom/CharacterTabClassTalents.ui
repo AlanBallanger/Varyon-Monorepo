@@ -1533,29 +1533,309 @@ Group {
         Visible: false;
 
         Label {
-          Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
+          Style: (...@MetaStyle, FontSize: 13, TextColor: #31C677FF, RenderBold: true, RenderUppercase: true);
           Text: "Bonus actuel";
         }
 
+        Group #ClassTreeCurrentBonusIcons {
+          LayoutMode: Left;
+          Anchor: (Top: 6);
+          Visible: false;
+
+          Group #ClassTreeCurrentStatDmg {
+            LayoutMode: Left;
+            Visible: false;
+
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+
+              Group {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
+              }
+            }
+
+            Group { Anchor: (Width: 6); }
+
+            Group {
+              LayoutMode: Top;
+
+              Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "Dégâts";
+              }
+
+              Label #ClassTreeCurrentStatDmgValue {
+                Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+
+          Group { Anchor: (Width: 10); }
+
+          Group #ClassTreeCurrentStatCd {
+            LayoutMode: Left;
+            Visible: false;
+
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+
+              Group {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/cooldown.png", Border: 0);
+              }
+            }
+
+            Group { Anchor: (Width: 6); }
+
+            Group {
+              LayoutMode: Top;
+
+              Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "CD";
+              }
+
+              Label #ClassTreeCurrentStatCdValue {
+                Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+
+          Group { Anchor: (Width: 10); }
+
+          Group #ClassTreeCurrentStatStamina {
+            LayoutMode: Left;
+            Visible: false;
+
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+
+              Group {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0);
+              }
+            }
+
+            Group { Anchor: (Width: 6); }
+
+            Group {
+              LayoutMode: Top;
+
+              Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "Endu";
+              }
+
+              Label #ClassTreeCurrentStatStaminaValue {
+                Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+
+          Group #ClassTreeCurrentStatMana {
+            LayoutMode: Left;
+            Visible: false;
+
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+
+              Group {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/mana.png", Border: 0);
+              }
+            }
+
+            Group { Anchor: (Width: 6); }
+
+            Group {
+              LayoutMode: Top;
+
+              Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "Coût mana";
+              }
+
+              Label #ClassTreeCurrentStatManaValue {
+                Style: (FontSize: 16, TextColor: #31C677FF, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+        }
+
         Label #ClassTreeCurrentBonusValue {
+          Anchor: (Top: 4);
           Style: (...@MetaStyle, FontSize: 13, TextColor: #31C677FF, RenderBold: true, Wrap: true);
           Text: "";
+          Visible: false;
         }
       }
 
       Group #ClassTreeNextRankRow {
         LayoutMode: Top;
-        Anchor: (Top: 4);
+        Anchor: (Top: 8);
         Visible: false;
 
         Label {
-          Style: (...@MetaStyle, FontSize: 13, TextColor: @InkMuted, RenderBold: true);
+          Style: (...@MetaStyle, FontSize: 13, TextColor: @GoldHighlight, RenderBold: true, RenderUppercase: true);
           Text: "Prochain rang";
         }
 
-        Label #ClassTreeNextRankValue {
+        Group #ClassTreeNextBonusIcons {
+          LayoutMode: Left;
+          Anchor: (Top: 6);
+          Visible: false;
+
+          Group #ClassTreeNextStatDmg {
+            LayoutMode: Left;
+            Visible: false;
+
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+
+              Group {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/attack.png", Border: 0);
+              }
+            }
+
+            Group { Anchor: (Width: 6); }
+
+            Group {
+              LayoutMode: Top;
+
+              Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "Dégâts";
+              }
+
+              Label #ClassTreeNextStatDmgValue {
+                Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+
+          Group { Anchor: (Width: 10); }
+
+          Group #ClassTreeNextStatCd {
+            LayoutMode: Left;
+            Visible: false;
+
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+
+              Group {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/cooldown.png", Border: 0);
+              }
+            }
+
+            Group { Anchor: (Width: 6); }
+
+            Group {
+              LayoutMode: Top;
+
+              Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "CD";
+              }
+
+              Label #ClassTreeNextStatCdValue {
+                Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+
+          Group { Anchor: (Width: 10); }
+
+          Group #ClassTreeNextStatStamina {
+            LayoutMode: Left;
+            Visible: false;
+
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+
+              Group {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/stamina.png", Border: 0);
+              }
+            }
+
+            Group { Anchor: (Width: 6); }
+
+            Group {
+              LayoutMode: Top;
+
+              Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "Endu";
+              }
+
+              Label #ClassTreeNextStatStaminaValue {
+                Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+
+          Group #ClassTreeNextStatMana {
+            LayoutMode: Left;
+            Visible: false;
+
+            Group {
+              Anchor: (Width: 36, Height: 36);
+              Background: #000000(0.35);
+              LayoutMode: Middle;
+
+              Group {
+                Anchor: (Width: 26, Height: 26);
+                Background: PatchStyle(TexturePath: "Icons/mana.png", Border: 0);
+              }
+            }
+
+            Group { Anchor: (Width: 6); }
+
+            Group {
+              LayoutMode: Top;
+
+              Label {
+                Style: (FontSize: 10, TextColor: @InkMuted, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
+                Text: "Coût mana";
+              }
+
+              Label #ClassTreeNextStatManaValue {
+                Style: (FontSize: 16, TextColor: @GoldHighlight, RenderBold: true, VerticalAlignment: Center);
+                Text: "";
+              }
+            }
+          }
+        }
+
+        Label #ClassTreeNextBonusValue {
+          Anchor: (Top: 4);
           Style: (...@MetaStyle, FontSize: 13, TextColor: @GoldHighlight, RenderBold: true, Wrap: true);
           Text: "";
+          Visible: false;
         }
       }
 

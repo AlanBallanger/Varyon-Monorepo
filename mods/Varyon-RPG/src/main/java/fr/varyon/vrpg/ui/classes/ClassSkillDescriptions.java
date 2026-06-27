@@ -37,6 +37,10 @@ public final class ClassSkillDescriptions {
     }
 
     @Nullable
+    public static SkillStatDisplay statDisplayForRank(@Nullable String skillId, int rank) {
+        return ClassSkillStatResolver.resolve(skillId, rank, statLineForRank(skillId, rank));
+    }
+
     public static String statLineForRank(@Nullable String skillId, int rank) {
         if (rank < 1 || skillId == null) return null;
         return switch (skillId) {
