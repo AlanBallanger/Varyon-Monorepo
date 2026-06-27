@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntitySta
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
+import fr.varyon.vrpg.combat.CombatCritDetection;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
@@ -140,7 +141,7 @@ public final class RavageurOutgoingDamageSystem extends DamageEventSystem {
 
             // Arme lourde — slow sur critique
             int armeLourdeRank = acc.getTalentRank(PlayerClass.BARBARE, RavageurPassifs.ARME_LOURDE_NODE);
-            if (armeLourdeRank > 0 && isCriticalHit(damage)) {
+            if (armeLourdeRank > 0 && CombatCritDetection.isCriticalHit(damage)) {
                 try {
                     int slowIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect
                         .getAssetMap().getIndex("Vrpg_Arme_Lourde");
@@ -167,24 +168,6 @@ public final class RavageurOutgoingDamageSystem extends DamageEventSystem {
             }
 
         } catch (Exception ignored) {}
-    }
-
-    private static boolean isCriticalHit(@Nonnull Damage damage) {
-        try {
-            boolean[] found = {false};
-            damage.forEachMetaObject(new com.hypixel.hytale.server.core.meta.IMetaStore.MetaEntryConsumer() {
-                @Override
-                public <T> void accept(int metaId, T value) {
-                    if (value == null || found[0]) return;
-                    String sl = value.toString().toLowerCase(java.util.Locale.ROOT);
-                    if (sl.contains("impact_critical") || (sl.contains("critical")
-                            && (sl.contains("particle") || sl.contains("systemid")))) {
-                        found[0] = true;
-                    }
-                }
-            });
-            return found[0];
-        } catch (Exception e) { return false; }
     }
 
     private float getHpPercent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {

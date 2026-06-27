@@ -20,6 +20,7 @@ import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntitySta
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
+import fr.varyon.vrpg.combat.CombatCritDetection;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
@@ -151,7 +152,7 @@ public final class LancierOutgoingDamageSystem extends DamageEventSystem {
 
             // --- Perce-cœur (passif) — saignement sur coup critique ---
             int perceRank = acc.getTalentRank(PlayerClass.TIREUR, LancierPassifs.PERCE_COEUR_NODE);
-            if (perceRank > 0 && isCriticalHit(damage)) {
+            if (perceRank > 0 && CombatCritDetection.isCriticalHit(damage)) {
                 int ticks = (int)(LancierPassifs.PERCE_BLEED_DURATION_MS / 1000L);
                 float dpt = amount * LancierPassifs.perceBleedPctForRank(perceRank);
                 bleedSystem.applyBleed(victimRef, dpt, ticks, store);
@@ -180,23 +181,5 @@ public final class LancierOutgoingDamageSystem extends DamageEventSystem {
             if (ta == null || tb == null) return 0;
             return ta.getPosition().distance(tb.getPosition());
         } catch (Exception e) { return 0; }
-    }
-
-    private static boolean isCriticalHit(@Nonnull Damage damage) {
-        try {
-            boolean[] found = {false};
-            damage.forEachMetaObject(new com.hypixel.hytale.server.core.meta.IMetaStore.MetaEntryConsumer() {
-                @Override
-                public <T> void accept(int metaId, T value) {
-                    if (value == null || found[0]) return;
-                    String sl = value.toString().toLowerCase(java.util.Locale.ROOT);
-                    if (sl.contains("impact_critical") || (sl.contains("critical")
-                            && (sl.contains("particle") || sl.contains("systemid")))) {
-                        found[0] = true;
-                    }
-                }
-            });
-            return found[0];
-        } catch (Exception e) { return false; }
     }
 }

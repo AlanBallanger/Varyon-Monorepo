@@ -20,6 +20,7 @@ import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.WeaponDamageReader;
+import fr.varyon.vrpg.combat.CombatCritDetection;
 import fr.varyon.vrpg.config.VrpgConfig;
 
 import javax.annotation.Nonnull;
@@ -127,7 +128,7 @@ public final class OmbreOutgoingDamageSystem extends DamageEventSystem {
             }
 
             // Frappe Précise (crit) — Danse des Lames
-            boolean isCrit = isCriticalHit(damage);
+            boolean isCrit = CombatCritDetection.isCriticalHit(damage);
             if (isCrit) {
                 int danseRank = acc.getTalentRank(PlayerClass.GUERRIER, OmbrePassifs.DANSE_LAMES_NODE);
                 if (danseRank > 0) {
@@ -181,25 +182,6 @@ public final class OmbreOutgoingDamageSystem extends DamageEventSystem {
                     com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
             }
         } catch (Exception ignored) {}
-    }
-
-    private static boolean isCriticalHit(@Nonnull Damage damage) {
-        try {
-            boolean[] found = {false};
-            damage.forEachMetaObject(new com.hypixel.hytale.server.core.meta.IMetaStore.MetaEntryConsumer() {
-                @Override
-                public <T> void accept(int metaId, T value) {
-                    if (found[0] || value == null) return;
-                    String s = value.toString().toLowerCase(java.util.Locale.ROOT);
-                    if (s.contains("impact_critical") || (s.contains("critical")
-                            && (s.contains("particle") || s.contains("systemid")))) {
-                        found[0] = true;
-                    }
-                }
-            });
-            return found[0];
-        } catch (Exception ignored) {}
-        return false;
     }
 
     private float getMaxHp(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {

@@ -21,7 +21,7 @@ import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.duelliste.CoupEstocSkill;
 import fr.varyon.vrpg.classes.duelliste.FeintSkill;
-import fr.varyon.vrpg.integration.DamageFloatBridge;
+import fr.varyon.vrpg.combat.CombatCritDetection;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
@@ -112,8 +112,8 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
                 }
             }
 
-            // Frappe Précise — bonus si crit détecté via particules d'impact
-            boolean isCrit = isCriticalHit(damage);
+            // Frappe Précise — bonus si crit VRPG
+            boolean isCrit = CombatCritDetection.isCriticalHit(damage);
             if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
                 LOG.atInfo().log("[FrappePrecise] isCrit=" + isCrit + " base=" + base + " initial=" + damage.getInitialAmount());
             if (isCrit) {
@@ -178,31 +178,6 @@ public final class DuellisteOutgoingDamageSystem extends DamageEventSystem {
             }
 
         } catch (Exception ignored) {}
-    }
-
-    private static boolean isCriticalHit(@Nonnull Damage damage) {
-        try {
-            boolean[] found = {false};
-            java.util.List<String> debugValues = fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()
-                ? new java.util.ArrayList<>() : null;
-            damage.forEachMetaObject(new com.hypixel.hytale.server.core.meta.IMetaStore.MetaEntryConsumer() {
-                @Override
-                public <T> void accept(int metaId, T value) {
-                    if (value == null) return;
-                    String s = value.toString();
-                    if (debugValues != null) debugValues.add(metaId + "=" + s.substring(0, Math.min(60, s.length())));
-                    String sl = s.toLowerCase(java.util.Locale.ROOT);
-                    if (!found[0] && (sl.contains("impact_critical") || (sl.contains("critical")
-                            && (sl.contains("particle") || sl.contains("systemid"))))) {
-                        found[0] = true;
-                    }
-                }
-            });
-            if (debugValues != null)
-                LOG.atInfo().log("[FrappePrecise] meta entries: " + debugValues);
-            return found[0];
-        } catch (Exception ignored) {}
-        return false;
     }
 
     private float getMaxHp(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {

@@ -35,6 +35,8 @@ import fr.varyon.vrpg.classes.ability.ClassSkillTriggerInteraction;
 import fr.varyon.vrpg.classes.ClassKillXpSystem;
 import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.SpecWeaponMasteryDamageSystem;
+import fr.varyon.vrpg.combat.VrpgCritDamageSystem;
+import fr.varyon.vrpg.combat.VrpgDamageCritResetSystem;
 import fr.varyon.vrpg.classes.duelliste.DuellisteBleedSystem;
 import fr.varyon.vrpg.classes.duelliste.DuellisteDesarmementDamageSystem;
 import fr.varyon.vrpg.classes.duelliste.DuellisteIncomingDamageSystem;
@@ -865,6 +867,19 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             getEntityStoreRegistry().registerSystem(new MaitriseChasseurDamageBoostSystem(professionManager));
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MaitriseChasseurDamageBoostSystem");
+        }
+
+        if (classManager != null) {
+            try {
+                getEntityStoreRegistry().registerSystem(new VrpgDamageCritResetSystem());
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgDamageCritResetSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(new VrpgCritDamageSystem(classManager));
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgCritDamageSystem");
+            }
         }
 
         if (duellisteBleedSystem != null && duellisteState != null && classManager != null) {

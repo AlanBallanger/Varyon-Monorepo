@@ -73,8 +73,9 @@ public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
                 store.getComponent(attackerRef, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType());
             if (playerRef == null) playerRef =
                 commandBuffer.getComponent(attackerRef, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType());
+            if (playerRef == null) return;
 
-            UUID uuid = playerComp.getUuid();
+            UUID uuid = playerRef.getUuid();
             ClassAccount acc = classManager.getOrLoad(uuid);
             if (acc.getActiveClass() != PlayerClass.MAGE) return;
             if (acc.getActiveSpec(PlayerClass.MAGE) != PlayerSpecialization.VAUDOU) return;
@@ -102,8 +103,7 @@ public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
                 fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
                 fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, victimRef, finalSkill * vaudouMageMult,
                     isCrit ? "SHADOW_CRITICAL" : "SHADOW");
-            } else if (playerRef != null
-                    && WeaponCategory.heldCategory(playerRef) == WeaponCategory.MAGIE
+            } else if (WeaponCategory.heldCategory(playerRef) == WeaponCategory.MAGIE
                     && damage.getCause() != com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.COMMAND) {
                 float base50 = 50f * critMult;
                 damage.setAmount(base50);

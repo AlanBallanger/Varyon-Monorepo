@@ -15,9 +15,7 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DamageModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import fr.varyon.vrpg.integration.DamageFloatBridge;
 import fr.varyon.vrpg.classes.ClassStatDefinition;
-import fr.varyon.vrpg.classes.ClassPlayerStats;
 import fr.varyon.vrpg.classes.PlayerClass;
 
 import javax.annotation.Nonnull;
@@ -73,28 +71,6 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
 
             float base = damage.getAmount();
             float amount = base;
-
-            // Crit VRPG — s'applique à tous les joueurs avec une spec active
-            // Sauf Arcaniste qui gère son propre crit + couleur dans ArcanistOutgoingDamageSystem
-            if (spec != null && spec != fr.varyon.vrpg.classes.PlayerSpecialization.ARCANISTE
-                    && spec != fr.varyon.vrpg.classes.PlayerSpecialization.VAUDOU) {
-                ClassPlayerStats stats = classManager.getStatEngine().getStats(uuid);
-                if (stats == null && activeClass != null) {
-                    stats = ClassStatDefinition.compute(
-                        acc.getProgress(activeClass).getLevel(), spec);
-                }
-                if (stats != null && stats.critChancePct() > 0) {
-                    if (Math.random() < stats.critChancePct() / 100.0) {
-                        float critMult = 1.0f + stats.critDamagePct() / 100.0f;
-                        amount *= critMult;
-                        DamageFloatBridge.markCritical(damage);
-                        if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
-                            LOG.atInfo().log(String.format("[Crit] spec=%s chance=%d%% dmg=+%d%% %.1f->%.1f",
-                                spec.getId(), stats.critChancePct(), stats.critDamagePct(), base, amount));
-                        }
-                    }
-                }
-            }
 
             // Multiplicateur de niveau — s'applique à toutes les classes
             if (spec != null && activeClass != null) {
