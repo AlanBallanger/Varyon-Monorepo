@@ -1,0 +1,71 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "SignatureEnergy": 100
+  },
+  "ValueType": "Percent",
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "Replace",
+        "Var": "KickTornado_EntityEffect",
+        "DefaultOk": true,
+        "DefaultValue": {
+          "Interactions": [
+            {
+              "Type": "ApplyEffect",
+              "EffectId": "Dagger_Signature"
+            }
+          ]
+        }
+      },
+      {
+        "Type": "Replace",
+        "Var": "Swing_Up_Left",
+        "DefaultOk": true,
+        "DefaultValue": {
+          "Interactions": [
+            "Weapon_Knuckles_Signature_Swing_Up_Left"
+          ]
+        }
+      },
+      {
+        "Type": "Replace",
+        "Var": "KickTornado",
+        "DefaultOk": true,
+        "DefaultValue": {
+          "Interactions": [
+            "Weapon_Knuckles_Signature_KickTornado"
+          ]
+        }
+      },
+      {
+        "Type": "Replace",
+        "Var": "Swing_Down_Left",
+        "DefaultOk": true,
+        "DefaultValue": {
+          "Interactions": [
+            "Weapon_Knuckles_Signature_Swing_Down_Left"
+          ]
+        }
+      },
+      {
+        "Type": "Replace",
+        "Var": "KickTornado_SignatureCost",
+        "DefaultOk": true,
+        "DefaultValue": {
+          "Interactions": [
+            {
+              "Type": "ChangeStat",
+              "ValueType": "Percent",
+              "StatModifiers": {
+                "SignatureEnergy": -100
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

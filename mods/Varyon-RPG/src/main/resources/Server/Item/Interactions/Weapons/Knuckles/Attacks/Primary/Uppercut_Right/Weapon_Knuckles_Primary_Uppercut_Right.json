@@ -1,0 +1,17 @@
+{
+  "Type": "Simple",
+  "Effects": {
+    "ItemAnimationId": "UppercutRight"
+  },
+  "RunTime": 0.069,
+  "Next": {
+    "Type": "Replace",
+    "Var": "Uppercut_Right_Selector",
+    "DefaultOk": true,
+    "DefaultValue": {
+      "Interactions": [
+        "Weapon_Knuckles_Primary_Uppercut_Right_Selector"
+      ]
+    }
+  }
+}

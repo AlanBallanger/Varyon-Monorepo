@@ -5,7 +5,7 @@ public final class UppercutSkill {
     public static final String SKILL_ID       = "uppercut";
     public static final String TALENT_NODE_ID = "bagarreur_11";
 
-    private static final float[] DAMAGE_PCT        = {0.7f, 0.9f, 1.1f, 1.4f, 1.8f};
+    private static final float[] DAMAGE_PCT        = {3.15f, 4.05f, 4.95f, 6.3f, 8.1f};
     private static final float   LAUNCH_Y          = 40.0f;
     private static final double  KNOCKBACK_H       = 5.0;
     private static final long[]  COOLDOWN_MS       = {16000, 14000, 12000, 10000, 8000};

@@ -112,7 +112,7 @@ public final class AbilitySlotsHud extends CustomUIHud {
         PlayerSpecialization spec = resolveActiveSpec();
         boolean weaponOk;
         if (spec == PlayerSpecialization.BAGARREUR) {
-            weaponOk = WeaponCategory.heldCategory(ref) == null;
+            weaponOk = WeaponCategory.heldCategory(ref) == WeaponCategory.GANTS;
         } else {
             weaponOk = spec != null && WeaponCategory.specCanUseHeldWeapon(spec, ref);
         }

@@ -1657,6 +1657,19 @@ public final class ClassSkillService {
             (acc, cls) -> fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.TALENT_NODE_ID)));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.lancier.EmpalementSkill.SKILL_ID,
             (acc, cls) -> fr.varyon.vrpg.classes.lancier.EmpalementSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.lancier.EmpalementSkill.TALENT_NODE_ID)));
+        // Bagarreur
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.bagarreur.UppercutSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.bagarreur.UppercutSkill.TALENT_NODE_ID)));
     }
 
     private static long echoTemporelCd(@Nonnull ClassAccount acc, @Nonnull PlayerClass cls,
@@ -2500,9 +2513,11 @@ public final class ClassSkillService {
             && acc.getActiveSpec(PlayerClass.BARBARE) == fr.varyon.vrpg.classes.PlayerSpecialization.BAGARREUR;
     }
 
-    private boolean isHoldingNothing(@Nonnull PlayerRef playerRef) {
-        String held = getHeldItemId(playerRef);
-        return held == null || held.isBlank();
+    private boolean isHoldingKnuckles(@Nonnull PlayerRef playerRef) {
+        String id = getHeldItemId(playerRef);
+        return id != null
+            && fr.varyon.vrpg.classes.WeaponCategory.fromItemId(id)
+                == fr.varyon.vrpg.classes.WeaponCategory.GANTS;
     }
 
     private float getBaseDamage(@Nonnull PlayerRef playerRef) {
@@ -2517,7 +2532,7 @@ public final class ClassSkillService {
                                        @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isBagarreur(acc)) return false;
-        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingKnuckles(playerRef)) { notifyNoWeapon(playerRef); return false; }
         int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.TALENT_NODE_ID);
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
@@ -2565,7 +2580,7 @@ public final class ClassSkillService {
     public boolean tryCastMonteeAdrenaline(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isBagarreur(acc)) return false;
-        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingKnuckles(playerRef)) { notifyNoWeapon(playerRef); return false; }
         int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.TALENT_NODE_ID);
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
@@ -2590,7 +2605,7 @@ public final class ClassSkillService {
                                          @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isBagarreur(acc)) return false;
-        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingKnuckles(playerRef)) { notifyNoWeapon(playerRef); return false; }
         int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.TALENT_NODE_ID);
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
@@ -2638,7 +2653,7 @@ public final class ClassSkillService {
                                           @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isBagarreur(acc)) return false;
-        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingKnuckles(playerRef)) { notifyNoWeapon(playerRef); return false; }
         int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.TALENT_NODE_ID);
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
@@ -2719,8 +2734,6 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID,
                 fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.cooldownMsForRank(rank))) return false;
-        float staminaCost = fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.staminaCostForRank(rank);
-        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         try {
             Integer hIdx = null;
@@ -2753,7 +2766,6 @@ public final class ClassSkillService {
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Status, "Club", "Guard", true, store);
         } catch (Exception ignored) {}
 
-        ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID);
         notifySkill(uuid, "Second Souffle");
         return true;
@@ -2765,7 +2777,7 @@ public final class ClassSkillService {
                                     @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isBagarreur(acc)) return false;
-        if (!isHoldingNothing(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingKnuckles(playerRef)) { notifyNoWeapon(playerRef); return false; }
         int rank = acc.getTalentRank(PlayerClass.BARBARE, fr.varyon.vrpg.classes.bagarreur.UppercutSkill.TALENT_NODE_ID);
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);

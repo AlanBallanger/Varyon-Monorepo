@@ -4,7 +4,8 @@
   "Version": "${plugin_version}",
   "Description": "${plugin_description}",
   "Authors": [
-    { "Name": "${plugin_author}" }
+    { "Name": "${plugin_author}" },
+    { "Name": "VexhaThePanda", "Url": "https://vexhathepanda.carrd.co/" }
   ],
   "Website": "${plugin_website}",
   "ServerVersion": "${server_version}",

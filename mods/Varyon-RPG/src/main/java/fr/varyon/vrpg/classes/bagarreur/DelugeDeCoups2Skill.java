@@ -10,8 +10,8 @@ public final class DelugeDeCoups2Skill {
 
     public static int hitCountForRank(int rank) { return HIT_COUNTS[idx(rank)]; }
 
-    private static final float[] DAMAGE_PER_HIT = {0.4f, 0.5f, 0.6f, 0.7f, 0.9f};
-    private static final long[]  COOLDOWN_MS    = {18000, 16000, 14000, 12000, 10000};
+    private static final float[] DAMAGE_PER_HIT = {1.8f, 2.25f, 2.7f, 3.15f, 4.05f};
+    private static final long[]  COOLDOWN_MS    = {20000, 19000, 18000, 17000, 16000};
     private static final float[] STAMINA_COST   = {8f, 9f, 10f, 11f, 12f};
 
     private DelugeDeCoups2Skill() {}

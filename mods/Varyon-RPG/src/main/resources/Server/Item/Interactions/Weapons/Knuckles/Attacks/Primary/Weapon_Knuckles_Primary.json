@@ -1,0 +1,17 @@
+{
+  "Type": "Charging",
+  "DisplayProgress": false,
+  "Next": {
+    "0": "Weapon_Knuckles_Primary_Chain",
+    "0.2": {
+      "Type": "Replace",
+      "Var": "Kick_Roundhouse_Left_StaminaCondition",
+      "DefaultOk": true,
+      "DefaultValue": {
+        "Interactions": [
+          "Weapon_Knuckles_Primary_Kick_Spinning_Right_StaminaCondition"
+        ]
+      }
+    }
+  }
+}

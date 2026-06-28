@@ -76,3 +76,12 @@ items.Varyon_Chasseur_Xp_Boost_Gigantic.name = Gigantic Hunter XP Boost Potion
 items.Varyon_Chasseur_Xp_Boost_Gigantic.description = Increases Hunter profession XP gains by +200% for 30 minutes.
 
 resourceType.Salvage_Corrupted.name = Any metallic ingot
+
+items.Weapon_Knuckles_Crude.name = Crude Knuckles
+items.Weapon_Knuckles_Copper.name = Copper Knuckles
+items.Weapon_Knuckles_Iron.name = Iron Knuckles
+items.Weapon_Knuckles_Cobalt.name = Cobalt Knuckles
+items.Weapon_Knuckles_Thorium.name = Thorium Knuckles
+items.Weapon_Knuckles_Mithril.name = Mithril Knuckles
+items.Weapon_Knuckles_Adamantite.name = Adamantite Knuckles
+items.Weapon_Knuckles_Template.name = Knuckles

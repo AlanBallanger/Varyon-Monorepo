@@ -10,9 +10,10 @@ public final class BagarreurState {
     private final ConcurrentHashMap<UUID, Long>  monteeExpiry = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Float> monteeBonus  = new ConcurrentHashMap<>();
 
-    // --- Adrénaline (speed boost après dégâts reçus) ---
-    private final ConcurrentHashMap<UUID, Long>  adrenalineExpiry = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, Float> adrenalineSpeed  = new ConcurrentHashMap<>();
+    // --- Adrénaline (speed boost cumulable après dégâts reçus) ---
+    private final ConcurrentHashMap<UUID, Long>    adrenalineExpiry       = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Integer> adrenalineStacks       = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Float>   adrenalineSpeedPerStack = new ConcurrentHashMap<>();
 
     // --- Acharnement (stacks dmg par cible) ---
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Long, Integer>> acharnementStacks   = new ConcurrentHashMap<>();
@@ -39,19 +40,31 @@ public final class BagarreurState {
 
     // ---- Adrénaline ----
 
-    public void triggerAdrenaline(@Nonnull UUID uuid, long durationMs, float speed) {
-        adrenalineExpiry.put(uuid, System.currentTimeMillis() + durationMs);
-        adrenalineSpeed.put(uuid, speed);
+    public void onDamageAdrenaline(@Nonnull UUID uuid, long durationMs, float speedPerStack, int maxStacks) {
+        long now = System.currentTimeMillis();
+        Long exp = adrenalineExpiry.get(uuid);
+        int stacks;
+        if (exp != null && now < exp) {
+            stacks = Math.min(adrenalineStacks.getOrDefault(uuid, 0) + 1, maxStacks);
+        } else {
+            stacks = 1;
+        }
+        adrenalineStacks.put(uuid, stacks);
+        adrenalineSpeedPerStack.put(uuid, speedPerStack);
+        adrenalineExpiry.put(uuid, now + durationMs);
     }
 
     public float getAdrenalineSpeed(@Nonnull UUID uuid) {
         Long exp = adrenalineExpiry.get(uuid);
         if (exp == null || System.currentTimeMillis() >= exp) {
             adrenalineExpiry.remove(uuid);
-            adrenalineSpeed.remove(uuid);
+            adrenalineStacks.remove(uuid);
+            adrenalineSpeedPerStack.remove(uuid);
             return 0f;
         }
-        return adrenalineSpeed.getOrDefault(uuid, 0f);
+        float perStack = adrenalineSpeedPerStack.getOrDefault(uuid, 0f);
+        int stacks = adrenalineStacks.getOrDefault(uuid, 0);
+        return perStack * stacks;
     }
 
     // ---- Acharnement (stacks par cible) ----
@@ -100,7 +113,8 @@ public final class BagarreurState {
         monteeExpiry.remove(uuid);
         monteeBonus.remove(uuid);
         adrenalineExpiry.remove(uuid);
-        adrenalineSpeed.remove(uuid);
+        adrenalineStacks.remove(uuid);
+        adrenalineSpeedPerStack.remove(uuid);
         acharnementStacks.remove(uuid);
         acharnementLastHit.remove(uuid);
     }

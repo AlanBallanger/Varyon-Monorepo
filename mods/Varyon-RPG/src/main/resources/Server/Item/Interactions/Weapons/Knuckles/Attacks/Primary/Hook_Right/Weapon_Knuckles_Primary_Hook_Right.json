@@ -1,0 +1,17 @@
+{
+  "Type": "Simple",
+  "Effects": {
+    "ItemAnimationId": "HookRight"
+  },
+  "RunTime": 0.069,
+  "Next": {
+    "Type": "Replace",
+    "Var": "Hook_Right_Selector",
+    "DefaultOk": true,
+    "DefaultValue": {
+      "Interactions": [
+        "Weapon_Knuckles_Primary_Hook_Right_Selector"
+      ]
+    }
+  }
+}

@@ -124,3 +124,12 @@ items.Varyon_Chasseur_Xp_Boost_Gigantic.name = Gigantesque potion de boost d'xp 
 items.Varyon_Chasseur_Xp_Boost_Gigantic.description = Augmente les gains d'xp du métier Chasseur de +200% pendant 30 minutes.
 
 resourceType.Salvage_Corrupted.name = Tout lingot métallique
+
+items.Weapon_Knuckles_Crude.name = Poing américain rudimentaire
+items.Weapon_Knuckles_Copper.name = Poing américain en cuivre
+items.Weapon_Knuckles_Iron.name = Poing américain en fer
+items.Weapon_Knuckles_Cobalt.name = Poing américain en cobalt
+items.Weapon_Knuckles_Thorium.name = Poing américain en thorium
+items.Weapon_Knuckles_Mithril.name = Poing américain en mithril
+items.Weapon_Knuckles_Adamantite.name = Poing américain en adamantite
+items.Weapon_Knuckles_Template.name = Poing américain

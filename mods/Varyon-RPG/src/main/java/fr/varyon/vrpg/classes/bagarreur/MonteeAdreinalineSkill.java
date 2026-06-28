@@ -5,9 +5,9 @@ public final class MonteeAdreinalineSkill {
     public static final String SKILL_ID       = "montee_adrenaline";
     public static final String TALENT_NODE_ID = "bagarreur_3";
 
-    private static final float[] DAMAGE_BONUS = {0.20f, 0.25f, 0.30f, 0.38f, 0.50f};
-    private static final long[]  DURATION_MS  = {4000, 5000, 6000, 7000, 8000};
-    private static final long[]  COOLDOWN_MS  = {28000, 25000, 22000, 20000, 16000};
+    private static final float[] DAMAGE_BONUS = {0.40f, 0.55f, 0.70f, 0.85f, 1.00f};
+    private static final long[]  DURATION_MS  = {4000, 4500, 5000, 5500, 6000};
+    private static final long[]  COOLDOWN_MS  = {22000, 21000, 20000, 19000, 16000};
     private static final float[] STAMINA_COST = {5f, 6f, 7f, 8f, 8f};
 
     private MonteeAdreinalineSkill() {}
@@ -22,8 +22,11 @@ public final class MonteeAdreinalineSkill {
 
     public static String statLineForRank(int rank) {
         int pct = Math.round(damageBonusForRank(rank) * 100);
-        int dur = (int) (durationMsForRank(rank) / 1000);
-        int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return "+" + pct + "% dégâts pendant " + dur + "s, Délai " + cd + "s";
+        long durMs = durationMsForRank(rank);
+        String dur = durMs % 1000L == 0L
+            ? (durMs / 1000L) + "s"
+            : String.format(java.util.Locale.ROOT, "%.1fs", durMs / 1000.0);
+        int cd = (int) (cooldownMsForRank(rank) / 1000);
+        return "+" + pct + "% dégâts pendant " + dur + ", Délai " + cd + "s";
     }
 }

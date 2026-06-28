@@ -1,0 +1,54 @@
+{
+  "Type": "Selector",
+  "RunTime": 0.069,
+  "Selector": {
+    "Id": "Stab",
+    "ExtendTop": 0.5,
+    "ExtendBottom": 0.5,
+    "ExtendLeft": 0.5,
+    "ExtendRight": 0.5,
+    "EndDistance": 2
+  },
+  "Effects": {
+    "WorldSoundEventId": "SFX_Daggers_T2_Swing",
+    "LocalSoundEventId": "SFX_Daggers_T2_Stab_Right_Local",
+    "CameraEffect": "Daggers_Swing_Diagonal_Left",
+    "Trails": [
+      {
+        "TrailId": "Unarmed",
+        "TargetEntityPart": "SecondaryItem",
+        "RotationOffset": {
+          "Pitch": 0
+        },
+        "PositionOffset": {
+          "Z": 0
+        },
+        "TargetNodeName": "Bottom"
+      }
+    ]
+  },
+  "Next": {
+    "Type": "Simple",
+    "$Comment": "Pad the interaction length",
+    "RunTime": 0.069
+  },
+  "HitBlock": {
+    "Interactions": [
+      "Block_Break_Adventure"
+    ]
+  },
+  "HitEntity": {
+    "Interactions": [
+      {
+        "Type": "Replace",
+        "Var": "Hook_Right_Damage",
+        "DefaultOk": true,
+        "DefaultValue": {
+          "Interactions": [
+            "Weapon_Knuckles_Primary_Hook_Right_Damage"
+          ]
+        }
+      }
+    ]
+  }
+}

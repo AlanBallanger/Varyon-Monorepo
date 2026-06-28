@@ -12,6 +12,7 @@ public enum WeaponCategory {
     DISTANCE,
     MAGIE,
     BOUCLIER,
+    GANTS,
     AUTRE;
 
     @Nullable
@@ -27,6 +28,7 @@ public enum WeaponCategory {
         if (matchesAny(id, "shortbow", "crossbow", "bow")) return DISTANCE;
         if (matchesAny(id, "staff", "wand", "spellbook")) return MAGIE;
         if (matchesAny(id, "shield")) return BOUCLIER;
+        if (matchesAny(id, "knuckle", "knuckles", "gloves")) return GANTS;
 
         return AUTRE;
     }
@@ -81,6 +83,7 @@ public enum WeaponCategory {
             case DISTANCE   -> spec.getWeaponDistanceMult();
             case MAGIE      -> spec.getWeaponMagieMult();
             case BOUCLIER   -> 1.0;
+            case GANTS      -> spec == PlayerSpecialization.BAGARREUR ? 1.50 : 0.75;
             case AUTRE      -> 1.0;
         };
     }

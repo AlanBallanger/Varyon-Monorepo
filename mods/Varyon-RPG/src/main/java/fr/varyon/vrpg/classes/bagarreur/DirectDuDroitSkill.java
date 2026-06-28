@@ -5,7 +5,7 @@ public final class DirectDuDroitSkill {
     public static final String SKILL_ID       = "direct_du_droit";
     public static final String TALENT_NODE_ID = "bagarreur_2";
 
-    private static final float[] DAMAGE_PCT   = {0.7f, 0.9f, 1.1f, 1.3f, 1.5f};
+    private static final float[] DAMAGE_PCT   = {3.15f, 4.05f, 4.95f, 5.85f, 6.75f};
     private static final long[]  STUN_MS      = {1000, 1200, 1400, 1600, 2000};
     private static final long[]  COOLDOWN_MS  = {14000, 12000, 11000, 10000, 8000};
     private static final float[] STAMINA_COST = {5f, 6f, 7f, 8f, 8f};

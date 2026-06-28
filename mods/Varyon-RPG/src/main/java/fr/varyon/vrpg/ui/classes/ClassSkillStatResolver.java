@@ -182,6 +182,15 @@ public final class ClassSkillStatResolver {
             case RavageurPassifs.COMBATTANT_INFATIGABLE_NODE -> combattantInfatigableStats(rank);
             case BagarreurPassifs.JUSQUAU_BOUT_NODE -> xpOnlyStats(
                 Math.round(BagarreurPassifs.jusquAuBoutBonusForRank(rank) * 100));
+            case DirectDuDroitSkill.SKILL_ID -> directDuDroitStats(rank);
+            case MonteeAdreinalineSkill.SKILL_ID -> monteeAdrenalineStats(rank);
+            case BagarreurPassifs.GARDE_BOXEUR_NODE -> gardeBoxeurStats(rank);
+            case BagarreurPassifs.ADRENALINE_NODE -> adrenalineBagarreurStats(rank);
+            case BagarreurPassifs.ACHARNEMENT_NODE -> acharnementStats(rank);
+            case BagarreurPassifs.ESPRIT_COMBATIF_NODE -> espritCombatifStats(rank);
+            case BagarreurPassifs.POINGS_ACIER_NODE -> poingsAcierStats(rank);
+            case fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID ->
+                secondSouffleBagarreurStats(rank);
             case GardienDeGaiaPassifs.HARMONIE_NODE -> xpOnlyStats(
                 Math.round(GardienDeGaiaPassifs.harmonieBonusForRank(rank) * 100));
             case VaudouPassifs.FETICHEUR_NODE -> xpOnlyStats(
@@ -430,6 +439,77 @@ public final class ClassSkillStatResolver {
             new SkillStatEntry(SkillStatKind.MOVE_SPEED, "-" + slow + "%", "Vitesse"),
             new SkillStatEntry(SkillStatKind.DURATION,
                 formatDurationMs(RavageurPassifs.armeLourdeDurationMs()))
+        );
+    }
+
+    private static List<SkillStatEntry> directDuDroitStats(int rank) {
+        int pct = Math.round(DirectDuDroitSkill.damagePctForRank(rank) * 100);
+        int stamina = Math.round(DirectDuDroitSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(DirectDuDroitSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> monteeAdrenalineStats(int rank) {
+        int dmg = Math.round(MonteeAdreinalineSkill.damageBonusForRank(rank) * 100);
+        int stamina = Math.round(MonteeAdreinalineSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + dmg + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(MonteeAdreinalineSkill.durationMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(MonteeAdreinalineSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> gardeBoxeurStats(int rank) {
+        int red = Math.round(BagarreurPassifs.gardeBoxeurReducForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DEFENSE, "-" + red + "%"));
+    }
+
+    private static List<SkillStatEntry> adrenalineBagarreurStats(int rank) {
+        int spd = Math.round(BagarreurPassifs.adrenalineSpeedPerStackForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, "+" + spd + "%", "Cumul"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(BagarreurPassifs.adrenalineDurationMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> acharnementStats(int rank) {
+        int pct = Math.round(BagarreurPassifs.acharnementBonusPerStack(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"));
+    }
+
+    private static List<SkillStatEntry> espritCombatifStats(int rank) {
+        int pct = Math.round(BagarreurPassifs.espritCombatifBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"));
+    }
+
+    private static List<SkillStatEntry> poingsAcierStats(int rank) {
+        int chance = Math.round(BagarreurPassifs.poingsAcierChanceForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.RATE, chance + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(BagarreurPassifs.poingsAcierStunMsForRank(rank)), "Étour.")
+        );
+    }
+
+    private static List<SkillStatEntry> secondSouffleBagarreurStats(int rank) {
+        int hp = Math.round(
+            fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.hpRestorePctForRank(rank) * 100);
+        int staRestore = Math.round(
+            fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.staminaRestorePctForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.HEAL, hp + "%"),
+            new SkillStatEntry(SkillStatKind.STAMINA, staRestore + "%"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(
+                    fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.cooldownMsForRank(rank)))
         );
     }
 

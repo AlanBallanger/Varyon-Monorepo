@@ -14,7 +14,7 @@ public enum PlayerSpecialization {
 
     BERSERKER("berserker", "Berserker",         PlayerClass.BARBARE,  "Weapon_Axe_Adamantite",          "Rage - Vitesse - Frénétique",    "Plus il est blessé, plus il devient dangereux.", 1.05, 1.25, 0.85, 0.90, 1.05, 1.15,  1.00, 0.75, 1.50, 1.00, 0.75, 1.00, 0.75),
     RAVAGEUR ("ravageur",  "Ravageur",          PlayerClass.BARBARE,  "Weapon_Longsword_Adamantite",    "Arme à deux mains - Exécutions - Dégâts","Frappes puissantes et dégâts massifs.", 1.10, 1.30, 1.00, 1.10, 0.90, 0.90,  1.00, 0.75, 1.00, 1.50, 0.75, 1.00, 0.75),
-    BAGARREUR("bagarreur", "Bagarreur",         PlayerClass.BARBARE,  "Armor_Cloth_Cindercloth_Hands",  "Corps à corps - Étourdissements - Tenace","Combat brutal à mains nues ou en mêlée.", 1.15, 1.50, 1.10, 0.90, 0.80, 0.50,  0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10),
+    BAGARREUR("bagarreur", "Bagarreur",         PlayerClass.BARBARE,  "Weapon_Knuckles_Iron",           "Gants de combat - Étourdissements - Tenace","Combat brutal au poing américain.", 1.15, 1.50, 1.10, 0.90, 0.80, 0.50,  0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10),
 
     ARCANISTE      ("arcaniste",       "Arcaniste",       PlayerClass.MAGE, "Weapon_Staff_Crystal_Flame",  "Magie - Sorts - Puissance",      "Lance des sorts dévastateurs depuis la distance.", 0.90, 1.20, 0.85, 0.85, 0.90, 1.05,  1.00, 1.00, 1.00, 0.75, 0.75, 1.00, 1.50),
     GARDIEN_DE_GAIA("gardien_de_gaia", "Gardien de Gaïa", PlayerClass.MAGE, "Weapon_Staff_Wood",           "Nature - Soin - Invocation",     "Puise dans la nature pour soigner et invoquer.",   0.90, 0.65, 0.90, 1.25, 0.70, 0.70,  1.00, 1.00, 1.00, 0.75, 0.75, 1.00, 1.50),

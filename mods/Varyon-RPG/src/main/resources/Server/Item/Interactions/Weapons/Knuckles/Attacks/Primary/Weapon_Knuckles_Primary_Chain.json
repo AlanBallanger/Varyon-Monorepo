@@ -1,0 +1,67 @@
+{
+  "$Comment": "Run each attack in sequence",
+  "Type": "Chaining",
+  "ChainingAllowance": 1.2,
+  "Next": [
+    {
+      "Type": "Replace",
+      "Var": "Primary_Swing_Right",
+      "DefaultOk": true,
+      "DefaultValue": {
+        "Interactions": [
+          "Weapon_Knuckles_Primary_Swing_Right"
+        ]
+      }
+    },
+    {
+      "Type": "Replace",
+      "Var": "Primary_Swing_Left",
+      "DefaultOk": true,
+      "DefaultValue": {
+        "Interactions": [
+          "Weapon_Knuckles_Primary_Swing_Left"
+        ]
+      }
+    },
+    {
+      "Type": "Replace",
+      "DefaultOk": true,
+      "Var": "Primary_Hook_Right",
+      "DefaultValue": {
+        "Interactions": [
+          "Weapon_Knuckles_Primary_Hook_Right"
+        ]
+      }
+    },
+    {
+      "Type": "Replace",
+      "DefaultOk": true,
+      "Var": "Primary_Uppercut_Left",
+      "DefaultValue": {
+        "Interactions": [
+          "Weapon_Knuckles_Primary_Uppercut_Left"
+        ]
+      }
+    },
+    {
+      "Type": "Replace",
+      "Var": "Primary_Uppercut_Right",
+      "DefaultOk": true,
+      "DefaultValue": {
+        "Interactions": [
+          "Weapon_Knuckles_Primary_Uppercut_Right"
+        ]
+      }
+    },
+    {
+      "Type": "Replace",
+      "Var": "Primary_Hook_Left",
+      "DefaultOk": true,
+      "DefaultValue": {
+        "Interactions": [
+          "Weapon_Knuckles_Primary_Hook_Left"
+        ]
+      }
+    }
+  ]
+}

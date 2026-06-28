@@ -15,12 +15,8 @@ import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntitySta
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import com.hypixel.hytale.server.core.inventory.InventoryComponent;
-import com.hypixel.hytale.server.core.inventory.ItemStack;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
-import fr.varyon.vrpg.classes.ClassProgress;
-import fr.varyon.vrpg.classes.ClassStatDefinition;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.config.VrpgConfig;
@@ -97,11 +93,11 @@ public final class BagarreurOutgoingDamageSystem extends DamageEventSystem {
                 if (log != null) log.append(String.format(" Montee=+%.0f%%", monteeBonus * 100));
             }
 
-            // Esprit combatif — bonus si joueur < 50% HP
+            // Esprit combatif — bonus si adversaire < 50% HP
             int espritRank = acc.getTalentRank(PlayerClass.BARBARE, BagarreurPassifs.ESPRIT_COMBATIF_NODE);
             if (espritRank > 0) {
-                float selfHpPct = getSelfHpPercent(attackerRef, store);
-                if (selfHpPct > 0f && selfHpPct < BagarreurPassifs.ESPRIT_COMBATIF_THRESHOLD) {
+                float victimHpPct = getHpPercent(victimRef, store);
+                if (victimHpPct > 0f && victimHpPct < BagarreurPassifs.ESPRIT_COMBATIF_THRESHOLD) {
                     float bonus = BagarreurPassifs.espritCombatifBonusForRank(espritRank);
                     amount *= (1f + bonus);
                     if (log != null) log.append(String.format(" EspritCombatif=+%.0f%%", bonus * 100));
@@ -141,22 +137,13 @@ public final class BagarreurOutgoingDamageSystem extends DamageEventSystem {
                                     store.getComponent(victimRef, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
                                 if (ec == null) ec = commandBuffer.getComponent(victimRef, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
                                 if (ec != null) ec.addEffect(victimRef, stunEff,
-                                    BagarreurPassifs.POINGS_ACIER_STUN_MS / 1000f,
+                                    BagarreurPassifs.poingsAcierStunMsForRank(poingsRank) / 1000f,
                                     com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
                                 if (log != null) log.append(" PoingsAcier(stun)");
                             }
                         } catch (Exception ignored2) {}
                     }
                 }
-            }
-
-            // Mains nues — multiplicateur bagarreur 100%→5000% selon niveau
-            if (isHoldingNothing(playerRef)) {
-                ClassProgress prog = acc.getProgress(PlayerClass.BARBARE);
-                int level = prog != null ? prog.getLevel() : 1;
-                float bareFistMult = (float) ClassStatDefinition.bagarreurBareFistMultiplier(level);
-                amount *= bareFistMult;
-                if (log != null) log.append(String.format(" BareFist(lvl%d)=x%.1f", level, bareFistMult));
             }
 
             if (amount != base) damage.setAmount(amount);
@@ -168,16 +155,7 @@ public final class BagarreurOutgoingDamageSystem extends DamageEventSystem {
         } catch (Exception ignored) {}
     }
 
-    private static boolean isHoldingNothing(@Nonnull PlayerRef playerRef) {
-        try {
-            InventoryComponent.Hotbar hotbar = playerRef.getComponent(InventoryComponent.Hotbar.getComponentType());
-            if (hotbar == null) return true;
-            ItemStack held = hotbar.getInventory().getItemStack((short) hotbar.getActiveSlot());
-            return held == null || held.isEmpty();
-        } catch (Exception e) { return true; }
-    }
-
-    private float getSelfHpPercent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
+    private float getHpPercent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
         try {
             if (healthIdx == null) {
                 try { healthIdx = DefaultEntityStatTypes.getHealth(); } catch (Exception e) { healthIdx = -1; }

@@ -1,0 +1,71 @@
+{
+  "Type": "Selector",
+  "$Comment": "Length of Combat",
+  "RunTime": 0.083,
+  "Effects": {
+    "CameraEffect": "Daggers_Bash",
+    "Particles": [
+      {
+        "SystemId": "Daggers_Bash",
+        "TargetEntityPart": "Entity",
+        "TargetNodeName": "R-Foot",
+        "RotationOffset": {
+          "Yaw": 0,
+          "Pitch": 0,
+          "Roll": 0
+        },
+        "PositionOffset": {
+          "Z": -0.2,
+          "X": 0
+        }
+      },
+      {
+        "SystemId": "Daggers_Bash",
+        "TargetEntityPart": "Entity",
+        "TargetNodeName": "R-Calf",
+        "RotationOffset": {
+          "Yaw": 0,
+          "Pitch": 0,
+          "Roll": 0
+        },
+        "PositionOffset": {
+          "Z": -0.2,
+          "X": 0
+        }
+      }
+    ]
+  },
+  "Selector": {
+    "Id": "Stab",
+    "TestLineOfSight": true,
+    "ExtendTop": 0.5,
+    "ExtendLeft": 0.5,
+    "ExtendRight": 0.5,
+    "ExtendBottom": 0.5,
+    "StartDistance": 0,
+    "EndDistance": 2.5
+  },
+  "HitBlock": {
+    "Interactions": [
+      "Block_Break_Adventure"
+    ]
+  },
+  "HitEntity": {
+    "Interactions": [
+      {
+        "Type": "Replace",
+        "Var": "Kick_Roundhouse_Left_Damage",
+        "DefaultOk": true,
+        "DefaultValue": {
+          "Interactions": [
+            "Kick_Roundhouse_Left_Damage"
+          ]
+        }
+      }
+    ]
+  },
+  "Next": {
+    "Type": "Simple",
+    "RunTime": 0.333
+  }
+}

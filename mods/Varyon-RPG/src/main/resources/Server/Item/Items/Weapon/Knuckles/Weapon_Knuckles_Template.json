@@ -1,0 +1,126 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Weapon_Knuckles_Template.name"
+  },
+  "DroppedItemAnimation": "Items/Animations/Dropped/Dropped_Diagonal_Left.blockyanim",
+  "Model": "Items/Weapons/Knuckles/Gloves_Base.blockymodel",
+  "Texture": "Items/Weapons/Knuckles/texture.png",
+  "Icon": "Icons/ItemsGenerated/Weapon_Knuckles_Template.png",
+  "PlayerAnimationsId": "Weapon_Knuckles",
+  "Reticle": "DefaultMelee",
+  "Quality": "Template",
+  "ItemLevel": 15,
+  "Categories": [
+    "Items.Weapons"
+  ],
+  "IconProperties": {
+    "Scale": 1.4,
+    "Rotation": [
+      32,
+      83,
+      15
+    ],
+    "Translation": [
+      -2,
+      -2
+    ]
+  },
+  "Utility": {
+    "Compatible": false
+  },
+  "Interactions": {
+    "Primary": "Root_Weapon_Knuckles_Primary",
+    "Secondary": "Root_Weapon_Knuckles_Secondary_Guard",
+    "Ability1": "Root_Weapon_Knuckles_Signature_KickTornadoRight"
+  },
+  "Tags": {
+    "Type": [
+      "Weapon"
+    ],
+    "Family": [
+      "Gloves"
+    ]
+  },
+  "Weapon": {
+    "EntityStatsToClear": [
+      "SignatureEnergy"
+    ],
+    "StatModifiers": {
+      "SignatureEnergy": [
+        {
+          "Amount": 12,
+          "CalculationType": "Additive"
+        }
+      ]
+    },
+    "RenderDualWielded": true
+  },
+  "ItemAppearanceConditions": {
+    "SignatureEnergy": [
+      {
+        "Condition": [
+          100,
+          100
+        ],
+        "ConditionValueType": "Percent",
+        "Particles": [
+          {
+            "SystemId": "Sword_Signature_Ready",
+            "TargetNodeName": "Handle",
+            "PositionOffset": {
+              "X": 0.8
+            },
+            "TargetEntityPart": "PrimaryItem"
+          },
+          {
+            "SystemId": "Sword_Signature_Status_Spawn",
+            "TargetNodeName": "Handle",
+            "PositionOffset": {
+              "X": 0.5
+            },
+            "TargetEntityPart": "PrimaryItem"
+          },
+          {
+            "SystemId": "Sword_Signature_Status",
+            "TargetNodeName": "Handle",
+            "PositionOffset": {
+              "X": 0.55
+            },
+            "TargetEntityPart": "PrimaryItem",
+            "Scale": 1.3
+          }
+        ],
+        "FirstPersonParticles": [
+          {
+            "SystemId": "Sword_Signature_Ready",
+            "TargetNodeName": "Handle",
+            "PositionOffset": {
+              "X": 0.8
+            },
+            "TargetEntityPart": "PrimaryItem"
+          },
+          {
+            "SystemId": "Sword_Signature_Status_Spawn",
+            "TargetNodeName": "Handle",
+            "TargetEntityPart": "PrimaryItem",
+            "PositionOffset": {
+              "Y": -100
+            }
+          },
+          {
+            "SystemId": "Sword_Signature_Status",
+            "TargetNodeName": "Handle",
+            "PositionOffset": {
+              "X": 0.5
+            },
+            "TargetEntityPart": "PrimaryItem"
+          }
+        ],
+        "ModelVFXId": "Sword_Signature_Status"
+      }
+    ]
+  },
+  "ItemSoundSetId": "ISS_Weapons_Blade_Large",
+  "MaxDurability": 80,
+  "DurabilityLossOnHit": 0.21
+}

@@ -1,0 +1,279 @@
+{
+  "Animations": {
+    "Idle": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "Walk": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "WalkBackward": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "Run": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "Crouch": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "CrouchWalk": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "CrouchWalkBackward": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "Jump": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "JumpWalk": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "JumpRun": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "Fall": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "FallFar": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "FlyIdle": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "Fly": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "FlyBackward": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "FlyFast": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "SwimIdle": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "Swim": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "SwimBackward": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "SwimFast": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "SwimJump": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim",
+      "Looping": false
+    },
+    "SwimFloat": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "SwimSink": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "SwimDive": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "SwimDiveBackward": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "SwimDiveFast": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "FluidIdle": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "FluidWalk": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "FluidWalkBackward": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "FluidRun": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "ClimbIdle": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "ClimbUp": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "ClimbDown": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "ClimbLeft": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "ClimbRight": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Fly/Fly_Idle.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Unarmed/Idle_FPS.blockyanim"
+    },
+    "Guard": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Guard/Guard.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Guard/Guard_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Guard/Guard_FPS.blockyanim",
+      "Looping": true,
+      "BlendingDuration": 0.1,
+      "KeepPreviousFirstPersonAnimation": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Frown.blockyanim"
+    },
+    "HookLeft": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Hook_Left/Hook_Left.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Hook_Left/Hook_Left_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Hook_Left/Hook_Left_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Frown.blockyanim"
+    },
+    "HookRight": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Hook_Right/Hook_Right.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Hook_Right/Hook_Right_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Hook_Right/Hook_Right_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Frown.blockyanim"
+    },
+    "KickRoundhouseLeft": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Roundhouse_Left/Kick_Roundhouse_Left.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Roundhouse_Left/Kick_Roundhouse_Left_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Roundhouse_Left/Kick_Roundhouse_Left_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Angry.blockyanim"
+    },
+    "KickSpinningRight": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Spinning_Right/Kick_Spinning_Right.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Spinning_Right/Kick_Spinning_Right_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Spinning_Right/Kick_Spinning_Right_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Rage.blockyanim"
+    },
+    "KickTornadoRight": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Tornado_Right/Kick_Tornado_Right.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Tornado_Right/Kick_Tornado_Right_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Kick_Tornado_Right/Kick_Tornado_Right_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": false,
+      "ClipsGeometry": true,
+      "BlendingDuration": 0.1,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Rage.blockyanim"
+    },
+    "SwingDownLeft": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Down_Left/Swing_Down_Left.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Down_Left/Swing_Down_Left_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Down_Left/Swing_Down_Left_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Rage.blockyanim"
+    },
+    "SwingLeft": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Left/Swing_Left.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Left/Swing_Left_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Left/Swing_Left_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Frown.blockyanim"
+    },
+    "SwingRight": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Right/Swing_Right.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Right/Swing_Right_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Right/Swing_Right_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Frown.blockyanim"
+    },
+    "SwingUpLeft": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Up_Left/Swing_Up_Left.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Up_Left/Swing_Up_Left_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Swing_Up_Left/Swing_Up_Left_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Smirk.blockyanim"
+    },
+    "UppercutLeft": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Uppercut_Left/Uppercut_Left.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Uppercut_Left/Uppercut_Left_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Uppercut_Left/Uppercut_Left_FPS.blockyanim",
+      "ClipsGeometry": true,
+      "KeepPreviousFirstPersonAnimation": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Frown.blockyanim"
+    },
+    "UppercutRight": {
+      "ThirdPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Uppercut_Right/Uppercut_Right.blockyanim",
+      "ThirdPersonMoving": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Uppercut_Right/Uppercut_Right_Moving.blockyanim",
+      "FirstPerson": "Characters/Animations/Items/Dual_Handed/Gloves/Attacks/Uppercut_Right/Uppercut_Right_FPS.blockyanim",
+      "KeepPreviousFirstPersonAnimation": true,
+      "ClipsGeometry": true,
+      "ThirdPersonFace": "Characters/Animations/Expressions/Frown.blockyanim"
+    }
+  },
+  "Camera": {
+    "Pitch": {
+      "TargetNodes": [
+        "Head",
+        "RShoulder",
+        "LShoulder"
+      ],
+      "AngleRange": {
+        "Min": -45,
+        "Max": 45
+      }
+    },
+    "Yaw": {
+      "TargetNodes": [
+        "Head",
+        "LShoulder",
+        "RShoulder"
+      ],
+      "AngleRange": {
+        "Min": -60,
+        "Max": 30
+      }
+    }
+  },
+  "WiggleWeights": {
+    "Pitch": 2.5,
+    "PitchDeceleration": 0.1,
+    "Roll": 0.1,
+    "RollDeceleration": 0.1,
+    "X": 2.5,
+    "XDeceleration": 0.1,
+    "Y": 0.1,
+    "YDeceleration": 0.1,
+    "Z": 0.1,
+    "ZDeceleration": 0.1
+  }
+}

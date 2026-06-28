@@ -1,0 +1,93 @@
+{
+  "Type": "Selector",
+  "$Comment": "Length of Combat",
+  "RunTime": 0.25,
+  "Selector": {
+    "Id": "Stab",
+    "TestLineOfSight": true,
+    "ExtendTop": 0.75,
+    "ExtendBottom": 0.75,
+    "ExtendLeft": 0.75,
+    "ExtendRight": 0.75,
+    "StartDistance": 0.1,
+    "EndDistance": 2.5
+  },
+  "Effects": {
+    "Particles": [
+      {
+        "PositionOffset": {
+          "X": 0,
+          "Y": 0
+        },
+        "RotationOffset": {
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 0
+        },
+        "TargetNodeName": "Knuckles",
+        "SystemId": "Daggers_Signature_Dash",
+        "TargetEntityPart": "PrimaryItem",
+        "Scale": 0.5
+      },
+      {
+        "PositionOffset": {
+          "X": 0,
+          "Y": 0
+        },
+        "RotationOffset": {
+          "Pitch": 0,
+          "Roll": 0,
+          "Yaw": 0
+        },
+        "TargetNodeName": "Knuckles",
+        "SystemId": "Daggers_Signature_Dash",
+        "TargetEntityPart": "SecondaryItem",
+        "Scale": 0.5
+      },
+      {
+        "SystemId": "Daggers_Lunge_Trail",
+        "TargetEntityPart": "PrimaryItem",
+        "PositionOffset": {
+          "Y": 0,
+          "Z": 0
+        },
+        "TargetNodeName": "Wrist",
+        "RotationOffset": {
+          "Yaw": 0
+        },
+        "Scale": 0.5
+      },
+      {
+        "SystemId": "Daggers_Lunge_Trail",
+        "TargetEntityPart": "SecondaryItem",
+        "TargetNodeName": "Wrist",
+        "Scale": 0.5
+      }
+    ],
+    "CameraEffect": "Daggers_Stab"
+  },
+  "Next": {
+    "Type": "Simple",
+    "$Comment": "Pad the interaction length",
+    "RunTime": 0.1
+  },
+  "HitBlock": {
+    "Interactions": [
+      "Block_Break_Adventure"
+    ]
+  },
+  "HitEntity": {
+    "Interactions": [
+      {
+        "Type": "Replace",
+        "Var": "Swing_Down_Left_Damage",
+        "DefaultOk": true,
+        "DefaultValue": {
+          "Interactions": [
+            "Weapon_Knuckles_Signature_Swing_Down_Left_Damage"
+          ]
+        }
+      }
+    ]
+  }
+}

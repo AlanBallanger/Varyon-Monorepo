@@ -63,9 +63,10 @@ public final class BagarreurIncomingDamageSystem extends DamageEventSystem {
             // Adrénaline — déclenche speed boost
             int adrenalineRank = acc.getTalentRank(PlayerClass.BARBARE, BagarreurPassifs.ADRENALINE_NODE);
             if (adrenalineRank > 0) {
-                bagarreurState.triggerAdrenaline(uuid,
-                    BagarreurPassifs.ADRENALINE_DURATION_MS,
-                    BagarreurPassifs.adrenalineSpeedForRank(adrenalineRank));
+                bagarreurState.onDamageAdrenaline(uuid,
+                    BagarreurPassifs.adrenalineDurationMsForRank(adrenalineRank),
+                    BagarreurPassifs.adrenalineSpeedPerStackForRank(adrenalineRank),
+                    BagarreurPassifs.ADRENALINE_MAX_STACKS);
             }
 
             // Garde du boxeur — réduction si attaque de face
