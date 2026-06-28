@@ -72,8 +72,8 @@ $C = "Common.ui";
 @SkillTooltipStyle = TextTooltipStyle(
   Background: (TexturePath: "Common/TooltipDefaultBackground.png", Border: 24),
   MaxWidth: 340,
-  LabelStyle: (Wrap: true, FontSize: 13, TextColor: #96a9be),
-  Padding: 16
+  LabelStyle: (Wrap: true, FontSize: 13, TextColor: #96a9be, FontName: "Default"),
+  Padding: (Horizontal: 14, Vertical: 10)
 );
 
 @PlusButtonStyle = (

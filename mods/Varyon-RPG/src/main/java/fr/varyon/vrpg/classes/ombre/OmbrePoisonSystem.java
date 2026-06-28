@@ -36,9 +36,9 @@ public final class OmbrePoisonSystem extends EntityTickingSystem<EntityStore> {
         }
     }
 
-    public void applyPoison(@Nonnull Ref<EntityStore> victimRef, float weaponDamage,
+    public void applyPoison(@Nonnull Ref<EntityStore> victimRef, float weaponDamage, float weaponPct,
                             @Nonnull Store<EntityStore> store) {
-        float dpt = weaponDamage * OmbrePassifs.POISON_WEAPON_PCT;
+        float dpt = weaponDamage * weaponPct;
         poisons.put(victimRef.getIndex(), new PoisonState(dpt));
         DamageFloatBridge.emit(store, victimRef, dpt, "POISON");
     }

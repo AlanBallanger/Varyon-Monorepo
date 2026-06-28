@@ -277,7 +277,7 @@ Group {
             Visible: false;
           }
           Group { FlexWeight: 1; }
-          Label { Style: @TabLabelStyle; Text: "Comp�tences"; }
+          Label { Style: @TabLabelStyle; Text: "Compétences"; }
           Group { FlexWeight: 1; }
         }
       }
@@ -345,13 +345,13 @@ Group {
       }
 
       Group #ClassTreeSpecializationWipRect { Anchor: (Left: 0, Top: 0, Width: 720, Height: 34); Background: @CardShade; Visible: false; }
-      Label #ClassTreeSpecializationWipLabel { Anchor: (Left: 0, Top: 0, Width: 720, Height: 34); Style: (...@MetaStyle, FontSize: 14, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Sp�cialisation (� venir)"; Visible: false; }
+      Label #ClassTreeSpecializationWipLabel { Anchor: (Left: 0, Top: 0, Width: 720, Height: 34); Style: (...@MetaStyle, FontSize: 14, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Spécialisation (à venir)"; Visible: false; }
 
       Button #ClassTreeAttribuerButton { Anchor: (Right: 8, Top: 4, Width: 118, Height: 28); Style: @PlusButtonStyle; LayoutMode: Middle;
         Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Attribuer"; }
       }
       Button #ClassTreeResetButton { Anchor: (Right: 8, Bottom: 8, Width: 88, Height: 26); Style: @PlusButtonStyle; LayoutMode: Middle;
-        Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "R�initialiser"; }
+        Label { Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser"; }
       }
 
 
@@ -1969,7 +1969,7 @@ Group {
           Label #ClassTreeKbCurrentLabel {
             Anchor: (Left: 8);
             Style: (...@MetaStyle, FontSize: 12, TextColor: #A89E90, VerticalAlignment: Center);
-            Text: "Non assign�";
+            Text: "Non assigné";
           }
         }
 
@@ -2054,7 +2054,7 @@ Group {
             Label {
               Anchor: (Left: 8);
               Style: (...@MetaStyle, FontSize: 12, TextColor: #FF8888, VerticalAlignment: Center);
-              Text: "D�sassigner";
+              Text: "Désassigner";
             }
           }
         }
@@ -2074,7 +2074,7 @@ Group {
 
           Label #UnlockClassTreeButtonLabel {
             Style: (...@MetaStyle, FontSize: 14, TextColor: @InkStrong, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "D�bloquer";
+            Text: "Débloquer";
           }
         }
 
@@ -2087,7 +2087,7 @@ Group {
 
           Label #UnlockClassTreeButtonDisabledLabel {
             Style: (...@MetaStyle, FontSize: 14, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-            Text: "D�bloqu�";
+            Text: "Débloqué";
           }
         }
       }
@@ -2130,7 +2130,7 @@ Group {
       Label {
         Anchor: (Left: 0, Right: 0, Height: 20);
         Style: @SectionTitleStyle;
-        Text: "Comp�tences actives";
+        Text: "Compétences actives";
       }
 
       Group { Anchor: (Height: 10); }
@@ -2229,7 +2229,7 @@ Group {
           Style: @PlusButtonStyle;
           LayoutMode: Left;
           Group { FlexWeight: 1; }
-          Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "R�initialiser"; }
+          Label { Style: (FontSize: 13, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Text: "Réinitialiser"; }
           Group { FlexWeight: 1; }
         }
       }
@@ -2250,7 +2250,7 @@ Group {
           Label {
             Anchor: (Height: 20);
             Style: (FontSize: 13, TextColor: #C8A96E, RenderUppercase: true, RenderBold: true, VerticalAlignment: Center);
-            Text: "Assignation des comp�tences";
+            Text: "Assignation des compétences";
           }
         }
 
@@ -2259,7 +2259,7 @@ Group {
         Label {
           Anchor: (Left: 0, Right: 0, Height: 48);
           Style: (FontSize: 11, TextColor: #C8BEB0, HorizontalAlignment: Start, VerticalAlignment: Center, Wrap: true);
-          Text: "Assignez vos comp�tences d�bloqu�es � la touche de votre choix. Vous disposez de 2 touches non attribu�es (E et R) + A qui ex�cute d�j� l'attaque sp�ciale, ainsi que leurs variantes en vous accroupissant + touche.";
+          Text: "Assignez vos compétences débloquées à la touche de votre choix. Vous disposez de 2 touches non attribuées (E et R) + A qui exécute déjà l'attaque spéciale, ainsi que leurs variantes en vous accroupissant + touche.";
         }
       }
     }
@@ -2273,7 +2273,7 @@ Group {
       Label {
         Anchor: (Left: 0, Right: 0, Height: 20);
         Style: @SectionTitleStyle;
-        Text: "Comp�tences disponibles";
+        Text: "Compétences disponibles";
       }
 
       Group { Anchor: (Height: 10); }
@@ -2320,7 +2320,7 @@ Group {
             Visible: false;
           }
           Group { FlexWeight: 1; }
-          Label { Style: @TabLabelStyle; Text: "D�fense"; }
+          Label { Style: @TabLabelStyle; Text: "Défense"; }
           Group { FlexWeight: 1; }
         }
         Group { Anchor: (Width: 4); }
@@ -2348,7 +2348,7 @@ Group {
             Visible: false;
           }
           Group { FlexWeight: 1; }
-          Label { Style: @TabLabelStyle; Text: "Mobilit�"; }
+          Label { Style: @TabLabelStyle; Text: "Mobilité"; }
           Group { FlexWeight: 1; }
         }
       }
@@ -2363,7 +2363,7 @@ Group {
         Label #SkillPickerSlotLabel {
           Anchor: (Left: 0, Right: 0, Height: 16);
           Style: (...@MetaStyle, FontSize: 12, TextColor: @InkMuted, RenderBold: true);
-          Text: "S�lectionnez pour :";
+          Text: "Sélectionnez pour :";
         }
         Group { Anchor: (Height: 6); }
         Group #SkillPickerList {

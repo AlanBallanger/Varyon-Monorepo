@@ -6,7 +6,7 @@ public final class PerceeSkill {
     public static final String TALENT_NODE_ID = "lancier_0";
 
     private static final double[] DASH_DISTANCE = {3, 4, 5, 6, 7, 8};
-    private static final long[]   COOLDOWN_MS   = {24000, 22000, 20000, 18000, 16000, 14000};
+    private static final long[]   COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
     private static final float[]  STAMINA_COST  = {5f, 5f, 6f, 6f, 7f, 7f};
 
     private PerceeSkill() {}

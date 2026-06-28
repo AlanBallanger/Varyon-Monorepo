@@ -6,7 +6,7 @@ public final class ReculStrategiqueSkill {
     public static final String TALENT_NODE_ID = "rodeur_0";
 
     private static final double[] DASH_DISTANCE = {3, 4, 5, 6, 7, 8};
-    private static final long[]   COOLDOWN_MS   = {22000, 20000, 18000, 16000, 14000, 12000};
+    private static final long[]   COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
     private static final float[]  STAMINA_COST  = {5f, 5f, 6f, 6f, 7f, 7f};
     private static final long[]   SPEED_MS      = {2000, 2500, 3000, 3500, 4000, 4000};
     private static final float[]  SPEED_BONUS   = {0.15f, 0.18f, 0.20f, 0.23f, 0.25f, 0.30f};

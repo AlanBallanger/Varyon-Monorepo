@@ -30,7 +30,7 @@ public final class AssautEclairSkill {
     public static final String TALENT_NODE_ID = "duelliste_0";
 
     private static final float[] DAMAGE_FACTOR = {1.8f, 2.3f, 2.8f, 3.5f, 4.2f};
-    private static final long[]  COOLDOWN_MS = {28000, 26000, 24000, 22000, 18000};
+    private static final long[]  COOLDOWN_MS = {20000, 18000, 16000, 14000, 12000};
     private static final float[] STAMINA_COST = {6f, 7f, 8f, 9f, 10f};
     private static final float   DASH_SPEED   = 24f;
     private static final double  DASH_DISTANCE = 5.0;

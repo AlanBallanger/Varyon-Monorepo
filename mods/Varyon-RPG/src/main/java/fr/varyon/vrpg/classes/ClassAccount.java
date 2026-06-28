@@ -169,6 +169,33 @@ public final class ClassAccount {
     @Nonnull
     public ClassProfile[] getProfiles() { return profiles; }
 
+    @Nullable
+    public PlayerClass resolveProfileActiveClass(int profileIndex) {
+        if (profileIndex < 0 || profileIndex >= ClassProfile.COUNT) return null;
+        PlayerClass stored = profiles[profileIndex].getActiveClass();
+        if (stored != null) return stored;
+        if (profileIndex == activeProfileIndex) return activeClass;
+        return null;
+    }
+
+    @Nullable
+    public PlayerSpecialization resolveProfileSpec(int profileIndex, @Nonnull PlayerClass playerClass) {
+        if (profileIndex < 0 || profileIndex >= ClassProfile.COUNT) return null;
+        if (profileIndex == activeProfileIndex) {
+            PlayerSpecialization live = getActiveSpec(playerClass);
+            if (live != null) return live;
+        }
+        return profiles[profileIndex].getSpec(playerClass);
+    }
+
+    @Nonnull
+    public ClassProgress resolveProfileProgress(int profileIndex, @Nonnull PlayerClass playerClass) {
+        if (profileIndex == activeProfileIndex) {
+            return progress.get(playerClass);
+        }
+        return profiles[profileIndex].getProgress(playerClass);
+    }
+
     public int getActiveProfileIndex() { return activeProfileIndex; }
 
     public void setActiveProfileIndex(int idx) {

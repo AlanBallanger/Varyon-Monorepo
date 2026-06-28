@@ -37,16 +37,20 @@ public final class OmbrePassifs {
     // --- Lames Empoisonnées (node à définir) ---
     public static final String LAMES_EMPOISONNEES_NODE = "ombre_2";
     private static final float[] POISON_CHANCE      = {0.08f, 0.12f, 0.16f, 0.20f, 0.25f};
-    public static final float    POISON_WEAPON_PCT  = 1.0f;
+    private static final float[] POISON_WEAPON_PCT  = {1.50f, 1.875f, 2.25f, 2.625f, 3.00f};
     public static final long     POISON_DURATION_MS = 5_000L;
 
     public static float poisonChanceForRank(int rank) {
         return POISON_CHANCE[idx(rank, POISON_CHANCE.length)];
     }
 
+    public static float poisonWeaponPctForRank(int rank) {
+        return POISON_WEAPON_PCT[idx(rank, POISON_WEAPON_PCT.length)];
+    }
+
     public static String poisonStatLine(int rank) {
         return Math.round(poisonChanceForRank(rank) * 100) + "% chance, "
-            + Math.round(POISON_WEAPON_PCT * 100) + "% dégâts arme/s pendant 5s";
+            + Math.round(poisonWeaponPctForRank(rank) * 100) + "% dégâts arme/s pendant 5s";
     }
 
     // --- Embuscade (node à définir) ---

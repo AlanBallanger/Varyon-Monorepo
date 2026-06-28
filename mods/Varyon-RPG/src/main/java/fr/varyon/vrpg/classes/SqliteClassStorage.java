@@ -132,6 +132,16 @@ public final class SqliteClassStorage {
                   PRIMARY KEY (uuid, profile_idx, class_id, slot_id)
                 )
             """);
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS player_class_profile_progress (
+                  uuid        TEXT NOT NULL,
+                  profile_idx INTEGER NOT NULL,
+                  class_id    TEXT NOT NULL,
+                  level       INTEGER NOT NULL DEFAULT 1,
+                  xp_in_level INTEGER NOT NULL DEFAULT 0,
+                  PRIMARY KEY (uuid, profile_idx, class_id)
+                )
+            """);
             migrateAddColumn(st, "player_class_account", "active_profile_idx", "INTEGER NOT NULL DEFAULT 0");
             migrateFixDoubleSpecPrefix(st);
         }
@@ -215,6 +225,10 @@ public final class SqliteClassStorage {
                 }
             }
             loadProfilesSync(uuid, account);
+            if (!hasProfileProgress(uuid)) {
+                migrateProfileProgressFromAccount(account);
+            }
+            account.getProfiles()[account.getActiveProfileIndex()].applyTo(account);
             return account;
         } catch (SQLException e) {
             LOGGER.at(Level.SEVERE).log("loadPlayer(%s) failed: %s", uuid, e.getMessage());
@@ -267,6 +281,41 @@ public final class SqliteClassStorage {
                     if (c == null) continue;
                     account.getProfiles()[idx].setSkillSlot(c, rs.getString("slot_id"), rs.getString("item_id"));
                 }
+            }
+        }
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT profile_idx, class_id, level, xp_in_level FROM player_class_profile_progress WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int idx = rs.getInt("profile_idx");
+                    if (idx < 0 || idx >= ClassProfile.COUNT) continue;
+                    PlayerClass c = PlayerClass.fromId(rs.getString("class_id"));
+                    if (c == null) continue;
+                    account.getProfiles()[idx].getProgress(c).setLevel(
+                        rs.getInt("level"), rs.getLong("xp_in_level"));
+                }
+            }
+        }
+    }
+
+    private boolean hasProfileProgress(@Nonnull UUID uuid) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT 1 FROM player_class_profile_progress WHERE uuid = ? LIMIT 1")) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private void migrateProfileProgressFromAccount(@Nonnull ClassAccount account) {
+        ClassProfile active = account.getProfiles()[account.getActiveProfileIndex()];
+        for (PlayerClass c : PlayerClass.values()) {
+            ClassProgress accProg = account.getProgress(c);
+            active.getProgress(c).setLevel(accProg.getLevel(), accProg.getXpInLevel());
+            if (active.getSpec(c) == null && accProg.getActiveSpec() != null) {
+                active.setSpec(c, accProg.getActiveSpec());
             }
         }
     }
@@ -383,6 +432,7 @@ public final class SqliteClassStorage {
                 }
                 ins.executeBatch();
             }
+            account.getProfiles()[account.getActiveProfileIndex()].snapshotFrom(account);
             saveProfilesSync(uuid, account);
             connection.commit();
         } catch (SQLException e) {
@@ -406,6 +456,11 @@ public final class SqliteClassStorage {
         }
         try (PreparedStatement del = connection.prepareStatement(
             "DELETE FROM player_class_profile_skill_slot WHERE uuid = ?")) {
+            del.setString(1, uuid.toString());
+            del.executeUpdate();
+        }
+        try (PreparedStatement del = connection.prepareStatement(
+            "DELETE FROM player_class_profile_progress WHERE uuid = ?")) {
             del.setString(1, uuid.toString());
             del.executeUpdate();
         }
@@ -465,6 +520,22 @@ public final class SqliteClassStorage {
                         ps.setString(5, e.getValue());
                         ps.addBatch();
                     }
+                }
+            }
+            ps.executeBatch();
+        }
+        try (PreparedStatement ps = connection.prepareStatement(
+            "INSERT INTO player_class_profile_progress (uuid, profile_idx, class_id, level, xp_in_level) VALUES (?,?,?,?,?)")) {
+            for (int i = 0; i < ClassProfile.COUNT; i++) {
+                ClassProfile p = account.getProfiles()[i];
+                for (PlayerClass c : PlayerClass.values()) {
+                    ClassProgress prog = p.getProgress(c);
+                    ps.setString(1, uuidStr);
+                    ps.setInt(2, i);
+                    ps.setString(3, c.getId());
+                    ps.setInt(4, prog.getLevel());
+                    ps.setLong(5, prog.getXpInLevel());
+                    ps.addBatch();
                 }
             }
             ps.executeBatch();

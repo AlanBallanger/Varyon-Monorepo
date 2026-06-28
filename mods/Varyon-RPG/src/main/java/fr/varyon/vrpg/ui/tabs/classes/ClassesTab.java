@@ -183,7 +183,7 @@ public final class ClassesTab {
                     ClassTalentTree.Node n = talentNodes[ni];
                     if (n.itemId().equals(assigned)) {
                         applySkillSlotIcon(uiBuilder, slotId, n.itemId());
-                        applySkillTooltip(uiBuilder, "#SkillSlot" + slotId, acc, n, ni);
+                        applySkillTooltip(uiBuilder, "#SkillSlot" + slotId, n);
                         shown = true;
                         break;
                     }
@@ -210,7 +210,7 @@ public final class ClassesTab {
             uiBuilder.append("#ClassesSkillPickerList", "CharacterTabClassTalents_SkillEntry.ui");
             applySkillEntryIcon(uiBuilder, "#ClassesSkillPickerList[" + i + "]", n.itemId());
             uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryName.TextSpans", Message.raw(n.name()));
-            applySkillTooltip(uiBuilder, "#ClassesSkillPickerList[" + i + "]", acc, n, entry.nodeIndex());
+            applySkillTooltip(uiBuilder, "#ClassesSkillPickerList[" + i + "]", n);
             uiBuilder.set("#ClassesSkillPickerList[" + i + "] #SkillEntryAssign.Visible", state.selectedSkillSlot != null);
             if (state.selectedSkillSlot != null) {
                 eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
@@ -321,13 +321,10 @@ public final class ClassesTab {
 
     private static void applySkillTooltip(@Nonnull UICommandBuilder uiBuilder,
                                           @Nonnull String selector,
-                                          @Nullable ClassAccount acc,
-                                          @Nonnull ClassTalentTree.Node node,
-                                          int nodeIndex) {
-        String skillId = ClassSkillDescriptions.skillIdForNode(acc, nodeIndex);
-        uiBuilder.set(selector + ".TooltipText", "");
-        uiBuilder.set(selector + ".TooltipTextSpans",
-            ClassSkillDescriptions.tooltipMessage(node.name(), skillId, node.description()));
+                                          @Nonnull ClassTalentTree.Node node) {
+        uiBuilder.set(selector + ".TooltipText",
+            ClassSkillDescriptions.tooltipPlainText(node.name(), node.description()));
+        uiBuilder.set(selector + ".TooltipTextSpans", Message.raw(""));
     }
 
     private static Message weaponMasteryMsg(@Nullable PlayerSpecialization spec, @Nonnull WeaponCategory category) {

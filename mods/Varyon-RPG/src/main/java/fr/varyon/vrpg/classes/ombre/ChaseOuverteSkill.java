@@ -22,6 +22,7 @@ public final class ChaseOuverteSkill {
     public static String statLineForRank(int rank) {
         float dur = durationMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return dur + "s, Délai " + cd + "s";
+        int stamina = Math.round(staminaCostForRank(rank));
+        return "Marque " + dur + "s, Délai " + cd + "s, " + stamina + " endurance";
     }
 }

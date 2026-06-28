@@ -8,6 +8,7 @@ public final class DelugeDeGamesSkill {
     private static final int[]   STRIKE_COUNT     = {3, 3, 4, 4, 5};
     private static final float[] DAMAGE_PCT       = {2.0f, 2.2f, 2.4f, 2.6f, 3.0f};
     private static final long[]  COOLDOWN_MS      = {30000, 28000, 25000, 22000, 20000};
+    private static final float[] STAMINA_COST  = {6f, 7f, 8f, 9f, 10f};
     private static final long    INTERVAL_MS      = 150L;
     private static final float   LOW_HP_THRESHOLD = 0.30f;
     private static final float   LOW_HP_BONUS     = 0.30f;
@@ -24,11 +25,14 @@ public final class DelugeDeGamesSkill {
     public static long  intervalMs()                 { return INTERVAL_MS; }
     public static float lowHpThreshold()             { return LOW_HP_THRESHOLD; }
     public static float lowHpBonus()                 { return LOW_HP_BONUS; }
+    public static float staminaCostForRank(int rank) { return STAMINA_COST[idx(rank)]; }
 
     public static String statLineForRank(int rank) {
         int strikes = strikeCountForRank(rank);
         int pct = Math.round(damagePctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return strikes + " frappes × " + pct + "% arme (+30% si cible <30% HP), Délai " + cd + "s";
+        int stamina = Math.round(staminaCostForRank(rank));
+        return pct + "% dégâts arme × " + strikes + " frappes (+30% si cible <30% HP), Délai " + cd + "s, "
+            + stamina + " endurance";
     }
 }

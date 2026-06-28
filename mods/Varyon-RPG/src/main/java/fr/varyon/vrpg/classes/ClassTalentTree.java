@@ -46,8 +46,8 @@ public final class ClassTalentTree {
             new Node("Charge",                "Actif",  "Trois enjambées et l'ennemi vole.",                                    "Charge sur l'ennemi ciblé en infligeant des dégâts.",              "Weapon_Spear_Mithril",       5),
             new Node("Chair Solide",          "Passif", "Blessé mais debout. Toujours debout.",                                 "Augmente les points de vie maximum.",                              "Armor_Mithril_Legs",         5),
             new Node("Instinct Prédateur",    "Passif", "Tu sens l'ennemi avant qu'il te voie.",                                "Augmente la détection des ennemis proches.",                       "Ingredient_Crystal_Red",     5),
-            new Node("Déchaînement",          "Passif", "Une hache, deux haches, peu importe — tout saigne.",                   "Enchaîne automatiquement plusieurs frappes.",                      "Weapon_Battleaxe_Onyxium",   5),
-            new Node("Indomptable",           "Actif",  "Ni magie ni acier — rien ne peut l'arrêter.",                          "Devient brièvement invulnérable.",                                 "Armor_Adamantite_Chest",     5),
+            new Node("Déchaînement",          "Passif", "Une hache, deux haches, peu importe, tout saigne.",                   "Enchaîne automatiquement plusieurs frappes.",                      "Weapon_Battleaxe_Onyxium",   5),
+            new Node("Indomptable",           "Actif",  "Ni magie ni acier, rien ne peut l'arrêter.",                          "Devient brièvement invulnérable.",                                 "Armor_Adamantite_Chest",     5),
             new Node("Colère Primordiale",    "Passif", "Au fond de chaque barbare dort un titan.",                             "Augmente massivement les dégâts sur la dernière cible frappée.",   "Weapon_Battleaxe_Adamantite",5),
         });
 
@@ -58,7 +58,7 @@ public final class ClassTalentTree {
             new Node("Bouclier Arcanique",    "Actif",  "La magie protège autant qu'elle détruit.",                             "Absorbe les dégâts pendant un bref instant.",                      "Weapon_Wand_Stoneskin",      5),
             new Node("Catalyseur",            "Passif", "Moins de temps à incanter, plus de temps à détruire.",                "Réduit le temps de recharge des sorts.",                           "Ingredient_Crystal_Cyan",    5),
             new Node("Maîtrise du Feu",       "Passif", "Le feu ne brûle pas ceux qui le comprennent.",                        "Augmente les dégâts des sorts de feu.",                            "Ingredient_Fire_Essence",    5),
-            new Node("Maîtrise du Froid",     "Passif", "Le gel ralentit tout — sauf lui.",                                    "Augmente les dégâts et la durée des effets de gel.",               "Ingredient_Ice_Essence",     5),
+            new Node("Maîtrise du Froid",     "Passif", "Le gel ralentit tout, sauf lui.",                                    "Augmente les dégâts et la durée des effets de gel.",               "Ingredient_Ice_Essence",     5),
             new Node("Invocation Élémentaire","Actif",  "Appelle les forces primaires à la rescousse.",                        "Invoque une entité élémentaire temporaire.",                       "Ingredient_Crystal_Green",   5),
             new Node("Distorsion Temporelle", "Passif", "Le temps lui-même est un sort comme un autre.",                       "Réduit les temps de recharge globaux.",                            "Ingredient_Crystal_Yellow",  5),
             new Node("Surcharge Magique",     "Passif", "Au-delà des limites, le sort explose.",                               "Augmente les dégâts de sorts en échange de mana supplémentaire.",  "Weapon_Staff_Onyxium",       5),
@@ -89,7 +89,7 @@ public final class ClassTalentTree {
             new Node("Coup d'Estoc",          "Actif",  "La pointe trouve toujours une faille que l'épée ignore.",                "Frappe en AoE autour du joueur, puis arme le prochain coup d'un multiplicateur de dégâts.", DI + "Coup_D_estoc.png", 5),
             new Node("Riposte Parfaite",      "Actif",  "La meilleure ouverture est celle qu'on vous offre.",                     "Entre en posture défensive. Si une attaque est reçue, contre-attaque instantanément.", DI + "Riposte_Parfaite.png",  5),
             new Node("Ascendant",              "Passif", "Un duel est plus beau sans y laisser une goutte de sang.",                "Après une parade réussie, la prochaine attaque inflige davantage de dégâts.", DI + "Contre_Attaque.png",    5),
-            new Node("Feinte",                "Actif",  "Montrer une faille pour en créer une vraie — c'est tout l'art du duel.", "Le prochain coup ne peut être ni bloqué ni paré par l'adversaire.", DI + "Feinte.png",                 5),
+            new Node("Feinte",                "Actif",  "Montrer une faille pour en créer une vraie, c'est tout l'art du duel.", "Le prochain coup ne peut être ni bloqué ni paré par l'adversaire.", DI + "Feinte.png",                 5),
             new Node("Jeu de Jambes",          "Passif", "Une lame ne touche que ce qu'elle peut atteindre.",                      "Augmente les chances d'esquive.",                                   DI + "Esquive_du_bretteur.png",    5),
             new Node("Frappe Précise",          "Passif", "Il suffit parfois d'un seul coup bien placé.",                            "Les coups critiques infligent des dégâts supplémentaires.",          DI + "Frappe_Précise.png",         5),
             new Node("Désarmement",           "Actif",  "Ôter l'arme, c'est ôter la menace avant même qu'elle frappe.",           "Réduit temporairement les dégâts infligés par la cible.",           DI + "Désarmement.png",            5),
@@ -99,7 +99,7 @@ public final class ClassTalentTree {
 
         final String OI = "Classes_Icons/Shadow/";
         SPEC_TREES.put(PlayerSpecialization.OMBRE, new Node[]{
-            new Node("Pas des Ténèbres",      "Actif",  "L'ombre n'attend pas — elle frappe et disparaît.",                          "Ruée vers l'arrière suivie d'une courte invisibilité.",                              OI + "Pas_Des_Tenebres.png",      5),
+            new Node("Pas des Ténèbres",      "Actif",  "L'ombre n'attend pas, elle frappe et disparaît.",                          "Ruée vers l'arrière suivie d'une courte invisibilité.",                              OI + "Pas_Des_Tenebres.png",      5),
             new Node("Mort Éclair",            "Passif", "Tu t'appelles Flash ?",                                                     "Gain d'expérience augmenté si la cible est tuée en moins de 5 secondes.",            OI + "Execution_Rapide.png",      5),
             new Node("Lames Empoisonnées",    "Passif", "Rien de tel qu'une mort lente et douloureuse.",                              "Les attaques ont une chance d'empoisonner la cible.",                                OI + "Lames_Empoisonnees.png",    5),
             new Node("Déluge de Lames",       "Actif",  "Quand une lame ne suffit pas, on en envoie cinq.",                          "Enchaînement rapide de frappes infligeant des dégâts à la cible devant soi.",       OI + "Deluge_De_Lames.png",       5),
@@ -109,8 +109,8 @@ public final class ClassTalentTree {
             new Node("Silhouette Fantôme",    "Passif", "Le mouvement évite bien des blessures.",                                     "Augmente les chances d'esquive.",                                                    OI + "Ombre_Insaisissable.png",   5),
             new Node("Traque",                 "Passif", "L'adrénaline aime les coups bien placés.",                                  "Après un coup critique, gagne un bonus de vitesse de déplacement pendant 3 sec.",   OI + "Danse_Des_Lames.png",       5),
             new Node("Traversée Obscure",      "Actif",  "La distance n'existe plus lorsqu'une cible est choisie.",                   "Se téléporte derrière la cible et frappe. Bonus si la cible est à moins de 30 % HP.", OI + "Pas_De_L_Ombre.png",      5),
-            new Node("Instinct de Survie",    "Passif", "Sous 30 %, l'ombre ne meurt pas — elle s'adapte.",                          "Sous 30 % de points de vie, les chances d'esquive sont fortement augmentées.",       OI + "Instict_De_Survie.png",     5),
-            new Node("Verrouillage Mortel",    "Actif",  "Toi, je ne te lâche plus.",                                                  "Marque une cible — toutes les attaques contre elle sont des coups critiques.",       OI + "Chasse_Ouverte.png",        5),
+            new Node("Instinct de Survie",    "Passif", "Sous 30 %, l'ombre ne meurt pas, elle s'adapte.",                          "Sous 30 % de points de vie, les chances d'esquive sont fortement augmentées.",       OI + "Instict_De_Survie.png",     5),
+            new Node("Verrouillage Mortel",    "Actif",  "Toi, je ne te lâche plus.",                                                  "Marque une cible : toutes les attaques contre elle sont des coups critiques.",       OI + "Chasse_Ouverte.png",        5),
         });
 
         final String BI = "Classes_Icons/Berserker/";
@@ -125,13 +125,13 @@ public final class ClassTalentTree {
             new Node("Ferveur Guerrière",     "Passif", "Plus la bataille dure, plus la rage se cristallise.",                     "Les dégâts augmentent d'un cran chaque seconde passée en combat (max 15 cumuls).",                      BI + "Ferveur_Guerrière.png",      5),
             new Node("Cri de Ralliement",     "Actif",  "Un hurlement qui fait oublier la peur et décuple la hargne.",             "Augmente temporairement les dégâts de toi et des alliés proches.",                                      BI + "Cri_De_Ralliement.png",      5),
             new Node("Déchiquetage",          "Actif",  "La chair cède, et avec elle une partie de son énergie vitale.",           "Le prochain coup tranche profondément et récupère une partie des dégâts infligés en HP.",               BI + "Eviscération.png",           5),
-            new Node("Dernier Souffle",       "Passif", "La mort attendra — il a encore des ennemis à abattre.",                   "Ignore temporairement la mort pendant 4 secondes (Délai 90s).",                                            BI + "Dernier_Souffle.png",        5),
+            new Node("Dernier Souffle",       "Passif", "La mort attendra, il a encore des ennemis à abattre.",                   "Ignore temporairement la mort pendant 4 secondes (Délai 90s).",                                            BI + "Dernier_Souffle.png",        5),
             new Node("Exécution Sauvage",     "Actif",  "Pour les blessés, chaque coup est le dernier.",                           "Frappe dévastatrice infligeant davantage de dégâts aux ennemis déjà affaiblis.",                        BI + "Exécution_Sauvage.png",      5),
         });
 
         final String RVI = "Classes_Icons/Ravager/";
         SPEC_TREES.put(PlayerSpecialization.RAVAGEUR, new Node[]{
-            new Node("Bond Écrasant",          "Actif",  "Il ne court pas vers ses ennemis — il s'abat sur eux.",                    "Bond en avant et s'écrase au sol, infligeant des dégâts en zone à l'atterrissage.",               RVI + "Bond_Ecrasant.png",              5),
+            new Node("Bond Écrasant",          "Actif",  "Il ne court pas vers ses ennemis, il s'abat sur eux.",                    "Bond en avant et s'écrase au sol, infligeant des dégâts en zone à l'atterrissage.",               RVI + "Bond_Ecrasant.png",              5),
             new Node("Moissonneur",            "Passif", "Chaque mort est une graine d'expérience.",                                  "Gain d'expérience augmenté lors des séries d'éliminations (max 5 cumuls).",                       RVI + "Moisonneur.png",                 5),
             new Node("Arme Lourde",            "Passif", "Un coup critique qui laisse des traces durables.",                          "Les coups critiques réduisent la vitesse de déplacement de la cible pendant 3 secondes.",          RVI + "Arme_Lourde.png",               5),
             new Node("Peau de Fer",            "Actif",  "Sa peau est moins une chair qu'une armure forgée au combat.",               "Réduit les dégâts subis pendant quelques secondes.",                                              RVI + "Peau_De_Fer.png",               5),
@@ -142,7 +142,7 @@ public final class ClassTalentTree {
             new Node("Premier Assaut",         "Actif",  "Frapper fort d'emblée pour ne jamais laisser l'ennemi reprendre son souffle.", "Frappe dévastatrice infligeant davantage de dégâts aux ennemis ayant plus de 70 % de vie.",    RVI + "Premier_Assaut.png",            5),
             new Node("Marteau-Pilon",          "Actif",  "Deux coups, une sentence.",                                                  "Enchaîne deux frappes lourdes. Le second coup étourdit la cible.",                               RVI + "Marteau_Pilon.png",             5),
             new Node("Combattant Infatigable", "Passif", "Chaque blessure reçue avive la flamme plutôt qu'elle ne l'éteint.",         "Les dégâts augmentent en fonction des points de vie manquants.",                                  RVI + "Combattant_Infatigable.png",    5),
-            new Node("Rabattage",              "Actif",  "Il ne chasse pas — il ramène le troupeau à lui.",                            "Balayage en arc devant soi, attirant les ennemis touchés et les étourdissant brièvement.",        RVI + "Rabattage.png",                 5),
+            new Node("Rabattage",              "Actif",  "Il ne chasse pas, il ramène le troupeau à lui.",                            "Balayage en arc devant soi, attirant les ennemis touchés et les étourdissant brièvement.",        RVI + "Rabattage.png",                 5),
         });
 
         final String FI = "Classes_Icons/Fighter/";
@@ -156,14 +156,14 @@ public final class ClassTalentTree {
             new Node("Acharnement",          "Passif", "Chaque coup porte un peu plus que le précédent.",                             "Les dégâts augmentent progressivement à chaque frappe sur la même cible.",                    FI + "Acharnement.png",                5),
             new Node("Esprit Combatif",      "Passif", "Le danger aiguise ses sens.",                                                 "Inflige davantage de dégâts lorsque ses points de vie sont inférieurs à 50 %.",              FI + "Esprit_Combatif.png",            5),
             new Node("Poings d'Acier",       "Passif", "Ses poings sont ses armes, et ses armes ne pardonnent pas.",                  "Les coups critiques ont une chance d'étourdir brièvement la cible.",                         FI + "Frappes_Répétées.png",           5),
-            new Node("Déluge de Coups",      "Actif",  "Pas le temps de souffler — pas le temps de répondre.",                       "Enchaîne rapidement cinq frappes successives sur la cible.",                                  FI + "Déluge_De_Coups.png",            5),
+            new Node("Déluge de Coups",      "Actif",  "Pas le temps de souffler, pas le temps de répondre.",                       "Enchaîne rapidement cinq frappes successives sur la cible.",                                  FI + "Déluge_De_Coups.png",            5),
             new Node("Second Souffle",       "Actif",  "Quand tout semble perdu, il trouve une réserve cachée.",                     "Restaure une partie des points de vie et de l'endurance.",                                   FI + "Second_Souffle.png",             5),
             new Node("Uppercut",             "Actif",  "Un uppercut qui envoie l'ennemi vers le ciel.",                              "Coup ascendant qui inflige des dégâts et projette la cible en l'air.",                       FI + "Uppercut.png",                   5),
         });
 
         final String GGI = "Classes_Icons/Guardian/";
         SPEC_TREES.put(PlayerSpecialization.GARDIEN_DE_GAIA, new Node[]{
-            new Node("Évasion Sylvestre",     "Actif",  "La forêt s'ouvre pour laisser passage — et se referme aussitôt.",        "Téléportation magique en arrière.",                                                         GGI + "Evasion_Sylvestre.png",          5),
+            new Node("Évasion Sylvestre",     "Actif",  "La forêt s'ouvre pour laisser passage, et se referme aussitôt.",        "Téléportation magique en arrière.",                                                         GGI + "Evasion_Sylvestre.png",          5),
             new Node("Harmonie Naturelle",    "Passif", "La nature récompense ceux qui restent en bonne santé.",                  "Gain d'expérience augmenté lorsque les PV sont supérieurs à 80 %.",                         GGI + "Harmonie_Naturelle.png",         5),
             new Node("Bénédiction de Gaïa",  "Actif",  "La terre s'éveille et verse sa vie sur ceux qui la servent.",            "Soigne instantanément les alliés dans une zone.",                                           GGI + "Bénédiction_De_Gaia.png",       5),
             new Node("Écorce Protectrice",   "Actif",  "La vie de la forêt enveloppe la cible comme une armure vivante.",        "Réduit les dégâts reçus par la cible pendant quelques secondes et la soigne.",              GGI + "Ecorce_Protectrice.png",         5),
@@ -171,7 +171,7 @@ public final class ClassTalentTree {
             new Node("Lien Spirituel",       "Passif", "Ce que fait l'invocation résonne dans l'âme du druide.",                  "Une partie des dégâts infligés par les invocations vous soigne.",                           GGI + "Lien_Spirituel.png",             5),
             new Node("Étreinte de Gaïa",     "Actif",  "La terre elle-même saisit les ennemis pour les retenir.",                "Lance un projectile qui en explosant immobilise les ennemis dans une zone.",                 GGI + "Etreinte_De_Gaia.png",           5),
             new Node("Gardien de la Nature", "Passif", "Les créatures de la forêt sont plus robustes sous sa protection.",       "Augmente les points de vie des invocations.",                                                GGI + "Gardien_De_La_Nature.png",       5),
-            new Node("Cycle de Vie",         "Passif", "Soigner, c'est recevoir en retour — le cycle ne s'arrête jamais.",       "Soigner un allié restaure une petite quantité de mana.",                                    GGI + "Cycle_De_Vie.png",              5),
+            new Node("Cycle de Vie",         "Passif", "Soigner, c'est recevoir en retour, le cycle ne s'arrête jamais.",       "Soigner un allié restaure une petite quantité de mana.",                                    GGI + "Cycle_De_Vie.png",              5),
             new Node("Grâce de Gaïa",        "Passif", "Gaïa donne plus à ceux qui en ont le plus besoin.",                      "Les soins sont plus efficaces sur les cibles ayant peu de points de vie.",                   GGI + "Grace_De_Gaia.png",              5),
             new Node("Souffle de la Nature", "Passif", "Un vent tiède qui redonne forces et vigueur à ceux qui l'écoutent.",     "Régénère la vie et l'endurance des alliés proches en permanence.",                          GGI + "Souffle_De_La_Nature.png",       5),
             new Node("Marque de Renaissance","Actif",  "La mort elle-même hésite devant le sceau de Gaïa.",                      "Protège la cible de la mort pendant une courte durée et lui octroie de la jauge spéciale.",  GGI + "Marque_De_Renaissance.png",      5),
@@ -179,31 +179,31 @@ public final class ClassTalentTree {
 
         final String VI = "Classes_Icons/Voodoo/";
         SPEC_TREES.put(PlayerSpecialization.VAUDOU, new Node[]{
-            new Node("Passage Éthéré",        "Actif",  "L'âme quitte le corps — et le retrouve de l'autre côté.",          "Se téléporte à la position symétrique de la cible par rapport à soi, face à elle.",  VI + "Passage_Ethere.png",           5),
+            new Node("Passage Éthéré",        "Actif",  "L'âme quitte le corps, et le retrouve de l'autre côté.",          "Se téléporte à la position symétrique de la cible par rapport à soi, face à elle.",  VI + "Passage_Ethere.png",           5),
             new Node("Féticheur",             "Passif", "La mort dans les bras, l'expérience afflue.",                       "Gain d'expérience augmenté si la cible meurt à moins de 5 blocs.",                  VI + "Feticheur.png",                5),
             new Node("Fléau Toxique",         "Actif",  "Un venin lent, mais inexorable.",                                  "Empoisonne la cible et réduit ses dégâts infligés.",                                 VI + "Fleau_Toxique.png",            5),
-            new Node("Totem d'Entrave",       "Actif",  "Le totem chuchote — et les jambes refusent d'avancer.",            "Déploie un totem qui ralentit les ennemis dans sa zone.",                            VI + "Totem_Entrave.png",            5),
-            new Node("Attaque Perfide",       "Actif",  "L'honnêteté est pour ceux qui perdent.",                           "Frappe de mêlée — bonus de 50 % si dans le dos de la cible.",                       VI + "Attaque_Perfide.png",          5),
+            new Node("Totem d'Entrave",       "Actif",  "Le totem chuchote, et les jambes refusent d'avancer.",            "Déploie un totem qui ralentit les ennemis dans sa zone.",                            VI + "Totem_Entrave.png",            5),
+            new Node("Attaque Perfide",       "Actif",  "L'honnêteté est pour ceux qui perdent.",                           "Frappe de mêlée, bonus de 50 % si dans le dos de la cible.",                       VI + "Attaque_Perfide.png",          5),
             new Node("Toxines",               "Passif", "Ses poisons résistent au temps mieux qu'à la chair.",              "Le poison dure plus longtemps.",                                                     VI + "Toxines.png",                  5),
             new Node("Totem de Vulnérabilité","Actif",  "Sous l'influence du totem, chaque coup résonne plus fort.",        "Déploie un totem qui augmente les dégâts subis par les ennemis dans la zone.",      VI + "Totem_Vulnerabilite.png",      5),
-            new Node("Parasite Spirituel",    "Passif", "Les malédictions ne font pas que blesser — elles nourrissent.",    "Frapper une cible maudite restaure des PV.",                                         VI + "Parasite_Spirituel.png",       5),
+            new Node("Parasite Spirituel",    "Passif", "Les malédictions ne font pas que blesser, elles nourrissent.",    "Frapper une cible maudite restaure des PV.",                                         VI + "Parasite_Spirituel.png",       5),
             new Node("Ancrage Rituel",        "Passif", "Le rituel gravé dans le sol tient plus longtemps.",                "Les totems restent actifs plus longtemps.",                                          VI + "Ancrage_Rituel.png",           5),
             new Node("Rituel Interdit",       "Passif", "Les anciens avaient raison d'interdire cela.",                     "Inflige davantage de dégâts aux cibles affectées par une malédiction.",              VI + "Rituel_Interdit.png",          5),
-            new Node("Extraction d'Âme",     "Actif",  "Arracher un fragment d'âme — et s'en nourrir.",                   "Frappe de mêlée qui récupère une partie des dégâts infligés en points de vie.",     VI + "Extraction_Ame.png",           5),
+            new Node("Extraction d'Âme",     "Actif",  "Arracher un fragment d'âme, et s'en nourrir.",                   "Frappe de mêlée qui récupère une partie des dégâts infligés en points de vie.",     VI + "Extraction_Ame.png",           5),
             new Node("Présence Oppressante",  "Passif", "Simplement être là suffit à briser la confiance de l'adversaire.", "Les ennemis proches infligent moins de dégâts.",                                     VI + "Presence_Oppressante.png",     5),
         });
 
         final String AI = "Classes_Icons/Arcanist/";
         SPEC_TREES.put(PlayerSpecialization.ARCANISTE, new Node[]{
-            new Node("Distorsion",          "Actif",  "La magie plie l'espace — et lui permet de disparaître.",              "Téléportation magique en arrière.",                                                         AI + "Distorsion.png",           5),
+            new Node("Distorsion",          "Actif",  "La magie plie l'espace, et lui permet de disparaître.",              "Téléportation magique en arrière.",                                                         AI + "Distorsion.png",           5),
             new Node("Talent Inné",         "Passif", "La distance est son terrain naturel.",                                  "Gain d'expérience augmenté lorsque tu es à plus de 8 blocs de la cible.",                   AI + "Talent_Inné.png",          5),
             new Node("Boule de Feu",        "Actif",  "Une sphère de flamme qui consume tout ce qu'elle touche.",             "Lance une boule de feu qui explose à l'impact.",                                            AI + "Boule_De_Feu.png",         5),
-            new Node("Écho Arcanique",      "Passif", "Parfois, le sort ne consomme rien — comme si la magie se répétait.", "Les sorts ont une chance de ne pas déclencher leur temps de recharge.",                     AI + "Echo_Arcanique.png",       5),
+            new Node("Écho Arcanique",      "Passif", "Parfois, le sort ne consomme rien, comme si la magie se répétait.", "Les sorts ont une chance de ne pas déclencher leur temps de recharge.",                     AI + "Echo_Arcanique.png",       5),
             new Node("Salve de Givre",      "Actif",  "Une tempête de glace qui laisse ses ennemis figés sur place.",        "Lance plusieurs projectiles glacés qui ralentissent les cibles touchées.",                   AI + "Salve_De_Givre.png",       5),
             new Node("Puits de Mana",       "Passif", "Son mana est un océan que peu peuvent égaler.",                        "Augmente le mana maximum.",                                                                  AI + "Puits_De_Mana.png",        5),
             new Node("Écho Temporel",       "Passif", "Le temps ralentit pour lui, jamais pour ses ennemis.",                 "Réduit le temps de recharge des compétences actives.",                                      AI + "Echo_Temporel.png",        5),
             new Node("Nova de Givre",       "Actif",  "Le froid jaillit de lui comme une explosion silencieuse.",             "Inflige des dégâts aux ennemis proches et les ralentit.",                                   AI + "Nova_De_Givre.png",        5),
-            new Node("Surcharge",           "Actif",  "Trop de pouvoir — et pourtant jamais assez.",                          "Restaure du mana et augmente temporairement les dégâts des sorts.",                        AI + "Surcharge.png",            5),
+            new Node("Surcharge",           "Actif",  "Trop de pouvoir, et pourtant jamais assez.",                          "Restaure du mana et augmente temporairement les dégâts des sorts.",                        AI + "Surcharge.png",            5),
             new Node("Drain Mystique",      "Passif", "Chaque mort nourrit sa réserve arcanique.",                            "Les éliminations restaurent une partie du mana.",                                           AI + "Drain_Mystique.png",       5),
             new Node("Météore",             "Actif",  "Il appelle l'extinction depuis les cieux.",                            "Lance un projectile explosif qui s'abat sur une zone.",                                     AI + "Météore.png",              5),
             new Node("Pouvoir Grandissant", "Passif", "L'inviolabilité forge une puissance silencieuse.",                     "Les dégâts des sorts augmentent tant que tu n'as pas subi de dégâts.",                      AI + "Pouvoir_Grandissant.png",  5),
@@ -211,7 +211,7 @@ public final class ClassTalentTree {
 
         final String ROI = "Classes_Icons/Rodder/";
         SPEC_TREES.put(PlayerSpecialization.RODEUR, new Node[]{
-            new Node("Recul Stratégique",    "Actif",  "Fuir n'est pas une faiblesse — c'est une tactique.",                 "Ruée vers l'arrière puis gagne temporairement de la vitesse.",                          ROI + "Recul_Stratégique.png",    5),
+            new Node("Recul Stratégique",    "Actif",  "Fuir n'est pas une faiblesse, c'est une tactique.",                 "Ruée vers l'arrière puis gagne temporairement de la vitesse.",                          ROI + "Recul_Stratégique.png",    5),
             new Node("Œil du Chasseur",      "Passif", "À cette distance, la cible n'a aucune chance.",                      "Gain d'expérience augmenté lorsque la cible est à plus de 10 mètres.",                  ROI + "Oeil_Du_Chasseur.png",     5),
             new Node("Pluie de Flèches",     "Actif",  "Quand une flèche ne suffit pas, le ciel en envoie une douzaine.",    "Bombarde une zone de projectiles pendant quelques secondes.",                           ROI + "Pluie_De_Flèches.png",     5),
             new Node("Marque du Chasseur",   "Actif",  "Une fois marqué, l'ennemi devient une proie.",                       "Marque une cible, augmentant les dégâts qu'elle subit.",                                ROI + "Marque_Du_Chasseur.png",   5),
@@ -220,9 +220,9 @@ public final class ClassTalentTree {
             new Node("Flèches Toxiques",     "Passif", "Chaque égratignure laisse une trace invisible.",                     "Les attaques ont une chance d'empoisonner la cible.",                                   ROI + "Flèches_Toxiques.png",     5),
             new Node("Instinct de Survie",   "Passif", "Le chasseur sent le danger avant qu'il arrive.",                     "Augmente les chances d'esquiver les attaques.",                                         ROI + "Instinct_De_Survie.png",   5),
             new Node("Précision Mortelle",   "Passif", "Les blessés tombent plus vite.",                                     "Inflige plus de dégâts aux ennemis ayant moins de 50 % de PV.",                        ROI + "Précision_Mortelle.png",   5),
-            new Node("Traque Mobile",        "Passif", "Il ne s'arrête jamais — et ses dégâts non plus.",                    "Augmente les dégâts lorsque le personnage est en déplacement.",                         ROI + "Traque_Mobile.png",        5),
+            new Node("Traque Mobile",        "Passif", "Il ne s'arrête jamais, et ses dégâts non plus.",                    "Augmente les dégâts lorsque le personnage est en déplacement.",                         ROI + "Traque_Mobile.png",        5),
             new Node("Traque sans Fin",      "Passif", "Une proie tuée libère la chasse pour une autre.",                    "Tuer une cible marquée réinitialise le Délai de Marque du Chasseur.",                     ROI + "Traque_Sans_Fin.png",      5),
-            new Node("Rafale",               "Actif",  "Quand le moment est venu, on ne tire qu'une seule fois — plusieurs.", "Tire plusieurs flèches en succession rapide.",                                         ROI + "Rafale.png",               5),
+            new Node("Rafale",               "Actif",  "Quand le moment est venu, on ne tire qu'une seule fois, plusieurs.", "Tire plusieurs flèches en succession rapide.",                                         ROI + "Rafale.png",               5),
         });
 
         final String ABI = "Classes_Icons/Crossbowman/";
@@ -238,22 +238,22 @@ public final class ClassTalentTree {
             new Node("Viseur Expérimenté",   "Passif", "Plus la cible est loin, plus le tir est précis.",                    "Les dégâts augmentent plus la cible est éloignée.",                                                                                 ABI + "Viseur_Expérimenté.png",   5),
             new Node("Carreaux Lacérants",   "Passif", "Chaque carreau laisse une marque qui saigne.",                       "Les attaques appliquent un saignement.",                                                                                             ABI + "Carreau_Lacérant.png",     5),
             new Node("Réflexes Affûtés",     "Passif", "Son instinct le fait bouger avant même qu'il décide.",               "Augmente les chances d'esquive.",                                                                                                   ABI + "Réflexes_Affutés.png",     5),
-            new Node("Mise en Joue",         "Actif",  "Prendre le temps d'ajuster — pour ne jamais manquer.",               "Prend le temps d'ajuster son tir. Le prochain carreau est garanti critique et inflige des dégâts considérablement augmentés.",     ABI + "Mise_En_Joue.png",         5),
+            new Node("Mise en Joue",         "Actif",  "Prendre le temps d'ajuster, pour ne jamais manquer.",               "Prend le temps d'ajuster son tir. Le prochain carreau est garanti critique et inflige des dégâts considérablement augmentés.",     ABI + "Mise_En_Joue.png",         5),
         });
 
         final String LCI = "Classes_Icons/Lancer/";
         SPEC_TREES.put(PlayerSpecialization.LANCIER, new Node[]{
             new Node("Percée",                "Actif",  "Reculer pour mieux piquer.",                                          "Ruée vers l'arrière.",                                                                       LCI + "Percée.png",                5),
             new Node("Discipline",            "Passif", "L'expérience forge ceux qui restent debout.",                          "Gain d'expérience augmenté lorsque les PV sont supérieurs à 50 %.",                          LCI + "Discipline.png",            5),
-            new Node("Charge Héroïque",       "Actif",  "Il ne charge pas — il renverse.",                                     "Charge une cible et l'étourdit brièvement.",                                                 LCI + "Charge_Héroique.png",       5),
+            new Node("Charge Héroïque",       "Actif",  "Il ne charge pas, il renverse.",                                     "Charge une cible et l'étourdit brièvement.",                                                 LCI + "Charge_Héroique.png",       5),
             new Node("Garde du Lancier",      "Actif",  "Un instant de calme avant la tempête.",                               "Adopte une posture défensive. La prochaine attaque reçue dans les 3 secondes est annulée et arme un coup dévastateur.", LCI + "Garde_Du_Lancier.png", 5),
-            new Node("Harponnage",            "Actif",  "La lance revient toujours à son lanceur — avec la proie.",            "Lance sa lance, inflige des dégâts et attire la cible vers soi.",                            LCI + "Harponnage.png",            5),
+            new Node("Harponnage",            "Actif",  "La lance revient toujours à son lanceur, avec la proie.",            "Lance sa lance, inflige des dégâts et attire la cible vers soi.",                            LCI + "Harponnage.png",            5),
             new Node("Formation de Piques",   "Actif",  "Un mur de pointes que l'ennemi doit traverser.",                     "Crée une zone devant soi. Les ennemis qui la traversent subissent des dégâts et sont ralentis.", LCI + "Formation_De_Piques.png",   5),
             new Node("Posture Dominante",     "Passif", "Toucher d'abord, c'est dicter les règles du combat.",                 "Après avoir touché un ennemi en mêlée, les dégâts reçus sont réduits pendant quelques secondes.", LCI + "Posture_Dominante.png",    5),
             new Node("Perce-Cœur",            "Passif", "Un coup critique bien placé laisse une blessure qui dure.",           "Les coups critiques infligent un saignement.",                                               LCI + "Perce_Coeur.png",           5),
-            new Node("Chasseur de Géants",    "Passif", "La taille est un avantage — jusqu'à ce que tu te retrouves face à lui.", "Inflige davantage de dégâts aux ennemis ayant plus de PV maximum que vous.",             LCI + "Chasseur_De_Géants.png",    5),
-            new Node("Briseur de Ligne",      "Passif", "Repousser, attirer, étourdir — puis frapper.",                       "Les ennemis repoussés, attirés ou étourdis subissent davantage de dégâts pendant quelques secondes.", LCI + "Controle_De_L_Espace.png", 5),
-            new Node("Portée Maîtrisée",      "Passif", "La lance a deux portées idéales — et toutes les deux font mal.",     "Inflige davantage de dégâts aux ennemis à moins de 3 mètres ou à plus de 10 mètres.",       LCI + "Portée_Maitrisée.png",      5),
+            new Node("Chasseur de Géants",    "Passif", "La taille est un avantage, jusqu'à ce que tu te retrouves face à lui.", "Inflige davantage de dégâts aux ennemis ayant plus de PV maximum que vous.",             LCI + "Chasseur_De_Géants.png",    5),
+            new Node("Briseur de Ligne",      "Passif", "Repousser, attirer, étourdir, puis frapper.",                       "Les ennemis repoussés, attirés ou étourdis subissent davantage de dégâts pendant quelques secondes.", LCI + "Controle_De_L_Espace.png", 5),
+            new Node("Portée Maîtrisée",      "Passif", "La lance a deux portées idéales, et toutes les deux font mal.",     "Inflige davantage de dégâts aux ennemis à moins de 3 mètres ou à plus de 10 mètres.",       LCI + "Portée_Maitrisée.png",      5),
             new Node("Empalement",            "Actif",  "La lance entre, la proie ne sort plus.",                              "Coup de lance précis qui inflige un saignement et immobilise brièvement la cible.",           LCI + "Empalement.png",            5),
         });
 
@@ -269,7 +269,7 @@ public final class ClassTalentTree {
             new Node("Infatigable",           "Passif", "Chaque coup arrêté prouve qu'il peut en encaisser un autre.",               "Chaque blocage réussi restaure une partie des points de vie.",                      RI + "Infatigable.png",            5),
             new Node("Riposte Lourde",         "Passif", "Il n'avait qu'à pas commencer.",                                            "Après un blocage réussi, la prochaine attaque inflige davantage de dégâts.",        RI + "Contre_Offensif.png",        5),
             new Node("Provocation",           "Actif",  "Serrez les rangs ! Je vous couvre !",                                       "Force les ennemis proches à t'attaquer pendant quelques secondes.",                 RI + "Provocation.png",            5),
-            new Node("Dernier Bastion",       "Passif", "Sous 30 %, le rempart ne cède pas — il résiste.",                           "Sous 30 % de points de vie, subis moins de dégâts.",                               RI + "Dernier_Bastion.png",        5),
+            new Node("Dernier Bastion",       "Passif", "Sous 30 %, le rempart ne cède pas, il résiste.",                           "Sous 30 % de points de vie, subis moins de dégâts.",                               RI + "Dernier_Bastion.png",        5),
             new Node("Garde Rapprochée",      "Actif",  "Là où se dresse le rempart, les siens trouvent refuge.",                    "Réduit les dégâts subis par toi et les alliés proches pendant quelques secondes.",  RI + "Garde Rapprochée.png",       5),
         });
     }

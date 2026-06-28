@@ -7,7 +7,7 @@ public final class GardeRapprocheSkill {
 
     private static final float[] DAMAGE_REDUCTION = {0.15f, 0.18f, 0.21f, 0.24f, 0.30f};
     private static final double  ALLY_RADIUS      = 6.0;
-    private static final long[]  DURATION_MS      = {5000, 6000, 7000, 8000, 10000};
+    private static final long[]  DURATION_MS      = {3000, 4000, 5000, 6000, 8000};
     private static final long[]  COOLDOWN_MS      = {35000, 32000, 30000, 27000, 25000};
     private static final float[] STAMINA_COST     = {8f, 9f, 10f, 11f, 12f};
 

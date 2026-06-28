@@ -19,9 +19,7 @@ public final class ClassTalentTreeLayouts {
         new EnumMap<>(PlayerSpecialization.class);
 
     static {
-        BY_SPEC.put(PlayerSpecialization.DUELLISTE, DuellisteLayout.INSTANCE);
-        BY_SPEC.put(PlayerSpecialization.OMBRE,     OmbreLayout.INSTANCE);
-        BY_SPEC.put(PlayerSpecialization.VAUDOU,    STANDARD);
+        BY_SPEC.put(PlayerSpecialization.VAUDOU, STANDARD);
     }
 
     private ClassTalentTreeLayouts() {}

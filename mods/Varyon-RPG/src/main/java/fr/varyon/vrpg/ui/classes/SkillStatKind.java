@@ -10,7 +10,9 @@ public enum SkillStatKind {
     MOVE_SPEED("Icons/movement_speed.png", "Vit."),
     DODGE("Icons/dodge.png", "Esquive"),
     XP("Icons/xp2.png", "XP"),
-    RATE("Icons/rate.png", "Chance");
+    RATE("Icons/rate.png", "Chance"),
+    HEAL("Icons/health.png", "PV"),
+    DEFENSE("Icons/defense.png", "Réduc.");
 
     private final String iconPath;
     private final String defaultLabel;

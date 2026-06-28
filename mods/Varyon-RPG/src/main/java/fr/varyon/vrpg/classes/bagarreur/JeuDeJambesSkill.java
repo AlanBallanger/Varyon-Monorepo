@@ -6,7 +6,7 @@ public final class JeuDeJambesSkill {
     public static final String TALENT_NODE_ID = "bagarreur_0";
 
     private static final double[] DASH_DISTANCE = {3.0, 3.5, 4.0, 4.5, 5.0};
-    private static final long[]   COOLDOWN_MS   = {12000, 10000, 9000, 8000, 6000};
+    private static final long[]   COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
     private static final float[]  STAMINA_COST  = {4f, 5f, 5f, 6f, 6f};
 
     private JeuDeJambesSkill() {}

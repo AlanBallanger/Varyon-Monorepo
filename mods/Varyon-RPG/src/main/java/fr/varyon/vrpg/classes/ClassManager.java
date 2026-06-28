@@ -82,12 +82,76 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         ReentrantLock lock = lockFor(uuid);
         lock.lock();
         try {
-            getOrLoad(uuid).getProgress(playerClass).setLevel(level, 0L);
+            ClassAccount acc = getOrLoad(uuid);
+            setLevelForProfileLocked(acc, acc.getActiveProfileIndex(), playerClass, level);
             dirty.add(uuid);
         } finally {
             lock.unlock();
         }
         ClassXpHud.refreshIfPresent(uuid);
+    }
+
+    public void setLevelForProfile(@Nonnull UUID uuid, int profileIndex,
+                                   @Nonnull PlayerClass playerClass, int level) {
+        if (profileIndex < 0 || profileIndex >= ClassProfile.COUNT) return;
+        boolean refreshHud;
+        ReentrantLock lock = lockFor(uuid);
+        lock.lock();
+        try {
+            ClassAccount acc = getOrLoad(uuid);
+            setLevelForProfileLocked(acc, profileIndex, playerClass, level);
+            refreshHud = profileIndex == acc.getActiveProfileIndex();
+            dirty.add(uuid);
+        } finally {
+            lock.unlock();
+        }
+        if (refreshHud) {
+            ClassXpHud.refreshIfPresent(uuid);
+        }
+    }
+
+    private void setLevelForProfileLocked(@Nonnull ClassAccount acc, int profileIndex,
+                                          @Nonnull PlayerClass playerClass, int level) {
+        acc.getProfiles()[profileIndex].getProgress(playerClass).setLevel(level, 0L);
+        syncProfileProgressToLive(acc, profileIndex, playerClass);
+    }
+
+    private void syncProfileProgressToLive(@Nonnull ClassAccount acc, int profileIndex,
+                                           @Nonnull PlayerClass playerClass) {
+        if (profileIndex != acc.getActiveProfileIndex()) return;
+        ClassProgress src = acc.getProfiles()[profileIndex].getProgress(playerClass);
+        acc.getProgress(playerClass).setLevel(src.getLevel(), src.getXpInLevel());
+    }
+
+    public int addXpForProfile(@Nonnull UUID uuid, int profileIndex, @Nonnull PlayerClass playerClass,
+                               double amount, @Nullable PlayerRef playerRef) {
+        if (profileIndex < 0 || profileIndex >= ClassProfile.COUNT) return 0;
+        int levelsGained;
+        boolean refreshHud;
+        ReentrantLock lock = lockFor(uuid);
+        lock.lock();
+        try {
+            ClassAccount acc = getOrLoad(uuid);
+            ClassProgress prog = profileIndex == acc.getActiveProfileIndex()
+                ? acc.getProgress(playerClass)
+                : acc.getProfiles()[profileIndex].getProgress(playerClass);
+            levelsGained = prog.addXp((long) amount);
+            if (profileIndex == acc.getActiveProfileIndex()) {
+                ClassProgress stored = acc.getProfiles()[profileIndex].getProgress(playerClass);
+                stored.setLevel(prog.getLevel(), prog.getXpInLevel());
+            }
+            refreshHud = profileIndex == acc.getActiveProfileIndex();
+            dirty.add(uuid);
+            if (amount > 0 && playerRef != null && refreshHud) {
+                scheduleXpNotif(uuid, playerRef, playerClass, amount, XP_NOTIF_DEBOUNCE_MS);
+            }
+        } finally {
+            lock.unlock();
+        }
+        if (refreshHud && amount > 0) {
+            ClassXpHud.refreshIfPresent(uuid);
+        }
+        return levelsGained;
     }
 
     public void setActiveClass(@Nonnull UUID uuid, @Nullable PlayerClass playerClass) {
@@ -196,6 +260,15 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
                 acc.getSkillSlots(c).clear();
             }
             acc.setActiveClass(null);
+            for (ClassProfile profile : acc.getProfiles()) {
+                profile.setActiveClass(null);
+                for (PlayerClass c : PlayerClass.values()) {
+                    profile.getProgress(c).setLevel(1, 0L);
+                    profile.setSpec(c, null);
+                    profile.resetTalents(c);
+                    profile.clearSkillSlots(c);
+                }
+            }
             dirty.add(uuid);
         } finally {
             lock.unlock();
@@ -210,9 +283,13 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
             ClassProfile profile = acc.getProfiles()[profileIndex];
             profile.setActiveClass(null);
             for (PlayerClass c : PlayerClass.values()) {
+                profile.getProgress(c).setLevel(1, 0L);
                 profile.setSpec(c, null);
                 profile.resetTalents(c);
                 profile.clearSkillSlots(c);
+            }
+            if (profileIndex == acc.getActiveProfileIndex()) {
+                profile.applyTo(acc);
             }
             dirty.add(uuid);
         } finally {

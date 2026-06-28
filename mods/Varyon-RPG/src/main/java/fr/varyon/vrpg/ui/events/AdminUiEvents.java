@@ -154,15 +154,18 @@ public final class AdminUiEvents {
             ClassManager mgr = VaryonRpgPlugin.getInstance().getClassManager();
             if (mgr == null) return UiEventResult.NONE;
             mgr.ensureAccount(target.getUuid(), target.getUsername());
-            ClassAccount acc = mgr.getAccount(target.getUuid());
+            ClassAccount acc = mgr.getOrLoad(target.getUuid());
             if (acc == null) return UiEventResult.NONE;
-            PlayerClass profileClass = acc.getProfiles()[state.adminProfileIndex].getActiveClass();
+            PlayerClass profileClass = acc.resolveProfileActiveClass(state.adminProfileIndex);
             if (profileClass == null) return UiEventResult.NONE;
+            int profileIdx = state.adminProfileIndex;
             try {
                 int amount = Integer.parseInt(data.amount);
-                mgr.addXp(target.getUuid(), profileClass, amount, target);
+                mgr.addXpForProfile(target.getUuid(), profileIdx, profileClass, amount, target);
             } catch (NumberFormatException ignored) {}
-            mgr.applyStats(target.getUuid(), target);
+            if (profileIdx == acc.getActiveProfileIndex()) {
+                mgr.applyStats(target.getUuid(), target);
+            }
             return UiEventResult.REBUILD;
         }
         if ("adminClassLevel".equals(data.action) && data.delta != null) {
@@ -172,11 +175,12 @@ public final class AdminUiEvents {
             ClassManager mgr = VaryonRpgPlugin.getInstance().getClassManager();
             if (mgr == null) return UiEventResult.NONE;
             mgr.ensureAccount(target.getUuid(), target.getUsername());
-            ClassAccount acc = mgr.getAccount(target.getUuid());
+            ClassAccount acc = mgr.getOrLoad(target.getUuid());
             if (acc == null) return UiEventResult.NONE;
-            PlayerClass profileClass = acc.getProfiles()[state.adminProfileIndex].getActiveClass();
+            PlayerClass profileClass = acc.resolveProfileActiveClass(state.adminProfileIndex);
             if (profileClass == null) return UiEventResult.NONE;
-            int currentLevel = acc.getProgress(profileClass).getLevel();
+            int profileIdx = state.adminProfileIndex;
+            int currentLevel = acc.resolveProfileProgress(profileIdx, profileClass).getLevel();
             int newLevel;
             if ("max".equals(data.delta)) {
                 newLevel = ClassXpCurve.MAX_LEVEL;
@@ -185,8 +189,10 @@ public final class AdminUiEvents {
                     newLevel = Math.max(1, Math.min(ClassXpCurve.MAX_LEVEL, currentLevel + Integer.parseInt(data.delta)));
                 } catch (NumberFormatException ignored) { return UiEventResult.NONE; }
             }
-            mgr.setLevel(target.getUuid(), profileClass, newLevel);
-            mgr.applyStats(target.getUuid(), target);
+            mgr.setLevelForProfile(target.getUuid(), profileIdx, profileClass, newLevel);
+            if (profileIdx == acc.getActiveProfileIndex()) {
+                mgr.applyStats(target.getUuid(), target);
+            }
             return UiEventResult.REBUILD;
         }
         if ("adminClassResetTalents".equals(data.action)) {
@@ -196,9 +202,9 @@ public final class AdminUiEvents {
             ClassManager mgr = VaryonRpgPlugin.getInstance().getClassManager();
             if (mgr == null) return UiEventResult.NONE;
             mgr.ensureAccount(target.getUuid(), target.getUsername());
-            ClassAccount acc = mgr.getAccount(target.getUuid());
+            ClassAccount acc = mgr.getOrLoad(target.getUuid());
             if (acc == null) return UiEventResult.NONE;
-            PlayerClass profileClass = acc.getProfiles()[state.adminProfileIndex].getActiveClass();
+            PlayerClass profileClass = acc.resolveProfileActiveClass(state.adminProfileIndex);
             if (profileClass == null) return UiEventResult.NONE;
             mgr.resetTalents(target.getUuid(), profileClass);
             mgr.pruneInvalidSkillSlots(mgr.getOrLoad(target.getUuid()), profileClass);

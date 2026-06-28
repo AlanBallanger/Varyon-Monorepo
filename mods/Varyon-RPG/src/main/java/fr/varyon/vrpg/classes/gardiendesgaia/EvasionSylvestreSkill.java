@@ -6,7 +6,7 @@ public final class EvasionSylvestreSkill {
     public static final String TALENT_NODE_ID = "gardien_de_gaia_0";
 
     private static final double[] DASH_DISTANCE = {4, 5, 6, 7, 8};
-    private static final long[]   COOLDOWN_MS   = {14000, 12000, 10000, 8000, 6000};
+    private static final long[]   COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
     private static final float[]  MANA_COST     = {6f, 7f, 8f, 9f, 10f};
 
     private EvasionSylvestreSkill() {}

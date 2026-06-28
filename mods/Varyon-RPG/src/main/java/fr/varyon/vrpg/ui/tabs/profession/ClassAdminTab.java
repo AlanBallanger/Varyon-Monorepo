@@ -31,17 +31,17 @@ public final class ClassAdminTab {
         ClassManager mgr = VaryonRpgPlugin.getInstance().getClassManager();
         if (mgr != null && target != null) {
             mgr.ensureAccount(target.getUuid(), target.getUsername());
-            ClassAccount acc = mgr.getAccount(target.getUuid());
+            ClassAccount acc = mgr.getOrLoad(target.getUuid());
             if (acc != null) {
                 ClassProfile profile = acc.getProfiles()[profileIdx];
-                PlayerClass profileClass = profile.getActiveClass();
+                PlayerClass profileClass = acc.resolveProfileActiveClass(profileIdx);
 
                 String profileLabel = profile.getName();
                 if (profileClass != null) profileLabel += " : " + profileClass.getDisplayName();
                 ui.set("#AdminClassName.TextSpans", Message.raw(profileLabel));
 
                 if (profileClass != null) {
-                    ClassProgress prog = acc.getProgress(profileClass);
+                    ClassProgress prog = acc.resolveProfileProgress(profileIdx, profileClass);
                     ui.set("#AdminClassLevel.TextSpans", Message.raw(String.valueOf(prog.getLevel())));
                     ui.set("#AdminClassXp.TextSpans", Message.raw(prog.getXpInLevel() + " / " + prog.getXpToNextLevel()));
                 } else {
@@ -54,10 +54,11 @@ public final class ClassAdminTab {
                 ClassProfile[] profiles = acc.getProfiles();
                 for (int i = 0; i < profiles.length; i++) {
                     ClassProfile p = profiles[i];
-                    PlayerClass pc = p.getActiveClass();
+                    PlayerClass pc = acc.resolveProfileActiveClass(i);
                     String classLabel = pc != null ? pc.getDisplayName() : "Vide";
-                    String levelLabel = pc != null ? "Nv " + acc.getProgress(pc).getLevel() : "—";
-                    PlayerSpecialization spec = pc != null ? p.getSpec(pc) : null;
+                    String levelLabel = pc != null
+                        ? "Nv " + acc.resolveProfileProgress(i, pc).getLevel() : "—";
+                    PlayerSpecialization spec = pc != null ? acc.resolveProfileSpec(i, pc) : null;
                     if (spec != null) classLabel += " — " + spec.getDisplayName();
                     ui.append("#AdminClassStatsContainer", "CharacterTabAdminStatRow.ui");
                     ui.set("#AdminClassStatsContainer[" + i + "] #AdminStatRowName.TextSpans",

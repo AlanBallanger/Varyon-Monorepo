@@ -589,8 +589,9 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.GUERRIER, EcranDeFumeeSkill.TALENT_NODE_ID);
         if (rank <= 0) rank = 1;
-        boolean onCd = !bypass && cooldowns.isOnCooldown(uuid, EcranDeFumeeSkill.SKILL_ID, EcranDeFumeeSkill.cooldownMsForRank(rank));
-        if (onCd) return false;
+        if (!bypass && cooldowns.isOnCooldown(uuid, EcranDeFumeeSkill.SKILL_ID, EcranDeFumeeSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = EcranDeFumeeSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         long durationMs = EcranDeFumeeSkill.durationMsForRank(rank);
         ombreState.startEcranFumee(uuid, durationMs);
@@ -612,6 +613,7 @@ public final class ClassSkillService {
                 }
             }
         } catch (Exception ignored) {}
+        ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, EcranDeFumeeSkill.SKILL_ID);
         notifySkill(uuid, "Écran de Fumée");
         return true;
@@ -626,6 +628,8 @@ public final class ClassSkillService {
         if (rank <= 0 && !bypass) return false;
         if (rank <= 0) rank = 1;
         if (!bypass && cooldowns.isOnCooldown(uuid, FrappeFataleSkill.SKILL_ID, FrappeFataleSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = FrappeFataleSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         ombreState.armFrappeFatale(uuid, FrappeFataleSkill.armedWindowMs());
         try {
@@ -638,6 +642,7 @@ public final class ClassSkillService {
                 }
             }
         } catch (Exception ignored) {}
+        ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, FrappeFataleSkill.SKILL_ID);
         notifySkill(uuid, "Frappe Fatale");
         return true;
@@ -655,6 +660,8 @@ public final class ClassSkillService {
         if (rank <= 0 && !bypass) return false;
         if (rank <= 0) rank = 1;
         if (!bypass && cooldowns.isOnCooldown(uuid, DelugeDeGamesSkill.SKILL_ID, DelugeDeGamesSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = DelugeDeGamesSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
@@ -732,6 +739,7 @@ public final class ClassSkillService {
             }
         } catch (Exception ignored) {}
 
+        ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, DelugeDeGamesSkill.SKILL_ID);
         notifySkill(uuid, "Déluge de Lames");
         return true;
@@ -1934,6 +1942,8 @@ public final class ClassSkillService {
         if (rank <= 0) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.berserker.DixPourSangSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         try {
             // Consommer 10% HP
@@ -1985,6 +1995,7 @@ public final class ClassSkillService {
             }
         } catch (Exception ignored) {}
 
+        ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID);
         notifySkill(uuid, "Dix pour Sang");
         return true;
@@ -2721,6 +2732,8 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID,
                 fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.cooldownMsForRank(rank))) return false;
+        float staminaCost = fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         try {
             Integer hIdx = null;
@@ -2753,6 +2766,7 @@ public final class ClassSkillService {
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Status, "Club", "Guard", true, store);
         } catch (Exception ignored) {}
 
+        ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID);
         notifySkill(uuid, "Second Souffle");
         return true;

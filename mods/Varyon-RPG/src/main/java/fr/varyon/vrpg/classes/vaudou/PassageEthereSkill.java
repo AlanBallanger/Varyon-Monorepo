@@ -6,7 +6,7 @@ public final class PassageEthereSkill {
     public static final String TALENT_NODE_ID = "vaudou_0";
 
     private static final double[] RANGE_BLOCKS = {8.0, 9.0, 10.0, 11.0, 12.0};
-    private static final long[]   COOLDOWN_MS  = {18000, 16000, 14000, 12000, 10000};
+    private static final long[]   COOLDOWN_MS  = {20000, 18000, 16000, 14000, 12000};
     private static final float[]  MANA_COST    = {6f, 7f, 7f, 8f, 8f};
 
     private PassageEthereSkill() {}

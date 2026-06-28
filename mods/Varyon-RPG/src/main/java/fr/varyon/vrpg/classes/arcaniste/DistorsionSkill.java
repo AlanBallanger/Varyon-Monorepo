@@ -6,7 +6,7 @@ public final class DistorsionSkill {
     public static final String TALENT_NODE_ID = "arcaniste_0";
 
     private static final double[] DASH_DISTANCE = {4, 5, 6, 7, 8};
-    private static final long[]   COOLDOWN_MS   = {16000, 14000, 12000, 10000, 8000};
+    private static final long[]   COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
     private static final float[]  MANA_COST     = {8f, 9f, 10f, 11f, 12f};
 
     private DistorsionSkill() {}

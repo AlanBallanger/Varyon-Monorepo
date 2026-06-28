@@ -148,9 +148,11 @@ public final class OmbreOutgoingDamageSystem extends DamageEventSystem {
             int poisonRank = acc.getTalentRank(PlayerClass.GUERRIER, OmbrePassifs.LAMES_EMPOISONNEES_NODE);
             if (poisonRank > 0 && Math.random() < OmbrePassifs.poisonChanceForRank(poisonRank)) {
                 Ref<EntityStore> victimRef = chunk.getReferenceTo(index);
-                poisonSystem.applyPoison(victimRef, amount, store);
+                float scaledWeapon = WeaponDamageReader.readScaledHeldWeaponDamage(playerRef, acc);
+                float poisonPct = OmbrePassifs.poisonWeaponPctForRank(poisonRank);
+                poisonSystem.applyPoison(victimRef, scaledWeapon, poisonPct, store);
                 if (VrpgConfig.isDebugCombat())
-                    LOG.atInfo().log("[OmbreDmg] Poison dpt=" + String.format("%.1f", amount * OmbrePassifs.POISON_WEAPON_PCT) + "/s");
+                    LOG.atInfo().log("[OmbreDmg] Poison dpt=" + String.format("%.1f", scaledWeapon * poisonPct) + "/s");
             }
 
             // Embuscade — première frappe après invisibilité immobilise

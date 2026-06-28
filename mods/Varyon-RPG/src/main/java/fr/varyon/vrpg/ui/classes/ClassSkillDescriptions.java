@@ -26,9 +26,6 @@ import java.util.Locale;
 
 public final class ClassSkillDescriptions {
 
-    private static final String TOOLTIP_TITLE_COLOR = "#ffffff";
-    private static final String TOOLTIP_BODY_COLOR = "#96a9be";
-
     private ClassSkillDescriptions() {}
 
     @Nullable
@@ -42,14 +39,19 @@ public final class ClassSkillDescriptions {
     }
 
     @Nonnull
+    public static String tooltipPlainText(@Nonnull String name, @Nonnull String baseDescription) {
+        return name.trim() + "\n\n" + baseDescription.trim();
+    }
+
+    @Nonnull
     public static Message tooltipMessage(@Nonnull String name,
                                          @Nullable String skillId,
                                          @Nonnull String baseDescription) {
-        return Message.raw(name.trim())
-            .color(TOOLTIP_TITLE_COLOR)
-            .bold(true)
-            .insert("\n\n")
-            .insert(Message.raw(effectText(skillId, baseDescription)).color(TOOLTIP_BODY_COLOR));
+        return Message.join(
+            Message.raw(name.trim()).bold(true),
+            Message.raw("\n\n"),
+            Message.raw(effectText(skillId, baseDescription))
+        );
     }
 
     @Nullable
