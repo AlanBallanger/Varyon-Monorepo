@@ -4,7 +4,7 @@ public enum SkillStatKind {
     WEAPON_DAMAGE("Icons/attack.png", "Dégâts"),
     DAMAGE_BONUS("Icons/attack.png", "Dégâts"),
     COOLDOWN("Icons/cooldown.png", "Délai"),
-    STAMINA("Icons/stamina.png", "Endu"),
+    STAMINA("Icons/stamina.png", "Endu."),
     MANA("Icons/mana.png", "Mana"),
     DURATION("Icons/time.png", "Durée"),
     MOVE_SPEED("Icons/movement_speed.png", "Vit."),

@@ -8,8 +8,8 @@ public final class MarteauPilonSkill {
     private static final float[] DAMAGE_PCT_1  = {0.8f, 0.9f, 1.0f, 1.2f, 1.4f};
     private static final float[] DAMAGE_PCT_2  = {1.2f, 1.4f, 1.6f, 1.9f, 2.3f};
     private static final long[]  STUN_MS       = {1200, 1400, 1600, 1800, 2200};
-    private static final long[]  COOLDOWN_MS   = {18000, 16000, 14000, 12000, 10000};
-    private static final float[] STAMINA_COST  = {8f, 9f, 10f, 11f, 12f};
+    private static final long[]  COOLDOWN_MS   = {21000, 19000, 17000, 15000, 13000};
+    private static final float[] STAMINA_COST  = {10f, 11f, 12f, 13f, 15f};
     public  static final long    SECOND_HIT_DELAY_MS = 500L;
 
     private MarteauPilonSkill() {}

@@ -5,7 +5,7 @@ public final class DechainementSkill {
     public static final String SKILL_ID       = "dechainement";
     public static final String TALENT_NODE_ID = "ravageur_5";
 
-    private static final float[] DAMAGE_BONUS  = {0.20f, 0.25f, 0.30f, 0.38f, 0.50f};
+    private static final float[] DAMAGE_BONUS  = {0.15f, 0.18f, 0.22f, 0.28f, 0.35f};
     private static final long[]  DURATION_MS   = {4000, 5000, 6000, 7000, 8000};
     private static final long[]  COOLDOWN_MS   = {30000, 28000, 25000, 22000, 18000};
     private static final float[] STAMINA_COST  = {6f, 7f, 8f, 9f, 10f};

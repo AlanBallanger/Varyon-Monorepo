@@ -173,6 +173,13 @@ public final class ClassSkillStatResolver {
             case GardeRapprocheSkill.SKILL_ID -> gardeRapprocheStats(rank);
             case RavageurPassifs.MOISSONNEUR_NODE -> xpStackStats(
                 Math.round(RavageurPassifs.moissonneurXpBonusPerStack(rank) * 100));
+            case RavageurPassifs.ARME_LOURDE_NODE -> armeLourdeStats(rank);
+            case PeauDeFerSkill.SKILL_ID -> peauDeFerStats(rank);
+            case RavageurPassifs.EXECUTEUR_NODE -> executeurStats(rank);
+            case DechainementSkill.SKILL_ID -> dechainementStats(rank);
+            case RavageurPassifs.CHASSEUR_GEANT_NODE -> chasseurGeantStats(rank);
+            case RavageurPassifs.ELAN_DESTRUCTEUR_NODE -> elanDestructeurStats(rank);
+            case RavageurPassifs.COMBATTANT_INFATIGABLE_NODE -> combattantInfatigableStats(rank);
             case BagarreurPassifs.JUSQUAU_BOUT_NODE -> xpOnlyStats(
                 Math.round(BagarreurPassifs.jusquAuBoutBonusForRank(rank) * 100));
             case GardienDeGaiaPassifs.HARMONIE_NODE -> xpOnlyStats(
@@ -409,10 +416,74 @@ public final class ClassSkillStatResolver {
         return List.of(
             new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, p1 + "%", "1"),
             new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, p2 + "%", "2"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(MarteauPilonSkill.stunMsForRank(rank)), "Étour."),
             new SkillStatEntry(SkillStatKind.COOLDOWN,
                 formatCooldown(MarteauPilonSkill.cooldownMsForRank(rank))),
             new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
         );
+    }
+
+    private static List<SkillStatEntry> armeLourdeStats(int rank) {
+        int slow = Math.round(RavageurPassifs.armeLourdeSlowForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, "-" + slow + "%", "Vitesse"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(RavageurPassifs.armeLourdeDurationMs()))
+        );
+    }
+
+    private static List<SkillStatEntry> peauDeFerStats(int rank) {
+        int red = Math.round(PeauDeFerSkill.damageReductionForRank(rank) * 100);
+        int stamina = Math.round(PeauDeFerSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DEFENSE, "-" + red + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(PeauDeFerSkill.durationMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(PeauDeFerSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> executeurStats(int rank) {
+        int pct = Math.round(RavageurPassifs.executeurBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%", "Attaque"));
+    }
+
+    private static List<SkillStatEntry> dechainementStats(int rank) {
+        int dmg = Math.round(DechainementSkill.damageBonusForRank(rank) * 100);
+        int stamina = Math.round(DechainementSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + dmg + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(DechainementSkill.durationMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(DechainementSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> chasseurGeantStats(int rank) {
+        int pct = Math.round(RavageurPassifs.chasseurGeantBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%", "Attaque"));
+    }
+
+    private static List<SkillStatEntry> elanDestructeurStats(int rank) {
+        int pct = Math.round(RavageurPassifs.elanBonusForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%", "Proch."),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(RavageurPassifs.ELAN_WINDOW_MS))
+        );
+    }
+
+    private static List<SkillStatEntry> combattantInfatigableStats(int rank) {
+        float raw = RavageurPassifs.combattantBonusPer10PctForRank(rank) * 100f;
+        String pctStr = raw == Math.floor(raw)
+            ? String.valueOf((int) raw)
+            : String.format(Locale.FRENCH, "%.1f", raw);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pctStr + "%/10% PV"));
     }
 
     private static List<SkillStatEntry> fureurSanguinaireStats(int rank) {

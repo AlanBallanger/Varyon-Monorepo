@@ -8,7 +8,7 @@ public final class RabattageSkill {
     private static final float[] DAMAGE_PCT   = {0.6f, 0.7f, 0.8f, 1.0f, 1.2f};
     private static final double  SWEEP_RADIUS = 10.0;
     private static final long[]  STUN_MS      = {800, 1000, 1200, 1400, 1600};
-    private static final long[]  COOLDOWN_MS  = {22000, 20000, 18000, 16000, 14000};
+    private static final long[]  COOLDOWN_MS  = {25000, 24000, 23000, 22000, 21000};
     private static final float[] STAMINA_COST = {7f, 8f, 9f, 10f, 11f};
     public  static final double  PULL_SPEED   = 60.0;
 

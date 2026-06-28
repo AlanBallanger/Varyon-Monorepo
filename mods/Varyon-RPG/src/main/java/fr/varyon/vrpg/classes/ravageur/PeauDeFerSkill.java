@@ -7,7 +7,7 @@ public final class PeauDeFerSkill {
 
     private static final float[] DAMAGE_REDUCTION = {0.15f, 0.18f, 0.22f, 0.27f, 0.35f};
     private static final long[]  DURATION_MS      = {3000, 4000, 5000, 6000, 7000};
-    private static final long[]  COOLDOWN_MS       = {24000, 22000, 20000, 18000, 15000};
+    private static final long[]  COOLDOWN_MS       = {30000, 28000, 26000, 24000, 21000};
     private static final float[] STAMINA_COST      = {5f, 6f, 7f, 8f, 8f};
 
     private PeauDeFerSkill() {}

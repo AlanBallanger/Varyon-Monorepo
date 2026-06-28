@@ -1,5 +1,7 @@
 package fr.varyon.vrpg.classes.ravageur;
 
+import java.util.Locale;
+
 public final class RavageurPassifs {
 
     private RavageurPassifs() {}
@@ -24,7 +26,7 @@ public final class RavageurPassifs {
 
     // --- Arme lourde (node 2) — critiques ralentissent la cible ---
     public static final String ARME_LOURDE_NODE      = "ravageur_2";
-    private static final float[] ARME_LOURDE_SLOW    = {0.15f, 0.20f, 0.25f, 0.30f, 0.40f};
+    private static final float[] ARME_LOURDE_SLOW    = {0.10f, 0.15f, 0.20f, 0.25f, 0.30f};
     private static final long    ARME_LOURDE_DURATION_MS = 3000L;
 
     public static float armeLourdeSlowForRank(int rank) {
@@ -88,7 +90,11 @@ public final class RavageurPassifs {
     }
 
     public static String combattantInfatigableStatLine(int rank) {
-        float pct = combattantBonusPer10PctForRank(rank) * 100;
-        return "+" + String.format("%.1f", pct) + "% dégâts par tranche de 10% PV manquants (max 100%)";
+        float per10 = combattantBonusPer10PctForRank(rank) * 100f;
+        int max = Math.round(per10 * 10f);
+        String perStr = per10 == Math.floor(per10)
+            ? String.valueOf((int) per10)
+            : String.format(Locale.FRENCH, "%.1f", per10);
+        return "+" + perStr + "% dégâts par tranche de 10% de PV perdus (max +" + max + "%)";
     }
 }

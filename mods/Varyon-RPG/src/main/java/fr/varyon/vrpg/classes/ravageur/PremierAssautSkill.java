@@ -7,8 +7,8 @@ public final class PremierAssautSkill {
 
     public static final float  HEALTHY_THRESHOLD   = 0.70f;
     private static final float[] DAMAGE_PCT        = {1.5f, 1.8f, 2.2f, 2.6f, 3.2f};
-    private static final long[]  COOLDOWN_MS       = {18000, 16000, 14000, 12000, 10000};
-    private static final float[] STAMINA_COST      = {7f, 8f, 9f, 10f, 10f};
+    private static final long[]  COOLDOWN_MS       = {21000, 19000, 17000, 15000, 13000};
+    private static final float[] STAMINA_COST      = {8f, 9f, 10f, 11f, 12f};
 
     private PremierAssautSkill() {}
 

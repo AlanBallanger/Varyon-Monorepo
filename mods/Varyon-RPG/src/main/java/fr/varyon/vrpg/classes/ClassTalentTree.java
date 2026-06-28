@@ -141,8 +141,8 @@ public final class ClassTalentTree {
             new Node("Élan Destructeur",       "Passif", "Un kill n'est qu'un tremplin vers le suivant.",                              "Après avoir éliminé un ennemi, la prochaine attaque inflige davantage de dégâts.",               RVI + "Elan_Destructeur.png",          5),
             new Node("Premier Assaut",         "Actif",  "Frapper fort d'emblée pour ne jamais laisser l'ennemi reprendre son souffle.", "Frappe dévastatrice infligeant davantage de dégâts aux ennemis ayant plus de 70 % de vie.",    RVI + "Premier_Assaut.png",            5),
             new Node("Marteau-Pilon",          "Actif",  "Deux coups, une sentence.",                                                  "Enchaîne deux frappes lourdes. Le second coup étourdit la cible.",                               RVI + "Marteau_Pilon.png",             5),
-            new Node("Combattant Infatigable", "Passif", "Chaque blessure reçue avive la flamme plutôt qu'elle ne l'éteint.",         "Les dégâts augmentent en fonction des points de vie manquants.",                                  RVI + "Combattant_Infatigable.png",    5),
-            new Node("Rabattage",              "Actif",  "Il ne chasse pas, il ramène le troupeau à lui.",                            "Balayage en arc devant soi, attirant les ennemis touchés et les étourdissant brièvement.",        RVI + "Rabattage.png",                 5),
+            new Node("Combattant Infatigable", "Passif", "Chaque blessure reçue avive la flamme plutôt qu'elle ne l'éteint.",         "Plus vous perdez de PV, plus vos attaques frappent fort : bonus par tranche de 10% de PV perdus.", RVI + "Combattant_Infatigable.png",    5),
+            new Node("Rabattage",              "Actif",  "Il ne chasse pas, il ramène le troupeau à lui.",                            "Balaye en arc devant toi sur 10 blocs, attirant les ennemis touchés et les étourdissant brièvement.", RVI + "Rabattage.png",                 5),
         });
 
         final String FI = "Classes_Icons/Fighter/";
