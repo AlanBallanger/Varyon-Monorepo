@@ -58,8 +58,7 @@ public final class ArcanistIncomingDamageSystem extends DamageEventSystem {
             if (acc.getActiveClass() != PlayerClass.MAGE) return;
             if (acc.getActiveSpec(PlayerClass.MAGE) != PlayerSpecialization.ARCANISTE) return;
 
-            // Réinitialise Pouvoir Grandissant quand on prend des dégâts
-            arcanistState.setPouvoirGrandissant(uuid, false);
+            arcanistState.recordDamageTaken(uuid);
 
         } catch (Exception ignored) {}
     }

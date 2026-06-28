@@ -8,7 +8,7 @@ public final class SurchargeSkill {
     private static final float[] DAMAGE_BONUS  = {0.20f, 0.28f, 0.36f, 0.45f, 0.55f};
     private static final float[] MANA_RESTORE  = {0.15f, 0.18f, 0.22f, 0.27f, 0.33f};
     private static final long[]  DURATION_MS   = {5000, 6000, 7000, 8000, 10000};
-    private static final long[]  COOLDOWN_MS   = {25000, 23000, 21000, 19000, 16000};
+    private static final long[]  COOLDOWN_MS   = {35000, 32000, 29000, 26000, 23000};
 
     private SurchargeSkill() {}
 

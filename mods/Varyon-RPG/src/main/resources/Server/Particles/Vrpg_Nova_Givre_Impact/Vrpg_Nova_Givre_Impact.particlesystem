@@ -1,0 +1,10 @@
+{
+  "Spawners": [
+    { "SpawnerId": "Ice_Blaste_Growing_Disk",    "PositionOffset": { "Y": 0.05 }, "Scale": 1.35 },
+    { "SpawnerId": "Ice_Blast_Rings_Thin",       "PositionOffset": { "Y": 0.05 }, "StartDelay": 0.05, "Scale": 1.35 },
+    { "SpawnerId": "Sword_Charged_Trail_Sparks", "PositionOffset": { "Y": 0.5 },  "StartDelay": 0.10, "Scale": 1.2 }
+  ],
+  "LifeSpan": 0.8,
+  "BoundingRadius": 12.0,
+  "CullDistance": 60.0
+}

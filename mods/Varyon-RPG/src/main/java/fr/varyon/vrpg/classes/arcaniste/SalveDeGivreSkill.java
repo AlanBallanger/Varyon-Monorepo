@@ -7,7 +7,7 @@ public final class SalveDeGivreSkill {
     public static final String SLOW_EFFECT    = "Vrpg_Arme_Lourde";
 
     private static final int[]   BOLT_COUNTS     = {3, 3, 4, 4, 5};
-    private static final float[] DAMAGE_PCT_HIT  = {1.4f, 1.6f, 1.8f, 2.0f, 2.2f};
+    private static final float[] DAMAGE_PCT_HIT  = {1.12f, 1.28f, 1.44f, 1.6f, 1.76f};
     private static final long    BOLT_DELAY_MS   = 120L;
     private static final long[]  SLOW_MS         = {2000, 2000, 2500, 2500, 3000};
     private static final long[]  COOLDOWN_MS     = {12000, 11000, 10000, 9000, 8000};

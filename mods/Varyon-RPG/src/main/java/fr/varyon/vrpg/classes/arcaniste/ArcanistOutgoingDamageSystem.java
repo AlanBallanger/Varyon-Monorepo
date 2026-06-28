@@ -25,7 +25,7 @@ import java.util.UUID;
 
 public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
 
-    private static final float STAFF_BASE_MULT = 10f;
+    private static final float STAFF_BASE_MULT = 5f;
 
     private static final com.hypixel.hytale.logger.HytaleLogger LOG =
         com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
@@ -122,7 +122,7 @@ public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
 
             // Pouvoir Grandissant — bonus si pas pris de dégâts
             int pouvoirRank = acc.getTalentRank(PlayerClass.MAGE, ArcanistPassifs.POUVOIR_GRANDISSANT_NODE);
-            if (pouvoirRank > 0 && arcanistState.isPouvoirGrandissantActive(uuid)) {
+            if (pouvoirRank > 0 && arcanistState.isPouvoirGrandissantActive(uuid, ArcanistPassifs.pouvoirGrandissantDelayMs())) {
                 float bonus = ArcanistPassifs.pouvoirGrandissantBonusForRank(pouvoirRank);
                 amount *= (1f + bonus);
                 if (log != null) log.append(String.format(" PouvoirGrandissant=+%.0f%%", bonus * 100));

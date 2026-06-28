@@ -3016,7 +3016,7 @@ public final class ClassSkillService {
             zoneCenter.y += fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.groundYOffset();
 
             final float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.damagePctForRank(rank);
-            final float radius = fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.impactRadius();
+            final float radius = fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.impactRadiusForRank(rank);
             final long dropDelay = fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.dropDelayMs();
             final org.joml.Vector3d fImpact = new org.joml.Vector3d(zoneCenter);
             final Ref<EntityStore> fRef = entityRef;
@@ -3025,7 +3025,7 @@ public final class ClassSkillService {
             final java.util.concurrent.atomic.AtomicReference<java.util.UUID> meteorProjectileId =
                 new java.util.concurrent.atomic.AtomicReference<>();
 
-            spawnMeteorParticle(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.TELEGRAPH_PARTICLE, fImpact, store);
+            spawnSkillParticle(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.TELEGRAPH_PARTICLE, fImpact, store);
             spawnMeteorFalling(fRef, fImpact, fw, meteorProjectileId);
             java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "meteore"); t.setDaemon(true); return t;
@@ -3034,7 +3034,7 @@ public final class ClassSkillService {
                     Store<EntityStore> ws = fw.getEntityStore().getStore();
                     removeMeteorProjectile(ws, meteorProjectileId.get(), fImpact);
                     if (!fRef.isValid()) return;
-                    spawnMeteorParticle(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.IMPACT_PARTICLE, fImpact, ws);
+                    spawnSkillParticle(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.IMPACT_PARTICLE, fImpact, ws);
                     ClassSkillSounds.playSkillSound(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.IMPACT_SOUND, fPr, fImpact, null);
                     damageNearby(fImpact, radius, fRef, ws, dmg, resolveFireDamageCause());
                 } catch (Exception e) {
@@ -3074,14 +3074,21 @@ public final class ClassSkillService {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             if (tc != null) {
                 org.joml.Vector3d center = tc.getPosition();
+                org.joml.Vector3d visualCenter = new org.joml.Vector3d(center.x, center.y + 0.05, center.z);
                 float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.damagePctForRank(rank);
-                float radius = fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.radius();
+                float radius = fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.radiusForRank(rank);
                 float slowSec = fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.slowMsForRank(rank) / 1000f;
                 int slowIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex(fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SLOW_EFFECT);
                 com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect slowEff = slowIdx >= 0
                     ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect) com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(slowIdx) : null;
                 final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fSlowEff = slowEff;
                 final float fSlowSec = slowSec;
+                arcanistState.setLastCastFire(uuid, false);
+                spawnSkillParticle(
+                    fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.IMPACT_PARTICLE,
+                    visualCenter, store, commandBuffer,
+                    fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.particleScaleForRadius(radius),
+                    entityRef);
                 damageNearby(center, radius, entityRef, store, dmg, resolveIceDamageCause());
                 // Slow séparé
                 long casterIdx = entityRef.getIndex();
@@ -3096,7 +3103,7 @@ public final class ClassSkillService {
                         } catch (Exception ignored2) {}
                     }, t -> t.getIndex() != casterIdx);
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
-                ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", playerRef, center, null);
+                ClassSkillSounds.playSkillSound(fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.IMPACT_SOUND, playerRef, center, null);
             }
         } catch (Exception ignored) {}
         ClassSkillMana.consume(playerRef, manaCost);
@@ -3253,13 +3260,35 @@ public final class ClassSkillService {
         return ice != null ? ice : com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL;
     }
 
-    private void spawnMeteorParticle(@Nonnull String particleId,
+    private void spawnSkillParticle(@Nonnull String particleId,
                                      @Nonnull org.joml.Vector3d at,
                                      @Nonnull Store<EntityStore> store) {
+        spawnSkillParticle(particleId, at, store, null, 1.0f, null);
+    }
+
+    private void spawnSkillParticle(@Nonnull String particleId,
+                                     @Nonnull org.joml.Vector3d at,
+                                     @Nonnull Store<EntityStore> store,
+                                     @Nullable CommandBuffer<EntityStore> commandBuffer,
+                                     float scale,
+                                     @Nullable Ref<EntityStore> sourceRef) {
         try {
-            com.hypixel.hytale.server.core.universe.world.ParticleUtil.spawnParticleEffect(particleId, at, store);
+            com.hypixel.hytale.component.ComponentAccessor<EntityStore> accessor =
+                commandBuffer != null ? commandBuffer : store;
+            if (scale <= 1.01f && sourceRef == null) {
+                com.hypixel.hytale.server.core.universe.world.ParticleUtil.spawnParticleEffect(particleId, at, accessor);
+                return;
+            }
+            com.hypixel.hytale.component.spatial.SpatialResource<Ref<EntityStore>, EntityStore> playerSpatial =
+                accessor.getResource(com.hypixel.hytale.server.core.modules.entity.EntityModule.get().getPlayerSpatialResourceType());
+            java.util.List<Ref<EntityStore>> playerRefs =
+                com.hypixel.hytale.component.spatial.SpatialResource.getThreadLocalReferenceList();
+            playerSpatial.getSpatialStructure().collect(
+                at, com.hypixel.hytale.server.core.universe.world.ParticleUtil.DEFAULT_PARTICLE_DISTANCE, playerRefs);
+            com.hypixel.hytale.server.core.universe.world.ParticleUtil.spawnParticleEffect(
+                particleId, at.x, at.y, at.z, 0f, 0f, 0f, scale, null, sourceRef, playerRefs, accessor);
         } catch (Exception e) {
-            LOG.atFine().log("[Meteore] particle " + particleId + " failed: " + e.getMessage());
+            LOG.atWarning().log("[SkillParticle] " + particleId + " failed: " + e.getMessage());
         }
     }
 
@@ -3629,7 +3658,7 @@ public final class ClassSkillService {
                           com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(rootEffIdx)
                         : null;
                     if (rootEff == null) return;
-                    spawnMeteorParticle(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.IMPACT_PARTICLE, fImpact, ws);
+                    spawnSkillParticle(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.IMPACT_PARTICLE, fImpact, ws);
                     long casterIdx = fCasterRef.getIndex();
                     final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fRootEff = rootEff;
                     com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector

@@ -69,15 +69,20 @@ public final class ArcanistPassifs {
         return pct + "% de chance de ne pas déclencher le temps de recharge";
     }
 
-    // --- Pouvoir Grandissant (node 11) — bonus dégâts sorts si pas touché ---
+    // --- Pouvoir Grandissant (node 11) — bonus dégâts sorts si pas touché depuis 10s ---
     public static final String POUVOIR_GRANDISSANT_NODE    = "arcaniste_11";
+    public static final long   POUVOIR_GRANDISSANT_DELAY_MS = 10_000L;
     private static final float[] POUVOIR_GRANDISSANT_BONUS = {0.10f, 0.15f, 0.20f, 0.28f, 0.40f};
 
     public static float pouvoirGrandissantBonusForRank(int rank) {
         return POUVOIR_GRANDISSANT_BONUS[idx(rank, POUVOIR_GRANDISSANT_BONUS.length)];
     }
+    public static long pouvoirGrandissantDelayMs() {
+        return POUVOIR_GRANDISSANT_DELAY_MS;
+    }
     public static String pouvoirGrandissantStatLine(int rank) {
         int pct = Math.round(pouvoirGrandissantBonusForRank(rank) * 100);
-        return "+" + pct + "% dégâts des sorts tant que tu n'as pas subi de dégâts";
+        int sec = (int) (POUVOIR_GRANDISSANT_DELAY_MS / 1000);
+        return "+" + pct + "% dégâts sorts après " + sec + "s sans subir de dégâts (reset au prochain coup)";
     }
 }

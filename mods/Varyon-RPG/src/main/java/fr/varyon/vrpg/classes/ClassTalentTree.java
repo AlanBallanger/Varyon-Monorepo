@@ -206,7 +206,7 @@ public final class ClassTalentTree {
             new Node("Surcharge",           "Actif",  "Trop de pouvoir, et pourtant jamais assez.",                          "Restaure du mana et augmente temporairement les dégâts des sorts.",                        AI + "Surcharge.png",            5),
             new Node("Drain Mystique",      "Passif", "Chaque mort nourrit sa réserve arcanique.",                            "Les éliminations restaurent une partie du mana.",                                           AI + "Drain_Mystique.png",       5),
             new Node("Météore",             "Actif",  "Il appelle l'extinction depuis les cieux.",                            "Lance un projectile explosif qui s'abat sur une zone.",                                     AI + "Météore.png",              5),
-            new Node("Pouvoir Grandissant", "Passif", "L'inviolabilité forge une puissance silencieuse.",                     "Les dégâts des sorts augmentent tant que tu n'as pas subi de dégâts.",                      AI + "Pouvoir_Grandissant.png",  5),
+            new Node("Pouvoir Grandissant", "Passif", "L'inviolabilité forge une puissance silencieuse.",                     "Bonus sorts si aucun dégât subi depuis 10 secondes. Reset au prochain coup.", AI + "Pouvoir_Grandissant.png",  5),
         });
 
         final String ROI = "Classes_Icons/Rodder/";

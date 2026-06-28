@@ -5,20 +5,24 @@ public final class NovaDeGivreSkill {
     public static final String SKILL_ID       = "nova_de_givre";
     public static final String TALENT_NODE_ID = "arcaniste_7";
     public static final String SLOW_EFFECT    = "Vrpg_Arme_Lourde";
+    public static final String IMPACT_PARTICLE = "Ice_Blast";
+    public static final String IMPACT_SOUND    = "SFX_Ice_Bolt_Death";
 
-    private static final float[] DAMAGE_PCT  = {2.4f, 3.3f, 4.5f, 6.0f, 8.4f};
-    private static final float   RADIUS      = 6.0f;
+    private static final float[] DAMAGE_PCT  = {1.2f, 1.65f, 2.25f, 3.0f, 4.2f};
+    private static final float[] RADIUS      = {3.0f, 4.0f, 5.0f, 6.0f, 7.0f};
     private static final long[]  SLOW_MS     = {2000, 2500, 3000, 3500, 4000};
     private static final long[]  COOLDOWN_MS = {14000, 13000, 12000, 11000, 10000};
     private static final float[] MANA_COST   = {12f, 14f, 16f, 18f, 20f};
 
     private NovaDeGivreSkill() {}
 
-    public static int   maxRank()                    { return COOLDOWN_MS.length; }
-    private static int  idx(int rank)               { return Math.max(0, Math.min(rank - 1, COOLDOWN_MS.length - 1)); }
+    public static int   maxRank()                    { return DAMAGE_PCT.length; }
+    private static int  idx(int rank)               { return Math.max(0, Math.min(rank - 1, DAMAGE_PCT.length - 1)); }
+    private static int  radiusIdx(int rank)         { return idx(rank); }
 
     public static float  damagePctForRank(int rank)  { return DAMAGE_PCT[idx(rank)]; }
-    public static float  radius()                    { return RADIUS; }
+    public static float  radiusForRank(int rank)     { return RADIUS[radiusIdx(rank)]; }
+    public static float  particleScaleForRadius(float radius) { return Math.max(1.0f, radius / 3.0f); }
     public static long   slowMsForRank(int rank)     { return SLOW_MS[idx(rank)]; }
     public static long   cooldownMsForRank(int rank)  { return COOLDOWN_MS[idx(rank)]; }
     public static float  manaCostForRank(int rank)   { return MANA_COST[idx(rank)]; }
@@ -28,6 +32,6 @@ public final class NovaDeGivreSkill {
         int slow = (int) (slowMsForRank(rank) / 1000);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
         int mana = Math.round(manaCostForRank(rank));
-        return pct + "% dégâts arme, ralentit " + slow + "s (rayon " + (int) RADIUS + " blocs), " + mana + " mana, Délai " + cd + "s";
+        return pct + "% dégâts arme, ralentit " + slow + "s (rayon " + (int) radiusForRank(rank) + " blocs), " + mana + " mana, Délai " + cd + "s";
     }
 }

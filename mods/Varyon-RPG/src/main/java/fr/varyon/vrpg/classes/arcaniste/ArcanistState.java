@@ -10,8 +10,8 @@ public final class ArcanistState {
     private final ConcurrentHashMap<UUID, Long>  surchargeExpiry = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Float> surchargeBonus  = new ConcurrentHashMap<>();
 
-    // --- Pouvoir Grandissant (bonus si pas touché) ---
-    private final ConcurrentHashMap<UUID, Boolean> pouvoirActive = new ConcurrentHashMap<>();
+    // --- Pouvoir Grandissant (bonus après 10s sans dégât subi) ---
+    private final ConcurrentHashMap<UUID, Long> lastDamageTakenMs = new ConcurrentHashMap<>();
 
     // --- Écho Arcanique (dernier skill utilisé pour bypass délai) ---
     private final ConcurrentHashMap<UUID, String> echoPending = new ConcurrentHashMap<>();
@@ -44,13 +44,18 @@ public final class ArcanistState {
 
     // ---- Pouvoir Grandissant ----
 
-    public void setPouvoirGrandissant(@Nonnull UUID uuid, boolean active) {
-        if (active) pouvoirActive.put(uuid, true);
-        else pouvoirActive.remove(uuid);
+    public void recordDamageTaken(@Nonnull UUID uuid) {
+        lastDamageTakenMs.put(uuid, System.currentTimeMillis());
     }
 
-    public boolean isPouvoirGrandissantActive(@Nonnull UUID uuid) {
-        return Boolean.TRUE.equals(pouvoirActive.get(uuid));
+    public void resetPouvoirGrandissantTimer(@Nonnull UUID uuid) {
+        lastDamageTakenMs.put(uuid, System.currentTimeMillis());
+    }
+
+    public boolean isPouvoirGrandissantActive(@Nonnull UUID uuid, long delayMs) {
+        Long last = lastDamageTakenMs.get(uuid);
+        if (last == null) return false;
+        return System.currentTimeMillis() - last >= delayMs;
     }
 
     // ---- Écho Arcanique ----
@@ -105,7 +110,7 @@ public final class ArcanistState {
     public void cleanup(@Nonnull UUID uuid) {
         surchargeExpiry.remove(uuid);
         surchargeBonus.remove(uuid);
-        pouvoirActive.remove(uuid);
+        lastDamageTakenMs.remove(uuid);
         echoPending.remove(uuid);
         lastCastFire.remove(uuid);
         pendingProjectileDmg.remove(uuid);

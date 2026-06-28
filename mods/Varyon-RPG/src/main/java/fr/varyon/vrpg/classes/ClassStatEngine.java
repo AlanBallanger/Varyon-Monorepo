@@ -82,7 +82,7 @@ public final class ClassStatEngine {
             fr.varyon.vrpg.VaryonRpgPlugin plugin = fr.varyon.vrpg.VaryonRpgPlugin.getInstance();
             if (plugin != null) {
                 fr.varyon.vrpg.classes.arcaniste.ArcanistState as = plugin.getArcanistState();
-                if (as != null) as.setPouvoirGrandissant(uuid, true);
+                if (as != null) as.resetPouvoirGrandissantTimer(uuid);
             }
         }
 

@@ -258,7 +258,6 @@ public final class ClassKillXpSystem {
                 float pct = fr.varyon.vrpg.classes.arcaniste.ArcanistPassifs.drainMystiqueBonusForRank(drainRank);
                 fr.varyon.vrpg.classes.ability.ClassSkillMana.restoreByPct(playerRef, pct);
             }
-            arcanistState.setPouvoirGrandissant(uuid, true);
         }
         if (activeClass == PlayerClass.BARBARE && spec == PlayerSpecialization.BERSERKER) {
             int frenesieRank = acc.getTalentRank(activeClass, BerserkerPassifs.FRENESIE_NODE);

@@ -542,7 +542,11 @@ public final class ClassSkillStatResolver {
 
     private static List<SkillStatEntry> pouvoirGrandissantStats(int rank) {
         int pct = Math.round(ArcanistPassifs.pouvoirGrandissantBonusForRank(rank) * 100);
-        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"));
+        int sec = (int) (ArcanistPassifs.pouvoirGrandissantDelayMs() / 1000);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%", "Sorts"),
+            new SkillStatEntry(SkillStatKind.DURATION, sec + "s", "Sans dégât")
+        );
     }
 
     private static List<SkillStatEntry> salveDeGivreStats(int rank) {
@@ -568,7 +572,7 @@ public final class ClassSkillStatResolver {
             new SkillStatEntry(SkillStatKind.DURATION,
                 formatDurationMs(NovaDeGivreSkill.slowMsForRank(rank)), "Ralent."),
             new SkillStatEntry(SkillStatKind.MOVE_SPEED,
-                String.valueOf((int) NovaDeGivreSkill.radius()), "Rayon"),
+                String.valueOf((int) NovaDeGivreSkill.radiusForRank(rank)), "Rayon"),
             new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
             new SkillStatEntry(SkillStatKind.COOLDOWN,
                 formatCooldown(NovaDeGivreSkill.cooldownMsForRank(rank)))
@@ -594,7 +598,7 @@ public final class ClassSkillStatResolver {
         return List.of(
             new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%"),
             new SkillStatEntry(SkillStatKind.MOVE_SPEED,
-                String.valueOf((int) MeteoreSkill.impactRadius()), "Rayon"),
+                String.valueOf((int) MeteoreSkill.impactRadiusForRank(rank)), "Rayon"),
             new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
             new SkillStatEntry(SkillStatKind.COOLDOWN,
                 formatCooldown(MeteoreSkill.cooldownMsForRank(rank)))
