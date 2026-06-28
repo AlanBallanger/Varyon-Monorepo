@@ -3405,8 +3405,8 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         long cd = fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.cooldownMsForRank(rank);
         if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID, cd)) return false;
-        float manaCost = fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.manaCostForRank(rank);
-        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+        float staminaCost = fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
@@ -3441,7 +3441,7 @@ public final class ClassSkillService {
             }
         } catch (Exception ignored) {}
 
-        ClassSkillMana.consume(playerRef, manaCost);
+        ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.SKILL_ID);
         notifySkill(uuid, "Évasion Sylvestre");
         return true;

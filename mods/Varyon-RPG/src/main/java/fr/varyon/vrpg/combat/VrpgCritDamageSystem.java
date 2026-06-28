@@ -71,7 +71,9 @@ public final class VrpgCritDamageSystem extends DamageEventSystem {
             ClassAccount acc = classManager.getOrLoad(uuid);
             PlayerClass activeClass = acc.getActiveClass();
             PlayerSpecialization spec = acc.getActiveSpec(activeClass);
-            if (spec == null || spec == PlayerSpecialization.ARCANISTE || spec == PlayerSpecialization.VAUDOU) {
+            if (spec == null || spec == PlayerSpecialization.ARCANISTE
+                    || spec == PlayerSpecialization.VAUDOU
+                    || spec == PlayerSpecialization.GARDIEN_DE_GAIA) {
                 return;
             }
 

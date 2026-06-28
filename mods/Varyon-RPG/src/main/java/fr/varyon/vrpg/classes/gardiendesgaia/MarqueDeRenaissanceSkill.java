@@ -5,10 +5,10 @@ public final class MarqueDeRenaissanceSkill {
     public static final String SKILL_ID       = "marque_de_renaissance";
     public static final String TALENT_NODE_ID = "gardien_de_gaia_11";
 
-    private static final long[]  DURATION_MS        = {6000, 7000, 8000, 10000, 12000};
+    private static final long[]  DURATION_MS        = {4000, 4500, 5000, 6000, 7000};
     private static final float[] SPECIAL_GAUGE_BONUS = {10f, 15f, 20f, 25f, 30f};
-    private static final long[]  COOLDOWN_MS         = {45000, 42000, 38000, 34000, 30000};
-    private static final float[] MANA_COST           = {12f, 13f, 14f, 15f, 16f};
+    private static final long[]  COOLDOWN_MS         = {60000, 55000, 50000, 45000, 40000};
+    private static final float[] MANA_COST           = {18f, 19f, 20f, 22f, 24f};
 
     private MarqueDeRenaissanceSkill() {}
 

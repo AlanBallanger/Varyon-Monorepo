@@ -9,7 +9,7 @@ public final class AppelDuTreantSkill {
     private static final float[] HP_FACTOR     = {1.0f,  1.25f, 1.5f,  1.75f, 2.0f};
     private static final float[] DAMAGE_FACTOR = {1.0f,  1.25f, 1.5f,  1.75f, 2.0f};
     private static final long[]  COOLDOWN_MS   = {60000, 60000, 60000, 60000, 60000};
-    private static final float[] MANA_COST     = {18f, 19f, 20f, 21f, 22f};
+    private static final float[] MANA_COST     = {26f, 28f, 30f, 32f, 34f};
 
     private AppelDuTreantSkill() {}
 

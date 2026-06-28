@@ -17,8 +17,8 @@ public final class MeteoreSkill {
     private static final float   GROUND_Y_OFFSET = 0.15f;
     private static final double  FALL_GRAVITY  = 15.0;
     private static final double  MAX_TARGET_DISTANCE = 30.0;
-    private static final long[]  COOLDOWN_MS  = {30000, 27000, 24000, 21000, 18000};
-    private static final float[] MANA_COST    = {20f, 22f, 24f, 26f, 28f};
+    private static final long[]  COOLDOWN_MS  = {48000, 43200, 38400, 33600, 28800};
+    private static final float[] MANA_COST    = {40f, 44f, 48f, 52f, 56f};
 
     private MeteoreSkill() {}
 

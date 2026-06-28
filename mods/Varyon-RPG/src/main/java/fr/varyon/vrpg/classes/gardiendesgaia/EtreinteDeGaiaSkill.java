@@ -11,8 +11,8 @@ public final class EtreinteDeGaiaSkill {
     public static final double PROJECTILE_SPEED  = 20.0;
     private static final double ROOT_RADIUS      = 8.0;
     private static final long[]  ROOT_DURATION = {2000, 2500, 3000, 3500, 4000};
-    private static final long[]  COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
-    private static final float[] MANA_COST     = {9f, 10f, 11f, 12f, 13f};
+    private static final long[]  COOLDOWN_MS   = {30000, 27000, 24000, 21000, 18000};
+    private static final float[] MANA_COST     = {14f, 15f, 16f, 17f, 18f};
 
     private EtreinteDeGaiaSkill() {}
 

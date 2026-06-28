@@ -26,6 +26,8 @@ import java.util.UUID;
 public final class GardienDeGaiaOutgoingDamageSystem extends DamageEventSystem {
 
     private static final float STAFF_BASE_MULT = 10f;
+    private static final String STAFF_KIND_NORMAL = "ICE";
+    private static final String STAFF_KIND_CRIT   = "ICE_CRITICAL";
 
     private static final com.hypixel.hytale.logger.HytaleLogger LOG =
         com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
@@ -56,7 +58,7 @@ public final class GardienDeGaiaOutgoingDamageSystem extends DamageEventSystem {
                        @Nonnull CommandBuffer<EntityStore> commandBuffer,
                        @Nonnull Damage damage) {
         try {
-            if (damage.isCancelled()) return;
+            if (damage.isCancelled() || damage.getAmount() <= 0f) return;
 
             Damage.Source source = damage.getSource();
             if (!(source instanceof Damage.EntitySource entitySource)) return;
@@ -136,12 +138,12 @@ public final class GardienDeGaiaOutgoingDamageSystem extends DamageEventSystem {
                 float finalAmt = amount * critMult;
                 damage.setAmount(finalAmt);
                 fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
-                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, chunk.getReferenceTo(index), finalAmt, "NATURE_CRITICAL");
+                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, chunk.getReferenceTo(index), finalAmt, STAFF_KIND_CRIT);
                 if (log != null) LOG.atInfo().log(log.append(String.format(" CRIT -> %.1f", finalAmt)).toString());
             } else {
                 if (amount != base) damage.setAmount(amount);
                 fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
-                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, chunk.getReferenceTo(index), amount, "NATURE");
+                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, chunk.getReferenceTo(index), amount, STAFF_KIND_NORMAL);
                 if (log != null) LOG.atInfo().log(log.append(String.format(" -> %.1f", amount)).toString());
             }
 

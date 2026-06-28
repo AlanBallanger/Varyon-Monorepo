@@ -51,7 +51,7 @@ public final class GardienDeGaiaPassifs {
 
     // --- Gardien de la Nature (node 7) — PV invocations augmentés ---
     public static final String GARDIEN_NODE     = "gardien_de_gaia_7";
-    private static final float[] GARDIEN_HP_BONUS = {0.10f, 0.18f, 0.26f, 0.35f, 0.50f};
+    private static final float[] GARDIEN_HP_BONUS = {0.50f, 0.60f, 0.70f, 0.80f, 1.00f};
 
     public static float gardienHpBonusForRank(int rank) {
         return GARDIEN_HP_BONUS[idx(rank, GARDIEN_HP_BONUS.length)];
@@ -70,14 +70,13 @@ public final class GardienDeGaiaPassifs {
         return GRACE_BONUS[idx(rank, GRACE_BONUS.length)];
     }
     public static String graceStatLine(int rank) {
-        int pct  = Math.round(graceBonusForRank(rank) * 100);
-        int seuil = Math.round(GRACE_HP_SEUIL * 100);
-        return "+" + pct + "% soins si cible < " + seuil + "% PV";
+        int pct = Math.round(graceBonusForRank(rank) * 100);
+        return "+" + pct + "% soins sous 40% HP";
     }
 
     // --- Cycle de Vie (node 8) — soigner un allié restaure du mana ---
     public static final String CYCLE_NODE     = "gardien_de_gaia_8";
-    private static final float[] CYCLE_MANA  = {1.5f, 2.0f, 2.5f, 3.0f, 4.0f};
+    private static final float[] CYCLE_MANA  = {5f, 6f, 7f, 8f, 10f};
 
     public static float cycleManaForRank(int rank) {
         return CYCLE_MANA[idx(rank, CYCLE_MANA.length)];

@@ -193,6 +193,16 @@ public final class ClassSkillStatResolver {
                 secondSouffleBagarreurStats(rank);
             case GardienDeGaiaPassifs.HARMONIE_NODE -> xpOnlyStats(
                 Math.round(GardienDeGaiaPassifs.harmonieBonusForRank(rank) * 100));
+            case EvasionSylvestreSkill.SKILL_ID -> evasionSylvestreStats(rank);
+            case BenedictionDeGaiaSkill.SKILL_ID -> benedictionDeGaiaStats(rank);
+            case EcorceProtectriceSkill.SKILL_ID -> ecorceProtectriceStats(rank);
+            case AppelDuTreantSkill.SKILL_ID -> appelDuTreantStats(rank);
+            case EtreinteDeGaiaSkill.SKILL_ID -> etreinteDeGaiaStats(rank);
+            case MarqueDeRenaissanceSkill.SKILL_ID -> marqueDeRenaissanceStats(rank);
+            case GardienDeGaiaPassifs.LIEN_NODE -> lienSpirituelStats(rank);
+            case GardienDeGaiaPassifs.GARDIEN_NODE -> gardienNatureStats(rank);
+            case GardienDeGaiaPassifs.CYCLE_NODE -> cycleDeVieStats(rank);
+            case GardienDeGaiaPassifs.SOUFFLE_NODE -> souffleNatureStats(rank);
             case VaudouPassifs.FETICHEUR_NODE -> xpOnlyStats(
                 Math.round(VaudouPassifs.feticheurXpBonusForRank(rank) * 100));
             case RodeurPassifs.OEIL_CHASSEUR_NODE -> xpOnlyStats(
@@ -517,6 +527,107 @@ public final class ClassSkillStatResolver {
             new SkillStatEntry(SkillStatKind.COOLDOWN,
                 formatCooldown(DistorsionSkill.cooldownMsForRank(rank))),
             new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> evasionSylvestreStats(int rank) {
+        int dist = (int) EvasionSylvestreSkill.dashDistanceForRank(rank);
+        int stamina = Math.round(EvasionSylvestreSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, String.valueOf(dist), "Dist."),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(EvasionSylvestreSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> benedictionDeGaiaStats(int rank) {
+        int heal = Math.round(BenedictionDeGaiaSkill.healAmountForRank(rank));
+        int mana = Math.round(BenedictionDeGaiaSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.HEAL, "+" + heal),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(BenedictionDeGaiaSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> ecorceProtectriceStats(int rank) {
+        int reduc = Math.round(EcorceProtectriceSkill.damageReductionForRank(rank) * 100);
+        float heal = EcorceProtectriceSkill.healPerSecForRank(rank);
+        int mana = Math.round(EcorceProtectriceSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DEFENSE, "-" + reduc + "%"),
+            new SkillStatEntry(SkillStatKind.HEAL, heal + "/s", "Regen."),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(EcorceProtectriceSkill.durationMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(EcorceProtectriceSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> appelDuTreantStats(int rank) {
+        int pct = Math.round(AppelDuTreantSkill.damageFactor(rank) * 100);
+        int mana = Math.round(AppelDuTreantSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(AppelDuTreantSkill.durationMsForRank(rank)), "Durée"),
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%", "Stats"),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(AppelDuTreantSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> etreinteDeGaiaStats(int rank) {
+        int mana = Math.round(EtreinteDeGaiaSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(EtreinteDeGaiaSkill.rootDurationMs(rank)), "Immob."),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(EtreinteDeGaiaSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> marqueDeRenaissanceStats(int rank) {
+        int gauge = Math.round(MarqueDeRenaissanceSkill.specialGaugeBonusForRank(rank));
+        int mana = Math.round(MarqueDeRenaissanceSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(MarqueDeRenaissanceSkill.durationMsForRank(rank)), "Durée"),
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, "+" + gauge, "Jauge"),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(MarqueDeRenaissanceSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> lienSpirituelStats(int rank) {
+        int pct = Math.round(GardienDeGaiaPassifs.lienRatioForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.HEAL, pct + "%", "Soin"));
+    }
+
+    private static List<SkillStatEntry> gardienNatureStats(int rank) {
+        int pct = Math.round(GardienDeGaiaPassifs.gardienHpBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.HEAL, "+" + pct + "%", "PV"));
+    }
+
+    private static List<SkillStatEntry> cycleDeVieStats(int rank) {
+        float mana = GardienDeGaiaPassifs.cycleManaForRank(rank);
+        String manaStr = mana == Math.floor(mana) ? String.valueOf((int) mana) : String.valueOf(mana);
+        return List.of(new SkillStatEntry(SkillStatKind.MANA, "+" + manaStr, "Mana"));
+    }
+
+    private static List<SkillStatEntry> souffleNatureStats(int rank) {
+        float hp = GardienDeGaiaPassifs.souffleHpRegenForRank(rank);
+        float sta = GardienDeGaiaPassifs.souffleStaRegenForRank(rank);
+        String hpStr = hp == Math.floor(hp) ? String.valueOf((int) hp) : String.valueOf(hp);
+        String staStr = sta == Math.floor(sta) ? String.valueOf((int) sta) : String.valueOf(sta);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.HEAL, "+" + hpStr + "/s", "PV"),
+            new SkillStatEntry(SkillStatKind.STAMINA, "+" + staStr + "/s", "Endu.")
         );
     }
 
@@ -934,6 +1045,7 @@ public final class ClassSkillStatResolver {
             case RabattageSkill.SKILL_ID -> RabattageSkill.staminaCostForRank(rank);
             case MarqueDuChasseurSkill.SKILL_ID -> MarqueDuChasseurSkill.staminaCostForRank(rank);
             case DistorsionSkill.SKILL_ID -> DistorsionSkill.staminaCostForRank(rank);
+            case EvasionSylvestreSkill.SKILL_ID -> EvasionSylvestreSkill.staminaCostForRank(rank);
             default -> null;
         };
     }
@@ -956,7 +1068,6 @@ public final class ClassSkillStatResolver {
             case AppelDuTreantSkill.SKILL_ID -> AppelDuTreantSkill.manaCostForRank(rank);
             case EtreinteDeGaiaSkill.SKILL_ID -> EtreinteDeGaiaSkill.manaCostForRank(rank);
             case MarqueDeRenaissanceSkill.SKILL_ID -> MarqueDeRenaissanceSkill.manaCostForRank(rank);
-            case EvasionSylvestreSkill.SKILL_ID -> EvasionSylvestreSkill.manaCostForRank(rank);
             default -> null;
         };
     }

@@ -10,8 +10,8 @@ public final class SalveDeGivreSkill {
     private static final float[] DAMAGE_PCT_HIT  = {1.12f, 1.28f, 1.44f, 1.6f, 1.76f};
     private static final long    BOLT_DELAY_MS   = 120L;
     private static final long[]  SLOW_MS         = {2000, 2000, 2500, 2500, 3000};
-    private static final long[]  COOLDOWN_MS     = {12000, 11000, 10000, 9000, 8000};
-    private static final float[] MANA_COST       = {12f, 14f, 16f, 18f, 20f};
+    private static final long[]  COOLDOWN_MS     = {24000, 22000, 20000, 18000, 16000};
+    private static final float[] MANA_COST       = {24f, 28f, 32f, 36f, 40f};
 
     private SalveDeGivreSkill() {}
 

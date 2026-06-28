@@ -5,11 +5,11 @@ public final class EcorceProtectriceSkill {
     public static final String SKILL_ID       = "ecorce_protectrice";
     public static final String TALENT_NODE_ID = "gardien_de_gaia_3";
 
-    private static final float[] DAMAGE_REDUCTION = {0.20f, 0.25f, 0.30f, 0.36f, 0.45f};
+    private static final float[] DAMAGE_REDUCTION = {0.08f, 0.10f, 0.12f, 0.14f, 0.16f};
     private static final float[] HEAL_PER_SEC     = {7f,    10f,   14f,   18f,   25f};
     private static final long[]  DURATION_MS      = {5000,  5000,  5000,  5000,  5000};
-    private static final long[]  COOLDOWN_MS      = {30000, 27000, 25000, 22000, 20000};
-    private static final float[] MANA_COST        = {10f,   11f,   12f,   13f,   14f};
+    private static final long[]  COOLDOWN_MS      = {45000, 40500, 37500, 33000, 30000};
+    private static final float[] MANA_COST        = {15f,   16f,   18f,   20f,   22f};
 
     private EcorceProtectriceSkill() {}
 

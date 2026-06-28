@@ -11,8 +11,8 @@ public final class NovaDeGivreSkill {
     private static final float[] DAMAGE_PCT  = {1.2f, 1.65f, 2.25f, 3.0f, 4.2f};
     private static final float[] RADIUS      = {3.0f, 4.0f, 5.0f, 6.0f, 7.0f};
     private static final long[]  SLOW_MS     = {2000, 2500, 3000, 3500, 4000};
-    private static final long[]  COOLDOWN_MS = {14000, 13000, 12000, 11000, 10000};
-    private static final float[] MANA_COST   = {12f, 14f, 16f, 18f, 20f};
+    private static final long[]  COOLDOWN_MS = {28000, 26000, 24000, 22000, 20000};
+    private static final float[] MANA_COST   = {24f, 28f, 32f, 36f, 40f};
 
     private NovaDeGivreSkill() {}
 

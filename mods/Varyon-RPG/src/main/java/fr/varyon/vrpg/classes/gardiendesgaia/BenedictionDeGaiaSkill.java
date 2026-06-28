@@ -7,7 +7,7 @@ public final class BenedictionDeGaiaSkill {
 
     public static final double HEAL_RADIUS = 10.0;
 
-    private static final float[] HEAL_AMOUNT  = {120f, 150f, 185f, 230f, 280f};
+    private static final float[] HEAL_AMOUNT  = {40f, 70f, 100f, 130f, 160f};
     private static final long[]  COOLDOWN_MS  = {22000, 20000, 18000, 16000, 14000};
     private static final float[] MANA_COST    = {10f, 11f, 12f, 13f, 15f};
 
