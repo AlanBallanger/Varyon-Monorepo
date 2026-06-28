@@ -91,7 +91,7 @@ public final class BerserkerIncomingDamageSystem extends DamageEventSystem {
                     if (currentHp > 0f && damage.getAmount() >= currentHp) {
                         boolean onCd = cooldowns.isOnCooldown(uuid,
                             BerserkerPassifs.DERNIER_SOUFFLE_NODE,
-                            BerserkerPassifs.DERNIER_SOUFFLE_COOLDOWN_MS);
+                            BerserkerPassifs.dernierSouffleCooldownMsForRank(dernierRank));
                         if (!onCd) {
                             berserkerState.startDernierSouffle(uuid, BerserkerPassifs.DERNIER_SOUFFLE_DURATION_MS);
                             cooldowns.markUsed(uuid, BerserkerPassifs.DERNIER_SOUFFLE_NODE);

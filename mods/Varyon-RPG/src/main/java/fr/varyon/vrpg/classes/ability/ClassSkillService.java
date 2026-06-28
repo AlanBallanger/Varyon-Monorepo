@@ -2014,37 +2014,24 @@ public final class ClassSkillService {
         float staminaCost = fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.staminaCostForRank(rank);
         if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
+        float spdBoost = fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.speedBonusForRank(rank);
         long durationMs = fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.durationMsForRank(rank);
-        berserkerState.startCor(uuid, durationMs);
-
-        // Boost vitesse de déplacement pendant la durée
-        try {
-            com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager mm =
-                playerRef.getComponent(com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager.getComponentType());
-            if (mm == null) mm = store.getComponent(entityRef,
-                com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager.getComponentType());
-            if (mm != null) {
-                float spdBoost = fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.speedBonusForRank(rank);
-                float target = mm.getDefaultSettings().baseSpeed * (1f + spdBoost);
-                mm.getSettings().baseSpeed = target;
-                mm.update(playerRef.getPacketHandler());
-                final com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager finalMm = mm;
-                final long dur = durationMs;
-                final com.hypixel.hytale.server.core.universe.PlayerRef finalRef = playerRef;
-                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                    Thread t = new Thread(r, "berserker-cor"); t.setDaemon(true); return t;
-                }).schedule(() -> {
-                    try {
-                        finalMm.resetDefaultsAndUpdate(entityRef, store);
-                        finalMm.update(finalRef.getPacketHandler());
-                    } catch (Exception ignored2) {}
-                }, dur, java.util.concurrent.TimeUnit.MILLISECONDS);
-            }
-        } catch (Exception ignored) {}
 
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
-            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            if (tc != null) {
+                double radius = fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.allyRadius();
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
+                    store, tc.getPosition(), radius, nearRef -> {
+                        try {
+                            com.hypixel.hytale.server.core.universe.PlayerRef nearPlayer =
+                                store.getComponent(nearRef, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType());
+                            if (nearPlayer == null) return;
+                            berserkerState.startCor(nearPlayer.getUuid(), durationMs, spdBoost);
+                        } catch (Exception ignored2) {}
+                    }, ref -> store.getComponent(ref, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType()) != null);
+                ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
+            }
         } catch (Exception ignored) {}
 
         ClassSkillStamina.consume(playerRef, staminaCost);

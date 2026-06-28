@@ -34,7 +34,7 @@ public final class GardienDeGaiaPassifs {
         return SOUFFLE_STA_REGEN[idx(rank, SOUFFLE_STA_REGEN.length)];
     }
     public static String souffleStatLine(int rank) {
-        return "+" + souffleHpRegenForRank(rank) + " HP/s et +" + souffleStaRegenForRank(rank) + " END/s aux alliés à " + (int) SOUFFLE_RADIUS + " blocs";
+        return "+" + souffleHpRegenForRank(rank) + " PV/s et +" + souffleStaRegenForRank(rank) + " END/s aux alliés à " + (int) SOUFFLE_RADIUS + " blocs";
     }
 
     // --- Lien Spirituel (node 5) — dégâts invocations → soin joueur ---

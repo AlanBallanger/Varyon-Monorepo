@@ -22,6 +22,6 @@ public final class PremierAssautSkill {
     public static String statLineForRank(int rank) {
         int pct = Math.round(damagePctForRank(rank) * 100);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return pct + "% dégâts arme si la cible a >70% HP, Délai " + cd + "s";
+        return pct + "% dégâts arme si la cible a >70% PV, Délai " + cd + "s";
     }
 }

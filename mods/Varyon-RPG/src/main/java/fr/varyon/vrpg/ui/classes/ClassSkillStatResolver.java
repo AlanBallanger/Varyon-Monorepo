@@ -152,6 +152,13 @@ public final class ClassSkillStatResolver {
                     formatDurationMs(OmbrePassifs.executionWindowMs())));
             case BerserkerPassifs.CARNAGE_NODE -> xpStackStats(
                 Math.round(BerserkerPassifs.carnageXpBonusPerStack(rank) * 100));
+            case BerserkerPassifs.FUREUR_NODE -> fureurSanguinaireStats(rank);
+            case BerserkerPassifs.FRENESIE_NODE -> frenesieStats(rank);
+            case BerserkerPassifs.FERVEUR_NODE -> ferveurStats(rank);
+            case BerserkerPassifs.BLESSURES_NODE -> blessuresProfondesStats(rank);
+            case BerserkerPassifs.DERNIER_SOUFFLE_NODE -> dernierSouffleStats(rank);
+            case CorDeGuerreSkill.SKILL_ID -> corDeGuerreStats(rank);
+            case CriRalliementSkill.SKILL_ID -> criRalliementStats(rank);
             case RempartPassifs.MAITRE_BOUCLIER_NODE -> xpOnlyStats(
                 Math.round(RempartPassifs.bouclierXpBonusForRank(rank) * 100));
             case RempartPassifs.CONSTITUTION_NODE -> constitutionStats(rank);
@@ -404,6 +411,81 @@ public final class ClassSkillStatResolver {
             new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, p2 + "%", "2"),
             new SkillStatEntry(SkillStatKind.COOLDOWN,
                 formatCooldown(MarteauPilonSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> fureurSanguinaireStats(int rank) {
+        int pct = Math.round(BerserkerPassifs.fureurLifestealPct(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.HEAL, pct + "%", "Vol vie"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(BerserkerPassifs.fureurDurationMs()))
+        );
+    }
+
+    private static List<SkillStatEntry> frenesieStats(int rank) {
+        int dmg = Math.round(BerserkerPassifs.frenesieDmgBonusPerStack(rank) * 100);
+        int spd = Math.round(BerserkerPassifs.frenesieSpdBonusPerStack(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + dmg + "%", "Attaque"),
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, "+" + spd + "%", "Vitesse"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(BerserkerPassifs.frenesieDurationMs()))
+        );
+    }
+
+    private static List<SkillStatEntry> ferveurStats(int rank) {
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS,
+                "+" + BerserkerPassifs.ferveurBonusPctDisplay(rank) + "%", "Cumul"),
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS,
+                String.valueOf(BerserkerPassifs.FERVEUR_MAX_STACKS), "Max")
+        );
+    }
+
+    private static List<SkillStatEntry> blessuresProfondesStats(int rank) {
+        int chance = Math.round(BerserkerPassifs.bleedChanceForRank(rank) * 100);
+        int bleed = Math.round(BerserkerPassifs.bleedWeaponPctForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.RATE, chance + "%"),
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, bleed + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(BerserkerPassifs.BLEED_DURATION_MS))
+        );
+    }
+
+    private static List<SkillStatEntry> dernierSouffleStats(int rank) {
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(BerserkerPassifs.DERNIER_SOUFFLE_DURATION_MS)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(BerserkerPassifs.dernierSouffleCooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> corDeGuerreStats(int rank) {
+        int spd = Math.round(CorDeGuerreSkill.speedBonusForRank(rank) * 100);
+        int stamina = Math.round(CorDeGuerreSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, "+" + spd + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(CorDeGuerreSkill.durationMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(CorDeGuerreSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> criRalliementStats(int rank) {
+        int dmg = Math.round(CriRalliementSkill.damageBonusForRank(rank) * 100);
+        int stamina = Math.round(CriRalliementSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + dmg + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(CriRalliementSkill.durationMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(CriRalliementSkill.cooldownMsForRank(rank))),
             new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
         );
     }

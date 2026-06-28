@@ -19,7 +19,7 @@ public final class BagarreurPassifs {
 
     public static String jusquAuBoutStatLine(int rank) {
         int pct = Math.round(jusquAuBoutBonusForRank(rank) * 100);
-        return "+" + pct + "% XP si HP < 80%";
+        return "+" + pct + "% XP si PV < 80%";
     }
 
     // --- Adrénaline (node 2) — speed boost après dégâts reçus ---
@@ -76,7 +76,7 @@ public final class BagarreurPassifs {
 
     public static String espritCombatifStatLine(int rank) {
         int pct = Math.round(espritCombatifBonusForRank(rank) * 100);
-        return "+" + pct + "% dégâts si HP < 50%";
+        return "+" + pct + "% dégâts si PV < 50%";
     }
 
     // --- Poings d'acier (node 8) — crit → chance de stun ---

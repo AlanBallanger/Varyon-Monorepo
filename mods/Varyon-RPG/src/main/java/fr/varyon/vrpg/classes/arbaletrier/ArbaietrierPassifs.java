@@ -39,7 +39,7 @@ public final class ArbaietrierPassifs {
     }
 
     public static String colossesStatLine(int rank) {
-        return "+" + Math.round(colossesBonusForRank(rank) * 100) + "% dégâts si cible a plus de HP que soi";
+        return "+" + Math.round(colossesBonusForRank(rank) * 100) + "% dégâts si cible a plus de PV que soi";
     }
 
     // --- Tireur embusqué (node 7) — bonus dégâts après immobilité ---

@@ -58,30 +58,33 @@ public final class BerserkerTickSystem extends EntityTickingSystem<EntityStore> 
         if (tc % CHECK_INTERVAL != 0) return;
 
         ClassAccount acc = classManager.getAccount(uuid);
-        if (acc == null) return;
-        if (acc.getActiveClass() != PlayerClass.BARBARE) return;
-        if (acc.getActiveSpec(PlayerClass.BARBARE) != PlayerSpecialization.BERSERKER) return;
+        float targetSpeedBoost = berserkerState.getCorSpeedBoost(uuid);
 
-        boolean inCombat = combatTracker.isInCombat(uuid);
+        boolean isBerserker = acc != null
+            && acc.getActiveClass() == PlayerClass.BARBARE
+            && acc.getActiveSpec(PlayerClass.BARBARE) == PlayerSpecialization.BERSERKER;
 
-        // --- Ferveur Guerrière : tick un stack par seconde en combat ---
-        int ferveurRank = acc.getTalentRank(PlayerClass.BARBARE, BerserkerPassifs.FERVEUR_NODE);
-        if (ferveurRank > 0) {
-            if (inCombat) {
-                berserkerState.tickFerveur(uuid, BerserkerPassifs.FERVEUR_MAX_STACKS);
-            } else {
-                berserkerState.resetFerveur(uuid);
+        if (isBerserker) {
+            boolean inCombat = combatTracker.isInCombat(uuid);
+
+            int ferveurRank = acc.getTalentRank(PlayerClass.BARBARE, BerserkerPassifs.FERVEUR_NODE);
+            if (ferveurRank > 0) {
+                if (inCombat) {
+                    berserkerState.tickFerveur(uuid, BerserkerPassifs.FERVEUR_MAX_STACKS);
+                } else {
+                    berserkerState.resetFerveur(uuid);
+                }
             }
-        }
 
-        // --- Frénésie : vitesse de déplacement ---
-        int frenesieRank = acc.getTalentRank(PlayerClass.BARBARE, BerserkerPassifs.FRENESIE_NODE);
-        float targetSpeedBoost = 0f;
-        if (frenesieRank > 0) {
-            int stacks = berserkerState.getFrenesieStacks(uuid);
-            if (stacks > 0) {
-                targetSpeedBoost = stacks * BerserkerPassifs.frenesieSpdBonusPerStack(frenesieRank);
+            int frenesieRank = acc.getTalentRank(PlayerClass.BARBARE, BerserkerPassifs.FRENESIE_NODE);
+            if (frenesieRank > 0) {
+                int stacks = berserkerState.getFrenesieStacks(uuid);
+                if (stacks > 0) {
+                    targetSpeedBoost += stacks * BerserkerPassifs.frenesieSpdBonusPerStack(frenesieRank);
+                }
             }
+        } else if (acc != null) {
+            berserkerState.resetFerveur(uuid);
         }
 
         float applied = appliedSpeedBoost.getOrDefault(uuid, 0f);

@@ -49,7 +49,7 @@ public final class RavageurPassifs {
 
     public static String executeurStatLine(int rank) {
         int pct = Math.round(executeurBonusForRank(rank) * 100);
-        return "+" + pct + "% dégâts si la cible a <30% HP";
+        return "+" + pct + "% dégâts si la cible a <30% PV";
     }
 
     // --- Chasseur de géant (node 6) — bonus dégâts si cible a PLUS de HP que soi ---
@@ -62,7 +62,7 @@ public final class RavageurPassifs {
 
     public static String chasseurGeantStatLine(int rank) {
         int pct = Math.round(chasseurGeantBonusForRank(rank) * 100);
-        return "+" + pct + "% dégâts si la cible a plus de HP que vous";
+        return "+" + pct + "% dégâts si la cible a plus de PV que vous";
     }
 
     // --- Élan destructeur (node 7) — prochain coup armé bonus après un kill ---
@@ -89,6 +89,6 @@ public final class RavageurPassifs {
 
     public static String combattantInfatigableStatLine(int rank) {
         float pct = combattantBonusPer10PctForRank(rank) * 100;
-        return "+" + String.format("%.1f", pct) + "% dégâts par tranche de 10% HP manquants (max 100%)";
+        return "+" + String.format("%.1f", pct) + "% dégâts par tranche de 10% PV manquants (max 100%)";
     }
 }

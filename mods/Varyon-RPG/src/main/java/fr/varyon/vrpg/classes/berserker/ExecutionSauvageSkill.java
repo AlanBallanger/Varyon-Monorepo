@@ -5,11 +5,11 @@ public final class ExecutionSauvageSkill {
     public static final String SKILL_ID       = "execution_sauvage";
     public static final String TALENT_NODE_ID = "berserker_11";
 
-    private static final float[] BASE_DAMAGE_PCT   = {1.0f, 1.2f, 1.4f, 1.7f, 2.0f};
-    private static final float[] LOW_HP_BONUS_PCT  = {0.20f, 0.30f, 0.40f, 0.55f, 0.70f};
+    private static final float[] BASE_DAMAGE_PCT   = {0.85f, 1.0f, 1.15f, 1.4f, 1.65f};
+    private static final float[] LOW_HP_BONUS_PCT  = {0.15f, 0.25f, 0.35f, 0.45f, 0.55f};
     private static final float   LOW_HP_THRESHOLD  = 0.50f;
-    private static final long[]  COOLDOWN_MS       = {16000, 15000, 13000, 11000, 9000};
-    private static final float[] STAMINA_COST      = {7f, 8f, 8f, 9f, 10f};
+    private static final long[]  COOLDOWN_MS       = {32000, 30000, 26000, 22000, 18000};
+    private static final float[] STAMINA_COST      = {8f, 9f, 10f, 11f, 12f};
 
     private ExecutionSauvageSkill() {}
 
@@ -27,6 +27,6 @@ public final class ExecutionSauvageSkill {
         int bonus  = Math.round(lowHpBonusPctForRank(rank) * 100);
         int thres  = Math.round(LOW_HP_THRESHOLD * 100);
         int cd     = (int) (cooldownMsForRank(rank) / 1000);
-        return pct + "% dégâts arme (+" + bonus + "% si cible < " + thres + "% HP), Délai " + cd + "s";
+        return pct + "% dégâts arme (+" + bonus + "% si cible < " + thres + "% PV), Délai " + cd + "s";
     }
 }

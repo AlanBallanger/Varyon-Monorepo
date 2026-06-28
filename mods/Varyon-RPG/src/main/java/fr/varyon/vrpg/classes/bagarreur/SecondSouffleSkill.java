@@ -27,7 +27,7 @@ public final class SecondSouffleSkill {
         int sta = Math.round(staminaRestorePctForRank(rank) * 100);
         int cost = Math.round(staminaCostForRank(rank));
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
-        return "Restaure " + hp + "% HP et " + sta + "% endurance (cast " + (CAST_DURATION_MS / 1000) + "s), "
+        return "Restaure " + hp + "% PV et " + sta + "% endurance (cast " + (CAST_DURATION_MS / 1000) + "s), "
             + cost + " endurance, Délai " + cd + "s";
     }
 }

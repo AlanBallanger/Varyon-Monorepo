@@ -54,7 +54,7 @@ public final class RodeurPassifs {
     }
 
     public static String precisionStatLine(int rank) {
-        return "+" + Math.round(precisionBonusForRank(rank) * 100) + "% dégâts si cible < 50% HP";
+        return "+" + Math.round(precisionBonusForRank(rank) * 100) + "% dégâts si cible < 50% PV";
     }
 
     // --- Traque mobile (node 9) — bonus dégâts en déplacement ---

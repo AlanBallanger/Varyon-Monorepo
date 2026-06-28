@@ -59,7 +59,7 @@ public final class LancierPassifs {
     }
 
     public static String geantsStatLine(int rank) {
-        return "+" + Math.round(geantsBonusForRank(rank) * 100) + "% dégâts si cible a plus de HP max que soi";
+        return "+" + Math.round(geantsBonusForRank(rank) * 100) + "% dégâts si cible a plus de PV max que soi";
     }
 
     // --- Briseur de ligne (node 9) — bonus dégâts après CC (repousse/attire/étourdissement) ---

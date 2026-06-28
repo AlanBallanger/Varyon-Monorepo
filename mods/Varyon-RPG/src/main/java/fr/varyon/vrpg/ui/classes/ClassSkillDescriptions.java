@@ -105,7 +105,7 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.SKILL_ID    -> fr.varyon.vrpg.classes.berserker.ExecutionSauvageSkill.statLineForRank(rank);
             case fr.varyon.vrpg.classes.berserker.DixPourSangSkill.SKILL_ID         -> fr.varyon.vrpg.classes.berserker.DixPourSangSkill.statLineForRank(rank);
             case fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID         -> fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.statLineForRank(rank);
-            case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.DERNIER_SOUFFLE_NODE -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.dernierSouffleStatLine();
+            case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.DERNIER_SOUFFLE_NODE -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.dernierSouffleStatLine(rank);
             case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FERVEUR_NODE     -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.ferveurStatLine(rank);
             case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.FUREUR_NODE      -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.fureurStatLine(rank);
             case fr.varyon.vrpg.classes.berserker.BerserkerPassifs.CARNAGE_NODE     -> fr.varyon.vrpg.classes.berserker.BerserkerPassifs.carnageStatLine(rank);

@@ -89,7 +89,7 @@ public final class OmbrePassifs {
     public static float survieHpThreshold() { return SURVIE_HP_THRESHOLD; }
 
     public static String instinctSurvieStatLine(int rank) {
-        return "+" + Math.round(survieDodgeBonusForRank(rank) * 100) + "% esquive supplémentaire sous 30% HP";
+        return "+" + Math.round(survieDodgeBonusForRank(rank) * 100) + "% esquive supplémentaire sous 30% PV";
     }
 
     private static int idx(int rank, int len) {

@@ -32,7 +32,7 @@ public final class DelugeDeGamesSkill {
         int pct = Math.round(damagePctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
         int stamina = Math.round(staminaCostForRank(rank));
-        return pct + "% dégâts arme × " + strikes + " frappes (+30% si cible <30% HP), Délai " + cd + "s, "
+        return pct + "% dégâts arme × " + strikes + " frappes (+30% si cible <30% PV), Délai " + cd + "s, "
             + stamina + " endurance";
     }
 }

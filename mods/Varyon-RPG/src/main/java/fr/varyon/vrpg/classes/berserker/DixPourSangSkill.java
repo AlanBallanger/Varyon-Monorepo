@@ -6,10 +6,10 @@ public final class DixPourSangSkill {
     public static final String TALENT_NODE_ID = "berserker_4";
 
     private static final float  SELF_HP_COST_PCT  = 0.10f;
-    private static final float[] DAMAGE_PCT       = {1.5f, 1.8f, 2.1f, 2.5f, 3.0f};
-    private static final float[] STAMINA_COST     = {6f, 7f, 8f, 9f, 10f};
+    private static final float[] DAMAGE_PCT       = {1.2f, 1.35f, 1.5f, 1.7f, 1.9f};
+    private static final float[] STAMINA_COST     = {12f, 14f, 16f, 18f, 20f};
     private static final double  HIT_RADIUS       = 2.5;
-    private static final long[]  COOLDOWN_MS      = {18000, 16000, 14000, 12000, 10000};
+    private static final long[]  COOLDOWN_MS      = {21000, 19000, 17000, 15000, 13000};
 
     private DixPourSangSkill() {}
 

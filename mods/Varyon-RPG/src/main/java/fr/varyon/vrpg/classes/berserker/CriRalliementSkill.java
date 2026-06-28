@@ -6,7 +6,7 @@ public final class CriRalliementSkill {
     public static final String TALENT_NODE_ID = "berserker_8";
 
     private static final float[] DAMAGE_BONUS  = {0.10f, 0.14f, 0.18f, 0.22f, 0.28f};
-    private static final long[]  DURATION_MS   = {5000, 6000, 7000, 8000, 10000};
+    private static final long[]  DURATION_MS   = {3000, 3500, 4000, 4500, 5000};
     private static final long[]  COOLDOWN_MS   = {35000, 32000, 29000, 26000, 22000};
     private static final float[] STAMINA_COST  = {5f, 6f, 7f, 8f, 9f};
     private static final double  ALLY_RADIUS   = 8.0;

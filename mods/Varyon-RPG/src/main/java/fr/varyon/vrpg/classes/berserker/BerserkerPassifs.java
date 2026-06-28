@@ -11,29 +11,41 @@ public final class BerserkerPassifs {
     // --- Dernier Souffle (node 10) ---
     public static final String DERNIER_SOUFFLE_NODE = "berserker_10";
     public static final long   DERNIER_SOUFFLE_DURATION_MS = 4_000L;
-    public static final long   DERNIER_SOUFFLE_COOLDOWN_MS = 90_000L;
+    private static final long[] DERNIER_SOUFFLE_COOLDOWN_MS = {150_000L, 135_000L, 120_000L, 105_000L, 90_000L};
 
-    public static String dernierSouffleStatLine() {
-        return "Ignore la mort pendant " + (DERNIER_SOUFFLE_DURATION_MS / 1000) + "s (Délai 90s)";
+    public static long dernierSouffleCooldownMsForRank(int rank) {
+        return DERNIER_SOUFFLE_COOLDOWN_MS[idx(rank, DERNIER_SOUFFLE_COOLDOWN_MS.length)];
+    }
+
+    public static String dernierSouffleStatLine(int rank) {
+        int cd = (int) (dernierSouffleCooldownMsForRank(rank) / 1000);
+        return "Ignore la mort (Délai " + cd + "s)";
     }
 
     // --- Ferveur Guerrière (node 7) ---
     public static final String FERVEUR_NODE     = "berserker_7";
-    public static final int    FERVEUR_MAX_STACKS = 15;
-    private static final float[] FERVEUR_PER_STACK = {0.01f, 0.012f, 0.015f, 0.018f, 0.02f};
+    public static final int    FERVEUR_MAX_STACKS = 10;
+    private static final float[] FERVEUR_PER_STACK = {0.01f, 0.015f, 0.02f, 0.025f, 0.03f};
 
     public static float ferveurBonusPerStack(int rank) {
         return FERVEUR_PER_STACK[idx(rank, FERVEUR_PER_STACK.length)];
     }
 
+    public static String ferveurBonusPctDisplay(int rank) {
+        float raw = ferveurBonusPerStack(rank) * 100f;
+        if (raw == Math.floor(raw)) {
+            return String.valueOf((int) raw);
+        }
+        return String.format(java.util.Locale.FRENCH, "%.1f", raw);
+    }
+
     public static String ferveurStatLine(int rank) {
-        int pct = Math.round(ferveurBonusPerStack(rank) * 100);
-        return "+" + pct + "% dégâts/s en combat (max " + FERVEUR_MAX_STACKS + " cumuls)";
+        return "+" + ferveurBonusPctDisplay(rank) + "% dégâts/s en combat (max " + FERVEUR_MAX_STACKS + " cumuls)";
     }
 
     // --- Fureur Sanguinaire (node 2) ---
     public static final String FUREUR_NODE = "berserker_2";
-    private static final float[] FUREUR_LIFESTEAL_PCT = {0.05f, 0.08f, 0.11f, 0.15f, 0.20f};
+    private static final float[] FUREUR_LIFESTEAL_PCT = {0.04f, 0.05f, 0.06f, 0.07f, 0.08f};
     private static final long    FUREUR_DURATION_MS   = 8_000L;
 
     public static float fureurLifestealPct(int rank) {
@@ -63,17 +75,21 @@ public final class BerserkerPassifs {
 
     // --- Blessures Profondes (node 6) ---
     public static final String BLESSURES_NODE = "berserker_6";
-    private static final float[] BLEED_CHANCE = {0.10f, 0.15f, 0.20f, 0.25f, 0.30f};
-    public static final float    BLEED_WEAPON_PCT  = 0.30f;
+    private static final float[] BLEED_CHANCE     = {0.10f, 0.15f, 0.20f, 0.25f, 0.30f};
+    private static final float[] BLEED_WEAPON_PCT  = {0.30f, 0.40f, 0.50f, 0.60f, 0.70f};
     public static final long     BLEED_DURATION_MS = 5_000L;
 
     public static float bleedChanceForRank(int rank) {
         return BLEED_CHANCE[idx(rank, BLEED_CHANCE.length)];
     }
 
+    public static float bleedWeaponPctForRank(int rank) {
+        return BLEED_WEAPON_PCT[idx(rank, BLEED_WEAPON_PCT.length)];
+    }
+
     public static String blessuresStatLine(int rank) {
         int pct = Math.round(bleedChanceForRank(rank) * 100);
-        int weaponPct = Math.round(BLEED_WEAPON_PCT * 100);
+        int weaponPct = Math.round(bleedWeaponPctForRank(rank) * 100);
         return pct + "% chance de saignement (" + weaponPct + "% arme/s, 5s)";
     }
 

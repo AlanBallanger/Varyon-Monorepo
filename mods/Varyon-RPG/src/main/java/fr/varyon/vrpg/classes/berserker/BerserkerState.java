@@ -18,13 +18,14 @@ public final class BerserkerState {
     private final ConcurrentHashMap<UUID, Long>    criExpiry           = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Float>   criBonus            = new ConcurrentHashMap<>();
 
-    // --- Cor de Guerre (stun + vitesse d'attaque, géré par état temporel) ---
+    // --- Cor de Guerre (vitesse de déplacement) ---
     private final ConcurrentHashMap<UUID, Long>    corExpiry           = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Float>   corSpeedBoost       = new ConcurrentHashMap<>();
 
     // --- Dernier Souffle (immortalité temporaire) ---
     private final ConcurrentHashMap<UUID, Long>    dernierSouffleExpiry = new ConcurrentHashMap<>();
 
-    // --- Ferveur Guerrière (stacks dégâts, 1/s max 15s) ---
+    // --- Ferveur Guerrière (stacks dégâts, 1/s max 10) ---
     private final ConcurrentHashMap<UUID, Integer> ferveurStacks       = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long>    ferveurLastTick     = new ConcurrentHashMap<>();
 
@@ -89,16 +90,23 @@ public final class BerserkerState {
 
     // ---- Cor de Guerre ----
 
-    public void startCor(@Nonnull UUID uuid, long durationMs) {
+    public void startCor(@Nonnull UUID uuid, long durationMs, float speedBoost) {
         corExpiry.put(uuid, System.currentTimeMillis() + durationMs);
+        corSpeedBoost.put(uuid, speedBoost);
+    }
+
+    public float getCorSpeedBoost(@Nonnull UUID uuid) {
+        Long exp = corExpiry.get(uuid);
+        if (exp == null || System.currentTimeMillis() >= exp) {
+            corExpiry.remove(uuid);
+            corSpeedBoost.remove(uuid);
+            return 0f;
+        }
+        return corSpeedBoost.getOrDefault(uuid, 0f);
     }
 
     public boolean isCorActive(@Nonnull UUID uuid) {
-        Long exp = corExpiry.get(uuid);
-        if (exp == null) return false;
-        if (System.currentTimeMillis() < exp) return true;
-        corExpiry.remove(uuid);
-        return false;
+        return getCorSpeedBoost(uuid) > 0f;
     }
 
     // ---- Dernier Souffle ----
@@ -223,6 +231,7 @@ public final class BerserkerState {
         criExpiry.remove(uuid);
         criBonus.remove(uuid);
         corExpiry.remove(uuid);
+        corSpeedBoost.remove(uuid);
         dernierSouffleExpiry.remove(uuid);
         ferveurStacks.remove(uuid);
         ferveurLastTick.remove(uuid);

@@ -25,7 +25,7 @@ public final class RempartPassifs {
     }
 
     public static String constitutionStatLine(int rank) {
-        return "+" + Math.round(constitutionHpBonusForRank(rank) * 100) + "% HP maximum";
+        return "+" + Math.round(constitutionHpBonusForRank(rank) * 100) + "% PV maximum";
     }
 
     // --- Garde Impénétrable (node 5) — réduction dégâts après blocage ---
@@ -52,7 +52,7 @@ public final class RempartPassifs {
     }
 
     public static String infatigableStatLine(int rank) {
-        return "Les blocages parfaits restaurent " + Math.round(infatigableHealPctForRank(rank) * 100) + "% HP max";
+        return "Les blocages parfaits restaurent " + Math.round(infatigableHealPctForRank(rank) * 100) + "% PV max";
     }
 
     // --- Contre Offensif (node 8) — bonus dégâts après blocage ---
@@ -82,7 +82,7 @@ public final class RempartPassifs {
     public static float bastionThreshold() { return BASTION_THRESHOLD; }
 
     public static String dernierBastionStatLine(int rank) {
-        return "-" + Math.round(bastionReductionForRank(rank) * 100) + "% dégâts reçus sous 30% HP";
+        return "-" + Math.round(bastionReductionForRank(rank) * 100) + "% dégâts reçus sous 30% PV";
     }
 
     private static int idx(int rank, int len) {
