@@ -1,6 +1,7 @@
 package fr.varyon.vrpg.classes.ability;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
@@ -26,5 +27,7 @@ public final class ClassSkillTriggerInteraction extends SimpleInstantInteraction
     @Override
     protected void firstRun(@Nonnull InteractionType type,
                             @Nonnull InteractionContext context,
-                            @Nonnull CooldownHandler cooldownHandler) {}
+                            @Nonnull CooldownHandler cooldownHandler) {
+        context.getState().state = InteractionState.Finished;
+    }
 }

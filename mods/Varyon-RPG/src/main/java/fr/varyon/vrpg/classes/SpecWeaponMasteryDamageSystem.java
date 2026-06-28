@@ -75,7 +75,8 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
             // Multiplicateur de niveau — sauf mages dont le scaling niveau est dans leur OutgoingDamageSystem
             if (spec != null && activeClass != null
                     && spec != PlayerSpecialization.ARCANISTE
-                    && spec != PlayerSpecialization.GARDIEN_DE_GAIA) {
+                    && spec != PlayerSpecialization.GARDIEN_DE_GAIA
+                    && spec != PlayerSpecialization.VAUDOU) {
                 try {
                     int level = acc.getProgress(activeClass).getLevel();
                     double levelMult = ClassStatDefinition.atkDisplayMultiplier(level, spec);
@@ -86,8 +87,8 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
                 } catch (Exception ignored2) {}
             }
 
-            // Maîtrise d'armes — multiplicateur selon type d'arme
-            if (spec != null) {
+            // Maîtrise d'armes — multiplicateur selon type d'arme (Vaudou : déjà appliqué dans VaudouOutgoingDamageSystem)
+            if (spec != null && spec != PlayerSpecialization.VAUDOU) {
                 String itemId = getHeldItemId(playerRef);
                 if (itemId != null) {
                     WeaponCategory category = WeaponCategory.fromItemId(itemId);

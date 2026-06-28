@@ -18,7 +18,7 @@ public enum PlayerSpecialization {
 
     ARCANISTE      ("arcaniste",       "Arcaniste",       PlayerClass.MAGE, "Weapon_Staff_Crystal_Flame",  "Magie - Sorts - Puissance",      "Lance des sorts dévastateurs depuis la distance.", 0.90, 1.20, 0.85, 0.85, 0.90, 1.05,  1.00, 1.00, 1.00, 0.75, 0.75, 1.00, 1.50),
     GARDIEN_DE_GAIA("gardien_de_gaia", "Gardien de Gaïa", PlayerClass.MAGE, "Weapon_Staff_Wood",           "Nature - Soin - Invocation",     "Puise dans la nature pour soigner et invoquer.",   0.90, 0.65, 0.90, 1.25, 0.70, 0.70,  1.00, 1.00, 1.00, 0.75, 0.75, 1.00, 1.50),
-    VAUDOU         ("vaudou",          "Vaudou",          PlayerClass.MAGE, "Weapon_Spellbook_Frost",      "Malédictions - Debuffs - Zones", "Affaiblit les ennemis par des malédictions.",      1.10, 0.85, 1.15, 1.20, 0.90, 0.90,  1.00, 0.75, 1.00, 1.00, 0.75, 1.00, 1.50),
+    VAUDOU         ("vaudou",          "Vaudou",          PlayerClass.MAGE, "Weapon_Spellbook_Frost",      "Malédictions - Debuffs - Zones", "Affaiblit les ennemis par des malédictions.",      1.10, 0.85, 1.10, 1.20, 0.90, 0.90,  1.00, 0.75, 1.00, 1.00, 0.75, 1.00, 1.50),
 
     RODEUR     ("rodeur",      "Rodeur",      PlayerClass.TIREUR, "Weapon_Shortbow_Thorium",     "Arc - Traque - Mobilité",        "Traque ses proies avec agilité et précision.",      0.90, 1.15, 0.85, 1.30, 1.05, 1.10,  1.00, 1.00, 1.00, 0.75, 0.75, 1.50, 0.75),
     ARBALETRIER("arbaletrier", "Arbalétrier", PlayerClass.TIREUR, "Weapon_Crossbow_Iron",        "Arbalète - Pénétration - Lent",  "Tirs lents mais dévastateurs à longue portée.",    0.90, 1.05, 0.85, 1.25, 1.15, 1.20,  1.00, 1.00, 1.00, 0.75, 0.75, 1.50, 0.75),

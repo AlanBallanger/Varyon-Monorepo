@@ -56,7 +56,7 @@ public final class VaudouPassifs {
 
     // --- Rituel Interdit (node 9) — +dégâts sur cible maudite ---
     public static final String RITUEL_NODE = "vaudou_9";
-    private static final float[] RITUEL_BONUS = {0.05f, 0.08f, 0.12f, 0.16f, 0.20f};
+    private static final float[] RITUEL_BONUS = {0.25f, 0.35f, 0.45f, 0.55f, 0.70f};
 
     public static float rituelBonusForRank(int rank) {
         return RITUEL_BONUS[idx(rank, RITUEL_BONUS.length)];

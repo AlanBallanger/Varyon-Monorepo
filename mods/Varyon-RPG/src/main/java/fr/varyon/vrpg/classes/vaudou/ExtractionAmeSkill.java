@@ -5,10 +5,10 @@ public final class ExtractionAmeSkill {
     public static final String SKILL_ID       = "extraction_ame";
     public static final String TALENT_NODE_ID = "vaudou_10";
 
-    private static final float[] DAMAGE_PCT    = {0.80f, 1.00f, 1.20f, 1.50f, 1.80f};
+    private static final float[] DAMAGE_PCT    = {1.60f, 2.00f, 2.40f, 3.00f, 3.60f};
     private static final float[] LIFESTEAL_PCT = {0.30f, 0.35f, 0.40f, 0.45f, 0.50f};
-    private static final long[]  COOLDOWN_MS   = {14000, 13000, 12000, 10000, 8000};
-    private static final float[] MANA_COST     = {7f, 8f, 9f, 10f, 11f};
+    private static final long[]  COOLDOWN_MS   = {30000, 27000, 24000, 21000, 18000};
+    private static final float[] MANA_COST     = {14f, 16f, 18f, 20f, 22f};
 
     private ExtractionAmeSkill() {}
 

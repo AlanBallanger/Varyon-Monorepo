@@ -37,7 +37,7 @@
   ],
   "Particles": [
     {
-      "SystemId": "Vrpg_Totem_Slow_Loop",
+      "SystemId": "Totem_Slow_AttachOnStatue",
       "TargetEntityPart": "Entity",
       "Scale": 1.0
     }

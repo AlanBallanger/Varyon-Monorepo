@@ -41,21 +41,28 @@ public final class ClassSkillKeyFilter implements PlayerPacketFilter {
 
             InteractionType type = toAbilityType(chain);
             if (type == null) continue;
-            if (isArbaletrier(playerRef)) blockPacket = true;
+            if (shouldBlockVanillaAbility(playerRef)) blockPacket = true;
             ClassSkillSlots.tryCastAbility(playerRef, type);
         }
         return blockPacket;
     }
 
-    private boolean isArbaletrier(@Nonnull PlayerRef playerRef) {
+    private boolean shouldBlockVanillaAbility(@Nonnull PlayerRef playerRef) {
         try {
             java.util.UUID uuid = playerRef.getUuid();
             if (uuid == null) return false;
-            ClassAccount acc = classManager.getAccount(uuid);
-            if (acc == null) return false;
-            return acc.getActiveClass() == PlayerClass.TIREUR
-                && acc.getActiveSpec(PlayerClass.TIREUR) == PlayerSpecialization.ARBALETRIER;
-        } catch (Exception e) { return false; }
+            ClassAccount acc = classManager.getOrLoad(uuid);
+            PlayerClass activeClass = acc.getActiveClass();
+            if (activeClass == null) return false;
+            if (activeClass == PlayerClass.TIREUR) {
+                PlayerSpecialization spec = acc.getActiveSpec(PlayerClass.TIREUR);
+                return spec == PlayerSpecialization.ARBALETRIER
+                    || spec == PlayerSpecialization.RODEUR;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void onSecondary(@Nonnull PlayerRef playerRef) {

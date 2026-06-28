@@ -1,4 +1,4 @@
-﻿$P = "CharacterPage.ui";
+$P = "CharacterPage.ui";
 $C = "Common.ui";
 
 Group {

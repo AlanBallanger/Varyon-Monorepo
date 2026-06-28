@@ -20,12 +20,18 @@ import fr.varyon.vrpg.classes.ClassStatDefinition;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.WeaponCategory;
+import fr.varyon.vrpg.config.VrpgConfig;
 import javax.annotation.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
+
+    public static final float STAFF_BASE_MULT = 5f;
+
+    private static final com.hypixel.hytale.logger.HytaleLogger LOG =
+        com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
 
     private final ClassManager classManager;
     private final VaudouState vaudouState;
@@ -58,7 +64,7 @@ public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
                        @Nonnull CommandBuffer<EntityStore> commandBuffer,
                        @Nonnull Damage damage) {
         try {
-            if (damage.isCancelled()) return;
+            if (damage.isCancelled() || damage.getAmount() <= 0f) return;
 
             Damage.Source source = damage.getSource();
             if (!(source instanceof Damage.EntitySource entitySource)) return;
@@ -67,6 +73,10 @@ public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
             com.hypixel.hytale.server.core.entity.entities.Player playerComp =
                 store.getComponent(attackerRef,
                     com.hypixel.hytale.server.core.entity.entities.Player.getComponentType());
+            if (playerComp == null) {
+                playerComp = commandBuffer.getComponent(attackerRef,
+                    com.hypixel.hytale.server.core.entity.entities.Player.getComponentType());
+            }
             if (playerComp == null) return;
 
             com.hypixel.hytale.server.core.universe.PlayerRef playerRef =
@@ -83,8 +93,7 @@ public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
             Ref<EntityStore> victimRef = chunk.getReferenceTo(index);
 
             int level = acc.getProgress(PlayerClass.MAGE).getLevel();
-            float vaudouMageMult = (float) (ClassStatDefinition.atkDisplayMultiplier(level, PlayerSpecialization.VAUDOU)
-                * PlayerSpecialization.VAUDOU.getWeaponMagieMult());
+            float levelMult = (float) ClassStatDefinition.atkDisplayMultiplier(level, PlayerSpecialization.VAUDOU);
 
             fr.varyon.vrpg.classes.ClassPlayerStats stats = classManager.getStatEngine().getStats(uuid);
             if (stats == null) stats = fr.varyon.vrpg.classes.ClassStatDefinition.compute(level, PlayerSpecialization.VAUDOU);
@@ -93,23 +102,25 @@ public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
             float critMult = isCrit ? (1.0f + (stats.critDamagePct() / 100.0f)) : 1.0f;
 
             float pendingSkill = vaudouState.consumePendingSkillDmg(uuid);
+            boolean skillDamagePreset = pendingSkill > 0f;
             boolean isFleauHit = vaudouState.hasPendingFleau(uuid);
+            boolean staffHit = false;
             if (isFleauHit) {
                 damage.setAmount(0f);
                 fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
-            } else if (pendingSkill > 0f) {
-                float finalSkill = pendingSkill * critMult;
-                damage.setAmount(finalSkill);
-                fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
-                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, victimRef, finalSkill * vaudouMageMult,
-                    isCrit ? "SHADOW_CRITICAL" : "SHADOW");
-            } else if (WeaponCategory.heldCategory(playerRef) == WeaponCategory.MAGIE
-                    && damage.getCause() != com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.COMMAND) {
-                float base50 = 50f * critMult;
-                damage.setAmount(base50);
-                fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
-                fr.varyon.vrpg.integration.DamageFloatBridge.emit(store, victimRef, base50 * vaudouMageMult,
-                    isCrit ? "SHADOW_CRITICAL" : "SHADOW");
+            } else {
+                float base = damage.getAmount();
+                if (pendingSkill > 0f) {
+                    base = pendingSkill;
+                }
+                float amount = base;
+                staffHit = WeaponCategory.heldCategory(playerRef) == WeaponCategory.MAGIE || skillDamagePreset;
+                if (staffHit
+                        && damage.getCause() != com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.COMMAND) {
+                    amount *= STAFF_BASE_MULT * levelMult;
+                }
+                amount *= critMult;
+                damage.setAmount(amount);
             }
 
             // Fléau Toxique — consomme le projectile pending et applique poison + malédiction
@@ -134,23 +145,24 @@ public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
                 } catch (Exception ignored) {}
             }
 
-            boolean isCursed;
+            boolean inTotemZone;
+            boolean npcCursed;
             try {
                 TransformComponent victimTc = store.getComponent(victimRef, TransformComponent.getComponentType());
-                isCursed = victimTc != null && VaudouTotemHelper.isInAnyTotem(victimTc.getPosition());
+                inTotemZone = victimTc != null && VaudouTotemHelper.isInAnyTotem(victimTc.getPosition());
+                npcCursed = vaudouState.isNpcCursed(victimRef.getIndex());
             } catch (Exception ignored) {
-                isCursed = false;
+                inTotemZone = false;
+                npcCursed = false;
             }
 
             float mult = 1.0f;
 
-            // Rituel Interdit — bonus sur cibles maudites
             int rituelRank = acc.getTalentRank(PlayerClass.MAGE, VaudouPassifs.RITUEL_NODE);
-            if (rituelRank > 0 && isCursed) {
+            if (rituelRank > 0 && inTotemZone) {
                 mult += VaudouPassifs.rituelBonusForRank(rituelRank);
             }
 
-            // Totem de Vulnérabilité — bonus si la cible est dans la zone
             try {
                 TransformComponent ttc = store.getComponent(victimRef, TransformComponent.getComponentType());
                 if (ttc != null) {
@@ -159,13 +171,37 @@ public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
                 }
             } catch (Exception ignored) {}
 
-            if (mult != 1.0f) {
+            if (mult != 1.0f && !skillDamagePreset) {
                 damage.setAmount(damage.getAmount() * mult);
             }
 
-            // Parasite Spirituel — soin au caster si cible maudite
+            if (!isFleauHit && damage.getAmount() > 0f) {
+                if (staffHit
+                        && damage.getCause() != com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.COMMAND) {
+                    float weaponMult = (float) WeaponCategory.MAGIE.getMultiplierFor(PlayerSpecialization.VAUDOU);
+                    if (weaponMult != 1.0f) {
+                        damage.setAmount(damage.getAmount() * weaponMult);
+                    }
+                }
+                float finalAmount = damage.getAmount();
+                if (VrpgConfig.isDebugCombat()) {
+                    String causeId = damage.getCause() != null ? damage.getCause().getId() : "?";
+                    LOG.atInfo().log(String.format(
+                        "[VaudouDmg] cause=%s Staff=x%.0f Lvl=x%.2f Weapon=x%.2f -> %.1f",
+                        causeId, STAFF_BASE_MULT, levelMult,
+                        (float) WeaponCategory.MAGIE.getMultiplierFor(PlayerSpecialization.VAUDOU),
+                        finalAmount));
+                }
+                fr.varyon.vrpg.integration.DamageFloatBridge.markSkipCombatText(damage);
+                if (isCrit) {
+                    fr.varyon.vrpg.integration.DamageFloatBridge.markCritical(damage);
+                }
+                fr.varyon.vrpg.integration.DamageFloatBridge.emit(
+                    store, victimRef, finalAmount, isCrit ? "SHADOW_CRITICAL" : "SHADOW");
+            }
+
             int parasiteRank = acc.getTalentRank(PlayerClass.MAGE, VaudouPassifs.PARASITE_NODE);
-            if (parasiteRank > 0 && isCursed) {
+            if (parasiteRank > 0 && npcCursed) {
                 final float heal = damage.getAmount() * VaudouPassifs.parasiteHealPctForRank(parasiteRank);
                 try {
                     com.hypixel.hytale.server.core.universe.PlayerRef casterPlayerRef =

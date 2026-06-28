@@ -9,8 +9,9 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Int
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.UnarmedInteractions;
 import fr.varyon.vrpg.VaryonRpgPlugin;
-
+import fr.varyon.vrpg.classes.WeaponCategory;
 import java.lang.reflect.Field;
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -31,6 +32,13 @@ public final class ClassSkillInteractionInjector {
     public static void register() {
         HytaleServer.get().getEventBus().register(LoadedAssetsEvent.class, Item.class,
             ClassSkillInteractionInjector::onItemsLoaded);
+        injectLoadedItems();
+    }
+
+    public static void injectLoadedItems() {
+        if (!ensureTriggerAssets()) return;
+        injectItems();
+        injectUnarmedEmpty();
     }
 
     private static void onItemsLoaded(LoadedAssetsEvent<?, Item, ?> event) {
@@ -71,6 +79,11 @@ public final class ClassSkillInteractionInjector {
         return root;
     }
 
+    private static boolean shouldForceAbilityOverride(@Nonnull Item item) {
+        WeaponCategory cat = WeaponCategory.fromItemId(item.getId());
+        return cat == WeaponCategory.MAGIE || cat == WeaponCategory.DISTANCE;
+    }
+
     private static void injectItems() {
         try {
             Field interactionsField = Item.class.getDeclaredField("interactions");
@@ -86,17 +99,24 @@ public final class ClassSkillInteractionInjector {
                     EnumMap<InteractionType, String> next = new EnumMap<>(InteractionType.class);
                     if (current != null) next.putAll(current);
                     boolean modified = false;
-                    if (!next.containsKey(InteractionType.Ability1)) {
-                        next.put(InteractionType.Ability1, TRIGGER_ABILITY_1);
-                        modified = true;
+                    boolean forceOverride = shouldForceAbilityOverride(item);
+                    if (forceOverride || !next.containsKey(InteractionType.Ability1)) {
+                        if (!TRIGGER_ABILITY_1.equals(next.get(InteractionType.Ability1))) {
+                            next.put(InteractionType.Ability1, TRIGGER_ABILITY_1);
+                            modified = true;
+                        }
                     }
-                    if (!next.containsKey(InteractionType.Ability2)) {
-                        next.put(InteractionType.Ability2, TRIGGER_ABILITY_2);
-                        modified = true;
+                    if (forceOverride || !next.containsKey(InteractionType.Ability2)) {
+                        if (!TRIGGER_ABILITY_2.equals(next.get(InteractionType.Ability2))) {
+                            next.put(InteractionType.Ability2, TRIGGER_ABILITY_2);
+                            modified = true;
+                        }
                     }
-                    if (!next.containsKey(InteractionType.Ability3)) {
-                        next.put(InteractionType.Ability3, TRIGGER_ABILITY_3);
-                        modified = true;
+                    if (forceOverride || !next.containsKey(InteractionType.Ability3)) {
+                        if (!TRIGGER_ABILITY_3.equals(next.get(InteractionType.Ability3))) {
+                            next.put(InteractionType.Ability3, TRIGGER_ABILITY_3);
+                            modified = true;
+                        }
                     }
                     if (!modified) continue;
                     interactionsField.set(item, Collections.unmodifiableMap(next));

@@ -201,10 +201,20 @@ public final class ClassSkillStatResolver {
             case MarqueDeRenaissanceSkill.SKILL_ID -> marqueDeRenaissanceStats(rank);
             case GardienDeGaiaPassifs.LIEN_NODE -> lienSpirituelStats(rank);
             case GardienDeGaiaPassifs.GARDIEN_NODE -> gardienNatureStats(rank);
+            case GardienDeGaiaPassifs.GRACE_NODE -> graceDeGaiaStats(rank);
             case GardienDeGaiaPassifs.CYCLE_NODE -> cycleDeVieStats(rank);
             case GardienDeGaiaPassifs.SOUFFLE_NODE -> souffleNatureStats(rank);
             case VaudouPassifs.FETICHEUR_NODE -> xpOnlyStats(
                 Math.round(VaudouPassifs.feticheurXpBonusForRank(rank) * 100));
+            case PassageEthereSkill.SKILL_ID -> passageEthereStats(rank);
+            case FleauToxiqueSkill.SKILL_ID -> fleauToxiqueStats(rank);
+            case TotemEntraveSkill.SKILL_ID -> totemEntraveStats(rank);
+            case TotemVulnerabiliteSkill.SKILL_ID -> totemVulnerabiliteStats(rank);
+            case VaudouPassifs.PARASITE_NODE -> parasiteSpirituelStats(rank);
+            case VaudouPassifs.TOXINES_NODE -> toxinesStats(rank);
+            case VaudouPassifs.ANCRAGE_NODE -> ancrageRituelStats(rank);
+            case VaudouPassifs.RITUEL_NODE -> rituelInterditStats(rank);
+            case VaudouPassifs.PRESENCE_NODE -> presenceOppressanteStats(rank);
             case RodeurPassifs.OEIL_CHASSEUR_NODE -> xpOnlyStats(
                 Math.round(RodeurPassifs.oeilXpBonusForRank(rank) * 100));
             case ArbaietrierPassifs.TIREUR_ELITE_NODE -> xpOnlyStats(
@@ -614,6 +624,11 @@ public final class ClassSkillStatResolver {
         return List.of(new SkillStatEntry(SkillStatKind.HEAL, "+" + pct + "%", "PV"));
     }
 
+    private static List<SkillStatEntry> graceDeGaiaStats(int rank) {
+        int pct = Math.round(GardienDeGaiaPassifs.graceBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.HEAL, "+" + pct + "%", "Soins <40% PV"));
+    }
+
     private static List<SkillStatEntry> cycleDeVieStats(int rank) {
         float mana = GardienDeGaiaPassifs.cycleManaForRank(rank);
         String manaStr = mana == Math.floor(mana) ? String.valueOf((int) mana) : String.valueOf(mana);
@@ -629,6 +644,83 @@ public final class ClassSkillStatResolver {
             new SkillStatEntry(SkillStatKind.HEAL, "+" + hpStr + "/s", "PV"),
             new SkillStatEntry(SkillStatKind.STAMINA, "+" + staStr + "/s", "Endu.")
         );
+    }
+
+    private static List<SkillStatEntry> passageEthereStats(int rank) {
+        int range = (int) PassageEthereSkill.rangeForRank(rank);
+        int stamina = Math.round(PassageEthereSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, String.valueOf(range), "Portée"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(PassageEthereSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> fleauToxiqueStats(int rank) {
+        int pct = Math.round(FleauToxiqueSkill.poisonWeaponPctForRank(rank) * 100);
+        int red = Math.round(FleauToxiqueSkill.damageReduceForRank(rank) * 100);
+        int mana = Math.round(FleauToxiqueSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%", "Poison"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(FleauToxiqueSkill.poisonDurationMsForRank(rank)), "Durée"),
+            new SkillStatEntry(SkillStatKind.DEFENSE, "-" + red + "%", "Redu."),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(FleauToxiqueSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> totemEntraveStats(int rank) {
+        int mana = Math.round(TotemEntraveSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED,
+                "-" + TotemEntraveSkill.slowReductionPct() + "%", "Vitesse"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(TotemEntraveSkill.baseDurationMsForRank(rank)), "Durée"),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(TotemEntraveSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> totemVulnerabiliteStats(int rank) {
+        int bonus = Math.round(TotemVulnerabiliteSkill.damageTakenBonusForRank(rank) * 100);
+        int mana = Math.round(TotemVulnerabiliteSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + bonus + "%", "Dégâts"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(TotemVulnerabiliteSkill.baseDurationMsForRank(rank)), "Durée"),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(TotemVulnerabiliteSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> parasiteSpirituelStats(int rank) {
+        int pct = Math.round(VaudouPassifs.parasiteHealPctForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.HEAL, pct + "%", "PV"));
+    }
+
+    private static List<SkillStatEntry> toxinesStats(int rank) {
+        int pct = Math.round(VaudouPassifs.toxinesDurationBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DURATION, "+" + pct + "%", "Durée"));
+    }
+
+    private static List<SkillStatEntry> ancrageRituelStats(int rank) {
+        int pct = Math.round(VaudouPassifs.ancrageTotemBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DURATION, "+" + pct + "%", "Durée"));
+    }
+
+    private static List<SkillStatEntry> rituelInterditStats(int rank) {
+        int pct = Math.round(VaudouPassifs.rituelBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%", "Dégâts"));
+    }
+
+    private static List<SkillStatEntry> presenceOppressanteStats(int rank) {
+        int pct = Math.round(VaudouPassifs.presenceReductionForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DEFENSE, "-" + pct + "%", "Redu."));
     }
 
     private static List<SkillStatEntry> puitsManaStats(int rank) {
@@ -1046,6 +1138,7 @@ public final class ClassSkillStatResolver {
             case MarqueDuChasseurSkill.SKILL_ID -> MarqueDuChasseurSkill.staminaCostForRank(rank);
             case DistorsionSkill.SKILL_ID -> DistorsionSkill.staminaCostForRank(rank);
             case EvasionSylvestreSkill.SKILL_ID -> EvasionSylvestreSkill.staminaCostForRank(rank);
+            case PassageEthereSkill.SKILL_ID -> PassageEthereSkill.staminaCostForRank(rank);
             default -> null;
         };
     }
@@ -1057,7 +1150,6 @@ public final class ClassSkillStatResolver {
             case MeteoreSkill.SKILL_ID -> MeteoreSkill.manaCostForRank(rank);
             case NovaDeGivreSkill.SKILL_ID -> NovaDeGivreSkill.manaCostForRank(rank);
             case SalveDeGivreSkill.SKILL_ID -> SalveDeGivreSkill.manaCostForRank(rank);
-            case PassageEthereSkill.SKILL_ID -> PassageEthereSkill.manaCostForRank(rank);
             case FleauToxiqueSkill.SKILL_ID -> FleauToxiqueSkill.manaCostForRank(rank);
             case TotemEntraveSkill.SKILL_ID -> TotemEntraveSkill.manaCostForRank(rank);
             case AttaquePerfideSkill.SKILL_ID -> AttaquePerfideSkill.manaCostForRank(rank);

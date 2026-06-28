@@ -155,6 +155,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaRegenTickSystem gardienDeGaiaRegenTickSystem;
     private fr.varyon.vrpg.classes.vaudou.VaudouState vaudouState;
     private fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem vaudouPoisonSystem;
+    private fr.varyon.vrpg.classes.vaudou.VaudouTotemSlowSystem vaudouTotemSlowSystem;
+    private fr.varyon.vrpg.classes.vaudou.VaudouTotemCleanupSystem vaudouTotemCleanupSystem;
     private fr.varyon.vrpg.classes.vaudou.VaudouOutgoingDamageSystem vaudouOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.vaudou.VaudouIncomingDamageSystem vaudouIncomingDamageSystem;
     private fr.varyon.vrpg.classes.rodeur.RodeurState rodeurState;
@@ -316,6 +318,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.gardienDeGaiaRegenTickSystem = new fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaRegenTickSystem(classManager, gardienDeGaiaState);
             this.vaudouState = new fr.varyon.vrpg.classes.vaudou.VaudouState();
             this.vaudouPoisonSystem = new fr.varyon.vrpg.classes.vaudou.VaudouPoisonSystem();
+            this.vaudouTotemSlowSystem = new fr.varyon.vrpg.classes.vaudou.VaudouTotemSlowSystem();
+            this.vaudouTotemCleanupSystem = new fr.varyon.vrpg.classes.vaudou.VaudouTotemCleanupSystem();
             this.vaudouOutgoingDamageSystem = new fr.varyon.vrpg.classes.vaudou.VaudouOutgoingDamageSystem(classManager, vaudouState);
             this.vaudouOutgoingDamageSystem.setVaudouPoisonSystem(vaudouPoisonSystem);
             this.vaudouIncomingDamageSystem = new fr.varyon.vrpg.classes.vaudou.VaudouIncomingDamageSystem(classManager);
@@ -1065,6 +1069,16 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 getEntityStoreRegistry().registerSystem(vaudouPoisonSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VaudouPoisonSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(vaudouTotemSlowSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VaudouTotemSlowSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(vaudouTotemCleanupSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VaudouTotemCleanupSystem");
             }
         }
 

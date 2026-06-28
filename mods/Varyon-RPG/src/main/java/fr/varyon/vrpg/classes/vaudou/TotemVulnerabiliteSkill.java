@@ -4,11 +4,13 @@ public final class TotemVulnerabiliteSkill {
 
     public static final String SKILL_ID       = "totem_vulnerabilite";
     public static final String TALENT_NODE_ID = "vaudou_6";
+    public static final String PROJECTILE_CONFIG = "Vrpg_Totem_Vulnerabilite_Throw";
+    public static final double THROW_SPEED      = 8.0;
 
-    private static final float[] DAMAGE_TAKEN_BONUS = {0.08f, 0.10f, 0.12f, 0.15f, 0.18f};
+    private static final float[] DAMAGE_TAKEN_BONUS = {0.10f, 0.12f, 0.14f, 0.17f, 0.20f};
     private static final long[]  BASE_DURATION_MS   = {10000, 12000, 14000, 16000, 18000};
     private static final long[]  COOLDOWN_MS         = {28000, 25000, 23000, 21000, 18000};
-    private static final float[] MANA_COST           = {8f, 9f, 10f, 11f, 12f};
+    private static final float[] MANA_COST           = {16f, 18f, 20f, 22f, 24f};
 
     private TotemVulnerabiliteSkill() {}
 

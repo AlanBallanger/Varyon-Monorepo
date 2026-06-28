@@ -71,7 +71,7 @@ public final class GardienDeGaiaPassifs {
     }
     public static String graceStatLine(int rank) {
         int pct = Math.round(graceBonusForRank(rank) * 100);
-        return "+" + pct + "% soins sous 40% HP";
+        return "+" + pct + "% soins sous 40% PV";
     }
 
     // --- Cycle de Vie (node 8) — soigner un allié restaure du mana ---
