@@ -203,6 +203,16 @@ public final class ClassSkillStatResolver {
                 Math.round(LancierPassifs.disciplineBonusForRank(rank) * 100));
             case ArcanistPassifs.TALENT_INNE_NODE -> xpOnlyStats(
                 Math.round(ArcanistPassifs.talentInneBonusForRank(rank) * 100));
+            case DistorsionSkill.SKILL_ID -> distorsionStats(rank);
+            case MeteoreSkill.SKILL_ID -> meteoreStats(rank);
+            case NovaDeGivreSkill.SKILL_ID -> novaDeGivreStats(rank);
+            case SurchargeSkill.SKILL_ID -> surchargeStats(rank);
+            case SalveDeGivreSkill.SKILL_ID -> salveDeGivreStats(rank);
+            case ArcanistPassifs.PUITS_MANA_NODE -> puitsManaStats(rank);
+            case ArcanistPassifs.ECHO_ARCANIQUE_NODE -> echoArcanicStats(rank);
+            case ArcanistPassifs.ECHO_TEMPOREL_NODE -> echoTemporelStats(rank);
+            case ArcanistPassifs.DRAIN_MYSTIQUE_NODE -> drainMystiqueStats(rank);
+            case ArcanistPassifs.POUVOIR_GRANDISSANT_NODE -> pouvoirGrandissantStats(rank);
             case OmbrePassifs.LAMES_EMPOISONNEES_NODE -> lamesEmpoisonneesStats(rank);
             case OmbrePassifs.EMBUSCADE_NODE -> embuscadeStats(rank);
             case OmbrePassifs.DANSE_LAMES_NODE -> danseLamesStats(rank);
@@ -496,6 +506,98 @@ public final class ClassSkillStatResolver {
             new SkillStatEntry(SkillStatKind.RATE, chance + "%"),
             new SkillStatEntry(SkillStatKind.DURATION,
                 formatDurationMs(BagarreurPassifs.poingsAcierStunMsForRank(rank)), "Étour.")
+        );
+    }
+
+    private static List<SkillStatEntry> distorsionStats(int rank) {
+        int dist = (int) DistorsionSkill.dashDistanceForRank(rank);
+        int stamina = Math.round(DistorsionSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, String.valueOf(dist), "Dist."),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(DistorsionSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> puitsManaStats(int rank) {
+        int pct = Math.round(ArcanistPassifs.puitsManaBonus(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.MANA, "+" + pct + "%", "Max"));
+    }
+
+    private static List<SkillStatEntry> echoArcanicStats(int rank) {
+        int pct = Math.round(ArcanistPassifs.echoArcanicChanceForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.RATE, pct + "%"));
+    }
+
+    private static List<SkillStatEntry> echoTemporelStats(int rank) {
+        int pct = Math.round(ArcanistPassifs.echoTemporelReducForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.COOLDOWN, "-" + pct + "%"));
+    }
+
+    private static List<SkillStatEntry> drainMystiqueStats(int rank) {
+        int pct = Math.round(ArcanistPassifs.drainMystiqueBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.MANA, "+" + pct + "%"));
+    }
+
+    private static List<SkillStatEntry> pouvoirGrandissantStats(int rank) {
+        int pct = Math.round(ArcanistPassifs.pouvoirGrandissantBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"));
+    }
+
+    private static List<SkillStatEntry> salveDeGivreStats(int rank) {
+        int bolts = SalveDeGivreSkill.boltCountForRank(rank);
+        int pct = Math.round(SalveDeGivreSkill.damagePctPerHitForRank(rank) * 100);
+        int mana = Math.round(SalveDeGivreSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, String.valueOf(bolts), "Proj."),
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(SalveDeGivreSkill.slowMsForRank(rank)), "Ralent."),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(SalveDeGivreSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> novaDeGivreStats(int rank) {
+        int pct = Math.round(NovaDeGivreSkill.damagePctForRank(rank) * 100);
+        int mana = Math.round(NovaDeGivreSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(NovaDeGivreSkill.slowMsForRank(rank)), "Ralent."),
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED,
+                String.valueOf((int) NovaDeGivreSkill.radius()), "Rayon"),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(NovaDeGivreSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> surchargeStats(int rank) {
+        int dmg = Math.round(SurchargeSkill.damageBonusForRank(rank) * 100);
+        int manaRst = Math.round(SurchargeSkill.manaRestorePctForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + dmg + "%"),
+            new SkillStatEntry(SkillStatKind.MANA, "+" + manaRst + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(SurchargeSkill.durationMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(SurchargeSkill.cooldownMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> meteoreStats(int rank) {
+        int pct = Math.round(MeteoreSkill.damagePctForRank(rank) * 100);
+        int mana = Math.round(MeteoreSkill.manaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%"),
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED,
+                String.valueOf((int) MeteoreSkill.impactRadius()), "Rayon"),
+            new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(MeteoreSkill.cooldownMsForRank(rank)))
         );
     }
 
@@ -827,6 +929,7 @@ public final class ClassSkillStatResolver {
             case MarteauPilonSkill.SKILL_ID -> MarteauPilonSkill.staminaCostForRank(rank);
             case RabattageSkill.SKILL_ID -> RabattageSkill.staminaCostForRank(rank);
             case MarqueDuChasseurSkill.SKILL_ID -> MarqueDuChasseurSkill.staminaCostForRank(rank);
+            case DistorsionSkill.SKILL_ID -> DistorsionSkill.staminaCostForRank(rank);
             default -> null;
         };
     }
@@ -834,11 +937,9 @@ public final class ClassSkillStatResolver {
     @Nullable
     private static Float manaCostFromSkill(String skillId, int rank) {
         return switch (skillId) {
-            case DistorsionSkill.SKILL_ID -> DistorsionSkill.manaCostForRank(rank);
             case BouleDeFeuSkill.SKILL_ID -> BouleDeFeuSkill.manaCostForRank(rank);
             case MeteoreSkill.SKILL_ID -> MeteoreSkill.manaCostForRank(rank);
             case NovaDeGivreSkill.SKILL_ID -> NovaDeGivreSkill.manaCostForRank(rank);
-            case SurchargeSkill.SKILL_ID -> SurchargeSkill.manaCostForRank(rank);
             case SalveDeGivreSkill.SKILL_ID -> SalveDeGivreSkill.manaCostForRank(rank);
             case PassageEthereSkill.SKILL_ID -> PassageEthereSkill.manaCostForRank(rank);
             case FleauToxiqueSkill.SKILL_ID -> FleauToxiqueSkill.manaCostForRank(rank);

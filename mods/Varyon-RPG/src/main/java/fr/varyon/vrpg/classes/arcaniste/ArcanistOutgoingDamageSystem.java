@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.ClassStatDefinition;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.config.VrpgConfig;
@@ -23,6 +24,8 @@ import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
+
+    private static final float STAFF_BASE_MULT = 10f;
 
     private static final com.hypixel.hytale.logger.HytaleLogger LOG =
         com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
@@ -75,10 +78,12 @@ public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
 
             // Pour les projectiles arcaniste, remplacer les dégâts vanilla par nos dégâts calculés
             {
-                float pending = arcanistState.consumePendingProjectileDmg(uuid);
+                float pending = -1f;
+                if (shouldApplyPendingProjectileDamage(damage, uuid, arcanistState)) {
+                    pending = arcanistState.consumePendingProjectileDmg(uuid);
+                }
                 if (pending > 0f) {
                     damage.setAmount(pending);
-                    // Son d'impact Salve de Givre (projectile glace qui touche)
                     if (!arcanistState.isLastCastFire(uuid)) {
                         try {
                             com.hypixel.hytale.server.core.modules.entity.component.TransformComponent victimTc =
@@ -98,12 +103,14 @@ public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
             String causeId = damage.getCause() != null ? damage.getCause().getId() : "?";
             StringBuilder log = debug ? new StringBuilder(String.format("[ArcanisteDmg] cause=%s base=%.1f", causeId, base)) : null;
 
-            // Multiplicateur de base mage : x50 (le LevelMult est appliqué par SpecWeaponMasteryDamageSystem)
+            // Multiplicateur staff + niveau (maîtrise magie via SpecWeaponMasteryDamageSystem)
             if (fr.varyon.vrpg.classes.WeaponCategory.heldCategory(playerRef)
                     == fr.varyon.vrpg.classes.WeaponCategory.MAGIE
                     && damage.getCause() != com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.COMMAND) {
-                amount *= 50f;
-                if (log != null) log.append(" Staff=x50");
+                int level = acc.getProgress(PlayerClass.MAGE).getLevel();
+                float levelMult = (float) ClassStatDefinition.atkDisplayMultiplier(level, PlayerSpecialization.ARCANISTE);
+                amount *= STAFF_BASE_MULT * levelMult;
+                if (log != null) log.append(String.format(" Staff=x%.0f Lvl=x%.2f", STAFF_BASE_MULT, levelMult));
             }
 
             // Surcharge — bonus dégâts sorts actif
@@ -134,6 +141,8 @@ public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
                 || (damage.getCause() == com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PROJECTILE
                     && arcanistState.isLastCastFire(uuid))
                 || (damage.getCause() == com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.ENVIRONMENT
+                    && arcanistState.isLastCastFire(uuid))
+                || (damage.getCause() == com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL
                     && arcanistState.isLastCastFire(uuid));
             String kindNormal = isFire ? "BURN" : "ICE";
             String kindCrit   = isFire ? "BURN_CRITICAL" : "ICE_CRITICAL";
@@ -157,5 +166,26 @@ public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
                 LOG.atInfo().log(log.toString());
             }
         } catch (Exception ignored) {}
+    }
+
+    private static boolean shouldApplyPendingProjectileDamage(@Nonnull Damage damage,
+                                                               @Nonnull UUID uuid,
+                                                               @Nonnull ArcanistState arcanistState) {
+        if (damage.getCause() == com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL) {
+            return arcanistState.isLastCastFire(uuid) && arcanistState.hasPendingProjectileDmg(uuid);
+        }
+        if (damage.getCause() == com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PROJECTILE) {
+            return true;
+        }
+        if (damage.getCause() == com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.ENVIRONMENT) {
+            return true;
+        }
+        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause fireCause =
+            (com.hypixel.hytale.server.core.modules.entity.damage.DamageCause)
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.getAssetMap().getAsset("Fire");
+        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause iceCause =
+            (com.hypixel.hytale.server.core.modules.entity.damage.DamageCause)
+            com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.getAssetMap().getAsset("Ice");
+        return damage.getCause() == fireCause || damage.getCause() == iceCause;
     }
 }

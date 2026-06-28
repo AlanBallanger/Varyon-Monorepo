@@ -41,8 +41,8 @@ public final class ClassSkillKeyFilter implements PlayerPacketFilter {
 
             InteractionType type = toAbilityType(chain);
             if (type == null) continue;
-            ClassSkillSlots.tryCastAbility(playerRef, type);
             if (isArbaletrier(playerRef)) blockPacket = true;
+            ClassSkillSlots.tryCastAbility(playerRef, type);
         }
         return blockPacket;
     }

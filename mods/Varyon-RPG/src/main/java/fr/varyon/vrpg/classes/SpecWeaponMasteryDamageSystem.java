@@ -72,8 +72,10 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
             float base = damage.getAmount();
             float amount = base;
 
-            // Multiplicateur de niveau — s'applique à toutes les classes
-            if (spec != null && activeClass != null) {
+            // Multiplicateur de niveau — sauf mages dont le scaling niveau est dans leur OutgoingDamageSystem
+            if (spec != null && activeClass != null
+                    && spec != PlayerSpecialization.ARCANISTE
+                    && spec != PlayerSpecialization.GARDIEN_DE_GAIA) {
                 try {
                     int level = acc.getProgress(activeClass).getLevel();
                     double levelMult = ClassStatDefinition.atkDisplayMultiplier(level, spec);

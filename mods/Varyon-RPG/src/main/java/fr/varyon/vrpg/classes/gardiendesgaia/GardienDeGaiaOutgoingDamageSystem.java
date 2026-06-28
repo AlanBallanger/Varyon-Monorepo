@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.ClassStatDefinition;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.gardiendesgaia.GardienDeGaiaPassifs;
@@ -23,6 +24,8 @@ import javax.annotation.Nonnull;
 import java.util.UUID;
 
 public final class GardienDeGaiaOutgoingDamageSystem extends DamageEventSystem {
+
+    private static final float STAFF_BASE_MULT = 10f;
 
     private static final com.hypixel.hytale.logger.HytaleLogger LOG =
         com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
@@ -120,8 +123,10 @@ public final class GardienDeGaiaOutgoingDamageSystem extends DamageEventSystem {
             if (fr.varyon.vrpg.classes.WeaponCategory.heldCategory(playerRef)
                     == fr.varyon.vrpg.classes.WeaponCategory.MAGIE
                     && damage.getCause() != com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.COMMAND) {
-                amount *= 50f;
-                if (log != null) log.append(" Staff=x50");
+                int level = acc.getProgress(PlayerClass.MAGE).getLevel();
+                float levelMult = (float) ClassStatDefinition.atkDisplayMultiplier(level, PlayerSpecialization.GARDIEN_DE_GAIA);
+                amount *= STAFF_BASE_MULT * levelMult;
+                if (log != null) log.append(String.format(" Staff=x%.0f Lvl=x%.2f", STAFF_BASE_MULT, levelMult));
             }
 
             fr.varyon.vrpg.classes.ClassPlayerStats stats = classManager.getStatEngine().getStats(uuid);

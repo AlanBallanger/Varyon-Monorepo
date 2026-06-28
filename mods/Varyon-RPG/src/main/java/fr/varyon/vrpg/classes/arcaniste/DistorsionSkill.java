@@ -7,7 +7,7 @@ public final class DistorsionSkill {
 
     private static final double[] DASH_DISTANCE = {4, 5, 6, 7, 8};
     private static final long[]   COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
-    private static final float[]  MANA_COST     = {8f, 9f, 10f, 11f, 12f};
+    private static final float[]  STAMINA_COST  = {8f, 9f, 10f, 11f, 12f};
 
     private DistorsionSkill() {}
 
@@ -16,12 +16,12 @@ public final class DistorsionSkill {
 
     public static double dashDistanceForRank(int rank) { return DASH_DISTANCE[idx(rank)]; }
     public static long   cooldownMsForRank(int rank)   { return COOLDOWN_MS[idx(rank)]; }
-    public static float  manaCostForRank(int rank)     { return MANA_COST[idx(rank)]; }
+    public static float  staminaCostForRank(int rank)  { return STAMINA_COST[idx(rank)]; }
 
     public static String statLineForRank(int rank) {
         int dist = (int) dashDistanceForRank(rank);
         int cd   = (int) (cooldownMsForRank(rank) / 1000);
-        int mana = Math.round(manaCostForRank(rank));
-        return dist + " blocs en arrière, " + mana + " mana, Délai " + cd + "s";
+        int stamina = Math.round(staminaCostForRank(rank));
+        return dist + " blocs en arrière, " + stamina + " endurance, Délai " + cd + "s";
     }
 }

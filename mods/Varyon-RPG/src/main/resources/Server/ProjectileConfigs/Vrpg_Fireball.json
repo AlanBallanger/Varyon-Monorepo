@@ -1,16 +1,39 @@
 {
-  "Parent": "Projectile_Config_Fireball",
+  "Model": "Fireball",
+  "LaunchForce": 35,
+  "Physics": {
+    "Type": "Standard",
+    "Gravity": 8,
+    "TerminalVelocityAir": 60,
+    "TerminalVelocityWater": 15,
+    "RotationMode": "VelocityDamped",
+    "Bounciness": 0.0,
+    "SticksVertically": false
+  },
+  "SpawnOffset": {
+    "X": 0.15,
+    "Y": -0.25,
+    "Z": -0.5
+  },
   "Interactions": {
     "ProjectileHit": {
+      "Cooldown": {
+        "Cooldown": 0
+      },
       "Interactions": [
         {
-          "Type": "Replace",
-          "Var": "Fireball_Impact_0",
-          "DefaultOk": true,
-          "DefaultValue": {
-            "Interactions": [
-              "Weapon_Stick_Fire_Impact_Base"
-            ]
+          "Type": "Simple",
+          "RunTime": 0,
+          "Effects": {
+            "WorldSoundEventId": "SFX_Staff_Flame_Fireball_Launch"
+          }
+        },
+        {
+          "Parent": "DamageEntityParent",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 1
+            }
           }
         },
         {
@@ -20,15 +43,15 @@
       ]
     },
     "ProjectileMiss": {
+      "Cooldown": {
+        "Cooldown": 0
+      },
       "Interactions": [
         {
-          "Type": "Replace",
-          "Var": "Fireball_Impact_0",
-          "DefaultOk": true,
-          "DefaultValue": {
-            "Interactions": [
-              "Weapon_Stick_Fire_Impact_Base"
-            ]
+          "Type": "Simple",
+          "RunTime": 0,
+          "Effects": {
+            "WorldSoundEventId": "SFX_Staff_Flame_Fireball_Launch"
           }
         },
         {

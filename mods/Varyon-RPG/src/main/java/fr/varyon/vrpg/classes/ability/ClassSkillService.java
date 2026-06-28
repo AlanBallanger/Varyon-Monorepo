@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.EntityStoreCommandBuffers;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.ClassStatDefinition;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
@@ -925,25 +926,12 @@ public final class ClassSkillService {
                                     fw.execute(() -> {
                                         try {
                                             Store<EntityStore> ws = fw.getEntityStore().getStore();
-                                            java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
-                                            takeCmd.setAccessible(true);
-                                            @SuppressWarnings("unchecked")
-                                            CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
-                                            Exception spawnEx = null;
-                                            try {
+                                            EntityStoreCommandBuffers.run(ws, cb -> {
                                                 com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
                                                     .spawnProjectile(fEntityRef, cb, fConfig, fSpawnPos, fDir);
-                                            } catch (Exception e3) {
-                                                spawnEx = e3;
-                                            }
-                                            try {
-                                                java.lang.reflect.Method consume = cb.getClass().getDeclaredMethod("consume");
-                                                consume.setAccessible(true);
-                                                consume.invoke(cb);
-                                            } catch (Exception e4) {
-                                            }
-                                        } catch (Exception e2) {
-                                        }
+                                                return Boolean.TRUE;
+                                            });
+                                        } catch (Exception ignored2) {}
                                     });
                                 }
                             }
@@ -2522,7 +2510,12 @@ public final class ClassSkillService {
 
     private float getBaseDamage(@Nonnull PlayerRef playerRef) {
         int w = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-        return w > 0 ? (float) w : 1f;
+        if (w > 0) return (float) w;
+        if (fr.varyon.vrpg.classes.WeaponCategory.heldCategory(playerRef)
+                == fr.varyon.vrpg.classes.WeaponCategory.MAGIE) {
+            return 5f;
+        }
+        return 1f;
     }
 
     public boolean tryCastJeuDeJambes(@Nonnull UUID uuid,
@@ -2837,8 +2830,8 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         long cd = applyEchoTemporel(acc, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.cooldownMsForRank(rank));
         if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID, cd)) return false;
-        float manaCost = fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.manaCostForRank(rank);
-        if (!fr.varyon.vrpg.classes.ability.ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
+        float staminaCost = fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.staminaCostForRank(rank);
+        if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
@@ -2921,7 +2914,7 @@ public final class ClassSkillService {
             }
         } catch (Exception ignored) {}
 
-        fr.varyon.vrpg.classes.ability.ClassSkillMana.consume(playerRef, manaCost);
+        ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID);
         maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID, bypass);
         notifySkill(uuid, "Distorsion");
@@ -2981,9 +2974,9 @@ public final class ClassSkillService {
                 org.joml.Vector3d spawnPos = new org.joml.Vector3d(tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
                 arcanistState.setLastCastFire(uuid, true);
                 arcanistState.setPendingProjectileDmg(uuid, dmg, 1);
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Staff_Flame_Fireball_Launch", playerRef, tc.getPosition(), null);
-                spawnMagicProjectile(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.PROJECTILE_CONFIG, spawnPos, hr.getDirection(), entityRef, playerRef, store, commandBuffer, dmg, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.damageRadius(), null, 0f);
+                spawnMagicProjectile(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.PROJECTILE_CONFIG, spawnPos, hr.getDirection(), entityRef, playerRef, store, commandBuffer);
             }
         } catch (Exception ignored) {}
         ClassSkillMana.consume(playerRef, manaCost);
@@ -3124,8 +3117,6 @@ public final class ClassSkillService {
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         long cd = applyEchoTemporel(acc, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.cooldownMsForRank(rank));
         if (!bypass && cooldowns.isOnCooldown(uuid, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID, cd)) return false;
-        float manaCost = fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.manaCostForRank(rank);
-        if (!ClassSkillMana.hasEnough(playerRef, manaCost)) return false;
         arcanistState.startSurcharge(uuid, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.durationMsForRank(rank),
             fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.damageBonusForRank(rank));
         ClassSkillMana.restore(playerRef, ClassSkillMana.getMaxMana(playerRef) * fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.manaRestorePctForRank(rank));
@@ -3133,7 +3124,6 @@ public final class ClassSkillService {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             if (tc != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_Combo_3", playerRef, tc.getPosition(), null);
         } catch (Exception ignored) {}
-        ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID);
         maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.SurchargeSkill.SKILL_ID, bypass);
         notifySkill(uuid, "Surcharge");
@@ -3162,19 +3152,13 @@ public final class ClassSkillService {
             if (tc != null && hr != null) {
                 int bolts = fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.boltCountForRank(rank);
                 float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.damagePctPerHitForRank(rank);
-                float slowSec = fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.slowMsForRank(rank) / 1000f;
                 long delayMs = fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.boltDelayMs();
                 org.joml.Vector3d chestPos = new org.joml.Vector3d(tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
-                int slowIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex(fr.varyon.vrpg.classes.arcaniste.SalveDeGivreSkill.SLOW_EFFECT);
-                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect slowEff = slowIdx >= 0
-                    ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect) com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(slowIdx) : null;
                 org.joml.Vector3d baseDir = hr.getDirection();
                 arcanistState.setLastCastFire(uuid, false);
                 arcanistState.setPendingProjectileDmg(uuid, dmg, bolts);
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
                 final org.joml.Vector3d fDir = new org.joml.Vector3d(baseDir).normalize();
-                final float fDmg = dmg; final float fSlowSec = slowSec;
-                final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fSlowEff = slowEff;
                 final Ref<EntityStore> fRef = entityRef;
                 final Store<EntityStore> fStore = store;
                 final org.joml.Vector3d fPos = new org.joml.Vector3d(chestPos);
@@ -3182,14 +3166,14 @@ public final class ClassSkillService {
                 for (int i = 0; i < bolts; i++) {
                     if (i == 0) {
                         ClassSkillSounds.playSkillSound("SFX_Vrpg_Salve_Launch", playerRef, tc.getPosition(), null);
-                        spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, playerRef, fStore, commandBuffer, fDmg, 1.5f, fSlowEff, fSlowSec);
+                        spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, playerRef, fStore, commandBuffer);
                     } else {
                         final long fDelay = delayMs * i;
                         final int fi = i;
                         java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "salve-" + fi); t.setDaemon(true); return t; })
                             .schedule(() -> {
                                 ClassSkillSounds.playSkillSound("SFX_Vrpg_Salve_Launch", fPlayerRef, fPos, null);
-                                spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, fPlayerRef, fStore, null, fDmg, 1.5f, fSlowEff, fSlowSec);
+                                spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, fPlayerRef, fStore, null);
                             }, fDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
                     }
                 }
@@ -3208,41 +3192,51 @@ public final class ClassSkillService {
                                        @Nonnull Ref<EntityStore> casterRef,
                                        @Nonnull PlayerRef playerRef,
                                        @Nonnull Store<EntityStore> store,
-                                       @Nullable CommandBuffer<EntityStore> commandBuffer,
-                                       float dmg, float impactRadius,
-                                       @Nullable com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect slowEff,
-                                       float slowSec) {
+                                       @Nullable CommandBuffer<EntityStore> commandBuffer) {
         try {
             com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
                 com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap().getAsset(configId);
-            if (cfg == null) return;
+            if (cfg == null) {
+                LOG.atWarning().log("[Projectile] missing config " + configId);
+                return;
+            }
             if (commandBuffer != null) {
                 com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
                     .spawnProjectile(casterRef, commandBuffer, cfg, spawnPos, dir);
-            } else {
-                com.hypixel.hytale.server.core.universe.world.World world = null;
-                try { java.util.UUID wUuid = playerRef.getWorldUuid(); if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid); } catch (Exception ignored2) {}
-                if (world != null) {
-                    final com.hypixel.hytale.server.core.universe.world.World fw = world;
-                    final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
-                    final org.joml.Vector3d fPos = spawnPos, fDir = dir;
-                    final Ref<EntityStore> fRef = casterRef;
-                    fw.execute(() -> {
-                        try {
-                            Store<EntityStore> ws = fw.getEntityStore().getStore();
-                            java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
-                            takeCmd.setAccessible(true);
-                            @SuppressWarnings("unchecked") CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
-                            try {
-                                com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get().spawnProjectile(fRef, cb, fCfg, fPos, fDir);
-                            } finally {
-                                try { java.lang.reflect.Method c = cb.getClass().getDeclaredMethod("consume"); c.setAccessible(true); c.invoke(cb); } catch (Exception ignored3) {}
-                            }
-                        } catch (Exception ignored2) {}
-                    });
-                }
+                return;
             }
-        } catch (Exception ignored) {}
+            if (spawnProjectileWithStore(casterRef, store, cfg, spawnPos, dir)) {
+                return;
+            }
+            com.hypixel.hytale.server.core.universe.world.World world = null;
+            try { java.util.UUID wUuid = playerRef.getWorldUuid(); if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid); } catch (Exception ignored2) {}
+            if (world != null) {
+                final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
+                final org.joml.Vector3d fPos = spawnPos, fDir = dir;
+                final Ref<EntityStore> fRef = casterRef;
+                fw.execute(() -> {
+                    try {
+                        Store<EntityStore> ws = fw.getEntityStore().getStore();
+                        spawnProjectileWithStore(fRef, ws, fCfg, fPos, fDir);
+                    } catch (Exception ignored2) {}
+                });
+            }
+        } catch (Exception e) {
+            LOG.atWarning().log("[Projectile] spawn failed config=" + configId + " err=" + e.getMessage());
+        }
+    }
+
+    private boolean spawnProjectileWithStore(@Nonnull Ref<EntityStore> casterRef,
+                                              @Nonnull Store<EntityStore> store,
+                                              @Nonnull com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg,
+                                              @Nonnull org.joml.Vector3d spawnPos,
+                                              @Nonnull org.joml.Vector3d dir) {
+        return EntityStoreCommandBuffers.run(store, cb -> {
+            com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                .spawnProjectile(casterRef, cb, cfg, spawnPos, dir);
+            return Boolean.TRUE;
+        });
     }
 
     private static com.hypixel.hytale.server.core.modules.entity.damage.DamageCause resolveFireDamageCause() {
@@ -3289,25 +3283,15 @@ public final class ClassSkillService {
                 try {
                     if (!fRef.isValid()) return;
                     Store<EntityStore> ws = world.getEntityStore().getStore();
-                    java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
-                    takeCmd.setAccessible(true);
-                    @SuppressWarnings("unchecked")
-                    CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
-                    if (cb == null) return;
-                    try {
+                    EntityStoreCommandBuffers.runWithResult(ws, cb -> {
                         java.util.UUID projectileId = java.util.UUID.randomUUID();
                         Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
                             .spawnProjectile(projectileId, fRef, cb, fCfg, fPos, fDir);
                         if (projectileRef != null) {
                             outProjectileId.set(projectileId);
                         }
-                    } finally {
-                        try {
-                            java.lang.reflect.Method c = cb.getClass().getDeclaredMethod("consume");
-                            c.setAccessible(true);
-                            c.invoke(cb);
-                        } catch (Exception ignored) {}
-                    }
+                        return null;
+                    });
                 } catch (Exception e) {
                     LOG.atWarning().log("[Meteore] falling projectile failed: " + e.getMessage());
                 }
@@ -3357,24 +3341,12 @@ public final class ClassSkillService {
                                         @Nonnull org.joml.Vector3d impactCenter) {
         Ref<EntityStore> projectileRef = findMeteorProjectileRef(store, projectileId, impactCenter);
         if (projectileRef == null || !projectileRef.isValid()) return;
-        try {
-            java.lang.reflect.Method takeCmd = store.getClass().getDeclaredMethod("takeCommandBuffer");
-            takeCmd.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(store);
-            if (cb != null) {
-                try {
-                    cb.removeEntity(projectileRef, com.hypixel.hytale.component.RemoveReason.REMOVE);
-                } finally {
-                    try {
-                        java.lang.reflect.Method c = cb.getClass().getDeclaredMethod("consume");
-                        c.setAccessible(true);
-                        c.invoke(cb);
-                    } catch (Exception ignored) {}
-                }
-                return;
-            }
-        } catch (Exception ignored) {}
+        if (EntityStoreCommandBuffers.run(store, cb -> {
+                cb.removeEntity(projectileRef, com.hypixel.hytale.component.RemoveReason.REMOVE);
+                return Boolean.TRUE;
+            })) {
+            return;
+        }
         try {
             store.removeEntity(projectileRef, com.hypixel.hytale.component.RemoveReason.REMOVE);
         } catch (Exception e) {
@@ -3634,7 +3606,7 @@ public final class ClassSkillService {
             long delayMs = (long) (dist / fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_SPEED * 1000.0);
 
             spawnMagicProjectile(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_CONFIG,
-                eyePos, dir, entityRef, playerRef, store, commandBuffer, 0f, 0f, null, 0f);
+                eyePos, dir, entityRef, playerRef, store, commandBuffer);
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
 
             final int fRank = rank;
@@ -3772,7 +3744,7 @@ public final class ClassSkillService {
         try {
             TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
             if (tc != null) {
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_TreeRegrowth", playerRef, tc.getPosition(), null);
             }
         } catch (Exception ignored) {}
@@ -3893,16 +3865,11 @@ public final class ClassSkillService {
                             final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fc = cfg;
                             final org.joml.Vector3d fPos = spawnPos, fDir = dir;
                             final Ref<EntityStore> fRef = entityRef;
-                            fw.execute(() -> {
-                                try {
-                                    Store<EntityStore> ws = fw.getEntityStore().getStore();
-                                    java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
-                                    takeCmd.setAccessible(true);
-                                    @SuppressWarnings("unchecked") CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
-                                    try { com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get().spawnProjectile(fRef, cb, fc, fPos, fDir); }
-                                    finally { try { java.lang.reflect.Method c = cb.getClass().getDeclaredMethod("consume"); c.setAccessible(true); c.invoke(cb); } catch (Exception ignored3) {} }
-                                } catch (Exception ignored2) {}
-                            });
+                            fw.execute(() -> EntityStoreCommandBuffers.run(fw.getEntityStore().getStore(), cb -> {
+                                com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                                    .spawnProjectile(fRef, cb, fc, fPos, fDir);
+                                return Boolean.TRUE;
+                            }));
                         }
                     }
                 } catch (Exception ignored) {}
@@ -3956,7 +3923,7 @@ public final class ClassSkillService {
                 final com.hypixel.hytale.component.Store<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fStoreEntrave = store;
                 final com.hypixel.hytale.component.CommandBuffer<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fCbEntrave = commandBuffer;
                 fr.varyon.vrpg.classes.vaudou.VaudouTotemHelper.patchAndRun("Slowness_Totem", fDurEntrave,
-                    () -> spawnMagicProjectile("Vrpg_Totem_Throw", fSpawnPosEntrave, fDirEntrave, fRefEntrave, fPrEntrave, fStoreEntrave, fCbEntrave, 0f, 0f, null, 0f));
+                    () -> spawnMagicProjectile("Vrpg_Totem_Throw", fSpawnPosEntrave, fDirEntrave, fRefEntrave, fPrEntrave, fStoreEntrave, fCbEntrave));
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, pos, null);
             }
         } catch (Exception ignored) {}
@@ -4041,7 +4008,7 @@ public final class ClassSkillService {
                         }), 50, java.util.concurrent.TimeUnit.MILLISECONDS);
                 }
 
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, targetPos, null);
             }
         } catch (Exception ignored) {}
@@ -4094,7 +4061,7 @@ public final class ClassSkillService {
                 final com.hypixel.hytale.component.Store<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fStoreVuln = store;
                 final com.hypixel.hytale.component.CommandBuffer<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> fCbVuln = commandBuffer;
                 fr.varyon.vrpg.classes.vaudou.VaudouTotemHelper.patchAndRun("Vulnerability_Totem", fDurVuln,
-                    () -> spawnMagicProjectile("Vrpg_Totem_Vulnerabilite_Throw", fSpawnPosVuln, fDirVuln, fRefVuln, fPrVuln, fStoreVuln, fCbVuln, 0f, 0f, null, 0f));
+                    () -> spawnMagicProjectile("Vrpg_Totem_Vulnerabilite_Throw", fSpawnPosVuln, fDirVuln, fRefVuln, fPrVuln, fStoreVuln, fCbVuln));
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, pos, null);
             }
         } catch (Exception ignored) {}
@@ -4163,7 +4130,7 @@ public final class ClassSkillService {
                         }), 50, java.util.concurrent.TimeUnit.MILLISECONDS);
                 }
 
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
             }
         } catch (Exception ignored) {}
@@ -5239,25 +5206,11 @@ public final class ClassSkillService {
                 final org.joml.Vector3d fDir = dir;
                 final Ref<EntityStore> fRef = casterRef;
                 final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
-                fw.execute(() -> {
-                    try {
-                        Store<EntityStore> ws = fw.getEntityStore().getStore();
-                        java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
-                        takeCmd.setAccessible(true);
-                        @SuppressWarnings("unchecked")
-                        CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
-                        try {
-                            com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
-                                .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
-                        } finally {
-                            try {
-                                java.lang.reflect.Method consume = cb.getClass().getDeclaredMethod("consume");
-                                consume.setAccessible(true);
-                                consume.invoke(cb);
-                            } catch (Exception ignored3) {}
-                        }
-                    } catch (Exception ignored2) {}
-                });
+                fw.execute(() -> EntityStoreCommandBuffers.run(fw.getEntityStore().getStore(), cb -> {
+                    com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                        .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
+                    return Boolean.TRUE;
+                }));
             }
         } catch (Exception ignored) {}
     }
@@ -5294,23 +5247,12 @@ public final class ClassSkillService {
             final org.joml.Vector3d fDir = dir;
             final Ref<EntityStore> fRef = casterRef;
             final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
-            fw.execute(() -> {
-                try {
-                    Store<EntityStore> ws = fw.getEntityStore().getStore();
-                    java.lang.reflect.Method takeCmd = ws.getClass().getDeclaredMethod("takeCommandBuffer");
-                    takeCmd.setAccessible(true);
-                    @SuppressWarnings("unchecked")
-                    CommandBuffer<EntityStore> cb = (CommandBuffer<EntityStore>) takeCmd.invoke(ws);
-                    Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
-                        .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
-                    try {
-                        java.lang.reflect.Method consume = cb.getClass().getDeclaredMethod("consume");
-                        consume.setAccessible(true);
-                        consume.invoke(cb);
-                    } catch (Exception ignored3) {}
-                    groundSystem.trackProjectile(projRef, creatorUuid);
-                } catch (Exception ignored2) {}
-            });
+            fw.execute(() -> EntityStoreCommandBuffers.runWithResult(fw.getEntityStore().getStore(), cb -> {
+                Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
+                groundSystem.trackProjectile(projRef, creatorUuid);
+                return null;
+            }));
         } catch (Exception ignored) {}
     }
 

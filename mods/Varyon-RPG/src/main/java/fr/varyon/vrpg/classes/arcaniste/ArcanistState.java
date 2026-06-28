@@ -85,6 +85,10 @@ public final class ArcanistState {
         pendingProjectileHits.put(uuid, hits);
     }
 
+    public boolean hasPendingProjectileDmg(@Nonnull UUID uuid) {
+        return pendingProjectileDmg.containsKey(uuid);
+    }
+
     public float consumePendingProjectileDmg(@Nonnull UUID uuid) {
         Float dmg = pendingProjectileDmg.get(uuid);
         if (dmg == null) return -1f;
