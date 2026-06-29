@@ -108,7 +108,7 @@ public final class LancierOutgoingDamageSystem extends DamageEventSystem {
             // Armement de la posture après un coup de mêlée
             int postureRank = acc.getTalentRank(PlayerClass.TIREUR, LancierPassifs.POSTURE_NODE);
             if (postureRank > 0) {
-                lancierState.armPosture(uuid, postureRank, LancierPassifs.POSTURE_DURATION_MS);
+                lancierState.armPosture(uuid, postureRank, LancierPassifs.postureDurationMsForRank(postureRank));
                 if (debug) log.append(" PostureArmed");
             }
 

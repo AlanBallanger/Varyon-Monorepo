@@ -8,6 +8,7 @@ public enum SkillStatKind {
     MANA("Icons/mana.png", "Mana"),
     DURATION("Icons/time.png", "Durée"),
     MOVE_SPEED("Icons/movement_speed.png", "Vit."),
+    RANGE("Icons/range.png", "Portée"),
     DODGE("Icons/dodge.png", "Esquive"),
     XP("Icons/xp2.png", "XP"),
     RATE("Icons/rate.png", "Chance"),

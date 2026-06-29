@@ -13,7 +13,7 @@ public final class FormationDePiquesSkill {
     private static final double[] ZONE_WIDTH    = {3.0, 3.5, 4.0, 4.5, 5.0};
     private static final double  ZONE_DEPTH     = 6.0;
     private static final long[]  COOLDOWN_MS    = {24000, 22000, 20000, 18000, 16000};
-    private static final float[] STAMINA_COST   = {7f, 7f, 8f, 8f, 9f};
+    private static final float[] STAMINA_COST   = {9f, 9f, 10f, 10f, 11f};
     private static final long    TICK_INTERVAL_MS = 1000L;
 
     private FormationDePiquesSkill() {}

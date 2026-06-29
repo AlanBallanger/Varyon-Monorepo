@@ -7,10 +7,10 @@ public final class ChargeHeroiqueSkill {
     public static final String SKILL_ID       = "charge_heroique";
     public static final String TALENT_NODE_ID = "lancier_2";
 
-    private static final float[] DAMAGE_FACTOR  = {1.6f, 2.0f, 2.5f, 3.0f, 3.8f};
+    private static final float[] DAMAGE_FACTOR  = {0.53f, 0.67f, 0.83f, 1.0f, 1.27f};
     private static final long[]  STUN_MS        = {1200, 1500, 1800, 2100, 2500};
     private static final long[]  COOLDOWN_MS    = {22000, 20000, 18000, 16000, 14000};
-    private static final float[] STAMINA_COST   = {6f, 6f, 7f, 7f, 8f};
+    private static final float[] STAMINA_COST   = {8f, 8f, 9f, 9f, 10f};
     private static final double  CHARGE_DISTANCE = 6.0;
     private static final double  HIT_RADIUS      = 1.5;
 
@@ -35,8 +35,7 @@ public final class ChargeHeroiqueSkill {
 
     public static String statLineForRank(int rank) {
         int dmg = Math.round(damageFactor(rank) * 100);
-        int stun = (int)(stunMsForRank(rank) / 100) * 100 / 1000;
-        int cd   = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, étourdissement " + stun + "s, Délai " + cd + "s";
+        int cd = (int) (cooldownMsForRank(rank) / 1000);
+        return dmg + "% dégâts, Délai " + cd + "s";
     }
 }

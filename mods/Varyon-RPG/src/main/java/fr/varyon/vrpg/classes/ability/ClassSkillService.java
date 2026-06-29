@@ -5251,8 +5251,11 @@ public final class ClassSkillService {
                                         new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
                                         com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
                                 applyEntityEffect("Vrpg_Stun", stunMs / 1000f, targetRef, store);
-                                lancierState.armCcDamage(uuid, acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE),
-                                    fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_DURATION_MS);
+                                int controleRank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE);
+                                if (controleRank > 0) {
+                                    lancierState.armCcDamage(uuid, controleRank,
+                                        fr.varyon.vrpg.classes.lancier.LancierPassifs.controleDurationMsForRank(controleRank));
+                                }
                             } catch (Exception ignored) {}
                         }, ref -> ref.getIndex() != casterIdx);
                 }
@@ -5349,7 +5352,8 @@ public final class ClassSkillService {
                     com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent.getComponentType(), kbComp);
 
                 int controleRank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE);
-                if (controleRank > 0) lancierState.armCcDamage(uuid, controleRank, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_DURATION_MS);
+                if (controleRank > 0) lancierState.armCcDamage(uuid, controleRank,
+                    fr.varyon.vrpg.classes.lancier.LancierPassifs.controleDurationMsForRank(controleRank));
             }
         } catch (Exception ignored) {}
 
@@ -5385,7 +5389,8 @@ public final class ClassSkillService {
                 if (len > 1e-6) dir.mul(1.0 / len);
                 org.joml.Vector3d zoneStart = new org.joml.Vector3d(tc.getPosition()).add(new org.joml.Vector3d(dir).mul(1.5));
                 float dmgPerTick = fr.varyon.vrpg.classes.lancier.FormationDePiquesSkill.computeDamagePerTick(rank, playerRef);
-                formationZoneSystem.createZone(uuid, entityRef, zoneStart, dir, rank, dmgPerTick);
+                int controleRank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE);
+                formationZoneSystem.createZone(uuid, entityRef, zoneStart, dir, rank, dmgPerTick, controleRank);
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "Guard", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_SkillActivate", playerRef, tc.getPosition(), null);
             }
@@ -5415,9 +5420,17 @@ public final class ClassSkillService {
             fr.varyon.vrpg.classes.lancier.EmpalementSkill.range());
 
         try {
-            AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "DashForward", true, store);
-            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
-            if (tc != null) ClassSkillSounds.playSkillSound("SFX_Sword_T2_Swing", playerRef, tc.getPosition(), null);
+            int stabIdx = com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction
+                .getAssetMap().getIndex("Spear_Stab");
+            if (stabIdx >= 0) {
+                String heldItemId = getHeldItemId(playerRef);
+                com.hypixel.hytale.protocol.packets.interaction.PlayInteractionFor stabPacket =
+                    new com.hypixel.hytale.protocol.packets.interaction.PlayInteractionFor(
+                        (int) entityRef.getIndex(), 0, null, 0, stabIdx,
+                        heldItemId, com.hypixel.hytale.protocol.InteractionType.Primary, false);
+                com.hypixel.hytale.server.core.universe.world.PlayerUtil.forEachPlayerThatCanSeeEntity(
+                    entityRef, (seenEntity, viewer, accessor) -> viewer.getPacketHandler().write(stabPacket), store);
+            }
 
             if (targeted != null) {
                 float dmg = fr.varyon.vrpg.classes.lancier.EmpalementSkill.computeDamage(rank, playerRef);
@@ -5432,10 +5445,11 @@ public final class ClassSkillService {
                 int ticks = (int)(bleedMs / 1000L);
                 float dpt = dmg * bleedPct;
                 lancierBleedSystem.applyBleed(targeted, dpt, ticks, store);
-                lancierState.rootEntity(targeted.getIndex(), rootMs);
+                applyEntityEffect("Vrpg_Stun", rootMs / 1000f, targeted, store);
 
                 int controleRank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE);
-                if (controleRank > 0) lancierState.armCcDamage(uuid, controleRank, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_DURATION_MS);
+                if (controleRank > 0) lancierState.armCcDamage(uuid, controleRank,
+                    fr.varyon.vrpg.classes.lancier.LancierPassifs.controleDurationMsForRank(controleRank));
             }
         } catch (Exception ignored) {}
 

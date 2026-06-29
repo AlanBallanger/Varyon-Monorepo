@@ -7,10 +7,10 @@ public final class HarponnageSkill {
     public static final String SKILL_ID       = "harponnage";
     public static final String TALENT_NODE_ID = "lancier_4";
 
-    private static final float[] DAMAGE_FACTOR = {1.4f, 1.7f, 2.1f, 2.6f, 3.2f};
+    private static final float[] DAMAGE_FACTOR = {0.47f, 0.57f, 0.70f, 0.87f, 1.07f};
     private static final double  RANGE         = 16.0;
     private static final long[]  COOLDOWN_MS   = {18000, 16000, 14000, 12000, 10000};
-    private static final float[] STAMINA_COST  = {6f, 6f, 7f, 7f, 8f};
+    private static final float[] STAMINA_COST  = {8f, 8f, 9f, 9f, 10f};
     private static final double  PULL_STRENGTH = 55.0;
 
     private HarponnageSkill() {}
@@ -34,6 +34,6 @@ public final class HarponnageSkill {
     public static String statLineForRank(int rank) {
         int dmg = Math.round(damageFactor(rank) * 100);
         int cd  = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, attire la cible, portée " + (int)RANGE + "m, Délai " + cd + "s";
+        return dmg + "% dégâts, attire la cible, Délai " + cd + "s";
     }
 }

@@ -27,27 +27,31 @@ public final class LancierPassifs {
     // --- Posture dominante (node 6) — réduction dégâts reçus après touche mêlée ---
     public static final String POSTURE_NODE        = "lancier_6";
     private static final float[] POSTURE_REDUCTION = {0.08f, 0.11f, 0.14f, 0.17f, 0.20f};
-    public static final long     POSTURE_DURATION_MS = 4_000L;
+    private static final long[]  POSTURE_DURATION_MS = {2000, 2500, 3000, 4000, 5000};
 
     public static float postureReductionForRank(int rank) {
         return POSTURE_REDUCTION[idx(rank, POSTURE_REDUCTION.length)];
     }
 
+    public static long postureDurationMsForRank(int rank) {
+        return POSTURE_DURATION_MS[idx(rank, POSTURE_DURATION_MS.length)];
+    }
+
     public static String postureStatLine(int rank) {
-        return "-" + Math.round(postureReductionForRank(rank) * 100) + "% dégâts reçus pendant 4s après touche mêlée";
+        return "-" + Math.round(postureReductionForRank(rank) * 100) + "% dégâts reçus après touche mêlée";
     }
 
     // --- Perce-cœur (node 7) — saignement sur critique ---
     public static final String PERCE_COEUR_NODE     = "lancier_7";
     private static final float[] PERCE_BLEED_PCT    = {0.20f, 0.25f, 0.30f, 0.35f, 0.40f};
-    public static final long     PERCE_BLEED_DURATION_MS = 4_000L;
+    public static final long     PERCE_BLEED_DURATION_MS = 5_000L;
 
     public static float perceBleedPctForRank(int rank) {
         return PERCE_BLEED_PCT[idx(rank, PERCE_BLEED_PCT.length)];
     }
 
     public static String perceCoeurStatLine(int rank) {
-        return "Coups critiques : saignement à " + Math.round(perceBleedPctForRank(rank) * 100) + "% dégâts/s pendant 4s";
+        return "Coups critiques : saignement à " + Math.round(perceBleedPctForRank(rank) * 100) + "% dégâts/s";
     }
 
     // --- Chasseur de géants (node 8) — bonus si cible a plus de HP max que soi ---
@@ -65,14 +69,18 @@ public final class LancierPassifs {
     // --- Briseur de ligne (node 9) — bonus dégâts après CC (repousse/attire/étourdissement) ---
     public static final String CONTROLE_NODE         = "lancier_9";
     private static final float[] CONTROLE_BONUS      = {0.10f, 0.14f, 0.18f, 0.22f, 0.28f};
-    public static final long     CONTROLE_DURATION_MS = 4_000L;
+    private static final long[]  CONTROLE_DURATION_MS = {1000, 1500, 2000, 2500, 3000};
 
     public static float controleBonusForRank(int rank) {
         return CONTROLE_BONUS[idx(rank, CONTROLE_BONUS.length)];
     }
 
+    public static long controleDurationMsForRank(int rank) {
+        return CONTROLE_DURATION_MS[idx(rank, CONTROLE_DURATION_MS.length)];
+    }
+
     public static String controleStatLine(int rank) {
-        return "+" + Math.round(controleBonusForRank(rank) * 100) + "% dégâts pendant 4s après CC infligé";
+        return "+" + Math.round(controleBonusForRank(rank) * 100) + "% dégâts après CC infligé";
     }
 
     // --- Portée maîtrisée (node 10) — bonus si < 3m ou > 10m ---

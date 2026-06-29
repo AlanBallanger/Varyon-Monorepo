@@ -22,7 +22,7 @@ public enum PlayerSpecialization {
 
     RODEUR     ("rodeur",      "Rodeur",      PlayerClass.TIREUR, "Weapon_Shortbow_Thorium",     "Arc - Traque - Mobilité",        "Traque ses proies avec agilité et précision.",      0.90, 1.15, 0.85, 1.30, 1.05, 1.10,  1.00, 1.00, 1.00, 0.75, 0.75, 1.50, 0.75),
     ARBALETRIER("arbaletrier", "Arbalétrier", PlayerClass.TIREUR, "Weapon_Crossbow_Iron",        "Arbalète - Pénétration - Lent",  "Tirs lents mais dévastateurs à longue portée.",    0.90, 1.05, 0.85, 1.25, 1.15, 1.20,  1.00, 1.00, 1.00, 0.75, 0.75, 1.50, 0.75),
-    LANCIER    ("lancier",     "Lancier",     PlayerClass.TIREUR, "Weapon_Spear_Iron",           "Lance - Zone - Charge",          "Combat avec une lance, efficace en zone et en charge.", 1.15, 1.15, 1.00, 1.15, 1.10, 0.90,  1.00, 1.00, 1.00, 0.75, 1.50, 1.00, 0.75);
+    LANCIER    ("lancier",     "Lancier",     PlayerClass.TIREUR, "Weapon_Spear_Iron",           "Lance - Zone - Charge",          "Combat avec une lance, efficace en zone et en charge.", 1.10, 1.10, 1.00, 1.15, 1.10, 0.90,  1.00, 1.00, 1.00, 0.75, 1.50, 1.00, 0.75);
 
     private final String id;
     private final String displayName;

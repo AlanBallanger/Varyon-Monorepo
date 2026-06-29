@@ -101,11 +101,19 @@ public final class WeaponDamageReader {
                 int v = extractPhysicalFromJson(json);
                 if (v >= 0) return v;
                 String parent = extractStringField(json, "Parent");
-                if (parent != null && !parent.isBlank()) return readFromDisk(parent.trim(), depth + 1);
-                return -1;
+                if (parent != null && !parent.isBlank()) {
+                    int fromParent = readFromDisk(parent.trim(), depth + 1);
+                    if (fromParent >= 0) return fromParent;
+                }
             }
-            // Item vanilla (pas sur disque) : lire depuis l'asset en mémoire
-            Item asset = Item.getAssetMap().getAsset(itemId.trim());
+            return readFromAsset(itemId.trim());
+        } catch (Exception ignored) {}
+        return -1;
+    }
+
+    private static int readFromAsset(@Nonnull String itemId) {
+        try {
+            Item asset = Item.getAssetMap().getAsset(itemId);
             if (asset != null && asset.getWeapon() != null) {
                 var breakdown = asset.getWeapon().getBasicDamageBreakdown();
                 if (breakdown != null && !breakdown.entries().isEmpty()) {

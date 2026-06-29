@@ -7,12 +7,12 @@ public final class EmpalementSkill {
     public static final String SKILL_ID       = "empalement";
     public static final String TALENT_NODE_ID = "lancier_11";
 
-    private static final float[] DAMAGE_FACTOR    = {2.0f, 2.5f, 3.0f, 3.7f, 4.5f};
+    private static final float[] DAMAGE_FACTOR    = {0.67f, 0.83f, 1.0f, 1.23f, 1.5f};
     private static final float[] BLEED_PCT_PER_S  = {0.25f, 0.30f, 0.35f, 0.40f, 0.50f};
     private static final long[]  BLEED_DURATION_MS = {4000, 4000, 5000, 5000, 6000};
     private static final long[]  ROOT_DURATION_MS  = {1500, 1800, 2100, 2400, 2800};
     private static final long[]  COOLDOWN_MS       = {22000, 20000, 18000, 16000, 14000};
-    private static final float[] STAMINA_COST      = {7f, 7f, 8f, 8f, 9f};
+    private static final float[] STAMINA_COST      = {9f, 9f, 10f, 10f, 11f};
     private static final double  RANGE             = 4.0;
 
     private EmpalementSkill() {}
@@ -37,10 +37,7 @@ public final class EmpalementSkill {
 
     public static String statLineForRank(int rank) {
         int dmg    = Math.round(damageFactor(rank) * 100);
-        int bleedPct = Math.round(bleedPctPerSForRank(rank) * 100);
-        int bleedDur = (int)(bleedDurationMsForRank(rank) / 1000);
-        int root   = (int)(rootDurationMsForRank(rank) / 100) * 100 / 1000;
-        int cd     = (int)(cooldownMsForRank(rank) / 1000);
-        return dmg + "% dégâts, saignement " + bleedPct + "%/s " + bleedDur + "s, immob. " + root + "s, Délai " + cd + "s";
+        int cd = (int) (cooldownMsForRank(rank) / 1000);
+        return dmg + "% dégâts, saignement et immobilisation, Délai " + cd + "s";
     }
 }

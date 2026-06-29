@@ -33,11 +33,13 @@ public final class FormationDePiquesZoneSystem extends EntityTickingSystem<Entit
         final double depth;
         final float damagePerTick;
         final float slowFactor;
+        final int controleRank;
         long expiresAt;
         long nextTickAt;
 
         PiqueZone(UUID casterUuid, Ref<EntityStore> casterRef, Vector3d center, Vector3d direction,
-                  double halfWidth, double depth, float damagePerTick, float slowFactor, long durationMs) {
+                  double halfWidth, double depth, float damagePerTick, float slowFactor, long durationMs,
+                  int controleRank) {
             this.casterUuid   = casterUuid;
             this.casterRef    = casterRef;
             this.center       = center;
@@ -46,6 +48,7 @@ public final class FormationDePiquesZoneSystem extends EntityTickingSystem<Entit
             this.depth        = depth;
             this.damagePerTick = damagePerTick;
             this.slowFactor   = slowFactor;
+            this.controleRank = controleRank;
             this.expiresAt    = System.currentTimeMillis() + durationMs;
             this.nextTickAt   = System.currentTimeMillis() + FormationDePiquesSkill.tickIntervalMs();
         }
@@ -62,14 +65,18 @@ public final class FormationDePiquesZoneSystem extends EntityTickingSystem<Entit
                            @Nonnull Vector3d center,
                            @Nonnull Vector3d direction,
                            int rank,
-                           float damagePerTick) {
+                           float damagePerTick,
+                           int controleRank) {
         double halfWidth = FormationDePiquesSkill.zoneWidthForRank(rank) / 2.0;
         double depth     = FormationDePiquesSkill.zoneDepth();
         float slow       = FormationDePiquesSkill.slowFactor(rank);
         long durationMs  = FormationDePiquesSkill.durationMsForRank(rank);
         zones.put(casterUuid, new PiqueZone(casterUuid, casterRef, new Vector3d(center),
-            new Vector3d(direction).normalize(), halfWidth, depth, damagePerTick, slow, durationMs));
-        lancierState.armCcDamage(casterUuid, rank, durationMs);
+            new Vector3d(direction).normalize(), halfWidth, depth, damagePerTick, slow, durationMs, controleRank));
+        if (controleRank > 0) {
+            lancierState.armCcDamage(casterUuid, controleRank,
+                LancierPassifs.controleDurationMsForRank(controleRank));
+        }
     }
 
     @Override
@@ -106,7 +113,10 @@ public final class FormationDePiquesZoneSystem extends EntityTickingSystem<Entit
                 } catch (Exception ignored) {}
 
                 applySlowToEntity(ref, store, commandBuffer, zone.slowFactor);
-                lancierState.armCcDamage(zone.casterUuid, 1, LancierPassifs.CONTROLE_DURATION_MS);
+                if (zone.controleRank > 0) {
+                    lancierState.armCcDamage(zone.casterUuid, zone.controleRank,
+                        LancierPassifs.controleDurationMsForRank(zone.controleRank));
+                }
             }
 
             for (UUID uid : new java.util.ArrayList<>(zones.keySet())) {

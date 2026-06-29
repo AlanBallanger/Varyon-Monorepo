@@ -241,6 +241,17 @@ public final class ClassSkillStatResolver {
             case ArbaietrierPassifs.REFLEXES_AFFUTES_NODE -> reflexesAffutesStats(rank);
             case LancierPassifs.DISCIPLINE_NODE -> xpOnlyStats(
                 Math.round(LancierPassifs.disciplineBonusForRank(rank) * 100));
+            case PerceeSkill.SKILL_ID -> perceeStats(rank);
+            case ChargeHeroiqueSkill.SKILL_ID -> chargeHeroiqueStats(rank);
+            case GardeDuLancierSkill.SKILL_ID -> gardeDuLancierStats(rank);
+            case HarponnageSkill.SKILL_ID -> harponnageStats(rank);
+            case FormationDePiquesSkill.SKILL_ID -> formationDePiquesStats(rank);
+            case EmpalementSkill.SKILL_ID -> empalementStats(rank);
+            case LancierPassifs.POSTURE_NODE -> postureDominanteStats(rank);
+            case LancierPassifs.PERCE_COEUR_NODE -> perceCoeurStats(rank);
+            case LancierPassifs.CHASSEUR_GEANTS_NODE -> chasseurGeantsLancierStats(rank);
+            case LancierPassifs.CONTROLE_NODE -> briseurDeLigneStats(rank);
+            case LancierPassifs.PORTEE_NODE -> porteeMaitriseeStats(rank);
             case ArcanistPassifs.TALENT_INNE_NODE -> xpOnlyStats(
                 Math.round(ArcanistPassifs.talentInneBonusForRank(rank) * 100));
             case DistorsionSkill.SKILL_ID -> distorsionStats(rank);
@@ -935,6 +946,128 @@ public final class ClassSkillStatResolver {
     private static List<SkillStatEntry> chasseurColossesStats(int rank) {
         int pct = Math.round(ArbaietrierPassifs.colossesBonusForRank(rank) * 100);
         return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%", "Attaque"));
+    }
+
+    private static List<SkillStatEntry> perceeStats(int rank) {
+        int dist = (int) PerceeSkill.dashDistanceForRank(rank);
+        int stamina = Math.round(PerceeSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, String.valueOf(dist), "Recul"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(PerceeSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> chargeHeroiqueStats(int rank) {
+        int dmg = Math.round(ChargeHeroiqueSkill.damageFactor(rank) * 100);
+        int stamina = Math.round(ChargeHeroiqueSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, dmg + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(ChargeHeroiqueSkill.stunMsForRank(rank)), "Étour."),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(ChargeHeroiqueSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> gardeDuLancierStats(int rank) {
+        int bonus = Math.round((GardeDuLancierSkill.nextHitMultForRank(rank) - 1f) * 100);
+        int stamina = Math.round(GardeDuLancierSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(GardeDuLancierSkill.windowMsForRank(rank)), "Durée"),
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + bonus + "%", "Dégâts"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(GardeDuLancierSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> harponnageStats(int rank) {
+        int dmg = Math.round(HarponnageSkill.damageFactor(rank) * 100);
+        int range = (int) HarponnageSkill.range();
+        int stamina = Math.round(HarponnageSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, dmg + "%"),
+            new SkillStatEntry(SkillStatKind.RANGE, range + "m"),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(HarponnageSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> formationDePiquesStats(int rank) {
+        int dmg = Math.round(FormationDePiquesSkill.damageFactor(rank) * 100);
+        int slow = Math.round(FormationDePiquesSkill.slowFactor(rank) * 100);
+        int width = (int) FormationDePiquesSkill.zoneWidthForRank(rank);
+        int depth = (int) FormationDePiquesSkill.zoneDepth();
+        int stamina = Math.round(FormationDePiquesSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, dmg + "%", "Dégâts"),
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, "-" + slow + "%", "Ralent."),
+            new SkillStatEntry(SkillStatKind.RANGE, width + "×" + depth + "m", "Zone"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(FormationDePiquesSkill.durationMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(FormationDePiquesSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> empalementStats(int rank) {
+        int dmg = Math.round(EmpalementSkill.damageFactor(rank) * 100);
+        int bleed = Math.round(EmpalementSkill.bleedPctPerSForRank(rank) * 100);
+        int stamina = Math.round(EmpalementSkill.staminaCostForRank(rank));
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, dmg + "%"),
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, bleed + "%", "Saign."),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(EmpalementSkill.bleedDurationMsForRank(rank)), "Saign."),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(EmpalementSkill.rootDurationMsForRank(rank)), "Immob."),
+            new SkillStatEntry(SkillStatKind.COOLDOWN,
+                formatCooldown(EmpalementSkill.cooldownMsForRank(rank))),
+            new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))
+        );
+    }
+
+    private static List<SkillStatEntry> postureDominanteStats(int rank) {
+        int red = Math.round(LancierPassifs.postureReductionForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DEFENSE, "-" + red + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(LancierPassifs.postureDurationMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> perceCoeurStats(int rank) {
+        int bleed = Math.round(LancierPassifs.perceBleedPctForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, bleed + "%", "Dégâts"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(LancierPassifs.PERCE_BLEED_DURATION_MS), "Durée")
+        );
+    }
+
+    private static List<SkillStatEntry> chasseurGeantsLancierStats(int rank) {
+        int pct = Math.round(LancierPassifs.geantsBonusForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%", "Attaque"));
+    }
+
+    private static List<SkillStatEntry> briseurDeLigneStats(int rank) {
+        int pct = Math.round(LancierPassifs.controleBonusForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(LancierPassifs.controleDurationMsForRank(rank)))
+        );
+    }
+
+    private static List<SkillStatEntry> porteeMaitriseeStats(int rank) {
+        int close = Math.round(LancierPassifs.porteeBonusCloseForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + close + "%", "Dégâts"));
     }
 
     private static List<SkillStatEntry> tireurEmbusqueStats(int rank) {
