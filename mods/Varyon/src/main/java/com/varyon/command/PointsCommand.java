@@ -6,7 +6,6 @@ import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.varyon.essence.EssenceManager;
 import com.varyon.essence.GlobalRewardsManager;
@@ -41,14 +40,8 @@ public class PointsCommand extends AbstractAsyncCommand {
     protected CompletableFuture<Void> executeAsync(CommandContext context) {
         CommandSender sender = context.sender();
 
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof PlayerRef playerRef)) {
             context.sendMessage(Message.raw("Commande joueur uniquement.").color(Color.RED));
-            return CompletableFuture.completedFuture(null);
-        }
-
-        PlayerRef playerRef = player.getPlayerRef();
-        if (playerRef == null) {
-            context.sendMessage(Message.raw("Impossible d'obtenir la référence joueur.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
@@ -191,14 +184,8 @@ public class PointsCommand extends AbstractAsyncCommand {
         @Override
         protected CompletableFuture<Void> executeAsync(CommandContext context) {
             CommandSender sender = context.sender();
-            if (!(sender instanceof Player player)) {
+            if (!(sender instanceof PlayerRef playerRef)) {
                 context.sendMessage(Message.raw("Commande joueur uniquement.").color(Color.RED));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            PlayerRef playerRef = com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(player.getUuid());
-            if (playerRef == null) {
-                context.sendMessage(Message.raw("Impossible d'obtenir la référence joueur.").color(Color.RED));
                 return CompletableFuture.completedFuture(null);
             }
 
