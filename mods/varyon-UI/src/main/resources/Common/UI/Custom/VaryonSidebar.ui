@@ -378,10 +378,15 @@ $Sounds = "Sounds.ui";
             Background: (Color: #232d42);
             Padding: (Top: 15, Bottom: 15);
 
-          Group #SidebarBalanceRow {
+          Button #SidebarBalanceRow {
             LayoutMode: Left;
             Anchor: (Left: 0, Right: 0, Height: 70);
-            Background: "HUD/CoinSection.png";
+            Style: ButtonStyle(
+              Default: (Background: "HUD/CoinSection.png"),
+              Hovered: (Background: "HUD/CoinSection.png"),
+              Pressed: (Background: "HUD/CoinSection.png"),
+              Sounds: $Sounds.@ButtonsLight
+            );
             Padding: (Top: 6, Bottom: 6);
 
             Group { Anchor: (Width: 64); }

@@ -233,6 +233,11 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
 
         eventBuilder.addEventBinding(
             CustomUIEventBindingType.Activating,
+            "#MenuGenDetailBtn",
+            EventData.of("Action", "command").append("Command", "/vrpg")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
             "#MenuJob1DetailBtn",
             EventData.of("Action", "command").append("Command", "/vp")
         );
@@ -240,6 +245,12 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             CustomUIEventBindingType.Activating,
             "#MenuJob2DetailBtn",
             EventData.of("Action", "command").append("Command", "/vp")
+        );
+
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#SidebarBalanceRow",
+            EventData.of("Action", "command").append("Command", "/bank")
         );
 
         eventBuilder.addEventBinding(
