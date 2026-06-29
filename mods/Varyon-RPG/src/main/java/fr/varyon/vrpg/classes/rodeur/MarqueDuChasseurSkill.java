@@ -6,9 +6,9 @@ public final class MarqueDuChasseurSkill {
     public static final String TALENT_NODE_ID = "rodeur_3";
 
     private static final float[] DAMAGE_BONUS  = {0.10f, 0.15f, 0.20f, 0.25f, 0.30f};
-    private static final long[]  DURATION_MS   = {8000, 10000, 12000, 14000, 16000};
-    private static final long[]  COOLDOWN_MS   = {25000, 23000, 21000, 19000, 17000};
-    private static final float[] STAMINA_COST  = {5f, 5f, 6f, 6f, 7f};
+    private static final long[]  DURATION_MS   = {4000, 5000, 6000, 7000, 8000};
+    private static final long[]  COOLDOWN_MS   = {28000, 26000, 24000, 22000, 20000};
+    private static final float[] STAMINA_COST  = {8f, 8f, 9f, 9f, 10f};
     private static final int[]   MAX_CONSUMES  = {3, 3, 4, 4, 5};
 
     private MarqueDuChasseurSkill() {}
@@ -27,7 +27,6 @@ public final class MarqueDuChasseurSkill {
         int dmg = Math.round(damageBonusForRank(rank) * 100);
         float dur = durationMsForRank(rank) / 1000f;
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        int consumes = maxConsumesForRank(rank);
-        return "+" + dmg + "% dégâts sur cible, " + consumes + " hits, " + dur + "s, Délai " + cd + "s";
+        return "+" + dmg + "% dégâts sur cible marquée, " + dur + "s, Délai " + cd + "s";
     }
 }

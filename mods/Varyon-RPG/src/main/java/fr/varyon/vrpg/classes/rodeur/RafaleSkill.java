@@ -4,12 +4,14 @@ public final class RafaleSkill {
 
     public static final String SKILL_ID       = "rafale";
     public static final String TALENT_NODE_ID = "rodeur_11";
+    public static final String PROJECTILE_ID  = "Vrpg_Fleche_Rafale";
+    private static final long    PENDING_TIMEOUT_MS = 4000L;
 
     private static final int[]   ARROW_COUNT   = {2, 2, 3, 3, 4};
-    private static final float[] DAMAGE_PCT    = {0.50f, 0.55f, 0.60f, 0.65f, 0.70f};
+    private static final float[] DAMAGE_PCT    = {2.00f, 2.25f, 2.50f, 2.75f, 3.00f};
     private static final long[]  DELAY_MS      = {300, 280, 260, 240, 220};
-    private static final long[]  COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
-    private static final float[] STAMINA_COST  = {7f, 7f, 8f, 8f, 9f};
+    private static final long[]  COOLDOWN_MS   = {26000, 24000, 22000, 20000, 18000};
+    private static final float[] STAMINA_COST  = {13f, 13f, 14f, 14f, 15f};
 
     private RafaleSkill() {}
 
@@ -22,11 +24,12 @@ public final class RafaleSkill {
     public static long  delayMsBetween(int rank)      { return DELAY_MS[idx(rank)]; }
     public static long  cooldownMsForRank(int rank)   { return COOLDOWN_MS[idx(rank)]; }
     public static float staminaCostForRank(int rank)  { return STAMINA_COST[idx(rank)]; }
+    public static long  pendingTimeoutMs()            { return PENDING_TIMEOUT_MS; }
 
     public static String statLineForRank(int rank) {
         int arrows = arrowCountForRank(rank);
         int dmg = Math.round(damagePctForRank(rank) * 100);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return arrows + " flèches à " + dmg + "% dégâts, Délai " + cd + "s";
+        return arrows + " tirs à " + dmg + "% dégâts, Délai " + cd + "s";
     }
 }

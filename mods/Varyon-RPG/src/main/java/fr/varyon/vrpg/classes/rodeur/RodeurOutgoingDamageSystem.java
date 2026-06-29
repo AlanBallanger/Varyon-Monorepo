@@ -22,10 +22,14 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassManager;
+import fr.varyon.vrpg.classes.ClassPlayerStats;
+import fr.varyon.vrpg.classes.ClassStatDefinition;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.ability.ClassSkillCooldowns;
+import fr.varyon.vrpg.combat.CombatCritDetection;
 import fr.varyon.vrpg.config.VrpgConfig;
+import fr.varyon.vrpg.integration.DamageFloatBridge;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -112,7 +116,7 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                 float arrowDmg = rodeurState.consumePendingArrowDmg(uuid);
                 if (arrowType == RodeurState.ARROW_TYPE_MARQUAGE || arrowDmg > 0f) {
                     if (arrowDmg > 0f) {
-                        amount = arrowDmg;
+                        amount = applyCritToArrowDamage(uuid, acc, arrowDmg, damage);
                         damage.setAmount(amount);
                     }
                     if (debug) log.append(String.format(" Arrow(%d)=%.1f", arrowType, arrowDmg));
@@ -145,6 +149,7 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                         } else {
                             LOG.atInfo().log("[RodeurKB] SKIP — kb=0");
                         }
+                        rodeurState.clearPendingArrow(uuid);
                     } else if (arrowType == RodeurState.ARROW_TYPE_MARQUAGE) {
                         damage.setAmount(0f);
                         long pendingDuration = rodeurState.getPendingMarqueDuration(uuid);
@@ -176,32 +181,20 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                                     com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
                             }
                         }
+                        rodeurState.clearPendingArrow(uuid);
+                    } else if (arrowType == RodeurState.ARROW_TYPE_RAFALE) {
+                        rodeurState.clearPendingArrow(uuid);
+                    }
+
+                    if (arrowType != RodeurState.ARROW_TYPE_MARQUAGE && amount > 0f) {
+                        amount = applyMarqueIfMarked(uuid, acc, victimRef, amount, store, debug, log);
+                        damage.setAmount(amount);
                     }
                 }
                 return;
             }
 
-            // Marque du chasseur — dégâts bonus sur la cible spécifiquement marquée, consommé après N hits
-            int marqueRank = rodeurState.getMarqueRank(uuid);
-            if (marqueRank > 0) {
-                long targetIdx = rodeurState.getMarqueTargetIdx(uuid);
-                if (targetIdx >= 0 && victimRef.getIndex() == targetIdx) {
-                    float bonus = MarqueDuChasseurSkill.damageBonusForRank(marqueRank);
-                    amount *= (1f + bonus);
-                    rodeurState.consumeMarque(uuid);
-                    if (debug) log.append(String.format(" Marque=+%.0f%%", bonus * 100));
-
-                    // Traque sans fin — si ce coup tue la cible, réduire le Délai de Marque
-                    int traqueSansFinRank = acc.getTalentRank(PlayerClass.TIREUR, RodeurPassifs.TRAQUE_SANS_FIN_NODE);
-                    if (traqueSansFinRank > 0 && willKill(victimRef, amount, store)) {
-                        float reduction = RodeurPassifs.traqueCdReductionForRank(traqueSansFinRank);
-                        long cdMs = MarqueDuChasseurSkill.cooldownMsForRank(marqueRank);
-                        long reduceMs = (long)(cdMs * reduction);
-                        cooldowns.reduceCooldownBy(uuid, MarqueDuChasseurSkill.SKILL_ID, reduceMs);
-                        if (debug) log.append(String.format(" TraqueSansFin=-%dms", reduceMs));
-                    }
-                }
-            }
+            amount = applyMarqueIfMarked(uuid, acc, victimRef, amount, store, debug, log);
 
             // Précision mortelle — bonus si cible < 50% HP
             int precisionRank = acc.getTalentRank(PlayerClass.TIREUR, RodeurPassifs.PRECISION_MORTELLE_NODE);
@@ -258,6 +251,58 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    private float applyCritToArrowDamage(@Nonnull UUID uuid,
+                                         @Nonnull ClassAccount acc,
+                                         float arrowDmg,
+                                         @Nonnull Damage damage) {
+        ClassPlayerStats stats = classManager.getStatEngine().getStats(uuid);
+        if (stats == null) {
+            stats = ClassStatDefinition.compute(acc.getProgress(PlayerClass.TIREUR).getLevel(),
+                PlayerSpecialization.RODEUR);
+        }
+        boolean isCrit = CombatCritDetection.isCriticalHit(damage);
+        if (!isCrit && stats != null && stats.critChancePct() > 0
+                && Math.random() < stats.critChancePct() / 100.0) {
+            isCrit = true;
+        }
+        float amount = arrowDmg;
+        if (isCrit && stats != null) {
+            amount *= (1.0f + stats.critDamagePct() / 100.0f);
+            DamageFloatBridge.markCritical(damage);
+        } else {
+            DamageFloatBridge.clearCritical(damage);
+        }
+        return amount;
+    }
+
+    private float applyMarqueIfMarked(@Nonnull UUID uuid,
+                                      @Nonnull ClassAccount acc,
+                                      @Nonnull Ref<EntityStore> victimRef,
+                                      float amount,
+                                      @Nonnull Store<EntityStore> store,
+                                      boolean debug,
+                                      StringBuilder log) {
+        int marqueRank = rodeurState.getMarqueRank(uuid);
+        if (marqueRank <= 0) return amount;
+        long targetIdx = rodeurState.getMarqueTargetIdx(uuid);
+        if (targetIdx < 0 || victimRef.getIndex() != targetIdx) return amount;
+
+        float bonus = MarqueDuChasseurSkill.damageBonusForRank(marqueRank);
+        amount *= (1f + bonus);
+        rodeurState.consumeMarque(uuid);
+        if (debug) log.append(String.format(" Marque=+%.0f%%", bonus * 100));
+
+        int traqueSansFinRank = acc.getTalentRank(PlayerClass.TIREUR, RodeurPassifs.TRAQUE_SANS_FIN_NODE);
+        if (traqueSansFinRank > 0 && willKill(victimRef, amount, store)) {
+            float reduction = RodeurPassifs.traqueCdReductionForRank(traqueSansFinRank);
+            long cdMs = MarqueDuChasseurSkill.cooldownMsForRank(marqueRank);
+            long reduceMs = (long) (cdMs * reduction);
+            cooldowns.reduceCooldownBy(uuid, MarqueDuChasseurSkill.SKILL_ID, reduceMs);
+            if (debug) log.append(String.format(" TraqueSansFin=-%dms", reduceMs));
+        }
+        return amount;
     }
 
     private float getHpRatio(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {

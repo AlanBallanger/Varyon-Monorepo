@@ -4,11 +4,13 @@ public final class FlecheEntravantSkill {
 
     public static final String SKILL_ID       = "fleche_entravante";
     public static final String TALENT_NODE_ID = "rodeur_5";
+    public static final String PROJECTILE_ID  = "Vrpg_Fleche_Entravante";
+    private static final long    PENDING_TIMEOUT_MS = 4000L;
 
-    private static final float[] DAMAGE_PCT    = {0.70f, 0.80f, 0.90f, 1.00f, 1.10f};
+    private static final float[] DAMAGE_PCT    = {1.75f, 2.00f, 2.25f, 2.50f, 2.75f};
     private static final long[]  ROOT_MS       = {1000, 1500, 2000, 2500, 3000};
-    private static final long[]  COOLDOWN_MS   = {18000, 16000, 15000, 14000, 12000};
-    private static final float[] STAMINA_COST  = {5f, 5f, 6f, 6f, 7f};
+    private static final long[]  COOLDOWN_MS   = {24000, 22000, 20000, 18000, 16000};
+    private static final float[] STAMINA_COST  = {8f, 8f, 9f, 9f, 10f};
 
     private FlecheEntravantSkill() {}
 
@@ -20,6 +22,7 @@ public final class FlecheEntravantSkill {
     public static long  rootMsForRank(int rank)     { return ROOT_MS[idx(rank)]; }
     public static long  cooldownMsForRank(int rank) { return COOLDOWN_MS[idx(rank)]; }
     public static float staminaCostForRank(int rank){ return STAMINA_COST[idx(rank)]; }
+    public static long  pendingTimeoutMs()         { return PENDING_TIMEOUT_MS; }
 
     public static String statLineForRank(int rank) {
         int dmg = Math.round(damagePctForRank(rank) * 100);

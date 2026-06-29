@@ -163,6 +163,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem rodeurPoisonSystem;
     private fr.varyon.vrpg.classes.rodeur.RodeurSpeedSystem rodeurSpeedSystem;
     private fr.varyon.vrpg.classes.rodeur.RodeurOutgoingDamageSystem rodeurOutgoingDamageSystem;
+    private fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem rodeurArrowGroundSystem;
     private fr.varyon.vrpg.classes.rodeur.RodeurIncomingDamageSystem rodeurIncomingDamageSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
     private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
@@ -1102,6 +1103,13 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 getEntityStoreRegistry().registerSystem(rodeurIncomingDamageSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurIncomingDamageSystem");
+            }
+            try {
+                this.rodeurArrowGroundSystem = new fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem(rodeurState);
+                getEntityStoreRegistry().registerSystem(rodeurArrowGroundSystem);
+                if (classSkillService != null) classSkillService.setRodeurArrowGroundSystem(rodeurArrowGroundSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurArrowGroundSystem");
             }
         }
 

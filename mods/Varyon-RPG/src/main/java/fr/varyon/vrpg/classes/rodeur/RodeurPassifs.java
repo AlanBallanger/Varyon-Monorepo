@@ -79,7 +79,7 @@ public final class RodeurPassifs {
 
     public static String traqueSansFinStatLine(int rank) {
         int pct = Math.round(traqueCdReductionForRank(rank) * 100);
-        return "Tuer une cible marquée réduit le Délai de Marque du Chasseur de " + pct + "%";
+        return "Tuer une cible marquée réduit le délai de Marque du Chasseur de " + pct + "%";
     }
 
     private static int idx(int rank, int len) {

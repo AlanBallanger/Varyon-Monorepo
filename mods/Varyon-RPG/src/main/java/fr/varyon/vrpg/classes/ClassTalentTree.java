@@ -221,8 +221,8 @@ public final class ClassTalentTree {
             new Node("Instinct de Survie",   "Passif", "Le chasseur sent le danger avant qu'il arrive.",                     "Augmente les chances d'esquiver les attaques.",                                         ROI + "Instinct_De_Survie.png",   5),
             new Node("Précision Mortelle",   "Passif", "Les blessés tombent plus vite.",                                     "Inflige plus de dégâts aux ennemis ayant moins de 50 % de PV.",                        ROI + "Précision_Mortelle.png",   5),
             new Node("Traque Mobile",        "Passif", "Il ne s'arrête jamais, et ses dégâts non plus.",                    "Augmente les dégâts lorsque le personnage est en déplacement.",                         ROI + "Traque_Mobile.png",        5),
-            new Node("Traque sans Fin",      "Passif", "Une proie tuée libère la chasse pour une autre.",                    "Tuer une cible marquée réinitialise le Délai de Marque du Chasseur.",                     ROI + "Traque_Sans_Fin.png",      5),
-            new Node("Rafale",               "Actif",  "Quand le moment est venu, on ne tire qu'une seule fois, plusieurs.", "Tire plusieurs flèches en succession rapide.",                                         ROI + "Rafale.png",               5),
+            new Node("Traque sans Fin",      "Passif", "Une proie tuée libère la chasse pour une autre.",                    "Tuer une cible marquée réduit le délai de Marque du Chasseur.",                          ROI + "Traque_Sans_Fin.png",      5),
+            new Node("Rafale",               "Actif",  "Un seul geste, une volée entière.",                                  "Enchaîne plusieurs tirs de flèches en succession rapide.",                               ROI + "Rafale.png",               5),
         });
 
         final String ABI = "Classes_Icons/Crossbowman/";

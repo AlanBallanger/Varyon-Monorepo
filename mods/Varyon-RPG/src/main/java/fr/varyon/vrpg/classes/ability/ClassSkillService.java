@@ -72,6 +72,7 @@ public final class ClassSkillService {
     private final fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
     private fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem rodeurPoisonSystem;
     @Nullable private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
+    @Nullable private fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem rodeurArrowGroundSystem;
     private final fr.varyon.vrpg.classes.lancier.LancierState lancierState;
     private final fr.varyon.vrpg.classes.lancier.LancierBleedSystem lancierBleedSystem;
     @Nullable private fr.varyon.vrpg.classes.lancier.FormationDePiquesZoneSystem formationZoneSystem;
@@ -119,6 +120,10 @@ public final class ClassSkillService {
 
     public void setCarreauExplosifGroundSystem(@Nonnull fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem sys) {
         this.carreauExplosifGroundSystem = sys;
+    }
+
+    public void setRodeurArrowGroundSystem(@Nonnull fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem sys) {
+        this.rodeurArrowGroundSystem = sys;
     }
 
     public void setFormationDePiquesZoneSystem(@Nonnull fr.varyon.vrpg.classes.lancier.FormationDePiquesZoneSystem sys) {
@@ -3367,6 +3372,35 @@ public final class ClassSkillService {
         }
     }
 
+    private void spawnPluieArrowFalling(@Nonnull Ref<EntityStore> casterRef,
+                                        @Nonnull Store<EntityStore> store,
+                                        @Nonnull org.joml.Vector3d spawnPos,
+                                        @Nonnull org.joml.Vector3d landPos,
+                                        @Nonnull java.util.concurrent.atomic.AtomicReference<java.util.UUID> outProjectileId) {
+        try {
+            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap()
+                    .getAsset(fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.PROJECTILE_ID);
+            if (cfg == null) return;
+            double dx = landPos.x - spawnPos.x;
+            double dy = landPos.y - spawnPos.y;
+            double dz = landPos.z - spawnPos.z;
+            double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (len < 1e-6) return;
+            org.joml.Vector3d dir = new org.joml.Vector3d(dx / len, dy / len, dz / len);
+            final org.joml.Vector3d fPos = new org.joml.Vector3d(spawnPos);
+            EntityStoreCommandBuffers.runWithResult(store, cb -> {
+                java.util.UUID projectileId = java.util.UUID.randomUUID();
+                Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(projectileId, casterRef, cb, cfg, fPos, dir);
+                if (projectileRef != null) {
+                    outProjectileId.set(projectileId);
+                }
+                return null;
+            });
+        } catch (Exception ignored) {}
+    }
+
     private void spawnMeteorFalling(@Nonnull Ref<EntityStore> casterRef,
                                     @Nonnull org.joml.Vector3d zoneCenter,
                                     @Nonnull com.hypixel.hytale.server.core.universe.world.World world,
@@ -3456,6 +3490,96 @@ public final class ClassSkillService {
         } catch (Exception e) {
             LOG.atFine().log("[Meteore] projectile cleanup failed: " + e.getMessage());
         }
+    }
+
+    private void scheduleRodeurPendingArrowClear(@Nonnull UUID uuid, int arrowType, long delayMs) {
+        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "rodeur-arrow-clear");
+            t.setDaemon(true);
+            return t;
+        }).schedule(() -> {
+            if (rodeurState.getPendingArrowType(uuid) == arrowType) {
+                rodeurState.clearPendingArrow(uuid);
+            }
+        }, delayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
+
+    private void spawnRodeurSkillArrow(@Nonnull UUID uuid,
+                                       int arrowType,
+                                       float dmg,
+                                       double kb,
+                                       long rootMs,
+                                       @Nonnull String projectileId,
+                                       @Nonnull Ref<EntityStore> entityRef,
+                                       @Nonnull PlayerRef playerRef,
+                                       @Nonnull Store<EntityStore> store,
+                                       long pendingTimeoutMs) {
+        TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
+        if (tcCaster == null) return;
+        com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+            store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+        org.joml.Vector3d dir = hr != null ? hr.getDirection() : new org.joml.Vector3d(0, 0, 1);
+        org.joml.Vector3d casterPos = tcCaster.getPosition();
+        org.joml.Vector3d aimFar = new org.joml.Vector3d(
+            casterPos.x + dir.x * 25.0,
+            casterPos.y + dir.y * 25.0,
+            casterPos.z + dir.z * 25.0);
+        rodeurState.setPendingArrow(uuid, arrowType, dmg, kb, rootMs);
+        if (rodeurArrowGroundSystem != null) {
+            spawnRodeurProjectileTowardTracked(projectileId, casterPos, aimFar, entityRef, playerRef, uuid);
+        } else {
+            spawnProjectileToward(projectileId, casterPos, aimFar, entityRef, playerRef, null);
+        }
+        ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPos, null);
+        scheduleRodeurPendingArrowClear(uuid, arrowType, pendingTimeoutMs);
+    }
+
+    private void spawnRodeurSkillArrowLive(@Nonnull UUID uuid,
+                                         int arrowType,
+                                         float dmg,
+                                         double kb,
+                                         long rootMs,
+                                         @Nonnull String projectileId,
+                                         long pendingTimeoutMs) {
+        try {
+            com.hypixel.hytale.server.core.universe.PlayerRef wr =
+                com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(uuid);
+            if (wr == null) return;
+            Ref<EntityStore> wRef = wr.getReference();
+            if (wRef == null || !wRef.isValid()) return;
+            Store<EntityStore> ws = wRef.getStore();
+            if (ws == null) return;
+            spawnRodeurSkillArrow(uuid, arrowType, dmg, kb, rootMs, projectileId, wRef, wr, ws, pendingTimeoutMs);
+        } catch (Exception ignored) {}
+    }
+
+    private org.joml.Vector3d aimGroundPointFromLook(@Nonnull org.joml.Vector3d feetPos,
+                                                    @Nonnull org.joml.Vector3d dir,
+                                                    double maxRange) {
+        org.joml.Vector3d d = new org.joml.Vector3d(dir);
+        if (d.lengthSquared() < 1e-8) {
+            d.set(0, 0, 1);
+        } else {
+            d.normalize();
+        }
+        double t;
+        if (d.y < -1e-4) {
+            t = -1.6 / d.y;
+            if (t > maxRange) {
+                t = maxRange;
+            }
+        } else {
+            double horiz = Math.sqrt(d.x * d.x + d.z * d.z);
+            if (horiz < 1e-6) {
+                t = maxRange;
+            } else {
+                t = maxRange / horiz;
+            }
+        }
+        return new org.joml.Vector3d(
+            feetPos.x + d.x * t,
+            feetPos.y,
+            feetPos.z + d.z * t);
     }
 
     // =====================================================================
@@ -4389,39 +4513,38 @@ public final class ClassSkillService {
                 if (dmgPerArrow < 1f) dmgPerArrow = 1f;
                 int arrows = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.arrowCountForRank(rank);
                 long durationMs = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.durationMs();
-                double radius = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.radius();
+                double radius = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.spreadRadius();
                 com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrPluie =
                     store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
-                org.joml.Vector3d dirPluie = hrPluie != null ? hrPluie.getDirection() : new org.joml.Vector3d(0, 0, 1);
+                org.joml.Vector3d dirPluie = hrPluie != null
+                    ? new org.joml.Vector3d(hrPluie.getDirection())
+                    : new org.joml.Vector3d(0, 0, 1);
                 org.joml.Vector3d pluieBase = tc.getPosition();
+                double pluieRange = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.aimRange();
                 org.joml.Vector3d center;
-                {
-                    Ref<EntityStore> pluieTarget = findTargetedNpcRef(playerRef, entityRef, store, 20.0);
-                    org.joml.Vector3d aimed = null;
-                    if (pluieTarget != null) {
-                        TransformComponent tcPluieTarget = store.getComponent(pluieTarget, TransformComponent.getComponentType());
-                        if (tcPluieTarget != null) {
-                            org.joml.Vector3d tp = tcPluieTarget.getPosition();
-                            org.joml.Vector3d toTarget = new org.joml.Vector3d(tp).sub(pluieBase).normalize();
-                            double cosAngle = toTarget.dot(dirPluie);
-                            if (cosAngle > Math.cos(Math.toRadians(15.0))) aimed = new org.joml.Vector3d(tp);
+                Ref<EntityStore> pluieTarget = findTargetedNpcRef(playerRef, entityRef, store, pluieRange);
+                if (pluieTarget != null) {
+                    TransformComponent tcPluieTarget = store.getComponent(pluieTarget, TransformComponent.getComponentType());
+                    if (tcPluieTarget != null) {
+                        org.joml.Vector3d tp = tcPluieTarget.getPosition();
+                        org.joml.Vector3d toTarget = new org.joml.Vector3d(tp).sub(pluieBase);
+                        if (toTarget.lengthSquared() > 1e-8) {
+                            toTarget.normalize();
                         }
-                    }
-                    if (aimed == null) {
-                        double eyeY = pluieBase.y + 1.6;
-                        double t;
-                        if (dirPluie.y < -1e-4) {
-                            t = Math.min(20.0 / Math.max(1e-6, Math.sqrt(dirPluie.x*dirPluie.x + dirPluie.z*dirPluie.z)),
-                                         -eyeY / dirPluie.y);
+                        org.joml.Vector3d lookDir = new org.joml.Vector3d(dirPluie);
+                        if (lookDir.lengthSquared() > 1e-8) {
+                            lookDir.normalize();
+                        }
+                        if (toTarget.dot(lookDir) > Math.cos(Math.toRadians(15.0))) {
+                            center = new org.joml.Vector3d(tp);
                         } else {
-                            t = 20.0 / Math.max(1e-6, Math.sqrt(dirPluie.x*dirPluie.x + dirPluie.z*dirPluie.z));
+                            center = aimGroundPointFromLook(pluieBase, dirPluie, pluieRange);
                         }
-                        aimed = new org.joml.Vector3d(
-                            pluieBase.x + dirPluie.x * t,
-                            pluieBase.y,
-                            pluieBase.z + dirPluie.z * t);
+                    } else {
+                        center = aimGroundPointFromLook(pluieBase, dirPluie, pluieRange);
                     }
-                    center = aimed;
+                } else {
+                    center = aimGroundPointFromLook(pluieBase, dirPluie, pluieRange);
                 }
 
                 com.hypixel.hytale.server.core.universe.world.World world = null;
@@ -4432,11 +4555,12 @@ public final class ClassSkillService {
                 ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, tc.getPosition(), null);
                 if (world != null) {
                     final com.hypixel.hytale.server.core.universe.world.World fw = world;
-                    final Ref<EntityStore> fEntityRef = entityRef;
+                    final UUID fUuid = uuid;
                     final float fDmg = dmgPerArrow;
                     final int fArrows = arrows;
                     final double fRadius = radius;
                     final org.joml.Vector3d fCenter = center;
+                    final long fFallMs = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.arrowFallMs();
                     long tickInterval = durationMs / Math.max(1, fArrows - 1);
                     java.util.concurrent.ScheduledExecutorService exec =
                         java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
@@ -4447,19 +4571,42 @@ public final class ClassSkillService {
                         try {
                             if (ticks[0] >= fArrows) { exec.shutdown(); return; }
                             ticks[0]++;
-                            double rndX = fCenter.x + (Math.random() * 2 - 1) * 1.0;
-                            double rndZ = fCenter.z + (Math.random() * 2 - 1) * 1.0;
-                            org.joml.Vector3d spawnAbove = new org.joml.Vector3d(rndX, fCenter.y + 10.0, rndZ);
-                            org.joml.Vector3d landPos    = new org.joml.Vector3d(rndX, fCenter.y,        rndZ);
-                            spawnProjectileToward("Vrpg_Fleche_Pluie", spawnAbove, landPos, fEntityRef, playerRef, null);
+                            double rndX = fCenter.x + (Math.random() * 2 - 1) * fRadius;
+                            double rndZ = fCenter.z + (Math.random() * 2 - 1) * fRadius;
+                            final org.joml.Vector3d spawnAbove = new org.joml.Vector3d(
+                                rndX,
+                                fCenter.y + fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.fallHeight(),
+                                rndZ);
+                            final org.joml.Vector3d landPos = new org.joml.Vector3d(rndX, fCenter.y, rndZ);
+                            final java.util.concurrent.atomic.AtomicReference<java.util.UUID> arrowId =
+                                new java.util.concurrent.atomic.AtomicReference<>();
                             fw.execute(() -> {
                                 try {
-                                    Store<EntityStore> liveStore = fw.getEntityStore().getStore();
-                                    damageNearby(landPos, 1.5f, fEntityRef, liveStore, fDmg,
-                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL);
-                                    ClassSkillSounds.playSkillSound("SFX_Arrow_Fire_Miss", playerRef, landPos, null);
+                                    com.hypixel.hytale.server.core.universe.PlayerRef wr =
+                                        com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(fUuid);
+                                    if (wr == null) return;
+                                    Ref<EntityStore> wRef = wr.getReference();
+                                    if (wRef == null || !wRef.isValid()) return;
+                                    Store<EntityStore> liveStore = wRef.getStore();
+                                    if (liveStore == null) return;
+                                    spawnPluieArrowFalling(wRef, liveStore, spawnAbove, landPos, arrowId);
                                 } catch (Exception ignored3) {}
                             });
+                            exec.schedule(() -> fw.execute(() -> {
+                                try {
+                                    com.hypixel.hytale.server.core.universe.PlayerRef wr =
+                                        com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(fUuid);
+                                    if (wr == null) return;
+                                    Ref<EntityStore> wRef = wr.getReference();
+                                    if (wRef == null || !wRef.isValid()) return;
+                                    Store<EntityStore> liveStore = wRef.getStore();
+                                    if (liveStore == null) return;
+                                    removeMeteorProjectile(liveStore, arrowId.get(), landPos);
+                                    damageNearby(landPos, 1.5f, wRef, liveStore, fDmg,
+                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL);
+                                    ClassSkillSounds.playSkillSound("SFX_Arrow_Fire_Miss", wr, landPos, null);
+                                } catch (Exception ignored3) {}
+                            }), fFallMs, java.util.concurrent.TimeUnit.MILLISECONDS);
                         } catch (Exception ignored4) { exec.shutdown(); }
                     }, 0L, tickInterval, java.util.concurrent.TimeUnit.MILLISECONDS);
                 }
@@ -4534,20 +4681,14 @@ public final class ClassSkillService {
             if (dmg < 1f) dmg = 1f;
             double kb = fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.knockbackForRank(rank);
 
-            TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
-            if (tcCaster == null) return false;
+            com.hypixel.hytale.server.core.universe.world.World world = store.getExternalData().getWorld();
+            if (world == null) return false;
 
-            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrRecul =
-                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
-            org.joml.Vector3d dirRecul = hrRecul != null ? hrRecul.getDirection() : new org.joml.Vector3d(0, 0, 1);
-            org.joml.Vector3d casterPos = tcCaster.getPosition();
-            org.joml.Vector3d aimFar = new org.joml.Vector3d(
-                casterPos.x + dirRecul.x * 20.0,
-                casterPos.y + dirRecul.y * 20.0,
-                casterPos.z + dirRecul.z * 20.0);
-            rodeurState.setPendingArrow(uuid, fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_RECUL, dmg, kb, 0L);
-            spawnProjectileToward("Vrpg_Fleche_Recul", casterPos, aimFar, entityRef, playerRef, null);
-            ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPos, null);
+            final float fDmg = dmg;
+            final double fKb = kb;
+            world.execute(() -> spawnRodeurSkillArrowLive(uuid,
+                fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_RECUL,
+                fDmg, fKb, 0L, "Vrpg_Fleche_Recul", 4000L));
         } catch (Exception ignored) {}
 
         ClassSkillStamina.consume(playerRef, staminaCost);
@@ -4578,19 +4719,15 @@ public final class ClassSkillService {
             if (dmg < 1f) dmg = 1f;
             long rootMs = fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.rootMsForRank(rank);
 
-            TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
-            if (tcCaster == null) return false;
-            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrEnt =
-                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
-            org.joml.Vector3d dirEnt = hrEnt != null ? hrEnt.getDirection() : new org.joml.Vector3d(0, 0, 1);
-            org.joml.Vector3d casterPosEnt = tcCaster.getPosition();
-            org.joml.Vector3d aimFarEnt = new org.joml.Vector3d(
-                casterPosEnt.x + dirEnt.x * 20.0,
-                casterPosEnt.y + dirEnt.y * 20.0,
-                casterPosEnt.z + dirEnt.z * 20.0);
-            rodeurState.setPendingArrow(uuid, fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_ENTRAVANTE, dmg, 0.0, rootMs);
-            spawnProjectileToward("Vrpg_Fleche_Recul", casterPosEnt, aimFarEnt, entityRef, playerRef, null);
-            ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPosEnt, null);
+            com.hypixel.hytale.server.core.universe.world.World world = store.getExternalData().getWorld();
+            if (world == null) return false;
+
+            final float fDmg = dmg;
+            final long fRootMs = rootMs;
+            world.execute(() -> spawnRodeurSkillArrowLive(uuid,
+                fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_ENTRAVANTE,
+                fDmg, 0.0, fRootMs, fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.PROJECTILE_ID,
+                fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.pendingTimeoutMs()));
         } catch (Exception ignored) {}
 
         ClassSkillStamina.consume(playerRef, staminaCost);
@@ -4622,22 +4759,15 @@ public final class ClassSkillService {
             int arrowCount = fr.varyon.vrpg.classes.rodeur.RafaleSkill.arrowCountForRank(rank);
             long delayMs = fr.varyon.vrpg.classes.rodeur.RafaleSkill.delayMsBetween(rank);
 
-            TransformComponent tcRafale = store.getComponent(entityRef, TransformComponent.getComponentType());
-            if (tcRafale == null) return false;
-            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hrRafale =
-                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
-            org.joml.Vector3d dirRafale = hrRafale != null ? hrRafale.getDirection() : new org.joml.Vector3d(0, 0, 1);
-            org.joml.Vector3d casterPosRafale = tcRafale.getPosition();
-            org.joml.Vector3d aimFarRafale = new org.joml.Vector3d(
-                casterPosRafale.x + dirRafale.x * 25.0,
-                casterPosRafale.y + dirRafale.y * 25.0,
-                casterPosRafale.z + dirRafale.z * 25.0);
-
-            ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, casterPosRafale, null);
-
-            final Ref<EntityStore> fEntityRef = entityRef;
+            final UUID fUuid = uuid;
             final float fDmg = dmgPerArrow;
             final int fCount = arrowCount;
+            final long fDelayMs = delayMs;
+            final long fTimeout = fr.varyon.vrpg.classes.rodeur.RafaleSkill.pendingTimeoutMs();
+            final String fProjectile = fr.varyon.vrpg.classes.rodeur.RafaleSkill.PROJECTILE_ID;
+            com.hypixel.hytale.server.core.universe.world.World rafaleWorld = store.getExternalData().getWorld();
+            if (rafaleWorld == null) return false;
+            final com.hypixel.hytale.server.core.universe.world.World fw = rafaleWorld;
             java.util.concurrent.ScheduledExecutorService rafaleExec =
                 java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
                     Thread t = new Thread(r, "rafale-arrow"); t.setDaemon(true); return t;
@@ -4647,10 +4777,11 @@ public final class ClassSkillService {
                 try {
                     if (shots[0] >= fCount) { rafaleExec.shutdown(); return; }
                     shots[0]++;
-                    rodeurState.setPendingArrow(uuid, fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_RAFALE, fDmg, 0.0, 0L);
-                    spawnProjectileToward("Vrpg_Fleche_Recul", casterPosRafale, aimFarRafale, fEntityRef, playerRef, null);
+                    fw.execute(() -> spawnRodeurSkillArrowLive(fUuid,
+                        fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_RAFALE,
+                        fDmg, 0.0, 0L, fProjectile, fTimeout));
                 } catch (Exception ignored4) { rafaleExec.shutdown(); }
-            }, 0L, delayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+            }, 0L, fDelayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
         } catch (Exception ignored) {}
 
         ClassSkillStamina.consume(playerRef, staminaCost);
@@ -5331,6 +5462,34 @@ public final class ClassSkillService {
             }, t -> t.getIndex() != ci);
     }
 
+    private void spawnProjectileTowardSync(
+            @Nonnull String configId,
+            @Nonnull org.joml.Vector3d fromPos,
+            @Nonnull org.joml.Vector3d toPos,
+            @Nonnull Ref<EntityStore> casterRef,
+            @Nonnull Store<EntityStore> store) {
+        try {
+            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap().getAsset(configId);
+            if (cfg == null) return;
+            double dx = toPos.x - fromPos.x;
+            double dy = (toPos.y + 0.5) - (fromPos.y + 1.5);
+            double dz = toPos.z - fromPos.z;
+            double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (len < 1e-6) return;
+            org.joml.Vector3d dir = new org.joml.Vector3d(dx / len, dy / len, dz / len);
+            org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                fromPos.x + dir.x * 0.5,
+                fromPos.y + 1.5,
+                fromPos.z + dir.z * 0.5);
+            EntityStoreCommandBuffers.run(store, cb -> {
+                com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(casterRef, cb, cfg, spawnPos, dir);
+                return Boolean.TRUE;
+            });
+        } catch (Exception ignored) {}
+    }
+
     private void spawnProjectileToward(
             @Nonnull String configId,
             @Nonnull org.joml.Vector3d fromPos,
@@ -5411,6 +5570,53 @@ public final class ClassSkillService {
                 Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
                     .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
                 groundSystem.trackProjectile(projRef, creatorUuid);
+                return null;
+            }));
+        } catch (Exception ignored) {}
+    }
+
+    private void spawnRodeurProjectileTowardTracked(
+            @Nonnull String configId,
+            @Nonnull org.joml.Vector3d fromPos,
+            @Nonnull org.joml.Vector3d toPos,
+            @Nonnull Ref<EntityStore> casterRef,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull UUID creatorUuid) {
+        if (rodeurArrowGroundSystem == null) {
+            spawnProjectileToward(configId, fromPos, toPos, casterRef, playerRef, null);
+            return;
+        }
+        try {
+            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap().getAsset(configId);
+            if (cfg == null) return;
+            double dx = toPos.x - fromPos.x;
+            double dy = (toPos.y + 0.5) - (fromPos.y + 1.5);
+            double dz = toPos.z - fromPos.z;
+            double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (len < 1e-6) return;
+            org.joml.Vector3d dir = new org.joml.Vector3d(dx / len, dy / len, dz / len);
+            org.joml.Vector3d spawnPos = new org.joml.Vector3d(
+                fromPos.x + dir.x * 0.5,
+                fromPos.y + 1.5,
+                fromPos.z + dir.z * 0.5);
+            java.util.UUID wUuid = playerRef.getWorldUuid();
+            if (wUuid == null) return;
+            com.hypixel.hytale.server.core.universe.world.World world =
+                com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+            if (world == null) return;
+            final com.hypixel.hytale.server.core.universe.world.World fw = world;
+            final org.joml.Vector3d fSpawnPos = spawnPos;
+            final org.joml.Vector3d fDir = dir;
+            final Ref<EntityStore> fRef = casterRef;
+            final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
+            final fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem fGround = rodeurArrowGroundSystem;
+            fw.execute(() -> EntityStoreCommandBuffers.runWithResult(fw.getEntityStore().getStore(), cb -> {
+                Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
+                if (projRef != null) {
+                    fGround.trackProjectile(projRef, creatorUuid);
+                }
                 return null;
             }));
         } catch (Exception ignored) {}

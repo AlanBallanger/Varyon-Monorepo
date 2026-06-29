@@ -5,12 +5,16 @@ public final class PluieDesFlechesSkill {
     public static final String SKILL_ID       = "pluie_des_fleches";
     public static final String TALENT_NODE_ID = "rodeur_2";
 
-    private static final float[] DAMAGE_PCT   = {0.60f, 0.70f, 0.80f, 0.90f, 1.00f};
+    private static final float[] DAMAGE_PCT   = {1.50f, 1.75f, 2.00f, 2.25f, 2.50f};
     private static final int[]   ARROW_COUNT  = {6, 7, 8, 9, 10};
     private static final long    DURATION_MS  = 1000L;
-    private static final double  RADIUS       = 6.0;
+    private static final double  SPREAD_RADIUS = 1.0;
+    private static final double  AIM_RANGE     = 20.0;
+    private static final double  FALL_HEIGHT  = 10.0;
+    private static final long    ARROW_FALL_MS = 700L;
+    public static final String   PROJECTILE_ID = "Vrpg_Fleche_Pluie";
     private static final long[]  COOLDOWN_MS  = {30000, 28000, 26000, 24000, 22000};
-    private static final float[] STAMINA_COST = {8f, 8f, 9f, 9f, 10f};
+    private static final float[] STAMINA_COST = {11f, 11f, 12f, 12f, 13f};
 
     private PluieDesFlechesSkill() {}
 
@@ -21,7 +25,10 @@ public final class PluieDesFlechesSkill {
     public static float  damagePctForRank(int rank)  { return DAMAGE_PCT[idx(rank)]; }
     public static int    arrowCountForRank(int rank) { return ARROW_COUNT[idx(rank)]; }
     public static long   durationMs()               { return DURATION_MS; }
-    public static double radius()                    { return RADIUS; }
+    public static double spreadRadius()              { return SPREAD_RADIUS; }
+    public static double aimRange()                  { return AIM_RANGE; }
+    public static double fallHeight()                { return FALL_HEIGHT; }
+    public static long   arrowFallMs()              { return ARROW_FALL_MS; }
     public static long   cooldownMsForRank(int rank) { return COOLDOWN_MS[idx(rank)]; }
     public static float  staminaCostForRank(int rank){ return STAMINA_COST[idx(rank)]; }
 

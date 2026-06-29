@@ -126,6 +126,13 @@ public final class RodeurState {
         return dmg != null ? dmg : 0f;
     }
 
+    public void clearPendingArrow(@Nonnull UUID uuid) {
+        pendingArrowDmg.remove(uuid);
+        pendingArrowType.remove(uuid);
+        pendingArrowKb.remove(uuid);
+        pendingArrowRoot.remove(uuid);
+    }
+
     public double getPendingArrowKb(@Nonnull UUID uuid) {
         return pendingArrowKb.getOrDefault(uuid, 0.0);
     }

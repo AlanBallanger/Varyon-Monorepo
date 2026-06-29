@@ -5,10 +5,10 @@ public final class FlecheDeReculsSkill {
     public static final String SKILL_ID       = "fleche_de_recul";
     public static final String TALENT_NODE_ID = "rodeur_4";
 
-    private static final float[] DAMAGE_PCT    = {0.80f, 0.90f, 1.00f, 1.10f, 1.20f};
+    private static final float[] DAMAGE_PCT    = {2.00f, 2.25f, 2.50f, 2.75f, 3.00f};
     private static final double[] KNOCKBACK    = {5.0, 6.0, 7.0, 8.0, 10.0};
-    private static final long[]  COOLDOWN_MS   = {15000, 14000, 13000, 12000, 10000};
-    private static final float[] STAMINA_COST  = {4f, 4f, 5f, 5f, 6f};
+    private static final long[]  COOLDOWN_MS   = {22000, 20000, 18000, 17000, 15000};
+    private static final float[] STAMINA_COST  = {7f, 7f, 8f, 8f, 9f};
 
     private FlecheDeReculsSkill() {}
 
