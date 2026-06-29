@@ -6,8 +6,8 @@ public final class CarreauLourdSkill {
     public static final String TALENT_NODE_ID = "arbaletrier_2";
 
     private static final float[] DAMAGE_BONUS   = {0.30f, 0.40f, 0.50f, 0.60f, 0.75f};
-    private static final long[]  COOLDOWN_MS    = {12000, 11000, 10000, 9000, 8000};
-    private static final float[] STAMINA_COST   = {4f, 4f, 5f, 5f, 6f};
+    private static final long[]  COOLDOWN_MS    = {17000, 16000, 15000, 14000, 13000};
+    private static final float[] STAMINA_COST   = {9f, 9f, 10f, 11f, 12f};
     private static final long    ARMED_WINDOW_MS = 8_000L;
 
     private CarreauLourdSkill() {}

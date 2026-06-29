@@ -5,11 +5,11 @@ public final class CarreauTranspercantSkill {
     public static final String SKILL_ID       = "carreau_transpercant";
     public static final String TALENT_NODE_ID = "arbaletrier_4";
 
-    private static final float[] DAMAGE_PCT    = {1.00f, 1.10f, 1.20f, 1.35f, 1.50f};
+    private static final float[] DAMAGE_PCT    = {2.00f, 2.25f, 2.50f, 2.75f, 3.00f};
     private static final float[] SLOW_FACTOR   = {0.40f, 0.45f, 0.50f, 0.55f, 0.60f};
     private static final long[]  SLOW_MS       = {3000, 3500, 4000, 4500, 5000};
-    private static final long[]  COOLDOWN_MS   = {18000, 16000, 15000, 14000, 12000};
-    private static final float[] STAMINA_COST  = {6f, 6f, 7f, 7f, 8f};
+    private static final long[]  COOLDOWN_MS   = {23000, 21000, 20000, 19000, 17000};
+    private static final float[] STAMINA_COST  = {11f, 11f, 12f, 12f, 13f};
     private static final int[]   PIERCE_COUNT  = {2, 2, 3, 3, 4};
 
     private CarreauTranspercantSkill() {}

@@ -132,18 +132,6 @@ public final class ArbaietrierState {
         pendingMiseEnJouActive.remove(uuid);
     }
 
-    // --- Coup de Botte — knockback pending ---
-
-    private final ConcurrentHashMap<UUID, double[]> coupDeBotteKb = new ConcurrentHashMap<>();
-
-    public void setPendingCoupDeBotteKb(@Nonnull UUID uuid, double vx, double vz) {
-        coupDeBotteKb.put(uuid, new double[]{vx, vz});
-    }
-
-    public double[] consumePendingCoupDeBotteKb(@Nonnull UUID uuid) {
-        return coupDeBotteKb.remove(uuid);
-    }
-
     // --- Détection d'immobilité (pour Ancrage + Tireur Embusqué) ---
 
     public void markMoving(@Nonnull UUID uuid) {

@@ -78,7 +78,7 @@ public final class ArbaietrierPassifs {
     // --- Carreaux lacérants (node 9) — saignement passif ---
     public static final String CARREAUX_LACERANTS_NODE = "arbaletrier_9";
     private static final float[] BLEED_CHANCE          = {0.08f, 0.12f, 0.16f, 0.20f, 0.25f};
-    public static final float    BLEED_WEAPON_PCT      = 0.25f;
+    public static final float    BLEED_WEAPON_PCT      = 0.75f;
     public static final long     BLEED_DURATION_MS     = 5_000L;
 
     public static float bleedChanceForRank(int rank) {
@@ -86,7 +86,7 @@ public final class ArbaietrierPassifs {
     }
 
     public static String bleedStatLine(int rank) {
-        return Math.round(bleedChanceForRank(rank) * 100) + "% chance, "
+        return Math.round(bleedChanceForRank(rank) * 100) + "% chance carreaux, "
             + Math.round(BLEED_WEAPON_PCT * 100) + "% dégâts arme/s pendant 5s";
     }
 

@@ -4826,7 +4826,7 @@ public final class ClassSkillService {
             casterPos.x + dirTransp.x * 25, casterPos.y + dirTransp.y * 25, casterPos.z + dirTransp.z * 25);
 
         arbaState.setPendingCarreau(uuid, fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState.CARREAU_TYPE_TRANSPERCANT, dmg, rank, false);
-        spawnProjectileToward("Vrpg_Carreau_Transpercant", casterPos, aimFar, entityRef, playerRef, commandBuffer);
+        spawnProjectileToward("Vrpg_Carreau_Transpercant", casterPos, aimFar, entityRef, playerRef, null);
         ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, tc.getPosition(), null);
 
         ClassSkillStamina.consume(playerRef, staminaCost);
@@ -4839,7 +4839,7 @@ public final class ClassSkillService {
                                       @Nonnull PlayerRef playerRef,
                                       @Nonnull Ref<EntityStore> entityRef,
                                       @Nonnull Store<EntityStore> store,
-                                      @Nonnull com.hypixel.hytale.component.CommandBuffer<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> commandBuffer) {
+                                      @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArbaletrier(acc)) return false;
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
@@ -4852,40 +4852,57 @@ public final class ClassSkillService {
         if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         Ref<EntityStore> targeted = findTargetedNpcRef(playerRef, entityRef, store, 3.0);
-        LOG.atInfo().log("[CoupDeBotte] targeted=" + (targeted != null ? targeted.getIndex() : "null") + " rank=" + rank);
         if (targeted == null) return false;
 
-        try {
-            float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-            float dmg = weaponDmg * fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.damagePctForRank(rank);
-            if (dmg < 1f) dmg = 1f;
-            double kb = fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.knockbackForRank(rank);
-            LOG.atInfo().log("[CoupDeBotte] weaponDmg=" + weaponDmg + " dmg=" + dmg + " kb=" + kb);
+        com.hypixel.hytale.server.core.universe.world.World world = store.getExternalData().getWorld();
+        if (world == null) return false;
 
-            TransformComponent tcCaster = store.getComponent(entityRef, TransformComponent.getComponentType());
-            TransformComponent tcTarget = store.getComponent(targeted, TransformComponent.getComponentType());
+        final int fRank = rank;
+        final Ref<EntityStore> fTarget = targeted;
+        world.execute(() -> {
+            try {
+                com.hypixel.hytale.server.core.universe.PlayerRef wr =
+                    com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(uuid);
+                if (wr == null) return;
+                Ref<EntityStore> wRef = wr.getReference();
+                if (wRef == null || !wRef.isValid()) return;
+                Store<EntityStore> ws = wRef.getStore();
+                if (ws == null) return;
+                if (!fTarget.isValid()) return;
 
-            com.hypixel.hytale.server.core.modules.entity.damage.Damage dmgEvent =
-                new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
-                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
-                    com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg);
+                float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(wr);
+                float dmg = weaponDmg * fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.damagePctForRank(fRank);
+                if (dmg < 1f) dmg = 1f;
+                double kb = fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.knockbackForRank(fRank);
 
-            if (tcCaster != null && tcTarget != null && kb > 0) {
-                org.joml.Vector3d diff = new org.joml.Vector3d(tcTarget.getPosition()).sub(tcCaster.getPosition());
-                diff.y = 0;
-                double len = diff.length();
-                if (len > 1e-6) diff.mul(1.0 / len);
-                LOG.atInfo().log("[CoupDeBotte] pending KB vx=" + (diff.x * kb) + " vz=" + (diff.z * kb));
-                arbaState.setPendingCoupDeBotteKb(uuid, diff.x * kb, diff.z * kb);
-            }
+                TransformComponent tcCaster = ws.getComponent(wRef, TransformComponent.getComponentType());
+                TransformComponent tcTarget = ws.getComponent(fTarget, TransformComponent.getComponentType());
 
-            com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, store, dmgEvent);
+                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(fTarget, ws,
+                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(wRef),
+                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
 
-            if (tcTarget != null)
-                ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", playerRef, tcTarget.getPosition(), null);
-        } catch (Exception e) {
-            LOG.atWarning().log("[CoupDeBotte] EXCEPTION: " + e.getMessage());
-        }
+                if (tcCaster != null && tcTarget != null && kb > 0) {
+                    org.joml.Vector3d diff = new org.joml.Vector3d(tcTarget.getPosition()).sub(tcCaster.getPosition());
+                    diff.y = 0;
+                    double len = diff.length();
+                    if (len > 1e-6) {
+                        diff.mul(1.0 / len);
+                        com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent kbComp =
+                            ws.ensureAndGetComponent(fTarget,
+                                com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent.getComponentType());
+                        kbComp.setVelocity(new org.joml.Vector3d(diff.x * kb, 0.0, diff.z * kb));
+                        kbComp.setVelocityType(com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                        kbComp.setDuration(0.0f);
+                    }
+                }
+
+                if (tcTarget != null) {
+                    ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", wr, tcTarget.getPosition(), null);
+                }
+            } catch (Exception ignored) {}
+        });
 
         ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.SKILL_ID);
@@ -4931,7 +4948,7 @@ public final class ClassSkillService {
                 if (world == null) return;
 
                 float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(liveRef);
-                float dmg = weaponDmg * (1f + fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.damageBonusForRank(fRank));
+                float dmg = weaponDmg * fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.damageMultiplierForRank(fRank);
                 if (dmg < 1f) dmg = 1f;
                 final float fDmg = dmg;
 

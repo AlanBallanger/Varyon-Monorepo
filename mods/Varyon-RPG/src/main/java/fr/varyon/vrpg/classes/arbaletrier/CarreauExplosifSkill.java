@@ -5,10 +5,10 @@ public final class CarreauExplosifSkill {
     public static final String SKILL_ID       = "carreau_explosif";
     public static final String TALENT_NODE_ID = "arbaletrier_3";
 
-    private static final float[]  DAMAGE_PCT   = {1.20f, 1.40f, 1.60f, 1.80f, 2.00f};
+    private static final float[]  DAMAGE_PCT   = {2.20f, 2.40f, 2.60f, 2.80f, 3.20f};
     private static final double   RADIUS       = 4.0;
-    private static final long[]   COOLDOWN_MS  = {22000, 20000, 18000, 16000, 14000};
-    private static final float[]  STAMINA_COST = {6f, 7f, 7f, 8f, 8f};
+    private static final long[]   COOLDOWN_MS  = {27000, 25000, 23000, 21000, 19000};
+    private static final float[]  STAMINA_COST = {11f, 12f, 12f, 13f, 14f};
 
     private CarreauExplosifSkill() {}
 

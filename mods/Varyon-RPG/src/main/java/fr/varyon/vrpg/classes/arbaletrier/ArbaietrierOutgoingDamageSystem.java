@@ -235,7 +235,7 @@ public final class ArbaietrierOutgoingDamageSystem extends DamageEventSystem {
                 }
                 int miseEnJouRank = arbaState.consumeMiseEnJou(uuid);
                 if (miseEnJouRank > 0) {
-                    amount *= (1f + MiseEnJouSkill.damageBonusForRank(miseEnJouRank));
+                    amount *= MiseEnJouSkill.damageMultiplierForRank(miseEnJouRank);
                     damage.setAmount(amount);
                     fr.varyon.vrpg.integration.DamageFloatBridge.markCritical(damage);
                     if (debug) log.append(String.format(" MiseEnJou(r%d,crit)", miseEnJouRank));
@@ -284,18 +284,6 @@ public final class ArbaietrierOutgoingDamageSystem extends DamageEventSystem {
 
             if (amount != base) damage.setAmount(amount);
             if (debug) { log.append(String.format(" → final=%.1f", amount)); LOG.atInfo().log(log.toString()); }
-
-            // Coup de Botte — knockback horizontal via commandBuffer
-            double[] kbPending = arbaState.consumePendingCoupDeBotteKb(uuid);
-            if (kbPending != null) {
-                com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent kbComp =
-                    new com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent();
-                kbComp.setVelocity(new org.joml.Vector3d(kbPending[0], 0.0, kbPending[1]));
-                kbComp.setVelocityType(com.hypixel.hytale.protocol.ChangeVelocityType.Set);
-                kbComp.setDuration(0.0f);
-                commandBuffer.putComponent(victimRef, com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent.getComponentType(), kbComp);
-                LOG.atInfo().log("[CoupDeBotte] commandBuffer.putComponent KB vx=" + kbPending[0] + " vz=" + kbPending[1]);
-            }
 
             // Carreaux lacérants — saignement passif
             int bleedRank = acc.getTalentRank(PlayerClass.TIREUR, ArbaietrierPassifs.CARREAUX_LACERANTS_NODE);
