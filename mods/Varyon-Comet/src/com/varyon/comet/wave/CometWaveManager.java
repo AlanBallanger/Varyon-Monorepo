@@ -149,8 +149,7 @@ public class CometWaveManager {
         final Vector3i blockPos;
         final Ref<EntityStore> playerRef;
         final Store<EntityStore> store;
-        long startTime; // Track when wave started for timeout (not final - needs to be reset for each wave)
-        /** Start of entire encounter (first wave); used for speed-based reward multiplier (not reset between waves). */
+        /** Start of entire encounter; global timeout and speed-based reward multiplier use this (not reset between waves). */
         final long encounterStartTime;
         long lastTimerUpdate = 0; // Track last time timer was updated (to update every 5 seconds)
         int initialSpawnCount = 0; // Track how many mobs were actually spawned
@@ -169,7 +168,6 @@ public class CometWaveManager {
             this.store = store;
             long now = System.currentTimeMillis();
             this.encounterStartTime = now;
-            this.startTime = now;
             this.lastTimerUpdate = now;
         }
 
@@ -180,8 +178,7 @@ public class CometWaveManager {
         void advanceToNextWave() {
             currentWaveIndex++;
             currentWave = currentWaveIndex + 1;
-            startTime = System.currentTimeMillis();
-            lastTimerUpdate = startTime;
+            lastTimerUpdate = System.currentTimeMillis();
             spawnedMobs.clear();
             initialSpawnCount = 0;
         }
@@ -212,8 +209,22 @@ public class CometWaveManager {
 
     private final Map<Vector3i, WaveData> activeWaves = new ConcurrentHashMap<>();
 
+    private static long getEncounterTimeoutMs(WaveData waveData, CometTier tier) {
+        long perWaveMs = WaveThemeProvider.getTimeoutMillis(tier);
+        int waves = Math.max(1, waveData.totalWaveCount);
+        return perWaveMs * (long) waves;
+    }
+
+    private static long getEncounterElapsedMs(WaveData waveData, long currentTime) {
+        return currentTime - waveData.encounterStartTime;
+    }
+
+    private static long getEncounterRemainingMs(WaveData waveData, CometTier tier, long currentTime) {
+        return getEncounterTimeoutMs(waveData, tier) - getEncounterElapsedMs(waveData, currentTime);
+    }
+
     /**
-     * Check for wave timeouts and destroy expired comets
+     * Check for encounter timeouts and destroy expired comets
      * This should be called periodically (every 1 second) from the plugin
      * NOTE: This runs on the scheduler thread, so we need to execute world
      * operations on WorldThread
@@ -226,15 +237,13 @@ public class CometWaveManager {
 
         for (Map.Entry<Vector3i, WaveData> entry : activeWaves.entrySet()) {
             WaveData waveData = entry.getValue();
-            long elapsedTime = currentTime - waveData.startTime;
-
-            // Get tier-specific timeout
             CometTier tier = cometTiers.getOrDefault(entry.getKey(), CometTier.UNCOMMON);
-            long tierTimeout = CometWaveRunner.getTierTimeoutMs(tier);
+            long encounterTimeout = getEncounterTimeoutMs(waveData, tier);
+            long elapsedTime = getEncounterElapsedMs(waveData, currentTime);
 
-            if (elapsedTime >= tierTimeout) {
-                LOGGER.info("[checkTimeouts] TIMEOUT for wave at " + entry.getKey() +
-                        " (elapsed=" + (elapsedTime / 1000) + "s)");
+            if (elapsedTime >= encounterTimeout) {
+                LOGGER.info("[checkTimeouts] TIMEOUT for encounter at " + entry.getKey() +
+                        " (elapsed=" + (elapsedTime / 1000) + "s, budget=" + (encounterTimeout / 1000) + "s)");
                 timedOutWaves.add(entry.getKey());
             } else {
                 activeWavesToRefresh.add(waveData);
@@ -807,18 +816,14 @@ public class CometWaveManager {
         waveData.remainingCount = remaining;
         waveData.previousRemainingCount = remaining;
 
-        // Get tier-specific timeout from config
         CometTier tier = cometTiers.getOrDefault(waveData.blockPos, CometTier.UNCOMMON);
-        long tierTimeout = WaveThemeProvider.getTimeoutMillis(tier);
-
-        // Check if wave has exceeded tier-specific timeout
         long currentTime = System.currentTimeMillis();
-        long elapsedTime = currentTime - waveData.startTime;
-        long remainingTime = tierTimeout - elapsedTime;
+        long encounterTimeout = getEncounterTimeoutMs(waveData, tier);
+        long remainingTime = getEncounterRemainingMs(waveData, tier, currentTime);
 
         if (remainingTime <= 0) {
-            LOGGER.warning("Wave at " + waveData.blockPos + " exceeded " + (tierTimeout / 1000)
-                    + " second timeout! Destroying comet.");
+            LOGGER.warning("Encounter at " + waveData.blockPos + " exceeded " + (encounterTimeout / 1000)
+                    + " second global timeout! Destroying comet.");
             // Timeout reached - destroy comet and clean up
             // Must execute on WorldThread
             try {
@@ -1198,17 +1203,22 @@ public class CometWaveManager {
      * Determines wave type and calls appropriate spawn method.
      */
     private void spawnNextWave(Store<EntityStore> store, Ref<EntityStore> playerRef, WaveData waveData) {
-        // Advance to next wave
+        Vector3i blockPos = waveData.blockPos;
+        CometTier tier = cometTiers.getOrDefault(blockPos, CometTier.UNCOMMON);
+        if (getEncounterRemainingMs(waveData, tier, System.currentTimeMillis()) <= 0) {
+            LOGGER.warning("Encounter at " + blockPos + " timed out before wave "
+                    + (waveData.currentWave + 1) + " could spawn");
+            destroyCometOnTimeout(store, waveData);
+            return;
+        }
+
         waveData.advanceToNextWave();
 
-        Vector3i blockPos = waveData.blockPos;
         String themeId = waveData.themeId != null ? waveData.themeId : cometThemes.get(blockPos);
         if (themeId == null || themeId.isBlank()) {
             LOGGER.severe("Multi-wave spawn missing theme at " + blockPos + "; using skeleton as last resort");
             themeId = "skeleton";
         }
-
-        CometTier tier = cometTiers.getOrDefault(blockPos, CometTier.UNCOMMON);
         int waveIndex = waveData.currentWaveIndex;
 
         LOGGER.info("=== SPAWNING WAVE " + waveData.currentWave + "/" + waveData.totalWaveCount +
