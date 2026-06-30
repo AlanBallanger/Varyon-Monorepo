@@ -125,7 +125,7 @@ public final class DamageNumbers {
             return;
         }
         String kindId = resolveKindId(damage);
-        DamageNumberEST.queueCombatTextDirect(store, targetRef, mag, kindId);
+        DamageNumberEST.queueCombatTextDirect(store, null, targetRef, mag, kindId, damage);
     }
 
     public static void emit(Ref<EntityStore> targetRef,

@@ -19,6 +19,7 @@ import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
+import fr.varyon.damagenumber.DamageNumberDisplaySettings;
 import irai.mod.DynamicFloatingDamageFormatter.DamageNumberMeta;
 import irai.mod.DynamicFloatingDamageFormatter.DamageNumbers;
 
@@ -89,7 +90,7 @@ public final class FloatingDamageParticles {
         double groupAlong = rng.nextDouble(-HORIZONTAL_GROUP_JITTER, HORIZONTAL_GROUP_JITTER);
 
         var accessor = commandBuffer != null ? commandBuffer : store;
-        List<Ref<EntityStore>> receivers = sanitizedViewerRefs(viewerRefs);
+        List<Ref<EntityStore>> receivers = sanitizedViewerRefs(store, commandBuffer, viewerRefs);
         if (receivers.isEmpty()) {
             return false;
         }
@@ -123,13 +124,16 @@ public final class FloatingDamageParticles {
         return spawnedFor > 0;
     }
 
-    private static List<Ref<EntityStore>> sanitizedViewerRefs(@Nullable List<Ref<EntityStore>> refs) {
+    private static List<Ref<EntityStore>> sanitizedViewerRefs(Store<EntityStore> store,
+                                                            @Nullable CommandBuffer<EntityStore> commandBuffer,
+                                                            @Nullable List<Ref<EntityStore>> refs) {
         if (refs == null || refs.isEmpty()) {
             return List.of();
         }
         ArrayList<Ref<EntityStore>> out = new ArrayList<>(refs.size());
         for (Ref<EntityStore> ref : refs) {
-            if (ref != null && ref.isValid()) {
+            if (ref != null && ref.isValid()
+                && DamageNumberDisplaySettings.isViewerEnabled(store, commandBuffer, ref)) {
                 out.add(ref);
             }
         }

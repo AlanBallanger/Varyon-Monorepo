@@ -59,12 +59,32 @@ val exportModJar = tasks.register<Copy>("exportModJar") {
     into(layout.projectDirectory.dir("../../build/output"))
 }
 
+val syncToDevServerMods = tasks.register("syncToDevServerMods") {
+    group = "build"
+    description = "Copie le JAR vers les dossiers run/mods des projets hytale locaux"
+    dependsOn(modJar)
+    doLast {
+        val jar = modJar.get().archiveFile.get().asFile
+        listOf(
+            layout.projectDirectory.dir("../Varyon/run/mods"),
+            layout.projectDirectory.dir("../varyon-UI/run/mods"),
+            layout.projectDirectory.dir("../Varyon-RPG/run/mods"),
+            layout.projectDirectory.dir("../Varyon-Holograms/run/mods"),
+        ).forEach { target ->
+            val dir = target.asFile
+            if (dir.isDirectory) {
+                jar.copyTo(dir.resolve(jar.name), overwrite = true)
+            }
+        }
+    }
+}
+
 tasks.named("assemble") {
     dependsOn(modJar)
 }
 
 tasks.named("build") {
-    dependsOn(exportModJar)
+    dependsOn(exportModJar, syncToDevServerMods)
 }
 
 tasks.named<JavaCompile>("compileJava") {

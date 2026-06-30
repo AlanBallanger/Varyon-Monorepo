@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -20,7 +21,6 @@ import com.hypixel.hytale.component.SystemGroup;
 import com.hypixel.hytale.component.dependency.Dependency;
 import com.hypixel.hytale.component.dependency.Order;
 import com.hypixel.hytale.component.dependency.SystemDependency;
-import com.hypixel.hytale.component.dependency.SystemGroupDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.protocol.CombatTextUpdate;
 import com.hypixel.hytale.protocol.EntityUIType;
@@ -38,6 +38,7 @@ import com.hypixel.hytale.server.core.modules.entityui.UIComponentList;
 import com.hypixel.hytale.server.core.modules.entityui.asset.EntityUIComponent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
+import fr.varyon.damagenumber.DamageNumberDisplaySettings;
 import irai.mod.DynamicFloatingDamageFormatter.DamageNumberMeta;
 import irai.mod.DynamicFloatingDamageFormatter.DamageNumbers;
 
@@ -48,6 +49,22 @@ import irai.mod.DynamicFloatingDamageFormatter.DamageNumbers;
  */
 public class DamageNumberEST extends DamageEventSystem {
     private static final float NON_DOT_RANDOM_JITTER_DEGREES = 240f;
+    private static final String[] MOD_COMBAT_TEXT_COMPONENT_IDS = {
+        "CombatText_Flat",
+        "CombatText_Critical",
+        "CombatText_Ice",
+        "CombatText_Ice_Critical",
+        "CombatText_Burn",
+        "CombatText_Burn_Alt",
+        "CombatText_Bleed",
+        "CombatText_Bleed_Alt",
+        "CombatText_Poison",
+        "CombatText_Poison_Alt",
+        "CombatText_Shock",
+        "CombatText_Water",
+        "CombatText_Void",
+        "CombatText_Heal",
+    };
 
     public static final AtomicInteger DBG_HANDLE_CALLS   = new AtomicInteger();
     public static final AtomicInteger DBG_SKIP_AMOUNT0   = new AtomicInteger();
@@ -88,21 +105,12 @@ public class DamageNumberEST extends DamageEventSystem {
     }
 
     private static Set<Dependency<EntityStore>> buildDependencies() {
-        try {
-            DamageModule dm = DamageModule.get();
-            if (dm != null) {
-                return Set.of(
-                        new SystemGroupDependency<>(Order.AFTER, dm.getFilterDamageGroup()),
-                        new SystemDependency<>(Order.BEFORE, DamageSystems.EntityUIEvents.class));
-            }
-        } catch (Throwable ignored) {
-        }
         return Set.of(new SystemDependency<>(Order.BEFORE, DamageSystems.EntityUIEvents.class));
     }
 
     @Override
     public SystemGroup<EntityStore> getGroup() {
-        return DamageModule.get().getInspectDamageGroup();
+        return DamageModule.get().getFilterDamageGroup();
     }
 
     @Override
@@ -161,8 +169,22 @@ public class DamageNumberEST extends DamageEventSystem {
             return;
         }
 
-        EntityViewer[] viewers = resolveViewers(visible);
-        if (viewers.length == 0) {
+        restoreDisabledViewerUi(store, commandBuffer, visible, targetRef, uiList);
+
+        Ref<EntityStore> attackerRef = resolveAttackerRef(damage);
+        UUID attackerUuid = DamageNumberDisplaySettings.resolvePlayerUuid(store, commandBuffer, attackerRef);
+        if (attackerUuid == null) {
+            attackerUuid = DamageNumberDisplaySettings.resolveAttackerUuid(store, commandBuffer, damage);
+        }
+        if (attackerUuid != null && !DamageNumberDisplaySettings.isEnabled(attackerUuid)) {
+            restoreViewerUiIfPresent(store, commandBuffer, visible, targetRef, uiList, attackerRef);
+            DBG_SKIP_NO_VIEWER.incrementAndGet();
+            return;
+        }
+
+        List<Map.Entry<Ref<EntityStore>, EntityViewer>> enabledViewers =
+            collectEnabledViewerEntries(store, commandBuffer, visible);
+        if (enabledViewers.isEmpty()) {
             DBG_SKIP_NO_VIEWER.incrementAndGet();
             return;
         }
@@ -174,7 +196,7 @@ public class DamageNumberEST extends DamageEventSystem {
                     + " crit=" + DamageNumberMeta.isCritical(damage)
                     + " impactCrit=" + DamageNumberMeta.inferCriticalFromImpactVfx(damage));
         }
-        List<Ref<EntityStore>> viewerRefs = collectViewerRefs(visible);
+        List<Ref<EntityStore>> viewerRefs = enabledViewers.stream().map(Map.Entry::getKey).toList();
         if (FloatingDamageParticles.trySpawn(store, commandBuffer, targetRef, displayAmount, kindId,
                 viewerRefs, damage)) {
             DBG_EMITTED.incrementAndGet();
@@ -191,7 +213,8 @@ public class DamageNumberEST extends DamageEventSystem {
         String text = DamageNumbers.format(displayAmount, kindId);
         CombatTextUpdate update = new CombatTextUpdate(angle, text);
 
-        for (EntityViewer viewer : viewers) {
+        for (Map.Entry<Ref<EntityStore>, EntityViewer> entry : enabledViewers) {
+            EntityViewer viewer = entry.getValue();
             if (viewer == null) {
                 continue;
             }
@@ -220,6 +243,15 @@ public class DamageNumberEST extends DamageEventSystem {
                                              Ref<EntityStore> targetRef,
                                              float amount,
                                              String kindId) {
+        queueCombatTextDirect(store, commandBuffer, targetRef, amount, kindId, null);
+    }
+
+    public static void queueCombatTextDirect(Store<EntityStore> store,
+                                             @Nullable CommandBuffer<EntityStore> commandBuffer,
+                                             Ref<EntityStore> targetRef,
+                                             float amount,
+                                             String kindId,
+                                             @Nullable Damage damage) {
         if (store == null || targetRef == null) {
             return;
         }
@@ -260,12 +292,25 @@ public class DamageNumberEST extends DamageEventSystem {
             return;
         }
 
-        EntityViewer[] viewers = resolveViewers(visible);
-        if (viewers.length == 0) {
+        restoreDisabledViewerUi(store, commandBuffer, visible, targetRef, uiList);
+
+        Ref<EntityStore> attackerRef = damage == null ? null : resolveAttackerRef(damage);
+        UUID attackerUuid = DamageNumberDisplaySettings.resolvePlayerUuid(store, commandBuffer, attackerRef);
+        if (attackerUuid == null && damage != null) {
+            attackerUuid = DamageNumberDisplaySettings.resolveAttackerUuid(store, commandBuffer, damage);
+        }
+        if (attackerUuid != null && !DamageNumberDisplaySettings.isEnabled(attackerUuid)) {
+            restoreViewerUiIfPresent(store, commandBuffer, visible, targetRef, uiList, attackerRef);
+            return;
+        }
+
+        List<Map.Entry<Ref<EntityStore>, EntityViewer>> enabledViewers =
+            collectEnabledViewerEntries(store, commandBuffer, visible);
+        if (enabledViewers.isEmpty()) {
             return;
         }
         String resolvedKind = (kindId == null || kindId.isBlank()) ? "FLAT" : kindId;
-        List<Ref<EntityStore>> viewerRefs = collectViewerRefs(visible);
+        List<Ref<EntityStore>> viewerRefs = enabledViewers.stream().map(Map.Entry::getKey).toList();
         if (FloatingDamageParticles.trySpawn(store, commandBuffer, targetRef, displayAmount, resolvedKind, viewerRefs, null)) {
             if ("HEAL".equalsIgnoreCase(resolvedKind)) {
                 HealFloatCoordinator.markFromDamageEvent(targetRef);
@@ -277,7 +322,8 @@ public class DamageNumberEST extends DamageEventSystem {
         String text = DamageNumbers.format(displayAmount, resolvedKind);
         CombatTextUpdate update = new CombatTextUpdate(angle, text);
 
-        for (EntityViewer viewer : viewers) {
+        for (Map.Entry<Ref<EntityStore>, EntityViewer> entry : enabledViewers) {
+            EntityViewer viewer = entry.getValue();
             if (viewer == null) {
                 continue;
             }
@@ -406,57 +452,232 @@ public class DamageNumberEST extends DamageEventSystem {
         return count == filtered.length ? filtered : Arrays.copyOf(filtered, count);
     }
 
-    private static List<Ref<EntityStore>> collectViewerRefs(Visible visible) {
+    private static void restoreDisabledViewerUi(Store<EntityStore> store,
+                                                @Nullable CommandBuffer<EntityStore> commandBuffer,
+                                                Visible visible,
+                                                Ref<EntityStore> targetRef,
+                                                UIComponentList uiList) {
+        for (Map.Entry<Ref<EntityStore>, EntityViewer> entry : collectAllPlayerViewerEntries(store, commandBuffer, visible)) {
+            Ref<EntityStore> viewerRef = entry.getKey();
+            if (DamageNumberDisplaySettings.isViewerEnabled(store, commandBuffer, viewerRef)) {
+                continue;
+            }
+            restoreBaseUiComponents(entry.getValue(), targetRef, uiList);
+        }
+    }
+
+    private static void restoreBaseUiComponents(EntityViewer viewer,
+                                                Ref<EntityStore> targetRef,
+                                                UIComponentList uiList) {
+        if (viewer == null || uiList == null) {
+            return;
+        }
+        int[] baseComponentIds = uiList.getComponentIds();
+        if (baseComponentIds == null || baseComponentIds.length == 0) {
+            return;
+        }
+        IndexedLookupTableAssetMap<String, EntityUIComponent> assetMap = EntityUIComponent.getAssetMap();
+        if (assetMap == null) {
+            viewer.queueUpdate(targetRef, new UIComponentsUpdate(Arrays.copyOf(baseComponentIds, baseComponentIds.length)));
+            return;
+        }
+        int[] restored = buildVanillaCombatTextList(baseComponentIds, assetMap);
+        viewer.queueUpdate(targetRef, new UIComponentsUpdate(restored));
+    }
+
+    @Nullable
+    private static Ref<EntityStore> resolveAttackerRef(@Nullable Damage damage) {
+        if (damage == null) {
+            return null;
+        }
+        Damage.Source source = damage.getSource();
+        if (!(source instanceof Damage.EntitySource entitySource)) {
+            return null;
+        }
+        Ref<EntityStore> attackerRef = entitySource.getRef();
+        if (attackerRef == null || !attackerRef.isValid()) {
+            return null;
+        }
+        return attackerRef;
+    }
+
+    private static void restoreViewerUiIfPresent(Store<EntityStore> store,
+                                                   @Nullable CommandBuffer<EntityStore> commandBuffer,
+                                                   Visible visible,
+                                                   Ref<EntityStore> targetRef,
+                                                   UIComponentList uiList,
+                                                   @Nullable Ref<EntityStore> viewerRef) {
+        if (viewerRef == null || !viewerRef.isValid()) {
+            return;
+        }
+        if (DamageNumberDisplaySettings.isViewerEnabled(store, commandBuffer, viewerRef)) {
+            return;
+        }
+        EntityViewer viewer = findViewer(visible, viewerRef);
+        if (viewer != null) {
+            restoreBaseUiComponents(viewer, targetRef, uiList);
+        }
+    }
+
+    @Nullable
+    private static EntityViewer findViewer(@Nullable Visible visible, Ref<EntityStore> viewerRef) {
+        if (visible == null || viewerRef == null) {
+            return null;
+        }
+        EntityViewer viewer = lookupViewer(visible.visibleTo, viewerRef);
+        if (viewer != null) {
+            return viewer;
+        }
+        viewer = lookupViewer(visible.newlyVisibleTo, viewerRef);
+        if (viewer != null) {
+            return viewer;
+        }
+        return lookupViewer(visible.previousVisibleTo, viewerRef);
+    }
+
+    @Nullable
+    private static EntityViewer lookupViewer(@Nullable Map<Ref<EntityStore>, EntityViewer> viewerMap,
+                                             Ref<EntityStore> viewerRef) {
+        if (viewerMap == null || viewerMap.isEmpty()) {
+            return null;
+        }
+        for (Map.Entry<Ref<EntityStore>, EntityViewer> entry : viewerMap.entrySet()) {
+            Ref<EntityStore> ref = entry.getKey();
+            if (ref != null && ref.equals(viewerRef)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    private static int[] buildVanillaCombatTextList(int[] baseComponentIds,
+                                                    IndexedLookupTableAssetMap<String, EntityUIComponent> assetMap) {
+        int[] filtered = new int[baseComponentIds.length];
+        int count = 0;
+        boolean keptCombatText = false;
+        for (int id : baseComponentIds) {
+            if (id < 0) {
+                continue;
+            }
+            EntityUIComponent component = assetMap.getAsset(id);
+            if (component == null) {
+                filtered[count++] = id;
+                continue;
+            }
+            EntityUIType type;
+            try {
+                type = component.toPacket().type;
+            } catch (Throwable ignored) {
+                filtered[count++] = id;
+                continue;
+            }
+            if (type == EntityUIType.CombatText) {
+                if (isModCombatTextIndex(assetMap, id)) {
+                    continue;
+                }
+                if (keptCombatText) {
+                    continue;
+                }
+                keptCombatText = true;
+            }
+            filtered[count++] = id;
+        }
+        if (count == 0) {
+            return Arrays.copyOf(baseComponentIds, baseComponentIds.length);
+        }
+        return count == filtered.length ? filtered : Arrays.copyOf(filtered, count);
+    }
+
+    private static boolean isModCombatTextIndex(IndexedLookupTableAssetMap<String, EntityUIComponent> assetMap,
+                                                int index) {
+        for (String modId : MOD_COMBAT_TEXT_COMPONENT_IDS) {
+            if (assetMap.getIndexOrDefault(modId, -1) == index) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<Map.Entry<Ref<EntityStore>, EntityViewer>> collectAllPlayerViewerEntries(
+            Store<EntityStore> store,
+            @Nullable CommandBuffer<EntityStore> commandBuffer,
+            Visible visible) {
         if (visible == null) {
             return List.of();
         }
-        List<Ref<EntityStore>> refs = refsFromViewerMap(visible.visibleTo);
-        if (!refs.isEmpty()) {
-            return refs;
+        List<Map.Entry<Ref<EntityStore>, EntityViewer>> entries =
+            playerViewerEntriesFromMap(store, commandBuffer, visible.visibleTo);
+        if (!entries.isEmpty()) {
+            return entries;
         }
-        refs = refsFromViewerMap(visible.newlyVisibleTo);
-        if (!refs.isEmpty()) {
-            return refs;
+        entries = playerViewerEntriesFromMap(store, commandBuffer, visible.newlyVisibleTo);
+        if (!entries.isEmpty()) {
+            return entries;
         }
-        return refsFromViewerMap(visible.previousVisibleTo);
+        return playerViewerEntriesFromMap(store, commandBuffer, visible.previousVisibleTo);
     }
 
-    private static List<Ref<EntityStore>> refsFromViewerMap(Map<Ref<EntityStore>, EntityViewer> viewerMap) {
+    private static List<Map.Entry<Ref<EntityStore>, EntityViewer>> collectEnabledViewerEntries(
+            Store<EntityStore> store,
+            @Nullable CommandBuffer<EntityStore> commandBuffer,
+            Visible visible) {
+        if (visible == null) {
+            return List.of();
+        }
+        List<Map.Entry<Ref<EntityStore>, EntityViewer>> entries =
+            enabledViewerEntriesFromMap(store, commandBuffer, visible.visibleTo);
+        if (!entries.isEmpty()) {
+            return entries;
+        }
+        entries = enabledViewerEntriesFromMap(store, commandBuffer, visible.newlyVisibleTo);
+        if (!entries.isEmpty()) {
+            return entries;
+        }
+        return enabledViewerEntriesFromMap(store, commandBuffer, visible.previousVisibleTo);
+    }
+
+    private static List<Map.Entry<Ref<EntityStore>, EntityViewer>> playerViewerEntriesFromMap(
+            Store<EntityStore> store,
+            @Nullable CommandBuffer<EntityStore> commandBuffer,
+            Map<Ref<EntityStore>, EntityViewer> viewerMap) {
         if (viewerMap == null || viewerMap.isEmpty()) {
             return List.of();
         }
-        List<Ref<EntityStore>> refs = new ArrayList<>(viewerMap.keySet());
-        refs.removeIf(r -> r == null || !r.isValid());
-        return refs;
-    }
-
-    private static EntityViewer[] resolveViewers(Visible visible) {
-        if (visible == null) {
-            return new EntityViewer[0];
-        }
-        EntityViewer[] viewers = collectViewers(visible.visibleTo);
-        if (viewers.length == 0) {
-            viewers = collectViewers(visible.newlyVisibleTo);
-        }
-        if (viewers.length == 0) {
-            viewers = collectViewers(visible.previousVisibleTo);
-        }
-        return viewers;
-    }
-
-    private static EntityViewer[] collectViewers(java.util.Map<Ref<EntityStore>, EntityViewer> viewersMap) {
-        if (viewersMap == null || viewersMap.isEmpty()) {
-            return new EntityViewer[0];
-        }
-        EntityViewer[] viewers = new EntityViewer[viewersMap.size()];
-        int count = 0;
-        for (EntityViewer viewer : viewersMap.values()) {
-            if (viewer == null) {
+        List<Map.Entry<Ref<EntityStore>, EntityViewer>> entries = new ArrayList<>(viewerMap.size());
+        for (Map.Entry<Ref<EntityStore>, EntityViewer> entry : viewerMap.entrySet()) {
+            Ref<EntityStore> viewerRef = entry.getKey();
+            EntityViewer viewer = entry.getValue();
+            if (viewerRef == null || !viewerRef.isValid() || viewer == null) {
                 continue;
             }
-            viewers[count++] = viewer;
+            if (DamageNumberDisplaySettings.resolvePlayerUuid(store, commandBuffer, viewerRef) == null) {
+                continue;
+            }
+            entries.add(entry);
         }
-        return count == viewers.length ? viewers : Arrays.copyOf(viewers, count);
+        return entries;
+    }
+
+    private static List<Map.Entry<Ref<EntityStore>, EntityViewer>> enabledViewerEntriesFromMap(
+            Store<EntityStore> store,
+            @Nullable CommandBuffer<EntityStore> commandBuffer,
+            Map<Ref<EntityStore>, EntityViewer> viewerMap) {
+        if (viewerMap == null || viewerMap.isEmpty()) {
+            return List.of();
+        }
+        List<Map.Entry<Ref<EntityStore>, EntityViewer>> entries = new ArrayList<>(viewerMap.size());
+        for (Map.Entry<Ref<EntityStore>, EntityViewer> entry : viewerMap.entrySet()) {
+            Ref<EntityStore> viewerRef = entry.getKey();
+            EntityViewer viewer = entry.getValue();
+            if (viewerRef == null || !viewerRef.isValid() || viewer == null) {
+                continue;
+            }
+            if (!DamageNumberDisplaySettings.isViewerEnabled(store, commandBuffer, viewerRef)) {
+                continue;
+            }
+            entries.add(entry);
+        }
+        return entries;
     }
 
     private void ensureComponentTypes() {

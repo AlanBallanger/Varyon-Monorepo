@@ -2,13 +2,17 @@ package fr.varyon.damagenumber;
 
 import javax.annotation.Nonnull;
 
+import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import irai.mod.DynamicFloatingDamageFormatter.DamageNumberConfig;
 import irai.mod.DynamicFloatingDamageFormatter.DamageNumbers;
 
 public final class VaryonDamageNumberPlugin extends JavaPlugin {
+
+    private DamageNumberDisplaySettingsManager displaySettingsManager;
 
     public VaryonDamageNumberPlugin(@Nonnull JavaPluginInit init) {
         super(init);
@@ -16,6 +20,10 @@ public final class VaryonDamageNumberPlugin extends JavaPlugin {
 
     @Override
     protected void setup() {
+        displaySettingsManager = new DamageNumberDisplaySettingsManager(getDataDirectory());
+        displaySettingsManager.initialize();
+        DamageNumberDisplaySettings.bind(displaySettingsManager);
+
         try {
             DamageNumbers.applyConfig(new DamageNumberConfig());
             System.out.println("[VaryonDamageNumber] DamageNumberConfig chargee.");
@@ -28,6 +36,35 @@ public final class VaryonDamageNumberPlugin extends JavaPlugin {
         tryRegisterDamageSystem("irai.mod.reforge.Entity.Events.ImpactCriticalSanitizerSystem");
         tryRegisterDamageSystem("irai.mod.reforge.Entity.Events.DamageNumberEST");
         tryRegisterDamageSystem("irai.mod.reforge.Entity.Events.HealingFloatTickSystem");
+
+        getEventRegistry().registerGlobal(AddPlayerToWorldEvent.class, event -> {
+            PlayerRef ref = event.getHolder().getComponent(PlayerRef.getComponentType());
+            if (ref != null) {
+                DamageNumberDisplaySettings.ensureLoaded(ref.getUuid());
+            }
+        });
+    }
+
+    @Override
+    protected void start() {
+        registerDamageNumberCommands();
+    }
+
+    @Override
+    protected void shutdown() {
+        if (displaySettingsManager != null) {
+            displaySettingsManager.flush();
+        }
+    }
+
+    private void registerDamageNumberCommands() {
+        try {
+            getCommandRegistry().registerCommand(new DamageNumberCommand());
+            System.out.println("[VaryonDamageNumber] Commande /dmgnum enregistree.");
+        } catch (Throwable t) {
+            System.err.println("[VaryonDamageNumber] Echec enregistrement commande: " + t.getMessage());
+            t.printStackTrace();
+        }
     }
 
     private void tryRegisterDamageSystem(String className) {
