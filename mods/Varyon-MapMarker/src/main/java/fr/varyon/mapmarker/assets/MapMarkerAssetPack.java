@@ -5,11 +5,9 @@ import com.hypixel.hytale.common.plugin.AuthorInfo;
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.common.semver.Semver;
 import com.hypixel.hytale.common.semver.SemverRange;
-import com.hypixel.hytale.protocol.packets.setup.RequestCommonAssetsRebuild;
 import com.hypixel.hytale.server.core.asset.AssetModule;
 import com.hypixel.hytale.server.core.asset.common.CommonAsset;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetModule;
-import com.hypixel.hytale.server.core.universe.Universe;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,7 +24,7 @@ public final class MapMarkerAssetPack {
     private static final String PACK_VERSION = "1.0.0";
     private static final String TARGET_SERVER_VERSION = "0.5.0";
     private static final String WORLD_MAP_MARKER_PREFIX = "UI/WorldMap/MapMarkers/";
-    private static final String HUD_MAP_MARKER_PREFIX = "UI/MapMarkers/";
+    private static final String ICON_FILE_PREFIX = "vmm-";
     private static final int MARKER_ICON_SIZE = 64;
 
     private static final String MANIFEST_JSON = """
@@ -65,14 +63,7 @@ public final class MapMarkerAssetPack {
         if (fileName == null || fileName.isBlank()) {
             return null;
         }
-        return WORLD_MAP_MARKER_PREFIX + normalizeFileName(fileName);
-    }
-
-    public static String toHudAssetPath(String fileName) {
-        if (fileName == null || fileName.isBlank()) {
-            return null;
-        }
-        return HUD_MAP_MARKER_PREFIX + normalizeFileName(fileName);
+        return WORLD_MAP_MARKER_PREFIX + toPackFileName(fileName);
     }
 
     public static Path publishMarkerImage(String fileName, byte[] pngBytes) {
@@ -82,23 +73,19 @@ public final class MapMarkerAssetPack {
             return null;
         }
 
-        String normalized = normalizeFileName(fileName);
+        String packFileName = toPackFileName(fileName);
         byte[] normalizedPng = MapMarkerImageHelper.normalizeForMapMarker(pngBytes, MARKER_ICON_SIZE);
         try {
-            Path worldMapOutput = packRoot.resolve("Common/UI/WorldMap/MapMarkers").resolve(normalized);
-            Path hudOutput = packRoot.resolve("Common/UI/MapMarkers").resolve(normalized);
+            Path worldMapOutput = packRoot.resolve("Common/UI/WorldMap/MapMarkers").resolve(packFileName);
             boolean worldChanged = writeBytesIfChanged(worldMapOutput, normalizedPng);
-            boolean hudChanged = writeBytesIfChanged(hudOutput, normalizedPng);
-            if (!worldChanged && !hudChanged) {
-                Path existing = publishedPackFiles.get(WORLD_MAP_MARKER_PREFIX + normalized);
+            if (!worldChanged) {
+                Path existing = publishedPackFiles.get(WORLD_MAP_MARKER_PREFIX + packFileName);
                 if (existing != null && Files.exists(existing)) {
                     return existing;
                 }
             }
-            pushAssetToClients(WORLD_MAP_MARKER_PREFIX + normalized, normalizedPng, worldMapOutput);
-            pushAssetToClients(HUD_MAP_MARKER_PREFIX + normalized, normalizedPng, hudOutput);
-            publishedPackFiles.put(WORLD_MAP_MARKER_PREFIX + normalized, worldMapOutput);
-            publishedPackFiles.put(HUD_MAP_MARKER_PREFIX + normalized, hudOutput);
+            pushAssetToClients(WORLD_MAP_MARKER_PREFIX + packFileName, normalizedPng, worldMapOutput);
+            publishedPackFiles.put(WORLD_MAP_MARKER_PREFIX + packFileName, worldMapOutput);
             return worldMapOutput;
         } catch (IOException ignored) {
             return null;
@@ -113,18 +100,8 @@ public final class MapMarkerAssetPack {
             }
 
             CommonAsset asset = new MapMarkerRuntimePngAsset(assetName, pngBytes);
-            cam.addCommonAsset(assetName, asset, true);
+            cam.addCommonAsset(PACK_NAME, asset, false);
             publishedPackFiles.put(assetName, filePath);
-        } catch (Exception ignored) {
-        }
-    }
-
-    public static void requestClientRebuild() {
-        try {
-            Universe universe = Universe.get();
-            if (universe != null && universe.getPlayerCount() > 0) {
-                universe.broadcastPacketNoCache(new RequestCommonAssetsRebuild());
-            }
         } catch (Exception ignored) {
         }
     }
@@ -144,6 +121,8 @@ public final class MapMarkerAssetPack {
                 Files.createDirectories(packRoot);
                 Files.writeString(packRoot.resolve("manifest.json"), MANIFEST_JSON, StandardCharsets.UTF_8);
                 ensureStaticWorldMapAssets();
+                cleanupLegacyHudAssets();
+                cleanupLegacyPackMarkerAssets();
                 Path worldRoot = MapMarkerPaths.resolveWorldRoot();
                 if (worldRoot != null) {
                     ensurePackEnabled(worldRoot.resolve("config.json"));
@@ -182,10 +161,47 @@ public final class MapMarkerAssetPack {
                 WORLD_MAP_MARKER_PREFIX + FALLBACK_MARKER_IMAGE,
                 packRoot.resolve("Common/UI/WorldMap/MapMarkers").resolve(FALLBACK_MARKER_IMAGE),
                 fallback);
-        writeStaticCommonAsset(
-                HUD_MAP_MARKER_PREFIX + FALLBACK_MARKER_IMAGE,
-                packRoot.resolve("Common/UI/MapMarkers").resolve(FALLBACK_MARKER_IMAGE),
-                fallback);
+    }
+
+    private static void cleanupLegacyHudAssets() {
+        Path legacyHudDir = packRoot.resolve("Common/UI/MapMarkers");
+        if (!Files.isDirectory(legacyHudDir)) {
+            return;
+        }
+        try (var stream = Files.list(legacyHudDir)) {
+            stream.filter(Files::isRegularFile).forEach(path -> {
+                try {
+                    Files.deleteIfExists(path);
+                } catch (IOException ignored) {
+                }
+            });
+        } catch (IOException ignored) {
+        }
+        try {
+            Files.deleteIfExists(legacyHudDir);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private static void cleanupLegacyPackMarkerAssets() {
+        Path markersDir = packRoot.resolve("Common/UI/WorldMap/MapMarkers");
+        if (!Files.isDirectory(markersDir)) {
+            return;
+        }
+        try (var stream = Files.list(markersDir)) {
+            stream.filter(Files::isRegularFile)
+                    .filter(path -> {
+                        String name = path.getFileName().toString().toLowerCase(java.util.Locale.ROOT);
+                        return name.endsWith(".png") && !name.startsWith(ICON_FILE_PREFIX);
+                    })
+                    .forEach(path -> {
+                        try {
+                            Files.deleteIfExists(path);
+                        } catch (IOException ignored) {
+                        }
+                    });
+        } catch (IOException ignored) {
+        }
     }
 
     private static void writeStaticCommonAsset(String assetName, Path output, byte[] pngBytes) {
@@ -253,11 +269,23 @@ public final class MapMarkerAssetPack {
     }
 
     public static String normalizeIconFileName(String fileName) {
-        return normalizeFileName(fileName);
+        return toPackFileName(fileName);
     }
 
     public static byte[] normalizeMarkerPng(byte[] pngBytes) {
         return MapMarkerImageHelper.normalizeForMapMarker(pngBytes, MARKER_ICON_SIZE);
+    }
+
+    private static String toPackFileName(String fileName) {
+        String normalized = normalizeFileName(fileName);
+        if (normalized.isEmpty()) {
+            return normalized;
+        }
+        String lower = normalized.toLowerCase(java.util.Locale.ROOT);
+        if (lower.startsWith(ICON_FILE_PREFIX)) {
+            return normalized;
+        }
+        return ICON_FILE_PREFIX + normalized;
     }
 
     private static String normalizeFileName(String fileName) {
