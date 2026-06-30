@@ -510,6 +510,11 @@ Group {
           FlexWeight: 1;
           LayoutMode: Full;
           Padding: (Full: 12);
+
+          Group #ParametresTabMount {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            LayoutMode: Full;
+          }
         }
       }
 

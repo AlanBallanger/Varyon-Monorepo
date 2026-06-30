@@ -12,6 +12,8 @@ import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassProgress;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
+import fr.varyon.vrpg.ui.prefs.HudLayoutHelper;
+import fr.varyon.vrpg.ui.prefs.PlayerUiPreferences;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,6 +30,7 @@ public final class ClassXpHud extends CustomUIHud {
 
     private boolean built = false;
     private boolean hidden = false;
+    private boolean panelBackgroundHidden = false;
 
     public ClassXpHud(@Nonnull PlayerRef playerRef) {
         super(playerRef, HUD_KEY);
@@ -84,12 +87,27 @@ public final class ClassXpHud extends CustomUIHud {
         update(false, builder);
     }
 
+    public void applyPreferences(@Nonnull PlayerUiPreferences prefs) {
+        hidden = !prefs.classHudVisible;
+        if (!built) return;
+        UICommandBuilder builder = new UICommandBuilder();
+        HudLayoutHelper.applyClassPanelAnchor(builder, prefs);
+        applyBar(builder);
+        update(false, builder);
+    }
+
     private void applyBar(@Nonnull UICommandBuilder builder) {
         if (hidden) {
             builder.setObject("#ClassXPPanel.Background", TRANSPARENT);
+            panelBackgroundHidden = true;
             builder.set("#ClassHudBorder.Visible", false);
             hideBar(builder);
             return;
+        }
+
+        if (panelBackgroundHidden) {
+            builder.setObject("#ClassXPPanel.Background", RpgUiStyles.HUD_XP_PANEL_STYLE);
+            panelBackgroundHidden = false;
         }
 
         builder.set("#ClassHudBorder.Visible", true);

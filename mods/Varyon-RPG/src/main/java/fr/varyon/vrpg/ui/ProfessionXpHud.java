@@ -11,6 +11,8 @@ import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.rpg.PlayerAccount;
 import fr.varyon.vrpg.rpg.Profession;
 import fr.varyon.vrpg.rpg.ProfessionProgress;
+import fr.varyon.vrpg.ui.prefs.HudLayoutHelper;
+import fr.varyon.vrpg.ui.prefs.PlayerUiPreferences;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,6 +41,7 @@ public final class ProfessionXpHud extends CustomUIHud {
 
     private boolean built = false;
     private boolean hidden = false;
+    private boolean panelBackgroundHidden = false;
     @Nullable private String lastJob1Id;
     @Nullable private String lastJob2Id;
 
@@ -99,14 +102,29 @@ public final class ProfessionXpHud extends CustomUIHud {
         update(false, builder);
     }
 
+    public void applyPreferences(@Nonnull PlayerUiPreferences prefs) {
+        hidden = !prefs.professionHudVisible;
+        if (!built) return;
+        UICommandBuilder builder = new UICommandBuilder();
+        HudLayoutHelper.applyProfessionPanelAnchor(builder, prefs);
+        applyBars(builder);
+        update(false, builder);
+    }
+
     private void applyBars(@Nonnull UICommandBuilder builder) {
         if (hidden) {
             builder.setObject("#XPPanel.Background", TRANSPARENT);
+            panelBackgroundHidden = true;
             builder.set("#HudBorder.Visible", false);
             builder.set("#JobSeparator.Visible", false);
             hideSlot(builder, 1);
             hideSlot(builder, 2);
             return;
+        }
+
+        if (panelBackgroundHidden) {
+            builder.setObject("#XPPanel.Background", RpgUiStyles.HUD_XP_PANEL_STYLE);
+            panelBackgroundHidden = false;
         }
 
         builder.set("#HudBorder.Visible", true);

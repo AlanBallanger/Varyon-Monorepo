@@ -113,6 +113,7 @@ import fr.varyon.vrpg.ui.AbilitySlotsHud;
 import fr.varyon.vrpg.ui.ClassXpHud;
 import fr.varyon.vrpg.ui.ProfessionXpHud;
 import fr.varyon.vrpg.ui.XpNotifHud;
+import fr.varyon.vrpg.ui.prefs.PlayerUiPreferencesManager;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 
 import javax.annotation.Nonnull;
@@ -126,6 +127,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
     private ProfessionManager professionManager;
     private ClassManager classManager;
+    private PlayerUiPreferencesManager uiPreferencesManager;
     private MobParticipantsTracker mobParticipantsTracker;
     private ClassKillXpSystem classKillXpSystem;
     private ClassSkillService classSkillService;
@@ -234,6 +236,10 @@ public final class VaryonRpgPlugin extends JavaPlugin {
 
     public ClassManager getClassManager() {
         return classManager;
+    }
+
+    public PlayerUiPreferencesManager getUiPreferencesManager() {
+        return uiPreferencesManager;
     }
 
     public ClassSkillService getClassSkillService() {
@@ -354,6 +360,13 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         }
 
         try {
+            this.uiPreferencesManager = new PlayerUiPreferencesManager(getDataDirectory());
+            this.uiPreferencesManager.initialize();
+        } catch (Exception e) {
+            LOGGER.atSevere().withCause(e).log("[VaryonRPG] Failed to initialize PlayerUiPreferencesManager");
+        }
+
+        try {
             this.professionManager = new ProfessionManager(getDataDirectory());
             this.miningHelmet = new MiningHelmet(professionManager);
             this.guardianManager = new GuardianStoneManager();
@@ -412,6 +425,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 if (player == null || ref == null || professionManager == null) return;
                 professionManager.ensureAccount(ref.getUuid(), ref.getUsername());
                 if (classManager != null) classManager.ensureAccount(ref.getUuid(), ref.getUsername());
+                if (uiPreferencesManager != null) uiPreferencesManager.ensureLoaded(ref.getUuid());
                 pendingProfessionHudInit.put(ref.getUuid(), ref);
             });
             getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
@@ -439,6 +453,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                         ProfessionXpHud.getOrCreate(readyPlayer, readyRef);
                         XpNotifHud.getOrCreate(readyPlayer, readyRef);
                         AbilitySlotsHud.getOrCreate(readyPlayer, readyRef).refreshSlots();
+                        if (uiPreferencesManager != null) uiPreferencesManager.applyHudLayout(uid);
                     } catch (Exception e) {
                         LOGGER.atWarning().withCause(e).log("[VaryonRPG] init ProfessionXpHud");
                     }
@@ -532,6 +547,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     ProfessionXpHud.cleanup(ref.getUuid());
                     XpNotifHud.cleanup(ref.getUuid());
                     AbilitySlotsHud.cleanup(ref.getUuid());
+                    if (uiPreferencesManager != null) uiPreferencesManager.cleanup(ref.getUuid());
                 }
                 if (ref != null && professionManager != null) {
                     professionManager.onPlayerDisconnect(ref.getUuid());

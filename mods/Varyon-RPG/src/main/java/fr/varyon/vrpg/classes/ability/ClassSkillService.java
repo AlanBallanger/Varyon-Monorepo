@@ -32,6 +32,7 @@ import fr.varyon.vrpg.classes.ombre.OmbrePassifs;
 import com.hypixel.hytale.protocol.AnimationSlot;
 import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import fr.varyon.vrpg.audio.ClassSkillSounds;
+import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.ui.RpgUiAdmin;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
@@ -1188,6 +1189,11 @@ public final class ClassSkillService {
 
     private void notifySkill(@Nonnull UUID uuid, @Nonnull String name) {
         try {
+            VaryonRpgPlugin plugin = VaryonRpgPlugin.getInstance();
+            if (plugin != null && plugin.getUiPreferencesManager() != null
+                && !plugin.getUiPreferencesManager().get(uuid).skillNotificationsEnabled) {
+                return;
+            }
             ClassAccount acc = classManager.getOrLoad(uuid);
             PlayerClass cls = acc.getActiveClass();
             PlayerSpecialization spec = cls != null ? acc.getActiveSpec(cls) : null;

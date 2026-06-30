@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.vrpg.rpg.PlayerAccount;
 import fr.varyon.vrpg.rpg.Profession;
 import fr.varyon.vrpg.rpg.TalentSoundNodes;
+import fr.varyon.vrpg.VaryonRpgPlugin;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -85,6 +86,11 @@ public final class TalentProcSounds {
                                       @Nonnull Ref<EntityStore> ref,
                                       @Nonnull CommandBuffer<EntityStore> commandBuffer,
                                       @Nonnull Vector3d at) {
+        VaryonRpgPlugin plugin = VaryonRpgPlugin.getInstance();
+        if (plugin != null && plugin.getUiPreferencesManager() != null
+            && !plugin.getUiPreferencesManager().get(playerRef.getUuid()).professionSoundsEnabled) {
+            return;
+        }
         try {
             int idx = SoundEvent.getAssetMap().getIndex(soundEventId);
             if (idx <= 0) return;

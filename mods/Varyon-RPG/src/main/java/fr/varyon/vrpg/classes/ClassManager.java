@@ -4,6 +4,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
+import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.rpg.AbstractPlayerManager;
 import fr.varyon.vrpg.ui.ClassXpHud;
 import fr.varyon.vrpg.ui.classes.ClassUnlockedActiveSkills;
@@ -56,6 +57,11 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
 
     @Override
     protected void sendXpNotification(@Nonnull PlayerRef playerRef, @Nonnull PlayerClass playerClass, @Nonnull String xpStr) {
+        VaryonRpgPlugin plugin = VaryonRpgPlugin.getInstance();
+        if (plugin != null && plugin.getUiPreferencesManager() != null
+            && !plugin.getUiPreferencesManager().get(playerRef.getUuid()).xpNotificationsEnabled) {
+            return;
+        }
         try {
             Message msg = Message.raw("+" + xpStr + " XP").color(new Color(0xFFD700));
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), msg, null, (String) null);

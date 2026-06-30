@@ -1,0 +1,280 @@
+$C = "Common.ui";
+
+@SettingRowBg = #000000(0.34);
+@SettingInk = #F2E8D8;
+@SettingMuted = #C8BEB0;
+@SettingAccentHud = #C8A96E;
+@SettingAccentNotif = #6BCB7A;
+@SettingAccentSons = #6FE3FF;
+@SettingBtn = #1a2838(0.92);
+@SettingBtnHover = #243448(0.92);
+@SettingBtnActive = #D4AF37(0.38);
+
+@SwitchBtnStyle = (
+  Default: (Background: (Color: @SettingBtn)),
+  Hovered: (Background: (Color: @SettingBtnHover)),
+  Pressed: (Background: (Color: @SettingBtnActive)),
+  Sounds: $C.@ButtonSounds
+);
+
+@CornerBtnStyle = (
+  Default: (Background: (Color: @SettingBtn)),
+  Hovered: (Background: (Color: @SettingBtnHover)),
+  Pressed: (Background: (Color: @SettingBtnActive)),
+  Sounds: $C.@ButtonSounds
+);
+
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+  LayoutMode: Top;
+
+  Group {
+    FlexWeight: 1;
+    LayoutMode: TopScrolling;
+    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+    Padding: (Full: 4);
+
+    Group #SettingsScrollContent {
+      LayoutMode: Top;
+
+      Group {
+        Padding: (Bottom: 8);
+        Label { Text: "HUD"; Style: (FontSize: 14, TextColor: @SettingAccentHud, RenderBold: true, RenderUppercase: true); }
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 16);
+        Group { Anchor: (Width: 3, Top: 0, Bottom: 0); Background: (Color: @SettingAccentHud); }
+        Group {
+          LayoutMode: Left;
+          FlexWeight: 1;
+          Background: (Color: @SettingRowBg);
+          Padding: (Full: 12);
+          Group #SettingsHudBlock {
+            LayoutMode: Top;
+            FlexWeight: 1;
+
+            Group #SettingsClassHudRow {
+              LayoutMode: Top;
+              Anchor: (Bottom: 16);
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 32, Bottom: 8);
+                Label { FlexWeight: 1; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); Text: "HUD classes"; }
+                Button #SettingsClassHudOn {
+                  Anchor: (Width: 52, Height: 28, Right: 4);
+                  Style: @SwitchBtnStyle;
+                  Label #SettingsClassHudOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Button #SettingsClassHudOff {
+                  Anchor: (Width: 52, Height: 28);
+                  Style: @SwitchBtnStyle;
+                  Label #SettingsClassHudOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+
+              Label { Text: "Position"; Anchor: (Bottom: 6); Style: (FontSize: 12, TextColor: @SettingMuted, RenderBold: true); }
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 28, Bottom: 10);
+                Button #SettingsClassHudPosTL { Anchor: (Width: 92, Height: 26, Right: 6); Style: @CornerBtnStyle; Label #SettingsClassHudPosTLLabel { Text: "Haut gauche"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Button #SettingsClassHudPosTR { Anchor: (Width: 92, Height: 26, Right: 6); Style: @CornerBtnStyle; Label #SettingsClassHudPosTRLabel { Text: "Haut droite"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Button #SettingsClassHudPosBR { Anchor: (Width: 92, Height: 26, Right: 6); Style: @CornerBtnStyle; Label #SettingsClassHudPosBRLabel { Text: "Bas droite"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Button #SettingsClassHudPosBL { Anchor: (Width: 92, Height: 26); Style: @CornerBtnStyle; Label #SettingsClassHudPosBLLabel { Text: "Bas gauche"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+              }
+
+              Label { Text: "Décalage"; Anchor: (Bottom: 6); Style: (FontSize: 12, TextColor: @SettingMuted, RenderBold: true); }
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 28);
+                Label { Text: "H"; Anchor: (Width: 14); Style: (FontSize: 11, TextColor: @SettingMuted, RenderBold: true, VerticalAlignment: Center); }
+                Label #SettingsClassHudOffsetXValue { Text: "0"; Anchor: (Width: 32); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, VerticalAlignment: Center); }
+                Slider #SettingsClassHudOffsetX {
+                  Value: 200;
+                  Min: 0;
+                  Max: 400;
+                  Step: 1;
+                  Style: $C.@DefaultSliderStyle;
+                  FlexWeight: 1;
+                  Anchor: (Height: 6);
+                }
+                Group { Anchor: (Width: 12); }
+                Label { Text: "V"; Anchor: (Width: 14); Style: (FontSize: 11, TextColor: @SettingMuted, RenderBold: true, VerticalAlignment: Center); }
+                Label #SettingsClassHudOffsetYValue { Text: "0"; Anchor: (Width: 32); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, VerticalAlignment: Center); }
+                Slider #SettingsClassHudOffsetY {
+                  Value: 300;
+                  Min: 0;
+                  Max: 600;
+                  Step: 1;
+                  Style: $C.@DefaultSliderStyle;
+                  FlexWeight: 1;
+                  Anchor: (Height: 6);
+                }
+                Group { Anchor: (Width: 8); }
+                Button #SettingsClassHudOffsetReset { Anchor: (Width: 56, Height: 28); Style: @CornerBtnStyle; Label { Text: "Reset"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+              }
+            }
+
+            Group { Anchor: (Height: 1, Bottom: 16); Background: (Color: #FFFFFF(0.08)); }
+
+            Group #SettingsProfHudRow {
+              LayoutMode: Top;
+
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 32, Bottom: 8);
+                Label { FlexWeight: 1; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); Text: "HUD métiers"; }
+                Button #SettingsProfHudOn {
+                  Anchor: (Width: 52, Height: 28, Right: 4);
+                  Style: @SwitchBtnStyle;
+                  Label #SettingsProfHudOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Button #SettingsProfHudOff {
+                  Anchor: (Width: 52, Height: 28);
+                  Style: @SwitchBtnStyle;
+                  Label #SettingsProfHudOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+
+              Label { Text: "Position"; Anchor: (Bottom: 6); Style: (FontSize: 12, TextColor: @SettingMuted, RenderBold: true); }
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 28, Bottom: 10);
+                Button #SettingsProfHudPosTL { Anchor: (Width: 92, Height: 26, Right: 6); Style: @CornerBtnStyle; Label #SettingsProfHudPosTLLabel { Text: "Haut gauche"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Button #SettingsProfHudPosTR { Anchor: (Width: 92, Height: 26, Right: 6); Style: @CornerBtnStyle; Label #SettingsProfHudPosTRLabel { Text: "Haut droite"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Button #SettingsProfHudPosBR { Anchor: (Width: 92, Height: 26, Right: 6); Style: @CornerBtnStyle; Label #SettingsProfHudPosBRLabel { Text: "Bas droite"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Button #SettingsProfHudPosBL { Anchor: (Width: 92, Height: 26); Style: @CornerBtnStyle; Label #SettingsProfHudPosBLLabel { Text: "Bas gauche"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+              }
+
+              Label { Text: "Décalage"; Anchor: (Bottom: 6); Style: (FontSize: 12, TextColor: @SettingMuted, RenderBold: true); }
+              Group {
+                LayoutMode: Left;
+                Anchor: (Height: 28);
+                Label { Text: "H"; Anchor: (Width: 14); Style: (FontSize: 11, TextColor: @SettingMuted, RenderBold: true, VerticalAlignment: Center); }
+                Label #SettingsProfHudOffsetXValue { Text: "0"; Anchor: (Width: 32); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, VerticalAlignment: Center); }
+                Slider #SettingsProfHudOffsetX {
+                  Value: 200;
+                  Min: 0;
+                  Max: 400;
+                  Step: 1;
+                  Style: $C.@DefaultSliderStyle;
+                  FlexWeight: 1;
+                  Anchor: (Height: 6);
+                }
+                Group { Anchor: (Width: 12); }
+                Label { Text: "V"; Anchor: (Width: 14); Style: (FontSize: 11, TextColor: @SettingMuted, RenderBold: true, VerticalAlignment: Center); }
+                Label #SettingsProfHudOffsetYValue { Text: "0"; Anchor: (Width: 32); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, VerticalAlignment: Center); }
+                Slider #SettingsProfHudOffsetY {
+                  Value: 300;
+                  Min: 0;
+                  Max: 600;
+                  Step: 1;
+                  Style: $C.@DefaultSliderStyle;
+                  FlexWeight: 1;
+                  Anchor: (Height: 6);
+                }
+                Group { Anchor: (Width: 8); }
+                Button #SettingsProfHudOffsetReset { Anchor: (Width: 56, Height: 28); Style: @CornerBtnStyle; Label { Text: "Reset"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+              }
+            }
+          }
+        }
+      }
+
+      Group {
+        Padding: (Bottom: 8);
+        Label { Text: "NOTIFICATIONS"; Style: (FontSize: 14, TextColor: @SettingAccentNotif, RenderBold: true, RenderUppercase: true); }
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 16);
+        Group { Anchor: (Width: 3, Top: 0, Bottom: 0); Background: (Color: @SettingAccentNotif); }
+        Group {
+          LayoutMode: Left;
+          FlexWeight: 1;
+          Background: (Color: @SettingRowBg);
+          Padding: (Full: 12);
+          Group #SettingsNotifBlock {
+            LayoutMode: Top;
+            FlexWeight: 1;
+
+            Group {
+              LayoutMode: Left;
+              Anchor: (Height: 32, Bottom: 12);
+              Label { FlexWeight: 1; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); Text: "Notifications XP"; }
+              Button #SettingsXpNotifOn {
+                Anchor: (Width: 52, Height: 28, Right: 4);
+                Style: @SwitchBtnStyle;
+                Label #SettingsXpNotifOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+              }
+              Button #SettingsXpNotifOff {
+                Anchor: (Width: 52, Height: 28);
+                Style: @SwitchBtnStyle;
+                Label #SettingsXpNotifOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+              }
+            }
+
+            Group { Anchor: (Height: 1, Bottom: 12); Background: (Color: #FFFFFF(0.08)); }
+
+            Group {
+              LayoutMode: Left;
+              Anchor: (Height: 32);
+              Label { FlexWeight: 1; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); Text: "Notifications sorts"; }
+              Button #SettingsSkillNotifOn {
+                Anchor: (Width: 52, Height: 28, Right: 4);
+                Style: @SwitchBtnStyle;
+                Label #SettingsSkillNotifOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+              }
+              Button #SettingsSkillNotifOff {
+                Anchor: (Width: 52, Height: 28);
+                Style: @SwitchBtnStyle;
+                Label #SettingsSkillNotifOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+              }
+            }
+          }
+        }
+      }
+
+      Group {
+        Padding: (Bottom: 8);
+        Label { Text: "SONS"; Style: (FontSize: 14, TextColor: @SettingAccentSons, RenderBold: true, RenderUppercase: true); }
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Bottom: 8);
+        Group { Anchor: (Width: 3, Top: 0, Bottom: 0); Background: (Color: @SettingAccentSons); }
+        Group {
+          LayoutMode: Left;
+          FlexWeight: 1;
+          Background: (Color: @SettingRowBg);
+          Padding: (Top: 12, Bottom: 12, Right: 12, Left: 10);
+          Group #SettingsSoundsBlock {
+            LayoutMode: Top;
+            FlexWeight: 1;
+
+            Group {
+              LayoutMode: Left;
+              Anchor: (Height: 32, Bottom: 4);
+              Label { FlexWeight: 1; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); Text: "Sons custom métiers"; }
+              Button #SettingsProfSoundsOn {
+                Anchor: (Width: 52, Height: 28, Right: 4);
+                Style: @SwitchBtnStyle;
+                Label #SettingsProfSoundsOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+              }
+              Button #SettingsProfSoundsOff {
+                Anchor: (Width: 52, Height: 28);
+                Style: @SwitchBtnStyle;
+                Label #SettingsProfSoundsOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+              }
+            }
+            Label { Text: "Désactive tous les sons custom émis par les talents de métier."; Style: (FontSize: 12, TextColor: @SettingMuted); }
+          }
+        }
+      }
+    }
+  }
+}

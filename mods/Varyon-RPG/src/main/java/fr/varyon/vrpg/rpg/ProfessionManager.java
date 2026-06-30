@@ -4,6 +4,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
+import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.ui.ProfessionXpHud;
 
 import javax.annotation.Nonnull;
@@ -61,6 +62,11 @@ public final class ProfessionManager extends AbstractPlayerManager<PlayerAccount
 
     @Override
     protected void sendXpNotification(@Nonnull PlayerRef playerRef, @Nonnull Profession profession, @Nonnull String xpStr) {
+        VaryonRpgPlugin plugin = VaryonRpgPlugin.getInstance();
+        if (plugin != null && plugin.getUiPreferencesManager() != null
+            && !plugin.getUiPreferencesManager().get(playerRef.getUuid()).xpNotificationsEnabled) {
+            return;
+        }
         LOGGER.at(Level.INFO).log("[XpNotif] %s %s +%s XP", playerRef.getUsername(), profession.name(), xpStr);
         try {
             Message msg = Message.raw("+" + xpStr + " XP").color(new Color(0x5BFF7F));

@@ -1,7 +1,7 @@
 Group {
   Group #XPPanel {
     Anchor: (Top: 130, Left: 12, Width: 240, Height: 127);
-    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.82));
     LayoutMode: Full;
 
     Group #HudBorder {

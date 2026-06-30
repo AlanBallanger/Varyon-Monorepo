@@ -30,6 +30,9 @@ import fr.varyon.vrpg.ui.tabs.classes.ClassesTab;
 import fr.varyon.vrpg.ui.tabs.profession.CharacterProfessionsTab;
 import fr.varyon.vrpg.ui.tabs.profession.ClassementTab;
 import fr.varyon.vrpg.ui.tabs.profession.ProfessionSkillsTab;
+import fr.varyon.vrpg.ui.events.SettingsUiEvents;
+import fr.varyon.vrpg.ui.tabs.SettingsTab;
+import fr.varyon.vrpg.VaryonRpgPlugin;
 
 import javax.annotation.Nonnull;
 
@@ -70,6 +73,7 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         uiBuilder.append("#ClassProfilesTabMount", "CharacterTabClassProfiles.ui");
         uiBuilder.append("#ArtisansTabMount", "CharacterTabArtisans.ui");
         uiBuilder.append("#ClassementTabMount", "CharacterTabClassement.ui");
+        uiBuilder.append("#ParametresTabMount", "CharacterTabParametres.ui");
         if (isAdmin) {
             uiBuilder.append("#AdminTabMount", "CharacterTabAdmin.ui");
         }
@@ -125,6 +129,8 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             ClassProfilesTab.build(playerRef, classUi, uiBuilder, eventBuilder);
         } else if ("classement".equals(activeTab)) {
             ClassementTab.build(professionUi, uiBuilder, eventBuilder);
+        } else if ("parametres".equals(activeTab)) {
+            SettingsTab.build(playerRef, uiBuilder, eventBuilder);
         } else if ("admin".equals(activeTab) && isAdmin) {
             AdminTab.build(professionUi, uiBuilder, eventBuilder);
         }
@@ -152,7 +158,10 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
             return;
         }
 
-        UiEventResult result = ProfessionUiEvents.handle(playerRef, professionUi, data);
+        UiEventResult result = SettingsUiEvents.handle(playerRef, data);
+        if (result == UiEventResult.NONE) {
+            result = ProfessionUiEvents.handle(playerRef, professionUi, data);
+        }
         if (result == UiEventResult.NONE) {
             result = AdminUiEvents.handle(playerRef, professionUi, data);
         }
@@ -162,6 +171,17 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
 
         switch (result) {
             case REBUILD -> rebuild();
+            case SETTINGS_UPDATE -> {
+                UICommandBuilder cmd = new UICommandBuilder();
+                if ("parametres".equals(activeTab)) {
+                    VaryonRpgPlugin plugin = VaryonRpgPlugin.getInstance();
+                    if (plugin != null && plugin.getUiPreferencesManager() != null) {
+                        SettingsTab.applyOffsetDisplays(cmd,
+                            plugin.getUiPreferencesManager().get(playerRef.getUuid()));
+                    }
+                }
+                sendUpdate(cmd, null, false);
+            }
             case HOVER_UPDATE -> {
                 UICommandBuilder cmd = new UICommandBuilder();
                 if ("skills".equals(activeTab)) {
@@ -223,6 +243,15 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
                 .addField(new KeyedCodec<>("Hovered", Codec.STRING),
                     (d, v) -> d.hovered = v,
                     d -> d.hovered)
+                .addField(new KeyedCodec<>("Setting", Codec.STRING),
+                    (d, v) -> d.setting = v,
+                    d -> d.setting)
+                .addField(new KeyedCodec<>("Corner", Codec.STRING),
+                    (d, v) -> d.corner = v,
+                    d -> d.corner)
+                .addField(new KeyedCodec<>("@SliderValue", Codec.INTEGER),
+                    (d, v) -> d.sliderValue = v,
+                    d -> d.sliderValue)
                 .build();
 
         public String action;
@@ -240,6 +269,9 @@ public final class RpgMainUI extends InteractiveCustomUIPage<RpgMainUI.Data> {
         public String slot;
         public String filter;
         public String hovered;
+        public String setting;
+        public String corner;
+        public Integer sliderValue;
 
         public Data() {}
     }

@@ -1,7 +1,7 @@
 Group {
   Group #ClassXPPanel {
     Anchor: (Top: 57, Left: 12, Width: 240, Height: 68);
-    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10);
+    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.82));
     LayoutMode: Full;
 
     Group #ClassHudBorder {
@@ -64,7 +64,7 @@ Group {
           Label #ClassXPText {
             Anchor: (Height: 24, Width: 75);
             Text: " ";
-            Style: (FontSize: 11, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+            Style: (FontSize: 11, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
           }
         }
       }
