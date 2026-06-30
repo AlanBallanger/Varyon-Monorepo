@@ -8,8 +8,20 @@ $Sounds = "Sounds.ui";
           LayoutMode: Top;
           Padding: (Top: 0, Left: 12, Right: 0, Bottom: 0);
 
+          Label #SidebarTitleVaryon {
+            Text: "Varyon";
+            Anchor: (Top: 0, Left: 0, Right: 5, Height: 70);
+            Style: (
+              FontSize: 32,
+              RenderBold: true,
+              TextColor: #ffffff,
+              VerticalAlignment: Center,
+              HorizontalAlignment: Center
+            );
+          }
+
           Group #LeftMenuSidebarSkinRow {
-            Anchor: (Top: 70, Left: 0, Right: 5);
+            Anchor: (Left: 0, Right: 5);
             LayoutMode: Top;
             Background: (Color: #232d42);
             Padding: (Top: 15, Bottom: 15);

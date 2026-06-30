@@ -34,6 +34,7 @@ import com.varyon.varyonui.config.TutorielConfig;
 import com.varyon.varyonui.config.VaryonConfig;
 import com.varyon.varyonui.hud.VaryonMenuHud;
 import com.varyon.varyonui.integration.CombatProfilBridge;
+import com.varyon.varyonui.integration.DamageNumberBridge;
 import com.varyon.varyonui.integration.EcotaleEconomyBridge;
 import com.varyon.varyonui.integration.MenuRpgBridge;
 import com.varyon.varyonui.integration.HytlSkinPreview;
@@ -98,6 +99,13 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
 
 
     private static final long COMMAND_EXECUTE_DELAY_MS = 100L;
+
+    private static final String SWITCH_ON_ACTIVE_BG = "#27AE60";
+    private static final String SWITCH_ON_INACTIVE_BG = "#27AE6047";
+    private static final String SWITCH_OFF_ACTIVE_BG = "#E74C3C";
+    private static final String SWITCH_OFF_INACTIVE_BG = "#E74C3C47";
+    private static final String SWITCH_ACTIVE_TEXT = "#FFFFFF";
+    private static final String SWITCH_INACTIVE_TEXT = "#FFFFFF55";
 
     private static final int MAX_SLOTS = 10;
     private static final int MAX_BUTTONS = 50;
@@ -283,6 +291,16 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             CustomUIEventBindingType.Activating,
             "#ParametresMenuTargetVaryon",
             EventData.of("Action", "menushortcuttarget").append("MenuShortcutTarget", "varyon")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresDmgNumOn",
+            EventData.of("Action", "dmgnumtoggle").append("DmgNumToggle", "on")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresDmgNumOff",
+            EventData.of("Action", "dmgnumtoggle").append("DmgNumToggle", "off")
         );
 
         if (isAdmin) {
@@ -556,6 +574,49 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             menuTarget == MenuShortcutTargetConfig.Target.COMMANDES);
         applyShortcutToggle(commandBuilder, "ParametresMenuTargetVaryon", "ParametresMenuTargetVaryonLabel",
             menuTarget == MenuShortcutTargetConfig.Target.VARYON);
+        applyParametresDmgNumAppearance(commandBuilder, uuid);
+    }
+
+    private static void applyParametresDmgNumAppearance(
+            @Nonnull UICommandBuilder commandBuilder,
+            @Nullable UUID uuid) {
+        boolean available = DamageNumberBridge.isAvailable();
+        commandBuilder.set("#ParametresDmgNumRow.Visible", available);
+        if (!available || uuid == null) {
+            return;
+        }
+        applyDualSwitch(commandBuilder,
+            "ParametresDmgNumOn", "ParametresDmgNumOnLabel",
+            "ParametresDmgNumOff", "ParametresDmgNumOffLabel",
+            DamageNumberBridge.isEnabled(uuid));
+    }
+
+    private static void applyDualSwitch(
+            @Nonnull UICommandBuilder ui,
+            @Nonnull String onBtn,
+            @Nonnull String onLabel,
+            @Nonnull String offBtn,
+            @Nonnull String offLabel,
+            boolean enabled) {
+        styleSwitchButton(ui, onBtn, onLabel, enabled, SWITCH_ON_ACTIVE_BG, SWITCH_ON_INACTIVE_BG);
+        styleSwitchButton(ui, offBtn, offLabel, !enabled, SWITCH_OFF_ACTIVE_BG, SWITCH_OFF_INACTIVE_BG);
+    }
+
+    private static void styleSwitchButton(
+            @Nonnull UICommandBuilder ui,
+            @Nonnull String btnId,
+            @Nonnull String labelId,
+            boolean active,
+            @Nonnull String activeBg,
+            @Nonnull String inactiveBg) {
+        String bg = active ? activeBg : inactiveBg;
+        PatchStyle def = new PatchStyle().setColor(Value.of(bg));
+        PatchStyle hov = new PatchStyle().setColor(Value.of(active ? activeBg : inactiveBg));
+        String base = "#" + btnId + ".Style";
+        ui.setObject(base + ".Default.Background", def);
+        ui.setObject(base + ".Hovered.Background", hov);
+        ui.setObject(base + ".Pressed.Background", def);
+        ui.set("#" + labelId + ".Style.TextColor", active ? SWITCH_ACTIVE_TEXT : SWITCH_INACTIVE_TEXT);
     }
 
     private static void applyShortcutToggle(
@@ -563,10 +624,10 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             @Nonnull String btnId,
             @Nonnull String labelId,
             boolean selected) {
-        String selBg = "#356cb0";
-        String idleBg = "#1a2838";
-        String selHov = "#447ccd";
-        String idleHov = "#243448";
+        String selBg = "#D4AF3760";
+        String idleBg = "#1a2838CC";
+        String selHov = "#D4AF3788";
+        String idleHov = "#243448CC";
         String bg = selected ? selBg : idleBg;
         String hov = selected ? selHov : idleHov;
         PatchStyle def = new PatchStyle().setColor(Value.of(bg));
@@ -575,7 +636,8 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         cb.setObject(base + ".Default.Background", def);
         cb.setObject(base + ".Hovered.Background", hovS);
         cb.setObject(base + ".Pressed.Background", def);
-        cb.set("#" + labelId + ".Style.TextColor", selected ? "#e8f4ff" : "#8899aa");
+        cb.set("#" + labelId + ".Style.TextColor", selected ? "#FFFFFF" : "#8899aa");
+        cb.set("#" + labelId + ".Style.RenderBold", selected);
     }
 
     private void buildCommandsContent(@Nonnull UICommandBuilder commandBuilder) {
@@ -1287,6 +1349,19 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
                 buildTabBar(commandBuilder, eventBuilder, false, ref);
                 sendUpdate(commandBuilder, eventBuilder, false);
             }
+        } else if ("dmgnumtoggle".equals(data.action) && data.dmgNumToggle != null) {
+            PlayerRef playerRefComp = store.getComponent(ref, PlayerRef.getComponentType());
+            if (playerRefComp != null && playerRefComp.getUuid() != null && DamageNumberBridge.isAvailable()) {
+                boolean wantOn = "on".equals(data.dmgNumToggle);
+                if (DamageNumberBridge.isEnabled(playerRefComp.getUuid()) != wantOn) {
+                    CommandManager.get().handleCommand(playerRefComp, "dmgnum");
+                }
+                UICommandBuilder commandBuilder = new UICommandBuilder();
+                UIEventBuilder eventBuilder = new UIEventBuilder();
+                buildContent(commandBuilder, eventBuilder, store, ref);
+                buildTabBar(commandBuilder, eventBuilder, false, ref);
+                sendUpdate(commandBuilder, eventBuilder, false);
+            }
         } else if ("playtimeclaim".equals(data.action)
                 && data.playtimeRewardId != null
                 && !data.playtimeRewardId.isBlank()) {
@@ -1388,6 +1463,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
                 .addField(new KeyedCodec<>("Command", Codec.STRING), (entry, s) -> entry.command = s, entry -> entry.command)
                 .addField(new KeyedCodec<>("ShortcutMode", Codec.STRING), (entry, s) -> entry.shortcutMode = s, entry -> entry.shortcutMode)
                 .addField(new KeyedCodec<>("MenuShortcutTarget", Codec.STRING), (entry, s) -> entry.menuShortcutTarget = s, entry -> entry.menuShortcutTarget)
+                .addField(new KeyedCodec<>("DmgNumToggle", Codec.STRING), (entry, s) -> entry.dmgNumToggle = s, entry -> entry.dmgNumToggle)
                 .addField(new KeyedCodec<>("PlaytimeRewardId", Codec.STRING), (entry, s) -> entry.playtimeRewardId = s, entry -> entry.playtimeRewardId)
                 .build();
 
@@ -1396,6 +1472,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         public String command;
         public String shortcutMode;
         public String menuShortcutTarget;
+        public String dmgNumToggle;
         public String playtimeRewardId;
     }
 }
