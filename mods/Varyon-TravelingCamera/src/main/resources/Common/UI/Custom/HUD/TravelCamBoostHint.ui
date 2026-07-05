@@ -1,0 +1,8 @@
+Group {
+  Label #TravelCamBoostHintLabel {
+    Visible: false;
+    Anchor: (Top: 40, Left: 300, Width: 320, Height: 40);
+    Text: " ";
+    Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+  }
+}

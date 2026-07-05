@@ -1,0 +1,16 @@
+{
+  "Group": "${plugin_group}",
+  "Name": "Varyon-TravelingCamera",
+  "Version": "${plugin_version}",
+  "Description": "${plugin_description}",
+  "Authors": [
+    { "Name": "Varyon Team" }
+  ],
+  "Website": "",
+  "ServerVersion": "${server_version}",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": false,
+  "Main": "${plugin_main_entrypoint}"
+}
