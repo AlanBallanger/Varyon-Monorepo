@@ -18,6 +18,8 @@ public final class TravelCamBoostHintHud extends CustomUIHud {
 
     private static final ConcurrentHashMap<UUID, TravelCamBoostHintHud> INSTANCES = new ConcurrentHashMap<>();
 
+    private boolean visible;
+
     public TravelCamBoostHintHud(@Nonnull PlayerRef playerRef) {
         super(playerRef, HUD_KEY);
     }
@@ -25,7 +27,8 @@ public final class TravelCamBoostHintHud extends CustomUIHud {
     @Override
     protected void build(@Nonnull UICommandBuilder builder) {
         builder.append("HUD/TravelCamBoostHint.ui");
-        builder.set("#TravelCamBoostHintLabel.TextSpans", Message.raw("Appuyez sur Z pour accelerer"));
+        builder.set("#TravelCamBoostHintLabel.Text", "Appuyez sur Z pour accelerer");
+        builder.set("#TravelCamBoostHintBox.Visible", visible);
     }
 
     public static void show(@Nullable Player player, @Nonnull PlayerRef playerRef) {
@@ -37,15 +40,18 @@ public final class TravelCamBoostHintHud extends CustomUIHud {
             return;
         }
         UUID uuid = playerRef.getUuid();
-        TravelCamBoostHintHud hud = INSTANCES.computeIfAbsent(uuid, id -> {
-            TravelCamBoostHintHud created = new TravelCamBoostHintHud(playerRef);
-            hudManager.addCustomHud(playerRef, created);
-            return created;
-        });
-
-        UICommandBuilder cmd = new UICommandBuilder();
-        cmd.set("#TravelCamBoostHintLabel.Visible", true);
-        hud.update(false, cmd);
+        TravelCamBoostHintHud existing = INSTANCES.get(uuid);
+        if (existing != null) {
+            existing.visible = true;
+            UICommandBuilder cmd = new UICommandBuilder();
+            cmd.set("#TravelCamBoostHintBox.Visible", true);
+            existing.update(false, cmd);
+            return;
+        }
+        TravelCamBoostHintHud created = new TravelCamBoostHintHud(playerRef);
+        created.visible = true;
+        INSTANCES.put(uuid, created);
+        hudManager.addCustomHud(playerRef, created);
     }
 
     public static void hide(@Nullable Player player, @Nonnull PlayerRef playerRef) {
@@ -54,8 +60,9 @@ public final class TravelCamBoostHintHud extends CustomUIHud {
         if (hud == null) {
             return;
         }
+        hud.visible = false;
         UICommandBuilder cmd = new UICommandBuilder();
-        cmd.set("#TravelCamBoostHintLabel.Visible", false);
+        cmd.set("#TravelCamBoostHintBox.Visible", false);
         hud.update(false, cmd);
     }
 

@@ -99,12 +99,14 @@ public final class TravelingCameraManager {
         }
         playbackStates.put(uuid, new PlaybackState(path));
         applyFrame(playerRef, path.waypoints.get(0), 0.2f, 0.2f);
+        runOnWorldThread(playerRef, () -> TravelCamBoostHintHud.show(resolvePlayer(playerRef), playerRef));
         return true;
     }
 
     public static void stop(@Nonnull UUID uuid, @Nullable PlayerRef playerRef) {
         if (playbackStates.remove(uuid) != null && playerRef != null) {
             resetCamera(playerRef);
+            runOnWorldThread(playerRef, () -> TravelCamBoostHintHud.hide(resolvePlayer(playerRef), playerRef));
         }
     }
 

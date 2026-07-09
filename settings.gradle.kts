@@ -32,4 +32,5 @@ include(
     ":mods:varyon-UI",
     ":mods:Varyon-Progression",
     ":mods:Varyon-Holograms",
+    ":mods:Varyon-TravelingCamera",
 )

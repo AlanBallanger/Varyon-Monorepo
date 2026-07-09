@@ -1,8 +1,22 @@
 Group {
-  Label #TravelCamBoostHintLabel {
+  LayoutMode: Center;
+
+  Group #TravelCamBoostHintBox {
     Visible: false;
-    Anchor: (Top: 40, Left: 300, Width: 320, Height: 40);
-    Text: " ";
-    Style: (FontSize: 14, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    Anchor: (Top: 60, Width: 320, Height: 48);
+    Background: (Color: #000000(0.6));
+    LayoutMode: CenterMiddle;
+
+    Label #TravelCamBoostHintLabel {
+      Text: "";
+      Anchor: (Width: 296, Height: 36);
+      Style: (
+        FontSize: 14,
+        RenderBold: true,
+        TextColor: #FFFFFF,
+        VerticalAlignment: Center,
+        HorizontalAlignment: Center
+      );
+    }
   }
 }
