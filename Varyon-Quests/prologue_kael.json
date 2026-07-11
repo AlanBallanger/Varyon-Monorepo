@@ -1,0 +1,150 @@
+{
+  "QuestlineId": "1_prologue",
+  "QuestlineTitle": "Prologue Les Échos de Varyon",
+  "Title": "Première mesure Chercheur Kael",
+  "Requirements": [],
+  "Actions": [],
+  "Repeatable": false,
+  "Pages": [
+    "chercheur_kael_completed",
+    "chercheur_kael_4",
+    "chercheur_kael_3",
+    "chercheur_kael_2",
+    "chercheur_kael_1"
+  ],
+  "PageData": {
+    "chercheur_kael_completed": {
+      "Title": "Mesure terminée",
+      "Name": "{b}Chercheur Kael",
+      "Requirements": [
+        "questCompleted:prologue_kael"
+      ],
+      "LoadActions": [],
+      "Dialog": "La mesure est déjà notée.\n\n102 Gaïons. Une valeur anormalement élevée pour un nouvel arrivant.\n\nLe Professeur Venim voudra sûrement examiner ces relevés.",
+      "GoalText": "",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "chercheur_kael_1": {
+      "Title": "Première mesure",
+      "Name": "{b}Chercheur Kael",
+      "Requirements": [
+        "questNotStarted:prologue_kael"
+      ],
+      "LoadActions": [],
+      "Dialog": "Toi, c'est le nouvel arrivant ? Parfait, approche.\n\nLe Professeur Venim veut une première mesure de mana avant de poursuivre.\n\nJe vais te confier une essence ionique. Pas d'inquiétude : place-toi sur la zone de mesure, tiens-la fermement, puis active-la avec un clic droit.\n\nSi les instruments sifflent, clignotent ou insultent quelqu'un, ne panique pas. Ça arrive plus souvent qu'on ne l'admet dans les rapports.",
+      "GoalText": "Réaliser la mesure de mana",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "Très bien. Donnez-moi l'essence.",
+          "Requirements": [
+            "questNotStarted:prologue_kael"
+          ],
+          "Actions": [
+            "removeTag:mana_measure_done",
+            "startquest:prologue_kael",
+            "item:Ionic_Plasma_Essence:1",
+            "track:mana_measure:use:Ionic_Plasma_Essence:button:right:loc:-34:255:-74:3"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "chercheur_kael_2": {
+      "Title": "Mesure en cours",
+      "Name": "{b}Chercheur Kael",
+      "Requirements": [
+        "questStarted:prologue_kael",
+        "!hasTag:mana_measure_done",
+        "!track:mana_measure:1"
+      ],
+      "LoadActions": [],
+      "Objectives": [
+        "track:mana_measure:1::Activer l'essence ionique sur la zone de mesure"
+      ],
+      "Dialog": "Place-toi sur le cercle de mesure.\n\nUne fois dessus, tiens l'essence ionique dans ta main et active-la avec un clic droit.\n\nÉvite de la secouer, de la goûter ou de demander si elle est comestible. La réponse est non.",
+      "GoalText": "Utiliser l'essence ionique sur la zone de mesure",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "Je vais essayer.",
+          "Actions": []
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "chercheur_kael_3": {
+      "Title": "Validation mesure mana",
+      "Name": "{b}Chercheur Kael",
+      "Requirements": [
+        "questStarted:prologue_kael",
+        "!hasTag:mana_measure_done",
+        "track:mana_measure:1"
+      ],
+      "AutoTrigger": true,
+      "LoadActions": [
+        "addTag:mana_measure_done",
+        "notify:Mesure de mana enregistrée",
+        "sound:SFX_Vrpg_Dubbing_Miraa"
+      ],
+      "Objectives": [],
+      "Dialog": "",
+      "Responses": []
+    },
+    "chercheur_kael_4": {
+      "Title": "Résultat du test",
+      "Name": "{b}Chercheur Kael",
+      "Requirements": [
+        "questStarted:prologue_kael",
+        "hasTag:mana_measure_done"
+      ],
+      "LoadActions": [],
+      "Dialog": "Hm... lecture enregistrée. Archivage du résultat.\n\n{b}102 Gaïons{/}.\n\nC'est plus élevé que prévu. Beaucoup plus élevé, même.\n\nPour un individu ordinaire, ce serait déjà remarquable. Pour un nouvel arrivant, c'est franchement anormal.\n\nJe vais transmettre ça au Professeur Venim. Il voudra sûrement comparer cette mesure avec les prochains tests.",
+      "GoalText": "Retourner voir le Professeur Venim",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "102 Gaïons... d'accord. Je retourne voir Venim.",
+          "Actions": [
+            "completequest:prologue_kael",
+            "removeTag:mana_measure_done"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    }
+  }
+}

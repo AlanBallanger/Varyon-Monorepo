@@ -1,0 +1,190 @@
+{
+  "QuestlineId": "1_prologue",
+  "QuestlineTitle": "Prologue Les Échos de Varyon",
+  "Title": "Test de résonance Chercheuse Lyra",
+  "Requirements": [],
+  "Actions": [],
+  "Repeatable": false,
+  "Pages": [
+    "chercheuse_lyra_completed",
+    "chercheuse_lyra_5",
+    "chercheuse_lyra_4",
+    "chercheuse_lyra_3",
+    "chercheuse_lyra_2",
+    "chercheuse_lyra_1"
+  ],
+  "PageData": {
+    "chercheuse_lyra_completed": {
+      "Title": "Expérience terminée",
+      "Name": "{b}Chercheuse Lyra",
+      "Requirements": [
+        "questCompleted:prologue_lyra"
+      ],
+      "LoadActions": [],
+      "Dialog": "Je préfère encore vérifier mes relevés avant de tirer la moindre conclusion.\n\nCe cristal n'aurait jamais dû réagir comme ça. Et pourtant, les instruments sont formels.",
+      "GoalText": "",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "chercheuse_lyra_1": {
+      "Title": "Test de résonance",
+      "Name": "{b}Chercheuse Lyra",
+      "Requirements": [
+        "questNotStarted:prologue_lyra"
+      ],
+      "LoadActions": [],
+      "Dialog": "Alors, c'est toi le nouvel arrivant ? Bien. J'ai besoin de vérifier quelque chose.\n\nTu vois les trois dispositifs dans la salle ? Je vais te demander de poser ta main sur chacun d'eux. L'ordre n'a aucune importance.\n\nLes instruments enregistreront les réactions provoquées par ton contact. Normalement.",
+      "GoalText": "Toucher les trois dispositifs",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "D'accord. Je dois simplement les toucher ?",
+          "Requirements": [
+            "questNotStarted:prologue_lyra"
+          ],
+          "Actions": [
+            "removeTag:resonance_test_done",
+            "removeTag:resonance_anomaly_seen",
+            "untrack:resonance_test_1",
+            "untrack:resonance_test_2",
+            "untrack:resonance_test_3",
+            "startquest:prologue_lyra",
+            "track:resonance_test_1:use:[Deco_Lever]:loc:-33:255:-78:2",
+            "track:resonance_test_2:use:[Deco_Lever]:loc:-34:255:-78:2",
+            "track:resonance_test_3:use:[Deco_Lever]:loc:-35:255:-78:2"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "chercheuse_lyra_2": {
+      "Title": "Test en cours",
+      "Name": "{b}Chercheuse Lyra",
+      "Requirements": [
+        "questStarted:prologue_lyra",
+        "!hasTag:resonance_test_done"
+      ],
+      "LoadActions": [],
+      "Objectives": [
+        "track:resonance_test_1:1::Toucher le premier dispositif",
+        "track:resonance_test_2:1::Toucher le deuxième dispositif",
+        "track:resonance_test_3:1::Toucher le troisième dispositif"
+      ],
+      "Dialog": "Pose simplement ta main sur chacun des trois dispositifs.\n\nTu peux les toucher dans l'ordre que tu veux. Les instruments enregistrent automatiquement chaque réaction.\n\nEnfin... lorsqu'ils fonctionnent correctement.",
+      "GoalText": "Toucher les trois dispositifs du laboratoire",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "Je m'en occupe.",
+          "Actions": []
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "chercheuse_lyra_3": {
+      "Title": "Validation du test",
+      "Name": "{b}Chercheuse Lyra",
+      "Requirements": [
+        "questStarted:prologue_lyra",
+        "!hasTag:resonance_test_done",
+        "track:resonance_test_1:1",
+        "track:resonance_test_2:1",
+        "track:resonance_test_3:1"
+      ],
+      "AutoTrigger": true,
+      "LoadActions": [
+        "addTag:resonance_test_done",
+        "notify:Les trois dispositifs ont été activés"
+      ],
+      "Objectives": [],
+      "Dialog": "",
+      "Responses": []
+    },
+    "chercheuse_lyra_4": {
+      "Title": "Une réaction inattendue",
+      "Name": "{b}Chercheuse Lyra",
+      "Requirements": [
+        "questStarted:prologue_lyra",
+        "hasTag:resonance_test_done",
+        "!hasTag:resonance_anomaly_seen"
+      ],
+      "LoadActions": [],
+      "Dialog": "Attends...\n\nNe touche plus à rien.\n\nCe cristal vient de réagir.\n\nNon, ce n'est pas possible... Les valeurs montent encore. Les instruments enregistrent des résultats complètement incohérents.\n\nReste exactement où tu es.",
+      "GoalText": "Parler à la Chercheuse Lyra",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "C'est moi qui ai provoqué ça ?",
+          "Actions": [
+            "addTag:resonance_anomaly_seen",
+            "page:chercheuse_lyra_5"
+          ]
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "chercheuse_lyra_5": {
+      "Title": "Des relevés impossibles",
+      "Name": "{b}Chercheuse Lyra",
+      "Requirements": [
+        "questStarted:prologue_lyra",
+        "hasTag:resonance_anomaly_seen"
+      ],
+      "LoadActions": [],
+      "Dialog": "Je n'en sais rien. Et je préfère ne pas inventer une réponse pour te rassurer.\n\nCe cristal était parfaitement stable avant ton arrivée. Maintenant, mes instruments semblent avoir décidé de perdre la raison.\n\nJe vais vérifier les relevés. Toi, retourne voir le Professeur Venim et raconte-lui exactement ce qui s'est passé.",
+      "GoalText": "Retourner voir le Professeur Venim",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "Très bien. Je vais prévenir Venim.",
+          "Actions": [
+            "untrack:resonance_test_1",
+            "untrack:resonance_test_2",
+            "untrack:resonance_test_3",
+            "removeTag:resonance_test_done",
+            "removeTag:resonance_anomaly_seen",
+            "completequest:prologue_lyra"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    }
+  }
+}
