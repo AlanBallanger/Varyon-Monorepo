@@ -1,0 +1,228 @@
+{
+  "QuestlineId": "1_prologue",
+  "QuestlineTitle": "Prologue Les Échos de Varyon",
+  "Title": "Les archives d'Ector",
+  "Requirements": [],
+  "Actions": [],
+  "Repeatable": false,
+  "Pages": [
+    "ector_completed",
+    "ector_step_5",
+    "ector_step_4",
+    "ector_step_3b",
+    "ector_step_3a",
+    "ector_step_2b",
+    "ector_step_2a",
+    "ector_step_1"
+  ],
+  "PageData": {
+    "ector_completed": {
+      "Title": "Retour aux archives",
+      "Name": "{b}Ector",
+      "Requirements": [
+        "questCompleted:prologue_ector"
+      ],
+      "Dialog": "J'ai du travail. Sauf si vous avez trouvé quelque chose que je devrais savoir.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "ector_step_5": {
+      "Title": "Un dossier presque vide",
+      "Name": "{b}Ector",
+      "Requirements": [
+        "questStarted:prologue_ector",
+        "hasTag:ector_shelf_ready",
+        "track:ector_shelf:1"
+      ],
+      "Dialog": "Le dossier est presque vide. Une seule ligne, à l'encre pâlie, un nom, une date, et la mention réaction anormale, non résolue. Ector ne lève pas les yeux de son propre travail. Gardez ça sur vous. Ce n'est rien d'officiel. Juste quelque chose que je n'aime pas voir traîner sans qu'on sache à qui ça appartient.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "Je le garde.",
+          "Actions": [
+            "removeTag:ector_shelf_ready",
+            "untrack:ector_shelf",
+            "givequestitem:Ector_Token:1",
+            "completequest:prologue_ector"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        }
+      ]
+    },
+    "ector_step_4": {
+      "Title": "La troisième rangée",
+      "Name": "{b}Ector",
+      "Requirements": [
+        "questStarted:prologue_ector",
+        "hasTag:ector_shelf_ready",
+        "!track:ector_shelf:1"
+      ],
+      "Dialog": "La troisième rangée, au fond. Personne ne la consulte jamais.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "track:ector_shelf:1::Fouiller la troisième rangée"
+      ],
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "ector_step_3a": {
+      "Title": "Une question directe",
+      "Name": "{b}Ector",
+      "Requirements": [
+        "questStarted:prologue_ector",
+        "hasTag:ector_relance_a"
+      ],
+      "Dialog": "Ça voudrait dire qu'il y a une différence entre revenir vide, et revenir plein de quelque chose qu'on a oublié qu'on portait. Vous, je pencherais pour la seconde option. Pendant que Venim s'occupe de ses instruments, allez donc jeter un œil à la troisième rangée. Vous comprendrez peut être mieux que moi ce que vous y trouverez.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Écouter Ector"
+      ],
+      "Responses": [
+        {
+          "Text": "Je vais voir ça de plus près.",
+          "Actions": [
+            "removeTag:ector_relance_a",
+            "addTag:ector_shelf_ready",
+            "track:ector_shelf:place:Deco_Book_Pile_Large:loc:-34:255:-77:3"
+          ]
+        }
+      ]
+    },
+    "ector_step_3b": {
+      "Title": "Un motif qui se répète",
+      "Name": "{b}Ector",
+      "Requirements": [
+        "questStarted:prologue_ector",
+        "hasTag:ector_relance_b"
+      ],
+      "Dialog": "Le taux était différent. La réaction du cristal aussi. Mais quelque chose, dans la façon dont tout ça s'est produit, me laisse une impression de déjà vu. Pendant que Venim est occupé, allez jeter un œil à la troisième rangée de livre derrière. Il y a un dossier que vous devriez lire.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Écouter Ector"
+      ],
+      "Responses": [
+        {
+          "Text": "Je vais voir ça de plus près.",
+          "Actions": [
+            "removeTag:ector_relance_b",
+            "addTag:ector_shelf_ready",
+            "track:ector_shelf:place:Deco_Book_Pile_Large:loc:-34:255:-77:3"
+          ]
+        }
+      ]
+    },
+    "ector_step_2a": {
+      "Title": "Une question directe",
+      "Name": "{b}Ector",
+      "Requirements": [
+        "questStarted:prologue_ector",
+        "hasTag:ector_choice_a"
+      ],
+      "Dialog": "Anormal, non. Mais inhabituel, certainement. Un cristal ne réagit jamais au hasard : il répond à ce qu'il reconnaît, et le vôtre a manifestement reconnu quelque chose en vous. Quant à votre taux de mana, ce n'est pas quelque chose qui s'apprend ou qui apparaît du jour au lendemain. Si vous l'avez aujourd'hui, alors il était déjà là bien avant votre réincarnation.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Écouter Ector"
+      ],
+      "Responses": [
+        {
+          "Text": "Quelque chose en moi ? Quoi donc ?",
+          "Actions": [
+            "removeTag:ector_choice_a",
+            "addTag:ector_relance_a",
+            "page:ector_step_3a"
+          ]
+        }
+      ]
+    },
+    "ector_step_2b": {
+      "Title": "Une inquiétude partagée",
+      "Name": "{b}Ector",
+      "Requirements": [
+        "questStarted:prologue_ector",
+        "hasTag:ector_choice_b"
+      ],
+      "Dialog": "Inquiéter n'est pas tout à fait le mot, non. Disons plutôt que j'ai passé assez d'années ici pour reconnaître certaines anomalies avant même qu'on me les explique. Et ce n'est pas la première fois que je vois un cristal réagir de cette façon. Il y a déjà eu un autre cas, il y a longtemps.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Écouter Ector"
+      ],
+      "Responses": [
+        {
+          "Text": "Ah ? Il s'est passé quoi avec cette personne ?",
+          "Actions": [
+            "removeTag:ector_choice_b",
+            "addTag:ector_relance_b",
+            "page:ector_step_3b"
+          ]
+        }
+      ]
+    },
+    "ector_step_1": {
+      "Title": "L'archiviste",
+      "Name": "{b}Ector",
+      "Requirements": [
+        "questNotStarted:prologue_ector"
+      ],
+      "LoadActions": [],
+      "Dialog": "Oh, je ne vous avais pas entendu entrer. Vous devez être un nouvel être réincarné. On le devine à votre façon de vous tenir et aux vêtements qu'on vous a donnés. Intéressant. Je suppose que vous êtes là en quête de réponses, vous avez pu passer les tests ? Dites moi ce qui vous amène.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Interroger Ector"
+      ],
+      "Responses": [
+        {
+          "Text": "Pourquoi le cristal a réagi comme ça avec moi ? Et mon taux de mana, il est anormal, non ?",
+          "Requirements": [
+            "questNotStarted:prologue_ector"
+          ],
+          "Actions": [
+            "startquest:prologue_ector",
+            "addTag:ector_choice_a",
+            "page:ector_step_2a"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "Ça a l'air de vous inquiéter autant que moi. Il y a déjà eu un cas similaire ?",
+          "Requirements": [
+            "questNotStarted:prologue_ector"
+          ],
+          "Actions": [
+            "startquest:prologue_ector",
+            "addTag:ector_choice_b",
+            "page:ector_step_2b"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    }
+  }
+}

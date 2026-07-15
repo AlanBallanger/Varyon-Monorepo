@@ -1,0 +1,162 @@
+{
+  "QuestlineId": "1_prologue",
+  "QuestlineTitle": "Prologue Les Échos de Varyon",
+  "Title": "Le portail de Sior",
+  "Pages": [
+    "sior_completed",
+    "sior_step_4",
+    "sior_step_3",
+    "sior_step_2",
+    "sior_step_1"
+  ],
+  "PageData": {
+    "sior_completed": {
+      "Title": "Retour au portail",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questCompleted:prologue_sior"
+      ],
+      "Dialog": "Le portail est calme, pour l\u0027instant.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "sior_step_4": {
+      "Title": "L\u0027expérience",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questStarted:prologue_sior",
+        "hasTag:sior_step_4"
+      ],
+      "Dialog": "Exactement. On va modifier légèrement la résonance du portail pour rendre ce qui se trouve de l\u0027autre côté plus visible. C\u0027est une procédure qu\u0027on effectue régulièrement. Pendant quelques instants, tu devrais pouvoir observer Varyon presque comme si tu y étais. Place toi près de la plateforme d\u0027observation et regarde bien.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Se rendre près de la plateforme d\u0027observation"
+      ],
+      "Responses": [
+        {
+          "Text": "Très bien. Je suis prêt.",
+          "Actions": [
+            "removeTag:sior_step_4",
+            "completequest:prologue_sior"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        }
+      ]
+    },
+    "sior_step_3": {
+      "Title": "Le danger de Varyon",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questStarted:prologue_sior",
+        "hasTag:sior_step_3"
+      ],
+      "Dialog": "Non. Et mieux vaut ne jamais partir du principe que ça le sera. Varyon a déjà coûté la vie à beaucoup d\u0027explorateurs. Mais chaque expédition nous permet d\u0027en apprendre un peu plus sur ce monde, et parfois sur le nôtre. Heureusement pour toi, aujourd\u0027hui, on va simplement l\u0027observer d\u0027ici.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Écouter Sior"
+      ],
+      "Responses": [
+        {
+          "Text": "Comment ça ?",
+          "Actions": [
+            "removeTag:sior_step_3",
+            "addTag:sior_step_4",
+            "page:sior_step_4"
+          ]
+        },
+        {
+          "Text": "C\u0027est donc ça, l\u0027expérience dont parlait Venim ?",
+          "Actions": [
+            "removeTag:sior_step_3",
+            "addTag:sior_step_4",
+            "page:sior_step_4"
+          ]
+        }
+      ]
+    },
+    "sior_step_2": {
+      "Title": "Varyon",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questStarted:prologue_sior",
+        "hasTag:sior_step_2"
+      ],
+      "Dialog": "Varyon, c\u0027est un autre monde. Immense, hostile, et dont on ne connaît encore qu\u0027une infime partie. On y envoie régulièrement des expéditions pour explorer ses ruines et rapporter ce qu\u0027elles trouvent, des cristaux, des vestiges, et parfois des choses qu\u0027on ne sait toujours pas expliquer.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Écouter Sior"
+      ],
+      "Responses": [
+        {
+          "Text": "Et c\u0027est sans danger ?",
+          "Actions": [
+            "removeTag:sior_step_2",
+            "addTag:sior_step_3",
+            "page:sior_step_3"
+          ]
+        }
+      ]
+    },
+    "sior_step_1": {
+      "Title": "Le responsable du portail",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questNotStarted:prologue_sior"
+      ],
+      "Dialog": "Alors, c\u0027est toi le nouvel arrivant. Venim m\u0027a parlé de toi. Il m\u0027a demandé de te faire assister à l\u0027une de nos expériences. Mais avant ça, autant reprendre depuis le début. Ce que tu vois derrière moi est notre seul accès à Varyon.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Interroger Sior"
+      ],
+      "Responses": [
+        {
+          "Text": "Varyon, c\u0027est quoi exactement ?",
+          "Requirements": [
+            "questNotStarted:prologue_sior"
+          ],
+          "Actions": [
+            "startquest:prologue_sior",
+            "addTag:sior_step_2",
+            "page:sior_step_2"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "Et qu\u0027est-ce qu\u0027il y a de l\u0027autre côté ?",
+          "Requirements": [
+            "questNotStarted:prologue_sior"
+          ],
+          "Actions": [
+            "startquest:prologue_sior",
+            "addTag:sior_step_2",
+            "page:sior_step_2"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    }
+  }
+}
