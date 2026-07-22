@@ -2,8 +2,15 @@
   "QuestlineId": "1_prologue",
   "QuestlineTitle": "Prologue Les Échos de Varyon",
   "Title": "Le portail de Sior",
+  "Requirements": [],
+  "Actions": [],
+  "Repeatable": false,
   "Pages": [
     "sior_completed",
+    "sior_step_7",
+    "sior_step_6",
+    "sior_step_5",
+    "sior_step_4b_wait",
     "sior_step_4",
     "sior_step_3",
     "sior_step_2",
@@ -16,7 +23,7 @@
       "Requirements": [
         "questCompleted:prologue_sior"
       ],
-      "Dialog": "Le portail est calme, pour l\u0027instant.",
+      "Dialog": "Le portail est calme, pour l'instant. Je vais devoir faire mon rapport à Venim.",
       "DialogWidth": "Mid",
       "Responses": [
         {
@@ -26,23 +33,23 @@
         }
       ]
     },
-    "sior_step_4": {
-      "Title": "L\u0027expérience",
+    "sior_step_7": {
+      "Title": "La distorsion",
       "Name": "{b}Sior",
       "Requirements": [
         "questStarted:prologue_sior",
-        "hasTag:sior_step_4"
+        "hasTag:sior_step_7"
       ],
-      "Dialog": "Exactement. On va modifier légèrement la résonance du portail pour rendre ce qui se trouve de l\u0027autre côté plus visible. C\u0027est une procédure qu\u0027on effectue régulièrement. Pendant quelques instants, tu devrais pouvoir observer Varyon presque comme si tu y étais. Place toi près de la plateforme d\u0027observation et regarde bien.",
+      "Dialog": "Elles ont disparu. Aussi vite qu'elles sont apparues, sans laisser la moindre trace. Mais il y a autre chose qui m'inquiète encore plus.\n\n{i}Il consulte un instrument à sa ceinture, fronce les sourcils.{/}\n\nLes capteurs ont enregistré une distorsion temporelle, au moment exact de l'incident. Ça, je ne l'ai jamais vu. Je vais devoir en parler à Venim, et vite.",
       "DialogWidth": "Mid",
       "Objectives": [
-        "text:Se rendre près de la plateforme d\u0027observation"
+        "text:Écouter Sior"
       ],
       "Responses": [
         {
-          "Text": "Très bien. Je suis prêt.",
+          "Text": "Je vous laisse faire votre rapport.",
           "Actions": [
-            "removeTag:sior_step_4",
+            "removeTag:sior_step_7",
             "completequest:prologue_sior"
           ],
           "Color": "E5BB32",
@@ -53,6 +60,94 @@
         }
       ]
     },
+    "sior_step_6": {
+      "Title": "Les créatures",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questStarted:prologue_sior",
+        "hasTag:sior_step_6"
+      ],
+      "Dialog": "Le système de sécurité a fini par couper la résonance de lui même, avant que ça devienne vraiment incontrôlable. Enfin, surtout, c'est toi qui a actionné le bon levier au bon moment. Sans ça, je ne sais pas comment ça se serait terminé.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Écouter Sior"
+      ],
+      "Responses": [
+        {
+          "Text": "Et les créatures, elles sont passées où ?",
+          "Actions": [
+            "removeTag:sior_step_6",
+            "addTag:sior_step_7",
+            "page:sior_step_7"
+          ]
+        }
+      ]
+    },
+    "sior_step_5": {
+      "Title": "Après coup",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questStarted:prologue_sior",
+        "hasTag:sior_step_5"
+      ],
+      "Dialog": "Ça y est, c'est fini. Enfin je crois. Laisse moi juste reprendre mon souffle une seconde.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Écouter Sior"
+      ],
+      "Responses": [
+        {
+          "Text": "Qu'est ce qui s'est passé ?",
+          "Actions": [
+            "removeTag:sior_step_5",
+            "addTag:sior_step_6",
+            "page:sior_step_6"
+          ]
+        }
+      ]
+    },
+    "sior_step_4": {
+      "Title": "L'expérience",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questStarted:prologue_sior",
+        "hasTag:sior_step_4"
+      ],
+      "Dialog": "Très bien. Approche toi de la plateforme, on commence.",
+      "DialogWidth": "Mid",
+      "Objectives": [
+        "text:Se rendre près de la plateforme d'observation"
+      ],
+      "Responses": [
+        {
+          "Text": "Je suis prêt.",
+          "Actions": [
+            "removeTag:sior_step_4",
+            "addTag:sior_step_4b_wait"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        }
+      ]
+    },
+    "sior_step_4b_wait": {
+      "Title": "L'attente",
+      "Name": "{b}Sior",
+      "Requirements": [
+        "questStarted:prologue_sior",
+        "hasTag:sior_step_4b_wait"
+      ],
+      "AutoTrigger": true,
+      "LoadActions": [
+        "removeTag:sior_step_4b_wait",
+        "delay:5",
+        "addTag:sior_step_5"
+      ],
+      "DialogWidth": "Mid"
+    },
     "sior_step_3": {
       "Title": "Le danger de Varyon",
       "Name": "{b}Sior",
@@ -60,7 +155,7 @@
         "questStarted:prologue_sior",
         "hasTag:sior_step_3"
       ],
-      "Dialog": "Non. Et mieux vaut ne jamais partir du principe que ça le sera. Varyon a déjà coûté la vie à beaucoup d\u0027explorateurs. Mais chaque expédition nous permet d\u0027en apprendre un peu plus sur ce monde, et parfois sur le nôtre. Heureusement pour toi, aujourd\u0027hui, on va simplement l\u0027observer d\u0027ici.",
+      "Dialog": "Non. Et mieux vaut ne jamais partir du principe que ça le sera. Varyon a déjà coûté la vie à beaucoup d'explorateurs. Mais chaque expédition nous permet d'en apprendre un peu plus sur ce monde, et parfois sur le nôtre. Heureusement pour toi, aujourd'hui, on va simplement l'observer d'ici.",
       "DialogWidth": "Mid",
       "Objectives": [
         "text:Écouter Sior"
@@ -75,7 +170,7 @@
           ]
         },
         {
-          "Text": "C\u0027est donc ça, l\u0027expérience dont parlait Venim ?",
+          "Text": "C'est donc ça, l'expérience dont parlait Venim ?",
           "Actions": [
             "removeTag:sior_step_3",
             "addTag:sior_step_4",
@@ -91,14 +186,14 @@
         "questStarted:prologue_sior",
         "hasTag:sior_step_2"
       ],
-      "Dialog": "Varyon, c\u0027est un autre monde. Immense, hostile, et dont on ne connaît encore qu\u0027une infime partie. On y envoie régulièrement des expéditions pour explorer ses ruines et rapporter ce qu\u0027elles trouvent, des cristaux, des vestiges, et parfois des choses qu\u0027on ne sait toujours pas expliquer.",
+      "Dialog": "Varyon, c'est un autre monde. Immense, hostile, et dont on ne connaît encore qu'une infime partie. On y envoie régulièrement des expéditions pour explorer ses ruines et rapporter ce qu'elles trouvent, des cristaux, des vestiges, et parfois des choses qu'on ne sait toujours pas expliquer.",
       "DialogWidth": "Mid",
       "Objectives": [
         "text:Écouter Sior"
       ],
       "Responses": [
         {
-          "Text": "Et c\u0027est sans danger ?",
+          "Text": "Et c'est sans danger ?",
           "Actions": [
             "removeTag:sior_step_2",
             "addTag:sior_step_3",
@@ -113,14 +208,15 @@
       "Requirements": [
         "questNotStarted:prologue_sior"
       ],
-      "Dialog": "Alors, c\u0027est toi le nouvel arrivant. Venim m\u0027a parlé de toi. Il m\u0027a demandé de te faire assister à l\u0027une de nos expériences. Mais avant ça, autant reprendre depuis le début. Ce que tu vois derrière moi est notre seul accès à Varyon.",
+      "LoadActions": [],
+      "Dialog": "Alors, c'est toi le nouvel arrivant. Venim m'a parlé de toi. Il m'a demandé de te faire assister à l'une de nos expériences. Mais avant ça, autant reprendre depuis le début. Ce que tu vois derrière moi est notre seul accès à Varyon.",
       "DialogWidth": "Mid",
       "Objectives": [
         "text:Interroger Sior"
       ],
       "Responses": [
         {
-          "Text": "Varyon, c\u0027est quoi exactement ?",
+          "Text": "Varyon, c'est quoi exactement ?",
           "Requirements": [
             "questNotStarted:prologue_sior"
           ],
@@ -136,7 +232,7 @@
           "BackgroundOpacity": 50
         },
         {
-          "Text": "Et qu\u0027est-ce qu\u0027il y a de l\u0027autre côté ?",
+          "Text": "Et qu'est-ce qu'il y a de l'autre côté ?",
           "Requirements": [
             "questNotStarted:prologue_sior"
           ],
