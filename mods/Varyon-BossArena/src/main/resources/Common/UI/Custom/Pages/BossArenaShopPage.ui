@@ -23,7 +23,7 @@ Group {
 
   Label #TitleLabel {
     Anchor: (Left: 368, Top: 108, Width: 860, Height: 42);
-    Text: "Boss Arena // Tableau des contrats";
+    Text: "Hall des défis";
     Style: (FontSize: 31, TextColor: #f3f7ff, RenderBold: true);
   }
 

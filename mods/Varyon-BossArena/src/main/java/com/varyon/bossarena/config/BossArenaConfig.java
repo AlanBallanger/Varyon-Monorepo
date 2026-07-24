@@ -57,6 +57,61 @@ public final class BossArenaConfig {
         return (safeHours * 60L) + safeMinutes;
     }
 
+    public static long resolveSeconds(long hours, long minutes, long seconds) {
+        long safeHours = Math.max(0L, hours);
+        long safeMinutes = Math.max(0L, minutes);
+        long safeSeconds = Math.max(0L, seconds);
+        return (safeHours * 3600L) + (safeMinutes * 60L) + safeSeconds;
+    }
+
+    public static long resolveIntervalSeconds(long hours, long days, long seconds) {
+        long h = Math.max(0L, hours);
+        long d = Math.max(0L, days);
+        long s = Math.max(0L, seconds);
+        return (d * 86400L) + (h * 3600L) + s;
+    }
+
+    /** Legacy N+unit → seconds. */
+    public static long resolveIntervalSeconds(long every, String unit) {
+        long n = Math.max(0L, every);
+        String u = normalizeIntervalUnit(unit);
+        return switch (u) {
+            case INTERVAL_UNIT_DAY -> n * 86400L;
+            case INTERVAL_UNIT_SECOND -> n;
+            default -> n * 3600L;
+        };
+    }
+
+    public static String normalizeIntervalUnit(String raw) {
+        String value = optional(raw).toUpperCase(Locale.ROOT);
+        if (INTERVAL_UNIT_DAY.equals(value) || "J".equals(value) || "JOUR".equals(value) || "DAYS".equals(value)) {
+            return INTERVAL_UNIT_DAY;
+        }
+        if (INTERVAL_UNIT_SECOND.equals(value) || "S".equals(value) || "SEC".equals(value) || "SECONDS".equals(value)) {
+            return INTERVAL_UNIT_SECOND;
+        }
+        return INTERVAL_UNIT_HOUR;
+    }
+
+    public static String nextIntervalUnit(String raw) {
+        String current = normalizeIntervalUnit(raw);
+        if (INTERVAL_UNIT_HOUR.equals(current)) {
+            return INTERVAL_UNIT_DAY;
+        }
+        if (INTERVAL_UNIT_DAY.equals(current)) {
+            return INTERVAL_UNIT_SECOND;
+        }
+        return INTERVAL_UNIT_HOUR;
+    }
+
+    public static String intervalUnitLabel(String raw) {
+        return switch (normalizeIntervalUnit(raw)) {
+            case INTERVAL_UNIT_DAY -> "j";
+            case INTERVAL_UNIT_SECOND -> "s";
+            default -> "h";
+        };
+    }
+
     private static String sanitizeItemId(String value, String fallback) {
         if (value == null || value.isBlank()) {
             return fallback;
@@ -261,6 +316,8 @@ public final class BossArenaConfig {
         out.put("$Boss / {Boss}", "Boss display name.");
         out.put("$Arena / {Arena}", "Arena id/name.");
         out.put("$World / {World}", "World name.");
+        out.put("&0-&f / §0-§f", "Chat color codes (e.g. &6 gold, &c red, &a green).");
+        out.put("&l / &o / &r", "Bold, italic, and reset formatting.");
         return out;
     }
 
@@ -288,9 +345,23 @@ public final class BossArenaConfig {
             clean.enabled = raw.enabled;
             clean.bossId = optional(raw.bossId);
             clean.arenaId = optional(raw.arenaId);
+            clean.scheduleMode = normalizeScheduleMode(raw.scheduleMode);
             clean.spawnIntervalHours = Math.max(0L, raw.spawnIntervalHours);
             clean.spawnIntervalMinutes = Math.max(0L, raw.spawnIntervalMinutes);
-            clean.preventDuplicateWhileAlive = raw.preventDuplicateWhileAlive;
+            clean.spawnIntervalSeconds = Math.max(0L, raw.spawnIntervalSeconds);
+            clean.intervalHours = Math.max(0L, raw.intervalHours);
+            clean.intervalDays = Math.max(0L, raw.intervalDays);
+            clean.intervalSeconds = Math.max(0L, raw.intervalSeconds);
+            clean.intervalEvery = Math.max(0L, raw.intervalEvery);
+            clean.intervalUnit = normalizeIntervalUnit(raw.intervalUnit);
+            clean.arrivalWindowHours = Math.max(0L, raw.arrivalWindowHours);
+            clean.arrivalWindowMinutes = Math.max(0L, raw.arrivalWindowMinutes);
+            clean.arrivalWindowSeconds = Math.max(0L, raw.arrivalWindowSeconds);
+            clean.fixedTimes = sanitizeFixedTimes(raw.fixedTimes);
+            clean.oneShot = false;
+            clean.requirePlayerInRadius = raw.requirePlayerInRadius;
+            clean.minPlayers = Math.max(1, raw.minPlayers);
+            clean.preventDuplicateWhileAlive = true;
             clean.despawnAfterHours = Math.max(0L, raw.despawnAfterHours);
             clean.despawnAfterMinutes = Math.max(0L, raw.despawnAfterMinutes);
             clean.announceWorldWide = raw.announceWorldWide;
@@ -303,15 +374,113 @@ public final class BossArenaConfig {
                 clean.worldAnnouncementText = DEFAULT_TIMED_ANNOUNCEMENT_TEXT;
             }
 
-            long intervalMinutes = resolveMinutes(clean.spawnIntervalHours, clean.spawnIntervalMinutes);
-            if (intervalMinutes <= 0L) {
-                clean.spawnIntervalHours = 1L;
-                clean.spawnIntervalMinutes = 0L;
+            // Legacy FIXED_TIMES créneaux → 1 jour.
+            String rawMode = optional(raw.scheduleMode).toUpperCase(Locale.ROOT);
+            boolean legacyFixed = SCHEDULE_FIXED_TIMES.equals(rawMode)
+                    || "FIXED".equals(rawMode)
+                    || "HEURES".equals(rawMode)
+                    || "CLOCK".equals(rawMode);
+            if (legacyFixed
+                    && clean.intervalHours <= 0L
+                    && clean.intervalDays <= 0L
+                    && clean.intervalSeconds <= 0L
+                    && clean.intervalEvery <= 0L) {
+                clean.scheduleMode = SCHEDULE_INTERVAL;
+                clean.intervalDays = 1L;
+            }
+
+            // Legacy N + unité → h/j/s.
+            if (resolveIntervalSeconds(clean.intervalHours, clean.intervalDays, clean.intervalSeconds) <= 0L
+                    && clean.intervalEvery > 0L) {
+                String u = normalizeIntervalUnit(clean.intervalUnit);
+                if (INTERVAL_UNIT_DAY.equals(u)) {
+                    clean.intervalDays = clean.intervalEvery;
+                } else if (INTERVAL_UNIT_SECOND.equals(u)) {
+                    clean.intervalSeconds = clean.intervalEvery;
+                } else {
+                    clean.intervalHours = clean.intervalEvery;
+                }
+            }
+
+            if (clean.isAfterDeathMode()) {
+                long totalSeconds = resolveSeconds(
+                        clean.spawnIntervalHours,
+                        clean.spawnIntervalMinutes,
+                        clean.spawnIntervalSeconds
+                );
+                if (totalSeconds <= 0L) {
+                    clean.spawnIntervalHours = 1L;
+                    clean.spawnIntervalMinutes = 0L;
+                    clean.spawnIntervalSeconds = 0L;
+                }
+            } else {
+                clean.scheduleMode = SCHEDULE_INTERVAL;
+                if (resolveIntervalSeconds(clean.intervalHours, clean.intervalDays, clean.intervalSeconds) <= 0L) {
+                    clean.intervalHours = 1L;
+                    clean.intervalDays = 0L;
+                    clean.intervalSeconds = 0L;
+                }
             }
 
             out.add(clean);
         }
         return out;
+    }
+
+    private static String normalizeScheduleMode(String raw) {
+        String value = optional(raw).toUpperCase(Locale.ROOT);
+        if (SCHEDULE_INTERVAL.equals(value)
+                || SCHEDULE_FIXED_TIMES.equals(value)
+                || "FIXED".equals(value)
+                || "HEURES".equals(value)
+                || "CLOCK".equals(value)
+                || "INTERVALLE".equals(value)) {
+            return SCHEDULE_INTERVAL;
+        }
+        return SCHEDULE_AFTER_DEATH;
+    }
+
+    private static List<String> sanitizeFixedTimes(List<String> source) {
+        List<String> out = new ArrayList<>();
+        if (source == null || source.isEmpty()) {
+            return out;
+        }
+        for (String raw : source) {
+            String normalized = normalizeFixedTime(raw);
+            if (normalized.isEmpty()) {
+                continue;
+            }
+            if (!out.contains(normalized)) {
+                out.add(normalized);
+            }
+        }
+        out.sort(String::compareTo);
+        return out;
+    }
+
+    /** Accepts "15:00", "15h00", "15". Returns "HH:MM" or empty if invalid. */
+    public static String normalizeFixedTime(String raw) {
+        String value = optional(raw).toLowerCase(Locale.ROOT).replace('h', ':').replace('.', ':');
+        if (value.isEmpty()) {
+            return "";
+        }
+        String[] parts = value.split(":");
+        try {
+            int hour;
+            int minute = 0;
+            if (parts.length == 1) {
+                hour = Integer.parseInt(parts[0].trim());
+            } else {
+                hour = Integer.parseInt(parts[0].trim());
+                minute = Integer.parseInt(parts[1].trim());
+            }
+            if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                return "";
+            }
+            return String.format(Locale.ROOT, "%02d:%02d", hour, minute);
+        } catch (NumberFormatException ex) {
+            return "";
+        }
     }
 
     private static String optional(String value) {
@@ -434,22 +603,72 @@ public final class BossArenaConfig {
         public String nameTemplate = DEFAULT_TIMED_MAP_MARKER_NAME_TEMPLATE;
     }
 
+    public static final String SCHEDULE_AFTER_DEATH = "AFTER_DEATH";
+    public static final String SCHEDULE_INTERVAL = "INTERVAL";
+    /** Legacy alias; sanitized to {@link #SCHEDULE_INTERVAL}. */
+    public static final String SCHEDULE_FIXED_TIMES = "FIXED_TIMES";
+    public static final String INTERVAL_UNIT_HOUR = "HOUR";
+    public static final String INTERVAL_UNIT_DAY = "DAY";
+    public static final String INTERVAL_UNIT_SECOND = "SECOND";
+
     public static final class TimedBossSpawn {
         public String id = "";
         public boolean enabled = true;
         public String bossId = "";
         public String arenaId = "";
+        /** {@link BossArenaConfig#SCHEDULE_AFTER_DEATH} or {@link BossArenaConfig#SCHEDULE_INTERVAL}. */
+        public String scheduleMode = SCHEDULE_AFTER_DEATH;
+        /** Delay after death. Used when scheduleMode is AFTER_DEATH. */
         public long spawnIntervalHours = 1L;
         public long spawnIntervalMinutes = 0L;
+        public long spawnIntervalSeconds = 0L;
+        /** Interval recurrence after each spawn: hours + days + seconds. */
+        public long intervalHours = 1L;
+        public long intervalDays = 0L;
+        public long intervalSeconds = 0L;
+        /** Legacy single-value interval (migrated into h/j/s). */
+        public long intervalEvery = 0L;
+        /** Legacy unit HOUR/DAY/SECOND (migrated). */
+        public String intervalUnit = INTERVAL_UNIT_HOUR;
+        /**
+         * Planifié only: max time after the scheduled spawn for a player to reach the arena (Rayon Décl).
+         * If nobody arrives in time, this spawn is skipped until the next interval.
+         */
+        public long arrivalWindowHours = 0L;
+        public long arrivalWindowMinutes = 15L;
+        public long arrivalWindowSeconds = 0L;
+        /** Legacy FIXED_TIMES slots (ignored). */
+        public List<String> fixedTimes = new ArrayList<>();
+        /** Legacy one-shot flag (ignored). */
+        public boolean oneShot = false;
+        /** Wait until a player is within the arena Rayon Décl before spawning. */
+        public boolean requirePlayerInRadius = false;
+        /** Minimum players online in the arena world required before spawn (default 1). */
+        public int minPlayers = 1;
         public boolean preventDuplicateWhileAlive = true;
         public long despawnAfterHours = 0L;
-        public long despawnAfterMinutes = 0L;
+        public long despawnAfterMinutes = 5L;
         // Legacy key: server-wide announcement across all worlds.
         public boolean announceWorldWide = false;
         // Optional world-only announcement for players in the spawned world.
         public boolean announceCurrentWorld = false;
         // Optional custom message for global announcement.
         public String worldAnnouncementText = DEFAULT_TIMED_ANNOUNCEMENT_TEXT;
+
+        public boolean isIntervalMode() {
+            String mode = optional(scheduleMode);
+            return SCHEDULE_INTERVAL.equalsIgnoreCase(mode) || SCHEDULE_FIXED_TIMES.equalsIgnoreCase(mode);
+        }
+
+        /** @deprecated use {@link #isIntervalMode()} */
+        @Deprecated
+        public boolean isFixedTimesMode() {
+            return isIntervalMode();
+        }
+
+        public boolean isAfterDeathMode() {
+            return !isIntervalMode();
+        }
     }
 
     public static final class PlaceholderDocs {

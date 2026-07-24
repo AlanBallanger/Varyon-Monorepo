@@ -123,7 +123,7 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
                     event.activeAddCount,
                     event.awaitingPrimaryBossSpawn ? "Preparing encounter" : null,
                     event.remainingCountdownMillis,
-                    true,
+                    event.awaitingPrimaryBossSpawn || event.aliveBossCount > 0 || event.activeAddCount > 0,
                     true,
                     notificationRadius
             );

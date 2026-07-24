@@ -125,19 +125,6 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
         player.getPageManager().openCustomPage(ref, store, page);
     }
 
-    private static String resolveShopArenaId(BossShopConfig.ShopLocation location,
-                                             String worldName,
-                                             int x,
-                                             int y,
-                                             int z) {
-        String configuredArenaId = optional(location != null ? location.arenaId : null);
-        if (!configuredArenaId.isEmpty()) {
-            return configuredArenaId;
-        }
-        String nearestArenaId = findNearestArenaIdForTable(worldName, x, y, z);
-        return nearestArenaId == null ? "" : nearestArenaId;
-    }
-
     private static List<ShopEntry> resolveLegacyEntriesForTier(BossShopConfig config, String tier) {
         Map<String, ShopEntry> entries = buildEntriesMap(config);
         int visibleSlots = resolveVisibleSlotsForTier(config, entries, tier);
@@ -179,10 +166,10 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
     }
 
     private static Integer findLocationContractCost(BossShopConfig.ShopLocation location, String bossId) {
-        if (location == null || location.contractPrices == null || location.contractPrices.isEmpty() || isBlank(bossId)) {
+        if (location == null || location.contracts == null || location.contracts.isEmpty() || isBlank(bossId)) {
             return null;
         }
-        for (BossShopConfig.ContractPrice entry : location.contractPrices) {
+        for (BossShopConfig.ShopContract entry : location.contracts) {
             if (entry == null || isBlank(entry.bossId)) {
                 continue;
             }
@@ -273,21 +260,38 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
 
     private static String buildCostText(int cost, String currencyItemId, String provider) {
         if (cost <= 0) {
-            return "Price: Free";
+            return "Prix : Gratuit";
         }
         if (ShopCurrencySupport.PROVIDER_HYMARKET.equals(provider)) {
-            return "Price: " + ShopCurrencySupport.formatHyMarketCost(cost);
+            return "Prix : " + ShopCurrencySupport.formatHyMarketCost(cost);
         }
         if (ShopCurrencySupport.PROVIDER_ECOTALE.equals(provider)) {
-            return "Price: " + ShopCurrencySupport.formatEcotaleCost(cost);
+            return "Prix : " + ShopCurrencySupport.formatEcotaleCost(cost);
         }
         if (ShopCurrencySupport.PROVIDER_ECONOMY_SYSTEM.equals(provider)) {
-            return "Price: " + ShopCurrencySupport.formatEconomySystemCost(cost);
+            return "Prix : " + ShopCurrencySupport.formatEconomySystemCost(cost);
         }
         if (currencyItemId == null || currencyItemId.isBlank()) {
-            return "Price: " + cost;
+            return "Prix : " + cost;
         }
-        return "Price: " + cost + " " + ItemNameResolver.resolveCommonName(currencyItemId);
+        return "Prix : " + cost + " " + ItemNameResolver.resolveCommonName(currencyItemId);
+    }
+
+    @Nonnull
+    private String resolveVendorDisplayName() {
+        BossShopConfig config = plugin != null ? plugin.getShopConfig() : null;
+        if (config != null
+                && tableWorldName != null
+                && !tableWorldName.isBlank()
+                && tableX != null
+                && tableY != null
+                && tableZ != null) {
+            BossShopConfig.ShopLocation location = config.getShopLocation(tableWorldName, tableX, tableY, tableZ);
+            if (location != null && location.name != null && !location.name.isBlank()) {
+                return location.name.trim();
+            }
+        }
+        return "Vendeur";
     }
 
     private static ShopEntry normalizeEntry(ShopEntry source, String tier, int slot) {
@@ -342,7 +346,7 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
         String currencyItemId = ShopCurrencySupport.PROVIDER_ITEM.equals(effectiveCurrencyProvider)
                 ? resolveItemCurrencyItemId()
                 : null;
-        cmd.set("#TitleLabel.Text", "Boss Arena // Tableau des contrats élite");
+        cmd.set("#TitleLabel.Text", "Hall des défis de " + resolveVendorDisplayName());
         cmd.set("#SubtitleLabel.Text", "Choisissez un rang et invoquez un boss");
 
         events.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton", EventData.of("Action", "close"));
@@ -476,11 +480,13 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
 
         if (tableWorldName != null && tableX != null && tableY != null && tableZ != null) {
             BossShopConfig.ShopLocation location = config.getShopLocation(tableWorldName, tableX, tableY, tableZ);
-            if (location != null && location.enabledBossIds != null) {
-                String tableArenaId = resolveShopArenaId(location, tableWorldName, tableX, tableY, tableZ);
+            if (location != null && location.contracts != null) {
                 List<ShopEntry> tableEntries = new ArrayList<>();
-                for (String bossId : location.enabledBossIds) {
-                    BossDefinition boss = BossRegistry.get(bossId);
+                for (BossShopConfig.ShopContract contract : location.contracts) {
+                    if (contract == null || isBlank(contract.bossId) || isBlank(contract.arenaId)) {
+                        continue;
+                    }
+                    BossDefinition boss = BossRegistry.get(contract.bossId);
                     if (boss == null) {
                         continue;
                     }
@@ -490,39 +496,19 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
                     }
 
                     ShopEntry configured = findConfiguredEntry(config.entries, boss.bossName, tier);
-                    Integer locationCost = findLocationContractCost(location, boss.bossName);
-                    if (locationCost == null) {
-                        locationCost = findLocationContractCost(location, bossId);
-                    }
-                    Integer configuredCost = configured != null ? Math.max(0, configured.cost) : null;
-                    boolean missingConfiguredCost = locationCost == null && configuredCost == null;
                     ShopEntry out = new ShopEntry();
                     out.enabled = true;
                     out.tier = tier;
                     out.slot = tableEntries.size() + 1;
                     out.bossId = boss.bossName;
-                    out.arenaId = tableArenaId;
-                    if (locationCost != null) {
-                        out.cost = locationCost;
-                    } else if (configuredCost != null) {
-                        out.cost = configuredCost;
-                    } else if (isStrictContractPricing(config)) {
-                        out.cost = 0;
-                        out.enabled = false;
-                    } else {
-                        out.cost = defaultCostForTier(tier);
-                    }
+                    out.arenaId = contract.arenaId.trim();
+                    out.cost = Math.max(0, contract.cost);
                     out.displayName = configured != null && !isBlank(configured.displayName)
                             ? configured.displayName
                             : boss.bossName;
                     out.description = configured != null && !isBlank(configured.description)
                             ? configured.description
-                            : (isBlank(out.arenaId)
-                            ? "Invoquer " + boss.bossName + ". Configurez l'arène boutique dans /ba config."
-                            : "Invoquer " + boss.bossName + " à " + out.arenaId);
-                    if (missingConfiguredCost && isStrictContractPricing(config)) {
-                        out.description = "Définissez le prix dans mods/Varyon-BossArena/shop.json shops[].contractPrices[] pour " + boss.bossName + ".";
-                    }
+                            : ("Invoquer " + boss.bossName + " à " + out.arenaId);
                     out.icon = configured != null ? configured.icon : "";
 
                     tableEntries.add(out);

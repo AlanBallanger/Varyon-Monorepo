@@ -11,6 +11,8 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -23,14 +25,15 @@ public final class BossWaveNotificationService {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
     private static final double DEFAULT_NOTIFY_RADIUS = 100.0d;
     private static final float TRANSIENT_DURATION_SECONDS = 3.0f;
-    private static final float PERSISTENT_DURATION_SECONDS = 999.0f;
+    /** Slightly above the 1s HUD refresh so the banner fades soon after the event stops updating. */
+    private static final float PERSISTENT_DURATION_SECONDS = 2.5f;
     private static final float FINAL_CLEAR_DURATION_SECONDS = 8.0f;
     private static final float WORLD_ALERT_DURATION_SECONDS = 10.0f;
     private static final long WORLD_ALERT_DURATION_MILLIS = (long) (WORLD_ALERT_DURATION_SECONDS * 1000f);
     private static final Map<UUID, Long> TIMED_ALERT_SUPPRESS_UNTIL = new ConcurrentHashMap<>();
     private static final Pattern PLACEHOLDER_PATTERN =
             Pattern.compile("\\$([A-Za-z][A-Za-z0-9_]*)|\\{([A-Za-z][A-Za-z0-9_]*)\\}");
-    private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("([§&])([0-9a-fA-FrR])");
+    private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("([§&])([0-9a-fA-FrRlLoOkKmMnN])");
 
     private BossWaveNotificationService() {
     }
@@ -262,7 +265,7 @@ public final class BossWaveNotificationService {
             }
             suppressLocalStatusTitles(playerRef);
             try {
-                playerRef.sendMessage(Message.raw(chatMessage));
+                playerRef.sendMessage(toColoredMessage(chatMessage));
             } catch (Exception e) {
                 LOGGER.fine(() -> "Failed to send timed global alert chat message: " + e.getMessage());
             }
@@ -505,5 +508,95 @@ public final class BossWaveNotificationService {
             return null;
         }
         return Message.raw(text);
+    }
+
+    /**
+     * Builds a chat {@link Message} that applies Minecraft-style {@code &} / {@code §} codes:
+     * colors {@code 0-9a-f}, bold {@code &l}, italic {@code &o}, reset {@code &r}.
+     */
+    static Message toColoredMessage(String text) {
+        if (text == null || text.isEmpty()) {
+            return Message.raw("");
+        }
+        String normalized = text.replace('§', '&');
+        if (!normalized.contains("&")) {
+            return Message.raw(normalized);
+        }
+        List<Message> parts = new ArrayList<>();
+        String currentHex = null;
+        boolean bold = false;
+        boolean italic = false;
+        String[] chunks = normalized.split("(?=&[0-9a-fk-orA-FK-OR])");
+        for (String chunk : chunks) {
+            if (chunk.isEmpty()) {
+                continue;
+            }
+            if (chunk.length() < 2 || chunk.charAt(0) != '&') {
+                parts.add(applyStyle(Message.raw(chunk), currentHex, bold, italic));
+                continue;
+            }
+            char code = Character.toLowerCase(chunk.charAt(1));
+            String content = chunk.substring(2);
+            if (code == 'l') {
+                bold = true;
+            } else if (code == 'o') {
+                italic = true;
+            } else if (code == 'r') {
+                currentHex = null;
+                bold = false;
+                italic = false;
+            } else {
+                String hex = hexFromLegacyColorCode(code);
+                if (hex != null) {
+                    currentHex = hex;
+                }
+            }
+            if (!content.isEmpty()) {
+                parts.add(applyStyle(Message.raw(content), currentHex, bold, italic));
+            }
+        }
+        if (parts.isEmpty()) {
+            return Message.raw("");
+        }
+        if (parts.size() == 1) {
+            return parts.get(0);
+        }
+        return Message.join(parts.toArray(new Message[0]));
+    }
+
+    private static Message applyStyle(Message message, String hex, boolean bold, boolean italic) {
+        Message out = message;
+        if (hex != null && !hex.isEmpty()) {
+            out = out.color(hex);
+        }
+        if (bold) {
+            out = out.bold(true);
+        }
+        if (italic) {
+            out = out.italic(true);
+        }
+        return out;
+    }
+
+    private static String hexFromLegacyColorCode(char code) {
+        return switch (code) {
+            case '0' -> "#000000";
+            case '1' -> "#0000AA";
+            case '2' -> "#00AA00";
+            case '3' -> "#00AAAA";
+            case '4' -> "#AA0000";
+            case '5' -> "#AA00AA";
+            case '6' -> "#FFAA00";
+            case '7' -> "#AAAAAA";
+            case '8' -> "#555555";
+            case '9' -> "#5555FF";
+            case 'a' -> "#55FF55";
+            case 'b' -> "#55FFFF";
+            case 'c' -> "#FF5555";
+            case 'd' -> "#FF55FF";
+            case 'e' -> "#FFFF55";
+            case 'f' -> "#FFFFFF";
+            default -> null;
+        };
     }
 }

@@ -15,7 +15,17 @@ public class Arena {
      * Optional distance (blocks) within which players are eligible for loot when a boss dies
      * at this arena. When &lt;= 0, BossArena falls back to the boss loot table radius.
      */
-    public double lootRadius = 0.0d;
+    /** Loot eligibility radius (blocks). Default 30 for new arenas. Values &lt;= 0 fall back to boss loot table. */
+    public double lootRadius = 30.0d;
+    /**
+     * Legacy: ignored at runtime. Proximity gating is configured per planification rule
+     * ({@code requirePlayerInRadius}) using {@link #proximityRadius}.
+     */
+    public boolean proximityEnabled = false;
+    /** Distance (blocks) used when a planification rule has "Attendre joueur" enabled. */
+    public double proximityRadius = 0.0d;
+    /** Legacy: ignored at runtime (respawn delay lives on planification rules). */
+    public long proximityCooldownSeconds = 60L;
 
     // For GSON
     public Arena() {}
@@ -43,6 +53,31 @@ public class Arena {
             return 0.0d;
         }
         return lootRadius;
+    }
+
+    /** Returns proximity radius in blocks. Values &lt;= 0 mean proximity spawning is disabled. */
+    public double getProximityRadius() {
+        if (!Double.isFinite(proximityRadius) || proximityRadius <= 0.0d) {
+            return 0.0d;
+        }
+        return proximityRadius;
+    }
+
+    /** Returns the proximity cooldown in seconds, clamped to a sane range. Non-positive values fall back to the default. */
+    public long getProximityCooldownSeconds(long defaultSeconds) {
+        long value = proximityCooldownSeconds;
+        if (value <= 0L) {
+            value = defaultSeconds;
+        }
+        long min = 1L;
+        long max = 7L * 24L * 60L * 60L;
+        if (value < min) {
+            value = min;
+        }
+        if (value > max) {
+            value = max;
+        }
+        return value;
     }
 
     /**

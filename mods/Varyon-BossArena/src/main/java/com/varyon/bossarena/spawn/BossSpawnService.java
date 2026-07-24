@@ -129,29 +129,20 @@ public final class BossSpawnService {
         return Math.max(0L, Math.round(seconds * 1000.0d));
     }
 
+    /**
+     * Proximity is now driven by the arena being spawned into ({@code arenaId}). When that arena has
+     * proximity enabled with a positive radius, a player must be within range of the arena center.
+     */
     private static boolean isProximitySatisfiedForSpawn(World world, String arenaId, BossDefinition def) {
-        if (world == null || def == null || def.extraMobs == null) {
+        if (world == null || arenaId == null || arenaId.isBlank()) {
             return true;
         }
-        def.extraMobs.sanitize();
-        if (!def.extraMobs.timedProximityEnabled) {
+        Arena arena = ArenaRegistry.get(arenaId.trim());
+        if (arena == null || !arena.proximityEnabled) {
             return true;
         }
-        double radius = def.extraMobs.getTimedProximityRadius();
+        double radius = arena.getProximityRadius();
         if (radius <= 0.0d) {
-            return true;
-        }
-        String configuredArenaId = def.extraMobs.timedProximityArenaId != null
-                ? def.extraMobs.timedProximityArenaId.trim()
-                : "";
-        String proximityArenaId = !configuredArenaId.isEmpty() ? configuredArenaId : (arenaId != null ? arenaId : "");
-        if (proximityArenaId.isEmpty()) {
-            return true;
-        }
-        Arena arena = ArenaRegistry.get(proximityArenaId);
-        if (arena == null) {
-            LOGGER.warning("Proximity spawn for boss '" + def.bossName + "' references missing arena '" + proximityArenaId + "'. "
-                    + "Spawning without proximity gating.");
             return true;
         }
         Vector3d center = arena.getPosition();
@@ -251,13 +242,11 @@ public final class BossSpawnService {
             return null;
         }
 
-        // Only run proximity check when not bypassed (e.g. command spawn) and boss has proximity enabled.
-        if (!ignoreProximity && def.extraMobs != null && def.extraMobs.timedProximityEnabled) {
-            if (!isProximitySatisfiedForSpawn(world, arenaId, def)) {
-                LOGGER.info("Proximity spawn conditions not met for boss '" + def.bossName
-                        + "' at arena '" + arenaId + "'. Spawn deferred/blocked.");
-                return null;
-            }
+        // Only run proximity check when not bypassed (e.g. command spawn). Proximity is driven by the target arena.
+        if (!ignoreProximity && !isProximitySatisfiedForSpawn(world, arenaId, def)) {
+            LOGGER.info("Proximity spawn conditions not met for boss '" + def.bossName
+                    + "' at arena '" + arenaId + "'. Spawn deferred/blocked.");
+            return null;
         }
 
         LOGGER.info("Attempting to spawn boss '" + def.bossName + "' at position: " + spawnPos);

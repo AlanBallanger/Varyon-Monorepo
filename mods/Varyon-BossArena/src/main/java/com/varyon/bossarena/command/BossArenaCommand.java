@@ -197,8 +197,6 @@ public final class BossArenaCommand extends AbstractCommand {
             }
 
             Store<EntityStore> store = world.getEntityStore().getStore();
-            plugin.bindShopNpcInteraction(store, result.first());
-
             Object uuidCompObj = store.getComponent(result.first(), UUIDComponent.getComponentType());
             UUID spawnedUuid = null;
             if (uuidCompObj instanceof UUIDComponent uuidComp) {
@@ -213,6 +211,7 @@ public final class BossArenaCommand extends AbstractCommand {
                     new Vector3i(x, y, z),
                     spawnedUuid
             );
+            plugin.bindShopNpcInteraction(store, result.first());
             ctx.sendMessage(Message.raw(
                     "Spawned shop NPC (" + shopNpcId + ") at "
                             + x + ", " + y + ", " + z + " in " + world.getName()
@@ -345,6 +344,7 @@ public final class BossArenaCommand extends AbstractCommand {
                 String worldName = world.getName();
 
                 Arena arena = new Arena(arenaId, worldName, position);
+                arena.lootRadius = 30.0d;
                 ArenaRegistry.register(arena);
 
                 plugin.saveArenas().thenRun(() -> {

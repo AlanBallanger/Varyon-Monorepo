@@ -30,7 +30,7 @@ final class BossArenaConfigUiControls {
     private BossArenaConfigUiControls() {}
 
     static void styleOnOffTextButton(@Nonnull UICommandBuilder cmd, @Nonnull String buttonId, boolean enabled) {
-        cmd.set(buttonId + ".Text", enabled ? "Oui" : "Non");
+        cmd.set(buttonId + ".Text", enabled ? "ON" : "OFF");
         styleTextButton(cmd, buttonId, enabled ? ON_BG : OFF_BG, enabled ? ON_HOVER : OFF_HOVER);
     }
 

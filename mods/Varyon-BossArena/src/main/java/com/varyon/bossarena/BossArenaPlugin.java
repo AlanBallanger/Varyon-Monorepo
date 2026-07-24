@@ -62,6 +62,8 @@ import com.hypixel.hytale.server.npc.entities.NPCEntity;
 
 import com.google.gson.*;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -348,6 +350,7 @@ public final class BossArenaPlugin extends JavaPlugin {
         this.timedSpawnScheduler = new BossTimedSpawnScheduler(bossSpawnService, trackingSystem);
         this.timedBossMapMarkerService = new TimedBossMapMarkerService(this, trackingSystem, timedSpawnScheduler);
         this.timedSpawnScheduler.setMapMarkerService(timedBossMapMarkerService);
+        this.timedSpawnScheduler.setOneShotDisableHandler(this::disableTimedRuleOneShot);
 
         DamageChartOpener chartOpener = createDamageChartOpener();
         BossLootHandler.setDamageChartDependencies(damageChartTracker, chartOpener);
@@ -737,7 +740,7 @@ public final class BossArenaPlugin extends JavaPlugin {
                 continue;
             }
 
-            if (bindShopNpcInteractionInternal(store, ref)) {
+            if (bindShopNpcInteractionInternal(store, ref, resolveVendorDisplayName(location))) {
                 rebound++;
             }
 
@@ -807,10 +810,46 @@ public final class BossArenaPlugin extends JavaPlugin {
     }
 
     public void bindShopNpcInteraction(Store<EntityStore> store, Ref<EntityStore> entityRef) {
-        bindShopNpcInteractionInternal(store, entityRef);
+        bindShopNpcInteractionInternal(store, entityRef, resolveVendorDisplayNameNear(store, entityRef));
     }
 
-    private boolean bindShopNpcInteractionInternal(Store<EntityStore> store, Ref<EntityStore> entityRef) {
+    public void bindShopNpcInteraction(Store<EntityStore> store, Ref<EntityStore> entityRef, String vendorName) {
+        bindShopNpcInteractionInternal(store, entityRef, vendorName);
+    }
+
+    public void refreshShopNpcInteractionHint(BossShopConfig.ShopLocation location) {
+        if (location == null || location.worldName == null || location.worldName.isBlank()) {
+            return;
+        }
+        World world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(location.worldName);
+        if (world == null) {
+            return;
+        }
+        Store<EntityStore> store = world.getEntityStore() != null ? world.getEntityStore().getStore() : null;
+        if (store == null) {
+            return;
+        }
+
+        Ref<EntityStore> ref = null;
+        String uuidText = location.uuid != null ? location.uuid.trim() : "";
+        if (!uuidText.isEmpty()) {
+            try {
+                ref = world.getEntityRef(UUID.fromString(uuidText));
+            } catch (IllegalArgumentException ignored) {
+                // fall back to proximity lookup
+            }
+        }
+        if (ref == null) {
+            ref = findShopNpcRefNearLocation(store, location, resolveShopNpcId());
+        }
+        if (ref != null) {
+            bindShopNpcInteractionInternal(store, ref, resolveVendorDisplayName(location));
+        }
+    }
+
+    private boolean bindShopNpcInteractionInternal(Store<EntityStore> store,
+                                                     Ref<EntityStore> entityRef,
+                                                     String vendorName) {
         if (store == null || entityRef == null) {
             return false;
         }
@@ -820,11 +859,55 @@ public final class BossArenaPlugin extends JavaPlugin {
             return false;
         }
 
+        String displayName = vendorName != null && !vendorName.isBlank()
+                ? vendorName.trim()
+                : resolveVendorDisplayNameNear(store, entityRef);
+
         store.ensureComponent(entityRef, Interactable.getComponentType());
         Interactions interactions = store.ensureAndGetComponent(entityRef, Interactions.getComponentType());
         interactions.setInteractionId(InteractionType.Use, SHOP_OPEN_INTERACTION_ID);
-        interactions.setInteractionHint("open Boss Arena Shop");
+        interactions.setInteractionHint("Parle au vendeur " + displayName);
         return true;
+    }
+
+    @Nonnull
+    private static String resolveVendorDisplayName(@Nullable BossShopConfig.ShopLocation location) {
+        if (location != null && location.name != null && !location.name.isBlank()) {
+            return location.name.trim();
+        }
+        return "Vendeur";
+    }
+
+    @Nonnull
+    private String resolveVendorDisplayNameNear(Store<EntityStore> store, Ref<EntityStore> entityRef) {
+        if (store == null || entityRef == null || shopConfig == null || shopConfig.shops == null) {
+            return "Vendeur";
+        }
+        Object transformObj = store.getComponent(entityRef, TransformComponent.getComponentType());
+        if (!(transformObj instanceof TransformComponent transform)) {
+            return "Vendeur";
+        }
+        org.joml.Vector3d pos = transform.getPosition();
+        int x = (int) Math.floor(pos.x);
+        int y = (int) Math.floor(pos.y);
+        int z = (int) Math.floor(pos.z);
+
+        BossShopConfig.ShopLocation best = null;
+        double bestDistSq = Double.MAX_VALUE;
+        for (BossShopConfig.ShopLocation location : shopConfig.shops) {
+            if (location == null) {
+                continue;
+            }
+            double dx = location.x - x;
+            double dy = location.y - y;
+            double dz = location.z - z;
+            double distSq = (dx * dx) + (dy * dy) + (dz * dz);
+            if (distSq <= (SHOP_NPC_SEARCH_RADIUS_BLOCKS * SHOP_NPC_SEARCH_RADIUS_BLOCKS) && distSq < bestDistSq) {
+                bestDistSq = distSq;
+                best = location;
+            }
+        }
+        return resolveVendorDisplayName(best);
     }
 
     private String resolveShopNpcId() {
@@ -902,6 +985,11 @@ public final class BossArenaPlugin extends JavaPlugin {
 
             reloadBossDefinitions().thenRun(() -> {
                 reloadArenas().thenRun(() -> {
+                    if (BossDefinition.migrateProximityToArenas()) {
+                        saveBossDefinitions();
+                        saveArenas();
+                        getLogger().atInfo().log("Migrated legacy boss proximity settings onto arenas.");
+                    }
                     refreshTimedBossSpawns();
                     if (timedBossMapMarkerService != null) {
                         timedBossMapMarkerService.registerForAllWorlds();
@@ -1059,7 +1147,7 @@ public final class BossArenaPlugin extends JavaPlugin {
             );
 
             if (result != null) {
-                bindShopNpcInteraction(world.getEntityStore().getStore(), result.first());
+                bindShopNpcInteraction(world.getEntityStore().getStore(), result.first(), resolveVendorDisplayName(location));
                 Object uuidObj = world.getEntityStore().getStore().getComponent(result.first(), UUIDComponent.getComponentType());
                 if (uuidObj instanceof UUIDComponent uuidComp) {
                     location.uuid = uuidComp.getUuid() != null ? uuidComp.getUuid().toString() : "";
@@ -1211,6 +1299,34 @@ public final class BossArenaPlugin extends JavaPlugin {
         if (timedBossMapMarkerService != null) {
             timedBossMapMarkerService.registerForAllWorlds();
         }
+    }
+
+    private void disableTimedRuleOneShot(BossArenaConfig.TimedBossSpawn match) {
+        if (config == null || match == null) {
+            return;
+        }
+        String bossId = match.bossId == null ? "" : match.bossId.trim();
+        String arenaId = match.arenaId == null ? "" : match.arenaId.trim();
+        List<BossArenaConfig.TimedBossSpawn> rows = config.getTimedBossSpawns();
+        boolean changed = false;
+        for (BossArenaConfig.TimedBossSpawn rule : rows) {
+            if (rule == null || !rule.enabled || !rule.isFixedTimesMode()) {
+                continue;
+            }
+            String ruleBoss = rule.bossId == null ? "" : rule.bossId.trim();
+            String ruleArena = rule.arenaId == null ? "" : rule.arenaId.trim();
+            if (bossId.equalsIgnoreCase(ruleBoss) && arenaId.equalsIgnoreCase(ruleArena)) {
+                rule.enabled = false;
+                changed = true;
+                break;
+            }
+        }
+        if (!changed) {
+            return;
+        }
+        config.timedBossSpawns = rows;
+        config.save();
+        refreshTimedBossSpawns();
     }
 
     public BossTimedSpawnScheduler getTimedSpawnScheduler() {

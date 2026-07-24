@@ -16,6 +16,43 @@ public class BossDefinition {
     public PerPlayerIncrease perPlayerIncrease = new PerPlayerIncrease();
     public ExtraMobs extraMobs = new ExtraMobs();
 
+    /**
+     * One-time migration of the legacy per-boss timed proximity settings onto arenas.
+     * <p>
+     * For every boss that had proximity enabled with a valid radius and a resolvable arena,
+     * the proximity settings are copied onto that arena (unless the arena already has proximity
+     * enabled), then cleared from the boss. Must be called after both bosses and arenas are loaded.
+     *
+     * @return true when at least one boss was migrated (callers should persist bosses and arenas).
+     */
+    public static boolean migrateProximityToArenas() {
+        boolean migratedAny = false;
+        for (BossDefinition def : BossRegistry.getAll().values()) {
+            if (def == null || def.extraMobs == null) {
+                continue;
+            }
+            ExtraMobs extra = def.extraMobs;
+            if (!extra.timedProximityEnabled) {
+                continue;
+            }
+            double radius = extra.getTimedProximityRadius();
+            String arenaId = extra.timedProximityArenaId == null ? "" : extra.timedProximityArenaId.trim();
+            if (radius > 0.0d && !arenaId.isEmpty()) {
+                Arena arena = ArenaRegistry.get(arenaId);
+                if (arena != null && !arena.proximityEnabled) {
+                    arena.proximityEnabled = true;
+                    arena.proximityRadius = radius;
+                    arena.proximityCooldownSeconds = extra.getTimedProximityCooldownSeconds(60L);
+                }
+            }
+            extra.timedProximityEnabled = false;
+            extra.timedProximityArenaId = "";
+            extra.timedProximityRadius = 0.0d;
+            migratedAny = true;
+        }
+        return migratedAny;
+    }
+
     public static class Modifiers {
         public float hp = 1.0f;
         public float damage = 1.0f;

@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
+
 public final class BossShopConfig {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -85,9 +87,11 @@ public final class BossShopConfig {
             normalized.x = entry.x;
             normalized.y = entry.y;
             normalized.z = entry.z;
-            normalized.arenaId = sanitizeArenaId(entry.arenaId);
-            normalized.enabledBossIds = sanitizeBossIds(entry.enabledBossIds);
-            normalized.contractPrices = sanitizeContractPrices(entry.contractPrices);
+            normalized.contracts = resolveContracts(entry);
+            // Legacy fields cleared after migration into contracts.
+            normalized.arenaId = "";
+            normalized.enabledBossIds = new ArrayList<>();
+            normalized.contractPrices = new ArrayList<>();
             if (normalized.name.isEmpty()) {
                 normalized.name = defaultShopName(normalized.uuid, normalized.x, normalized.y, normalized.z);
             }
@@ -191,32 +195,85 @@ public final class BossShopConfig {
             target.y = source.y;
             target.z = source.z;
         }
-        if (optional(target.arenaId).isEmpty() && !optional(source.arenaId).isEmpty()) {
-            target.arenaId = source.arenaId;
+        if ((target.contracts == null || target.contracts.isEmpty())
+                && source.contracts != null && !source.contracts.isEmpty()) {
+            target.contracts = sanitizeContracts(source.contracts);
         }
-        if ((target.enabledBossIds == null || target.enabledBossIds.isEmpty())
-                && source.enabledBossIds != null && !source.enabledBossIds.isEmpty()) {
-            target.enabledBossIds = sanitizeBossIds(source.enabledBossIds);
-        }
-        if ((target.contractPrices == null || target.contractPrices.isEmpty())
-                && source.contractPrices != null && !source.contractPrices.isEmpty()) {
-            target.contractPrices = sanitizeContractPrices(source.contractPrices);
+        if (target.contracts == null || target.contracts.isEmpty()) {
+            List<ShopContract> migrated = resolveContracts(source);
+            if (!migrated.isEmpty()) {
+                target.contracts = migrated;
+            }
         }
 
         if (optional(target.name).isEmpty()) {
             target.name = defaultShopName(target.uuid, target.x, target.y, target.z);
         }
-        target.arenaId = sanitizeArenaId(target.arenaId);
-        if (target.enabledBossIds == null) {
-            target.enabledBossIds = new ArrayList<>();
+        if (target.contracts == null) {
+            target.contracts = new ArrayList<>();
         } else {
-            target.enabledBossIds = sanitizeBossIds(target.enabledBossIds);
+            target.contracts = sanitizeContracts(target.contracts);
         }
-        if (target.contractPrices == null) {
-            target.contractPrices = new ArrayList<>();
-        } else {
-            target.contractPrices = sanitizeContractPrices(target.contractPrices);
+        target.arenaId = "";
+        target.enabledBossIds = new ArrayList<>();
+        target.contractPrices = new ArrayList<>();
+    }
+
+    @Nonnull
+    private static List<ShopContract> resolveContracts(ShopLocation source) {
+        if (source == null) {
+            return new ArrayList<>();
         }
+        List<ShopContract> fromContracts = sanitizeContracts(source.contracts);
+        if (!fromContracts.isEmpty()) {
+            return fromContracts;
+        }
+        return migrateLegacyContracts(source.arenaId, source.enabledBossIds, source.contractPrices);
+    }
+
+    @Nonnull
+    private static List<ShopContract> migrateLegacyContracts(
+            String shopArenaId,
+            List<String> enabledBossIds,
+            List<ContractPrice> contractPrices
+    ) {
+        List<ShopContract> out = new ArrayList<>();
+        String fallbackArena = sanitizeArenaId(shopArenaId);
+        List<String> bosses = sanitizeBossIds(enabledBossIds);
+        List<ContractPrice> prices = sanitizeContractPrices(contractPrices);
+
+        for (String bossId : bosses) {
+            if (bossId == null || bossId.isBlank()) {
+                continue;
+            }
+            int cost = 0;
+            for (ContractPrice price : prices) {
+                if (price != null && bossId.equalsIgnoreCase(optional(price.bossId))) {
+                    cost = Math.max(0, price.cost);
+                    break;
+                }
+            }
+            ShopContract contract = new ShopContract();
+            contract.bossId = bossId;
+            contract.arenaId = fallbackArena;
+            contract.cost = cost;
+            out.add(contract);
+        }
+
+        // Prices for bosses not in enabledBossIds still become contracts when arena is known.
+        if (out.isEmpty() && !prices.isEmpty() && !fallbackArena.isEmpty()) {
+            for (ContractPrice price : prices) {
+                if (price == null || optional(price.bossId).isEmpty()) {
+                    continue;
+                }
+                ShopContract contract = new ShopContract();
+                contract.bossId = optional(price.bossId);
+                contract.arenaId = fallbackArena;
+                contract.cost = Math.max(0, price.cost);
+                out.add(contract);
+            }
+        }
+        return sanitizeContracts(out);
     }
 
     private static String sanitizeArenaId(String source) {
@@ -275,6 +332,44 @@ public final class BossShopConfig {
             }
             ContractPrice clean = new ContractPrice();
             clean.bossId = bossId;
+            clean.cost = Math.max(0, raw.cost);
+            out.add(clean);
+        }
+        return out;
+    }
+
+    @Nonnull
+    private static List<ShopContract> sanitizeContracts(List<ShopContract> source) {
+        List<ShopContract> out = new ArrayList<>();
+        if (source == null || source.isEmpty()) {
+            return out;
+        }
+        for (ShopContract raw : source) {
+            if (raw == null) {
+                continue;
+            }
+            String bossId = optional(raw.bossId);
+            String arenaId = sanitizeArenaId(raw.arenaId);
+            if (bossId.isEmpty()) {
+                continue;
+            }
+            boolean duplicate = false;
+            for (ShopContract existing : out) {
+                if (existing == null) {
+                    continue;
+                }
+                if (bossId.equalsIgnoreCase(optional(existing.bossId))
+                        && arenaId.equalsIgnoreCase(optional(existing.arenaId))) {
+                    duplicate = true;
+                    break;
+                }
+            }
+            if (duplicate) {
+                continue;
+            }
+            ShopContract clean = new ShopContract();
+            clean.bossId = bossId;
+            clean.arenaId = arenaId;
             clean.cost = Math.max(0, raw.cost);
             out.add(clean);
         }
@@ -436,13 +531,40 @@ public final class BossShopConfig {
             return false;
         }
         for (int i = 0; i < left.size(); i++) {
-            ContractPrice l = left.get(i);
-            ContractPrice r = right.get(i);
-            String lb = optional(l != null ? l.bossId : null);
-            String rb = optional(r != null ? r.bossId : null);
-            int lc = l != null ? Math.max(0, l.cost) : 0;
-            int rc = r != null ? Math.max(0, r.cost) : 0;
-            if (!lb.equalsIgnoreCase(rb) || lc != rc) {
+            ContractPrice a = left.get(i);
+            ContractPrice b = right.get(i);
+            if (a == b) {
+                continue;
+            }
+            if (a == null || b == null) {
+                return false;
+            }
+            if (!optional(a.bossId).equalsIgnoreCase(optional(b.bossId)) || a.cost != b.cost) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean shopContractListsEqual(List<ShopContract> left, List<ShopContract> right) {
+        if (left == right) {
+            return true;
+        }
+        if (left == null || right == null || left.size() != right.size()) {
+            return false;
+        }
+        for (int i = 0; i < left.size(); i++) {
+            ShopContract a = left.get(i);
+            ShopContract b = right.get(i);
+            if (a == b) {
+                continue;
+            }
+            if (a == null || b == null) {
+                return false;
+            }
+            if (!optional(a.bossId).equalsIgnoreCase(optional(b.bossId))
+                    || !optional(a.arenaId).equalsIgnoreCase(optional(b.arenaId))
+                    || a.cost != b.cost) {
                 return false;
             }
         }
@@ -687,6 +809,7 @@ public final class BossShopConfig {
             target.arenaId = "";
             target.enabledBossIds = new ArrayList<>();
             target.contractPrices = new ArrayList<>();
+            target.contracts = new ArrayList<>();
             shops.add(target);
             changed = true;
         }
@@ -714,27 +837,15 @@ public final class BossShopConfig {
                 changed = true;
             }
         }
-        target.arenaId = sanitizeArenaId(target.arenaId);
-        if (target.enabledBossIds == null) {
-            target.enabledBossIds = new ArrayList<>();
+
+        List<ShopContract> resolved = resolveContracts(target);
+        if (target.contracts == null || !shopContractListsEqual(resolved, target.contracts)) {
+            target.contracts = resolved;
             changed = true;
-        } else {
-            List<String> cleanedBossIds = sanitizeBossIds(target.enabledBossIds);
-            if (!cleanedBossIds.equals(target.enabledBossIds)) {
-                target.enabledBossIds = cleanedBossIds;
-                changed = true;
-            }
         }
-        if (target.contractPrices == null) {
-            target.contractPrices = new ArrayList<>();
-            changed = true;
-        } else {
-            List<ContractPrice> cleanedContractPrices = sanitizeContractPrices(target.contractPrices);
-            if (!contractPriceListsEqual(cleanedContractPrices, target.contractPrices)) {
-                target.contractPrices = cleanedContractPrices;
-                changed = true;
-            }
-        }
+        target.arenaId = "";
+        target.enabledBossIds = new ArrayList<>();
+        target.contractPrices = new ArrayList<>();
         return changed;
     }
 
@@ -753,17 +864,10 @@ public final class BossShopConfig {
         } else {
             location.name = sanitizeShopName(location.name);
         }
-        location.arenaId = sanitizeArenaId(location.arenaId);
-        if (location.enabledBossIds == null) {
-            location.enabledBossIds = new ArrayList<>();
-        } else {
-            location.enabledBossIds = sanitizeBossIds(location.enabledBossIds);
-        }
-        if (location.contractPrices == null) {
-            location.contractPrices = new ArrayList<>();
-        } else {
-            location.contractPrices = sanitizeContractPrices(location.contractPrices);
-        }
+        location.contracts = resolveContracts(location);
+        location.arenaId = "";
+        location.enabledBossIds = new ArrayList<>();
+        location.contractPrices = new ArrayList<>();
         return location;
     }
 
@@ -858,9 +962,16 @@ public final class BossShopConfig {
         public int x;
         public int y;
         public int z;
+        /** @deprecated Migrated into {@link #contracts}. Kept for Gson load of old shop.json. */
+        @Deprecated
         public String arenaId = "";
+        /** @deprecated Migrated into {@link #contracts}. */
+        @Deprecated
         public List<String> enabledBossIds = new ArrayList<>();
+        /** @deprecated Migrated into {@link #contracts}. */
+        @Deprecated
         public List<ContractPrice> contractPrices = new ArrayList<>();
+        public List<ShopContract> contracts = new ArrayList<>();
 
         @Override
         public String toString() {
@@ -870,6 +981,12 @@ public final class BossShopConfig {
             }
             return worldName + ":" + x + "," + y + "," + z;
         }
+    }
+
+    public static final class ShopContract {
+        public String bossId = "";
+        public String arenaId = "";
+        public int cost = 0;
     }
 
     public static final class ContractPrice {
