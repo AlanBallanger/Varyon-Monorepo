@@ -33,6 +33,7 @@ import com.varyon.varyonui.config.HomeConfig;
 import com.varyon.varyonui.config.TutorielConfig;
 import com.varyon.varyonui.config.VaryonConfig;
 import com.varyon.varyonui.hud.VaryonMenuHud;
+import com.varyon.varyonui.integration.ActivityBubbleBridge;
 import com.varyon.varyonui.integration.CombatProfilBridge;
 import com.varyon.varyonui.integration.DamageNumberBridge;
 import com.varyon.varyonui.integration.EcotaleEconomyBridge;
@@ -301,6 +302,21 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             CustomUIEventBindingType.Activating,
             "#ParametresDmgNumOff",
             EventData.of("Action", "dmgnumtoggle").append("DmgNumToggle", "off")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresActivityBubbleOn",
+            EventData.of("Action", "bbubtoggle").append("ActivityBubbleToggle", "on")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresActivityBubbleOff",
+            EventData.of("Action", "bbubtoggle").append("ActivityBubbleToggle", "off")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresQuestConfigOpen",
+            EventData.of("Action", "command").append("Command", "/qlconfig")
         );
 
         if (isAdmin) {
@@ -575,6 +591,19 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         applyShortcutToggle(commandBuilder, "ParametresMenuTargetVaryon", "ParametresMenuTargetVaryonLabel",
             menuTarget == MenuShortcutTargetConfig.Target.VARYON);
         applyParametresDmgNumAppearance(commandBuilder, uuid);
+        applyParametresActivityBubbleAppearance(commandBuilder, uuid);
+    }
+
+    private static void applyParametresActivityBubbleAppearance(
+            @Nonnull UICommandBuilder commandBuilder,
+            @Nullable UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        applyDualSwitch(commandBuilder,
+            "ParametresActivityBubbleOn", "ParametresActivityBubbleOnLabel",
+            "ParametresActivityBubbleOff", "ParametresActivityBubbleOffLabel",
+            ActivityBubbleBridge.isEnabled(uuid));
     }
 
     private static void applyParametresDmgNumAppearance(
@@ -1362,6 +1391,20 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
                 buildTabBar(commandBuilder, eventBuilder, false, ref);
                 sendUpdate(commandBuilder, eventBuilder, false);
             }
+        } else if ("bbubtoggle".equals(data.action) && data.activityBubbleToggle != null) {
+            PlayerRef playerRefComp = store.getComponent(ref, PlayerRef.getComponentType());
+            if (playerRefComp != null && playerRefComp.getUuid() != null) {
+                boolean wantOn = "on".equals(data.activityBubbleToggle);
+                if (ActivityBubbleBridge.isEnabled(playerRefComp.getUuid()) != wantOn) {
+                    CommandManager.get().handleCommand(playerRefComp, "bbub");
+                    ActivityBubbleBridge.setLocalEnabled(playerRefComp.getUuid(), wantOn);
+                }
+                UICommandBuilder commandBuilder = new UICommandBuilder();
+                UIEventBuilder eventBuilder = new UIEventBuilder();
+                buildContent(commandBuilder, eventBuilder, store, ref);
+                buildTabBar(commandBuilder, eventBuilder, false, ref);
+                sendUpdate(commandBuilder, eventBuilder, false);
+            }
         } else if ("playtimeclaim".equals(data.action)
                 && data.playtimeRewardId != null
                 && !data.playtimeRewardId.isBlank()) {
@@ -1464,6 +1507,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
                 .addField(new KeyedCodec<>("ShortcutMode", Codec.STRING), (entry, s) -> entry.shortcutMode = s, entry -> entry.shortcutMode)
                 .addField(new KeyedCodec<>("MenuShortcutTarget", Codec.STRING), (entry, s) -> entry.menuShortcutTarget = s, entry -> entry.menuShortcutTarget)
                 .addField(new KeyedCodec<>("DmgNumToggle", Codec.STRING), (entry, s) -> entry.dmgNumToggle = s, entry -> entry.dmgNumToggle)
+                .addField(new KeyedCodec<>("ActivityBubbleToggle", Codec.STRING), (entry, s) -> entry.activityBubbleToggle = s, entry -> entry.activityBubbleToggle)
                 .addField(new KeyedCodec<>("PlaytimeRewardId", Codec.STRING), (entry, s) -> entry.playtimeRewardId = s, entry -> entry.playtimeRewardId)
                 .build();
 
@@ -1473,6 +1517,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         public String shortcutMode;
         public String menuShortcutTarget;
         public String dmgNumToggle;
+        public String activityBubbleToggle;
         public String playtimeRewardId;
     }
 }

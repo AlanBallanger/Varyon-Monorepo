@@ -136,7 +136,24 @@ $Sounds = "Sounds.ui";
                   Background: (Color: @SettingRowBg);
                   Padding: (Full: 12);
                   Group #ParametresDisplayBlock {
-                    Anchor: (Left: 0, Right: 0, Height: 4);
+                    LayoutMode: Top;
+                    FlexWeight: 1;
+                    Anchor: (Left: 0, Right: 0);
+
+                    Group #ParametresActivityBubbleRow {
+                      LayoutMode: Left;
+                      Label { FlexWeight: 1; Text: "Bulles d'activite"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
+                      Button #ParametresActivityBubbleOn {
+                        Anchor: (Width: 52, Height: 28, Right: 4);
+                        Style: @SwitchBtnStyle;
+                        Label #ParametresActivityBubbleOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                      Button #ParametresActivityBubbleOff {
+                        Anchor: (Width: 52, Height: 28);
+                        Style: @SwitchBtnStyle;
+                        Label #ParametresActivityBubbleOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                    }
                   }
                 }
               }
@@ -172,6 +189,18 @@ $Sounds = "Sounds.ui";
                         Anchor: (Width: 52, Height: 28);
                         Style: @SwitchBtnStyle;
                         Label #ParametresDmgNumOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                    }
+
+                    Group { Anchor: (Height: 1, Bottom: 12, Top: 12); Background: (Color: #FFFFFF(0.08)); }
+
+                    Group #ParametresQuestConfigRow {
+                      LayoutMode: Left;
+                      Label { FlexWeight: 1; Text: "Configuration quetes"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
+                      Button #ParametresQuestConfigOpen {
+                        Anchor: (Width: 102, Height: 28);
+                        Style: @OptionBtnStyle;
+                        Label #ParametresQuestConfigOpenLabel { Text: "Ouvrir"; Anchor: (Full: 0); Style: (FontSize: 13, TextColor: @SettingMuted, HorizontalAlignment: Center, VerticalAlignment: Center); }
                       }
                     }
                   }
