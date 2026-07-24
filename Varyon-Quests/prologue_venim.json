@@ -32,7 +32,9 @@
       "Name": "{b}Professeur Venim",
       "Requirements": [
         "questStarted:prologue_venim",
-        "hasTag:venim_step_5"
+        "hasTag:venim_step_5",
+        "escortAt:venim:20:58:119:4",
+        "escortPlayerInRange:venim:8"
       ],
       "Dialog": "Déçu ? Non, rassure toi. Si tu t'en étais souvenu, là, j'aurais été surpris.\n\nLa perte de mémoire semble commune à tous ceux qui reviennent ici.\n\nIl va néanmoins falloir te trouver un nom. Pour les registres, les rapports et, accessoirement, pour éviter de t'appeler « sujet numéro je ne sais combien » pendant les prochaines heures.\n\nBon, trêve de bavardages. Nous sommes arrivés. Il est temps de passer à quelques tests.",
       "DialogWidth": "Mid",
@@ -44,6 +46,7 @@
           "Text": "Très bien. Voyons ces fameux tests.",
           "Actions": [
             "removeTag:venim_step_5",
+            "escortStop:venim",
             "completequest:prologue_venim",
             "iconState:Venim:completed"
           ],
@@ -65,7 +68,9 @@
       "Name": "{b}Professeur Venim",
       "Requirements": [
         "questStarted:prologue_venim",
-        "hasTag:venim_step_4"
+        "hasTag:venim_step_4",
+        "escortAt:venim:10:60:123:4",
+        "escortPlayerInRange:venim:8"
       ],
       "Dialog": "C'est justement l'une des questions auxquelles nous essayons de répondre.\n\nNous n'avons pas de date exacte, mais nos estimations sont formelles : tu as vécu il y a plus de mille ans.\n\nBien plus de mille ans, probablement.\n\nEt à ce que je vois, cette information ne réveille aucun souvenir chez toi... intéressant.\n\nTu te souviens au moins de ton nom ?",
       "DialogWidth": "Mid",
@@ -77,7 +82,8 @@
           "Text": "Non, pas vraiment... Vous avez l'air déçu.",
           "Actions": [
             "removeTag:venim_step_4",
-            "addTag:venim_step_5"
+            "addTag:venim_step_5",
+            "escortMove:venim:20:58:119"
           ]
         },
         {
@@ -92,7 +98,9 @@
       "Name": "{b}Professeur Venim",
       "Requirements": [
         "questStarted:prologue_venim",
-        "hasTag:venim_step_3"
+        "hasTag:venim_step_3",
+        "escortAt:venim:11:58:141:4",
+        "escortPlayerInRange:venim:8"
       ],
       "Dialog": "Cela signifie que tu n'es pas le premier.\n\nD'autres sont apparus ici avant toi. Tous sans véritable souvenir de leur ancienne vie, mais avec la même particularité.\n\nVous avez vécu autrefois. Vous êtes morts. Et, pour une raison que nous ne comprenons toujours pas, le sanctuaire vous ramène aujourd'hui parmi les vivants.",
       "DialogWidth": "Mid",
@@ -104,7 +112,8 @@
           "Text": "Mort ?! Depuis combien de temps ?",
           "Actions": [
             "removeTag:venim_step_3",
-            "addTag:venim_step_4"
+            "addTag:venim_step_4",
+            "escortMove:venim:10:60:123"
           ]
         },
         {
@@ -119,7 +128,9 @@
       "Name": "{b}Professeur Venim",
       "Requirements": [
         "questStarted:prologue_venim",
-        "hasTag:venim_step_2"
+        "hasTag:venim_step_2",
+        "escortAt:venim:11:58:153:4",
+        "escortPlayerInRange:venim:8"
       ],
       "Dialog": "Impressionnantes, pas vrai ? Ces stèles étaient déjà là bien avant nous.\n\nNous avons construit ce laboratoire autour du sanctuaire pour les étudier. Mais le sanctuaire lui même... nous ignorons qui l'a bâti, quand, et surtout pourquoi.\n\nNous savons seulement une chose avec certitude : depuis quelque temps, des personnes comme toi y apparaissent. Une à une. Petit à petit.",
       "DialogWidth": "Mid",
@@ -131,7 +142,8 @@
           "Text": "Des personnes comme moi ? Qu'est-ce que ça veut dire ?",
           "Actions": [
             "removeTag:venim_step_2",
-            "addTag:venim_step_3"
+            "addTag:venim_step_3",
+            "escortMove:venim:11:58:141"
           ]
         },
         {
@@ -169,7 +181,9 @@
             "removeTag:venim_step_5",
             "startquest:prologue_venim",
             "iconState:Venim:inprogress",
-            "addTag:venim_step_2"
+            "addTag:venim_step_2",
+            "startEscort:venim:Venim:6:58:152",
+            "escortMove:venim:11:58:153"
           ],
           "Color": "E5BB32",
           "TextColor": "#ffffff",
