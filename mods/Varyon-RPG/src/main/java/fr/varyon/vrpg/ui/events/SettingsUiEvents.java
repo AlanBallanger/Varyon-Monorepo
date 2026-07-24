@@ -7,7 +7,6 @@ import fr.varyon.vrpg.ui.prefs.HudCorner;
 import fr.varyon.vrpg.ui.prefs.HudLayoutHelper;
 import fr.varyon.vrpg.ui.prefs.PlayerUiPreferences;
 import fr.varyon.vrpg.ui.prefs.PlayerUiPreferencesManager;
-import fr.varyon.vrpg.ui.tabs.SettingsTab;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
@@ -56,27 +55,31 @@ public final class SettingsUiEvents {
                 }
             }
             case "classHudOffsetX" -> {
-                if (data.sliderValue == null) return UiEventResult.NONE;
+                int delta = parseDelta(data.delta);
+                if (delta == 0) return UiEventResult.NONE;
                 prefs.classHudOffsetX = HudLayoutHelper.clampClassOffsetX(
-                    SettingsTab.sliderToOffsetX(data.sliderValue), prefs.classHudCorner);
+                    prefs.classHudOffsetX + delta, prefs.classHudCorner);
                 offsetChange = true;
             }
             case "classHudOffsetY" -> {
-                if (data.sliderValue == null) return UiEventResult.NONE;
+                int delta = parseDelta(data.delta);
+                if (delta == 0) return UiEventResult.NONE;
                 prefs.classHudOffsetY = HudLayoutHelper.clampClassOffsetY(
-                    SettingsTab.sliderToOffsetY(data.sliderValue), prefs.classHudCorner);
+                    prefs.classHudOffsetY + delta, prefs.classHudCorner);
                 offsetChange = true;
             }
             case "profHudOffsetX" -> {
-                if (data.sliderValue == null) return UiEventResult.NONE;
+                int delta = parseDelta(data.delta);
+                if (delta == 0) return UiEventResult.NONE;
                 prefs.professionHudOffsetX = HudLayoutHelper.clampProfessionOffsetX(
-                    SettingsTab.sliderToOffsetX(data.sliderValue), prefs.professionHudCorner);
+                    prefs.professionHudOffsetX + delta, prefs.professionHudCorner);
                 offsetChange = true;
             }
             case "profHudOffsetY" -> {
-                if (data.sliderValue == null) return UiEventResult.NONE;
+                int delta = parseDelta(data.delta);
+                if (delta == 0) return UiEventResult.NONE;
                 prefs.professionHudOffsetY = HudLayoutHelper.clampProfessionOffsetY(
-                    SettingsTab.sliderToOffsetY(data.sliderValue), prefs.professionHudCorner);
+                    prefs.professionHudOffsetY + delta, prefs.professionHudCorner);
                 offsetChange = true;
             }
             case "classHudOffsetReset" -> {
@@ -105,6 +108,15 @@ public final class SettingsUiEvents {
             case "skillNotif" -> prefs.skillNotificationsEnabled = enabled;
             case "profSounds" -> prefs.professionSoundsEnabled = enabled;
             default -> {}
+        }
+    }
+
+    private static int parseDelta(String raw) {
+        if (raw == null || raw.isBlank()) return 0;
+        try {
+            return Integer.parseInt(raw.trim());
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 }

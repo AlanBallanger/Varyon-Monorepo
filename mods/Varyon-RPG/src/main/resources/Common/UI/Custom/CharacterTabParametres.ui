@@ -85,34 +85,18 @@ Group {
                 Button #SettingsClassHudPosBL { Anchor: (Width: 92, Height: 26); Style: @CornerBtnStyle; Label #SettingsClassHudPosBLLabel { Text: "Bas gauche"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
               }
 
-              Label { Text: "Décalage"; Anchor: (Bottom: 6); Style: (FontSize: 12, TextColor: @SettingMuted, RenderBold: true); }
+              Label { Text: "Decalage"; Anchor: (Bottom: 6); Style: (FontSize: 12, TextColor: @SettingMuted, RenderBold: true); }
               Group {
                 LayoutMode: Left;
                 Anchor: (Height: 28);
                 Label { Text: "H"; Anchor: (Width: 14); Style: (FontSize: 11, TextColor: @SettingMuted, RenderBold: true, VerticalAlignment: Center); }
-                Label #SettingsClassHudOffsetXValue { Text: "0"; Anchor: (Width: 32); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, VerticalAlignment: Center); }
-                Slider #SettingsClassHudOffsetX {
-                  Value: 200;
-                  Min: 0;
-                  Max: 400;
-                  Step: 1;
-                  Style: $C.@DefaultSliderStyle;
-                  FlexWeight: 1;
-                  Anchor: (Height: 6);
-                }
-                Group { Anchor: (Width: 12); }
+                Button #SettingsClassHudOffsetXMinus { Anchor: (Width: 28, Height: 28, Right: 4); Style: @CornerBtnStyle; Label { Text: "-"; Anchor: (Full: 0); Style: (FontSize: 14, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Label #SettingsClassHudOffsetXValue { Text: "0"; Anchor: (Width: 36); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                Button #SettingsClassHudOffsetXPlus { Anchor: (Width: 28, Height: 28, Right: 12); Style: @CornerBtnStyle; Label { Text: "+"; Anchor: (Full: 0); Style: (FontSize: 14, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
                 Label { Text: "V"; Anchor: (Width: 14); Style: (FontSize: 11, TextColor: @SettingMuted, RenderBold: true, VerticalAlignment: Center); }
-                Label #SettingsClassHudOffsetYValue { Text: "0"; Anchor: (Width: 32); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, VerticalAlignment: Center); }
-                Slider #SettingsClassHudOffsetY {
-                  Value: 300;
-                  Min: 0;
-                  Max: 600;
-                  Step: 1;
-                  Style: $C.@DefaultSliderStyle;
-                  FlexWeight: 1;
-                  Anchor: (Height: 6);
-                }
-                Group { Anchor: (Width: 8); }
+                Button #SettingsClassHudOffsetYMinus { Anchor: (Width: 28, Height: 28, Right: 4); Style: @CornerBtnStyle; Label { Text: "-"; Anchor: (Full: 0); Style: (FontSize: 14, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Label #SettingsClassHudOffsetYValue { Text: "0"; Anchor: (Width: 36); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                Button #SettingsClassHudOffsetYPlus { Anchor: (Width: 28, Height: 28, Right: 8); Style: @CornerBtnStyle; Label { Text: "+"; Anchor: (Full: 0); Style: (FontSize: 14, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
                 Button #SettingsClassHudOffsetReset { Anchor: (Width: 56, Height: 28); Style: @CornerBtnStyle; Label { Text: "Reset"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
               }
             }
@@ -148,34 +132,18 @@ Group {
                 Button #SettingsProfHudPosBL { Anchor: (Width: 92, Height: 26); Style: @CornerBtnStyle; Label #SettingsProfHudPosBLLabel { Text: "Bas gauche"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, HorizontalAlignment: Center, VerticalAlignment: Center); } }
               }
 
-              Label { Text: "Décalage"; Anchor: (Bottom: 6); Style: (FontSize: 12, TextColor: @SettingMuted, RenderBold: true); }
+              Label { Text: "Decalage"; Anchor: (Bottom: 6); Style: (FontSize: 12, TextColor: @SettingMuted, RenderBold: true); }
               Group {
                 LayoutMode: Left;
                 Anchor: (Height: 28);
                 Label { Text: "H"; Anchor: (Width: 14); Style: (FontSize: 11, TextColor: @SettingMuted, RenderBold: true, VerticalAlignment: Center); }
-                Label #SettingsProfHudOffsetXValue { Text: "0"; Anchor: (Width: 32); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, VerticalAlignment: Center); }
-                Slider #SettingsProfHudOffsetX {
-                  Value: 200;
-                  Min: 0;
-                  Max: 400;
-                  Step: 1;
-                  Style: $C.@DefaultSliderStyle;
-                  FlexWeight: 1;
-                  Anchor: (Height: 6);
-                }
-                Group { Anchor: (Width: 12); }
+                Button #SettingsProfHudOffsetXMinus { Anchor: (Width: 28, Height: 28, Right: 4); Style: @CornerBtnStyle; Label { Text: "-"; Anchor: (Full: 0); Style: (FontSize: 14, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Label #SettingsProfHudOffsetXValue { Text: "0"; Anchor: (Width: 36); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                Button #SettingsProfHudOffsetXPlus { Anchor: (Width: 28, Height: 28, Right: 12); Style: @CornerBtnStyle; Label { Text: "+"; Anchor: (Full: 0); Style: (FontSize: 14, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
                 Label { Text: "V"; Anchor: (Width: 14); Style: (FontSize: 11, TextColor: @SettingMuted, RenderBold: true, VerticalAlignment: Center); }
-                Label #SettingsProfHudOffsetYValue { Text: "0"; Anchor: (Width: 32); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, VerticalAlignment: Center); }
-                Slider #SettingsProfHudOffsetY {
-                  Value: 300;
-                  Min: 0;
-                  Max: 600;
-                  Step: 1;
-                  Style: $C.@DefaultSliderStyle;
-                  FlexWeight: 1;
-                  Anchor: (Height: 6);
-                }
-                Group { Anchor: (Width: 8); }
+                Button #SettingsProfHudOffsetYMinus { Anchor: (Width: 28, Height: 28, Right: 4); Style: @CornerBtnStyle; Label { Text: "-"; Anchor: (Full: 0); Style: (FontSize: 14, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
+                Label #SettingsProfHudOffsetYValue { Text: "0"; Anchor: (Width: 36); Style: (FontSize: 11, TextColor: @SettingAccentHud, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                Button #SettingsProfHudOffsetYPlus { Anchor: (Width: 28, Height: 28, Right: 8); Style: @CornerBtnStyle; Label { Text: "+"; Anchor: (Full: 0); Style: (FontSize: 14, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
                 Button #SettingsProfHudOffsetReset { Anchor: (Width: 56, Height: 28); Style: @CornerBtnStyle; Label { Text: "Reset"; Anchor: (Full: 0); Style: (FontSize: 11, TextColor: @SettingInk, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); } }
               }
             }

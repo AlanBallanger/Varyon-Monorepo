@@ -12,7 +12,6 @@ import fr.varyon.vrpg.VaryonRpgPlugin;
 import fr.varyon.vrpg.ui.prefs.HudCorner;
 import fr.varyon.vrpg.ui.prefs.HudLayoutHelper;
 import fr.varyon.vrpg.ui.prefs.PlayerUiPreferences;
-import fr.varyon.vrpg.ui.prefs.PlayerUiPreferencesManager;
 
 import javax.annotation.Nonnull;
 
@@ -30,8 +29,7 @@ public final class SettingsTab {
     private static final String OFF_INACTIVE_BG = "#E74C3C47";
     private static final String ACTIVE_TEXT = "#FFFFFF";
     private static final String INACTIVE_TEXT = "#FFFFFF55";
-    private static final int H_SLIDER_CENTER = 200;
-    private static final int V_SLIDER_CENTER = 300;
+    public static final int OFFSET_STEP = 10;
 
     private SettingsTab() {}
 
@@ -63,10 +61,14 @@ public final class SettingsTab {
         bindCorner(events, "profHud", "#SettingsProfHudPosBR", HudCorner.BOTTOM_RIGHT);
         bindCorner(events, "profHud", "#SettingsProfHudPosBL", HudCorner.BOTTOM_LEFT);
 
-        bindOffsetSlider(events, "#SettingsClassHudOffsetX", "classHudOffsetX");
-        bindOffsetSlider(events, "#SettingsClassHudOffsetY", "classHudOffsetY");
-        bindOffsetSlider(events, "#SettingsProfHudOffsetX", "profHudOffsetX");
-        bindOffsetSlider(events, "#SettingsProfHudOffsetY", "profHudOffsetY");
+        bindOffsetStep(events, "#SettingsClassHudOffsetXMinus", "classHudOffsetX", -OFFSET_STEP);
+        bindOffsetStep(events, "#SettingsClassHudOffsetXPlus", "classHudOffsetX", OFFSET_STEP);
+        bindOffsetStep(events, "#SettingsClassHudOffsetYMinus", "classHudOffsetY", -OFFSET_STEP);
+        bindOffsetStep(events, "#SettingsClassHudOffsetYPlus", "classHudOffsetY", OFFSET_STEP);
+        bindOffsetStep(events, "#SettingsProfHudOffsetXMinus", "profHudOffsetX", -OFFSET_STEP);
+        bindOffsetStep(events, "#SettingsProfHudOffsetXPlus", "profHudOffsetX", OFFSET_STEP);
+        bindOffsetStep(events, "#SettingsProfHudOffsetYMinus", "profHudOffsetY", -OFFSET_STEP);
+        bindOffsetStep(events, "#SettingsProfHudOffsetYPlus", "profHudOffsetY", OFFSET_STEP);
 
         events.addEventBinding(CustomUIEventBindingType.Activating, "#SettingsClassHudOffsetReset",
             EventData.of("Action", "classHudOffsetReset"), false);
@@ -104,10 +106,6 @@ public final class SettingsTab {
         int profOffsetX = HudLayoutHelper.clampProfessionOffsetX(prefs.professionHudOffsetX, prefs.professionHudCorner);
         int profOffsetY = HudLayoutHelper.clampProfessionOffsetY(prefs.professionHudOffsetY, prefs.professionHudCorner);
 
-        ui.set("#SettingsClassHudOffsetX.Value", offsetXToSlider(classOffsetX));
-        ui.set("#SettingsClassHudOffsetY.Value", offsetYToSlider(classOffsetY));
-        ui.set("#SettingsProfHudOffsetX.Value", offsetXToSlider(profOffsetX));
-        ui.set("#SettingsProfHudOffsetY.Value", offsetYToSlider(profOffsetY));
         ui.set("#SettingsClassHudOffsetXValue.TextSpans", Message.raw(String.valueOf(classOffsetX)));
         ui.set("#SettingsClassHudOffsetYValue.TextSpans", Message.raw(String.valueOf(classOffsetY)));
         ui.set("#SettingsProfHudOffsetXValue.TextSpans", Message.raw(String.valueOf(profOffsetX)));
@@ -129,22 +127,6 @@ public final class SettingsTab {
             "#SettingsProfHudPosBL", "#SettingsProfHudPosBLLabel");
     }
 
-    public static int offsetXToSlider(int offsetX) {
-        return H_SLIDER_CENTER + PlayerUiPreferencesManager.clampOffsetX(offsetX);
-    }
-
-    public static int offsetYToSlider(int offsetY) {
-        return V_SLIDER_CENTER + PlayerUiPreferencesManager.clampOffsetY(offsetY);
-    }
-
-    public static int sliderToOffsetX(int sliderValue) {
-        return PlayerUiPreferencesManager.clampOffsetX(sliderValue - H_SLIDER_CENTER);
-    }
-
-    public static int sliderToOffsetY(int sliderValue) {
-        return PlayerUiPreferencesManager.clampOffsetY(sliderValue - V_SLIDER_CENTER);
-    }
-
     private static void bindSwitch(@Nonnull UIEventBuilder events, @Nonnull String id,
                                    @Nonnull String setting, boolean enabled) {
         events.addEventBinding(CustomUIEventBindingType.Activating, id,
@@ -157,9 +139,10 @@ public final class SettingsTab {
             EventData.of("Action", "settingCorner").append("Setting", setting).append("Corner", corner.id()), false);
     }
 
-    private static void bindOffsetSlider(@Nonnull UIEventBuilder events, @Nonnull String sliderId, @Nonnull String action) {
-        events.addEventBinding(CustomUIEventBindingType.ValueChanged, sliderId,
-            EventData.of("Action", action).append("@SliderValue", sliderId + ".Value"), false);
+    private static void bindOffsetStep(@Nonnull UIEventBuilder events, @Nonnull String buttonId,
+                                       @Nonnull String action, int delta) {
+        events.addEventBinding(CustomUIEventBindingType.Activating, buttonId,
+            EventData.of("Action", action).append("Delta", String.valueOf(delta)), false);
     }
 
     private static void applyDualSwitch(@Nonnull UICommandBuilder ui,

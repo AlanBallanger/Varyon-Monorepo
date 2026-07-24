@@ -194,13 +194,13 @@ $Sounds = "Sounds.ui";
 
                     Group { Anchor: (Height: 1, Bottom: 12, Top: 12); Background: (Color: #FFFFFF(0.08)); }
 
-                    Group #ParametresQuestConfigRow {
+                    Group #ParametresRpgSettingsRow {
                       LayoutMode: Left;
-                      Label { FlexWeight: 1; Text: "Configuration quetes"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
-                      Button #ParametresQuestConfigOpen {
+                      Label { FlexWeight: 1; Text: "Parametres classes et metiers"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
+                      Button #ParametresRpgSettingsOpen {
                         Anchor: (Width: 102, Height: 28);
                         Style: @OptionBtnStyle;
-                        Label #ParametresQuestConfigOpenLabel { Text: "Ouvrir"; Anchor: (Full: 0); Style: (FontSize: 13, TextColor: @SettingMuted, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                        Label #ParametresRpgSettingsOpenLabel { Text: "Ouvrir"; Anchor: (Full: 0); Style: (FontSize: 13, TextColor: @SettingMuted, HorizontalAlignment: Center, VerticalAlignment: Center); }
                       }
                     }
                   }

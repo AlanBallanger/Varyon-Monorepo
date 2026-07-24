@@ -124,9 +124,17 @@ val verifyModJar = tasks.register("verifyModJar") {
     }
 }
 
+val exportModJar = tasks.register<Copy>("exportModJar") {
+    group = "build"
+    description = "Copie le JAR vers Varyon-Monorepo/build/output"
+    dependsOn(fatJar, verifyModJar)
+    from(fatJar)
+    into(rootProject.layout.buildDirectory.dir("output"))
+}
+
 tasks.named("build") {
     dependsOn(fatJar)
-    finalizedBy(verifyModJar)
+    finalizedBy(verifyModJar, exportModJar)
 }
 
 tasks.named<Jar>("jar") {

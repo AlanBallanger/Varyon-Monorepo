@@ -26,6 +26,7 @@ public final class VrpgCommand extends AbstractAsyncCommand {
     public VrpgCommand(@Nonnull VaryonRpgPlugin plugin) {
         super("vrpg", "Varyon RPG - Classes");
         this.addSubCommand(new ReloadConfigSub());
+        this.addSubCommand(new ParamSub());
         this.addSubCommand(new ResetClassSub());
         this.addSubCommand(new ResetTalentsSub());
         this.addSubCommand(new ResetAllSub());
@@ -35,6 +36,11 @@ public final class VrpgCommand extends AbstractAsyncCommand {
     @Override
     @Nonnull
     protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
+        return openUi(ctx, "classes");
+    }
+
+    @Nonnull
+    private static CompletableFuture<Void> openUi(@Nonnull CommandContext ctx, @Nonnull String tab) {
         CommandSender sender = ctx.sender();
         if (!(sender instanceof PlayerRef playerRef)) {
             sender.sendMessage(Message.raw("Commande joueur uniquement.").color(Color.RED));
@@ -46,11 +52,21 @@ public final class VrpgCommand extends AbstractAsyncCommand {
             ((EntityStore) store.getExternalData()).getWorld().execute(() -> {
                 Player player = store.getComponent(ref, Player.getComponentType());
                 if (player != null) {
-                    player.getPageManager().openCustomPage(ref, store, new RpgMainUI(playerRef, "classes"));
+                    player.getPageManager().openCustomPage(ref, store, new RpgMainUI(playerRef, tab));
                 }
             });
         }
         return done();
+    }
+
+    private static final class ParamSub extends AbstractAsyncCommand {
+        ParamSub() { super("param", "Ouvre les parametres classes et metiers"); }
+
+        @Override
+        @Nonnull
+        protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
+            return openUi(ctx, "parametres");
+        }
     }
 
     private static final class ResetClassSub extends AbstractAsyncCommand {

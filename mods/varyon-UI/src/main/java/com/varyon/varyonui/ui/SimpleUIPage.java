@@ -33,7 +33,6 @@ import com.varyon.varyonui.config.HomeConfig;
 import com.varyon.varyonui.config.TutorielConfig;
 import com.varyon.varyonui.config.VaryonConfig;
 import com.varyon.varyonui.hud.VaryonMenuHud;
-import com.varyon.varyonui.integration.ActivityBubbleBridge;
 import com.varyon.varyonui.integration.CombatProfilBridge;
 import com.varyon.varyonui.integration.DamageNumberBridge;
 import com.varyon.varyonui.integration.EcotaleEconomyBridge;
@@ -46,6 +45,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.Locale;
 import java.util.UUID;
@@ -100,6 +100,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
 
 
     private static final long COMMAND_EXECUTE_DELAY_MS = 100L;
+    private static final ConcurrentHashMap<UUID, Boolean> ACTIVITY_BUBBLE_ON = new ConcurrentHashMap<>();
 
     private static final String SWITCH_ON_ACTIVE_BG = "#27AE60";
     private static final String SWITCH_ON_INACTIVE_BG = "#27AE6047";
@@ -315,8 +316,8 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         );
         eventBuilder.addEventBinding(
             CustomUIEventBindingType.Activating,
-            "#ParametresQuestConfigOpen",
-            EventData.of("Action", "command").append("Command", "/qlconfig")
+            "#ParametresRpgSettingsOpen",
+            EventData.of("Action", "command").append("Command", "/vrpg param")
         );
 
         if (isAdmin) {
@@ -603,7 +604,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         applyDualSwitch(commandBuilder,
             "ParametresActivityBubbleOn", "ParametresActivityBubbleOnLabel",
             "ParametresActivityBubbleOff", "ParametresActivityBubbleOffLabel",
-            ActivityBubbleBridge.isEnabled(uuid));
+            ACTIVITY_BUBBLE_ON.getOrDefault(uuid, true));
     }
 
     private static void applyParametresDmgNumAppearance(
@@ -1395,9 +1396,10 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             PlayerRef playerRefComp = store.getComponent(ref, PlayerRef.getComponentType());
             if (playerRefComp != null && playerRefComp.getUuid() != null) {
                 boolean wantOn = "on".equals(data.activityBubbleToggle);
-                if (ActivityBubbleBridge.isEnabled(playerRefComp.getUuid()) != wantOn) {
+                UUID uuid = playerRefComp.getUuid();
+                if (ACTIVITY_BUBBLE_ON.getOrDefault(uuid, true) != wantOn) {
                     CommandManager.get().handleCommand(playerRefComp, "bbub");
-                    ActivityBubbleBridge.setLocalEnabled(playerRefComp.getUuid(), wantOn);
+                    ACTIVITY_BUBBLE_ON.put(uuid, wantOn);
                 }
                 UICommandBuilder commandBuilder = new UICommandBuilder();
                 UIEventBuilder eventBuilder = new UIEventBuilder();
