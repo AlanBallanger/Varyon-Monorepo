@@ -20,11 +20,20 @@ public final class BossArenaConfig {
     public static final String DEFAULT_TIMED_ANNOUNCEMENT_TEXT = "[$World] $Boss event started at $Arena";
     public static final String DEFAULT_TIMED_MAP_MARKER_IMAGE = "map_marker.png";
     public static final String DEFAULT_TIMED_MAP_MARKER_NAME_TEMPLATE = "Timed Boss: $Boss @ $Arena";
-    public static final String DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE = "The Shadows Stir—$BossUpper Approaches!";
+    public static final String DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE = "Les ombres s'agitent : $BossUpper approche !";
     public static final String DEFAULT_EVENT_ACTIVE_SUBTITLE_TEMPLATE =
+            "$ContextLine$CountdownLineBoss en vie : $BossAlive | Mobs de vague en vie : $AddsAlive";
+    public static final String DEFAULT_EVENT_VICTORY_TITLE_TEMPLATE = "VICTOIRE ! Réclamez votre butin !";
+    public static final String DEFAULT_EVENT_VICTORY_SUBTITLE_TEMPLATE = "Boss en vie : 0 | Mobs de vague en vie : 0";
+    private static final String LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE = "The Shadows Stir—$BossUpper Approaches!";
+    private static final String LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE_COLON = "The Shadows Stir: $BossUpper Approaches!";
+    private static final String LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE =
             "$ContextLine$CountdownLineBoss alive: $BossAlive | Wave mobs alive: $AddsAlive";
-    public static final String DEFAULT_EVENT_VICTORY_TITLE_TEMPLATE = "VICTORY! Claim your spoils!";
-    public static final String DEFAULT_EVENT_VICTORY_SUBTITLE_TEMPLATE = "Boss alive: 0 | Wave mobs alive: 0";
+    private static final String LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE_CAPS =
+            "$ContextLine$CountdownLineALIVE: $BossAlive | WAVE MOBS ALIVE: $AddsAlive";
+    private static final String LEGACY_EVENT_VICTORY_TITLE_TEMPLATE = "VICTORY! Claim your spoils!";
+    private static final String LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE = "Boss alive: 0 | Wave mobs alive: 0";
+    private static final String LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE_CAPS = "ALIVE: 0 | WAVE MOBS ALIVE: 0";
     private static final Logger LOGGER = Logger.getLogger("BossArena");
     private static final String DEFAULT_CURRENCY_ITEM_ID = "Coin";
     private static final String DEFAULT_FALLBACK_CURRENCY_ITEM_ID = "Ingredient_Bar_Iron";
@@ -123,27 +132,51 @@ public final class BossArenaConfig {
             return out;
         }
 
-        out.activeTitle = optional(source.activeTitle);
-        if (out.activeTitle.isEmpty()) {
-            out.activeTitle = DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE;
-        }
-
-        out.activeSubtitle = optional(source.activeSubtitle);
-        if (out.activeSubtitle.isEmpty()) {
-            out.activeSubtitle = DEFAULT_EVENT_ACTIVE_SUBTITLE_TEMPLATE;
-        }
-
-        out.victoryTitle = optional(source.victoryTitle);
-        if (out.victoryTitle.isEmpty()) {
-            out.victoryTitle = DEFAULT_EVENT_VICTORY_TITLE_TEMPLATE;
-        }
-
-        out.victorySubtitle = optional(source.victorySubtitle);
-        if (out.victorySubtitle.isEmpty()) {
-            out.victorySubtitle = DEFAULT_EVENT_VICTORY_SUBTITLE_TEMPLATE;
-        }
+        out.activeTitle = migrateEventBannerText(
+                optional(source.activeTitle),
+                DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE,
+                LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE,
+                LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE_COLON
+        );
+        out.activeSubtitle = migrateEventBannerText(
+                optional(source.activeSubtitle),
+                DEFAULT_EVENT_ACTIVE_SUBTITLE_TEMPLATE,
+                LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE,
+                LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE_CAPS
+        );
+        out.victoryTitle = migrateEventBannerText(
+                optional(source.victoryTitle),
+                DEFAULT_EVENT_VICTORY_TITLE_TEMPLATE,
+                LEGACY_EVENT_VICTORY_TITLE_TEMPLATE
+        );
+        out.victorySubtitle = migrateEventBannerText(
+                optional(source.victorySubtitle),
+                DEFAULT_EVENT_VICTORY_SUBTITLE_TEMPLATE,
+                LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE,
+                LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE_CAPS
+        );
 
         return out;
+    }
+
+    private static String migrateEventBannerText(String value, String frenchDefault, String... legacyEnglishDefaults) {
+        String cleaned = stripEmDashes(value);
+        if (cleaned.isEmpty()) {
+            return frenchDefault;
+        }
+        for (String legacy : legacyEnglishDefaults) {
+            if (cleaned.equals(legacy) || cleaned.equals(stripEmDashes(legacy))) {
+                return frenchDefault;
+            }
+        }
+        return cleaned;
+    }
+
+    private static String stripEmDashes(String value) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+        return value.replace('\u2014', ':').replace('\u2013', '-');
     }
 
     private static TimedMapMarkerSettings createDefaultTimedMapMarkerSettings() {
@@ -216,7 +249,7 @@ public final class BossArenaConfig {
         out.put("$Context / {Context}", "Optional context text (for example wave status).");
         out.put("$ContextLine / {ContextLine}", "Context text with trailing ' | ' when context exists.");
         out.put("$Countdown / {Countdown}", "Remaining timer as MM:SS (blank when no timer).");
-        out.put("$CountdownLabel / {CountdownLabel}", "Time left label (for example 'Time left: 14:22').");
+        out.put("$CountdownLabel / {CountdownLabel}", "Libellé du temps restant (ex. 'Temps restant : 14:22').");
         out.put("$CountdownLine / {CountdownLine}", "Countdown label with trailing ' | ' when timer exists.");
         out.put("$State / {State}", "Event state: active or victory.");
         out.put("Legacy aliases", "$ContextPrefix and $CountdownPrefix are still supported.");

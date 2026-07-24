@@ -43,8 +43,8 @@ public final class BossArenaDamageChartOpener implements DamageChartOpener {
         StringBuilder sb = new StringBuilder();
 
         String title = (bossName != null && !bossName.isBlank())
-                ? ("Damage Dealt — " + bossName)
-                : "Damage Dealt";
+                ? ("Dégâts infligés : " + bossName)
+                : "Dégâts infligés";
         sb.append(title);
 
         int n = Math.min(rows.size(), MAX_CHAT_ROWS);

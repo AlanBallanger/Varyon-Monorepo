@@ -312,10 +312,10 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
         }
 
         if (isBlank(out.displayName)) {
-            out.displayName = BossShopItems.displayTier(tier) + " Contract " + slot;
+            out.displayName = BossShopItems.displayTier(tier) + " Contrat " + slot;
         }
         if (isBlank(out.description)) {
-            out.description = "Summon boss " + slot + " from the " + BossShopItems.displayTier(tier) + " tier.";
+            out.description = "Invoquer le boss " + slot + " du rang " + BossShopItems.displayTier(tier) + ".";
         }
         if (out.bossId == null) {
             out.bossId = "";
@@ -342,8 +342,8 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
         String currencyItemId = ShopCurrencySupport.PROVIDER_ITEM.equals(effectiveCurrencyProvider)
                 ? resolveItemCurrencyItemId()
                 : null;
-        cmd.set("#TitleLabel.Text", "Boss Arena // Elite Contract Board");
-        cmd.set("#SubtitleLabel.Text", "Choose a tier and summon a boss");
+        cmd.set("#TitleLabel.Text", "Boss Arena // Tableau des contrats élite");
+        cmd.set("#SubtitleLabel.Text", "Choisissez un rang et invoquez un boss");
 
         events.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton", EventData.of("Action", "close"));
 
@@ -379,8 +379,8 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
             if (noDisplayedEntries) {
                 entry = new ShopEntry();
                 entry.enabled = false;
-                entry.displayName = "No Contracts";
-                entry.description = "No bosses are enabled for this shop and tier.";
+                entry.displayName = "Aucun contrat";
+                entry.description = "Aucun boss n'est activé pour cette boutique et ce rang.";
                 entry.cost = 0;
                 entry.bossId = "";
                 entry.arenaId = "";
@@ -397,7 +397,7 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
             boolean needsConfig = entry.enabled && !ready;
             cmd.set("#BuyBtn" + suffix + ".Visible", true);
             cmd.set("#BuyBtn" + suffix + ".Disabled", noDisplayedEntries || !entry.enabled || needsConfig);
-            cmd.set("#BuyBtn" + suffix + ".Text", !entry.enabled ? "Locked" : (needsConfig ? "Please Configure" : "Summon"));
+            cmd.set("#BuyBtn" + suffix + ".Text", !entry.enabled ? "Verrouillé" : (needsConfig ? "À configurer" : "Invoquer"));
 
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
@@ -443,24 +443,24 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
     private void handlePurchase(Ref<EntityStore> ref, Store<EntityStore> store, int slot) {
         List<ShopEntry> displayed = resolveDisplayedEntriesForTier(selectedTier);
         if (displayed.isEmpty()) {
-            playerRef.sendMessage(Message.raw("No bosses are enabled for this shop and tier."));
+            playerRef.sendMessage(Message.raw("Aucun boss n'est activé pour cette boutique et ce rang."));
             return;
         }
 
         if (slot < 1 || slot > displayed.size()) {
-            playerRef.sendMessage(Message.raw("Invalid shop slot."));
+            playerRef.sendMessage(Message.raw("Emplacement boutique invalide."));
             return;
         }
 
         ShopEntry entry = displayed.get(slot - 1);
 
         if (!entry.enabled) {
-            playerRef.sendMessage(Message.raw("That contract is locked."));
+            playerRef.sendMessage(Message.raw("Ce contrat est verrouillé."));
             return;
         }
 
         if (isBlank(entry.bossId) || isBlank(entry.arenaId)) {
-            playerRef.sendMessage(Message.raw("This contract is not configured. Edit mods/Varyon-BossArena/shop.json."));
+            playerRef.sendMessage(Message.raw("Ce contrat n'est pas configuré. Éditez mods/Varyon-BossArena/shop.json."));
             return;
         }
 
@@ -518,10 +518,10 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
                     out.description = configured != null && !isBlank(configured.description)
                             ? configured.description
                             : (isBlank(out.arenaId)
-                            ? "Summon " + boss.bossName + ". Configure the shop arena in /ba config."
-                            : "Summon " + boss.bossName + " at " + out.arenaId);
+                            ? "Invoquer " + boss.bossName + ". Configurez l'arène boutique dans /ba config."
+                            : "Invoquer " + boss.bossName + " à " + out.arenaId);
                     if (missingConfiguredCost && isStrictContractPricing(config)) {
-                        out.description = "Set price in mods/Varyon-BossArena/shop.json shops[].contractPrices[] for " + boss.bossName + ".";
+                        out.description = "Définissez le prix dans mods/Varyon-BossArena/shop.json shops[].contractPrices[] pour " + boss.bossName + ".";
                     }
                     out.icon = configured != null ? configured.icon : "";
 

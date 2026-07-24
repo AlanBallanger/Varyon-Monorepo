@@ -23,19 +23,19 @@ Group {
 
   Label #TitleLabel {
     Anchor: (Left: 368, Top: 108, Width: 860, Height: 42);
-    Text: "Boss Arena // Contract Board";
+    Text: "Boss Arena // Tableau des contrats";
     Style: (FontSize: 31, TextColor: #f3f7ff, RenderBold: true);
   }
 
   Label #SubtitleLabel {
     Anchor: (Left: 368, Top: 150, Width: 880, Height: 26);
-    Text: "Choose a tier and summon a boss.";
+    Text: "Choisissez un rang et invoquez un boss.";
     Style: (FontSize: 15, TextColor: #b2c0d2);
   }
 
   TextButton #CloseButton {
     Anchor: (Left: 1428, Top: 116, Width: 136, Height: 48);
-    Text: "Close";
+    Text: "Fermer";
     Style: TextButtonStyle(
       Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -81,7 +81,7 @@ Group {
 
   TextButton #TierBtncommon {
     Anchor: (Left: 609, Top: 223, Width: 228, Height: 42);
-    Text: "Common";
+    Text: "Commun";
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -91,7 +91,7 @@ Group {
 
   TextButton #TierBtnuncommon {
     Anchor: (Left: 372, Top: 223, Width: 228, Height: 42);
-    Text: "Uncommon";
+    Text: "Peu commun";
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -111,7 +111,7 @@ Group {
 
   TextButton #TierBtnepic {
     Anchor: (Left: 1083, Top: 223, Width: 228, Height: 42);
-    Text: "Epic";
+    Text: "Épique";
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -121,7 +121,7 @@ Group {
 
   TextButton #TierBtnlegendary {
     Anchor: (Left: 1320, Top: 223, Width: 228, Height: 42);
-    Text: "Legendary";
+    Text: "Légendaire";
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -139,13 +139,13 @@ Group {
 
     Label #ItemName1 {
       Anchor: (Left: 24, Top: 16, Width: 370, Height: 32);
-      Text: "Contract Name";
+      Text: "Nom du contrat";
       Style: (FontSize: 20, TextColor: #f3f7ff, RenderBold: true);
     }
 
     Label #ItemPrice1 {
       Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
-      Text: "Price";
+      Text: "Prix";
       Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
     }
 
@@ -157,7 +157,7 @@ Group {
 
     TextButton #BuyBtn1 {
       Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
-      Text: "Summon";
+      Text: "Invoquer";
       Style: TextButtonStyle(
         Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
         Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -177,13 +177,13 @@ Group {
 
     Label #ItemName2 {
       Anchor: (Left: 24, Top: 16, Width: 370, Height: 32);
-      Text: "Contract Name";
+      Text: "Nom du contrat";
       Style: (FontSize: 20, TextColor: #f3f7ff, RenderBold: true);
     }
 
     Label #ItemPrice2 {
       Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
-      Text: "Price";
+      Text: "Prix";
       Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
     }
 
@@ -195,7 +195,7 @@ Group {
 
     TextButton #BuyBtn2 {
       Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
-      Text: "Summon";
+      Text: "Invoquer";
       Style: TextButtonStyle(
         Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
         Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -215,13 +215,13 @@ Group {
 
     Label #ItemName3 {
       Anchor: (Left: 24, Top: 16, Width: 370, Height: 32);
-      Text: "Contract Name";
+      Text: "Nom du contrat";
       Style: (FontSize: 20, TextColor: #f3f7ff, RenderBold: true);
     }
 
     Label #ItemPrice3 {
       Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
-      Text: "Price";
+      Text: "Prix";
       Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
     }
 
@@ -233,7 +233,7 @@ Group {
 
     TextButton #BuyBtn3 {
       Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
-      Text: "Summon";
+      Text: "Invoquer";
       Style: TextButtonStyle(
         Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
         Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -253,13 +253,13 @@ Group {
 
     Label #ItemName4 {
       Anchor: (Left: 24, Top: 16, Width: 370, Height: 32);
-      Text: "Contract Name";
+      Text: "Nom du contrat";
       Style: (FontSize: 20, TextColor: #f3f7ff, RenderBold: true);
     }
 
     Label #ItemPrice4 {
       Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
-      Text: "Price";
+      Text: "Prix";
       Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
     }
 
@@ -271,7 +271,7 @@ Group {
 
     TextButton #BuyBtn4 {
       Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
-      Text: "Summon";
+      Text: "Invoquer";
       Style: TextButtonStyle(
         Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
         Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -291,13 +291,13 @@ Group {
 
     Label #ItemName5 {
       Anchor: (Left: 24, Top: 16, Width: 370, Height: 32);
-      Text: "Contract Name";
+      Text: "Nom du contrat";
       Style: (FontSize: 20, TextColor: #f3f7ff, RenderBold: true);
     }
 
     Label #ItemPrice5 {
       Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
-      Text: "Price";
+      Text: "Prix";
       Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
     }
 
@@ -309,7 +309,7 @@ Group {
 
     TextButton #BuyBtn5 {
       Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
-      Text: "Summon";
+      Text: "Invoquer";
       Style: TextButtonStyle(
         Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
         Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),

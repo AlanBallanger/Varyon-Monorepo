@@ -120,7 +120,7 @@ public final class BossWaveNotificationService {
         }
         String contextText = context == null || context.isBlank() ? "" : (context.trim() + " | ");
         String countdownValue = formatCountdownValue(remainingCountdownMillis);
-        String countdownLabel = countdownValue.isEmpty() ? "" : "Time left: " + countdownValue;
+        String countdownLabel = countdownValue.isEmpty() ? "" : "Temps restant : " + countdownValue;
         String countdownText = countdownLabel.isEmpty() ? "" : (countdownLabel + " | ");
         int bossesAlive = Math.max(0, aliveBossCount);
         int addsAlive = Math.max(0, activeAdds);

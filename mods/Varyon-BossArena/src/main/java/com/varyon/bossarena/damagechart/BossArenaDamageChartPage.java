@@ -59,7 +59,7 @@ public final class BossArenaDamageChartPage extends InteractiveCustomUIPage<Boss
                       @Nonnull Store<EntityStore> store) {
         cmd.append(LAYOUT);
 
-        String title = bossName.isBlank() ? "Damage Dealt" : ("Damage Dealt — " + bossName);
+        String title = bossName.isBlank() ? "Dégâts infligés" : ("Dégâts infligés : " + bossName);
         cmd.set("#TitleLabel.Text", title);
 
         events.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton", EventData.of("Action", "close"));

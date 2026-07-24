@@ -38,8 +38,17 @@ public final class BossShopItems {
         if (tier == null || tier.isBlank()) {
             return "";
         }
-        String lower = tier.toLowerCase(Locale.ROOT);
-        return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+        return switch (tier.toLowerCase(Locale.ROOT)) {
+            case "common" -> "Commun";
+            case "uncommon" -> "Peu commun";
+            case "rare" -> "Rare";
+            case "epic" -> "Épique";
+            case "legendary" -> "Légendaire";
+            default -> {
+                String lower = tier.toLowerCase(Locale.ROOT);
+                yield Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+            }
+        };
     }
 
     public static String key(String tier, int slot) {

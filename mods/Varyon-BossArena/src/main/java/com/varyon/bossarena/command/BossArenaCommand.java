@@ -81,28 +81,16 @@ public final class BossArenaCommand extends AbstractCommand {
         }
     }
 
-    /** Uses reflection to bridge CommandContext/Player APIs that may differ across Hytale versions. */
-    @SuppressWarnings("JavaReflectionMemberAccess")
-    private static CommandSender getSender(CommandContext ctx) {
-        if (ctx == null) return null;
-        try {
-            Method m = ctx.getClass().getMethod("getSender");
-            Object o = m.invoke(ctx);
-            if (o instanceof CommandSender cs) return cs;
-        } catch (Throwable ignored) {
+    private static World resolveWorldFromPlayerRef(Ref<EntityStore> ref) {
+        if (ref == null || !ref.isValid()) {
+            return null;
         }
-
-        try {
-            if (ctx.isPlayer()) {
-                com.hypixel.hytale.component.Ref<EntityStore> ref = ctx.senderAsPlayerRef();
-                if (ref != null) {
-                    Object pr = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
-                    if (pr instanceof PlayerRef playerRef) return playerRef;
-                }
-            }
-        } catch (Throwable ignored) {
+        Store<EntityStore> store = ref.getStore();
+        if (store == null) {
+            return null;
         }
-        return null;
+        EntityStore external = store.getExternalData();
+        return external != null ? external.getWorld() : null;
     }
 
     /** Uses reflection to resolve PlayerRef and transform for position; fallback (0,0,0) on API mismatch. */
@@ -158,37 +146,17 @@ public final class BossArenaCommand extends AbstractCommand {
             return CompletableFuture.completedFuture(null);
         }
 
-        com.hypixel.hytale.component.Ref<EntityStore> _shopPlayerRef = ctx.senderAsPlayerRef();
-        if (_shopPlayerRef == null) {
+        Ref<EntityStore> shopPlayerRef = ctx.senderAsPlayerRef();
+        if (shopPlayerRef == null || !shopPlayerRef.isValid()) {
             ctx.sendMessage(Message.raw("Could not resolve player"));
             return CompletableFuture.completedFuture(null);
         }
-        PlayerRef _shopPR = _shopPlayerRef.getStore().getComponent(_shopPlayerRef, PlayerRef.getComponentType());
-        World world = _shopPR != null ? Universe.get().getWorld(_shopPR.getWorldUuid()) : null;
-        Player player = _shopPlayerRef.getStore().getComponent(_shopPlayerRef, Player.getComponentType());
+        World world = resolveWorldFromPlayerRef(shopPlayerRef);
         if (world == null) {
             ctx.sendMessage(Message.raw("Could not resolve player world"));
             return CompletableFuture.completedFuture(null);
         }
 
-        Vector3d playerPosition = getPlayerPosition(player);
-        com.hypixel.hytale.math.vector.Rotation3f playerRotation = getPlayerRotation(player);
-        float playerYaw = playerRotation.yaw();
-        if (Float.isNaN(playerYaw)) {
-            playerYaw = 0f;
-        }
-
-        // Spawn exactly 2 blocks forward from the player's facing direction (horizontal plane).
-        org.joml.Vector3d forward = Transform.getDirection(0f, playerYaw);
-        org.joml.Vector3d spawnPosition = new org.joml.Vector3d(
-                playerPosition.x + (forward.x * 2.0d),
-                playerPosition.y,
-                playerPosition.z + (forward.z * 2.0d)
-        );
-
-        // Make the guard face back toward the player.
-        float npcYaw = playerYaw + (float) Math.PI;
-        com.hypixel.hytale.math.vector.Rotation3f npcRotation = new com.hypixel.hytale.math.vector.Rotation3f(0f, npcYaw, 0f);
         String shopNpcId = plugin.getShopConfig() != null
                 && plugin.getShopConfig().shopNpcId != null
                 && !plugin.getShopConfig().shopNpcId.isBlank()
@@ -196,6 +164,25 @@ public final class BossArenaCommand extends AbstractCommand {
                 : BossArenaPlugin.SHOP_NPC_TYPE_ID;
 
         world.execute(() -> {
+            Store<EntityStore> playerStore = shopPlayerRef.getStore();
+            Player player = playerStore.getComponent(shopPlayerRef, Player.getComponentType());
+
+            Vector3d playerPosition = getPlayerPosition(player);
+            com.hypixel.hytale.math.vector.Rotation3f playerRotation = getPlayerRotation(player);
+            float playerYaw = playerRotation.yaw();
+            if (Float.isNaN(playerYaw)) {
+                playerYaw = 0f;
+            }
+
+            org.joml.Vector3d forward = Transform.getDirection(0f, playerYaw);
+            org.joml.Vector3d spawnPosition = new org.joml.Vector3d(
+                    playerPosition.x + (forward.x * 2.0d),
+                    playerPosition.y,
+                    playerPosition.z + (forward.z * 2.0d)
+            );
+
+            float npcYaw = playerYaw + (float) Math.PI;
+            com.hypixel.hytale.math.vector.Rotation3f npcRotation = new com.hypixel.hytale.math.vector.Rotation3f(0f, npcYaw, 0f);
             var result = NPCPlugin.get().spawnNPC(
                     world.getEntityStore().getStore(),
                     shopNpcId,
@@ -285,7 +272,7 @@ public final class BossArenaCommand extends AbstractCommand {
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
         ctx.sendMessage(Message.raw(
-                "Use: /bossarena arena <create|delete|list> OR /bossarena spawn <bossId> <arenaId|here> OR /bossarena reload OR /bossarena config OR /bossarena shop <open|place|delete> OR /bossarena cleanup"
+                "Use: /bossarena arena <create|delete|list> OR /bossarena spawn <bossId> <arenaId|here> OR /bossarena reload OR /bossarena config OR /bossarena shop [place|remove] OR /bossarena cleanup"
         ));
         return CompletableFuture.completedFuture(null);
     }
@@ -328,9 +315,11 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            com.hypixel.hytale.component.Ref<EntityStore> _createRef = ctx.senderAsPlayerRef();
-            PlayerRef _createPR = _createRef != null ? _createRef.getStore().getComponent(_createRef, PlayerRef.getComponentType()) : null;
-            Player player = _createRef != null ? _createRef.getStore().getComponent(_createRef, Player.getComponentType()) : null;
+            Ref<EntityStore> createRef = ctx.senderAsPlayerRef();
+            if (createRef == null || !createRef.isValid()) {
+                ctx.sendMessage(Message.raw("Could not resolve player"));
+                return CompletableFuture.completedFuture(null);
+            }
             String arenaId = ctx.get(idArg);
 
             if (arenaId == null || arenaId.isBlank()) {
@@ -343,25 +332,27 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            World world = _createPR != null ? Universe.get().getWorld(_createPR.getWorldUuid()) : null;
+            World world = resolveWorldFromPlayerRef(createRef);
             if (world == null) {
                 ctx.sendMessage(Message.raw("Could not resolve player world"));
                 return CompletableFuture.completedFuture(null);
             }
 
-            Vector3d position = BossArenaCommand.getPlayerPosition(player);
-            String worldName = world.getName(); // Instead of world.getWorldConfig().getName()
+            return CompletableFuture.runAsync(() -> {
+                Store<EntityStore> store = createRef.getStore();
+                Player player = store.getComponent(createRef, Player.getComponentType());
+                Vector3d position = BossArenaCommand.getPlayerPosition(player);
+                String worldName = world.getName();
 
-            Arena arena = new Arena(arenaId, worldName, position);
-            ArenaRegistry.register(arena);
+                Arena arena = new Arena(arenaId, worldName, position);
+                ArenaRegistry.register(arena);
 
-            plugin.saveArenas().thenRun(() -> {
-                ctx.sendMessage(Message.raw("✓ Created arena '" + arenaId + "' at your location"));
-                ctx.sendMessage(Message.raw(String.format("  Position: %.1f, %.1f, %.1f in %s",
-                        position.x, position.y, position.z, worldName)));
-            });
-
-            return CompletableFuture.completedFuture(null);
+                plugin.saveArenas().thenRun(() -> {
+                    ctx.sendMessage(Message.raw("✓ Created arena '" + arenaId + "' at your location"));
+                    ctx.sendMessage(Message.raw(String.format("  Position: %.1f, %.1f, %.1f in %s",
+                            position.x, position.y, position.z, worldName)));
+                });
+            }, world);
         }
     }
 
@@ -451,68 +442,78 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            com.hypixel.hytale.component.Ref<EntityStore> _spawnRef = ctx.senderAsPlayerRef();
-            PlayerRef _spawnPR = _spawnRef != null ? _spawnRef.getStore().getComponent(_spawnRef, PlayerRef.getComponentType()) : null;
-            Player player = _spawnRef != null ? _spawnRef.getStore().getComponent(_spawnRef, Player.getComponentType()) : null;
+            Ref<EntityStore> spawnRef = ctx.senderAsPlayerRef();
+            if (spawnRef == null || !spawnRef.isValid()) {
+                ctx.sendMessage(Message.raw("Could not resolve player"));
+                return CompletableFuture.completedFuture(null);
+            }
             String bossId = ctx.get(bossIdArg);
             String location = ctx.get(locationArg);
 
-            World world = _spawnPR != null ? Universe.get().getWorld(_spawnPR.getWorldUuid()) : null;
-            Vector3d spawnPos = BossArenaCommand.getPlayerPosition(player);
+            World world = resolveWorldFromPlayerRef(spawnRef);
+            if (world == null) {
+                ctx.sendMessage(Message.raw("Could not resolve player world"));
+                return CompletableFuture.completedFuture(null);
+            }
+
             BossDefinition def = BossRegistry.get(bossId);
 
             if (def == null) {
-                ctx.sendMessage(Message.raw("§cBoss '" + bossId + "' not found in registry."));
+                ctx.sendMessage(Message.raw("[BossArena] Boss '" + bossId + "' introuvable dans le registre."));
                 return CompletableFuture.completedFuture(null);
             }
 
             if (def.npcId == null || def.npcId.isBlank()) {
-                ctx.sendMessage(Message.raw("§cBoss '" + bossId + "' has no npcId set."));
+                ctx.sendMessage(Message.raw("[BossArena] Boss '" + bossId + "' sans npcId."));
                 return CompletableFuture.completedFuture(null);
             }
 
-            // Check if using arena or current location
-            String finalArenaId = null;
+            Vector3d arenaSpawnPos = null;
+            String arenaId = null;
             if (!location.equalsIgnoreCase("here")) {
-                // It's an arena ID
                 var arena = ArenaRegistry.get(location);
                 if (arena == null) {
-                    ctx.sendMessage(Message.raw("§cArena '" + location + "' not found. Use 'here' to spawn at your location."));
+                    ctx.sendMessage(Message.raw("[BossArena] Arène '" + location + "' introuvable. Utilisez 'here' pour spawner à votre position."));
                     return CompletableFuture.completedFuture(null);
                 }
-                spawnPos = arena.getPosition();
-                finalArenaId = location;
+                arenaSpawnPos = arena.getPosition();
+                arenaId = location;
                 ctx.sendMessage(Message.raw("Spawning at arena: " + location));
             } else {
                 ctx.sendMessage(Message.raw("Spawning at your location"));
             }
 
-            final Vector3d finalSpawnPos = spawnPos;
-            final String arenaId = finalArenaId;
+            final Vector3d resolvedArenaSpawnPos = arenaSpawnPos;
+            final String resolvedArenaId = arenaId;
 
-            world.execute(() -> {
+            ctx.sendMessage(Message.raw("Spawning boss: " + bossId + "..."));
+            return CompletableFuture.runAsync(() -> {
+                Store<EntityStore> store = spawnRef.getStore();
+                PlayerRef spawnPR = store.getComponent(spawnRef, PlayerRef.getComponentType());
+                Player player = store.getComponent(spawnRef, Player.getComponentType());
+                Vector3d spawnPos = resolvedArenaSpawnPos != null
+                        ? resolvedArenaSpawnPos
+                        : BossArenaCommand.getPlayerPosition(player);
+
                 UUID uuid = plugin.getBossSpawnService().spawnBossFromJson(
-                        _spawnPR,
+                        spawnPR,
                         bossId,
                         world,
-                        finalSpawnPos,
-                        arenaId,
+                        spawnPos,
+                        resolvedArenaId,
                         null,
                         null,
                         true
                 );
 
                 if (uuid == null) {
-                    ctx.sendMessage(Message.raw("§cSpawn failed for '" + bossId + "'."));
+                    ctx.sendMessage(Message.raw("[BossArena] Échec du spawn pour '" + bossId + "'."));
                 } else if (BossSpawnService.DEFERRED_SPAWN_UUID.equals(uuid)) {
-                    ctx.sendMessage(Message.raw("§aSpawn sequence started for '" + bossId + "'. Boss will spawn after pre-boss waves."));
+                    ctx.sendMessage(Message.raw("[BossArena] Séquence lancée pour '" + bossId + "'. Le boss apparaîtra après les vagues pré-boss."));
                 } else {
-                    ctx.sendMessage(Message.raw("§aSpawned boss: " + bossId + " (UUID: " + uuid + ")"));
+                    ctx.sendMessage(Message.raw("[BossArena] Boss invoqué : " + bossId + " (UUID: " + uuid + ")"));
                 }
-            });
-
-            ctx.sendMessage(Message.raw("Spawning boss: " + bossId + "..."));
-            return CompletableFuture.completedFuture(null);
+            }, world);
         }
     }
 
@@ -591,27 +592,23 @@ public final class BossArenaCommand extends AbstractCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            com.hypixel.hytale.component.Ref<EntityStore> _configRef = ctx.senderAsPlayerRef();
-            PlayerRef _configPR = _configRef != null ? _configRef.getStore().getComponent(_configRef, PlayerRef.getComponentType()) : null;
-            Player _configPlayer = _configRef != null ? _configRef.getStore().getComponent(_configRef, Player.getComponentType()) : null;
-            World world = _configPR != null ? Universe.get().getWorld(_configPR.getWorldUuid()) : null;
+            Ref<EntityStore> configRef = ctx.senderAsPlayerRef();
+            if (configRef == null || !configRef.isValid()) {
+                ctx.sendMessage(Message.raw("Could not resolve player"));
+                return CompletableFuture.completedFuture(null);
+            }
+
+            Store<EntityStore> store = configRef.getStore();
+            World world = resolveWorldFromPlayerRef(configRef);
             if (world == null) {
                 ctx.sendMessage(Message.raw("Could not resolve player world"));
                 return CompletableFuture.completedFuture(null);
             }
 
-            final Ref<EntityStore> _configRefFinal = _configRef;
-            final Player _configPlayerFinal = _configPlayer;
-            world.execute(() -> {
-                if (_configRefFinal == null) {
-                    return;
-                }
-
-                Store<EntityStore> store = _configRefFinal.getStore();
-                BossArenaConfigPage.open(_configRefFinal, store, _configPlayerFinal, plugin);
-            });
-
-            return CompletableFuture.completedFuture(null);
+            return CompletableFuture.runAsync(() -> {
+                Player player = store.getComponent(configRef, Player.getComponentType());
+                BossArenaConfigPage.open(configRef, store, player, plugin);
+            }, world);
         }
     }
 
@@ -619,67 +616,52 @@ public final class BossArenaCommand extends AbstractCommand {
     // /bossarena shop ...
     // ============================================================
     static final class ShopRoot extends AbstractCommand {
+        private final BossArenaPlugin plugin;
 
         ShopRoot(BossArenaPlugin plugin) {
-            super("shop", "Shop management");
+            super("shop", "Ouvre la boutique, ou : place | remove");
+            this.plugin = plugin;
             requireAdminPermission(this);
-            addSubCommand(new ShopOpen(plugin));
             addSubCommand(new ShopPlace(plugin));
-            addSubCommand(new ShopDelete(plugin));
+            addSubCommand(new ShopRemove(plugin));
         }
 
         @Override
         protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-            ctx.sendMessage(Message.raw("Use: /bossarena shop <open|place|delete>"));
-            return CompletableFuture.completedFuture(null);
+            return openShopGui(ctx, plugin);
         }
     }
 
-    private static final class ShopOpen extends AbstractCommand {
-        private final BossArenaPlugin plugin;
-
-        ShopOpen(BossArenaPlugin plugin) {
-            super("open", "Open the shop GUI: /bossarena shop open");
-            this.plugin = plugin;
-            requireAdminPermission(this);
-        }
-
-        @Override
-        protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-            if (!ctx.isPlayer()) {
-                ctx.sendMessage(Message.raw("Player-only command"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            com.hypixel.hytale.component.Ref<EntityStore> _shopOpenRef = ctx.senderAsPlayerRef();
-            PlayerRef _shopOpenPR = _shopOpenRef != null ? _shopOpenRef.getStore().getComponent(_shopOpenRef, PlayerRef.getComponentType()) : null;
-            Player _shopOpenPlayer = _shopOpenRef != null ? _shopOpenRef.getStore().getComponent(_shopOpenRef, Player.getComponentType()) : null;
-            World world = _shopOpenPR != null ? Universe.get().getWorld(_shopOpenPR.getWorldUuid()) : null;
-            if (world == null) {
-                ctx.sendMessage(Message.raw("Could not resolve player world"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            final Ref<EntityStore> _shopOpenRefFinal = _shopOpenRef;
-            final Player _shopOpenPlayerFinal = _shopOpenPlayer;
-            world.execute(() -> {
-                if (_shopOpenRefFinal == null) {
-                    return;
-                }
-
-                Store<EntityStore> store = _shopOpenRefFinal.getStore();
-                BossArenaShopPage.open(_shopOpenRefFinal, store, _shopOpenPlayerFinal, plugin);
-            });
-
+    private static CompletableFuture<Void> openShopGui(@Nonnull CommandContext ctx, BossArenaPlugin plugin) {
+        if (!ctx.isPlayer()) {
+            ctx.sendMessage(Message.raw("Commande réservée aux joueurs"));
             return CompletableFuture.completedFuture(null);
         }
+
+        Ref<EntityStore> shopOpenRef = ctx.senderAsPlayerRef();
+        if (shopOpenRef == null || !shopOpenRef.isValid()) {
+            ctx.sendMessage(Message.raw("Impossible de résoudre le joueur"));
+            return CompletableFuture.completedFuture(null);
+        }
+
+        Store<EntityStore> store = shopOpenRef.getStore();
+        World world = resolveWorldFromPlayerRef(shopOpenRef);
+        if (world == null) {
+            ctx.sendMessage(Message.raw("Impossible de résoudre le monde du joueur"));
+            return CompletableFuture.completedFuture(null);
+        }
+
+        return CompletableFuture.runAsync(() -> {
+            Player player = store.getComponent(shopOpenRef, Player.getComponentType());
+            BossArenaShopPage.open(shopOpenRef, store, player, plugin);
+        }, world);
     }
 
     private static final class ShopPlace extends AbstractCommand {
         private final BossArenaPlugin plugin;
 
         ShopPlace(BossArenaPlugin plugin) {
-            super("place", "Spawn the shop NPC at your location: /bossarena shop place");
+            super("place", "Place le PNJ boutique à votre position : /ba shop place");
             this.plugin = plugin;
             requireAdminPermission(this);
         }
@@ -690,89 +672,95 @@ public final class BossArenaCommand extends AbstractCommand {
         }
     }
 
-    private static final class ShopDelete extends AbstractCommand {
+    private static final class ShopRemove extends AbstractCommand {
         private final BossArenaPlugin plugin;
 
-        ShopDelete(BossArenaPlugin plugin) {
-            super("delete", "Delete nearest spawned shop NPC: /bossarena shop delete");
+        ShopRemove(BossArenaPlugin plugin) {
+            super("remove", "Supprime le PNJ boutique le plus proche : /ba shop remove");
             this.plugin = plugin;
         }
 
         @Override
         protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
             if (!ctx.isPlayer()) {
-                ctx.sendMessage(Message.raw("Player-only command"));
+                ctx.sendMessage(Message.raw("Commande réservée aux joueurs"));
                 return CompletableFuture.completedFuture(null);
             }
 
-            com.hypixel.hytale.component.Ref<EntityStore> _delRef = ctx.senderAsPlayerRef();
-            PlayerRef _delPR = _delRef != null ? _delRef.getStore().getComponent(_delRef, PlayerRef.getComponentType()) : null;
-            Player player = _delRef != null ? _delRef.getStore().getComponent(_delRef, Player.getComponentType()) : null;
-            World world = _delPR != null ? Universe.get().getWorld(_delPR.getWorldUuid()) : null;
+            Ref<EntityStore> delRef = ctx.senderAsPlayerRef();
+            if (delRef == null || !delRef.isValid()) {
+                ctx.sendMessage(Message.raw("Impossible de résoudre le joueur"));
+                return CompletableFuture.completedFuture(null);
+            }
+            World world = resolveWorldFromPlayerRef(delRef);
             if (world == null) {
-                ctx.sendMessage(Message.raw("Could not resolve player world"));
+                ctx.sendMessage(Message.raw("Impossible de résoudre le monde du joueur"));
                 return CompletableFuture.completedFuture(null);
             }
 
-            Vector3d playerPosition = getPlayerPosition(player);
-            UUID nearest = findNearestShopNpcUuid(plugin, world, playerPosition);
-            if (nearest == null) {
-                boolean removedShopLocation = false;
-                if (plugin.getShopConfig() != null) {
-                    int x = (int) Math.floor(playerPosition.x);
-                    int y = (int) Math.floor(playerPosition.y);
-                    int z = (int) Math.floor(playerPosition.z);
-                    removedShopLocation = plugin.getShopConfig().removeNearestShopLocation(world.getName(), x, y, z, 4);
+            return CompletableFuture.runAsync(() -> {
+                Store<EntityStore> store = delRef.getStore();
+                Player player = store.getComponent(delRef, Player.getComponentType());
+                Vector3d playerPosition = getPlayerPosition(player);
+                UUID nearest = findNearestShopNpcUuid(plugin, world, playerPosition);
+                if (nearest == null) {
+                    boolean removedShopLocation = false;
+                    if (plugin.getShopConfig() != null) {
+                        int x = (int) Math.floor(playerPosition.x);
+                        int y = (int) Math.floor(playerPosition.y);
+                        int z = (int) Math.floor(playerPosition.z);
+                        removedShopLocation = plugin.getShopConfig().removeNearestShopLocation(world.getName(), x, y, z, 4);
+                        if (removedShopLocation) {
+                            plugin.saveShopConfig();
+                        }
+                    }
                     if (removedShopLocation) {
-                        plugin.saveShopConfig();
+                        ctx.sendMessage(Message.raw("Aucun PNJ boutique suivi. Entrée d'emplacement la plus proche supprimée près de vous."));
+                    } else {
+                        ctx.sendMessage(Message.raw("Aucun PNJ boutique suivi dans ce monde."));
                     }
-                }
-                if (removedShopLocation) {
-                    ctx.sendMessage(Message.raw("No tracked shop NPC found. Removed nearest saved shop location entry near your position."));
-                } else {
-                    ctx.sendMessage(Message.raw("No tracked shop NPC found in this world."));
-                }
-                return CompletableFuture.completedFuture(null);
-            }
-
-            world.execute(() -> {
-                Ref<EntityStore> ref = world.getEntityRef(nearest);
-                if (ref == null) {
-                    if (plugin.getShopConfig() != null && plugin.getShopConfig().removeShopNpcUuid(nearest.toString())) {
-                        plugin.saveShopConfig();
-                    }
-                    ctx.sendMessage(Message.raw("Shop NPC entity not found (stale UUID): " + nearest));
                     return;
                 }
 
-                boolean changed = false;
-                Store<EntityStore> wstore = world.getEntityStore().getStore();
-                Entity entity = EntityUtils.getEntity(ref, wstore);
-                if (plugin.getShopConfig() != null) {
-                    changed |= plugin.getShopConfig().removeShopNpcUuid(nearest.toString());
-                    Object _tc = wstore.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
-                    if (_tc instanceof com.hypixel.hytale.server.core.modules.entity.component.TransformComponent _transform) {
-                        org.joml.Vector3d position = _transform.getPosition();
-                        int x = (int) Math.floor(position.x);
-                        int y = (int) Math.floor(position.y);
-                        int z = (int) Math.floor(position.z);
-                        String worldName = world.getName();
-                        boolean removedExact = plugin.getShopConfig().removeShopLocation(worldName, x, y, z);
-                        changed |= removedExact;
-                        if (!removedExact) {
-                            changed |= plugin.getShopConfig().removeNearestShopLocation(worldName, x, y, z, 3);
-                        }
-                    }
-                }
-                if (changed) {
-                    plugin.saveShopConfig();
-                }
-
-                world.getEntityStore().getStore().removeEntity(ref, RemoveReason.REMOVE);
-                ctx.sendMessage(Message.raw("Deleted shop NPC: " + nearest));
-            });
-            return CompletableFuture.completedFuture(null);
+                deleteShopNpcEntity(ctx, plugin, world, nearest);
+            }, world);
         }
+    }
+
+    private static void deleteShopNpcEntity(CommandContext ctx, BossArenaPlugin plugin, World world, UUID nearest) {
+        Ref<EntityStore> ref = world.getEntityRef(nearest);
+        if (ref == null) {
+            if (plugin.getShopConfig() != null && plugin.getShopConfig().removeShopNpcUuid(nearest.toString())) {
+                plugin.saveShopConfig();
+            }
+            ctx.sendMessage(Message.raw("Entité PNJ boutique introuvable (UUID obsolète) : " + nearest));
+            return;
+        }
+
+        boolean changed = false;
+        Store<EntityStore> wstore = world.getEntityStore().getStore();
+        if (plugin.getShopConfig() != null) {
+            changed |= plugin.getShopConfig().removeShopNpcUuid(nearest.toString());
+            Object _tc = wstore.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+            if (_tc instanceof com.hypixel.hytale.server.core.modules.entity.component.TransformComponent _transform) {
+                org.joml.Vector3d position = _transform.getPosition();
+                int x = (int) Math.floor(position.x);
+                int y = (int) Math.floor(position.y);
+                int z = (int) Math.floor(position.z);
+                String worldName = world.getName();
+                boolean removedExact = plugin.getShopConfig().removeShopLocation(worldName, x, y, z);
+                changed |= removedExact;
+                if (!removedExact) {
+                    changed |= plugin.getShopConfig().removeNearestShopLocation(worldName, x, y, z, 3);
+                }
+            }
+        }
+        if (changed) {
+            plugin.saveShopConfig();
+        }
+
+        world.getEntityStore().getStore().removeEntity(ref, RemoveReason.REMOVE);
+        ctx.sendMessage(Message.raw("PNJ boutique supprimé : " + nearest));
     }
 
     static final class Cleanup extends AbstractCommand {
@@ -791,28 +779,28 @@ public final class BossArenaCommand extends AbstractCommand {
             CommandSender sender = ctx.sender();
 
             if (!ctx.get(confirmArg)) {
-                sender.sendMessage(Message.raw("§c[BossArena] WARNING: This will permanently delete ALL active bosses, mobs, arenas, and shop keepers!"));
-                sender.sendMessage(Message.raw("§c[BossArena] To proceed, run: §f/ba cleanup --confirm"));
+                sender.sendMessage(Message.raw("[BossArena] ATTENTION : ceci supprimera définitivement tous les boss actifs, mobs, arènes et marchands !"));
+                sender.sendMessage(Message.raw("[BossArena] Pour confirmer, lancez : /ba cleanup --confirm"));
                 return CompletableFuture.completedFuture(null);
             }
 
-            sender.sendMessage(Message.raw("§e[BossArena] Starting deep cleanup..."));
+            sender.sendMessage(Message.raw("[BossArena] Nettoyage approfondi en cours..."));
 
             // 1. Clear Registries (Permanent config removal)
             ArenaRegistry.clear();
             plugin.saveArenas();
-            sender.sendMessage(Message.raw("§a- All arenas cleared from registry and saved."));
+            sender.sendMessage(Message.raw("[BossArena] - Toutes les arènes ont été effacées du registre et sauvegardées."));
 
             if (plugin.getShopConfig() != null && plugin.getShopConfig().shops != null) {
                 plugin.getShopConfig().shops.clear();
                 plugin.saveShopConfig();
-                sender.sendMessage(Message.raw("§a- All shop locations removed from config and saved."));
+                sender.sendMessage(Message.raw("[BossArena] - Tous les emplacements boutique ont été retirés de la config et sauvegardés."));
             }
 
             // 2. Clear Map Markers
             if (plugin.getTimedBossMapMarkerService() != null) {
                 plugin.getTimedBossMapMarkerService().clearAllMarkers();
-                sender.sendMessage(Message.raw("§a- Map markers cleared."));
+                sender.sendMessage(Message.raw("[BossArena] - Marqueurs de carte effacés."));
             }
 
             // 3. Prepare entities to remove
@@ -863,16 +851,16 @@ public final class BossArenaCommand extends AbstractCommand {
                         }
                     }
 
-                    sender.sendMessage(Message.raw("§a- Cleanup completed in world: " + world.getName()));
+                    sender.sendMessage(Message.raw("[BossArena] - Nettoyage terminé dans le monde : " + world.getName()));
                 });
             }
 
             // 5. Delete persistent runtime state files
             plugin.deletePersistentState();
-            sender.sendMessage(Message.raw("§a- Persistent runtime state cleared."));
+            sender.sendMessage(Message.raw("[BossArena] - État runtime persistant effacé."));
 
-            sender.sendMessage(Message.raw("§6[BossArena] Deep cleanup scheduled on world threads."));
-            sender.sendMessage(Message.raw("§e(Note: Boss definitions were preserved. Restart recommended.)"));
+            sender.sendMessage(Message.raw("[BossArena] Nettoyage approfondi planifié sur les threads du monde."));
+            sender.sendMessage(Message.raw("[BossArena] (Note : les définitions de boss ont été conservées. Redémarrage recommandé.)"));
             return CompletableFuture.completedFuture(null);
         }
     }

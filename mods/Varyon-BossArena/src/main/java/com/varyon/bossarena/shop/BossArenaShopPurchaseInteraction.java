@@ -45,41 +45,41 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
         }
 
         if (bossId == null || bossId.isBlank()) {
-            playerRef.sendMessage(Message.raw("Shop entry missing bossId."));
+            playerRef.sendMessage(Message.raw("Entrée boutique sans bossId."));
             return;
         }
         if (arenaId == null || arenaId.isBlank()) {
-            playerRef.sendMessage(Message.raw("Shop entry missing arenaId."));
+            playerRef.sendMessage(Message.raw("Entrée boutique sans arenaId."));
             return;
         }
 
         BossDefinition def = BossRegistry.get(bossId);
         if (def == null) {
-            playerRef.sendMessage(Message.raw("Boss not found: " + bossId));
+            playerRef.sendMessage(Message.raw("Boss introuvable : " + bossId));
             return;
         }
 
         Arena arena = ArenaRegistry.get(arenaId);
         if (arena == null) {
-            playerRef.sendMessage(Message.raw("Arena not found: " + arenaId));
+            playerRef.sendMessage(Message.raw("Arène introuvable : " + arenaId));
             return;
         }
 
         World world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(playerRef.getWorldUuid());
         if (world == null) {
-            playerRef.sendMessage(Message.raw("Could not resolve world."));
+            playerRef.sendMessage(Message.raw("Impossible de résoudre le monde."));
             return;
         }
 
         world.execute(() -> {
             BossSpawnService spawnService = plugin.getBossSpawnService();
             if (spawnService == null) {
-                playerRef.sendMessage(Message.raw("Boss spawn service is unavailable."));
+                playerRef.sendMessage(Message.raw("Service de spawn boss indisponible."));
                 return;
             }
 
             if (spawnService.hasAnyEventInProgress()) {
-                playerRef.sendMessage(Message.raw("A boss event is already in progress. Wait for all bosses and waves to be cleared."));
+                playerRef.sendMessage(Message.raw("Un événement boss est déjà en cours. Attendez que tous les boss et vagues soient terminés."));
                 return;
             }
 
@@ -100,11 +100,11 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
             );
 
             if (uuid == null) {
-                playerRef.sendMessage(Message.raw("Failed to spawn boss: " + bossId));
+                playerRef.sendMessage(Message.raw("Échec du spawn du boss : " + bossId));
             } else if (BossSpawnService.DEFERRED_SPAWN_UUID.equals(uuid)) {
-                playerRef.sendMessage(Message.raw("Spawn sequence started for boss: " + bossId + ". Boss will spawn after pre-boss waves."));
+                playerRef.sendMessage(Message.raw("Séquence lancée pour le boss : " + bossId + ". Le boss apparaîtra après les vagues pré-boss."));
             } else {
-                playerRef.sendMessage(Message.raw("Spawned boss: " + bossId));
+                playerRef.sendMessage(Message.raw("Boss invoqué : " + bossId));
             }
         });
 

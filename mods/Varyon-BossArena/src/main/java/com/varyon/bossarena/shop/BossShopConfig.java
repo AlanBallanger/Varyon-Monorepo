@@ -331,8 +331,8 @@ public final class BossShopConfig {
             entry.slot = 1;
             entry.enabled = true;
             entry.cost = tierBaseCost(tier) + 25;
-            entry.displayName = BossShopItems.displayTier(tier) + " Boss Contract";
-            entry.description = "Configure shop arena in /ba config and bossId in mods/Varyon-BossArena/shop.json. Cost uses copper (100c=1s, 10,000c=1g).";
+            entry.displayName = BossShopItems.displayTier(tier) + " Contrat boss";
+            entry.description = "Configurez l'arène boutique dans /ba config et le bossId dans mods/Varyon-BossArena/shop.json. Coût en cuivre (100c=1s, 10 000c=1g).";
             entry.arenaId = "";
             entry.bossId = "";
             entry.icon = "Boss_Shop_" + BossShopItems.displayTier(tier) + "_1";
