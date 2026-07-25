@@ -119,7 +119,12 @@ public class BossDeathSystem extends DeathSystems.OnDeathSystem {
                     0,
                     0,
                     null,
-                    0L
+                    0L,
+                    false,
+                    true,
+                    -1.0d,
+                    pendingLoot.eventId,
+                    0
             );
             BossLootHandler.queueLootSpawn(pendingLoot.world, pendingLoot.spawnLocation, pendingLoot.bossName, pendingLoot.eventId);
             return;
@@ -163,7 +168,12 @@ public class BossDeathSystem extends DeathSystems.OnDeathSystem {
                     0,
                     0,
                     null,
-                    0L
+                    0L,
+                    false,
+                    true,
+                    -1.0d,
+                    pendingLoot.eventId,
+                    0
             );
             BossLootHandler.queueLootSpawn(pendingLoot.world, pendingLoot.spawnLocation, pendingLoot.bossName, pendingLoot.eventId);
             return;

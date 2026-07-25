@@ -93,7 +93,11 @@ public final class BossLootChestBlock implements Component<ChunkStore> {
     }
 
     public ItemContainer getItemContainer(Player playerComponent, UUID playerUuid) {
-        return getOrCreateContainer(playerUuid);
+        return getOrCreateContainer(null, playerUuid);
+    }
+
+    public ItemContainer getItemContainer(World world, Player playerComponent, UUID playerUuid) {
+        return getOrCreateContainer(world, playerUuid);
     }
 
     public ItemContainer getItemContainer() {
@@ -102,7 +106,7 @@ public final class BossLootChestBlock implements Component<ChunkStore> {
             return new SimpleItemContainer((short) 27);
         }
         LAST_OPEN_UUID.remove();
-        return getOrCreateContainer(playerUuid);
+        return getOrCreateContainer(null, playerUuid);
     }
 
     public boolean canOpen(Ref<EntityStore> ref, ComponentAccessor<EntityStore> accessor) {
@@ -126,7 +130,7 @@ public final class BossLootChestBlock implements Component<ChunkStore> {
         return windows;
     }
 
-    private ItemContainer getOrCreateContainer(UUID playerUuid) {
+    private ItemContainer getOrCreateContainer(World world, UUID playerUuid) {
         ItemContainer cached = playerContainers.get(playerUuid);
         if (cached != null) {
             return cached;
@@ -136,7 +140,7 @@ public final class BossLootChestBlock implements Component<ChunkStore> {
 
         Vector3d lookupLocation = lootLookupLocation();
         List<GeneratedLoot> loot = BossLootHandler.claimLoot(
-                null,
+                world,
                 lookupLocation,
                 playerUuid
         );

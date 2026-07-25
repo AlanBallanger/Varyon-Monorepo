@@ -20,25 +20,31 @@ public final class BossArenaConfig {
     public static final String DEFAULT_TIMED_ANNOUNCEMENT_TEXT = "[$World] $Boss event started at $Arena";
     public static final String DEFAULT_TIMED_MAP_MARKER_IMAGE = "map_marker.png";
     public static final String DEFAULT_TIMED_MAP_MARKER_NAME_TEMPLATE = "Timed Boss: $Boss @ $Arena";
-    public static final String DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE = "Les ombres s'agitent : $BossUpper approche !";
-    public static final String DEFAULT_EVENT_ACTIVE_SUBTITLE_TEMPLATE =
-            "$ContextLine$CountdownLineBoss en vie : $BossAlive | Mobs de vague en vie : $AddsAlive";
+    public static final String DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE = "$PhaseTitle";
+    public static final String DEFAULT_EVENT_ACTIVE_SUBTITLE_TEMPLATE = "Monstres restants : $MonstersAlive";
     public static final String DEFAULT_EVENT_VICTORY_TITLE_TEMPLATE = "VICTOIRE ! Réclamez votre butin !";
-    public static final String DEFAULT_EVENT_VICTORY_SUBTITLE_TEMPLATE = "Boss en vie : 0 | Mobs de vague en vie : 0";
+    public static final String DEFAULT_EVENT_VICTORY_SUBTITLE_TEMPLATE = "Dégâts infligés : $DamageDealt";
     private static final String LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE = "The Shadows Stir—$BossUpper Approaches!";
     private static final String LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE_COLON = "The Shadows Stir: $BossUpper Approaches!";
+    private static final String LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE_FR =
+            "Les ombres s'agitent : $BossUpper approche !";
     private static final String LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE =
             "$ContextLine$CountdownLineBoss alive: $BossAlive | Wave mobs alive: $AddsAlive";
     private static final String LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE_CAPS =
             "$ContextLine$CountdownLineALIVE: $BossAlive | WAVE MOBS ALIVE: $AddsAlive";
+    private static final String LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE_FR =
+            "$ContextLine$CountdownLineBoss en vie : $BossAlive | Mobs de vague en vie : $AddsAlive";
     private static final String LEGACY_EVENT_VICTORY_TITLE_TEMPLATE = "VICTORY! Claim your spoils!";
     private static final String LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE = "Boss alive: 0 | Wave mobs alive: 0";
     private static final String LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE_CAPS = "ALIVE: 0 | WAVE MOBS ALIVE: 0";
+    private static final String LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE_FR =
+            "Boss en vie : 0 | Mobs de vague en vie : 0";
     private static final Logger LOGGER = Logger.getLogger("BossArena");
     private static final String DEFAULT_CURRENCY_ITEM_ID = "Coin";
     private static final String DEFAULT_FALLBACK_CURRENCY_ITEM_ID = "Ingredient_Bar_Iron";
     private static final int MIN_COUNTDOWN_MINUTES = 1;
-    private static final Path CONFIG_PATH = Path.of("mods", "BossArena", "config.json");
+    private static final Path CONFIG_PATH = Path.of("mods", "Varyon-BossArena", "config.json");
+    private static final Path LEGACY_CONFIG_PATH = Path.of("mods", "BossArena", "config.json");
 
     /** Distance (blocks) within which players see boss event title/subtitle. */
     public double notificationRadius = NotificationRadiusConstants.DEFAULT;
@@ -191,13 +197,15 @@ public final class BossArenaConfig {
                 optional(source.activeTitle),
                 DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE,
                 LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE,
-                LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE_COLON
+                LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE_COLON,
+                LEGACY_EVENT_ACTIVE_TITLE_TEMPLATE_FR
         );
         out.activeSubtitle = migrateEventBannerText(
                 optional(source.activeSubtitle),
                 DEFAULT_EVENT_ACTIVE_SUBTITLE_TEMPLATE,
                 LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE,
-                LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE_CAPS
+                LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE_CAPS,
+                LEGACY_EVENT_ACTIVE_SUBTITLE_TEMPLATE_FR
         );
         out.victoryTitle = migrateEventBannerText(
                 optional(source.victoryTitle),
@@ -208,7 +216,8 @@ public final class BossArenaConfig {
                 optional(source.victorySubtitle),
                 DEFAULT_EVENT_VICTORY_SUBTITLE_TEMPLATE,
                 LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE,
-                LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE_CAPS
+                LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE_CAPS,
+                LEGACY_EVENT_VICTORY_SUBTITLE_TEMPLATE_FR
         );
 
         return out;
@@ -297,17 +306,14 @@ public final class BossArenaConfig {
 
     private static Map<String, String> createDefaultEventBannerPlaceholderDocs() {
         Map<String, String> out = new LinkedHashMap<>();
+        out.put("$PhaseTitle / {PhaseTitle}", "Combat title: 'Vague N' or 'Boss : Nom'.");
+        out.put("$MonstersAlive / {MonstersAlive}", "Total remaining monsters (bosses + adds).");
+        out.put("$DamageDealt / {DamageDealt}", "Player damage dealt (victory subtitle).");
         out.put("$Boss / {Boss}", "Boss display name.");
         out.put("$BossUpper / {BossUpper}", "Boss display name in uppercase.");
         out.put("$BossAlive / {BossAlive}", "Alive tracked boss count.");
         out.put("$AddsAlive / {AddsAlive}", "Alive tracked wave/add mob count.");
-        out.put("$Context / {Context}", "Optional context text (for example wave status).");
-        out.put("$ContextLine / {ContextLine}", "Context text with trailing ' | ' when context exists.");
-        out.put("$Countdown / {Countdown}", "Remaining timer as MM:SS (blank when no timer).");
-        out.put("$CountdownLabel / {CountdownLabel}", "Libellé du temps restant (ex. 'Temps restant : 14:22').");
-        out.put("$CountdownLine / {CountdownLine}", "Countdown label with trailing ' | ' when timer exists.");
         out.put("$State / {State}", "Event state: active or victory.");
-        out.put("Legacy aliases", "$ContextPrefix and $CountdownPrefix are still supported.");
         return out;
     }
 
@@ -500,6 +506,7 @@ public final class BossArenaConfig {
 
     public void load() {
         try {
+            migrateLegacyConfigIfNeeded();
             if (Files.exists(CONFIG_PATH)) {
                 String content = Files.readString(CONFIG_PATH);
                 BossArenaConfig loaded = new GsonBuilder().create().fromJson(content, BossArenaConfig.class);
@@ -521,6 +528,19 @@ public final class BossArenaConfig {
             }
         } catch (IOException e) {
             LOGGER.severe("Failed to load BossArena config: " + e.getMessage());
+        }
+    }
+
+    private void migrateLegacyConfigIfNeeded() {
+        try {
+            if (Files.exists(CONFIG_PATH) || !Files.isRegularFile(LEGACY_CONFIG_PATH)) {
+                return;
+            }
+            Files.createDirectories(CONFIG_PATH.getParent());
+            Files.copy(LEGACY_CONFIG_PATH, CONFIG_PATH);
+            LOGGER.info("Migrated config from " + LEGACY_CONFIG_PATH + " to " + CONFIG_PATH);
+        } catch (IOException e) {
+            LOGGER.warning("Failed to migrate legacy BossArena config: " + e.getMessage());
         }
     }
 

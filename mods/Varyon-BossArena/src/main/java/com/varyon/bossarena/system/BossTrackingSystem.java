@@ -1,6 +1,7 @@
 package com.varyon.bossarena.system;
 
 import com.varyon.bossarena.boss.BossModifiers;
+import com.varyon.bossarena.music.BossFightMusicService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -576,6 +577,9 @@ public class BossTrackingSystem {
         addToBoss.clear();
         addModifiers.clear();
         bossToEvent.clear();
+        for (UUID eventId : eventsById.keySet()) {
+            BossFightMusicService.stopForEvent(eventId);
+        }
         eventsById.clear();
     }
 
@@ -880,7 +884,7 @@ public class BossTrackingSystem {
     }
 
     public UUID createEvent(World world, Vector3d eventCenter, String bossName) {
-        return createEvent(world, eventCenter, bossName, null, 0L, false);
+        return createEvent(world, eventCenter, bossName, null, 0L, false, null);
     }
 
     public UUID createEvent(World world,
@@ -888,7 +892,7 @@ public class BossTrackingSystem {
                             String bossName,
                             String bossTier,
                             long countdownDurationMs) {
-        return createEvent(world, eventCenter, bossName, bossTier, countdownDurationMs, false);
+        return createEvent(world, eventCenter, bossName, bossTier, countdownDurationMs, false, null);
     }
 
     public UUID createEvent(World world,
@@ -897,12 +901,22 @@ public class BossTrackingSystem {
                             String bossTier,
                             long countdownDurationMs,
                             boolean awaitingPrimaryBossSpawn) {
+        return createEvent(world, eventCenter, bossName, bossTier, countdownDurationMs, awaitingPrimaryBossSpawn, null);
+    }
+
+    public UUID createEvent(World world,
+                            Vector3d eventCenter,
+                            String bossName,
+                            String bossTier,
+                            long countdownDurationMs,
+                            boolean awaitingPrimaryBossSpawn,
+                            String arenaId) {
         if (eventCenter == null) {
             throw new IllegalArgumentException("eventCenter cannot be null");
         }
 
         UUID eventId = UUID.randomUUID();
-        eventsById.put(eventId, new EventData(
+        EventData event = new EventData(
                 eventId,
                 world,
                 eventCenter,
@@ -911,10 +925,38 @@ public class BossTrackingSystem {
                 countdownDurationMs,
                 System.currentTimeMillis(),
                 awaitingPrimaryBossSpawn
-        ));
+        );
+        if (arenaId != null && !arenaId.isBlank()) {
+            event.arenaId = arenaId.trim();
+        }
+        eventsById.put(eventId, event);
         markDirty();
         refreshEventChunkRetention();
         return eventId;
+    }
+
+    public void setEventArenaId(UUID eventId, String arenaId) {
+        if (eventId == null || arenaId == null || arenaId.isBlank()) {
+            return;
+        }
+        EventData event = eventsById.get(eventId);
+        if (event == null) {
+            return;
+        }
+        event.arenaId = arenaId.trim();
+        markDirty();
+    }
+
+    public void setEventCurrentWave(UUID eventId, int waveNumber) {
+        if (eventId == null || waveNumber <= 0) {
+            return;
+        }
+        EventData event = eventsById.get(eventId);
+        if (event == null) {
+            return;
+        }
+        event.currentWaveNumber = Math.max(event.currentWaveNumber, waveNumber);
+        markDirty();
     }
 
     public void track(UUID uuid, String bossName, BossModifiers mods, String arenaId, World world, Vector3d spawnPos) {
@@ -973,6 +1015,9 @@ public class BossTrackingSystem {
         event.awaitingPrimaryBossSpawn = false;
         event.bossUuids.add(uuid);
         event.aliveBosses.add(uuid);
+        if (arenaId != null && !arenaId.isBlank()) {
+            event.arenaId = arenaId.trim();
+        }
         markDirty();
         refreshEventChunkRetention();
     }
@@ -1169,16 +1214,19 @@ public class BossTrackingSystem {
             if (!isEventInProgress(event)) {
                 continue;
             }
-            String arenaId = null;
-            for (UUID bossUuid : event.bossUuids) {
-                BossData b = trackedBosses.get(bossUuid);
-                if (b != null && b.arenaId != null && !b.arenaId.isBlank()) {
-                    arenaId = b.arenaId;
-                    break;
+            String arenaId = event.arenaId;
+            if (arenaId == null || arenaId.isBlank()) {
+                for (UUID bossUuid : event.bossUuids) {
+                    BossData b = trackedBosses.get(bossUuid);
+                    if (b != null && b.arenaId != null && !b.arenaId.isBlank()) {
+                        arenaId = b.arenaId;
+                        break;
+                    }
                 }
             }
             World resolvedWorld = resolveEventWorld(event);
             out.add(new ActiveEventStatus(
+                    eventId,
                     resolvedWorld,
                     event.eventCenter,
                     event.bossName,
@@ -1187,7 +1235,8 @@ public class BossTrackingSystem {
                     adds,
                     getRemainingCountdownMillis(event),
                     event.awaitingPrimaryBossSpawn,
-                    arenaId
+                    arenaId,
+                    event.currentWaveNumber
             ));
         }
         return out;
@@ -1258,6 +1307,7 @@ public class BossTrackingSystem {
             event.bossUuids.remove(uuid);
             if (event.bossUuids.isEmpty() && event.activeAdds.isEmpty()) {
                 eventsById.remove(eventId);
+                BossFightMusicService.stopForEvent(eventId);
             }
         }
 
@@ -1377,6 +1427,8 @@ public class BossTrackingSystem {
             clearBossAddMappings(bossUuid, event);
         }
 
+        BossFightMusicService.stopForEvent(eventId);
+
         return new PendingLootData(lootWorld, lootLocation, event.eventCenter, lootBossName, event.bossUuids, eventId);
     }
 
@@ -1435,6 +1487,7 @@ public class BossTrackingSystem {
         for (UUID bossUuid : new ArrayList<>(removed.bossUuids)) {
             bossToEvent.remove(bossUuid);
         }
+        BossFightMusicService.stopForEvent(eventId);
         markDirty();
         refreshEventChunkRetention();
     }
@@ -1630,6 +1683,7 @@ public class BossTrackingSystem {
     }
 
     public static class ActiveEventStatus {
+        public final UUID eventId;
         public final World world;
         public final Vector3d eventCenter;
         public final String bossName;
@@ -1640,8 +1694,10 @@ public class BossTrackingSystem {
         public final boolean awaitingPrimaryBossSpawn;
         /** Arena id for this event (may be null); used to resolve per-arena notification radius. */
         public final String arenaId;
+        public final int currentWaveNumber;
 
-        public ActiveEventStatus(World world,
+        public ActiveEventStatus(UUID eventId,
+                                 World world,
                                  Vector3d eventCenter,
                                  String bossName,
                                  String bossTier,
@@ -1649,7 +1705,9 @@ public class BossTrackingSystem {
                                  int activeAddCount,
                                  long remainingCountdownMillis,
                                  boolean awaitingPrimaryBossSpawn,
-                                 String arenaId) {
+                                 String arenaId,
+                                 int currentWaveNumber) {
+            this.eventId = eventId;
             this.world = world;
             this.eventCenter = eventCenter == null ? null : new Vector3d(eventCenter.x, eventCenter.y, eventCenter.z);
             this.bossName = bossName;
@@ -1659,6 +1717,7 @@ public class BossTrackingSystem {
             this.remainingCountdownMillis = remainingCountdownMillis;
             this.awaitingPrimaryBossSpawn = awaitingPrimaryBossSpawn;
             this.arenaId = arenaId;
+            this.currentWaveNumber = Math.max(0, currentWaveNumber);
         }
     }
 
@@ -1697,6 +1756,8 @@ public class BossTrackingSystem {
         private final Set<UUID> activeAdds = ConcurrentHashMap.newKeySet();
         private World world;
         private volatile boolean awaitingPrimaryBossSpawn;
+        private volatile String arenaId;
+        private volatile int currentWaveNumber;
 
         private EventData(UUID eventId,
                           World world,

@@ -337,13 +337,20 @@ public class BossLootHandler {
         if (CHEST_LOOT.containsKey(key) && isWorldMatch(world, key)) {
             return key;
         }
+        Vector3d best = null;
+        double bestDist = Double.MAX_VALUE;
         for (Vector3d chestLoc : CHEST_LOOT.keySet()) {
+            if (!isWorldMatch(world, chestLoc)) {
+                continue;
+            }
             double dist = chestLoc.distance(location);
-            if (dist < 2.0 && isWorldMatch(world, chestLoc)) {
-                return chestLoc;
+            // Player feet are often ~1 block above the chest block key.
+            if (dist < 5.0 && dist < bestDist) {
+                bestDist = dist;
+                best = chestLoc;
             }
         }
-        return null;
+        return best;
     }
 
     // Claim loot for a player
@@ -621,26 +628,119 @@ public class BossLootHandler {
 
     private static void replaceChestState(World world, int x, int y, int z, Vector3d originalLocation) {
         try {
-            Holder<ChunkStore> holder = world.getBlockComponentHolder(x, y, z);
-            if (holder == null) {
-                LOGGER.warning("No block component holder for boss chest at " + x + "," + y + "," + z);
-                return;
+            if (!attachBossLootChestBlock(world, x, y, z, originalLocation)) {
+                LOGGER.warning("Failed to attach BossLootChestBlock at " + x + "," + y + "," + z);
             }
-
-            tryRemoveItemContainerBlockComponent(holder);
-            holder.tryRemoveComponent(BossLootChestBlock.getComponentType());
-
-            BossLootChestBlock custom = new BossLootChestBlock(new Vector3d(
-                    originalLocation.x,
-                    originalLocation.y,
-                    originalLocation.z
-            ));
-            holder.putComponent(BossLootChestBlock.getComponentType(), custom);
-
-            LOGGER.info("Replaced chest block components with BossLootChestBlock");
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error replacing chest block components", e);
+        }
+    }
+
+    /**
+     * Persist {@link BossLootChestBlock} on the live block entity.
+     * {@code World#getBlockComponentHolder} returns a copy — mutating it alone does nothing.
+     */
+    public static boolean attachBossLootChestBlock(World world, int x, int y, int z, Vector3d lootOrigin) {
+        if (world == null) {
+            return false;
+        }
+        Vector3d origin = lootOrigin != null
+                ? new Vector3d(lootOrigin.x, lootOrigin.y, lootOrigin.z)
+                : new Vector3d(x, y, z);
+        BossLootChestBlock custom = new BossLootChestBlock(origin);
+
+        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
+        if (chunk == null) {
+            LOGGER.warning("Chunk not loaded for BossLootChestBlock at " + x + "," + y + "," + z);
+            return false;
+        }
+
+        int localX = x & 31;
+        int localZ = z & 31;
+        BlockType blockType = world.getBlockType(x, y, z);
+        int rotation = chunk.getRotationIndex(localX, y, localZ);
+
+        // Preferred: mutate the live ChunkStore entity.
+        try {
+            var entityRef = chunk.getBlockComponentEntity(localX, y, localZ);
+            if (entityRef != null) {
+                Store<ChunkStore> chunkStore = entityRef.getStore();
+                if (chunkStore != null) {
+                    tryRemoveItemContainerBlockComponentLive(chunkStore, entityRef);
+                    chunkStore.putComponent(entityRef, BossLootChestBlock.getComponentType(), custom);
+                    if (BossLootChestBlock.getAt(world, x, y, z) != null) {
+                        LOGGER.info("Attached BossLootChestBlock via live entity at " + x + "," + y + "," + z);
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Live entity attach failed at " + x + "," + y + "," + z, e);
+        }
+
+        // Fallback: write a holder through setState (BlockEntity.setBlockEntity).
+        try {
+            Holder<ChunkStore> holder = world.getBlockComponentHolder(x, y, z);
+            if (holder == null) {
+                holder = ChunkStore.REGISTRY.newHolder();
+            }
+            tryRemoveItemContainerBlockComponent(holder);
+            holder.tryRemoveComponent(BossLootChestBlock.getComponentType());
+            holder.putComponent(BossLootChestBlock.getComponentType(), custom);
+            if (blockType != null) {
+                chunk.setState(localX, y, localZ, blockType, rotation, holder);
+            }
+            boolean ok = BossLootChestBlock.getAt(world, x, y, z) != null;
+            if (ok) {
+                LOGGER.info("Attached BossLootChestBlock via setState at " + x + "," + y + "," + z);
+            } else {
+                LOGGER.warning("BossLootChestBlock still missing after setState at " + x + "," + y + "," + z);
+            }
+            return ok;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "setState attach failed at " + x + "," + y + "," + z, e);
+            return false;
+        }
+    }
+
+    /**
+     * If the chest block exists but lost its component, re-attach using CHEST_LOOT near the block.
+     */
+    public static BossLootChestBlock ensureBossLootChestBlock(World world, int x, int y, int z) {
+        BossLootChestBlock existing = BossLootChestBlock.getAt(world, x, y, z);
+        if (existing != null) {
+            return existing;
+        }
+        Vector3d blockPos = new Vector3d(x, y, z);
+        Vector3d lootKey = getChestLocationNear(world, blockPos);
+        if (lootKey == null) {
+            // Still allow open path to create an empty-looking chest marker when block is ours.
+            BlockType type = world != null ? world.getBlockType(x, y, z) : null;
+            String id = type != null ? type.getId() : null;
+            if (id == null || !id.contains("Boss_Arena_Chest")) {
+                return null;
+            }
+            lootKey = blockPos;
+        }
+        if (!attachBossLootChestBlock(world, x, y, z, lootKey)) {
+            return null;
+        }
+        return BossLootChestBlock.getAt(world, x, y, z);
+    }
+
+    private static void tryRemoveItemContainerBlockComponentLive(
+            Store<ChunkStore> store,
+            com.hypixel.hytale.component.Ref<ChunkStore> ref) {
+        if (store == null || ref == null) {
+            return;
+        }
+        try {
+            Class<?> cls = Class.forName("com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock");
+            @SuppressWarnings("unchecked")
+            ComponentType<ChunkStore, ?> type =
+                    (ComponentType<ChunkStore, ?>) cls.getMethod("getComponentType").invoke(null);
+            store.tryRemoveComponent(ref, type);
+        } catch (Throwable ignored) {
         }
     }
 

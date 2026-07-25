@@ -508,7 +508,7 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
                             : boss.bossName;
                     out.description = configured != null && !isBlank(configured.description)
                             ? configured.description
-                            : ("Invoquer " + boss.bossName + " à " + out.arenaId);
+                            : ("Invoquer " + boss.bossName + " dans l'arène " + out.arenaId);
                     out.icon = configured != null ? configured.icon : "";
 
                     tableEntries.add(out);

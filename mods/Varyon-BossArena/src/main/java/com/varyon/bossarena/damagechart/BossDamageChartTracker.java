@@ -31,6 +31,19 @@ public final class BossDamageChartTracker {
                 .add(amount);
     }
 
+    /** Peek damage dealt by a player in an event without clearing the tally. */
+    public long getDamage(UUID eventId, UUID playerUuid) {
+        if (eventId == null || playerUuid == null) {
+            return 0L;
+        }
+        Map<UUID, LongAdder> perPlayer = byEvent.get(eventId);
+        if (perPlayer == null) {
+            return 0L;
+        }
+        LongAdder adder = perPlayer.get(playerUuid);
+        return adder == null ? 0L : Math.max(0L, adder.sum());
+    }
+
     /**
      * Take a snapshot of damage per player for the event, then remove the event's data.
      * Call from loot handling when the event completes. Returns entries sorted by damage descending.

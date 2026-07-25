@@ -125,7 +125,9 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
                     event.remainingCountdownMillis,
                     event.awaitingPrimaryBossSpawn || event.aliveBossCount > 0 || event.activeAddCount > 0,
                     true,
-                    notificationRadius
+                    notificationRadius,
+                    event.eventId,
+                    event.currentWaveNumber
             );
         }
     }
@@ -181,7 +183,12 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
                         0,
                         0,
                         null,
-                        0L
+                        0L,
+                        false,
+                        true,
+                        -1.0d,
+                        pendingLoot.eventId,
+                        0
                 );
                 BossLootHandler.queueLootSpawn(pendingLoot.world, pendingLoot.spawnLocation, pendingLoot.bossName, pendingLoot.eventId);
                 continue;
@@ -244,7 +251,12 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
                         0,
                         0,
                         null,
-                        0L
+                        0L,
+                        false,
+                        true,
+                        -1.0d,
+                        pendingLoot.eventId,
+                        0
                 );
                 BossLootHandler.queueLootSpawn(pendingLoot.world, pendingLoot.spawnLocation, pendingLoot.bossName, pendingLoot.eventId);
                 continue;

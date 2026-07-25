@@ -12,9 +12,27 @@ public class BossDefinition {
     // 0 = default RPGLeveling behavior, >=1 forces a specific spawn level.
     public int levelOverride = 0;
 
+    /**
+     * Basename of an OGG in the BossArena {@code music/} folder (optional). Empty = no fight music.
+     */
+    public String musicFileName = "";
+    /** Sphere radius (blocks) around the encounter center for fight music. Default 30. */
+    public double musicRadius = 30.0d;
+
     public Modifiers modifiers = new Modifiers();
     public PerPlayerIncrease perPlayerIncrease = new PerPlayerIncrease();
     public ExtraMobs extraMobs = new ExtraMobs();
+
+    public boolean hasFightMusic() {
+        return musicFileName != null && !musicFileName.isBlank();
+    }
+
+    public double getMusicRadius() {
+        if (!Double.isFinite(musicRadius) || musicRadius <= 0.0d) {
+            return 30.0d;
+        }
+        return musicRadius;
+    }
 
     /**
      * One-time migration of the legacy per-boss timed proximity settings onto arenas.
@@ -171,10 +189,16 @@ public class BossDefinition {
             if (trigger == null) {
                 return null;
             }
+            // Fold legacy "on_spawn" into "after_spawn_seconds" at 0s (Avec le boss, immédiat).
+            double triggerValue = Double.isFinite(wave.triggerValue) ? wave.triggerValue : 0.0d;
+            if (TRIGGER_ON_SPAWN.equals(trigger)) {
+                trigger = TRIGGER_AFTER_SPAWN_SECONDS;
+                triggerValue = 0.0d;
+            }
 
             ScheduledWave out = new ScheduledWave();
             out.trigger = trigger;
-            out.triggerValue = Double.isFinite(wave.triggerValue) ? wave.triggerValue : 0.0d;
+            out.triggerValue = triggerValue;
             out.repeatCount = wave.repeatCount == 0 ? 1 : wave.repeatCount;
             if (out.repeatCount < -1) {
                 out.repeatCount = -1;

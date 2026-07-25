@@ -24,8 +24,12 @@ import com.varyon.bossarena.system.RPGLevelingBossScaleCompatSystem;
 import com.varyon.bossarena.loot.LootRegistry;
 import com.varyon.bossarena.loot.BossLootHandler;
 import com.varyon.bossarena.loot.BossLootChestBlock;
+import com.varyon.bossarena.loot.BossLootChestOpener;
+import com.varyon.bossarena.loot.BossLootChestUseSystem;
 import com.varyon.bossarena.util.BossArenaCleanup;
 import com.varyon.bossarena.loot.OpenBossChestInteraction;
+import com.varyon.bossarena.music.BossFightMusicApplySystem;
+import com.varyon.bossarena.music.BossFightMusicManager;
 import com.varyon.bossarena.shop.BossShopConfig;
 import com.varyon.bossarena.shop.BossArenaShopPage;
 import com.varyon.bossarena.shop.OpenBossShopNpcInteraction;
@@ -101,6 +105,7 @@ public final class BossArenaPlugin extends JavaPlugin {
     private BossSpawnService bossSpawnService;
     private BossTimedSpawnScheduler timedSpawnScheduler;
     private TimedBossMapMarkerService timedBossMapMarkerService;
+    private BossFightMusicManager fightMusicManager;
     private Path bossesJsonPath;
     private Path arenasJsonPath;
     private Path lootTablesPath;
@@ -252,6 +257,10 @@ public final class BossArenaPlugin extends JavaPlugin {
         return timedBossMapMarkerService;
     }
 
+    public BossFightMusicManager getFightMusicManager() {
+        return fightMusicManager;
+    }
+
     /**
      * Lifecycle: setup() registers codecs, interactions, asset pack, blocks, ECS systems, commands, and paths;
      * then loads config and starts async {@link #startBossArenaSystems()} (persistence, bosses/arenas/loot, timed spawns).
@@ -289,11 +298,14 @@ public final class BossArenaPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new BossEventNotificationSystem(trackingSystem, this));
         this.getEntityStoreRegistry().registerSystem(new BossEntityRemovedSystem(trackingSystem, this));
         this.getEntityStoreRegistry().registerSystem(new RPGLevelingBossScaleCompatSystem(trackingSystem));
+        this.fightMusicManager = new BossFightMusicManager(getModRootDirectory().resolve("music"));
+        this.getEntityStoreRegistry().registerSystem(new BossFightMusicApplySystem(fightMusicManager));
+        this.getEntityStoreRegistry().registerSystem(new BossLootChestUseSystem());
         getLogger().atInfo().log("Registered BossArena HP scale compatibility system "
                 + "(activates only when RPGLeveling is loaded)");
         getLogger().atInfo().log("Successfully registered boss systems");
 
-        // Register chest interaction event
+        // Fallback chest open (UseBlockEvent.Pre is the primary path via BossLootChestUseSystem)
         this.getEventRegistry().registerGlobal(
                 LivingEntityUseBlockEvent.class,
                 this::onBlockInteract
@@ -528,8 +540,10 @@ public final class BossArenaPlugin extends JavaPlugin {
 
         String blockType = event.getBlockType();
 
-        // Check if it's a chest
-        if (!blockType.contains("Chest_Legendary") && !blockType.contains("Furniture_Dungeon_Chest")) {
+        // Check if it's a boss loot chest (custom or fallback vanilla legendary)
+        if (!blockType.contains("Boss_Arena_Chest")
+                && !blockType.contains("Chest_Legendary")
+                && !blockType.contains("Furniture_Dungeon_Chest")) {
             return;
         }
 
@@ -552,7 +566,7 @@ public final class BossArenaPlugin extends JavaPlugin {
         org.joml.Vector3d rawPlayerPos = ((TransformComponent) transformObj).getPosition();
         Vector3d playerPos = VecUtil.toJoml(rawPlayerPos);
 
-        // Find chest location near player (within 5 blocks)
+        // Prefer loot keyed near the player; OpenBossChestInteraction uses exact block coords.
         Vector3d chestLoc = BossLootHandler.getChestLocationNear(playerWorld, playerPos);
         if (chestLoc == null) {
             getLogger().atInfo().log("No boss loot chest nearby");
@@ -563,13 +577,14 @@ public final class BossArenaPlugin extends JavaPlugin {
         int y = (int) Math.floor(chestLoc.y);
         int z = (int) Math.floor(chestLoc.z);
 
-        if (BossLootChestBlock.getAt(playerWorld, x, y, z) == null) {
-            getLogger().atWarning().log("Chest nearby but block has no BossLootChestBlock component");
+        if (BossLootHandler.ensureBossLootChestBlock(playerWorld, x, y, z) == null) {
+            getLogger().atWarning().log("Chest nearby but could not attach BossLootChestBlock at "
+                    + x + "," + y + "," + z);
             return;
         }
 
-        getLogger().atInfo().log("Found BossLootChestBlock at boss loot chest");
-        // Chest interaction is handled by OpenBossChestInteraction when the player uses the block.
+        getLogger().atInfo().log("Opening BossLootChestBlock at " + x + "," + y + "," + z);
+        BossLootChestOpener.open(playerWorld, playerRef, store, null, x, y, z);
     }
 
     private void onPlayerInteract(PlayerInteractEvent event) {
@@ -955,6 +970,10 @@ public final class BossArenaPlugin extends JavaPlugin {
         try {
             getLogger().atInfo().log("Starting BossArena systems...");
 
+            if (fightMusicManager != null) {
+                fightMusicManager.start();
+            }
+
             BossLootHandler.initializePersistence(lootChestStatePath);
             getLogger().atInfo().log("Loot chest persistence initialized at " + lootChestStatePath);
             trackingSystem.initializePersistence(bossFightStatePath);
@@ -1031,6 +1050,10 @@ public final class BossArenaPlugin extends JavaPlugin {
 
             if (timedSpawnScheduler != null) {
                 timedSpawnScheduler.shutdown();
+            }
+
+            if (fightMusicManager != null) {
+                fightMusicManager.shutdown();
             }
 
             if (timedBossMapMarkerService != null) {

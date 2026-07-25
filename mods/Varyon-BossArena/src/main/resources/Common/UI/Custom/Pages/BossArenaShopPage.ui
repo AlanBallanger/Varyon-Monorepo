@@ -1,10 +1,17 @@
 Group {
-  Anchor: (Left: 0, Top: 0, Width: 1920, Height: 1080);
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
 
   Panel #Overlay {
-    Anchor: (Left: 0, Top: 0, Width: 1920, Height: 1080);
+    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
     Background: #000000(0.45);
   }
+
+  Group #Center {
+    LayoutMode: Middle;
+    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+
+  Group #Window {
+    Anchor: (Width: 1920, Height: 1080);
 
   Panel #Background {
     Anchor: (Left: 330, Top: 88, Width: 1260, Height: 904);
@@ -317,5 +324,7 @@ Group {
         Disabled: (Background: #334358, LabelStyle: (FontSize: 15, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
       );
     }
+  }
+  }
   }
 }

@@ -31,26 +31,7 @@
     "Material": "Solid",
     "Opacity": "Transparent",
     "State": {
-      "Id": "container",
-      "Capacity": 27,
-      "Definitions": {
-        "OpenWindow": {
-          "InteractionSoundEventId": "SFX_Chest_Wooden_Open",
-          "CustomModelAnimation": "Blocks/Animations/Chest/Chest_Open.blockyanim",
-          "State": {
-            "Definitions": {
-              "CloseWindow": {
-                "InteractionSoundEventId": "SFX_Chest_Wooden_Close",
-                "CustomModelAnimation": "Blocks/Animations/Chest/Chest_Close.blockyanim"
-              },
-              "OpenWindow": {
-                "InteractionSoundEventId": "SFX_Chest_Wooden_Open",
-                "CustomModelAnimation": "Blocks/Animations/Chest/Chest_Open.blockyanim"
-              }
-            }
-          }
-        }
-      }
+      "Id": "container"
     },
     "Supporting": {
       "Up": [

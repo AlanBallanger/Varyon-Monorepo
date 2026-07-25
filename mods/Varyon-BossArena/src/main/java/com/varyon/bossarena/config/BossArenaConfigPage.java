@@ -14,6 +14,7 @@ import com.varyon.bossarena.data.BossRegistry;
 import com.varyon.bossarena.loot.LootItem;
 import com.varyon.bossarena.loot.LootRegistry;
 import com.varyon.bossarena.loot.LootTable;
+import com.varyon.bossarena.music.BossFightMusicService;
 import com.varyon.bossarena.shop.BossShopConfig;
 import com.varyon.bossarena.shop.ShopEntry;
 import com.hypixel.hytale.codec.Codec;
@@ -69,6 +70,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private static final float MULT_SIZE_MAX = 10.00f;
     private static final float MULT_PERS_MIN = 0.00f;
     private static final float MULT_PERS_MAX = 5.00f;
+    private static final float MULT_SCALE_MIN = 0.10f;
+    private static final float MULT_SCALE_MAX = 10.00f;
     private static final int MAX_TIMED_SPAWN_ROWS = 6;
     private static final int BOSS_SCROLL_THUMB_STEPS = 10;
     private static final int SHOP_CONTRACT_PRICE_STEP = 25;
@@ -86,7 +89,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
     private BossEditorState bossEditorState;
     private boolean bossWavesOverlayOpen;
-    private boolean bossScalersOverlayOpen;
     /** Index (0-based) of the ScheduledWave currently being edited in the waves overlay. */
     private int bossWavePageIndex;
     /** Offset into the unbounded loot list for the visible loot window. */
@@ -153,15 +155,15 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
     private static String defaultWaveTriggerInput(int row, boolean useExamples) {
         if (!useExamples) {
-            return "Après spawn";
+            return "Avant le boss";
         }
         if (row == 1) {
-            return "3";
+            return "1";
         }
         if (row == 2) {
-            return "Après spawn";
+            return "Avant le boss";
         }
-        return "Après spawn";
+        return "Avant le boss";
     }
 
     private static int defaultWaveValueSeconds(int row, boolean useExamples) {
@@ -191,6 +193,16 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     }
 
     private static String normalizeWaveTriggerInput(String input) {
+        String raw = optionalText(input).trim().toLowerCase(Locale.ROOT).replace('-', '_').replace(' ', '_');
+        if (BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS.equals(raw)
+                || BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS.equals(raw)
+                || BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE.equals(raw)
+                || BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(raw)) {
+            return raw;
+        }
+        if (BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN.equals(raw)) {
+            return BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS;
+        }
         String cleaned = optionalText(input)
                 .toLowerCase(Locale.ROOT)
                 .replace('_', ' ')
@@ -203,42 +215,56 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         return switch (cleaned) {
             case "1", "before boss", "before", "pre", "pre boss", "bb",
                  "avant le boss", "avant", "avant boss" -> BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS;
+            // "Avec le boss" merges old Au spawn + Après spawn: delay in Sec (0 = immédiat).
             case "2", "on spawn", "spawn", "at spawn", "on boss spawn", "with boss", "os",
-                 "au spawn", "a spawn", "avec boss" ->
-                    BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN;
-            case "after spawn seconds", "after spawn", "after", "seconds", "time", "timer", "after spawn second",
+                 "au spawn", "a spawn", "avec boss", "avec le boss",
+                 "after spawn seconds", "after spawn", "after", "seconds", "time", "timer", "after spawn second",
                  "apres spawn", "après spawn", "apres", "après", "secondes",
-                 "apres spawn secondes", "après spawn secondes" ->
+                 "apres spawn secondes", "après spawn secondes",
+                 "3", "as", "after s" ->
                     BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS;
-            case "3", "as", "after s" -> BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS;
             case "since last wave", "since last wave second", "since last wave seconds", "since wave", "last wave",
                  "wave delay", "since previous wave", "since last",
                  "depuis derniere vague", "depuis dernière vague", "depuis vague",
                  "derniere vague", "dernière vague", "delai vague", "délai vague",
-                 "depuis derniere", "depuis dernière" -> BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE;
-            case "4", "slw", "since", "depuis" -> BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE;
+                 "depuis derniere", "depuis dernière",
+                 "apres vague precedente", "après vague précédente", "apres vague précédente",
+                 "après vague precedente", "vague precedente", "vague précédente",
+                 "4", "slw", "since", "depuis" -> BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE;
             case "boss hp percent", "boss health percent", "hp percent", "health percent", "boss hp", "boss health",
-                 "hp", "pv boss", "pv boss percent", "pv percent", "vie boss" -> BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT;
-            case "5", "hpp", "health" -> BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT;
+                 "hp", "pv boss", "pv boss percent", "pv percent", "vie boss",
+                 "5", "hpp", "health" -> BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT;
             default -> null;
         };
     }
 
+    /** Dropdown / storage id shown in the wave editor (on_spawn folded into after_spawn_seconds). */
+    private static String toWaveTriggerDropdownValue(String trigger) {
+        String normalized = normalizeWaveTriggerInput(trigger);
+        if (normalized == null || normalized.isBlank()) {
+            return BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS;
+        }
+        return normalized;
+    }
+
     private static String toWaveTriggerDisplayName(String trigger) {
         String normalized = normalizeWaveTriggerInput(trigger);
-        if (BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS.equals(normalized)) {
-            return "Avant le boss";
-        }
-        if (BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN.equals(normalized)) {
-            return "Au spawn";
+        if (BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS.equals(normalized)) {
+            return "Avec le boss";
         }
         if (BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE.equals(normalized)) {
-            return "Depuis dernière vague";
+            return "Après vague précédente";
         }
         if (BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(normalized)) {
             return "PV boss %";
         }
-        return "Après spawn";
+        return "Avant le boss";
+    }
+
+    private static String waveTriggerValueUnitLabel(String trigger) {
+        return BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(normalizeWaveTriggerInput(trigger))
+                ? "%"
+                : "Sec";
     }
 
     private static WaveScheduleRow copyWaveScheduleRow(WaveScheduleRow source) {
@@ -270,8 +296,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         add.damage = 1.0f;
         add.size = 1.0f;
         return new WaveScheduleRow(
-                BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS,
-                30.0d,
+                BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS,
+                0.0d,
                 1,
                 0.0d,
                 add
@@ -430,12 +456,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
     private static String toBossSpawnTriggerDisplayName(String trigger) {
         if (BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_BEFORE_BOSS.equals(trigger)) {
-            return "Après fin des vagues";
+            return "Fin des vagues";
         }
         if (BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_SECONDS.equals(trigger)) {
             return "Après délai";
         }
-        return trigger != null ? trigger : "Après fin des vagues";
+        return trigger != null ? trigger : "Fin des vagues";
     }
 
     private static String normalizeBossSpawnTriggerInput(String input) {
@@ -454,6 +480,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 || normalized.contains("après pré-boss")
                 || normalized.contains("fin des vagues")
                 || normalized.contains("fin vagues")
+                || normalized.equals("fin des vagues")
                 || normalized.contains("after before boss")) {
             return BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_BEFORE_BOSS;
         }
@@ -518,6 +545,20 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     }
 
     @Nonnull
+    private static List<DropdownEntryInfo> musicDropdownEntries(List<String> musicFiles) {
+        List<DropdownEntryInfo> entries = new ArrayList<>();
+        entries.add(new DropdownEntryInfo(LocalizableString.fromString("(aucune)"), ""));
+        if (musicFiles != null) {
+            for (String file : musicFiles) {
+                if (file == null || file.isBlank()) {
+                    continue;
+                }
+                entries.add(new DropdownEntryInfo(LocalizableString.fromString(file), file));
+            }
+        }
+        return entries;
+    }
+
     private static List<DropdownEntryInfo> arenaDropdownEntries() {
         List<Arena> arenas = new ArrayList<>(ArenaRegistry.getAll());
         arenas.sort(Comparator.comparing(a -> a.arenaId == null ? "" : a.arenaId, String.CASE_INSENSITIVE_ORDER));
@@ -833,6 +874,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         out.tier = source != null ? normalizeTier(source.tier) : "common";
         out.amount = source != null ? source.amount : 1;
         out.levelOverride = source != null ? Math.max(0, source.levelOverride) : 0;
+        out.musicFileName = source != null && source.musicFileName != null ? source.musicFileName : "";
+        out.musicRadius = source != null ? source.getMusicRadius() : 30.0d;
 
         out.modifiers = new BossDefinition.Modifiers();
         if (source != null && source.modifiers != null) {
@@ -1673,6 +1716,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
+        if (action.startsWith("arena_here_")) {
+            handleArenaMoveHere(action.substring("arena_here_".length()), ref, store);
+            return;
+        }
+
         if (action.startsWith("arena_save_")) {
             handleArenaSave(action.substring("arena_save_".length()), data, null);
             return;
@@ -1718,6 +1766,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             cmd.set("#ArenaProxRadius" + suffix + ".Value", formatCoord(arena.getProximityRadius()));
 
             events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaDelete" + suffix, EventData.of("Action", "arena_delete_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaHere" + suffix, EventData.of("Action", "arena_here_" + row));
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
                     "#ArenaSave" + suffix,
@@ -1785,6 +1834,49 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         plugin.saveArenas();
         arenaStatusText = "Arène '" + arenaId + "' supprimée.";
+        rebuild();
+    }
+
+    private void handleArenaMoveHere(String rowToken, Ref<EntityStore> ref, Store<EntityStore> store) {
+        int row = parseRow(rowToken);
+        if (row < 1 || row > arenaRows.size()) {
+            arenaStatusText = "Sélection de ligne arène invalide.";
+            rebuild();
+            return;
+        }
+
+        String arenaId = arenaRows.get(row - 1);
+        Arena arena = ArenaRegistry.get(arenaId);
+        if (arena == null) {
+            arenaStatusText = "L'arène '" + arenaId + "' n'existe plus.";
+            rebuild();
+            return;
+        }
+
+        Player player = store.getComponent(ref, Player.getComponentType());
+        com.hypixel.hytale.server.core.universe.PlayerRef playerRef =
+                store.getComponent(ref, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType());
+        World world = playerRef != null
+                ? com.hypixel.hytale.server.core.universe.Universe.get().getWorld(playerRef.getWorldUuid())
+                : null;
+        Object transformObj = store.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+        org.joml.Vector3d rawPosition = transformObj instanceof com.hypixel.hytale.server.core.modules.entity.component.TransformComponent tc
+                ? tc.getPosition()
+                : null;
+        if (player == null || world == null || rawPosition == null) {
+            arenaStatusText = "Impossible de résoudre votre position.";
+            rebuild();
+            return;
+        }
+
+        arena.worldName = world.getName();
+        arena.x = rawPosition.x;
+        arena.y = rawPosition.y;
+        arena.z = rawPosition.z;
+        plugin.saveArenas();
+        arenaStatusText = "Arène '" + arenaId + "' déplacée ici : "
+                + formatCoord(arena.x) + ", " + formatCoord(arena.y) + ", " + formatCoord(arena.z)
+                + " (" + arena.worldName + ").";
         rebuild();
     }
 
@@ -1878,7 +1970,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         if ("boss_editor_close".equals(action)) {
             bossEditorState = null;
             bossWavesOverlayOpen = false;
-            bossScalersOverlayOpen = false;
             bossNpcPicksOpen = false;
             bossStatusText = "";
             rebuild();
@@ -1888,8 +1979,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         if ("boss_waves_open".equals(action)) {
             if (bossEditorState != null) {
                 bossWavesOverlayOpen = true;
-                bossScalersOverlayOpen = false;
-                bossWavePageIndex = 0;
+                    bossWavePageIndex = 0;
                 waveNpcPicksOpen = false;
                 waveNpcPicksRow = 0;
                 waveNpcSearchQuery = "";
@@ -1905,6 +1995,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         if ("boss_wave_page_next".equals(action)) {
             handleBossWavePageChange(1, data);
+            return;
+        }
+
+        if ("boss_wave_trigger_changed".equals(action)) {
+            handleBossWaveTriggerChanged(data);
             return;
         }
 
@@ -1997,25 +2092,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
-        if ("boss_scalers_open".equals(action)) {
-            if (bossEditorState != null) {
-                bossScalersOverlayOpen = true;
-                bossWavesOverlayOpen = false;
-                rebuild();
-            }
-            return;
-        }
-
-        if ("boss_scalers_close".equals(action)) {
-            bossScalersOverlayOpen = false;
-            rebuild();
-            return;
-        }
-
-        if ("boss_scalers_save".equals(action)) {
-            handleBossScalersSave(data);
-            return;
-        }
 
         if (action.startsWith("boss_loot_add_row_")) {
             handleBossLootAddRow(action.substring("boss_loot_add_row_".length()), data);
@@ -2166,33 +2242,61 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         float ppDmg = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.damage, MULT_PERS_MIN, MULT_PERS_MAX);
         float ppSize = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.size, MULT_PERS_MIN, MULT_PERS_MAX);
 
+        float speed = BossArenaConfigUiControls.clampFloat(boss.modifiers.movementSpeed, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        float attackRate = BossArenaConfigUiControls.clampFloat(boss.modifiers.attackRate, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        float abilityCooldown = BossArenaConfigUiControls.clampFloat(boss.modifiers.abilityCooldown, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        float kbGiven = BossArenaConfigUiControls.clampFloat(boss.modifiers.knockbackGiven, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        float kbTaken = BossArenaConfigUiControls.clampFloat(boss.modifiers.knockbackTaken, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        float turnRate = BossArenaConfigUiControls.clampFloat(boss.modifiers.turnRate, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        float regen = BossArenaConfigUiControls.clampFloat(boss.modifiers.regen, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        float ppSpeed = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.movementSpeed, MULT_PERS_MIN, MULT_PERS_MAX);
+        float ppAttackRate = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.attackRate, MULT_PERS_MIN, MULT_PERS_MAX);
+        float ppAbilityCooldown = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.abilityCooldown, MULT_PERS_MIN, MULT_PERS_MAX);
+        float ppKbGiven = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.knockbackGiven, MULT_PERS_MIN, MULT_PERS_MAX);
+        float ppKbTaken = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.knockbackTaken, MULT_PERS_MIN, MULT_PERS_MAX);
+        float ppTurnRate = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.turnRate, MULT_PERS_MIN, MULT_PERS_MAX);
+        float ppRegen = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.regen, MULT_PERS_MIN, MULT_PERS_MAX);
+
         cmd.set("#BossEditHp.Value", hpMult);
         cmd.set("#BossEditDamage.Value", dmgMult);
         cmd.set("#BossEditSize.Value", sizeMult);
+        cmd.set("#BossEditSpeed.Value", speed);
+        cmd.set("#BossEditAttackRate.Value", attackRate);
+        cmd.set("#BossEditAbilityCooldown.Value", abilityCooldown);
+        cmd.set("#BossEditKnockbackGiven.Value", kbGiven);
+        cmd.set("#BossEditKnockbackTaken.Value", kbTaken);
+        cmd.set("#BossEditTurnRate.Value", turnRate);
+        cmd.set("#BossEditRegen.Value", regen);
         cmd.set("#BossEditPpHp.Value", ppHp);
         cmd.set("#BossEditPpDamage.Value", ppDmg);
         cmd.set("#BossEditPpSize.Value", ppSize);
+        cmd.set("#BossEditPpSpeed.Value", ppSpeed);
+        cmd.set("#BossEditPpAttackRate.Value", ppAttackRate);
+        cmd.set("#BossEditPpAbilityCooldown.Value", ppAbilityCooldown);
+        cmd.set("#BossEditPpKnockbackGiven.Value", ppKbGiven);
+        cmd.set("#BossEditPpKnockbackTaken.Value", ppKbTaken);
+        cmd.set("#BossEditPpTurnRate.Value", ppTurnRate);
+        cmd.set("#BossEditPpRegen.Value", ppRegen);
         cmd.set("#BossEditHpValue.Text", formatFloat(hpMult));
         cmd.set("#BossEditDamageValue.Text", formatFloat(dmgMult));
         cmd.set("#BossEditSizeValue.Text", formatFloat(sizeMult));
+        cmd.set("#BossEditSpeedValue.Text", formatFloat(speed));
+        cmd.set("#BossEditAttackRateValue.Text", formatFloat(attackRate));
+        cmd.set("#BossEditAbilityCooldownValue.Text", formatFloat(abilityCooldown));
+        cmd.set("#BossEditKnockbackGivenValue.Text", formatFloat(kbGiven));
+        cmd.set("#BossEditKnockbackTakenValue.Text", formatFloat(kbTaken));
+        cmd.set("#BossEditTurnRateValue.Text", formatFloat(turnRate));
+        cmd.set("#BossEditRegenValue.Text", formatFloat(regen));
         cmd.set("#BossEditPpHpValue.Text", formatFloat(ppHp));
         cmd.set("#BossEditPpDamageValue.Text", formatFloat(ppDmg));
         cmd.set("#BossEditPpSizeValue.Text", formatFloat(ppSize));
-
-        cmd.set("#BossEditSpeed.Value", formatFloat(boss.modifiers.movementSpeed));
-        cmd.set("#BossEditAttackRate.Value", formatFloat(boss.modifiers.attackRate));
-        cmd.set("#BossEditAbilityCooldown.Value", formatFloat(boss.modifiers.abilityCooldown));
-        cmd.set("#BossEditKnockbackGiven.Value", formatFloat(boss.modifiers.knockbackGiven));
-        cmd.set("#BossEditKnockbackTaken.Value", formatFloat(boss.modifiers.knockbackTaken));
-        cmd.set("#BossEditTurnRate.Value", formatFloat(boss.modifiers.turnRate));
-        cmd.set("#BossEditRegen.Value", formatFloat(boss.modifiers.regen));
-        cmd.set("#BossEditPpSpeed.Value", formatFloat(boss.perPlayerIncrease.movementSpeed));
-        cmd.set("#BossEditPpAttackRate.Value", formatFloat(boss.perPlayerIncrease.attackRate));
-        cmd.set("#BossEditPpAbilityCooldown.Value", formatFloat(boss.perPlayerIncrease.abilityCooldown));
-        cmd.set("#BossEditPpKnockbackGiven.Value", formatFloat(boss.perPlayerIncrease.knockbackGiven));
-        cmd.set("#BossEditPpKnockbackTaken.Value", formatFloat(boss.perPlayerIncrease.knockbackTaken));
-        cmd.set("#BossEditPpTurnRate.Value", formatFloat(boss.perPlayerIncrease.turnRate));
-        cmd.set("#BossEditPpRegen.Value", formatFloat(boss.perPlayerIncrease.regen));
+        cmd.set("#BossEditPpSpeedValue.Text", formatFloat(ppSpeed));
+        cmd.set("#BossEditPpAttackRateValue.Text", formatFloat(ppAttackRate));
+        cmd.set("#BossEditPpAbilityCooldownValue.Text", formatFloat(ppAbilityCooldown));
+        cmd.set("#BossEditPpKnockbackGivenValue.Text", formatFloat(ppKbGiven));
+        cmd.set("#BossEditPpKnockbackTakenValue.Text", formatFloat(ppKbTaken));
+        cmd.set("#BossEditPpTurnRateValue.Text", formatFloat(ppTurnRate));
+        cmd.set("#BossEditPpRegenValue.Text", formatFloat(ppRegen));
 
         applyBossNpcPicks(cmd, events, true);
         applyBossEditorScrollForNpcPicks(cmd);
@@ -2218,9 +2322,21 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#BossWaveRandomToggle", editorExtra.useRandomSpawnLocations);
         cmd.set("#BossWaveRandomRadius.Value", formatWaveNumber(editorExtra.getWaveRandomSpawnRadius()));
 
+        String musicFile = boss.musicFileName != null ? boss.musicFileName.trim() : "";
+        List<String> musicFiles = BossFightMusicService.listMusicFileNames();
+        boolean musicKnown = musicFile.isEmpty() || musicFiles.stream().anyMatch(f -> f.equalsIgnoreCase(musicFile));
+        List<DropdownEntryInfo> musicEntries = musicDropdownEntries(musicFiles);
+        cmd.set("#BossEditMusic.Entries", withExtraDropdownValue(musicEntries, musicFile, !musicFile.isEmpty() && !musicKnown));
+        cmd.set("#BossEditMusic.Value", musicFile);
+        cmd.set("#BossEditMusicRadius.Value", formatWaveNumber(boss.getMusicRadius()));
+        if (BossFightMusicService.listMusicFileNames().isEmpty()) {
+            cmd.set("#BossEditMusicHint.Text", "Dépose des .ogg dans Varyon-BossArena/music/");
+        } else {
+            cmd.set("#BossEditMusicHint.Text", "Fichiers dans Varyon-BossArena/music/*.ogg");
+        }
+
         events.addEventBinding(CustomUIEventBindingType.Activating, "#BossEditorCloseButton", EventData.of("Action", "boss_editor_close"));
         events.addEventBinding(CustomUIEventBindingType.Activating, "#BossEditWavesButton", EventData.of("Action", "boss_waves_open"));
-        events.addEventBinding(CustomUIEventBindingType.Activating, "#BossEditScalersButton", EventData.of("Action", "boss_scalers_open"));
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#BossSpawnAfterPreBoss",
@@ -2281,6 +2397,90 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         events.addEventBinding(
                 CustomUIEventBindingType.ValueChanged,
                 "#BossEditPpSize",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditSpeed",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditAttackRate",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditAbilityCooldown",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditKnockbackGiven",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditKnockbackTaken",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditTurnRate",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditRegen",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditPpSpeed",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditPpAttackRate",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditPpAbilityCooldown",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditPpKnockbackGiven",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditPpKnockbackTaken",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditPpTurnRate",
+                buildBossEditorSnapshotEvent("boss_slider_changed"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#BossEditPpRegen",
                 buildBossEditorSnapshotEvent("boss_slider_changed"),
                 false
         );
@@ -2365,12 +2565,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     : newEmptyScheduledWave();
 
             cmd.set("#BossWavePageLabel.Text", "Vague " + (bossWavePageIndex + 1) + " / " + pageCount);
-            String triggerId = normalizeWaveTriggerInput(current.trigger);
-            if (triggerId == null || triggerId.isBlank()) {
-                triggerId = BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS;
-            }
+            String rawTrigger = optionalText(current.trigger).trim().toLowerCase(Locale.ROOT).replace('-', '_').replace(' ', '_');
+            String triggerId = toWaveTriggerDropdownValue(current.trigger);
+            double triggerValue = BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN.equals(rawTrigger)
+                    ? 0.0d
+                    : current.triggerValue;
             cmd.set("#BossWaveTriggerField.Value", triggerId);
-            cmd.set("#BossWaveTriggerValueField.Value", formatWaveNumber(current.triggerValue));
+            cmd.set("#BossWaveTriggerValueFieldLabel.Text", waveTriggerValueUnitLabel(triggerId));
+            cmd.set("#BossWaveTriggerValueField.Value", formatWaveNumber(triggerValue));
             cmd.set("#BossWaveRepeatCountField.Value", Integer.toString(current.repeatCount));
             cmd.set("#BossWaveRepeatSecField.Value", "0");
 
@@ -2439,18 +2641,15 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     "#BossWaveDeletePageButton",
                     buildBossWavesSnapshotEvent("boss_wave_delete_page")
             );
+            events.addEventBinding(
+                    CustomUIEventBindingType.ValueChanged,
+                    "#BossWaveTriggerField",
+                    buildBossWavesSnapshotEvent("boss_wave_trigger_changed"),
+                    false
+            );
             applyWaveNpcPicks(cmd, events, true);
         }
 
-        cmd.set("#BossScalersOverlay.Visible", bossScalersOverlayOpen);
-        if (bossScalersOverlayOpen) {
-            events.addEventBinding(CustomUIEventBindingType.Activating, "#BossScalersCloseButton", EventData.of("Action", "boss_scalers_close"));
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    "#BossScalersSaveButton",
-                    buildBossEditorSnapshotEvent("boss_scalers_save")
-            );
-        }
     }
 
     private void buildBossTimedOverlay(UICommandBuilder cmd, UIEventBuilder events) {
@@ -3091,7 +3290,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append("@BossSpawnTrigger", "#BossSpawnTrigger.Value")
                 .append("@BossSpawnTriggerValue", "#BossSpawnTriggerValue.Value")
                 .append("@BossWaveRandomLocations", "#BossWaveRandomLocations.Value")
-                .append("@BossWaveRandomRadius", "#BossWaveRandomRadius.Value");
+                .append("@BossWaveRandomRadius", "#BossWaveRandomRadius.Value")
+                .append("@BossEditMusic", "#BossEditMusic.Value")
+                .append("@BossEditMusicRadius", "#BossEditMusicRadius.Value");
 
         for (int row = 1; row <= MAX_LOOT_ROWS; row++) {
             String suffix = Integer.toString(row);
@@ -3144,7 +3345,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         bossEditorState = new BossEditorState(null, boss, loot);
         bossWavesOverlayOpen = false;
-        bossScalersOverlayOpen = false;
         bossNpcPicksOpen = false;
         lootListOffset = 0;
         bossWavePageIndex = 0;
@@ -3174,7 +3374,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 cloneLoot(sourceLoot, sourceBoss.bossName)
         );
         bossWavesOverlayOpen = false;
-        bossScalersOverlayOpen = false;
         bossNpcPicksOpen = false;
         lootListOffset = 0;
         bossWavePageIndex = 0;
@@ -3206,7 +3405,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 && bossEditorState.originalBossName.equalsIgnoreCase(bossName)) {
             bossEditorState = null;
             bossWavesOverlayOpen = false;
-            bossScalersOverlayOpen = false;
         }
 
         plugin.saveBossDefinitions();
@@ -3421,11 +3619,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     MULT_HP_DMG_MAX,
                     "Mult Dégâts doit être entre 0.50 et 50.00."
             );
-            outBoss.modifiers.movementSpeed = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditSpeed, formatFloat(outBoss.modifiers.movementSpeed)),
-                    "Mult vitesse déplacement doit être un nombre > 0.",
-                    Float.MIN_NORMAL,
-                    Float.MAX_VALUE
+            outBoss.modifiers.movementSpeed = requireSliderFloat(
+                    data.bossEditSpeed,
+                    outBoss.modifiers.movementSpeed,
+                    MULT_SCALE_MIN,
+                    MULT_SCALE_MAX,
+                    "Mult vitesse déplacement doit être entre 0.10 et 10.00."
             );
             outBoss.modifiers.size = requireSliderFloat(
                     data.bossEditSize,
@@ -3434,41 +3633,47 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     MULT_SIZE_MAX,
                     "Mult Taille doit être entre 0.10 et 10.00."
             );
-            outBoss.modifiers.attackRate = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditAttackRate, formatFloat(outBoss.modifiers.attackRate)),
-                    "Mult cadence d'attaque doit être un nombre > 0.",
-                    Float.MIN_NORMAL,
-                    Float.MAX_VALUE
+            outBoss.modifiers.attackRate = requireSliderFloat(
+                    data.bossEditAttackRate,
+                    outBoss.modifiers.attackRate,
+                    MULT_SCALE_MIN,
+                    MULT_SCALE_MAX,
+                    "Mult cadence d'attaque doit être entre 0.10 et 10.00."
             );
-            outBoss.modifiers.abilityCooldown = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditAbilityCooldown, formatFloat(outBoss.modifiers.abilityCooldown)),
-                    "Mult recharge capacité doit être un nombre > 0.",
-                    Float.MIN_NORMAL,
-                    Float.MAX_VALUE
+            outBoss.modifiers.abilityCooldown = requireSliderFloat(
+                    data.bossEditAbilityCooldown,
+                    outBoss.modifiers.abilityCooldown,
+                    MULT_SCALE_MIN,
+                    MULT_SCALE_MAX,
+                    "Mult recharge capacité doit être entre 0.10 et 10.00."
             );
-            outBoss.modifiers.knockbackGiven = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditKnockbackGiven, formatFloat(outBoss.modifiers.knockbackGiven)),
-                    "Mult knockback donné doit être un nombre > 0.",
-                    Float.MIN_NORMAL,
-                    Float.MAX_VALUE
+            outBoss.modifiers.knockbackGiven = requireSliderFloat(
+                    data.bossEditKnockbackGiven,
+                    outBoss.modifiers.knockbackGiven,
+                    MULT_SCALE_MIN,
+                    MULT_SCALE_MAX,
+                    "Mult knockback donné doit être entre 0.10 et 10.00."
             );
-            outBoss.modifiers.knockbackTaken = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditKnockbackTaken, formatFloat(outBoss.modifiers.knockbackTaken)),
-                    "Mult knockback reçu doit être un nombre > 0.",
-                    Float.MIN_NORMAL,
-                    Float.MAX_VALUE
+            outBoss.modifiers.knockbackTaken = requireSliderFloat(
+                    data.bossEditKnockbackTaken,
+                    outBoss.modifiers.knockbackTaken,
+                    MULT_SCALE_MIN,
+                    MULT_SCALE_MAX,
+                    "Mult knockback reçu doit être entre 0.10 et 10.00."
             );
-            outBoss.modifiers.turnRate = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditTurnRate, formatFloat(outBoss.modifiers.turnRate)),
-                    "Mult vitesse rotation doit être un nombre > 0.",
-                    Float.MIN_NORMAL,
-                    Float.MAX_VALUE
+            outBoss.modifiers.turnRate = requireSliderFloat(
+                    data.bossEditTurnRate,
+                    outBoss.modifiers.turnRate,
+                    MULT_SCALE_MIN,
+                    MULT_SCALE_MAX,
+                    "Mult vitesse rotation doit être entre 0.10 et 10.00."
             );
-            outBoss.modifiers.regen = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditRegen, formatFloat(outBoss.modifiers.regen)),
-                    "Mult régén doit être un nombre > 0.",
-                    Float.MIN_NORMAL,
-                    Float.MAX_VALUE
+            outBoss.modifiers.regen = requireSliderFloat(
+                    data.bossEditRegen,
+                    outBoss.modifiers.regen,
+                    MULT_SCALE_MIN,
+                    MULT_SCALE_MAX,
+                    "Mult régén doit être entre 0.10 et 10.00."
             );
             outBoss.perPlayerIncrease.hp = requireSliderFloat(
                     data.bossEditPpHp,
@@ -3484,11 +3689,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     MULT_PERS_MAX,
                     "Dégâts/joueurs doit être entre 0.00 et 5.00."
             );
-            outBoss.perPlayerIncrease.movementSpeed = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditPpSpeed, formatFloat(outBoss.perPlayerIncrease.movementSpeed)),
-                    "Vitesse déplacement/joueur doit être un nombre fini.",
-                    -Float.MAX_VALUE,
-                    Float.MAX_VALUE
+            outBoss.perPlayerIncrease.movementSpeed = requireSliderFloat(
+                    data.bossEditPpSpeed,
+                    outBoss.perPlayerIncrease.movementSpeed,
+                    MULT_PERS_MIN,
+                    MULT_PERS_MAX,
+                    "Vitesse/joueurs doit être entre 0.00 et 5.00."
             );
             outBoss.perPlayerIncrease.size = requireSliderFloat(
                     data.bossEditPpSize,
@@ -3497,41 +3703,47 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     MULT_PERS_MAX,
                     "Taille/joueurs doit être entre 0.00 et 5.00."
             );
-            outBoss.perPlayerIncrease.attackRate = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditPpAttackRate, formatFloat(outBoss.perPlayerIncrease.attackRate)),
-                    "Vitesse d'attaque/joueur doit être un nombre fini.",
-                    -Float.MAX_VALUE,
-                    Float.MAX_VALUE
+            outBoss.perPlayerIncrease.attackRate = requireSliderFloat(
+                    data.bossEditPpAttackRate,
+                    outBoss.perPlayerIncrease.attackRate,
+                    MULT_PERS_MIN,
+                    MULT_PERS_MAX,
+                    "Attaque/joueurs doit être entre 0.00 et 5.00."
             );
-            outBoss.perPlayerIncrease.abilityCooldown = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditPpAbilityCooldown, formatFloat(outBoss.perPlayerIncrease.abilityCooldown)),
-                    "Recharge capacité/joueur doit être un nombre fini.",
-                    -Float.MAX_VALUE,
-                    Float.MAX_VALUE
+            outBoss.perPlayerIncrease.abilityCooldown = requireSliderFloat(
+                    data.bossEditPpAbilityCooldown,
+                    outBoss.perPlayerIncrease.abilityCooldown,
+                    MULT_PERS_MIN,
+                    MULT_PERS_MAX,
+                    "Recharge/joueurs doit être entre 0.00 et 5.00."
             );
-            outBoss.perPlayerIncrease.knockbackGiven = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditPpKnockbackGiven, formatFloat(outBoss.perPlayerIncrease.knockbackGiven)),
-                    "Recul infligé/joueur doit être un nombre fini.",
-                    -Float.MAX_VALUE,
-                    Float.MAX_VALUE
+            outBoss.perPlayerIncrease.knockbackGiven = requireSliderFloat(
+                    data.bossEditPpKnockbackGiven,
+                    outBoss.perPlayerIncrease.knockbackGiven,
+                    MULT_PERS_MIN,
+                    MULT_PERS_MAX,
+                    "Recul+/joueurs doit être entre 0.00 et 5.00."
             );
-            outBoss.perPlayerIncrease.knockbackTaken = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditPpKnockbackTaken, formatFloat(outBoss.perPlayerIncrease.knockbackTaken)),
-                    "Recul reçu/joueur doit être un nombre fini.",
-                    -Float.MAX_VALUE,
-                    Float.MAX_VALUE
+            outBoss.perPlayerIncrease.knockbackTaken = requireSliderFloat(
+                    data.bossEditPpKnockbackTaken,
+                    outBoss.perPlayerIncrease.knockbackTaken,
+                    MULT_PERS_MIN,
+                    MULT_PERS_MAX,
+                    "Recul-/joueurs doit être entre 0.00 et 5.00."
             );
-            outBoss.perPlayerIncrease.turnRate = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditPpTurnRate, formatFloat(outBoss.perPlayerIncrease.turnRate)),
-                    "Vitesse rotation/joueur doit être un nombre fini.",
-                    -Float.MAX_VALUE,
-                    Float.MAX_VALUE
+            outBoss.perPlayerIncrease.turnRate = requireSliderFloat(
+                    data.bossEditPpTurnRate,
+                    outBoss.perPlayerIncrease.turnRate,
+                    MULT_PERS_MIN,
+                    MULT_PERS_MAX,
+                    "Rotation/joueurs doit être entre 0.00 et 5.00."
             );
-            outBoss.perPlayerIncrease.regen = parseRequiredFloat(
-                    resolvedOrFallback(data.bossEditPpRegen, formatFloat(outBoss.perPlayerIncrease.regen)),
-                    "Régénération/joueur doit être un nombre fini.",
-                    -Float.MAX_VALUE,
-                    Float.MAX_VALUE
+            outBoss.perPlayerIncrease.regen = requireSliderFloat(
+                    data.bossEditPpRegen,
+                    outBoss.perPlayerIncrease.regen,
+                    MULT_PERS_MIN,
+                    MULT_PERS_MAX,
+                    "Régén/joueurs doit être entre 0.00 et 5.00."
             );
             if (outBoss.extraMobs == null) {
                 outBoss.extraMobs = new BossDefinition.ExtraMobs();
@@ -3544,6 +3756,23 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     Integer.MAX_VALUE
             );
             outBoss.extraMobs.sanitize();
+
+            String musicText = optionalText(data.bossEditMusic);
+            if (!looksLikeUiBindingExpression(musicText)) {
+                outBoss.musicFileName = musicText;
+            }
+            String musicRadiusText = resolvedOrFallback(
+                    data.bossEditMusicRadius,
+                    formatWaveNumber(outBoss.getMusicRadius())
+            );
+            if (!musicRadiusText.isEmpty()) {
+                outBoss.musicRadius = parseRequiredDouble(
+                        musicRadiusText,
+                        "Le rayon musique doit être un nombre > 0.",
+                        0.1d,
+                        Double.MAX_VALUE
+                );
+            }
 
             LootTable outLoot = new LootTable();
             outLoot.bossName = outBoss.bossName;
@@ -3581,7 +3810,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
             bossEditorState = new BossEditorState(outBoss.bossName, cloneBoss(outBoss), cloneLoot(outLoot, outBoss.bossName));
             bossWavesOverlayOpen = false;
-            bossScalersOverlayOpen = false;
             bossStatusText = "Boss '" + outBoss.bossName + "' enregistré.";
             rebuild();
         } catch (IllegalArgumentException ex) {
@@ -3642,36 +3870,29 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         if (data.bossEditDamage != null && Float.isFinite(data.bossEditDamage)) {
             boss.modifiers.damage = BossArenaConfigUiControls.clampFloat(data.bossEditDamage, MULT_HP_DMG_MIN, MULT_HP_DMG_MAX);
         }
-        Float speed = parseOptionalFloat(data.bossEditSpeed);
-        if (speed != null && speed > 0f) {
-            boss.modifiers.movementSpeed = speed;
-        }
         if (data.bossEditSize != null && Float.isFinite(data.bossEditSize)) {
             boss.modifiers.size = BossArenaConfigUiControls.clampFloat(data.bossEditSize, MULT_SIZE_MIN, MULT_SIZE_MAX);
         }
-        Float attackRate = parseOptionalFloat(data.bossEditAttackRate);
-        if (attackRate != null && attackRate > 0f) {
-            boss.modifiers.attackRate = attackRate;
+        if (data.bossEditSpeed != null && Float.isFinite(data.bossEditSpeed)) {
+            boss.modifiers.movementSpeed = BossArenaConfigUiControls.clampFloat(data.bossEditSpeed, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
-        Float abilityCooldown = parseOptionalFloat(data.bossEditAbilityCooldown);
-        if (abilityCooldown != null && abilityCooldown > 0f) {
-            boss.modifiers.abilityCooldown = abilityCooldown;
+        if (data.bossEditAttackRate != null && Float.isFinite(data.bossEditAttackRate)) {
+            boss.modifiers.attackRate = BossArenaConfigUiControls.clampFloat(data.bossEditAttackRate, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
-        Float knockbackGiven = parseOptionalFloat(data.bossEditKnockbackGiven);
-        if (knockbackGiven != null && knockbackGiven > 0f) {
-            boss.modifiers.knockbackGiven = knockbackGiven;
+        if (data.bossEditAbilityCooldown != null && Float.isFinite(data.bossEditAbilityCooldown)) {
+            boss.modifiers.abilityCooldown = BossArenaConfigUiControls.clampFloat(data.bossEditAbilityCooldown, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
-        Float knockbackTaken = parseOptionalFloat(data.bossEditKnockbackTaken);
-        if (knockbackTaken != null && knockbackTaken > 0f) {
-            boss.modifiers.knockbackTaken = knockbackTaken;
+        if (data.bossEditKnockbackGiven != null && Float.isFinite(data.bossEditKnockbackGiven)) {
+            boss.modifiers.knockbackGiven = BossArenaConfigUiControls.clampFloat(data.bossEditKnockbackGiven, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
-        Float turnRate = parseOptionalFloat(data.bossEditTurnRate);
-        if (turnRate != null && turnRate > 0f) {
-            boss.modifiers.turnRate = turnRate;
+        if (data.bossEditKnockbackTaken != null && Float.isFinite(data.bossEditKnockbackTaken)) {
+            boss.modifiers.knockbackTaken = BossArenaConfigUiControls.clampFloat(data.bossEditKnockbackTaken, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
-        Float regen = parseOptionalFloat(data.bossEditRegen);
-        if (regen != null && regen > 0f) {
-            boss.modifiers.regen = regen;
+        if (data.bossEditTurnRate != null && Float.isFinite(data.bossEditTurnRate)) {
+            boss.modifiers.turnRate = BossArenaConfigUiControls.clampFloat(data.bossEditTurnRate, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        }
+        if (data.bossEditRegen != null && Float.isFinite(data.bossEditRegen)) {
+            boss.modifiers.regen = BossArenaConfigUiControls.clampFloat(data.bossEditRegen, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
 
         if (data.bossEditPpHp != null && Float.isFinite(data.bossEditPpHp)) {
@@ -3680,36 +3901,29 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         if (data.bossEditPpDamage != null && Float.isFinite(data.bossEditPpDamage)) {
             boss.perPlayerIncrease.damage = BossArenaConfigUiControls.clampFloat(data.bossEditPpDamage, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        Float ppSpeed = parseOptionalFloat(data.bossEditPpSpeed);
-        if (ppSpeed != null) {
-            boss.perPlayerIncrease.movementSpeed = ppSpeed;
-        }
         if (data.bossEditPpSize != null && Float.isFinite(data.bossEditPpSize)) {
             boss.perPlayerIncrease.size = BossArenaConfigUiControls.clampFloat(data.bossEditPpSize, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        Float ppAttackRate = parseOptionalFloat(data.bossEditPpAttackRate);
-        if (ppAttackRate != null) {
-            boss.perPlayerIncrease.attackRate = ppAttackRate;
+        if (data.bossEditPpSpeed != null && Float.isFinite(data.bossEditPpSpeed)) {
+            boss.perPlayerIncrease.movementSpeed = BossArenaConfigUiControls.clampFloat(data.bossEditPpSpeed, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        Float ppAbilityCooldown = parseOptionalFloat(data.bossEditPpAbilityCooldown);
-        if (ppAbilityCooldown != null) {
-            boss.perPlayerIncrease.abilityCooldown = ppAbilityCooldown;
+        if (data.bossEditPpAttackRate != null && Float.isFinite(data.bossEditPpAttackRate)) {
+            boss.perPlayerIncrease.attackRate = BossArenaConfigUiControls.clampFloat(data.bossEditPpAttackRate, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        Float ppKnockbackGiven = parseOptionalFloat(data.bossEditPpKnockbackGiven);
-        if (ppKnockbackGiven != null) {
-            boss.perPlayerIncrease.knockbackGiven = ppKnockbackGiven;
+        if (data.bossEditPpAbilityCooldown != null && Float.isFinite(data.bossEditPpAbilityCooldown)) {
+            boss.perPlayerIncrease.abilityCooldown = BossArenaConfigUiControls.clampFloat(data.bossEditPpAbilityCooldown, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        Float ppKnockbackTaken = parseOptionalFloat(data.bossEditPpKnockbackTaken);
-        if (ppKnockbackTaken != null) {
-            boss.perPlayerIncrease.knockbackTaken = ppKnockbackTaken;
+        if (data.bossEditPpKnockbackGiven != null && Float.isFinite(data.bossEditPpKnockbackGiven)) {
+            boss.perPlayerIncrease.knockbackGiven = BossArenaConfigUiControls.clampFloat(data.bossEditPpKnockbackGiven, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        Float ppTurnRate = parseOptionalFloat(data.bossEditPpTurnRate);
-        if (ppTurnRate != null) {
-            boss.perPlayerIncrease.turnRate = ppTurnRate;
+        if (data.bossEditPpKnockbackTaken != null && Float.isFinite(data.bossEditPpKnockbackTaken)) {
+            boss.perPlayerIncrease.knockbackTaken = BossArenaConfigUiControls.clampFloat(data.bossEditPpKnockbackTaken, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        Float ppRegen = parseOptionalFloat(data.bossEditPpRegen);
-        if (ppRegen != null) {
-            boss.perPlayerIncrease.regen = ppRegen;
+        if (data.bossEditPpTurnRate != null && Float.isFinite(data.bossEditPpTurnRate)) {
+            boss.perPlayerIncrease.turnRate = BossArenaConfigUiControls.clampFloat(data.bossEditPpTurnRate, MULT_PERS_MIN, MULT_PERS_MAX);
+        }
+        if (data.bossEditPpRegen != null && Float.isFinite(data.bossEditPpRegen)) {
+            boss.perPlayerIncrease.regen = BossArenaConfigUiControls.clampFloat(data.bossEditPpRegen, MULT_PERS_MIN, MULT_PERS_MAX);
         }
         Integer waves = parseOptionalInt(data.bossEditWaves);
         if (waves != null && waves >= -1) {
@@ -3718,6 +3932,17 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             }
             boss.extraMobs.waves = waves;
             boss.extraMobs.sanitize();
+        }
+
+        if (data.bossEditMusic != null) {
+            String musicText = optionalText(data.bossEditMusic);
+            if (!looksLikeUiBindingExpression(musicText)) {
+                boss.musicFileName = musicText;
+            }
+        }
+        Double musicRadius = parseOptionalDouble(data.bossEditMusicRadius);
+        if (musicRadius != null && musicRadius > 0.0d) {
+            boss.musicRadius = musicRadius;
         }
 
     }
@@ -4001,18 +4226,26 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
         BossDefinition boss = bossEditorState.boss;
         UICommandBuilder cmd = new UICommandBuilder();
-        float hpMult = BossArenaConfigUiControls.clampFloat(boss.modifiers.hp, MULT_HP_DMG_MIN, MULT_HP_DMG_MAX);
-        float dmgMult = BossArenaConfigUiControls.clampFloat(boss.modifiers.damage, MULT_HP_DMG_MIN, MULT_HP_DMG_MAX);
-        float sizeMult = BossArenaConfigUiControls.clampFloat(boss.modifiers.size, MULT_SIZE_MIN, MULT_SIZE_MAX);
-        float ppHp = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.hp, MULT_PERS_MIN, MULT_PERS_MAX);
-        float ppDmg = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.damage, MULT_PERS_MIN, MULT_PERS_MAX);
-        float ppSize = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.size, MULT_PERS_MIN, MULT_PERS_MAX);
-        cmd.set("#BossEditHpValue.Text", formatFloat(hpMult));
-        cmd.set("#BossEditDamageValue.Text", formatFloat(dmgMult));
-        cmd.set("#BossEditSizeValue.Text", formatFloat(sizeMult));
-        cmd.set("#BossEditPpHpValue.Text", formatFloat(ppHp));
-        cmd.set("#BossEditPpDamageValue.Text", formatFloat(ppDmg));
-        cmd.set("#BossEditPpSizeValue.Text", formatFloat(ppSize));
+        cmd.set("#BossEditHpValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.hp, MULT_HP_DMG_MIN, MULT_HP_DMG_MAX)));
+        cmd.set("#BossEditDamageValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.damage, MULT_HP_DMG_MIN, MULT_HP_DMG_MAX)));
+        cmd.set("#BossEditSizeValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.size, MULT_SIZE_MIN, MULT_SIZE_MAX)));
+        cmd.set("#BossEditSpeedValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.movementSpeed, MULT_SCALE_MIN, MULT_SCALE_MAX)));
+        cmd.set("#BossEditAttackRateValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.attackRate, MULT_SCALE_MIN, MULT_SCALE_MAX)));
+        cmd.set("#BossEditAbilityCooldownValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.abilityCooldown, MULT_SCALE_MIN, MULT_SCALE_MAX)));
+        cmd.set("#BossEditKnockbackGivenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.knockbackGiven, MULT_SCALE_MIN, MULT_SCALE_MAX)));
+        cmd.set("#BossEditKnockbackTakenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.knockbackTaken, MULT_SCALE_MIN, MULT_SCALE_MAX)));
+        cmd.set("#BossEditTurnRateValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.turnRate, MULT_SCALE_MIN, MULT_SCALE_MAX)));
+        cmd.set("#BossEditRegenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.regen, MULT_SCALE_MIN, MULT_SCALE_MAX)));
+        cmd.set("#BossEditPpHpValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.hp, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpDamageValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.damage, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpSizeValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.size, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpSpeedValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.movementSpeed, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpAttackRateValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.attackRate, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpAbilityCooldownValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.abilityCooldown, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpKnockbackGivenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.knockbackGiven, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpKnockbackTakenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.knockbackTaken, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpTurnRateValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.turnRate, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpRegenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.regen, MULT_PERS_MIN, MULT_PERS_MAX)));
         sendUpdate(cmd, false);
     }
 
@@ -4066,8 +4299,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
     private static BossDefinition.ExtraMobs.ScheduledWave newEmptyScheduledWave() {
         BossDefinition.ExtraMobs.ScheduledWave wave = new BossDefinition.ExtraMobs.ScheduledWave();
-        wave.trigger = BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS;
-        wave.triggerValue = 30.0d;
+        wave.trigger = BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS;
+        wave.triggerValue = 0.0d;
         wave.repeatCount = 1;
         wave.repeatEverySeconds = 0.0d;
         wave.adds = new ArrayList<>();
@@ -4102,12 +4335,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             repeatSecText = "";
         }
 
-        String fallbackTrigger = fallback != null ? fallback.trigger : BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS;
+        String fallbackTrigger = fallback != null ? fallback.trigger : BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS;
         String resolvedTrigger = triggerText.isEmpty() ? fallbackTrigger : triggerText;
         String trigger = normalizeWaveTriggerInput(resolvedTrigger);
         if (trigger == null) {
             throw new IllegalArgumentException(
-                    "Déclencheur de vague invalide. Utilisez 1-5, Avant le boss, Au spawn, Après spawn, Depuis dernière vague, ou PV boss %."
+                    "Déclencheur de vague invalide. Utilisez : Avant le boss, Avec le boss, Après vague précédente, ou PV boss %."
             );
         }
 
@@ -4115,9 +4348,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 ? formatDouble(fallback.triggerValue)
                 : (BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(trigger) ? "50" : "0");
         double triggerValue;
-        if (BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN.equals(trigger)) {
-            triggerValue = 0.0d;
-        } else if (BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(trigger)) {
+        if (BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(trigger)) {
             triggerValue = parseRequiredDouble(
                     resolvedOrFallback(triggerValueText, defaultValue),
                     "Valeur déclencheur vague doit être 0-100.",
@@ -4262,6 +4493,19 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
     }
 
+    private void handleBossWaveTriggerChanged(ConfigEventData data) {
+        if (!bossWavesOverlayOpen) {
+            return;
+        }
+        String trigger = normalizeWaveTriggerInput(optionalText(data.getBossWaveEvery(1)));
+        if (trigger == null) {
+            return;
+        }
+        UICommandBuilder cmd = new UICommandBuilder();
+        cmd.set("#BossWaveTriggerValueFieldLabel.Text", waveTriggerValueUnitLabel(trigger));
+        sendUpdate(cmd, false);
+    }
+
     private void handleBossWaveAddPage(ConfigEventData data) {
         if (bossEditorState == null) {
             return;
@@ -4335,21 +4579,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
     }
 
-    private void handleBossScalersSave(ConfigEventData data) {
-        if (bossEditorState == null) {
-            return;
-        }
-
-        try {
-            applyBossEditorDraft(data);
-            bossScalersOverlayOpen = false;
-            bossStatusText = "Valeurs boss mises à jour. Cliquez sur Enregistrer pour sauvegarder.";
-            rebuild();
-        } catch (IllegalArgumentException ex) {
-            bossStatusText = ex.getMessage();
-            rebuild();
-        }
-    }
 
     private void handleBossWaveAddRow(String rowToken, ConfigEventData data) {
         if (bossEditorState == null) {
@@ -4466,12 +4695,13 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             }
 
             String resolvedTrigger = triggerText.isEmpty()
-                    ? (fallback != null ? fallback.trigger : BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS)
+                    ? (fallback != null ? fallback.trigger : BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS)
                     : triggerText;
             String trigger = normalizeWaveTriggerInput(resolvedTrigger);
             if (trigger == null) {
                 throw new IllegalArgumentException(
-                        "Déclencheur de vague invalide sur la ligne " + row + ". Utilisez 1-5, Avant le boss, Au spawn, Après spawn, Depuis dernière vague, ou PV boss %."
+                        "Déclencheur de vague invalide sur la ligne " + row
+                                + ". Utilisez : Avant le boss, Avec le boss, Après vague précédente, ou PV boss %."
                 );
             }
 
@@ -4479,9 +4709,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     ? formatDouble(fallback.triggerValue)
                     : (BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(trigger) ? "50" : "0");
             double triggerValue;
-            if (BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN.equals(trigger)) {
-                triggerValue = 0.0d;
-            } else if (BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(trigger)) {
+            if (BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT.equals(trigger)) {
                 triggerValue = parseRequiredDouble(
                         resolvedOrFallback(triggerValueText, defaultValue),
                         "Valeur déclencheur vague doit être 0-100 sur la ligne " + row + ".",
@@ -4747,24 +4975,24 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append(new KeyedCodec<>("@BossEditLevelOverride", Codec.STRING), (d, v) -> d.bossEditLevelOverride = v, d -> d.bossEditLevelOverride).add()
                 .append(new KeyedCodec<>("@BossEditHp", Codec.FLOAT), (d, v) -> d.bossEditHp = v, d -> d.bossEditHp).add()
                 .append(new KeyedCodec<>("@BossEditDamage", Codec.FLOAT), (d, v) -> d.bossEditDamage = v, d -> d.bossEditDamage).add()
-                .append(new KeyedCodec<>("@BossEditSpeed", Codec.STRING), (d, v) -> d.bossEditSpeed = v, d -> d.bossEditSpeed).add()
+                .append(new KeyedCodec<>("@BossEditSpeed", Codec.FLOAT), (d, v) -> d.bossEditSpeed = v, d -> d.bossEditSpeed).add()
                 .append(new KeyedCodec<>("@BossEditSize", Codec.FLOAT), (d, v) -> d.bossEditSize = v, d -> d.bossEditSize).add()
-                .append(new KeyedCodec<>("@BossEditAttackRate", Codec.STRING), (d, v) -> d.bossEditAttackRate = v, d -> d.bossEditAttackRate).add()
-                .append(new KeyedCodec<>("@BossEditAbilityCooldown", Codec.STRING), (d, v) -> d.bossEditAbilityCooldown = v, d -> d.bossEditAbilityCooldown).add()
-                .append(new KeyedCodec<>("@BossEditKnockbackGiven", Codec.STRING), (d, v) -> d.bossEditKnockbackGiven = v, d -> d.bossEditKnockbackGiven).add()
-                .append(new KeyedCodec<>("@BossEditKnockbackTaken", Codec.STRING), (d, v) -> d.bossEditKnockbackTaken = v, d -> d.bossEditKnockbackTaken).add()
-                .append(new KeyedCodec<>("@BossEditTurnRate", Codec.STRING), (d, v) -> d.bossEditTurnRate = v, d -> d.bossEditTurnRate).add()
-                .append(new KeyedCodec<>("@BossEditRegen", Codec.STRING), (d, v) -> d.bossEditRegen = v, d -> d.bossEditRegen).add()
+                .append(new KeyedCodec<>("@BossEditAttackRate", Codec.FLOAT), (d, v) -> d.bossEditAttackRate = v, d -> d.bossEditAttackRate).add()
+                .append(new KeyedCodec<>("@BossEditAbilityCooldown", Codec.FLOAT), (d, v) -> d.bossEditAbilityCooldown = v, d -> d.bossEditAbilityCooldown).add()
+                .append(new KeyedCodec<>("@BossEditKnockbackGiven", Codec.FLOAT), (d, v) -> d.bossEditKnockbackGiven = v, d -> d.bossEditKnockbackGiven).add()
+                .append(new KeyedCodec<>("@BossEditKnockbackTaken", Codec.FLOAT), (d, v) -> d.bossEditKnockbackTaken = v, d -> d.bossEditKnockbackTaken).add()
+                .append(new KeyedCodec<>("@BossEditTurnRate", Codec.FLOAT), (d, v) -> d.bossEditTurnRate = v, d -> d.bossEditTurnRate).add()
+                .append(new KeyedCodec<>("@BossEditRegen", Codec.FLOAT), (d, v) -> d.bossEditRegen = v, d -> d.bossEditRegen).add()
                 .append(new KeyedCodec<>("@BossEditPpHp", Codec.FLOAT), (d, v) -> d.bossEditPpHp = v, d -> d.bossEditPpHp).add()
                 .append(new KeyedCodec<>("@BossEditPpDamage", Codec.FLOAT), (d, v) -> d.bossEditPpDamage = v, d -> d.bossEditPpDamage).add()
-                .append(new KeyedCodec<>("@BossEditPpSpeed", Codec.STRING), (d, v) -> d.bossEditPpSpeed = v, d -> d.bossEditPpSpeed).add()
+                .append(new KeyedCodec<>("@BossEditPpSpeed", Codec.FLOAT), (d, v) -> d.bossEditPpSpeed = v, d -> d.bossEditPpSpeed).add()
                 .append(new KeyedCodec<>("@BossEditPpSize", Codec.FLOAT), (d, v) -> d.bossEditPpSize = v, d -> d.bossEditPpSize).add()
-                .append(new KeyedCodec<>("@BossEditPpAttackRate", Codec.STRING), (d, v) -> d.bossEditPpAttackRate = v, d -> d.bossEditPpAttackRate).add()
-                .append(new KeyedCodec<>("@BossEditPpAbilityCooldown", Codec.STRING), (d, v) -> d.bossEditPpAbilityCooldown = v, d -> d.bossEditPpAbilityCooldown).add()
-                .append(new KeyedCodec<>("@BossEditPpKnockbackGiven", Codec.STRING), (d, v) -> d.bossEditPpKnockbackGiven = v, d -> d.bossEditPpKnockbackGiven).add()
-                .append(new KeyedCodec<>("@BossEditPpKnockbackTaken", Codec.STRING), (d, v) -> d.bossEditPpKnockbackTaken = v, d -> d.bossEditPpKnockbackTaken).add()
-                .append(new KeyedCodec<>("@BossEditPpTurnRate", Codec.STRING), (d, v) -> d.bossEditPpTurnRate = v, d -> d.bossEditPpTurnRate).add()
-                .append(new KeyedCodec<>("@BossEditPpRegen", Codec.STRING), (d, v) -> d.bossEditPpRegen = v, d -> d.bossEditPpRegen).add()
+                .append(new KeyedCodec<>("@BossEditPpAttackRate", Codec.FLOAT), (d, v) -> d.bossEditPpAttackRate = v, d -> d.bossEditPpAttackRate).add()
+                .append(new KeyedCodec<>("@BossEditPpAbilityCooldown", Codec.FLOAT), (d, v) -> d.bossEditPpAbilityCooldown = v, d -> d.bossEditPpAbilityCooldown).add()
+                .append(new KeyedCodec<>("@BossEditPpKnockbackGiven", Codec.FLOAT), (d, v) -> d.bossEditPpKnockbackGiven = v, d -> d.bossEditPpKnockbackGiven).add()
+                .append(new KeyedCodec<>("@BossEditPpKnockbackTaken", Codec.FLOAT), (d, v) -> d.bossEditPpKnockbackTaken = v, d -> d.bossEditPpKnockbackTaken).add()
+                .append(new KeyedCodec<>("@BossEditPpTurnRate", Codec.FLOAT), (d, v) -> d.bossEditPpTurnRate = v, d -> d.bossEditPpTurnRate).add()
+                .append(new KeyedCodec<>("@BossEditPpRegen", Codec.FLOAT), (d, v) -> d.bossEditPpRegen = v, d -> d.bossEditPpRegen).add()
                 .append(new KeyedCodec<>("@BossEditWaves", Codec.STRING), (d, v) -> d.bossEditWaves = v, d -> d.bossEditWaves).add()
                 .append(new KeyedCodec<>("@BossEditExtraNpcId", Codec.STRING), (d, v) -> d.bossEditExtraNpcId = v, d -> d.bossEditExtraNpcId).add()
                 .append(new KeyedCodec<>("@BossEditExtraTimeLimit", Codec.STRING), (d, v) -> d.bossEditExtraTimeLimit = v, d -> d.bossEditExtraTimeLimit).add()
@@ -4775,6 +5003,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append(new KeyedCodec<>("@BossSpawnTriggerValue", Codec.STRING), (d, v) -> d.bossSpawnTriggerValue = v, d -> d.bossSpawnTriggerValue).add()
                 .append(new KeyedCodec<>("@BossWaveRandomLocations", Codec.STRING), (d, v) -> d.bossWaveRandomLocations = v, d -> d.bossWaveRandomLocations).add()
                 .append(new KeyedCodec<>("@BossWaveRandomRadius", Codec.STRING), (d, v) -> d.bossWaveRandomRadius = v, d -> d.bossWaveRandomRadius).add()
+                .append(new KeyedCodec<>("@BossEditMusic", Codec.STRING), (d, v) -> d.bossEditMusic = v, d -> d.bossEditMusic).add()
+                .append(new KeyedCodec<>("@BossEditMusicRadius", Codec.STRING), (d, v) -> d.bossEditMusicRadius = v, d -> d.bossEditMusicRadius).add()
                 .append(new KeyedCodec<>("@BossWaveTimeSec", Codec.STRING), (d, v) -> d.bossWaveTimeSec = v, d -> d.bossWaveTimeSec).add()
                 .append(new KeyedCodec<>("@BossWaveNpc1", Codec.STRING), (d, v) -> d.bossWaveNpc1 = v, d -> d.bossWaveNpc1).add()
                 .append(new KeyedCodec<>("@BossWaveAmount1", Codec.STRING), (d, v) -> d.bossWaveAmount1 = v, d -> d.bossWaveAmount1).add()
@@ -4979,24 +5209,24 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String bossEditLevelOverride;
         public Float bossEditHp;
         public Float bossEditDamage;
-        public String bossEditSpeed;
+        public Float bossEditSpeed;
         public Float bossEditSize;
-        public String bossEditAttackRate;
-        public String bossEditAbilityCooldown;
-        public String bossEditKnockbackGiven;
-        public String bossEditKnockbackTaken;
-        public String bossEditTurnRate;
-        public String bossEditRegen;
+        public Float bossEditAttackRate;
+        public Float bossEditAbilityCooldown;
+        public Float bossEditKnockbackGiven;
+        public Float bossEditKnockbackTaken;
+        public Float bossEditTurnRate;
+        public Float bossEditRegen;
         public Float bossEditPpHp;
         public Float bossEditPpDamage;
-        public String bossEditPpSpeed;
+        public Float bossEditPpSpeed;
         public Float bossEditPpSize;
-        public String bossEditPpAttackRate;
-        public String bossEditPpAbilityCooldown;
-        public String bossEditPpKnockbackGiven;
-        public String bossEditPpKnockbackTaken;
-        public String bossEditPpTurnRate;
-        public String bossEditPpRegen;
+        public Float bossEditPpAttackRate;
+        public Float bossEditPpAbilityCooldown;
+        public Float bossEditPpKnockbackGiven;
+        public Float bossEditPpKnockbackTaken;
+        public Float bossEditPpTurnRate;
+        public Float bossEditPpRegen;
         public String bossEditWaves;
         public String bossEditExtraNpcId;
         public String bossEditExtraTimeLimit;
@@ -5006,6 +5236,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String bossSpawnTriggerValue;
         public String bossWaveRandomLocations;
         public String bossWaveRandomRadius;
+        public String bossEditMusic;
+        public String bossEditMusicRadius;
         public String bossWaveTimeSec;
         public String bossWaveNpc1;
         public String bossWaveAmount1;

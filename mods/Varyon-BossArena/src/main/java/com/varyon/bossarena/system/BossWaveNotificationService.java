@@ -24,11 +24,11 @@ import java.util.logging.Logger;
 public final class BossWaveNotificationService {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
     private static final double DEFAULT_NOTIFY_RADIUS = 100.0d;
-    private static final float TRANSIENT_DURATION_SECONDS = 3.0f;
+    private static final float TRANSIENT_DURATION_SECONDS = 2.0f;
     /** Slightly above the 1s HUD refresh so the banner fades soon after the event stops updating. */
-    private static final float PERSISTENT_DURATION_SECONDS = 2.5f;
-    private static final float FINAL_CLEAR_DURATION_SECONDS = 8.0f;
-    private static final float WORLD_ALERT_DURATION_SECONDS = 10.0f;
+    private static final float PERSISTENT_DURATION_SECONDS = 1.4f;
+    private static final float FINAL_CLEAR_DURATION_SECONDS = 2.5f;
+    private static final float WORLD_ALERT_DURATION_SECONDS = 4.0f;
     private static final long WORLD_ALERT_DURATION_MILLIS = (long) (WORLD_ALERT_DURATION_SECONDS * 1000f);
     private static final Map<UUID, Long> TIMED_ALERT_SUPPRESS_UNTIL = new ConcurrentHashMap<>();
     private static final Pattern PLACEHOLDER_PATTERN =
@@ -118,83 +118,79 @@ public final class BossWaveNotificationService {
                                              boolean forceActiveState,
                                              boolean showVictoryOnFinish,
                                              double notificationRadiusBlocks) {
+        notifyBossAliveStatus(
+                world,
+                eventCenter,
+                bossName,
+                aliveBossCount,
+                activeAdds,
+                context,
+                remainingCountdownMillis,
+                forceActiveState,
+                showVictoryOnFinish,
+                notificationRadiusBlocks,
+                null,
+                0
+        );
+    }
+
+    public static void notifyBossAliveStatus(World world,
+                                             Vector3d eventCenter,
+                                             String bossName,
+                                             int aliveBossCount,
+                                             int activeAdds,
+                                             String context,
+                                             long remainingCountdownMillis,
+                                             boolean forceActiveState,
+                                             boolean showVictoryOnFinish,
+                                             double notificationRadiusBlocks,
+                                             UUID eventId,
+                                             int currentWaveNumber) {
         if (world == null || eventCenter == null) {
             return;
         }
-        String contextText = context == null || context.isBlank() ? "" : (context.trim() + " | ");
-        String countdownValue = formatCountdownValue(remainingCountdownMillis);
-        String countdownLabel = countdownValue.isEmpty() ? "" : "Temps restant : " + countdownValue;
-        String countdownText = countdownLabel.isEmpty() ? "" : (countdownLabel + " | ");
         int bossesAlive = Math.max(0, aliveBossCount);
         int addsAlive = Math.max(0, activeAdds);
-        boolean eventFinished = !forceActiveState && bossesAlive <= 0 && addsAlive <= 0;
-        BossArenaConfig.EventBannerTemplates templates = resolveEventBannerTemplates();
+        int monstersAlive = bossesAlive + addsAlive;
+        boolean eventFinished = !forceActiveState && monstersAlive <= 0;
         String bossDisplay = safeBossDisplayName(bossName);
-
-        String titleText = "";
-        String subtitleText = "";
-
-        if (eventFinished) {
-            if (showVictoryOnFinish) {
-                titleText = applyEventBannerPlaceholders(
-                        templates.victoryTitle,
-                        bossDisplay,
-                        bossesAlive,
-                        addsAlive,
-                        context,
-                        contextText,
-                        countdownValue,
-                        countdownLabel,
-                        countdownText,
-                        true
-                );
-                subtitleText = applyEventBannerPlaceholders(
-                        templates.victorySubtitle,
-                        bossDisplay,
-                        bossesAlive,
-                        addsAlive,
-                        context,
-                        contextText,
-                        countdownValue,
-                        countdownLabel,
-                        countdownText,
-                        true
-                );
-            }
-        } else {
-            titleText = applyEventBannerPlaceholders(
-                    templates.activeTitle,
-                    bossDisplay,
-                    bossesAlive,
-                    addsAlive,
-                    context,
-                    contextText,
-                    countdownValue,
-                    countdownLabel,
-                    countdownText,
-                    false
-            );
-            subtitleText = applyEventBannerPlaceholders(
-                    templates.activeSubtitle,
-                    bossDisplay,
-                    bossesAlive,
-                    addsAlive,
-                    context,
-                    contextText,
-                    countdownValue,
-                    countdownLabel,
-                    countdownText,
-                    false
-            );
-        }
-
-        // Event banner may not render colored text; strip &/§ codes so any displayed text is clean.
-        Message title = toPlainMessage(stripColorCodes(titleText));
-        Message subtitle = toPlainMessage(stripColorCodes(subtitleText));
-        float duration = (forceActiveState || bossesAlive > 0 || addsAlive > 0)
+        float duration = (forceActiveState || monstersAlive > 0)
                 ? PERSISTENT_DURATION_SECONDS
                 : FINAL_CLEAR_DURATION_SECONDS;
-        showToNearbyPlayers(world, eventCenter, title, subtitle, duration, notificationRadiusBlocks);
+
+        if (eventFinished) {
+            if (!showVictoryOnFinish) {
+                return;
+            }
+            String titleText = BossArenaConfig.DEFAULT_EVENT_VICTORY_TITLE_TEMPLATE;
+            Message title = toPlainMessage(stripColorCodes(titleText));
+            showToNearbyPlayers(
+                    world,
+                    eventCenter,
+                    title,
+                    duration,
+                    notificationRadiusBlocks,
+                    playerRef -> {
+                        long damage = resolvePlayerDamage(eventId, playerRef);
+                        return toPlainMessage(stripColorCodes("Dégâts infligés : " + formatDamageAmount(damage)));
+                    }
+            );
+            return;
+        }
+
+        String phaseTitle = bossesAlive > 0
+                ? ("Boss : " + bossDisplay)
+                : ("Vague " + Math.max(1, currentWaveNumber));
+        Message title = toPlainMessage(stripColorCodes(phaseTitle));
+        Message subtitle = toPlainMessage(stripColorCodes("Monstres restants : " + monstersAlive));
+        showToNearbyPlayers(
+                world,
+                eventCenter,
+                title,
+                duration,
+                notificationRadiusBlocks,
+                ignored -> subtitle
+        );
     }
 
     public static void notifyWaveSpawn(World world,
@@ -246,7 +242,7 @@ public final class BossWaveNotificationService {
         String chatMessage = applyTimedAnnouncementPlaceholders(messageTemplate, bossDisplay, arenaDisplay, worldDisplay);
 
         Message title = Message.raw("WORLD BOSS ALERT");
-        Message subtitle = Message.raw(bossDisplay + " | Arena: " + arenaDisplay + " | World: " + worldDisplay);
+        Message subtitle = Message.raw("Boss : " + bossDisplay + " | Arène : " + arenaDisplay);
 
         Iterable<PlayerRef> targets;
         if (announceServerWide) {
@@ -290,9 +286,9 @@ public final class BossWaveNotificationService {
     private static void showToNearbyPlayers(World world,
                                             Vector3d center,
                                             Message title,
-                                            Message subtitle,
                                             float durationSeconds,
-                                            double notificationRadiusBlocks) {
+                                            double notificationRadiusBlocks,
+                                            java.util.function.Function<PlayerRef, Message> subtitleForPlayer) {
         double radius = (Double.isFinite(notificationRadiusBlocks) && notificationRadiusBlocks > 0)
                 ? notificationRadiusBlocks
                 : resolveNotificationRadius();
@@ -314,7 +310,6 @@ public final class BossWaveNotificationService {
 
             if (playerPosition.distance(center) > radius) {
                 try {
-                    // Clear any previously shown BossArena title once the player leaves range.
                     EventTitleUtil.hideEventTitleFromPlayer(playerRef, 0f);
                 } catch (Exception e) {
                     LOGGER.fine(() -> "Failed to hide out-of-range wave notification: " + e.getMessage());
@@ -323,10 +318,8 @@ public final class BossWaveNotificationService {
             }
 
             try {
-                // Always hide the previous title first to ensure a clean transition or a clear end state.
                 EventTitleUtil.hideEventTitleFromPlayer(playerRef, 0f);
-
-                // If both are null, we don't show any new title, so it stays hidden.
+                Message subtitle = subtitleForPlayer != null ? subtitleForPlayer.apply(playerRef) : null;
                 if (title != null || subtitle != null) {
                     EventTitleUtil.showEventTitleToPlayer(
                             playerRef,
@@ -343,6 +336,32 @@ public final class BossWaveNotificationService {
                 LOGGER.fine(() -> "Failed to update wave notification visibility: " + e.getMessage());
             }
         }
+    }
+
+    private static long resolvePlayerDamage(UUID eventId, PlayerRef playerRef) {
+        if (eventId == null || playerRef == null) {
+            return 0L;
+        }
+        BossArenaPlugin plugin = BossArenaPlugin.getInstance();
+        if (plugin == null || plugin.getDamageChartTracker() == null) {
+            return 0L;
+        }
+        UUID playerUuid = playerRef.getUuid();
+        if (playerUuid == null) {
+            return 0L;
+        }
+        return plugin.getDamageChartTracker().getDamage(eventId, playerUuid);
+    }
+
+    private static String formatDamageAmount(long damage) {
+        long safe = Math.max(0L, damage);
+        if (safe >= 1_000_000L) {
+            return String.format(Locale.ROOT, "%.1fM", safe / 1_000_000.0d);
+        }
+        if (safe >= 1_000L) {
+            return String.format(Locale.ROOT, "%.1fK", safe / 1_000.0d);
+        }
+        return Long.toString(safe);
     }
 
     private static String safeBossName(String bossName) {

@@ -27,8 +27,13 @@ import java.util.Locale;
  */
 public final class BossArenaAssetSetup {
     private static final int TIMED_MARKER_SIZE = 64;
+    private static volatile Path registeredAssetsRoot;
 
     private BossArenaAssetSetup() {}
+
+    public static Path getRegisteredAssetsRoot() {
+        return registeredAssetsRoot;
+    }
 
     /**
      * Extracts assets to a temp directory and registers the asset pack with the engine.
@@ -39,6 +44,7 @@ public final class BossArenaAssetSetup {
             Path assetsRoot = Files.createTempDirectory("VaryonBossArenaAssets");
             assetsRoot.toFile().deleteOnExit();
             extractAssets(plugin, assetsRoot);
+            registeredAssetsRoot = assetsRoot;
 
             AssetModule assetModule = AssetModule.get();
             if (assetModule != null
@@ -84,6 +90,7 @@ public final class BossArenaAssetSetup {
         copyPackResource(plugin, assetsRoot, "Blocks/Boss_Arena_Chest_Legendary_Texture.png");
         copyPackResource(plugin, assetsRoot, "Server/Item/Items/Boss_Arena_Chest_Legendary.json");
         copyPackResource(plugin, assetsRoot, "Server/Item/Items/Boss_Arena_Chest_Legendary.blockymodel");
+        copyPackResource(plugin, assetsRoot, "Server/Item/RootInteractions/BossArena_OpenChest.json");
         copyPackResource(plugin, assetsRoot, "Server/NPC/Roles/bossarena_shop_guard.json");
         copyPackResource(plugin, assetsRoot, "Server/Textures/Boss_Arena_Chest_Legendary_Texture.png");
         copyPackResource(plugin, assetsRoot, "Server/Icons/ItemsGenerated/boss_arena_shop_icon.png");

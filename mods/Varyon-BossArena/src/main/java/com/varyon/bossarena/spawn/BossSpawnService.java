@@ -10,6 +10,7 @@ import com.varyon.bossarena.util.BossScaler;
 import com.varyon.bossarena.util.VecUtil;
 import com.varyon.bossarena.boss.BossModifiers;
 import com.varyon.bossarena.boss.PlayerFinder;
+import com.varyon.bossarena.music.BossFightMusicService;
 import com.varyon.bossarena.system.BossTrackingSystem;
 import com.varyon.bossarena.system.BossWaveNotificationService;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -92,14 +93,44 @@ public final class BossSpawnService {
         return out;
     }
 
-    /** Number of before_boss wave executions that will be run (for pending pre-boss spawn). */
-    private static int getBeforeBossExecutionCount(List<BossDefinition.ExtraMobs.ScheduledWave> schedules) {
-        List<BossDefinition.ExtraMobs.ScheduledWave> beforeBoss = filterSchedulesByTrigger(
+    private static boolean isIntroWaveTrigger(String trigger) {
+        return BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS.equals(trigger)
+                || BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN.equals(trigger)
+                || BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS.equals(trigger)
+                || BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE.equals(trigger);
+    }
+
+    /**
+     * Waves that must finish before the boss when spawn mode is « Après fin des vagues ».
+     * Prefers explicit {@code before_boss}; otherwise uses intro triggers (on_spawn / after_spawn /
+     * since_last_wave) so configs that only use « Depuis dernière vague » still run before the boss.
+     */
+    private static List<BossDefinition.ExtraMobs.ScheduledWave> resolvePreBossWaves(
+            List<BossDefinition.ExtraMobs.ScheduledWave> schedules
+    ) {
+        if (schedules == null || schedules.isEmpty()) {
+            return List.of();
+        }
+        List<BossDefinition.ExtraMobs.ScheduledWave> explicit = filterSchedulesByTrigger(
                 schedules,
                 BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS
         );
+        if (!explicit.isEmpty()) {
+            return explicit;
+        }
+        List<BossDefinition.ExtraMobs.ScheduledWave> fallback = new ArrayList<>();
+        for (BossDefinition.ExtraMobs.ScheduledWave wave : schedules) {
+            if (wave != null && isIntroWaveTrigger(wave.trigger)) {
+                fallback.add(wave);
+            }
+        }
+        return fallback;
+    }
+
+    /** Number of pre-boss wave executions that will be run (for pending pre-boss spawn). */
+    private static int getPreBossExecutionCount(List<BossDefinition.ExtraMobs.ScheduledWave> preBossWaves) {
         int count = 0;
-        for (BossDefinition.ExtraMobs.ScheduledWave wave : beforeBoss) {
+        for (BossDefinition.ExtraMobs.ScheduledWave wave : preBossWaves) {
             if (wave == null) {
                 continue;
             }
@@ -311,20 +342,22 @@ public final class BossSpawnService {
             resolvedWavesBuffer = def.extraMobs.getResolvedScheduledWaves();
         }
         final List<BossDefinition.ExtraMobs.ScheduledWave> resolvedWaves = resolvedWavesBuffer;
-        boolean hasBeforeBossSchedule = !filterSchedulesByTrigger(
-                resolvedWaves,
-                BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS
-        ).isEmpty();
-        final UUID deferredEventId = hasBeforeBossSchedule
+        final List<BossDefinition.ExtraMobs.ScheduledWave> preBossWaves = resolvePreBossWaves(resolvedWaves);
+        boolean hasPreBossSchedule = !preBossWaves.isEmpty();
+        final UUID deferredEventId = hasPreBossSchedule
                 ? tracking.createEvent(
                 world,
                 spawnPos,
                 def.bossName,
                 def.tier,
                 countdownDurationMs,
-                true
+                true,
+                arenaId
         )
                 : null;
+        if (deferredEventId != null) {
+            BossFightMusicService.startForEvent(deferredEventId, world, spawnPos, def);
+        }
 
         String bossSpawnTrigger = (def.extraMobs != null && def.extraMobs.bossSpawnTrigger != null)
                 ? def.extraMobs.bossSpawnTrigger
@@ -344,31 +377,39 @@ public final class BossSpawnService {
                 pendingPreBossAdds,
                 nextWaveNumber,
                 deferredEventId,
-                onPrimaryBossSpawned
+                onPrimaryBossSpawned,
+                preBossWaves
         ));
 
-        if (hasBeforeBossSchedule && BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_BEFORE_BOSS.equals(bossSpawnTrigger)) {
-            int totalExecutions = getBeforeBossExecutionCount(resolvedWaves);
+        if (hasPreBossSchedule && BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_BEFORE_BOSS.equals(bossSpawnTrigger)) {
+            int totalExecutions = getPreBossExecutionCount(preBossWaves);
             tracking.registerPendingPreBossSpawn(deferredEventId, totalExecutions, spawnBossRunnable);
-            LOGGER.info("Boss '" + def.bossName + "' will spawn when all before_boss wave adds are dead (" + totalExecutions + " wave execution(s)).");
+            LOGGER.info("Boss '" + def.bossName + "' will spawn when all pre-boss wave adds are dead ("
+                    + totalExecutions + " wave execution(s), rows=" + preBossWaves.size() + ").");
         }
 
         long preBossDelayMs = scheduleBeforeBossWaveTimeline(
                 world,
                 def,
                 spawnPos,
-                resolvedWaves,
+                preBossWaves,
                 nextWaveNumber,
                 pendingPreBossAdds,
                 deferredEventId
         );
 
-        if (preBossDelayMs > 0L) {
-            if (!BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_BEFORE_BOSS.equals(bossSpawnTrigger)) {
-                long delayMs = (long) (bossSpawnTriggerValue * 1000.0d);
-                LOGGER.info("Delaying boss spawn for '" + def.bossName + "' by " + delayMs + "ms (after_seconds=" + bossSpawnTriggerValue + ").");
-                EXTRA_WAVE_SCHEDULER.schedule(spawnBossRunnable, Math.max(0L, delayMs), TimeUnit.MILLISECONDS);
-            }
+        // « Après fin des vagues »: never spawn the boss until pre-boss adds are cleared.
+        if (hasPreBossSchedule && BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_BEFORE_BOSS.equals(bossSpawnTrigger)) {
+            return DEFERRED_SPAWN_UUID;
+        }
+
+        if (preBossDelayMs > 0L || BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_SECONDS.equals(bossSpawnTrigger)) {
+            long delayMs = BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_SECONDS.equals(bossSpawnTrigger)
+                    ? (long) (bossSpawnTriggerValue * 1000.0d)
+                    : 0L;
+            LOGGER.info("Delaying boss spawn for '" + def.bossName + "' by " + delayMs + "ms (after_seconds="
+                    + bossSpawnTriggerValue + ").");
+            EXTRA_WAVE_SCHEDULER.schedule(spawnBossRunnable, Math.max(0L, delayMs), TimeUnit.MILLISECONDS);
             return DEFERRED_SPAWN_UUID;
         }
 
@@ -383,7 +424,8 @@ public final class BossSpawnService {
                 pendingPreBossAdds,
                 nextWaveNumber,
                 deferredEventId,
-                onPrimaryBossSpawned
+                onPrimaryBossSpawned,
+                preBossWaves
         );
     }
 
@@ -398,6 +440,34 @@ public final class BossSpawnService {
                              AtomicInteger nextWaveNumber,
                              UUID existingEventId,
                              Consumer<UUID> onPrimaryBossSpawned) {
+        return spawnBossNow(
+                world,
+                def,
+                spawnPos,
+                arenaId,
+                mods,
+                countdownDurationMs,
+                resolvedWaves,
+                pendingPreBossAdds,
+                nextWaveNumber,
+                existingEventId,
+                onPrimaryBossSpawned,
+                List.of()
+        );
+    }
+
+    public UUID spawnBossNow(World world,
+                             BossDefinition def,
+                             Vector3d spawnPos,
+                             String arenaId,
+                             BossModifiers mods,
+                             long countdownDurationMs,
+                             List<BossDefinition.ExtraMobs.ScheduledWave> resolvedWaves,
+                             List<UUID> pendingPreBossAdds,
+                             AtomicInteger nextWaveNumber,
+                             UUID existingEventId,
+                             Consumer<UUID> onPrimaryBossSpawned,
+                             List<BossDefinition.ExtraMobs.ScheduledWave> alreadySpawnedPreBossWaves) {
         UUID primaryBossUuid = null;
         UUID bossEventId = existingEventId;
 
@@ -428,7 +498,9 @@ public final class BossSpawnService {
                     UUID uuid = uuidComp.getUuid();
 
                     if (bossEventId == null) {
-                        bossEventId = tracking.createEvent(world, spawnPos, def.bossName, def.tier, countdownDurationMs);
+                        bossEventId = tracking.createEvent(
+                                world, spawnPos, def.bossName, def.tier, countdownDurationMs, false, arenaId);
+                        BossFightMusicService.startForEvent(bossEventId, world, spawnPos, def);
                     }
 
                     tracking.track(
@@ -485,7 +557,15 @@ public final class BossSpawnService {
 
         if (primaryBossUuid != null && def.extraMobs != null && def.extraMobs.hasConfiguredAdds()) {
             attachPreBossAddsToEvent(world, primaryBossUuid, pendingPreBossAdds);
-            scheduleConfiguredWaves(world, def, spawnPos, primaryBossUuid, resolvedWaves, nextWaveNumber);
+            scheduleConfiguredWaves(
+                    world,
+                    def,
+                    spawnPos,
+                    primaryBossUuid,
+                    resolvedWaves,
+                    nextWaveNumber,
+                    alreadySpawnedPreBossWaves
+            );
         }
 
         if (primaryBossUuid == null && bossEventId != null) {
@@ -605,39 +685,35 @@ public final class BossSpawnService {
     private long scheduleBeforeBossWaveTimeline(World world,
                                                 BossDefinition def,
                                                 Vector3d spawnPos,
-                                                List<BossDefinition.ExtraMobs.ScheduledWave> schedules,
+                                                List<BossDefinition.ExtraMobs.ScheduledWave> preBossWaves,
                                                 AtomicInteger nextWaveNumber,
                                                 List<UUID> pendingPreBossAdds,
                                                 UUID deferredEventId) {
-        List<BossDefinition.ExtraMobs.ScheduledWave> beforeBoss = filterSchedulesByTrigger(
-                schedules,
-                BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS
-        );
-        if (beforeBoss.isEmpty()) {
+        if (preBossWaves == null || preBossWaves.isEmpty()) {
             return 0L;
         }
 
         List<PreBossExecution> executions = new ArrayList<>();
         int scheduleIndex = 0;
-        long bossSpawnIntervalMs = DEFAULT_REPEAT_INTERVAL_MS;
-        for (BossDefinition.ExtraMobs.ScheduledWave scheduledWave : beforeBoss) {
+        for (BossDefinition.ExtraMobs.ScheduledWave scheduledWave : preBossWaves) {
+            if (scheduledWave == null) {
+                continue;
+            }
             scheduleIndex++;
             int repeatCount = Math.max(1, scheduledWave.repeatCount);
             if (scheduledWave.repeatCount < 0) {
-                LOGGER.info("before_boss trigger requested infinite repeats; limiting to 1 execution for '" + def.bossName + "'.");
+                LOGGER.info("pre-boss trigger requested infinite repeats; limiting to 1 execution for '"
+                        + def.bossName + "'.");
                 repeatCount = 1;
             }
-            long firstDelayMs = toMillisOrDefault(scheduledWave.triggerValue, 0L);
-            long repeatStepMs = toMillisOrDefault(scheduledWave.repeatEverySeconds, DEFAULT_REPEAT_INTERVAL_MS);
-            long scheduleBossIntervalMs = repeatStepMs;
-            if (scheduledWave.repeatEverySeconds <= 0.0d && scheduledWave.triggerValue > 0.0d) {
-                scheduleBossIntervalMs = toMillisOrDefault(scheduledWave.triggerValue, DEFAULT_REPEAT_INTERVAL_MS);
-            }
-            bossSpawnIntervalMs = Math.max(bossSpawnIntervalMs, scheduleBossIntervalMs);
-
             for (int execution = 1; execution <= repeatCount; execution++) {
-                long triggerDelayMs = firstDelayMs + ((long) (execution - 1) * repeatStepMs);
-                executions.add(new PreBossExecution(triggerDelayMs, execution, scheduleIndex, scheduledWave));
+                // triggerDelayMs unused for chain scheduling; kept for log labels.
+                executions.add(new PreBossExecution(
+                        toMillisOrDefault(scheduledWave.triggerValue, 0L),
+                        execution,
+                        scheduleIndex,
+                        scheduledWave
+                ));
             }
         }
 
@@ -645,59 +721,186 @@ public final class BossSpawnService {
             return 0L;
         }
 
-        long bossDelayMs = 0L;
-        for (PreBossExecution execution : executions) {
-            bossDelayMs = Math.max(bossDelayMs, execution.triggerDelayMs);
+        LOGGER.info("Chaining " + executions.size() + " pre-boss wave execution(s) for boss '"
+                + def.bossName + "' (since_last_wave waits for previous adds to die).");
+
+        long fightStartMs = System.currentTimeMillis();
+        long firstDelayMs = computePreBossInitialDelayMs(executions.get(0));
+        schedulePreBossExecutionAt(
+                world,
+                def,
+                spawnPos,
+                executions,
+                0,
+                firstDelayMs,
+                fightStartMs,
+                nextWaveNumber,
+                pendingPreBossAdds,
+                deferredEventId
+        );
+
+        // Estimate only used when boss spawn mode is Après délai (Fin des vagues waits on deaths).
+        return firstDelayMs + Math.max(1L, DEFAULT_REPEAT_INTERVAL_MS) * executions.size();
+    }
+
+    private static long computePreBossInitialDelayMs(PreBossExecution execution) {
+        if (execution == null || execution.wave == null) {
+            return 0L;
         }
-        bossDelayMs += Math.max(1L, bossSpawnIntervalMs);
+        String trigger = execution.wave.trigger;
+        if (BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS.equals(trigger)
+                || BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS.equals(trigger)
+                || BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE.equals(trigger)) {
+            return toMillisOrDefault(execution.wave.triggerValue, 0L);
+        }
+        return 0L;
+    }
 
-        executions.sort(Comparator
-                .comparingLong((PreBossExecution execution) -> execution.triggerDelayMs)
-                .thenComparingInt(execution -> execution.scheduleIndex)
-                .thenComparingInt(execution -> execution.executionNumber));
+    private void schedulePreBossExecutionAt(World world,
+                                            BossDefinition def,
+                                            Vector3d spawnPos,
+                                            List<PreBossExecution> executions,
+                                            int index,
+                                            long delayMs,
+                                            long fightStartMs,
+                                            AtomicInteger nextWaveNumber,
+                                            List<UUID> pendingPreBossAdds,
+                                            UUID deferredEventId) {
+        if (executions == null || index < 0 || index >= executions.size()) {
+            return;
+        }
+        Runnable run = () -> world.execute(() -> runPreBossExecution(
+                world,
+                def,
+                spawnPos,
+                executions,
+                index,
+                fightStartMs,
+                nextWaveNumber,
+                pendingPreBossAdds,
+                deferredEventId
+        ));
+        if (delayMs <= 0L) {
+            run.run();
+            return;
+        }
+        LOGGER.info("Scheduled pre-boss wave execution " + (index + 1) + "/" + executions.size()
+                + " in " + delayMs + "ms.");
+        EXTRA_WAVE_SCHEDULER.schedule(run, delayMs, TimeUnit.MILLISECONDS);
+    }
 
-        LOGGER.info("Scheduling " + executions.size() + " pre-boss wave execution(s) over " + bossDelayMs
-                + "ms for boss '" + def.bossName + "' (boss interval=" + bossSpawnIntervalMs + "ms).");
-
-        for (PreBossExecution execution : executions) {
-            long delayMs = Math.max(0L, execution.triggerDelayMs);
-            Runnable runExecution = () -> {
-                int waveNumber = nextWaveNumber.getAndIncrement();
-                List<UUID> spawned = spawnConfiguredWave(
-                        world,
-                        def,
-                        spawnPos,
-                        waveNumber,
-                        null,
-                        execution.wave.adds,
-                        "before_boss@+" + formatSeconds(execution.triggerDelayMs / 1000.0d) + "s#" + execution.executionNumber
-                );
-                if (!spawned.isEmpty()) {
-                    synchronized (pendingPreBossAdds) {
-                        pendingPreBossAdds.addAll(spawned);
-                    }
-                    if (deferredEventId != null) {
-                        for (UUID addUuid : spawned) {
-                            tracking.addPendingPreBossAdd(deferredEventId, addUuid);
-                        }
-                        tracking.markBeforeBossWaveExecuted(deferredEventId);
-                    }
-                } else if (deferredEventId != null) {
-                    tracking.markBeforeBossWaveExecuted(deferredEventId);
-                }
-            };
-
-            if (delayMs <= 0L) {
-                runExecution.run();
-                continue;
+    private void runPreBossExecution(World world,
+                                     BossDefinition def,
+                                     Vector3d spawnPos,
+                                     List<PreBossExecution> executions,
+                                     int index,
+                                     long fightStartMs,
+                                     AtomicInteger nextWaveNumber,
+                                     List<UUID> pendingPreBossAdds,
+                                     UUID deferredEventId) {
+        if (executions == null || index < 0 || index >= executions.size()) {
+            return;
+        }
+        PreBossExecution execution = executions.get(index);
+        String triggerLabel = execution.wave.trigger != null ? execution.wave.trigger : "pre_boss";
+        int waveNumber = nextWaveNumber.getAndIncrement();
+        List<UUID> spawned = spawnConfiguredWave(
+                world,
+                def,
+                spawnPos,
+                waveNumber,
+                null,
+                execution.wave.adds,
+                triggerLabel + "#" + execution.executionNumber
+        );
+        if (deferredEventId != null) {
+            tracking.setEventCurrentWave(deferredEventId, waveNumber);
+        }
+        if (!spawned.isEmpty()) {
+            synchronized (pendingPreBossAdds) {
+                pendingPreBossAdds.addAll(spawned);
             }
-
-            LOGGER.info("Scheduled before_boss wave execution " + execution.executionNumber
-                    + " in " + delayMs + "ms (schedule row " + execution.scheduleIndex + ").");
-            EXTRA_WAVE_SCHEDULER.schedule(() -> world.execute(runExecution), delayMs, TimeUnit.MILLISECONDS);
+            if (deferredEventId != null) {
+                for (UUID addUuid : spawned) {
+                    tracking.addPendingPreBossAdd(deferredEventId, addUuid);
+                }
+            }
+        }
+        if (deferredEventId != null) {
+            tracking.markBeforeBossWaveExecuted(deferredEventId);
         }
 
-        return bossDelayMs;
+        int nextIndex = index + 1;
+        if (nextIndex >= executions.size()) {
+            return;
+        }
+        PreBossExecution next = executions.get(nextIndex);
+        boolean nextWaitsForClear = BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE.equals(
+                next.wave != null ? next.wave.trigger : null
+        );
+
+        Runnable continueNext = () -> {
+            long extraDelayMs;
+            if (nextWaitsForClear) {
+                extraDelayMs = toMillisOrDefault(next.wave.triggerValue, 0L);
+            } else if (BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS.equals(next.wave.trigger)
+                    || BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS.equals(next.wave.trigger)) {
+                long absoluteMs = toMillisOrDefault(next.wave.triggerValue, 0L);
+                long elapsedMs = Math.max(0L, System.currentTimeMillis() - fightStartMs);
+                extraDelayMs = Math.max(0L, absoluteMs - elapsedMs);
+            } else {
+                extraDelayMs = 0L;
+            }
+            schedulePreBossExecutionAt(
+                    world,
+                    def,
+                    spawnPos,
+                    executions,
+                    nextIndex,
+                    extraDelayMs,
+                    fightStartMs,
+                    nextWaveNumber,
+                    pendingPreBossAdds,
+                    deferredEventId
+            );
+        };
+
+        if (nextWaitsForClear) {
+            LOGGER.info("Pre-boss wave " + waveNumber + " done; next since_last_wave waits for "
+                    + spawned.size() + " add(s) to die.");
+            waitUntilAddsDead(world, spawned, continueNext);
+        } else {
+            continueNext.run();
+        }
+    }
+
+    private void waitUntilAddsDead(World world, List<UUID> adds, Runnable onClear) {
+        if (onClear == null) {
+            return;
+        }
+        if (adds == null || adds.isEmpty()) {
+            onClear.run();
+            return;
+        }
+        List<UUID> watch = List.copyOf(adds);
+        EXTRA_WAVE_SCHEDULER.schedule(new Runnable() {
+            @Override
+            public void run() {
+                if (world == null) {
+                    onClear.run();
+                    return;
+                }
+                world.execute(() -> {
+                    for (UUID addUuid : watch) {
+                        if (isEntityAlive(world, addUuid)) {
+                            EXTRA_WAVE_SCHEDULER.schedule(this, 250L, TimeUnit.MILLISECONDS);
+                            return;
+                        }
+                    }
+                    onClear.run();
+                });
+            }
+        }, 250L, TimeUnit.MILLISECONDS);
     }
 
     private void scheduleConfiguredWaves(World world,
@@ -705,26 +908,44 @@ public final class BossSpawnService {
                                          Vector3d spawnPos,
                                          UUID bossUuid,
                                          List<BossDefinition.ExtraMobs.ScheduledWave> resolvedWaves,
-                                         AtomicInteger nextWaveNumber) {
+                                         AtomicInteger nextWaveNumber,
+                                         List<BossDefinition.ExtraMobs.ScheduledWave> alreadySpawnedPreBossWaves) {
         if (resolvedWaves == null || resolvedWaves.isEmpty()) {
             LOGGER.info("No resolved wave schedule for boss '" + def.bossName + "'.");
             return;
         }
 
+        java.util.IdentityHashMap<BossDefinition.ExtraMobs.ScheduledWave, Boolean> consumed =
+                new java.util.IdentityHashMap<>();
+        if (alreadySpawnedPreBossWaves != null) {
+            for (BossDefinition.ExtraMobs.ScheduledWave wave : alreadySpawnedPreBossWaves) {
+                if (wave != null) {
+                    consumed.put(wave, Boolean.TRUE);
+                }
+            }
+        }
+
+        List<BossDefinition.ExtraMobs.ScheduledWave> postBossWaves = new ArrayList<>();
+        for (BossDefinition.ExtraMobs.ScheduledWave wave : resolvedWaves) {
+            if (wave != null && !consumed.containsKey(wave)) {
+                postBossWaves.add(wave);
+            }
+        }
+
         List<BossDefinition.ExtraMobs.ScheduledWave> onSpawn = filterSchedulesByTrigger(
-                resolvedWaves,
+                postBossWaves,
                 BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN
         );
         List<BossDefinition.ExtraMobs.ScheduledWave> afterSpawn = filterSchedulesByTrigger(
-                resolvedWaves,
+                postBossWaves,
                 BossDefinition.ExtraMobs.TRIGGER_AFTER_SPAWN_SECONDS
         );
         List<BossDefinition.ExtraMobs.ScheduledWave> sinceLastWave = filterSchedulesByTrigger(
-                resolvedWaves,
+                postBossWaves,
                 BossDefinition.ExtraMobs.TRIGGER_SINCE_LAST_WAVE
         );
         List<BossDefinition.ExtraMobs.ScheduledWave> hpThreshold = filterSchedulesByTrigger(
-                resolvedWaves,
+                postBossWaves,
                 BossDefinition.ExtraMobs.TRIGGER_BOSS_HP_PERCENT
         );
         afterSpawn.sort(Comparator.comparingDouble(wave -> wave.triggerValue));
@@ -1165,6 +1386,13 @@ public final class BossSpawnService {
         }
 
         LOGGER.info("Executing wave " + waveNumber + " for '" + def.bossName + "' via trigger '" + triggerLabel + "'.");
+
+        if (bossUuid != null) {
+            UUID eventIdForWave = tracking.getEventIdForTrackedEntity(bossUuid);
+            if (eventIdForWave != null) {
+                tracking.setEventCurrentWave(eventIdForWave, waveNumber);
+            }
+        }
 
         int trackedAddsSpawned = 0;
         List<UUID> spawnedAddUuids = new ArrayList<>();
