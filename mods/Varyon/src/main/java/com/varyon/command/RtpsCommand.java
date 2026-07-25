@@ -28,7 +28,7 @@ public class RtpsCommand extends AbstractPlayerCommand {
     private final RtpService rtpService = new RtpService();
 
     public RtpsCommand() {
-        super("rtps", "TÃ©lÃ©portation alÃ©atoire en zone Hytale zone1, hors du carrÃ© central ([rtps])");
+        super("rtps", "Téléportation aléatoire en zone Hytale zone1, hors du carré central ([rtps])");
         this.requirePermission("varyon.rtps");
     }
 
@@ -48,11 +48,11 @@ public class RtpsCommand extends AbstractPlayerCommand {
         ChunkGenerator generator = (ChunkGenerator) worldGen;
         Zone[] zone1Zones = rtpService.resolveAllZonesByPrefix(generator, "zone1");
         if (zone1Zones == null || zone1Zones.length == 0) {
-            context.sendMessage(Message.raw("Aucune zone Hytale Â« zone1 Â» pour ce monde.").color(Color.RED));
+            context.sendMessage(Message.raw("Aucune zone Hytale « zone1 » pour ce monde.").color(Color.RED));
             return;
         }
 
-        context.sendMessage(Message.raw("TÃ©lÃ©portation alÃ©atoire (zone1)...").color(Color.GREEN));
+        context.sendMessage(Message.raw("Téléportation aléatoire (zone1)...").color(Color.GREEN));
 
         world.execute(() -> {
             try {
@@ -62,14 +62,14 @@ public class RtpsCommand extends AbstractPlayerCommand {
                 if (safePosition != null) {
                     Teleport teleport = Teleport.createForPlayer(world, new org.joml.Vector3d(safePosition.x, safePosition.y, safePosition.z), com.hypixel.hytale.math.vector.Rotation3f.ZERO);
                     store.addComponent(ref, Teleport.getComponentType(), teleport);
-                    context.sendMessage(Message.raw("TÃ©lÃ©portÃ© en " +
+                    context.sendMessage(Message.raw("Téléporté en " +
                         (int) safePosition.x + ", " + (int) safePosition.y + ", " + (int) safePosition.z).color(Color.GREEN));
                 } else {
-                    context.sendMessage(Message.raw("Impossible de trouver un emplacement sÃ»r").color(Color.RED));
+                    context.sendMessage(Message.raw("Impossible de trouver un emplacement sûr").color(Color.RED));
                 }
             } catch (Exception e) {
-                LOGGER.at(Level.SEVERE).log("Erreur lors de la tÃ©lÃ©portation RTPS: " + e.getMessage(), e);
-                context.sendMessage(Message.raw("Ã‰chec de la tÃ©lÃ©portation").color(Color.RED));
+                LOGGER.at(Level.SEVERE).log("Erreur lors de la téléportation RTPS: " + e.getMessage(), e);
+                context.sendMessage(Message.raw("Échec de la téléportation").color(Color.RED));
             }
         });
     }

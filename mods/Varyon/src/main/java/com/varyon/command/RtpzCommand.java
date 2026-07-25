@@ -57,13 +57,13 @@ public class RtpzCommand extends AbstractPlayerCommand {
 
     private class NoArgVariant extends CommandBase {
         public NoArgVariant() {
-            super("TÃ©lÃ©portation alÃ©atoire vers une zone random");
+            super("Téléportation aléatoire vers une zone random");
         }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
             if (!context.isPlayer()) {
-                context.sendMessage(Message.raw("Cette commande doit Ãªtre exÃ©cutÃ©e par un joueur.").color(Color.RED));
+                context.sendMessage(Message.raw("Cette commande doit être exécutée par un joueur.").color(Color.RED));
                 return;
             }
             Ref<EntityStore> ref = context.senderAsPlayerRef();
@@ -121,13 +121,13 @@ public class RtpzCommand extends AbstractPlayerCommand {
 
             zoneForTeleport = matchingZones.get(random.nextInt(matchingZones.size()));
             String zoneDisplay = formatHytaleZoneLabel(zoneForTeleport.name());
-            LOGGER.at(Level.INFO).log("RTPZ vanilla: " + zoneForTeleport.name() + " (" + zoneDisplay + ") â€” "
+            LOGGER.at(Level.INFO).log("RTPZ vanilla: " + zoneForTeleport.name() + " (" + zoneDisplay + ") ” "
                 + matchingZones.size() + " match(es) for prefix: " + prefix);
         } else {
             List<Zone> z1to4 = listHytaleZonesWithIndexInRange(zones, 1, 4);
             if (z1to4.isEmpty()) {
                 context.sendMessage(Message.raw(
-                    "Aucune zone Hytale (zone1 Ã  zone4) dÃ©tectÃ©e pour ce monde."
+                    "Aucune zone Hytale (zone1 à zone4) détectée pour ce monde."
                 ).color(Color.RED));
                 return;
             }
@@ -137,7 +137,7 @@ public class RtpzCommand extends AbstractPlayerCommand {
 
         final Integer extractedZoneNumber = parseZoneIndexFromHytaleName(zoneForTeleport.name());
 
-        // VÃ©rifier la permission (numÃ©ro dÃ©rivÃ© du nom de zone Hytale, pas des zones Varyon)
+        // Vérifier la permission (numéro dérivé du nom de zone Hytale, pas des zones Varyon)
         if (extractedZoneNumber != null) {
             PlayerRef pr = context.sender() instanceof PlayerRef _pr ? _pr : null;
             if (pr != null && !pr.hasPermission("varyon.rtp")) {
@@ -177,7 +177,7 @@ public class RtpzCommand extends AbstractPlayerCommand {
                         .replace("{attempts}", String.valueOf(RtpService.DEFAULT_RTP_MAX_ATTEMPTS))).color(Color.RED));
                 }
             } catch (Exception e) {
-                LOGGER.at(Level.SEVERE).log("Erreur lors de la tÃ©lÃ©portation RTP: " + e.getMessage(), e);
+                LOGGER.at(Level.SEVERE).log("Erreur lors de la téléportation RTP: " + e.getMessage(), e);
                 context.sendMessage(Message.raw(msg.error).color(Color.RED));
             }
         });

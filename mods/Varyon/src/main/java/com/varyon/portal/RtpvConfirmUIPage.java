@@ -90,7 +90,7 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
         @Nonnull Store<EntityStore> store
     ) {
         commandBuilder.append("RtpvConfirmMenu.ui");
-        commandBuilder.set("#TitleLabel.Text", "TÃ©lÃ©portation alÃ©atoire Varyon");
+        commandBuilder.set("#TitleLabel.Text", "Téléportation aléatoire Varyon");
 
         RtpvConfig rtpvConfig = null;
         boolean economyEnabled = false;
@@ -103,10 +103,10 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
         }
 
         String noLabel = economyEnabled
-            ? "Non, me re-tÃ©lÃ©porter pour " + currentRetryPrice() + " Coins"
-            : "Non, me re-tÃ©lÃ©porter";
+            ? "Non, me re-téléporter pour " + currentRetryPrice() + " Coins"
+            : "Non, me re-téléporter";
         commandBuilder.set("#NoButtonLabel.Text", noLabel);
-        commandBuilder.set("#MaybeButtonLabel.Text", "Peut-Ãªtre, laisse moi 15 secondes");
+        commandBuilder.set("#MaybeButtonLabel.Text", "Peut-être, laisse moi 15 secondes");
 
         eventBuilder.addEventBinding(
             CustomUIEventBindingType.Activating, "#YesButton", EventData.of("Action", "yes"));
@@ -163,7 +163,7 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
         int cooldownSec = rtpvConfig != null ? rtpvConfig.getCooldownSeconds() : 0;
         if (!RtpvCooldownStore.isConsecutiveRtpvAllowed(playerRefComp.getUuid(), cooldownSec)) {
             playerRefComp.sendMessage(Message.raw(
-                "Limite atteinte : 5 tÃ©lÃ©portations alÃ©atoires dâ€™affilÃ©e maximum."
+                "Limite atteinte : 5 téléportations aléatoires d'affilée maximum."
             ).color(Color.RED));
             return;
         }
@@ -176,13 +176,13 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
                 if (!hasEnoughBalance(playerRefComp, costBD)) {
                     BigDecimal balance = getBalance(playerRefComp);
                     playerRefComp.sendMessage(Message.raw(
-                        "Coins insuffisants pour la re-tÃ©lÃ©portation. CoÃ»t : " + price +
+                        "Coins insuffisants pour la re-téléportation. Coût : " + price +
                             " | Solde : " + balance.intValue()
                     ).color(Color.RED));
                     return;
                 }
             } catch (NoClassDefFoundError e) {
-                LOGGER.at(Level.WARNING).log("Vault non disponible lors du contrÃ´le Ã©conomie confirm");
+                LOGGER.at(Level.WARNING).log("Vault non disponible lors du contrôle économie confirm");
             }
         }
 
@@ -198,7 +198,7 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
             try {
                 IWorldGen worldGen = world.getChunkStore().getGenerator();
                 if (!(worldGen instanceof ChunkGenerator generator)) {
-                    playerRefComp.sendMessage(Message.raw("World generation non supportÃ©e").color(Color.RED));
+                    playerRefComp.sendMessage(Message.raw("World generation non supportée").color(Color.RED));
                     return;
                 }
 
@@ -210,7 +210,7 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
 
                 if (safePos == null) {
                     playerRefComp.sendMessage(Message.raw(
-                        "Impossible de trouver un emplacement sÃ»r dans " + targetZone.getName()
+                        "Impossible de trouver un emplacement sûr dans " + targetZone.getName()
                     ).color(Color.RED));
                     return;
                 }
@@ -225,7 +225,7 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
                     try {
                         withdrawBalance(playerRefComp, BigDecimal.valueOf(finalRetryCost), finalRetryCost);
                     } catch (NoClassDefFoundError e) {
-                        LOGGER.at(Level.WARNING).log("Vault non disponible lors de la dÃ©duction confirm");
+                        LOGGER.at(Level.WARNING).log("Vault non disponible lors de la déduction confirm");
                     }
                 }
 
@@ -239,7 +239,7 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
                 String pvpLabel = pvpFilter == null ? "" : (pvpFilter ? " (PvP)" : " (Hors PvP)");
                 String costLabel = finalRetryCost > 0 ? " (-" + finalRetryCost + " coins)" : "";
                 playerRefComp.sendMessage(Message.raw(
-                    "Re-tÃ©lÃ©portÃ© vers " + targetZone.getName() + pvpLabel + costLabel
+                    "Re-téléporté vers " + targetZone.getName() + pvpLabel + costLabel
                 ).color(Color.GREEN));
 
                 RtpvCooldownStore.incrementConsecutiveRtpv(playerRefComp.getUuid());
@@ -247,8 +247,8 @@ public class RtpvConfirmUIPage extends InteractiveCustomUIPage<RtpvConfirmUIPage
                 scheduleNextConfirm(playerRefComp, world);
 
             } catch (Exception e) {
-                LOGGER.at(Level.SEVERE).log("Erreur re-tÃ©lÃ©portation confirm: " + e.getMessage(), e);
-                playerRefComp.sendMessage(Message.raw("Erreur lors de la re-tÃ©lÃ©portation").color(Color.RED));
+                LOGGER.at(Level.SEVERE).log("Erreur re-téléportation confirm: " + e.getMessage(), e);
+                playerRefComp.sendMessage(Message.raw("Erreur lors de la re-téléportation").color(Color.RED));
             }
         });
     }

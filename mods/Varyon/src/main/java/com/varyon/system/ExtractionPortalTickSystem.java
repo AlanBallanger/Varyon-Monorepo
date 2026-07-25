@@ -92,14 +92,14 @@ public class ExtractionPortalTickSystem extends EntityTickingSystem<EntityStore>
             Transform spawnPoint = spawnProvider.getSpawnPoint(world, playerId);
             org.joml.Vector3d spawnPos = spawnPoint.getPosition();
 
-            // Jouer le son de tÃ©lÃ©portation
+            // Jouer le son de téléportation
             try {
                 com.hypixel.hytale.protocol.SoundCategory soundCategory = com.hypixel.hytale.protocol.SoundCategory.UI;
                 com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent soundEvent = 
                     com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent.class.cast(null);
                 
-                // Utiliser le son du tÃ©lÃ©porteur vanilla ou un son de portail
-                String soundId = "SFX_Teleporter_Arrival"; // Son de tÃ©lÃ©portation
+                // Utiliser le son du téléporteur vanilla ou un son de portail
+                String soundId = "SFX_Teleporter_Arrival"; // Son de téléportation
                 int soundIndex = com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent.getAssetMap().getIndex(soundId);
                 
                 if (soundIndex != 0) {
@@ -107,7 +107,7 @@ public class ExtractionPortalTickSystem extends EntityTickingSystem<EntityStore>
                         playerRef, soundIndex, soundCategory, 1.0f, 1.0f);
                 }
             } catch (Exception e) {
-                // Si le son Ã©choue, on continue quand mÃªme
+                // Si le son échoue, on continue quand même
             }
 
             Teleport teleport = Teleport.createForPlayer(world, spawnPos, com.hypixel.hytale.math.vector.Rotation3f.ZERO);

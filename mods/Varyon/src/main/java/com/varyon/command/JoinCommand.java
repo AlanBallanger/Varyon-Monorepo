@@ -10,7 +10,6 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.VaryonPlugin;
@@ -49,16 +48,26 @@ public class JoinCommand extends AbstractAsyncCommand {
             return CompletableFuture.completedFuture(null);
         }
 
-        Player joinerPlayer = (Player) context.sender();
-        if (joinerPlayer == null) {
+        if (!(context.sender() instanceof PlayerRef joinerRef)) {
+            context.sendMessage(Message.raw("Tu dois être un joueur pour cette commande.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
 
-        PlayerRef joinerRef = Universe.get().getPlayer(joinerPlayer.getUuid());
-        if (joinerRef == null) {
+        Ref<EntityStore> joinerEntityRef = context.senderAsPlayerRef();
+        if (joinerEntityRef == null || !joinerEntityRef.isValid()) {
             context.sendMessage(Message.raw("Tu dois être connecté.").color(Color.RED));
             return CompletableFuture.completedFuture(null);
         }
+
+        Store<EntityStore> joinerStore = joinerEntityRef.getStore();
+        Object joinerExt = joinerStore.getExternalData();
+        if (!(joinerExt instanceof EntityStore joinerEntityStore) || joinerEntityStore.getWorld() == null) {
+            context.sendMessage(Message.raw("Tu n'es pas dans un monde.").color(Color.RED));
+            return CompletableFuture.completedFuture(null);
+        }
+
+        World joinerWorld = joinerEntityStore.getWorld();
+        String joinerWorldName = joinerWorld.getName();
 
         PlayerRef targetRef = context.get(playerArg);
         if (targetRef == null || !targetRef.isValid()) {
@@ -89,7 +98,6 @@ public class JoinCommand extends AbstractAsyncCommand {
         World targetWorld = targetEntityStore.getWorld();
         String targetWorldName = targetWorld.getName();
 
-        String joinerWorldName = joinerPlayer.getWorld() != null ? joinerPlayer.getWorld().getName() : "";
         if (!targetWorldName.equals(joinerWorldName)) {
             context.sendMessage(Message.raw("Tu dois être dans le même monde (" + targetWorldName + ").").color(Color.RED));
             return CompletableFuture.completedFuture(null);
@@ -193,22 +201,25 @@ public class JoinCommand extends AbstractAsyncCommand {
                 return CompletableFuture.completedFuture(null);
             }
 
-            Player accepterPlayer = (Player) context.sender();
-            if (accepterPlayer == null) {
+            if (!(context.sender() instanceof PlayerRef accepterRef)) {
+                context.sendMessage(Message.raw("Tu dois être un joueur pour cette commande.").color(Color.RED));
                 return CompletableFuture.completedFuture(null);
             }
 
-            World accepterWorld = accepterPlayer.getWorld();
-            if (accepterWorld == null) {
+            Ref<EntityStore> accepterEntityRef = context.senderAsPlayerRef();
+            if (accepterEntityRef == null || !accepterEntityRef.isValid()) {
+                context.sendMessage(Message.raw("Erreur joueur.").color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+
+            Store<EntityStore> accepterStore = accepterEntityRef.getStore();
+            Object accepterExt = accepterStore.getExternalData();
+            if (!(accepterExt instanceof EntityStore accepterEntityStore) || accepterEntityStore.getWorld() == null) {
                 context.sendMessage(Message.raw("Tu n'es pas dans un monde.").color(Color.RED));
                 return CompletableFuture.completedFuture(null);
             }
 
-            PlayerRef accepterRef = Universe.get().getPlayer(accepterPlayer.getUuid());
-            if (accepterRef == null) {
-                context.sendMessage(Message.raw("Erreur joueur.").color(Color.RED));
-                return CompletableFuture.completedFuture(null);
-            }
+            World accepterWorld = accepterEntityStore.getWorld();
 
             PlayerRef joinerRef = context.get(joinerArg);
             if (joinerRef == null || !joinerRef.isValid()) {

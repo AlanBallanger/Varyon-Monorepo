@@ -46,7 +46,7 @@ public class ReturnCommand extends AbstractPlayerCommand {
     private static final Random random = new Random();
 
     public ReturnCommand() {
-        super("return", "Ouvre la confirmation de retour prÃ¨s de votre point de mort");
+        super("return", "Ouvre la confirmation de retour près de votre point de mort");
         this.setPermissionGroups("adventure");
         this.requirePermission(PERM_USE);
     }
@@ -56,7 +56,7 @@ public class ReturnCommand extends AbstractPlayerCommand {
                            @Nonnull Ref<EntityStore> ref, @Nonnull PlayerRef playerRef, @Nonnull World world) {
         DeathPointManager deathManager = VaryonPlugin.getInstance().getDeathPointManager();
         if (deathManager == null) {
-            context.sendMessage(Message.raw("SystÃ¨me de retour indisponible.").color(Color.RED));
+            context.sendMessage(Message.raw("Système de retour indisponible.").color(Color.RED));
             return;
         }
 
@@ -69,7 +69,7 @@ public class ReturnCommand extends AbstractPlayerCommand {
         MessagesConfig.ReturnMessages msg = VaryonPlugin.getStaticConfigManager().getMessagesConfig().getReturn();
 
         if (!config.isEnabled()) {
-            context.sendMessage(Message.raw("Le systÃ¨me de retour est dÃ©sactivÃ©.").color(Color.RED));
+            context.sendMessage(Message.raw("Le système de retour est désactivé.").color(Color.RED));
             return;
         }
 
@@ -103,12 +103,12 @@ public class ReturnCommand extends AbstractPlayerCommand {
                 if (!hasEnoughBalance(playerRef, costBD)) {
                     BigDecimal balance = getBalance(playerRef);
                     context.sendMessage(Message.raw(
-                        "Coins insuffisants. CoÃ»t : " + totalCost + " | Solde : " + balance.intValue()
+                        "Coins insuffisants. Coût : " + totalCost + " | Solde : " + balance.intValue()
                     ).color(Color.RED));
                     return;
                 }
             } catch (NoClassDefFoundError e) {
-                LOGGER.at(Level.WARNING).log("Vault non disponible, vÃ©rification Ã©conomie ignorÃ©e");
+                LOGGER.at(Level.WARNING).log("Vault non disponible, vérification économie ignorée");
             }
         }
 
@@ -177,12 +177,12 @@ public class ReturnCommand extends AbstractPlayerCommand {
                 if (!hasEnoughBalance(playerRef, costBD)) {
                     BigDecimal balance = getBalance(playerRef);
                     playerRef.sendMessage(Message.raw(
-                        "Coins insuffisants. CoÃ»t : " + totalCost + " | Solde : " + balance.intValue()
+                        "Coins insuffisants. Coût : " + totalCost + " | Solde : " + balance.intValue()
                     ).color(Color.RED));
                     return;
                 }
             } catch (NoClassDefFoundError e) {
-                LOGGER.at(Level.WARNING).log("Vault non disponible, vÃ©rification Ã©conomie ignorÃ©e");
+                LOGGER.at(Level.WARNING).log("Vault non disponible, vérification économie ignorée");
             }
         }
 
@@ -193,7 +193,7 @@ public class ReturnCommand extends AbstractPlayerCommand {
             try {
                 withdrawBalance(playerRef, costBD, totalCost);
             } catch (NoClassDefFoundError e) {
-                LOGGER.at(Level.WARNING).log("Vault non disponible, dÃ©duction ignorÃ©e");
+                LOGGER.at(Level.WARNING).log("Vault non disponible, déduction ignorée");
             }
         }
 

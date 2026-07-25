@@ -48,7 +48,7 @@ public class RtphCommand extends AbstractPlayerCommand {
         }
 
         ChunkGenerator generator = (ChunkGenerator) worldGen;
-        context.sendMessage(Message.raw("TÃ©lÃ©portation vers les confins...").color(Color.GREEN));
+        context.sendMessage(Message.raw("Téléportation vers les confins...").color(Color.GREEN));
 
         world.execute(() -> {
             try {
@@ -67,7 +67,7 @@ public class RtphCommand extends AbstractPlayerCommand {
                 }
 
                 if (!candidateFound) {
-                    context.sendMessage(Message.raw("Impossible de gÃ©nÃ©rer une position valide dans les confins").color(Color.RED));
+                    context.sendMessage(Message.raw("Impossible de générer une position valide dans les confins").color(Color.RED));
                     return;
                 }
 
@@ -75,14 +75,14 @@ public class RtphCommand extends AbstractPlayerCommand {
 
                 if (safePosition != null) {
                     teleportPlayer(store, ref, world, safePosition);
-                    context.sendMessage(Message.raw("TÃ©lÃ©portÃ© vers les confins en " +
+                    context.sendMessage(Message.raw("Téléporté vers les confins en " +
                         (int) safePosition.x + ", " + (int) safePosition.y + ", " + (int) safePosition.z).color(Color.GREEN));
                 } else {
-                    context.sendMessage(Message.raw("Impossible de trouver un emplacement sÃ»r dans les confins").color(Color.RED));
+                    context.sendMessage(Message.raw("Impossible de trouver un emplacement sûr dans les confins").color(Color.RED));
                 }
             } catch (Exception e) {
-                LOGGER.at(Level.SEVERE).log("Erreur lors de la tÃ©lÃ©portation RTPH: " + e.getMessage(), e);
-                context.sendMessage(Message.raw("Ã‰chec de la tÃ©lÃ©portation").color(Color.RED));
+                LOGGER.at(Level.SEVERE).log("Erreur lors de la téléportation RTPH: " + e.getMessage(), e);
+                context.sendMessage(Message.raw("Échec de la téléportation").color(Color.RED));
             }
         });
     }

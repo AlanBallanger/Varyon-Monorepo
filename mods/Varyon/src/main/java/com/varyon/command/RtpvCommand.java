@@ -74,15 +74,15 @@ public class RtpvCommand extends AbstractPlayerCommand {
         private final RequiredArg<String> pvpArg;
 
         PvpVariant() {
-            super("TÃ©lÃ©portation vers une zone mod avec filtre PvP");
+            super("Téléportation vers une zone mod avec filtre PvP");
             this.zoneArg = this.withRequiredArg("zone", "Zone number (1-10)", ArgTypes.INTEGER);
-            this.pvpArg = this.withRequiredArg("pvp", "true/false - tÃ©lÃ©porter en zone PvP ou hors PvP", ArgTypes.STRING);
+            this.pvpArg = this.withRequiredArg("pvp", "true/false - téléporter en zone PvP ou hors PvP", ArgTypes.STRING);
         }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
             if (!context.isPlayer()) {
-                context.sendMessage(Message.raw("Cette commande doit Ãªtre exÃ©cutÃ©e par un joueur.").color(Color.RED));
+                context.sendMessage(Message.raw("Cette commande doit être exécutée par un joueur.").color(Color.RED));
                 return;
             }
             Ref<EntityStore> ref = context.senderAsPlayerRef();
@@ -126,7 +126,7 @@ public class RtpvCommand extends AbstractPlayerCommand {
         if (!zonePerms.canAccessZone(playerRef, zoneNumber)) {
             String required = zonePerms.getPermissionForZone(zoneNumber);
             context.sendMessage(Message.raw(
-                "Vous n'avez pas accÃ¨s Ã  la zone " + zoneNumber + ". Permission requise : " + required
+                "Vous n'avez pas accès à la zone " + zoneNumber + ". Permission requise : " + required
             ).color(Color.RED));
             return;
         }
@@ -139,7 +139,7 @@ public class RtpvCommand extends AbstractPlayerCommand {
             int remain = RtpvCooldownStore.getRemainingCooldownSeconds(playerRef.getUuid(), cooldownSec);
             if (remain > 0) {
                 context.sendMessage(Message.raw(
-                    "TÃ©lÃ©portation alÃ©atoire en cooldown. RÃ©essayez dans " + remain + " s."
+                    "Téléportation aléatoire en cooldown. Réessayez dans " + remain + " s."
                 ).color(Color.RED));
                 return;
             }
@@ -147,7 +147,7 @@ public class RtpvCommand extends AbstractPlayerCommand {
 
         if (!RtpvCooldownStore.isConsecutiveRtpvAllowed(playerRef.getUuid(), cooldownSec)) {
             context.sendMessage(Message.raw(
-                "Limite atteinte : 5 tÃ©lÃ©portations alÃ©atoires dâ€™affilÃ©e maximum."
+                "Limite atteinte : 5 téléportations aléatoires d'affilée maximum."
             ).color(Color.RED));
             return;
         }
@@ -164,12 +164,12 @@ public class RtpvCommand extends AbstractPlayerCommand {
                 if (!hasEnoughBalance(playerRef, costBD)) {
                     BigDecimal balance = getBalance(playerRef);
                     context.sendMessage(Message.raw(
-                        "Coins insuffisants. CoÃ»t : " + finalCost + " | Solde : " + balance.intValue()
+                        "Coins insuffisants. Coût : " + finalCost + " | Solde : " + balance.intValue()
                     ).color(Color.RED));
                     return;
                 }
             } catch (NoClassDefFoundError e) {
-                LOGGER.at(Level.WARNING).log("Vault non disponible, vÃ©rification Ã©conomie ignorÃ©e");
+                LOGGER.at(Level.WARNING).log("Vault non disponible, vérification économie ignorée");
             }
         }
 
@@ -185,7 +185,7 @@ public class RtpvCommand extends AbstractPlayerCommand {
 
         String pvpLabel = pvpFilter == null ? "" : (pvpFilter ? " (PvP)" : " (Hors PvP)");
         String costLabel = rtpvConfig.isEconomyEnabled() ? " [" + finalCost + " coins]" : "";
-        context.sendMessage(Message.raw("TÃ©lÃ©portation vers " + targetZone.getName() + pvpLabel + costLabel + "...").color(Color.GREEN));
+        context.sendMessage(Message.raw("Téléportation vers " + targetZone.getName() + pvpLabel + costLabel + "...").color(Color.GREEN));
 
         world.execute(() -> {
             try {
@@ -200,7 +200,7 @@ public class RtpvCommand extends AbstractPlayerCommand {
                         try {
                             withdrawBalance(playerRef, costBD, finalCost);
                         } catch (NoClassDefFoundError e) {
-                            LOGGER.at(Level.WARNING).log("Vault non disponible, dÃ©duction ignorÃ©e");
+                            LOGGER.at(Level.WARNING).log("Vault non disponible, déduction ignorée");
                         }
                     }
 
@@ -211,7 +211,7 @@ public class RtpvCommand extends AbstractPlayerCommand {
                             safePosition.x, safePosition.y, safePosition.z, 0f, 0f, 0f);
                     }
 
-                    context.sendMessage(Message.raw("TÃ©lÃ©portÃ© vers " + targetZone.getName() + pvpLabel +
+                    context.sendMessage(Message.raw("Téléporté vers " + targetZone.getName() + pvpLabel +
                         " en " + (int) safePosition.x + ", " + (int) safePosition.y + ", " + (int) safePosition.z +
                         (rtpvConfig.isEconomyEnabled() ? " (-" + finalCost + " coins)" : "")).color(Color.GREEN));
 
@@ -219,11 +219,11 @@ public class RtpvCommand extends AbstractPlayerCommand {
                     RtpvCooldownStore.recordSuccessfulRtpv(playerRef.getUuid());
                     RtpvCooldownStore.incrementConsecutiveRtpv(playerRef.getUuid());
                 } else {
-                    context.sendMessage(Message.raw("Impossible de trouver un emplacement sÃ»r dans " + targetZone.getName()).color(Color.RED));
+                    context.sendMessage(Message.raw("Impossible de trouver un emplacement sûr dans " + targetZone.getName()).color(Color.RED));
                 }
             } catch (Exception e) {
                 LOGGER.at(Level.SEVERE).log("Error during RTP: " + e.getMessage(), e);
-                context.sendMessage(Message.raw("Ã‰chec de la tÃ©lÃ©portation").color(Color.RED));
+                context.sendMessage(Message.raw("Échec de la téléportation").color(Color.RED));
             }
         });
     }

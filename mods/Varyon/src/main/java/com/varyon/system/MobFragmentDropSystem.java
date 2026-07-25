@@ -104,7 +104,7 @@ public class MobFragmentDropSystem {
     }
 
     // -------------------------------------------------------------------------
-    // Death â€” resolve contributing player like Ecotale mob coins (killer else last attacker).
+    // Death ” resolve contributing player like Ecotale mob coins (killer else last attacker).
     // -------------------------------------------------------------------------
     public final class DropOnDeath extends DeathSystems.OnDeathSystem {
 

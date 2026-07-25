@@ -60,8 +60,17 @@ val fatJar = tasks.register<Jar>("fatJar") {
     }
 }
 
+val exportModJar = tasks.register<Copy>("exportModJar") {
+    group = "build"
+    description = "Copie le JAR vers Varyon-Monorepo/build/output"
+    dependsOn(fatJar)
+    from(fatJar)
+    into(rootProject.layout.buildDirectory.dir("output"))
+}
+
 tasks.named("build") {
     dependsOn(fatJar)
+    finalizedBy(exportModJar)
 }
 
 hytale {
@@ -73,6 +82,10 @@ java {
     }
 
     withSourcesJar()
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
 }
 
 tasks.named<ProcessResources>("processResources") {
