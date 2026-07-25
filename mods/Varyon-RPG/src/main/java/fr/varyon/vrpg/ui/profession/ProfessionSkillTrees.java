@@ -167,7 +167,7 @@ public final class ProfessionSkillTrees {
         {"0",  "Moisson Généreuse",       "Passif", "Les champs généreux ne comptent pas leurs fruits.",                               "Chance de doubler les récoltes obtenues.",                                        "Jobs_Icons/Crops_Loot.png"},
         {"1",  "Mains Vertes",           "Passif", "La pratique vaut toutes les théories.",                                            "Augmente l'expérience gagnée en récoltant.",                                      "Jobs_Icons/Xp_Boost.png"},
         {"2",  "Maître Arroseur",        "Passif", "Un vrai fermier hydrate ses cultures avec style.",                                  "Débloque les arroseurs automatiques.",                                            "Jobs_Icons/Sprinkler.png"},
-        {"3",  "Graines Fantomatiques",  "Passif", "On raconte que certaines graines apparaissent sans avoir été semées.",             "Chance d'obtenir des Graines Fantomatiques lors des récoltes.",                   "Jobs_Icons/Seed_Corrupted.png"},
+        {"3",  "Graines Fantomatiques",  "Passif", "On raconte que certaines graines apparaissent sans avoir été semées.",             "Chance d'obtenir des Graines Fantomatiques lors des récoltes.",                   "Jobs_Icons/Seed_Special.png"},
         {"4",  "Bras Long",              "Passif", "Les champs sont grands. Heureusement, vos bras aussi.",                           "Plante sur 5 blocs de long.",                                                     "Jobs_Icons/Multiple_Crop.png"},
         {"5",  "Grains Sans Fin",        "Passif", "La vie trouve toujours un chemin.",                                               "Chance d'obtenir une Graine Éternelle en récoltant n'importe quelle culture.",    "Jobs_Icons/Eternal_Seed_Plus.png"},
         {"6",  "CO-CO-COMBO",            "Passif", "Plus la cadence augmente, plus la récolte prospère.",                             "Enchaîner les récoltes rapporte de l'XP et du loot bonus par combo (max. 10).",  "Jobs_Icons/Combo_Harvsting.png"},
@@ -219,7 +219,7 @@ public final class ProfessionSkillTrees {
     private static final String[][] FERMIER_NODE_STAT_VALUES = {
         {"5% loot",              "10% loot",             "15% loot",             "20% loot",             "25% loot"},
         {"5% XP",                "10% XP",               "15% XP",               "20% XP",               "25% XP"},
-        {"Arroseur en cuivre",   "Arroseur en fer",      "Arroseur en thorium",  "Arroseur en cobalt",   "Arroseur en adamantite"},
+        {"Arroseur en fer",      "Arroseur en thorium",  "Arroseur en cobalt",   "Arroseur en adamantite", "Arroseur en mithril"},
         {"1% graines",           "1.5% graines",         "2% graines",           "2.5% graines",         "3% graines"},
         {"Replantation 5 blocs activée"},
         {"0.5% graine éternelle",  "0.75% graine éternelle", "1% graine éternelle",   "1.25% graine éternelle", "1.5% graine éternelle"},

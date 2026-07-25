@@ -49,6 +49,12 @@ public class BossLootHandler {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final int PERSISTENCE_VERSION = 1;
     private static final Map<Vector3d, Map<UUID, List<GeneratedLoot>>> CHEST_LOOT = new ConcurrentHashMap<>();
+    /**
+     * Per-player open containers for a chest. Lives outside {@link BossLootChestBlock} so loot survives
+     * block-component clone/replace when the chest OpenWindow/CloseWindow state changes.
+     */
+    private static final Map<Vector3d, Map<UUID, com.hypixel.hytale.server.core.inventory.container.ItemContainer>> CLAIMED_CONTAINERS =
+            new ConcurrentHashMap<>();
     private static final Map<Vector3d, String> CHEST_WORLD = new ConcurrentHashMap<>();
     private static final Map<Vector3d, ScheduledFuture<?>> CHEST_EXPIRY_TASKS = new ConcurrentHashMap<>();
     private static final Map<Vector3d, Long> CHEST_EXPIRY_DEADLINES = new ConcurrentHashMap<>();
@@ -92,6 +98,7 @@ public class BossLootHandler {
         CHEST_EXPIRY_DEADLINES.clear();
         CHEST_WORLD.clear();
         CHEST_LOOT.clear();
+        CLAIMED_CONTAINERS.clear();
     }
 
     // Queue a loot spawn
@@ -387,6 +394,131 @@ public class BossLootHandler {
         return loot;
     }
 
+    /**
+     * Returns the durable per-player loot container for this chest.
+     * First open claims from {@link #CHEST_LOOT}; later opens reuse the same container
+     * (including leftover items after a partial take).
+     */
+    public static com.hypixel.hytale.server.core.inventory.container.ItemContainer getOrCreatePlayerLootContainer(
+            World world,
+            Vector3d location,
+            UUID playerUuid) {
+        if (playerUuid == null) {
+            return new com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer((short) 27);
+        }
+
+        Vector3d chestLoc = getChestLocationNear(world, location);
+        if (chestLoc == null) {
+            chestLoc = normalizeChestKey(location);
+        }
+
+        Map<UUID, com.hypixel.hytale.server.core.inventory.container.ItemContainer> byPlayer =
+                CLAIMED_CONTAINERS.computeIfAbsent(chestLoc, ignored -> new ConcurrentHashMap<>());
+
+        com.hypixel.hytale.server.core.inventory.container.ItemContainer existing = byPlayer.get(playerUuid);
+        if (existing != null) {
+            return existing;
+        }
+
+        com.hypixel.hytale.server.core.inventory.container.ItemContainer container =
+                new com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer((short) 27);
+
+        // Non-destructive read: remaining stacks stay in CHEST_LOOT until close-sync clears them.
+        List<GeneratedLoot> loot = getStoredLootForPlayer(world, location, playerUuid);
+        if (loot != null && !loot.isEmpty()) {
+            int slot = 0;
+            for (GeneratedLoot item : loot) {
+                if (slot >= 27) {
+                    break;
+                }
+                try {
+                    com.hypixel.hytale.server.core.inventory.ItemStack stack =
+                            new com.hypixel.hytale.server.core.inventory.ItemStack(item.itemId, item.amount);
+                    container.setItemStackForSlot((short) slot, stack);
+                    slot++;
+                } catch (Exception e) {
+                    LOGGER.warning("Failed to create ItemStack for " + item.itemId + ": " + e.getMessage());
+                }
+            }
+            LOGGER.info("Player " + playerUuid + " opened loot chest with " + loot.size() + " stack(s)");
+        } else {
+            LOGGER.info("Player " + playerUuid + " has no loot at this chest (already taken or not eligible)");
+        }
+
+        byPlayer.put(playerUuid, container);
+        return container;
+    }
+
+    /**
+     * Writes leftover container items back into {@link #CHEST_LOOT} so reopen/restart keep remaining loot.
+     * Removes the player entry when the container is empty.
+     */
+    public static void syncPlayerLootContainer(World world, Vector3d location, UUID playerUuid) {
+        if (playerUuid == null || location == null) {
+            return;
+        }
+
+        Vector3d chestLoc = getChestLocationNear(world, location);
+        if (chestLoc == null) {
+            chestLoc = normalizeChestKey(location);
+        }
+
+        Map<UUID, com.hypixel.hytale.server.core.inventory.container.ItemContainer> byPlayer =
+                CLAIMED_CONTAINERS.get(chestLoc);
+        if (byPlayer == null) {
+            return;
+        }
+
+        com.hypixel.hytale.server.core.inventory.container.ItemContainer container = byPlayer.get(playerUuid);
+        if (container == null) {
+            return;
+        }
+
+        List<GeneratedLoot> remaining = extractRemainingLoot(container);
+        Map<UUID, List<GeneratedLoot>> playerLoot =
+                CHEST_LOOT.computeIfAbsent(chestLoc, ignored -> new ConcurrentHashMap<>());
+
+        if (remaining.isEmpty()) {
+            playerLoot.remove(playerUuid);
+            byPlayer.remove(playerUuid);
+            if (byPlayer.isEmpty()) {
+                CLAIMED_CONTAINERS.remove(chestLoc, byPlayer);
+            }
+            LOGGER.info("Player " + playerUuid + " finished looting chest at " + chestLoc);
+        } else {
+            playerLoot.put(playerUuid, remaining);
+            LOGGER.info("Synced " + remaining.size() + " remaining loot stack(s) for " + playerUuid
+                    + " at " + chestLoc);
+        }
+
+        if (world != null) {
+            CHEST_WORLD.putIfAbsent(chestLoc, world.getName());
+        }
+        persistStateSafe();
+    }
+
+    private static List<GeneratedLoot> extractRemainingLoot(
+            com.hypixel.hytale.server.core.inventory.container.ItemContainer container) {
+        List<GeneratedLoot> remaining = new ArrayList<>();
+        if (container == null) {
+            return remaining;
+        }
+        short capacity = container.getCapacity();
+        for (short slot = 0; slot < capacity; slot++) {
+            com.hypixel.hytale.server.core.inventory.ItemStack stack = container.getItemStack(slot);
+            if (stack == null || stack.isEmpty()) {
+                continue;
+            }
+            String itemId = stack.getItemId();
+            int amount = stack.getQuantity();
+            if (itemId == null || itemId.isBlank() || amount <= 0) {
+                continue;
+            }
+            remaining.add(new GeneratedLoot(itemId, amount));
+        }
+        return remaining;
+    }
+
     public static void cleanupChestIfEmpty(World world, Vector3d location) {
         Vector3d chestLoc = getChestLocationNear(world, location);
         if (chestLoc == null) {
@@ -394,7 +526,11 @@ public class BossLootHandler {
         }
 
         Map<UUID, List<GeneratedLoot>> playerLoot = CHEST_LOOT.get(chestLoc);
-        if (playerLoot == null || playerLoot.isEmpty()) {
+        Map<UUID, com.hypixel.hytale.server.core.inventory.container.ItemContainer> claimed =
+                CLAIMED_CONTAINERS.get(chestLoc);
+        boolean lootEmpty = playerLoot == null || playerLoot.isEmpty();
+        boolean containersEmpty = claimed == null || claimed.isEmpty();
+        if (lootEmpty && containersEmpty) {
             // Keep the block alive until expiry after the last window closes.
             LOGGER.info("All loot claimed at " + chestLoc + ", waiting for close-expiry cleanup.");
             persistStateSafe();
@@ -828,6 +964,7 @@ public class BossLootHandler {
     private static void expireChestOnWorldThread(World world, Vector3d key) {
         world.execute(() -> {
             CHEST_LOOT.remove(key);
+            CLAIMED_CONTAINERS.remove(key);
             CHEST_WORLD.remove(key);
             CHEST_EXPIRY_DEADLINES.remove(key);
             CHEST_EXPIRY_TASKS.remove(key);
@@ -848,6 +985,7 @@ public class BossLootHandler {
         }
         for (Vector3d loc : toRemove) {
             CHEST_LOOT.remove(loc);
+            CLAIMED_CONTAINERS.remove(loc);
             CHEST_WORLD.remove(loc);
             cancelChestExpiry(loc, false);
             removeChestBlockDirectly(world, loc);

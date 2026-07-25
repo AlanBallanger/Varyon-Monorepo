@@ -25,7 +25,7 @@ public final class BossArenaShortCommand extends AbstractCommand {
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
         ctx.sendMessage(com.hypixel.hytale.server.core.Message.raw(
-                "Use: /ba arena <create|delete|list> OR /ba spawn <bossId> <arenaId|here> OR /ba reload OR /ba config OR /ba shop [place|remove] OR /ba cleanup"
+                "Use: /ba arena <create|delete|list> OR /ba spawn <bossId> <arenaId|here> OR /ba reload OR /ba config OR /ba shop [place|remove <id>] OR /ba cleanup"
         ));
         return CompletableFuture.completedFuture(null);
     }

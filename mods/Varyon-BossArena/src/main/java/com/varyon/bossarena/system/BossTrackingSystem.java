@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,8 @@ public class BossTrackingSystem {
     private final Map<UUID, Set<UUID>> trackedAddsByBoss = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> addToBoss = new ConcurrentHashMap<>();
     private final Map<UUID, BossModifiers> addModifiers = new ConcurrentHashMap<>();
+    /** Baked zone/world HP factor (assetMax × factor × bossMult). Survives before trackAdd. */
+    private final Map<UUID, Float> addWorldHealthFactors = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> bossToEvent = new ConcurrentHashMap<>();
     private final Map<UUID, EventData> eventsById = new ConcurrentHashMap<>();
     private final Map<UUID, HeldChunk> heldChunkByEvent = new ConcurrentHashMap<>();
@@ -190,6 +193,7 @@ public class BossTrackingSystem {
         copy.knockbackTakenMultiplier = source.knockbackTakenMultiplier;
         copy.turnRateMultiplier = source.turnRateMultiplier;
         copy.regenMultiplier = source.regenMultiplier;
+        copy.worldHealthFactor = source.worldHealthFactor;
         return copy;
     }
 
@@ -210,6 +214,7 @@ public class BossTrackingSystem {
         copy.knockbackTakenMultiplier = source.knockbackTakenMultiplier;
         copy.turnRateMultiplier = source.turnRateMultiplier;
         copy.regenMultiplier = source.regenMultiplier;
+        copy.worldHealthFactor = source.worldHealthFactor;
         return copy;
     }
 
@@ -289,7 +294,7 @@ public class BossTrackingSystem {
                     1.0f,
                     1.0f,
                     1.0f,
-                    1.0f
+                    0.0f
             );
         }
         return new BossModifiers(
@@ -302,7 +307,7 @@ public class BossTrackingSystem {
                 clampModifier(modifiers.knockbackGivenMultiplier()),
                 clampModifier(modifiers.knockbackTakenMultiplier()),
                 clampModifier(modifiers.turnRateMultiplier()),
-                clampModifier(modifiers.regenMultiplier())
+                com.varyon.bossarena.util.BossRegen.normalizeHpPerSecond(modifiers.regenMultiplier())
         );
     }
 
@@ -514,6 +519,7 @@ public class BossTrackingSystem {
             out.knockbackTakenMultiplier = mods != null ? mods.knockbackTakenMultiplier() : 1.0f;
             out.turnRateMultiplier = mods != null ? mods.turnRateMultiplier() : 1.0f;
             out.regenMultiplier = mods != null ? mods.regenMultiplier() : 1.0f;
+            out.worldHealthFactor = data.worldHealthFactor;
             state.bosses.add(out);
         }
 
@@ -537,6 +543,8 @@ public class BossTrackingSystem {
             link.knockbackTakenMultiplier = mods != null ? mods.knockbackTakenMultiplier() : 1.0f;
             link.turnRateMultiplier = mods != null ? mods.turnRateMultiplier() : 1.0f;
             link.regenMultiplier = mods != null ? mods.regenMultiplier() : 1.0f;
+            Float addFactor = addWorldHealthFactors.get(addUuid);
+            link.worldHealthFactor = addFactor != null ? addFactor : 0.0f;
             state.addLinks.add(link);
         }
 
@@ -819,6 +827,7 @@ public class BossTrackingSystem {
                 eventId,
                 persisted.spawnedAtEpochMs
         );
+        data.worldHealthFactor = persisted.worldHealthFactor;
         trackedBosses.put(bossUuid, data);
         bossToEvent.put(bossUuid, eventId);
         EventData event = eventsById.get(eventId);
@@ -838,6 +847,9 @@ public class BossTrackingSystem {
                 persisted.knockbackGivenMultiplier, persisted.knockbackTakenMultiplier, persisted.turnRateMultiplier,
                 persisted.regenMultiplier
         ));
+        if (persisted.worldHealthFactor > 0.01f) {
+            addWorldHealthFactors.put(addUuid, persisted.worldHealthFactor);
+        }
         EventData event = getEventForBoss(bossUuid);
         if (event != null) {
             event.activeAdds.add(addUuid);
@@ -956,7 +968,33 @@ public class BossTrackingSystem {
             return;
         }
         event.currentWaveNumber = Math.max(event.currentWaveNumber, waveNumber);
+        if (event.totalWaveCount > 0) {
+            event.totalWaveCount = Math.max(event.totalWaveCount, event.currentWaveNumber);
+        }
         markDirty();
+    }
+
+    /** Planned wave executions for this fight (0 = unknown / infinite). */
+    public void setEventTotalWaves(UUID eventId, int totalWaves) {
+        if (eventId == null || totalWaves < 0) {
+            return;
+        }
+        EventData event = eventsById.get(eventId);
+        if (event == null) {
+            return;
+        }
+        event.totalWaveCount = Math.max(event.totalWaveCount, totalWaves);
+        markDirty();
+    }
+
+    public int getEventCurrentWave(UUID eventId) {
+        EventData event = eventId != null ? eventsById.get(eventId) : null;
+        return event != null ? event.currentWaveNumber : 0;
+    }
+
+    public int getEventTotalWaves(UUID eventId) {
+        EventData event = eventId != null ? eventsById.get(eventId) : null;
+        return event != null ? event.totalWaveCount : 0;
     }
 
     public void track(UUID uuid, String bossName, BossModifiers mods, String arenaId, World world, Vector3d spawnPos) {
@@ -1024,6 +1062,33 @@ public class BossTrackingSystem {
 
     public boolean isTracked(UUID uuid) {
         return trackedBosses.containsKey(uuid);
+    }
+
+    /** {@code <= 0} means unknown (capture from live stats on next HP apply). */
+    public float getWorldHealthFactor(UUID entityUuid) {
+        if (entityUuid == null) {
+            return 0.0f;
+        }
+        BossData boss = trackedBosses.get(entityUuid);
+        if (boss != null) {
+            return boss.worldHealthFactor;
+        }
+        Float addFactor = addWorldHealthFactors.get(entityUuid);
+        return addFactor != null ? addFactor : 0.0f;
+    }
+
+    public void setWorldHealthFactor(UUID entityUuid, float worldHealthFactor) {
+        if (entityUuid == null || !Float.isFinite(worldHealthFactor) || worldHealthFactor <= 0.01f) {
+            return;
+        }
+        BossData boss = trackedBosses.get(entityUuid);
+        if (boss != null) {
+            boss.worldHealthFactor = worldHealthFactor;
+            markDirty();
+            return;
+        }
+        addWorldHealthFactors.put(entityUuid, worldHealthFactor);
+        markDirty();
     }
 
     public void trackAdd(UUID bossUuid, UUID addUuid) {
@@ -1190,6 +1255,31 @@ public class BossTrackingSystem {
         return event.activeAdds.size();
     }
 
+    /**
+     * Locks boss damage until the given HP-% wave adds are dead/removed.
+     * Call after spawning a {@code boss_hp_percent} wave.
+     */
+    public void activateHpWaveDamageLock(UUID bossUuid, Collection<UUID> addUuids) {
+        if (bossUuid == null || addUuids == null || addUuids.isEmpty()) {
+            return;
+        }
+        EventData event = getEventForBoss(bossUuid);
+        if (event == null) {
+            return;
+        }
+        for (UUID addUuid : addUuids) {
+            if (addUuid != null) {
+                event.hpWaveShieldAdds.add(addUuid);
+            }
+        }
+    }
+
+    /** True while at least one add from an HP-% wave is still alive for this boss's event. */
+    public boolean isBossDamageLockedByHpWave(UUID bossUuid) {
+        EventData event = getEventForBoss(bossUuid);
+        return event != null && !event.hpWaveShieldAdds.isEmpty();
+    }
+
     public long getRemainingCountdownMillis(UUID bossUuid) {
         EventData event = getEventForBoss(bossUuid);
         return getRemainingCountdownMillis(event);
@@ -1236,7 +1326,8 @@ public class BossTrackingSystem {
                     getRemainingCountdownMillis(event),
                     event.awaitingPrimaryBossSpawn,
                     arenaId,
-                    event.currentWaveNumber
+                    event.currentWaveNumber,
+                    event.totalWaveCount
             ));
         }
         return out;
@@ -1257,6 +1348,57 @@ public class BossTrackingSystem {
 
     public Map<UUID, UUID> snapshotTrackedAdds() {
         return new HashMap<>(addToBoss);
+    }
+
+    /** Pending pre-boss wave adds: addUuid → eventId. */
+    public Map<UUID, UUID> snapshotPendingPreBossAdds() {
+        return new HashMap<>(pendingPreBossAddToEventId);
+    }
+
+    /**
+     * Returns a status snapshot for an event id (including not-yet-bannered fights),
+     * or null if the event is unknown.
+     */
+    public ActiveEventStatus getActiveEventStatus(UUID eventId) {
+        if (eventId == null) {
+            return null;
+        }
+        EventData event = eventsById.get(eventId);
+        if (event == null) {
+            return null;
+        }
+        int alive = event.aliveBosses.size();
+        int adds = event.activeAdds.size();
+        if (event.awaitingPrimaryBossSpawn) {
+            PendingPreBossState pending = pendingPreBossByEventId.get(eventId);
+            if (pending != null) {
+                adds = pending.aliveAdds.size();
+            }
+        }
+        String arenaId = event.arenaId;
+        if (arenaId == null || arenaId.isBlank()) {
+            for (UUID bossUuid : event.bossUuids) {
+                BossData b = trackedBosses.get(bossUuid);
+                if (b != null && b.arenaId != null && !b.arenaId.isBlank()) {
+                    arenaId = b.arenaId;
+                    break;
+                }
+            }
+        }
+        return new ActiveEventStatus(
+                eventId,
+                resolveEventWorld(event),
+                event.eventCenter,
+                event.bossName,
+                event.bossTier,
+                alive,
+                adds,
+                getRemainingCountdownMillis(event),
+                event.awaitingPrimaryBossSpawn,
+                arenaId,
+                event.currentWaveNumber,
+                event.totalWaveCount
+        );
     }
 
     public Set<UUID> snapshotAddsForBoss(UUID bossUuid) {
@@ -1355,6 +1497,7 @@ public class BossTrackingSystem {
             return null;
         }
         addModifiers.remove(addUuid);
+        addWorldHealthFactors.remove(addUuid);
 
         Set<UUID> adds = trackedAddsByBoss.get(bossUuid);
         if (adds != null) {
@@ -1368,6 +1511,7 @@ public class BossTrackingSystem {
         EventData event = eventId != null ? eventsById.get(eventId) : null;
         if (event != null) {
             event.activeAdds.remove(addUuid);
+            event.hpWaveShieldAdds.remove(addUuid);
             PendingLootData pending = tryCompleteEvent(eventId);
             markDirty();
             refreshEventChunkRetention();
@@ -1441,8 +1585,10 @@ public class BossTrackingSystem {
         for (UUID addUuid : adds) {
             addToBoss.remove(addUuid);
             addModifiers.remove(addUuid);
+            addWorldHealthFactors.remove(addUuid);
             if (event != null) {
                 event.activeAdds.remove(addUuid);
+                event.hpWaveShieldAdds.remove(addUuid);
             }
         }
     }
@@ -1605,6 +1751,8 @@ public class BossTrackingSystem {
         public int levelOverride;
         public UUID eventId;
         public long spawnedAtEpochMs;
+        /** Zone/world HP bake factor; {@code <= 0} = unknown. */
+        public float worldHealthFactor;
 
         public BossData(String bossName,
                         BossModifiers modifiers,
@@ -1624,6 +1772,7 @@ public class BossTrackingSystem {
             this.levelOverride = Math.max(0, levelOverride);
             this.eventId = eventId;
             this.spawnedAtEpochMs = spawnedAtEpochMs;
+            this.worldHealthFactor = 0.0f;
         }
     }
 
@@ -1695,6 +1844,8 @@ public class BossTrackingSystem {
         /** Arena id for this event (may be null); used to resolve per-arena notification radius. */
         public final String arenaId;
         public final int currentWaveNumber;
+        /** Planned wave executions; 0 means unknown (e.g. infinite repeats). */
+        public final int totalWaveCount;
 
         public ActiveEventStatus(UUID eventId,
                                  World world,
@@ -1707,6 +1858,22 @@ public class BossTrackingSystem {
                                  boolean awaitingPrimaryBossSpawn,
                                  String arenaId,
                                  int currentWaveNumber) {
+            this(eventId, world, eventCenter, bossName, bossTier, aliveBossCount, activeAddCount,
+                    remainingCountdownMillis, awaitingPrimaryBossSpawn, arenaId, currentWaveNumber, 0);
+        }
+
+        public ActiveEventStatus(UUID eventId,
+                                 World world,
+                                 Vector3d eventCenter,
+                                 String bossName,
+                                 String bossTier,
+                                 int aliveBossCount,
+                                 int activeAddCount,
+                                 long remainingCountdownMillis,
+                                 boolean awaitingPrimaryBossSpawn,
+                                 String arenaId,
+                                 int currentWaveNumber,
+                                 int totalWaveCount) {
             this.eventId = eventId;
             this.world = world;
             this.eventCenter = eventCenter == null ? null : new Vector3d(eventCenter.x, eventCenter.y, eventCenter.z);
@@ -1718,6 +1885,7 @@ public class BossTrackingSystem {
             this.awaitingPrimaryBossSpawn = awaitingPrimaryBossSpawn;
             this.arenaId = arenaId;
             this.currentWaveNumber = Math.max(0, currentWaveNumber);
+            this.totalWaveCount = Math.max(0, totalWaveCount);
         }
     }
 
@@ -1754,10 +1922,13 @@ public class BossTrackingSystem {
         private final Set<UUID> bossUuids = ConcurrentHashMap.newKeySet();
         private final Set<UUID> aliveBosses = ConcurrentHashMap.newKeySet();
         private final Set<UUID> activeAdds = ConcurrentHashMap.newKeySet();
+        /** Adds from a boss_hp_percent wave: boss is invulnerable until these are cleared. */
+        private final Set<UUID> hpWaveShieldAdds = ConcurrentHashMap.newKeySet();
         private World world;
         private volatile boolean awaitingPrimaryBossSpawn;
         private volatile String arenaId;
         private volatile int currentWaveNumber;
+        private volatile int totalWaveCount;
 
         private EventData(UUID eventId,
                           World world,
@@ -1868,6 +2039,7 @@ public class BossTrackingSystem {
         public float knockbackTakenMultiplier;
         public float turnRateMultiplier;
         public float regenMultiplier;
+        public float worldHealthFactor;
     }
 
     public static final class PersistedAddLink {
@@ -1883,5 +2055,6 @@ public class BossTrackingSystem {
         public float knockbackTakenMultiplier;
         public float turnRateMultiplier;
         public float regenMultiplier;
+        public float worldHealthFactor;
     }
 }

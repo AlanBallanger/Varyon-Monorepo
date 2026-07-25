@@ -50,6 +50,15 @@ public final class BossDamageScalingSystem extends DamageEventSystem {
         }
 
         UUID targetUuid = extractTargetUuid(index, archetypeChunk);
+        // HP-% wave shield: cancel all damage to the boss until wave adds are dead.
+        if (targetUuid != null
+                && trackingSystem.isTracked(targetUuid)
+                && trackingSystem.isBossDamageLockedByHpWave(targetUuid)) {
+            damage.setCancelled(true);
+            damage.setAmount(0.0f);
+            return;
+        }
+
         BossModifiers targetMods = trackingSystem.getEntityModifiers(targetUuid);
         BossModifiers sourceMods = extractSourceModifiers(damage, store);
 

@@ -11,6 +11,7 @@ import com.varyon.bossarena.spawn.BossTimedSpawnScheduler;
 import com.varyon.bossarena.spawn.TimedBossMapMarkerService;
 import com.varyon.bossarena.damagechart.BossDamageChartTracker;
 import com.varyon.bossarena.damagechart.BossArenaDamageChartOpener;
+import com.varyon.bossarena.damagechart.BossDamageChartHpSnapshotSystem;
 import com.varyon.bossarena.damagechart.BossDamageChartRecordingSystem;
 import com.varyon.bossarena.damagechart.DamageChartOpener;
 import com.varyon.bossarena.system.BossTrackingSystem;
@@ -18,6 +19,7 @@ import com.varyon.bossarena.system.BossDeathSystem;
 import com.varyon.bossarena.system.BossDamageScalingSystem;
 import com.varyon.bossarena.system.BossEventNotificationSystem;
 import com.varyon.bossarena.system.BossEntityRemovedSystem;
+import com.varyon.bossarena.system.BossLeashSystem;
 import com.varyon.bossarena.system.BossSpeedScalingSystem;
 import com.varyon.bossarena.system.LootSpawnSystem;
 import com.varyon.bossarena.system.RPGLevelingBossScaleCompatSystem;
@@ -292,8 +294,10 @@ public final class BossArenaPlugin extends JavaPlugin {
         // Register ECS systems
         this.getEntityStoreRegistry().registerSystem(new LootSpawnSystem());
         this.getEntityStoreRegistry().registerSystem(new BossDamageScalingSystem(trackingSystem));
+        this.getEntityStoreRegistry().registerSystem(new BossDamageChartHpSnapshotSystem(trackingSystem));
         this.getEntityStoreRegistry().registerSystem(new BossDamageChartRecordingSystem(trackingSystem, damageChartTracker));
         this.getEntityStoreRegistry().registerSystem(new BossSpeedScalingSystem(trackingSystem));
+        this.getEntityStoreRegistry().registerSystem(new BossLeashSystem(trackingSystem));
         this.getEntityStoreRegistry().registerSystem(new BossDeathSystem(trackingSystem, this));
         this.getEntityStoreRegistry().registerSystem(new BossEventNotificationSystem(trackingSystem, this));
         this.getEntityStoreRegistry().registerSystem(new BossEntityRemovedSystem(trackingSystem, this));
@@ -363,6 +367,7 @@ public final class BossArenaPlugin extends JavaPlugin {
         this.timedBossMapMarkerService = new TimedBossMapMarkerService(this, trackingSystem, timedSpawnScheduler);
         this.timedSpawnScheduler.setMapMarkerService(timedBossMapMarkerService);
         this.timedSpawnScheduler.setOneShotDisableHandler(this::disableTimedRuleOneShot);
+        this.timedSpawnScheduler.setConfigSupplier(this::getConfig);
 
         DamageChartOpener chartOpener = createDamageChartOpener();
         BossLootHandler.setDamageChartDependencies(damageChartTracker, chartOpener);
@@ -1513,18 +1518,18 @@ public final class BossArenaPlugin extends JavaPlugin {
         exampleBoss.modifiers.knockbackGiven = 1.0f;
         exampleBoss.modifiers.knockbackTaken = 1.0f;
         exampleBoss.modifiers.turnRate = 1.0f;
-        exampleBoss.modifiers.regen = 1.0f;
+        exampleBoss.modifiers.regen = 0.0f;
 
         exampleBoss.perPlayerIncrease = new BossDefinition.PerPlayerIncrease();
-        exampleBoss.perPlayerIncrease.hp = 0.5f;
-        exampleBoss.perPlayerIncrease.damage = 0.2f;
-        exampleBoss.perPlayerIncrease.movementSpeed = 0.0f;
-        exampleBoss.perPlayerIncrease.size = 0.0f;
-        exampleBoss.perPlayerIncrease.attackRate = 0.0f;
-        exampleBoss.perPlayerIncrease.abilityCooldown = 0.0f;
-        exampleBoss.perPlayerIncrease.knockbackGiven = 0.0f;
-        exampleBoss.perPlayerIncrease.knockbackTaken = 0.0f;
-        exampleBoss.perPlayerIncrease.turnRate = 0.0f;
+        exampleBoss.perPlayerIncrease.hp = 1.0f;
+        exampleBoss.perPlayerIncrease.damage = 1.0f;
+        exampleBoss.perPlayerIncrease.movementSpeed = 1.0f;
+        exampleBoss.perPlayerIncrease.size = 1.0f;
+        exampleBoss.perPlayerIncrease.attackRate = 1.0f;
+        exampleBoss.perPlayerIncrease.abilityCooldown = 1.0f;
+        exampleBoss.perPlayerIncrease.knockbackGiven = 1.0f;
+        exampleBoss.perPlayerIncrease.knockbackTaken = 1.0f;
+        exampleBoss.perPlayerIncrease.turnRate = 1.0f;
         exampleBoss.perPlayerIncrease.regen = 0.0f;
 
         exampleBoss.extraMobs = new BossDefinition.ExtraMobs();

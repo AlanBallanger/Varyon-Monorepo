@@ -11,7 +11,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.ContainerBlockWindow;
-import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -20,14 +19,11 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 public final class BossLootChestBlock implements Component<ChunkStore> {
-    private static final Logger LOGGER = Logger.getLogger("BossArena");
     private static volatile ComponentType<ChunkStore, BossLootChestBlock> componentType;
 
     private static final ThreadLocal<UUID> LAST_OPEN_UUID = new ThreadLocal<>();
@@ -47,7 +43,6 @@ public final class BossLootChestBlock implements Component<ChunkStore> {
             .build();
 
     private final transient Map<UUID, ContainerBlockWindow> windows = new ConcurrentHashMap<>();
-    private final transient Map<UUID, ItemContainer> playerContainers = new ConcurrentHashMap<>();
     private boolean allowViewing = true;
     private double lootOx;
     private double lootOy;
@@ -131,38 +126,7 @@ public final class BossLootChestBlock implements Component<ChunkStore> {
     }
 
     private ItemContainer getOrCreateContainer(World world, UUID playerUuid) {
-        ItemContainer cached = playerContainers.get(playerUuid);
-        if (cached != null) {
-            return cached;
-        }
-
-        ItemContainer container = new SimpleItemContainer((short) 27);
-
-        Vector3d lookupLocation = lootLookupLocation();
-        List<GeneratedLoot> loot = BossLootHandler.claimLoot(
-                world,
-                lookupLocation,
-                playerUuid
-        );
-
-        if (loot != null && !loot.isEmpty()) {
-            int slot = 0;
-            for (GeneratedLoot item : loot) {
-                if (slot >= 27) {
-                    break;
-                }
-                try {
-                    ItemStack stack = new ItemStack(item.itemId, item.amount);
-                    container.setItemStackForSlot((short) slot, stack);
-                    slot++;
-                } catch (Exception e) {
-                    LOGGER.warning("Failed to create ItemStack for " + item.itemId + ": " + e.getMessage());
-                }
-            }
-        }
-
-        playerContainers.put(playerUuid, container);
-        return container;
+        return BossLootHandler.getOrCreatePlayerLootContainer(world, lootLookupLocation(), playerUuid);
     }
 
     @Override

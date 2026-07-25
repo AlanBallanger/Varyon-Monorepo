@@ -21,31 +21,34 @@ public final class BossScaler {
         float baseKnockbackGiven = positiveOrDefault(def.modifiers != null ? def.modifiers.knockbackGiven : 1.0f, 1.0f);
         float baseKnockbackTaken = positiveOrDefault(def.modifiers != null ? def.modifiers.knockbackTaken : 1.0f, 1.0f);
         float baseTurnRate = positiveOrDefault(def.modifiers != null ? def.modifiers.turnRate : 1.0f, 1.0f);
-        float baseRegen = positiveOrDefault(def.modifiers != null ? def.modifiers.regen : 1.0f, 1.0f);
+        // regen = flat HP restored every second (discrete steps on the stored values).
+        float baseRegen = BossRegen.normalizeHpPerSecond(def.modifiers != null ? def.modifiers.regen : 0.0f);
 
-        float perHp = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.hp : 0.0f, 0.0f);
-        float perDamage = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.damage : 0.0f, 0.0f);
-        float perSpeed = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.movementSpeed : 0.0f, 0.0f);
-        float perSize = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.size : 0.0f, 0.0f);
-        float perAttackRate = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.attackRate : 0.0f, 0.0f);
-        float perAbilityCooldown = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.abilityCooldown : 0.0f, 0.0f);
-        float perKnockbackGiven = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.knockbackGiven : 0.0f, 0.0f);
-        float perKnockbackTaken = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.knockbackTaken : 0.0f, 0.0f);
-        float perTurnRate = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.turnRate : 0.0f, 0.0f);
-        float perRegen = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.regen : 0.0f, 0.0f);
+        float perHp = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.hp : 1.0f, 1.0f);
+        float perDamage = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.damage : 1.0f, 1.0f);
+        float perSpeed = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.movementSpeed : 1.0f, 1.0f);
+        float perSize = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.size : 1.0f, 1.0f);
+        float perAttackRate = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.attackRate : 1.0f, 1.0f);
+        float perAbilityCooldown = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.abilityCooldown : 1.0f, 1.0f);
+        float perKnockbackGiven = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.knockbackGiven : 1.0f, 1.0f);
+        float perKnockbackTaken = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.knockbackTaken : 1.0f, 1.0f);
+        float perTurnRate = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.turnRate : 1.0f, 1.0f);
+        float perRegen = BossRegen.normalizeHpPerSecond(def.perPlayerIncrease != null ? def.perPlayerIncrease.regen : 0.0f);
 
-        int extraPlayers = Math.max(0, playerCount - 1);
+        int players = Math.max(1, playerCount);
 
-        float hp = positiveOrDefault(baseHp + (perHp * extraPlayers), 1.0f);
-        float damage = positiveOrDefault(baseDamage + (perDamage * extraPlayers), 1.0f);
-        float speed = positiveOrDefault(baseSpeed + (perSpeed * extraPlayers), 1.0f);
-        float size = positiveOrDefault(baseSize + (perSize * extraPlayers), 1.0f);
-        float attackRate = positiveOrDefault(baseAttackRate + (perAttackRate * extraPlayers), 1.0f);
-        float abilityCooldown = positiveOrDefault(baseAbilityCooldown + (perAbilityCooldown * extraPlayers), 1.0f);
-        float knockbackGiven = positiveOrDefault(baseKnockbackGiven + (perKnockbackGiven * extraPlayers), 1.0f);
-        float knockbackTaken = positiveOrDefault(baseKnockbackTaken + (perKnockbackTaken * extraPlayers), 1.0f);
-        float turnRate = positiveOrDefault(baseTurnRate + (perTurnRate * extraPlayers), 1.0f);
-        float regen = positiveOrDefault(baseRegen + (perRegen * extraPlayers), 1.0f);
+        // final = base × (perPlayer × playerCount), e.g. 1.5 with 2 players → ×3
+        float hp = scaleByPlayers(baseHp, perHp, players);
+        float damage = scaleByPlayers(baseDamage, perDamage, players);
+        float speed = scaleByPlayers(baseSpeed, perSpeed, players);
+        float size = scaleByPlayers(baseSize, perSize, players);
+        float attackRate = scaleByPlayers(baseAttackRate, perAttackRate, players);
+        float abilityCooldown = scaleByPlayers(baseAbilityCooldown, perAbilityCooldown, players);
+        float knockbackGiven = scaleByPlayers(baseKnockbackGiven, perKnockbackGiven, players);
+        float knockbackTaken = scaleByPlayers(baseKnockbackTaken, perKnockbackTaken, players);
+        float turnRate = scaleByPlayers(baseTurnRate, perTurnRate, players);
+        // Regen stays flat HP/s added once per present player.
+        float regen = Math.max(0.0f, baseRegen + (perRegen * players));
 
         return new BossModifiers(
                 hp,
@@ -61,6 +64,18 @@ public final class BossScaler {
         );
     }
 
+    /**
+     * Multiplies base by {@code perPlayer × playerCount}.
+     * Legacy {@code perPlayer <= 0} keeps base unchanged (scaling off).
+     */
+    private static float scaleByPlayers(float base, float perPlayer, int players) {
+        float safeBase = positiveOrDefault(base, 1.0f);
+        if (!Float.isFinite(perPlayer) || perPlayer <= 0.0f) {
+            return safeBase;
+        }
+        return positiveOrDefault(safeBase * perPlayer * players, 1.0f);
+    }
+
     private static BossModifiers defaultModifiers() {
         return new BossModifiers(
                 1.0f,
@@ -72,7 +87,7 @@ public final class BossScaler {
                 1.0f,
                 1.0f,
                 1.0f,
-                1.0f
+                0.0f
         );
     }
 

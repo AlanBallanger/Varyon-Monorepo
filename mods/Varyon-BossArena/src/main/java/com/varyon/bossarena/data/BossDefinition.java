@@ -19,6 +19,14 @@ public class BossDefinition {
     /** Sphere radius (blocks) around the encounter center for fight music. Default 30. */
     public double musicRadius = 30.0d;
 
+    /**
+     * When true, each boss entity spawns at a random point within {@link #spawnSpreadRadius}.
+     * When false, bosses use a spiral around the arena center (spacing from the radius).
+     */
+    public boolean useRandomBossSpawn = false;
+    /** Boss spawn spread radius in blocks (random disk, or spiral spacing base). Default 15. */
+    public double spawnSpreadRadius = 15.0d;
+
     public Modifiers modifiers = new Modifiers();
     public PerPlayerIncrease perPlayerIncrease = new PerPlayerIncrease();
     public ExtraMobs extraMobs = new ExtraMobs();
@@ -32,6 +40,13 @@ public class BossDefinition {
             return 30.0d;
         }
         return musicRadius;
+    }
+
+    public double getSpawnSpreadRadius() {
+        if (!Double.isFinite(spawnSpreadRadius) || spawnSpreadRadius < 0.0d) {
+            return 15.0d;
+        }
+        return spawnSpreadRadius;
     }
 
     /**
@@ -81,19 +96,22 @@ public class BossDefinition {
         public float knockbackGiven = 1.0f;
         public float knockbackTaken = 1.0f;
         public float turnRate = 1.0f;
-        public float regen = 1.0f;
+        /** Flat HP restored every second (0, 1, 5, 10, 20, 50, 100, 200, 500, 1000). */
+        public float regen = 0.0f;
     }
 
     public static class PerPlayerIncrease {
-        public float hp = 0.0f;
-        public float damage = 0.0f;
-        public float movementSpeed = 0.0f;
-        public float size = 0.0f;
-        public float attackRate = 0.0f;
-        public float abilityCooldown = 0.0f;
-        public float knockbackGiven = 0.0f;
-        public float knockbackTaken = 0.0f;
-        public float turnRate = 0.0f;
+        /** Multiplier applied as {@code base × value × playerCount}. Default 1.0 = ×1 par joueur. */
+        public float hp = 1.0f;
+        public float damage = 1.0f;
+        public float movementSpeed = 1.0f;
+        public float size = 1.0f;
+        public float attackRate = 1.0f;
+        public float abilityCooldown = 1.0f;
+        public float knockbackGiven = 1.0f;
+        public float knockbackTaken = 1.0f;
+        public float turnRate = 1.0f;
+        /** Flat HP/s added per present player (not a multiplier). */
         public float regen = 0.0f;
     }
 
@@ -113,6 +131,11 @@ public class BossDefinition {
         public long timeLimitMs;
         public int waves;
         public int mobsPerWave = 3;
+        /**
+         * Legacy global switch. Migrated on sanitize into per-wave {@link ScheduledWave#enabled}.
+         * Always forced back to true after migration.
+         */
+        public boolean wavesEnabled = true;
         public boolean useRandomSpawnLocations = true;
         public double randomSpawnRadius = 15.0d;
         // New format: multiple add definitions with per-wave cadence.
@@ -197,6 +220,7 @@ public class BossDefinition {
             }
 
             ScheduledWave out = new ScheduledWave();
+            out.enabled = wave.enabled;
             out.trigger = trigger;
             out.triggerValue = triggerValue;
             out.repeatCount = wave.repeatCount == 0 ? 1 : wave.repeatCount;
@@ -272,6 +296,7 @@ public class BossDefinition {
                 }
 
                 ScheduledWave wave = new ScheduledWave();
+                wave.enabled = true;
                 wave.trigger = TRIGGER_AFTER_SPAWN_SECONDS;
                 wave.triggerValue = firstAtSeconds;
                 wave.repeatCount = repeatCount;
@@ -286,6 +311,7 @@ public class BossDefinition {
 
         private static ScheduledWave copyScheduledWave(ScheduledWave wave) {
             ScheduledWave out = new ScheduledWave();
+            out.enabled = wave.enabled;
             out.trigger = wave.trigger;
             out.triggerValue = wave.triggerValue;
             out.repeatCount = wave.repeatCount;
@@ -388,6 +414,16 @@ public class BossDefinition {
                 scheduledWaves = migrateLegacyWaves(adds, waves, timeLimitMs);
             }
 
+            // Legacy global OFF → disable each wave once, then clear the global flag.
+            if (!wavesEnabled) {
+                for (ScheduledWave wave : scheduledWaves) {
+                    if (wave != null) {
+                        wave.enabled = false;
+                    }
+                }
+                wavesEnabled = true;
+            }
+
             String normalizedBossSpawn = normalizeBossSpawnTrigger(bossSpawnTrigger);
             bossSpawnTrigger = normalizedBossSpawn != null ? normalizedBossSpawn : BOSS_SPAWN_AFTER_BEFORE_BOSS;
             bossSpawnTriggerValue = Double.isFinite(bossSpawnTriggerValue) ? Math.max(0.0d, bossSpawnTriggerValue) : 0.0d;
@@ -425,7 +461,8 @@ public class BossDefinition {
             return new ArrayList<>(adds);
         }
 
-        public List<ScheduledWave> getResolvedScheduledWaves() {
+        /** All configured waves (including disabled), for the editor / summary. */
+        public List<ScheduledWave> getAllScheduledWaves() {
             sanitize();
             List<ScheduledWave> out = new ArrayList<>();
             for (ScheduledWave wave : scheduledWaves) {
@@ -435,6 +472,36 @@ public class BossDefinition {
                 out.add(copyScheduledWave(wave));
             }
             return out;
+        }
+
+        /** Enabled waves only — used at fight start. */
+        public List<ScheduledWave> getResolvedScheduledWaves() {
+            List<ScheduledWave> out = new ArrayList<>();
+            for (ScheduledWave wave : getAllScheduledWaves()) {
+                if (wave != null && wave.enabled) {
+                    out.add(wave);
+                }
+            }
+            return out;
+        }
+
+        /**
+         * Planned wave executions for UI (sum of finite {@code repeatCount}).
+         * Returns 0 when any wave repeats infinitely ({@code repeatCount < 0}).
+         */
+        public int countPlannedWaveExecutions() {
+            List<ScheduledWave> waves = getResolvedScheduledWaves();
+            int total = 0;
+            for (ScheduledWave wave : waves) {
+                if (wave == null) {
+                    continue;
+                }
+                if (wave.repeatCount < 0) {
+                    return 0;
+                }
+                total += Math.max(1, wave.repeatCount);
+            }
+            return total;
         }
 
         public void setPrimaryAdd(String inputNpcId, int inputMobsPerWave) {
@@ -486,6 +553,8 @@ public class BossDefinition {
         }
 
         public static class ScheduledWave {
+            /** When false, this wave is kept in config but not run during fights. */
+            public boolean enabled = true;
             public String trigger = TRIGGER_AFTER_SPAWN_SECONDS;
             // Seconds for time-based triggers, HP percent for hp trigger.
             public double triggerValue = 0.0d;

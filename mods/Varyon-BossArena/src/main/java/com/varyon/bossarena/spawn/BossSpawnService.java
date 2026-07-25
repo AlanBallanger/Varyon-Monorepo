@@ -23,20 +23,26 @@ import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
+import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
-import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
-import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.interaction.Interactions;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.math.shape.Box;
+import com.hypixel.hytale.server.core.asset.type.model.config.DetailBox;
+import com.hypixel.hytale.server.core.asset.type.model.config.Model;
+import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
+import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.EntityScaleComponent;
+import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.protocol.InteractionType;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -81,10 +87,10 @@ public final class BossSpawnService {
             List<BossDefinition.ExtraMobs.ScheduledWave> schedules,
             String trigger
     ) {
-        if (schedules == null || schedules.isEmpty()) {
-            return List.of();
-        }
         List<BossDefinition.ExtraMobs.ScheduledWave> out = new ArrayList<>();
+        if (schedules == null || schedules.isEmpty()) {
+            return out;
+        }
         for (BossDefinition.ExtraMobs.ScheduledWave wave : schedules) {
             if (wave != null && trigger.equals(wave.trigger)) {
                 out.add(wave);
@@ -340,6 +346,13 @@ public final class BossSpawnService {
         if (def.extraMobs != null) {
             def.extraMobs.sanitize();
             resolvedWavesBuffer = def.extraMobs.getResolvedScheduledWaves();
+            int totalWaves = def.extraMobs.getAllScheduledWaves().size();
+            if (totalWaves > resolvedWavesBuffer.size()) {
+                LOGGER.info("Boss '" + def.bossName + "': "
+                        + (totalWaves - resolvedWavesBuffer.size())
+                        + " vague(s) désactivée(s), "
+                        + resolvedWavesBuffer.size() + " active(s).");
+            }
         }
         final List<BossDefinition.ExtraMobs.ScheduledWave> resolvedWaves = resolvedWavesBuffer;
         final List<BossDefinition.ExtraMobs.ScheduledWave> preBossWaves = resolvePreBossWaves(resolvedWaves);
@@ -357,6 +370,10 @@ public final class BossSpawnService {
                 : null;
         if (deferredEventId != null) {
             BossFightMusicService.startForEvent(deferredEventId, world, spawnPos, def);
+            int plannedWaves = def.extraMobs != null ? def.extraMobs.countPlannedWaveExecutions() : 0;
+            if (plannedWaves > 0) {
+                tracking.setEventTotalWaves(deferredEventId, plannedWaves);
+            }
         }
 
         String bossSpawnTrigger = (def.extraMobs != null && def.extraMobs.bossSpawnTrigger != null)
@@ -473,7 +490,7 @@ public final class BossSpawnService {
 
         // Spawn the boss(es)
         for (int i = 0; i < def.amount; i++) {
-            Vector3d spreadPos = computeBossSpawnPosition(spawnPos, i);
+            Vector3d spreadPos = computeBossSpawnPosition(world, spawnPos, i, def);
 
             LOGGER.info("Spawning NPC ID: " + def.npcId + " at: " + spreadPos);
 
@@ -501,6 +518,10 @@ public final class BossSpawnService {
                         bossEventId = tracking.createEvent(
                                 world, spawnPos, def.bossName, def.tier, countdownDurationMs, false, arenaId);
                         BossFightMusicService.startForEvent(bossEventId, world, spawnPos, def);
+                        int plannedWaves = def.extraMobs != null ? def.extraMobs.countPlannedWaveExecutions() : 0;
+                        if (plannedWaves > 0) {
+                            tracking.setEventTotalWaves(bossEventId, plannedWaves);
+                        }
                     }
 
                     tracking.track(
@@ -521,7 +542,7 @@ public final class BossSpawnService {
                         tracking.untrack(uuid);
                         continue;
                     }
-                    applyModifiers(store, npcRef, mods);
+                    applyModifiers(store, npcRef, mods, uuid);
                     disableDefaultEntityLoot(store, npcRef, def.bossName + "#" + (i + 1));
 
                     // Diagnostic logging for NPC behavior
@@ -618,31 +639,40 @@ public final class BossSpawnService {
         return TimeUnit.MINUTES.toMillis(Math.max(1, countdownMinutes));
     }
 
-    private void applyModifiers(Store<EntityStore> store, Ref<EntityStore> entityRef, BossModifiers mods) {
+    private void applyModifiers(Store<EntityStore> store,
+                                Ref<EntityStore> entityRef,
+                                BossModifiers mods,
+                                UUID entityUuid) {
         try {
             Object statMapObj = store.getComponent(entityRef, EntityStatMap.getComponentType());
 
             if (statMapObj instanceof EntityStatMap statMap) {
                 LOGGER.info("Found EntityStatMap, applying modifiers...");
 
-                var assetMap = EntityStatType.getAssetMap();
-
-                // Apply Health modifier
-                int healthIndex = assetMap.getIndex("Health");
+                int healthIndex = DefaultEntityStatTypes.getHealth();
+                if (healthIndex < 0) {
+                    var assetMap = EntityStatType.getAssetMap();
+                    healthIndex = assetMap != null ? assetMap.getIndex("Health") : -1;
+                }
                 if (healthIndex >= 0) {
-                    StaticModifier healthMod = new StaticModifier(
-                            Modifier.ModifierTarget.MAX,
-                            StaticModifier.CalculationType.MULTIPLICATIVE,
-                            mods.hpMultiplier()
-                    );
-                    statMap.putModifier(healthIndex, HEALTH_MODIFIER_KEY, healthMod);
-                    statMap.maximizeStatValue(healthIndex);
+                    float hpMult = mods.hpMultiplier();
+                    if (!Float.isFinite(hpMult) || hpMult <= 0f) {
+                        hpMult = 1.0f;
+                    }
+                    float knownFactor = entityUuid != null ? tracking.getWorldHealthFactor(entityUuid) : 0.0f;
+                    float worldFactor = com.varyon.bossarena.util.BossHealthScale.apply(
+                            statMap, hpMult, knownFactor);
+                    if (entityUuid != null) {
+                        tracking.setWorldHealthFactor(entityUuid, worldFactor);
+                    }
 
                     var healthValue = statMap.get(healthIndex);
                     float currentHealth = healthValue != null ? healthValue.get() : 0;
                     float maxHealth = healthValue != null ? healthValue.getMax() : 0;
 
-                    LOGGER.info("Applied HP multiplier: " + mods.hpMultiplier());
+                    LOGGER.info("Applied HP multiplier: " + hpMult
+                            + " (worldFactor=" + worldFactor
+                            + ", effective=" + (worldFactor * hpMult) + ")");
                     LOGGER.info("Current HP: " + currentHealth + " / Max HP: " + maxHealth);
                 } else {
                     LOGGER.warning("Health stat not found!");
@@ -651,35 +681,120 @@ public final class BossSpawnService {
                 LOGGER.warning("EntityStatMap not found on entity");
             }
 
-            // Apply Size modifier using EntityScaleComponent
-            if (mods.scaleMultiplier() != 1.0f) {
-                try {
-                    Object scaleCompObj = store.getComponent(entityRef, EntityScaleComponent.getComponentType());
-
-                    if (scaleCompObj instanceof EntityScaleComponent scaleComp) {
-                        float originalScale = scaleComp.getScale();
-                        float newScale = originalScale * mods.scaleMultiplier();
-
-                        LOGGER.info("Found existing EntityScaleComponent - original scale: " + originalScale);
-                        scaleComp.setScale(newScale);
-
-                        LOGGER.info("Set scale to: " + newScale + " (multiplier: " + mods.scaleMultiplier() + ")");
-                    } else {
-                        // Component doesn't exist - create and add it
-                        LOGGER.info("EntityScaleComponent not found - creating new one");
-                        EntityScaleComponent newScaleComp = new EntityScaleComponent(mods.scaleMultiplier());
-                        store.addComponent(entityRef, EntityScaleComponent.getComponentType(), newScaleComp);
-
-                        LOGGER.info("Created and added EntityScaleComponent with scale: " + mods.scaleMultiplier());
-                    }
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Failed to apply scale modifier", e);
-                }
-            }
+            applyScaleAndHitbox(store, entityRef, mods.scaleMultiplier());
 
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to apply modifiers", e);
         }
+    }
+
+    /**
+     * Visual scale via {@link EntityScaleComponent}. Hitbox via a Model rebuilt with
+     * {@link Model#createScaledModel} (Model.scale kept at 1 so visuals are not double-scaled).
+     */
+    private void applyScaleAndHitbox(Store<EntityStore> store, Ref<EntityStore> entityRef, float scaleMultiplier) {
+        if (!Float.isFinite(scaleMultiplier) || scaleMultiplier <= 0.0f || Math.abs(scaleMultiplier - 1.0f) < 0.0001f) {
+            return;
+        }
+        try {
+            float targetScale = scaleMultiplier;
+            Object scaleCompObj = store.getComponent(entityRef, EntityScaleComponent.getComponentType());
+            if (scaleCompObj instanceof EntityScaleComponent scaleComp) {
+                targetScale = Math.max(0.01f, scaleComp.getScale() * scaleMultiplier);
+                scaleComp.setScale(targetScale);
+                LOGGER.info("Set EntityScale to: " + targetScale + " (multiplier: " + scaleMultiplier + ")");
+            } else {
+                store.addComponent(entityRef, EntityScaleComponent.getComponentType(), new EntityScaleComponent(targetScale));
+                LOGGER.info("Created EntityScaleComponent with scale: " + targetScale);
+            }
+
+            ModelComponent modelComp = store.getComponent(entityRef, ModelComponent.getComponentType());
+            if (modelComp != null && modelComp.getModel() != null) {
+                Model current = modelComp.getModel();
+                float bakedScale = Math.max(0.01f, current.getScale() * scaleMultiplier);
+                ModelAsset asset = ModelAsset.getAssetMap().getAsset(current.getModelAssetId());
+                if (asset != null) {
+                    Model scaled = Model.createScaledModel(asset, bakedScale, current.getRandomAttachmentIds());
+                    Box hitbox = scaled.getBoundingBox() != null ? scaled.getBoundingBox().clone() : null;
+                    // Unit model scale + already-scaled hitbox: UpdateBoundingBox keeps the large BB
+                    // while EntityScale alone drives the visual size.
+                    Model unit = hitbox != null
+                            ? Model.createUnitScaleModel(asset, hitbox)
+                            : Model.createUnitScaleModel(asset);
+                    store.putComponent(entityRef, ModelComponent.getComponentType(), new ModelComponent(unit));
+                    // UpdateBoundingBox copies the already-scaled hitbox from the unit model.
+                    if (scaled.getDetailBoxes() != null) {
+                        applyDetailBoxesToComponent(store, entityRef, scaled.getDetailBoxes());
+                    }
+                    LOGGER.info("Applied scaled hitbox for " + current.getModelAssetId()
+                            + " (bakedScale=" + bakedScale + ")");
+                    return;
+                }
+            }
+
+            scaleBoundingBoxComponent(store, entityRef, scaleMultiplier);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to apply scale modifier", e);
+            try {
+                scaleBoundingBoxComponent(store, entityRef, scaleMultiplier);
+            } catch (Exception ignored) {
+                // already logged above
+            }
+        }
+    }
+
+    private static void applyDetailBoxesToComponent(Store<EntityStore> store,
+                                                    Ref<EntityStore> entityRef,
+                                                    Map<String, DetailBox[]> detailBoxes) {
+        BoundingBox bbComp = store.getComponent(entityRef, BoundingBox.getComponentType());
+        if (bbComp == null || detailBoxes == null) {
+            return;
+        }
+        Map<String, DetailBox[]> copy = new HashMap<>();
+        for (Map.Entry<String, DetailBox[]> entry : detailBoxes.entrySet()) {
+            DetailBox[] src = entry.getValue();
+            if (src == null) {
+                copy.put(entry.getKey(), null);
+                continue;
+            }
+            DetailBox[] out = new DetailBox[src.length];
+            for (int i = 0; i < src.length; i++) {
+                out[i] = src[i] != null ? new DetailBox(src[i]) : null;
+            }
+            copy.put(entry.getKey(), out);
+        }
+        bbComp.setDetailBoxes(copy);
+    }
+
+    private static void scaleBoundingBoxComponent(Store<EntityStore> store,
+                                                  Ref<EntityStore> entityRef,
+                                                  float scaleMultiplier) {
+        BoundingBox bbComp = store.getComponent(entityRef, BoundingBox.getComponentType());
+        if (bbComp == null) {
+            return;
+        }
+        Box box = bbComp.getBoundingBox();
+        if (box != null) {
+            box.scale(scaleMultiplier);
+        }
+        Map<String, DetailBox[]> details = bbComp.getDetailBoxes();
+        if (details == null || details.isEmpty()) {
+            return;
+        }
+        Map<String, DetailBox[]> scaled = new HashMap<>();
+        for (Map.Entry<String, DetailBox[]> entry : details.entrySet()) {
+            DetailBox[] src = entry.getValue();
+            if (src == null) {
+                scaled.put(entry.getKey(), null);
+                continue;
+            }
+            DetailBox[] out = new DetailBox[src.length];
+            for (int i = 0; i < src.length; i++) {
+                out[i] = src[i] != null ? src[i].scaled(scaleMultiplier) : null;
+            }
+            scaled.put(entry.getKey(), out);
+        }
+        bbComp.setDetailBoxes(scaled);
     }
 
     private long scheduleBeforeBossWaveTimeline(World world,
@@ -1433,16 +1548,16 @@ public final class BossSpawnService {
                         1.0f,
                         1.0f
                 );
-                applyModifiers(world.getEntityStore().getStore(), addRef, addMods);
+                Object addUuidObj = world.getEntityStore().getStore().getComponent(addRef, UUIDComponent.getComponentType());
+                UUID addUuid = addUuidObj instanceof UUIDComponent addUuidComp ? addUuidComp.getUuid() : null;
+                applyModifiers(world.getEntityStore().getStore(), addRef, addMods, addUuid);
                 disableDefaultEntityLoot(world.getEntityStore().getStore(), addRef, add.npcId);
                 if (!addRef.isValid()) {
                     LOGGER.warning("Spawned add '" + add.npcId + "' became invalid during setup; skipping tracking.");
                     continue;
                 }
 
-                Object addUuidObj = world.getEntityStore().getStore().getComponent(addRef, UUIDComponent.getComponentType());
-                if (addUuidObj instanceof UUIDComponent addUuidComp) {
-                    UUID addUuid = addUuidComp.getUuid();
+                if (addUuid != null) {
                     spawnedAddUuids.add(addUuid);
                     if (bossUuid != null) {
                         tracking.trackAdd(bossUuid, addUuid, addMods);
@@ -1471,15 +1586,25 @@ public final class BossSpawnService {
         if (trackedAddsSpawned > 0) {
             BossTrackingSystem.BossData bossData = tracking.getBossData(bossUuid);
             if (bossData != null) {
+                UUID eventIdForNotify = tracking.getEventIdForTrackedEntity(bossUuid);
+                int totalWaves = tracking.getEventTotalWaves(eventIdForNotify);
                 BossWaveNotificationService.notifyWaveSpawn(
                         world,
                         bossData.spawnLocation,
                         bossData.bossName,
                         waveNumber,
+                        totalWaves,
                         trackedAddsSpawned,
                         tracking.getActiveAddCountForEvent(bossUuid),
-                        tracking.getRemainingCountdownMillis(bossUuid)
+                        tracking.getRemainingCountdownMillis(bossUuid),
+                        tracking.getAliveBossCount(bossUuid)
                 );
+            }
+            // Boss HP% waves: boss cannot take damage until these adds are cleared.
+            if (triggerLabel != null && triggerLabel.startsWith("boss_hp_percent")) {
+                tracking.activateHpWaveDamageLock(bossUuid, spawnedAddUuids);
+                LOGGER.info("Boss " + bossUuid + " damage locked until HP-% wave adds are cleared ("
+                        + spawnedAddUuids.size() + " add(s)).");
             }
         }
 
@@ -1591,17 +1716,45 @@ public final class BossSpawnService {
                 || normalized.contains("lava");
     }
 
-    private Vector3d computeBossSpawnPosition(Vector3d center, int index) {
-        if (center == null || index <= 0) {
+    private Vector3d computeBossSpawnPosition(World world, Vector3d center, int index, BossDefinition def) {
+        if (center == null) {
+            return null;
+        }
+
+        double configuredRadius = def != null ? def.getSpawnSpreadRadius() : 15.0d;
+        boolean random = def != null && def.useRandomBossSpawn;
+
+        if (random) {
+            if (configuredRadius <= 0.0d) {
+                return center;
+            }
+            ThreadLocalRandom rng = ThreadLocalRandom.current();
+            double angle = rng.nextDouble(0.0d, Math.PI * 2.0d);
+            double distance = Math.sqrt(rng.nextDouble()) * configuredRadius;
+            double x = center.x + (Math.cos(angle) * distance);
+            double z = center.z + (Math.sin(angle) * distance);
+            int refY = (int) Math.floor(center.y);
+            double y = resolveWaveSpawnY(world, (int) Math.floor(x), (int) Math.floor(z), refY);
+            return new Vector3d(x, y, z);
+        }
+
+        if (index <= 0 || configuredRadius <= 0.0d) {
             return center;
         }
 
-        // Golden-angle spiral keeps dense waves spread around the arena center without clumping.
-        double radius = BOSS_SPAWN_SPACING_BLOCKS * Math.sqrt(index);
+        // Spiral around center; radius field scales spacing (legacy default ~2.75 when radius≈15).
+        double spacing = Math.max(BOSS_SPAWN_SPACING_BLOCKS, configuredRadius / Math.max(1.0d, Math.sqrt(Math.max(1, def.amount))));
+        double radius = spacing * Math.sqrt(index);
+        // Cap spiral to the configured radius disk.
+        if (radius > configuredRadius) {
+            radius = configuredRadius;
+        }
         double angle = index * GOLDEN_ANGLE_RADIANS;
         double x = center.x + (Math.cos(angle) * radius);
         double z = center.z + (Math.sin(angle) * radius);
-        return new Vector3d(x, center.y, z);
+        int refY = (int) Math.floor(center.y);
+        double y = resolveWaveSpawnY(world, (int) Math.floor(x), (int) Math.floor(z), refY);
+        return new Vector3d(x, y, z);
     }
 
     private static final class PreBossExecution {

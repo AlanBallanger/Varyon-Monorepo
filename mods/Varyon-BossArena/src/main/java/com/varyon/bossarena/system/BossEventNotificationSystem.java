@@ -127,7 +127,8 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
                     true,
                     notificationRadius,
                     event.eventId,
-                    event.currentWaveNumber
+                    event.currentWaveNumber,
+                    event.totalWaveCount
             );
         }
     }

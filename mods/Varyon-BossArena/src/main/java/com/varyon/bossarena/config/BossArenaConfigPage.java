@@ -22,6 +22,7 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.varyon.bossarena.util.BossRegen;
 import com.varyon.bossarena.util.VecUtil;
 import org.joml.Vector3d;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
@@ -35,7 +36,9 @@ import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
+import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
@@ -68,14 +71,17 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private static final float MULT_HP_DMG_MAX = 50.00f;
     private static final float MULT_SIZE_MIN = 0.10f;
     private static final float MULT_SIZE_MAX = 10.00f;
-    private static final float MULT_PERS_MIN = 0.00f;
-    private static final float MULT_PERS_MAX = 5.00f;
+    private static final float MULT_PERS_MIN = 0.50f;
+    private static final float MULT_PERS_MAX = 4.00f;
+    private static final float MULT_PERS_STEP = 0.10f;
     private static final float MULT_SCALE_MIN = 0.10f;
     private static final float MULT_SCALE_MAX = 10.00f;
+    private static final float REGEN_MIN = BossRegen.MIN_HP_PER_SECOND;
+    private static final float REGEN_MAX = BossRegen.MAX_HP_PER_SECOND;
     private static final int MAX_TIMED_SPAWN_ROWS = 6;
     private static final int BOSS_SCROLL_THUMB_STEPS = 10;
-    private static final int SHOP_CONTRACT_PRICE_STEP = 25;
     private static final Pattern ARENA_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
+    private static final int MAX_SHOP_CURRENCY_PICKS = BossArenaConfigUiControls.MAX_ITEM_PICKS;
 
     private final BossArenaPlugin plugin;
     private final List<String> arenaRows = new ArrayList<>();
@@ -100,6 +106,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private int waveNpcPicksRow;
     private String waveNpcSearchQuery = "";
     private ShopLocationEditorState shopLocationEditorState;
+    /** Currency item suggestions while typing in the shop editor. */
+    private boolean shopCurrencyPicksOpen;
 
     private BossArenaConfigPage(PlayerRef playerRef, BossArenaPlugin plugin, String tab) {
         super(playerRef, CustomPageLifetime.CanDismiss, ConfigEventData.CODEC);
@@ -403,6 +411,55 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return false;
         }
         return Math.abs(existing.repeatEverySeconds - row.repeatEverySeconds) <= 0.0001d;
+    }
+
+    private static void applyBossSpawnSpreadFromData(BossDefinition boss, ConfigEventData data) {
+        if (boss == null || data == null) {
+            return;
+        }
+
+        String resolvedRandom = resolvedOrFallback(
+                data.bossSpawnSpreadRandom,
+                boss.useRandomBossSpawn ? "true" : "false"
+        );
+        if (!resolvedRandom.isEmpty()) {
+            Boolean randomEnabled = parseToggleInput(resolvedRandom);
+            if (randomEnabled == null) {
+                throw new IllegalArgumentException("Le spread boss aléatoire doit être true/false, on/off, yes/no, oui/non ou 1/0.");
+            }
+            boss.useRandomBossSpawn = randomEnabled;
+        }
+
+        String resolvedRadius = resolvedOrFallback(
+                data.bossSpawnSpreadRadius,
+                formatWaveNumber(boss.getSpawnSpreadRadius())
+        );
+        if (!resolvedRadius.isEmpty()) {
+            boss.spawnSpreadRadius = parseRequiredDouble(
+                    resolvedRadius,
+                    "Le rayon de spread boss doit être un nombre >= 0.",
+                    0.0d,
+                    Double.MAX_VALUE
+            );
+        }
+    }
+
+    private void handleBossSpawnSpreadToggle(ConfigEventData data) {
+        if (bossEditorState == null) {
+            return;
+        }
+        try {
+            applyBossSpawnSpreadFromData(bossEditorState.boss, data);
+            applyWaveSpawnSettingsFromData(
+                    bossEditorState.boss.extraMobs != null ? bossEditorState.boss.extraMobs : new BossDefinition.ExtraMobs(),
+                    data
+            );
+            bossEditorState.boss.useRandomBossSpawn = !bossEditorState.boss.useRandomBossSpawn;
+            rebuild();
+        } catch (IllegalArgumentException ex) {
+            bossStatusText = ex.getMessage();
+            rebuild();
+        }
     }
 
     private static void applyWaveSpawnSettingsFromData(BossDefinition.ExtraMobs extra, ConfigEventData data) {
@@ -774,6 +831,16 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         return out;
     }
 
+    private static float requirePerPlayerSlider(Float value, float fallback, String label) {
+        float raw = (value != null && Float.isFinite(value)) ? value : fallback;
+        if (!Float.isFinite(raw)) {
+            throw new IllegalArgumentException(label + " doit être entre 0.00 et 4.00 (pas de 0.10).");
+        }
+        // Clamp legacy values above the new max (was 5.00) instead of failing save.
+        float clamped = BossArenaConfigUiControls.clampFloat(raw, MULT_PERS_MIN, MULT_PERS_MAX);
+        return Math.round(clamped / MULT_PERS_STEP) * MULT_PERS_STEP;
+    }
+
     private static float parseRequiredFloat(String raw, String errorMessage, float min, float max) {
         try {
             float out = Float.parseFloat(optionalText(raw));
@@ -876,6 +943,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         out.levelOverride = source != null ? Math.max(0, source.levelOverride) : 0;
         out.musicFileName = source != null && source.musicFileName != null ? source.musicFileName : "";
         out.musicRadius = source != null ? source.getMusicRadius() : 30.0d;
+        out.useRandomBossSpawn = source != null && source.useRandomBossSpawn;
+        out.spawnSpreadRadius = source != null ? source.getSpawnSpreadRadius() : 15.0d;
 
         out.modifiers = new BossDefinition.Modifiers();
         if (source != null && source.modifiers != null) {
@@ -911,6 +980,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             out.extraMobs.timeLimitMs = source.extraMobs.timeLimitMs;
             out.extraMobs.waves = source.extraMobs.waves;
             out.extraMobs.mobsPerWave = source.extraMobs.mobsPerWave;
+            out.extraMobs.wavesEnabled = source.extraMobs.wavesEnabled;
             out.extraMobs.useRandomSpawnLocations = source.extraMobs.useRandomSpawnLocations;
             out.extraMobs.randomSpawnRadius = source.extraMobs.randomSpawnRadius;
             out.extraMobs.bossSpawnTrigger = source.extraMobs.bossSpawnTrigger != null ? source.extraMobs.bossSpawnTrigger : BossDefinition.ExtraMobs.BOSS_SPAWN_AFTER_BEFORE_BOSS;
@@ -941,6 +1011,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                         continue;
                     }
                     BossDefinition.ExtraMobs.ScheduledWave waveCopy = new BossDefinition.ExtraMobs.ScheduledWave();
+                    waveCopy.enabled = wave.enabled;
                     waveCopy.trigger = wave.trigger;
                     waveCopy.triggerValue = wave.triggerValue;
                     waveCopy.repeatCount = wave.repeatCount;
@@ -970,35 +1041,51 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         return out;
     }
 
+    private static final int MAX_WAVE_SUMMARY_LINES = 8;
+
     private static BossWavesSummary buildBossWavesSummary(BossDefinition.ExtraMobs extra) {
+        String[] lines = new String[MAX_WAVE_SUMMARY_LINES];
+        for (int i = 0; i < lines.length; i++) {
+            lines[i] = "";
+        }
         if (extra == null) {
-            return new BossWavesSummary("Aucun planning de vagues.", "Appuyez sur Éditer pour ajouter des vagues.", "");
+            lines[0] = "Aucun planning de vagues.";
+            lines[1] = "Appuyez sur Éditer pour ajouter des vagues.";
+            return new BossWavesSummary(lines);
         }
         extra.sanitize();
 
-        List<BossDefinition.ExtraMobs.ScheduledWave> schedule = extra.getResolvedScheduledWaves();
-        String addLine1 = "Aucun planning de vagues.";
-        String addLine2 = "";
-        if (!schedule.isEmpty()) {
-            addLine1 = formatWaveSummaryLine(1, schedule.get(0));
-            if (schedule.size() >= 2) {
-                addLine2 = formatWaveSummaryLine(2, schedule.get(1));
-                if (schedule.size() > 2) {
-                    addLine2 = addLine2 + " | +" + (schedule.size() - 2);
-                }
-            }
+        List<BossDefinition.ExtraMobs.ScheduledWave> schedule = extra.getAllScheduledWaves();
+        if (schedule.isEmpty()) {
+            lines[0] = "Aucun planning de vagues.";
+            lines[1] = "Appuyez sur Éditer pour ajouter des vagues.";
+            return new BossWavesSummary(lines);
         }
 
-        return new BossWavesSummary(addLine1, addLine2, "");
+        int visible = Math.min(MAX_WAVE_SUMMARY_LINES, schedule.size());
+        for (int i = 0; i < visible; i++) {
+            lines[i] = formatWaveSummaryLine(i + 1, schedule.get(i));
+        }
+        if (schedule.size() > MAX_WAVE_SUMMARY_LINES) {
+            int last = MAX_WAVE_SUMMARY_LINES - 1;
+            lines[last] = lines[last] + " | +" + (schedule.size() - MAX_WAVE_SUMMARY_LINES);
+        }
+        return new BossWavesSummary(lines);
     }
 
     private static String formatWaveSummaryLine(int index, BossDefinition.ExtraMobs.ScheduledWave wave) {
         String trigger = toWaveTriggerDisplayName(wave != null ? wave.trigger : null);
         String addsSummary = formatWaveAddsSummary(wave);
+        String line;
         if (addsSummary.isEmpty()) {
-            return index + " : " + trigger;
+            line = index + " : " + trigger;
+        } else {
+            line = index + " : " + trigger + " | " + addsSummary;
         }
-        return index + " : " + trigger + " | " + addsSummary;
+        if (wave != null && !wave.enabled) {
+            return "[OFF] " + line;
+        }
+        return line;
     }
 
     private static String formatWaveAddsSummary(BossDefinition.ExtraMobs.ScheduledWave wave) {
@@ -1389,13 +1476,13 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
-        if (action.startsWith("shop_edit_price_inc_")) {
-            handleShopEditPriceAdjust(action.substring("shop_edit_price_inc_".length()), SHOP_CONTRACT_PRICE_STEP, data);
+        if ("shop_currency_filter".equals(action)) {
+            handleShopCurrencyFilter(data);
             return;
         }
 
-        if (action.startsWith("shop_edit_price_dec_")) {
-            handleShopEditPriceAdjust(action.substring("shop_edit_price_dec_".length()), -SHOP_CONTRACT_PRICE_STEP, data);
+        if (action.startsWith("shop_currency_pick_")) {
+            handleShopCurrencyPick(action.substring("shop_currency_pick_".length()), data);
             return;
         }
 
@@ -1406,6 +1493,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         if ("shop_edit_close".equals(action)) {
             shopLocationEditorState = null;
+            shopCurrencyPicksOpen = false;
             rebuild();
         }
     }
@@ -1447,11 +1535,23 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             }
         }
 
+        String currencyItemId = "";
+        if (shopConfig.currencyItemId != null && !shopConfig.currencyItemId.isBlank()) {
+            currencyItemId = shopConfig.currencyItemId.trim();
+        } else if (plugin.getConfig() != null && plugin.getConfig().fallbackCurrencyItemId != null) {
+            currencyItemId = plugin.getConfig().fallbackCurrencyItemId.trim();
+        }
+        if (currencyItemId.isEmpty()) {
+            currencyItemId = "Ingredient_Bar_Iron";
+        }
+
         shopLocationEditorState = new ShopLocationEditorState(
                 shopLocation,
                 drafts,
-                optionalText(location.name)
+                optionalText(location.name),
+                currencyItemId
         );
+        shopCurrencyPicksOpen = false;
         shopStatusText = "";
         rebuild();
     }
@@ -1496,30 +1596,126 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         rebuild();
     }
 
-    private void handleShopEditPriceAdjust(String rowToken, int delta, ConfigEventData data) {
-        if (shopLocationEditorState == null || delta == 0) {
+    private void handleShopCurrencyFilter(ConfigEventData data) {
+        if (shopLocationEditorState == null) {
             return;
         }
         syncShopContractDraftsFromData(data);
-
-        int row = parseRow(rowToken);
-        if (row < 1 || row > MAX_SHOP_CONTRACT_ROWS) {
-            shopStatusText = "Ligne de prix invalide.";
-            rebuild();
-            return;
-        }
-
-        int index = shopLocationEditorState.listOffset + row - 1;
-        if (index < 0 || index >= shopLocationEditorState.contracts.size()) {
-            shopStatusText = "Ligne de prix invalide.";
-            rebuild();
-            return;
-        }
-
-        ShopContractDraft draft = shopLocationEditorState.contracts.get(index);
-        draft.cost = Math.max(0, draft.cost + delta);
+        String query = optionalText(data != null ? data.shopEditCurrencyItem : null);
+        shopLocationEditorState.currencyItemId = query;
+        // Soft-update only (like boss NPC search) so the text field keeps focus while typing.
+        shopCurrencyPicksOpen = !query.isEmpty() && !BossArenaConfigUiControls.isExactItemId(query);
         shopStatusText = "";
-        rebuild();
+        softUpdateShopCurrencyPicks(false);
+    }
+
+    private void handleShopCurrencyPick(String pickToken, ConfigEventData data) {
+        if (shopLocationEditorState == null) {
+            return;
+        }
+        syncShopContractDraftsFromData(data);
+        int pick = parseRow(pickToken);
+        if (pick < 1 || pick > MAX_SHOP_CURRENCY_PICKS) {
+            return;
+        }
+        String filter = optionalText(shopLocationEditorState.currencyItemId);
+        List<String> picks = BossArenaConfigUiControls.filterItemIds(filter, MAX_SHOP_CURRENCY_PICKS);
+        if (pick > picks.size()) {
+            return;
+        }
+        shopLocationEditorState.currencyItemId = picks.get(pick - 1);
+        shopCurrencyPicksOpen = false;
+        shopStatusText = "";
+        softUpdateShopCurrencyPicks(true);
+    }
+
+    private void softUpdateShopCurrencyPicks(boolean syncFieldValue) {
+        if (shopLocationEditorState == null) {
+            return;
+        }
+        UICommandBuilder cmd = new UICommandBuilder();
+        if (syncFieldValue) {
+            cmd.set("#ShopEditorCurrencyItem.Value", optionalText(shopLocationEditorState.currencyItemId));
+        }
+        applyShopCurrencyPicks(cmd, null, false);
+        applyShopContractLayoutForCurrencyPicks(cmd);
+        sendUpdate(cmd, false);
+    }
+
+    private void applyShopCurrencyPicks(UICommandBuilder cmd, UIEventBuilder events, boolean bindEvents) {
+        List<String> currencyPicks = List.of();
+        if (shopLocationEditorState != null && shopCurrencyPicksOpen) {
+            String query = optionalText(shopLocationEditorState.currencyItemId).trim();
+            if (!query.isEmpty() && !BossArenaConfigUiControls.isExactItemId(query)) {
+                currencyPicks = BossArenaConfigUiControls.filterItemIds(query, MAX_SHOP_CURRENCY_PICKS);
+            }
+        }
+
+        int pickTop = 206;
+        for (int i = 1; i <= MAX_SHOP_CURRENCY_PICKS; i++) {
+            String pickId = "#ShopCurrencyPick" + i;
+            boolean visible = i <= currencyPicks.size();
+
+            Anchor anchor = new Anchor();
+            anchor.setLeft(Value.of(520));
+            anchor.setTop(Value.of(pickTop + (i - 1) * 20));
+            anchor.setWidth(Value.of(400));
+            anchor.setHeight(Value.of(20));
+            cmd.setObject(pickId + ".Anchor", anchor);
+            cmd.set(pickId + ".Visible", visible);
+            if (visible) {
+                cmd.set(pickId + ".Text", currencyPicks.get(i - 1));
+            }
+            // Always bind: picks start hidden, soft-update only toggles Visible/Text.
+            if (bindEvents && events != null) {
+                events.addEventBinding(
+                        CustomUIEventBindingType.Activating,
+                        pickId,
+                        buildShopEditSnapshotEvent("shop_currency_pick_" + i),
+                        false
+                );
+            }
+        }
+    }
+
+    /** Push contract headers/rows below the currency suggestion list when it is open. */
+    private void applyShopContractLayoutForCurrencyPicks(UICommandBuilder cmd) {
+        int extra = shopCurrencyPicksOpen ? (MAX_SHOP_CURRENCY_PICKS * 20 + 8) : 0;
+        int headerTop = 214 + extra;
+        int row1Top = 240 + extra;
+        int rowStride = 34;
+
+        setShopOverlayAnchor(cmd, "#ShopEditHeaderBoss", 98, headerTop, 280, 22);
+        setShopOverlayAnchor(cmd, "#ShopEditHeaderArena", 390, headerTop, 220, 22);
+        setShopOverlayAnchor(cmd, "#ShopEditHeaderPrice", 626, headerTop, 180, 22);
+
+        for (int row = 1; row <= MAX_SHOP_CONTRACT_ROWS; row++) {
+            setShopOverlayAnchor(
+                    cmd,
+                    "#ShopEditContractRow" + row,
+                    98,
+                    row1Top + (row - 1) * rowStride,
+                    980,
+                    30
+            );
+        }
+        setShopOverlayAnchor(cmd, "#ShopEditorOverflowLabel", 98, row1Top + MAX_SHOP_CONTRACT_ROWS * rowStride + 4, 700, 22);
+    }
+
+    private static void setShopOverlayAnchor(
+            UICommandBuilder cmd,
+            String selector,
+            int left,
+            int top,
+            int width,
+            int height
+    ) {
+        Anchor anchor = new Anchor();
+        anchor.setLeft(Value.of(left));
+        anchor.setTop(Value.of(top));
+        anchor.setWidth(Value.of(width));
+        anchor.setHeight(Value.of(height));
+        cmd.setObject(selector + ".Anchor", anchor);
     }
 
     private void syncShopContractDraftsFromData(ConfigEventData data) {
@@ -1528,6 +1724,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
         if (data.shopEditVendorName != null) {
             shopLocationEditorState.vendorName = optionalText(data.shopEditVendorName);
+        }
+        if (data.shopEditCurrencyItem != null) {
+            shopLocationEditorState.currencyItemId = optionalText(data.shopEditCurrencyItem);
         }
         List<ShopContractDraft> contracts = shopLocationEditorState.contracts;
         int offset = shopLocationEditorState.listOffset;
@@ -1539,16 +1738,22 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             ShopContractDraft draft = contracts.get(index);
             draft.bossId = optionalText(data.getShopEditBoss(row));
             draft.arenaId = optionalText(data.getShopEditArena(row));
+            Integer parsedCost = parseOptionalInt(data.getShopEditPrice(row));
+            if (parsedCost != null) {
+                draft.cost = Math.max(0, parsedCost);
+            }
         }
     }
 
     private EventData buildShopEditSnapshotEvent(String action) {
         EventData event = new EventData().append("Action", action);
         event.append("@ShopEditVendorName", "#ShopEditorVendorName.Value");
+        event.append("@ShopEditCurrencyItem", "#ShopEditorCurrencyItem.Value");
         for (int row = 1; row <= MAX_SHOP_CONTRACT_ROWS; row++) {
             String suffix = Integer.toString(row);
             event.append("@ShopEditBoss" + suffix, "#ShopEditBoss" + suffix + ".Value");
             event.append("@ShopEditArena" + suffix, "#ShopEditArena" + suffix + ".Value");
+            event.append("@ShopEditBossPrice" + suffix, "#ShopEditBossPrice" + suffix + ".Value");
         }
         return event;
     }
@@ -1579,6 +1784,21 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 shopLocationEditorState.vendorName
         );
         shopLocationEditorState.vendorName = configuredVendorName;
+        String currencyItemId = resolvedOrFallback(
+                data != null ? data.shopEditCurrencyItem : null,
+                shopLocationEditorState.currencyItemId
+        ).trim();
+        if (currencyItemId.isEmpty()) {
+            shopStatusText = "Indiquez un item monnaie (ex: Ingredient_Bar_Iron).";
+            rebuild();
+            return;
+        }
+        if (!BossArenaConfigUiControls.isExactItemId(currencyItemId)) {
+            shopStatusText = "Item monnaie inconnu: " + currencyItemId;
+            rebuild();
+            return;
+        }
+        shopLocationEditorState.currencyItemId = currencyItemId;
 
         List<BossShopConfig.ShopContract> saved = new ArrayList<>();
         Set<String> seenPairs = new LinkedHashSet<>();
@@ -1614,11 +1834,15 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         location.enabledBossIds = new ArrayList<>();
         location.contractPrices = new ArrayList<>();
 
+        shopConfig.currencyProvider = "item";
+        shopConfig.currencyItemId = currencyItemId;
+
         plugin.saveShopConfig();
         plugin.refreshShopNpcInteractionHint(location);
         shopStatusText = "Emplacement boutique enregistré (" + shopLocation.x + ", " + shopLocation.y + ", " + shopLocation.z
-                + ") avec " + saved.size() + " contrat(s).";
+                + ") avec " + saved.size() + " contrat(s). Monnaie: " + currencyItemId + ".";
         shopLocationEditorState = null;
+        shopCurrencyPicksOpen = false;
         rebuild();
     }
 
@@ -1635,9 +1859,19 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         );
         cmd.set(
                 "#ShopEditorHint.Text",
-                "Ajoutez des contrats (boss + arène + prix). L'arène est obligatoire pour chaque contrat."
-        );
+                "Contrats: boss + arène + prix. Tapez l'item monnaie pour chercher."
+            );
         cmd.set("#ShopEditorVendorName.Value", optionalText(state.vendorName));
+        cmd.set("#ShopEditorCurrencyItem.Value", optionalText(state.currencyItemId));
+
+        applyShopCurrencyPicks(cmd, events, true);
+        applyShopContractLayoutForCurrencyPicks(cmd);
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#ShopEditorCurrencyItem",
+                buildShopEditSnapshotEvent("shop_currency_filter"),
+                false
+        );
 
         int totalContracts = state.contracts.size();
         int maxOffset = Math.max(0, totalContracts - MAX_SHOP_CONTRACT_ROWS);
@@ -1670,18 +1904,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             cmd.set("#ShopEditBoss" + suffix + ".Value", bossId);
             cmd.set("#ShopEditArena" + suffix + ".Entries", withExtraDropdownValue(arenaEntries, arenaId, ArenaRegistry.get(arenaId) == null));
             cmd.set("#ShopEditArena" + suffix + ".Value", arenaId);
-            cmd.set("#ShopEditBossPrice" + suffix + ".Text", Integer.toString(Math.max(0, draft.cost)));
+            cmd.set("#ShopEditBossPrice" + suffix + ".Value", Integer.toString(Math.max(0, draft.cost)));
 
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    "#ShopEditBossPriceUp" + suffix,
-                    buildShopEditSnapshotEvent("shop_edit_price_inc_" + row)
-            );
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    "#ShopEditBossPriceDown" + suffix,
-                    buildShopEditSnapshotEvent("shop_edit_price_dec_" + row)
-            );
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
                     "#ShopEditRemove" + suffix,
@@ -1718,6 +1942,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         if (action.startsWith("arena_here_")) {
             handleArenaMoveHere(action.substring("arena_here_".length()), ref, store);
+            return;
+        }
+
+        if (action.startsWith("arena_tp_")) {
+            handleArenaTeleport(action.substring("arena_tp_".length()), ref, store);
             return;
         }
 
@@ -1759,6 +1988,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             arenaRows.add(arena.arenaId);
 
             cmd.set("#ArenaName" + suffix + ".Value", arena.arenaId == null ? "" : arena.arenaId);
+            cmd.set("#ArenaWorld" + suffix + ".Value", arena.worldName == null ? "" : arena.worldName);
             cmd.set("#ArenaX" + suffix + ".Value", formatCoord(arena.x));
             cmd.set("#ArenaY" + suffix + ".Value", formatCoord(arena.y));
             cmd.set("#ArenaZ" + suffix + ".Value", formatCoord(arena.z));
@@ -1767,6 +1997,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
             events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaDelete" + suffix, EventData.of("Action", "arena_delete_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaHere" + suffix, EventData.of("Action", "arena_here_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaTp" + suffix, EventData.of("Action", "arena_tp_" + row));
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
                     "#ArenaSave" + suffix,
@@ -1780,6 +2011,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         return new EventData()
                 .append("Action", action)
                 .append("@ArenaName", "#ArenaName" + suffix + ".Value")
+                .append("@ArenaWorld", "#ArenaWorld" + suffix + ".Value")
                 .append("@ArenaX", "#ArenaX" + suffix + ".Value")
                 .append("@ArenaY", "#ArenaY" + suffix + ".Value")
                 .append("@ArenaZ", "#ArenaZ" + suffix + ".Value")
@@ -1880,6 +2112,52 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         rebuild();
     }
 
+    private void handleArenaTeleport(String rowToken, Ref<EntityStore> ref, Store<EntityStore> store) {
+        int row = parseRow(rowToken);
+        if (row < 1 || row > arenaRows.size()) {
+            arenaStatusText = "Sélection de ligne arène invalide.";
+            rebuild();
+            return;
+        }
+
+        String arenaId = arenaRows.get(row - 1);
+        Arena arena = ArenaRegistry.get(arenaId);
+        if (arena == null) {
+            arenaStatusText = "L'arène '" + arenaId + "' n'existe plus.";
+            rebuild();
+            return;
+        }
+
+        String worldName = optionalText(arena.worldName);
+        if (worldName.isEmpty()) {
+            arenaStatusText = "L'arène '" + arenaId + "' n'a pas de monde configuré.";
+            rebuild();
+            return;
+        }
+
+        World targetWorld = Universe.get().getWorld(worldName);
+        if (targetWorld == null) {
+            arenaStatusText = "Monde introuvable : '" + worldName + "'.";
+            rebuild();
+            return;
+        }
+
+        org.joml.Vector3d dest = new org.joml.Vector3d(arena.x, arena.y, arena.z);
+        Teleport teleport = Teleport.createForPlayer(
+                targetWorld,
+                dest,
+                com.hypixel.hytale.math.vector.Rotation3f.ZERO
+        );
+        if (store.getComponent(ref, Teleport.getComponentType()) != null) {
+            store.putComponent(ref, Teleport.getComponentType(), teleport);
+        } else {
+            store.addComponent(ref, Teleport.getComponentType(), teleport);
+        }
+        arenaStatusText = "Téléportation vers '" + arenaId + "' (" + worldName + " : "
+                + formatCoord(arena.x) + ", " + formatCoord(arena.y) + ", " + formatCoord(arena.z) + ").";
+        rebuild();
+    }
+
     private void handleArenaSave(String rowToken, ConfigEventData data, Boolean proximityEnabledOverride) {
         int row = parseRow(rowToken);
         if (row < 1 || row > arenaRows.size()) {
@@ -1917,6 +2195,24 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
+        String worldName = optionalText(data.arenaWorld);
+        if (looksLikeUiBindingExpression(worldName)) {
+            worldName = "";
+        }
+        if (worldName.isEmpty()) {
+            worldName = optionalText(arena.worldName);
+        }
+        if (worldName.isEmpty()) {
+            arenaStatusText = "Le monde de l'arène ne peut pas être vide.";
+            rebuild();
+            return;
+        }
+        if (Universe.get().getWorld(worldName) == null) {
+            arenaStatusText = "Monde introuvable : '" + worldName + "'.";
+            rebuild();
+            return;
+        }
+
         String lootRadiusRaw = optionalText(data.getArenaLootRadius(row));
         double lootRadius = arena.lootRadius > 0.0d ? arena.lootRadius : 30.0d;
         if (!lootRadiusRaw.isEmpty()) {
@@ -1944,6 +2240,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
 
         arena.arenaId = requestedId;
+        arena.worldName = worldName;
         arena.x = x;
         arena.y = y;
         arena.z = z;
@@ -1953,7 +2250,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         ArenaRegistry.register(arena);
 
         plugin.saveArenas();
-        arenaStatusText = "Arène '" + arena.arenaId + "' enregistrée.";
+        arenaStatusText = "Arène '" + arena.arenaId + "' enregistrée (" + arena.worldName + ").";
         rebuild();
     }
 
@@ -2042,7 +2339,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
-        if ("boss_wave_random_toggle".equals(action)) {
+        if ("boss_spawn_spread_toggle".equals(action)) {
+            handleBossSpawnSpreadToggle(data);
+            return;
+        }
+
+        if ("boss_wave_random_toggle".equals(action) || "boss_waves_enabled_toggle".equals(action)) {
             handleBossWaveToggle(action, data);
             return;
         }
@@ -2244,59 +2546,51 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         float speed = BossArenaConfigUiControls.clampFloat(boss.modifiers.movementSpeed, MULT_SCALE_MIN, MULT_SCALE_MAX);
         float attackRate = BossArenaConfigUiControls.clampFloat(boss.modifiers.attackRate, MULT_SCALE_MIN, MULT_SCALE_MAX);
-        float abilityCooldown = BossArenaConfigUiControls.clampFloat(boss.modifiers.abilityCooldown, MULT_SCALE_MIN, MULT_SCALE_MAX);
         float kbGiven = BossArenaConfigUiControls.clampFloat(boss.modifiers.knockbackGiven, MULT_SCALE_MIN, MULT_SCALE_MAX);
         float kbTaken = BossArenaConfigUiControls.clampFloat(boss.modifiers.knockbackTaken, MULT_SCALE_MIN, MULT_SCALE_MAX);
-        float turnRate = BossArenaConfigUiControls.clampFloat(boss.modifiers.turnRate, MULT_SCALE_MIN, MULT_SCALE_MAX);
-        float regen = BossArenaConfigUiControls.clampFloat(boss.modifiers.regen, MULT_SCALE_MIN, MULT_SCALE_MAX);
+        float regen = BossArenaConfigUiControls.clampFloat(
+                BossRegen.normalizeHpPerSecond(boss.modifiers.regen), REGEN_MIN, REGEN_MAX);
+        boss.modifiers.regen = regen;
         float ppSpeed = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.movementSpeed, MULT_PERS_MIN, MULT_PERS_MAX);
         float ppAttackRate = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.attackRate, MULT_PERS_MIN, MULT_PERS_MAX);
-        float ppAbilityCooldown = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.abilityCooldown, MULT_PERS_MIN, MULT_PERS_MAX);
         float ppKbGiven = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.knockbackGiven, MULT_PERS_MIN, MULT_PERS_MAX);
         float ppKbTaken = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.knockbackTaken, MULT_PERS_MIN, MULT_PERS_MAX);
-        float ppTurnRate = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.turnRate, MULT_PERS_MIN, MULT_PERS_MAX);
-        float ppRegen = BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.regen, MULT_PERS_MIN, MULT_PERS_MAX);
+        float ppRegen = BossArenaConfigUiControls.clampFloat(
+                BossRegen.normalizeHpPerSecond(boss.perPlayerIncrease.regen), REGEN_MIN, REGEN_MAX);
+        boss.perPlayerIncrease.regen = ppRegen;
 
         cmd.set("#BossEditHp.Value", hpMult);
         cmd.set("#BossEditDamage.Value", dmgMult);
         cmd.set("#BossEditSize.Value", sizeMult);
         cmd.set("#BossEditSpeed.Value", speed);
         cmd.set("#BossEditAttackRate.Value", attackRate);
-        cmd.set("#BossEditAbilityCooldown.Value", abilityCooldown);
         cmd.set("#BossEditKnockbackGiven.Value", kbGiven);
         cmd.set("#BossEditKnockbackTaken.Value", kbTaken);
-        cmd.set("#BossEditTurnRate.Value", turnRate);
         cmd.set("#BossEditRegen.Value", regen);
         cmd.set("#BossEditPpHp.Value", ppHp);
         cmd.set("#BossEditPpDamage.Value", ppDmg);
         cmd.set("#BossEditPpSize.Value", ppSize);
         cmd.set("#BossEditPpSpeed.Value", ppSpeed);
         cmd.set("#BossEditPpAttackRate.Value", ppAttackRate);
-        cmd.set("#BossEditPpAbilityCooldown.Value", ppAbilityCooldown);
         cmd.set("#BossEditPpKnockbackGiven.Value", ppKbGiven);
         cmd.set("#BossEditPpKnockbackTaken.Value", ppKbTaken);
-        cmd.set("#BossEditPpTurnRate.Value", ppTurnRate);
         cmd.set("#BossEditPpRegen.Value", ppRegen);
         cmd.set("#BossEditHpValue.Text", formatFloat(hpMult));
         cmd.set("#BossEditDamageValue.Text", formatFloat(dmgMult));
         cmd.set("#BossEditSizeValue.Text", formatFloat(sizeMult));
         cmd.set("#BossEditSpeedValue.Text", formatFloat(speed));
         cmd.set("#BossEditAttackRateValue.Text", formatFloat(attackRate));
-        cmd.set("#BossEditAbilityCooldownValue.Text", formatFloat(abilityCooldown));
         cmd.set("#BossEditKnockbackGivenValue.Text", formatFloat(kbGiven));
         cmd.set("#BossEditKnockbackTakenValue.Text", formatFloat(kbTaken));
-        cmd.set("#BossEditTurnRateValue.Text", formatFloat(turnRate));
-        cmd.set("#BossEditRegenValue.Text", formatFloat(regen));
+        cmd.set("#BossEditRegenValue.Text", BossRegen.formatLabel(regen));
         cmd.set("#BossEditPpHpValue.Text", formatFloat(ppHp));
         cmd.set("#BossEditPpDamageValue.Text", formatFloat(ppDmg));
         cmd.set("#BossEditPpSizeValue.Text", formatFloat(ppSize));
         cmd.set("#BossEditPpSpeedValue.Text", formatFloat(ppSpeed));
         cmd.set("#BossEditPpAttackRateValue.Text", formatFloat(ppAttackRate));
-        cmd.set("#BossEditPpAbilityCooldownValue.Text", formatFloat(ppAbilityCooldown));
         cmd.set("#BossEditPpKnockbackGivenValue.Text", formatFloat(ppKbGiven));
         cmd.set("#BossEditPpKnockbackTakenValue.Text", formatFloat(ppKbTaken));
-        cmd.set("#BossEditPpTurnRateValue.Text", formatFloat(ppTurnRate));
-        cmd.set("#BossEditPpRegenValue.Text", formatFloat(ppRegen));
+        cmd.set("#BossEditPpRegenValue.Text", BossRegen.formatLabel(ppRegen));
 
         applyBossNpcPicks(cmd, events, true);
         applyBossEditorScrollForNpcPicks(cmd);
@@ -2305,8 +2599,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             boss.extraMobs.sanitize();
         }
         BossWavesSummary summary = buildBossWavesSummary(boss.extraMobs);
-        cmd.set("#BossWavesAdd1.Text", summary.addLine1);
-        cmd.set("#BossWavesAdd2.Text", summary.addLine2);
+        cmd.set("#BossWavesLabel.Text", "Vagues");
+        for (int i = 0; i < MAX_WAVE_SUMMARY_LINES; i++) {
+            String line = summary.lineAt(i);
+            cmd.set("#BossWavesAdd" + (i + 1) + ".Text", line);
+            cmd.set("#BossWavesAdd" + (i + 1) + ".Visible", line != null && !line.isBlank());
+        }
         cmd.set("#BossWavesMeta.Text", "");
 
         BossDefinition.ExtraMobs editorExtra = boss.extraMobs != null ? boss.extraMobs : new BossDefinition.ExtraMobs();
@@ -2318,6 +2616,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         cmd.set("#BossSpawnTriggerValueLabel.Visible", afterDelay);
         BossArenaConfigUiControls.styleModeTextButton(cmd, "#BossSpawnAfterPreBoss", !afterDelay);
         BossArenaConfigUiControls.styleModeTextButton(cmd, "#BossSpawnAfterDelay", afterDelay);
+        cmd.set("#BossSpawnSpreadRandom.Value", boss.useRandomBossSpawn ? "true" : "false");
+        BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#BossSpawnSpreadToggle", boss.useRandomBossSpawn);
+        cmd.set("#BossSpawnSpreadRadius.Value", formatWaveNumber(boss.getSpawnSpreadRadius()));
         cmd.set("#BossWaveRandomLocations.Value", editorExtra.useRandomSpawnLocations ? "true" : "false");
         BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#BossWaveRandomToggle", editorExtra.useRandomSpawnLocations);
         cmd.set("#BossWaveRandomRadius.Value", formatWaveNumber(editorExtra.getWaveRandomSpawnRadius()));
@@ -2346,6 +2647,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 CustomUIEventBindingType.Activating,
                 "#BossSpawnAfterDelay",
                 buildBossEditorSnapshotEvent("boss_spawn_after_delay")
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#BossSpawnSpreadToggle",
+                buildBossEditorSnapshotEvent("boss_spawn_spread_toggle")
         );
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
@@ -2414,12 +2720,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         );
         events.addEventBinding(
                 CustomUIEventBindingType.ValueChanged,
-                "#BossEditAbilityCooldown",
-                buildBossEditorSnapshotEvent("boss_slider_changed"),
-                false
-        );
-        events.addEventBinding(
-                CustomUIEventBindingType.ValueChanged,
                 "#BossEditKnockbackGiven",
                 buildBossEditorSnapshotEvent("boss_slider_changed"),
                 false
@@ -2427,12 +2727,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         events.addEventBinding(
                 CustomUIEventBindingType.ValueChanged,
                 "#BossEditKnockbackTaken",
-                buildBossEditorSnapshotEvent("boss_slider_changed"),
-                false
-        );
-        events.addEventBinding(
-                CustomUIEventBindingType.ValueChanged,
-                "#BossEditTurnRate",
                 buildBossEditorSnapshotEvent("boss_slider_changed"),
                 false
         );
@@ -2456,12 +2750,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         );
         events.addEventBinding(
                 CustomUIEventBindingType.ValueChanged,
-                "#BossEditPpAbilityCooldown",
-                buildBossEditorSnapshotEvent("boss_slider_changed"),
-                false
-        );
-        events.addEventBinding(
-                CustomUIEventBindingType.ValueChanged,
                 "#BossEditPpKnockbackGiven",
                 buildBossEditorSnapshotEvent("boss_slider_changed"),
                 false
@@ -2469,12 +2757,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         events.addEventBinding(
                 CustomUIEventBindingType.ValueChanged,
                 "#BossEditPpKnockbackTaken",
-                buildBossEditorSnapshotEvent("boss_slider_changed"),
-                false
-        );
-        events.addEventBinding(
-                CustomUIEventBindingType.ValueChanged,
-                "#BossEditPpTurnRate",
                 buildBossEditorSnapshotEvent("boss_slider_changed"),
                 false
         );
@@ -2565,6 +2847,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     : newEmptyScheduledWave();
 
             cmd.set("#BossWavePageLabel.Text", "Vague " + (bossWavePageIndex + 1) + " / " + pageCount);
+            boolean waveEnabled = current == null || current.enabled;
+            cmd.set("#BossWavesEnabled.Value", waveEnabled ? "true" : "false");
+            BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#BossWavesEnabledToggle", waveEnabled);
             String rawTrigger = optionalText(current.trigger).trim().toLowerCase(Locale.ROOT).replace('-', '_').replace(' ', '_');
             String triggerId = toWaveTriggerDropdownValue(current.trigger);
             double triggerValue = BossDefinition.ExtraMobs.TRIGGER_ON_SPAWN.equals(rawTrigger)
@@ -2621,6 +2906,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             }
 
             events.addEventBinding(CustomUIEventBindingType.Activating, "#BossWavesCloseButton", EventData.of("Action", "boss_waves_close"));
+            events.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    "#BossWavesEnabledToggle",
+                    buildBossWavesSnapshotEvent("boss_waves_enabled_toggle")
+            );
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
                     "#BossWavesSaveButton",
@@ -2695,15 +2985,20 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
             BossArenaConfig.TimedBossSpawn entry = rows.get(row - 1);
             boolean interval = entry != null && entry.isIntervalMode();
-            boolean afterDeath = !interval;
+            boolean manual = entry != null && entry.isManualMode();
+            boolean afterDeath = entry == null || entry.isAfterDeathMode();
             boolean enabled = entry == null || entry.enabled;
             boolean requirePlayer = entry != null && entry.requirePlayerInRadius;
             boolean announceGlobal = entry != null && entry.announceWorldWide;
             boolean announceWorld = entry != null && entry.announceCurrentWorld && !announceGlobal;
             cmd.set("#TimedEnabled" + suffix + ".Value", enabled ? "true" : "false");
             BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedEnabledToggle" + suffix, enabled);
-            cmd.set("#TimedMode" + suffix + ".Value", interval ? BossArenaConfig.SCHEDULE_INTERVAL : BossArenaConfig.SCHEDULE_AFTER_DEATH);
-            cmd.set("#TimedModeToggle" + suffix + ".Text", interval ? "Planifié" : "Temps réapparition");
+            String modeValue = manual
+                    ? BossArenaConfig.SCHEDULE_MANUAL
+                    : (interval ? BossArenaConfig.SCHEDULE_INTERVAL : BossArenaConfig.SCHEDULE_AFTER_DEATH);
+            cmd.set("#TimedMode" + suffix + ".Value", modeValue);
+            cmd.set("#TimedModeToggle" + suffix + ".Text",
+                    manual ? "Manuel" : (interval ? "Planifié" : "Temps réapparition"));
 
             String bossId = safeText(entry != null ? entry.bossId : "");
             String arenaId = safeText(entry != null ? entry.arenaId : "");
@@ -2945,9 +3240,15 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             BossArenaConfig.TimedBossSpawn entry = parsed.get(row - 1);
             switch (field) {
                 case "enabled" -> entry.enabled = !entry.enabled;
-                case "mode" -> entry.scheduleMode = entry.isIntervalMode()
-                        ? BossArenaConfig.SCHEDULE_AFTER_DEATH
-                        : BossArenaConfig.SCHEDULE_INTERVAL;
+                case "mode" -> {
+                    if (entry.isAfterDeathMode()) {
+                        entry.scheduleMode = BossArenaConfig.SCHEDULE_INTERVAL;
+                    } else if (entry.isIntervalMode()) {
+                        entry.scheduleMode = BossArenaConfig.SCHEDULE_MANUAL;
+                    } else {
+                        entry.scheduleMode = BossArenaConfig.SCHEDULE_AFTER_DEATH;
+                    }
+                }
                 case "require" -> entry.requirePlayerInRadius = !entry.requirePlayerInRadius;
                 case "announce_global" -> {
                     entry.announceWorldWide = !entry.announceWorldWide;
@@ -3086,13 +3387,29 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             if (enabled == null) {
                 throw new IllegalArgumentException("Ligne " + row + " : Actif doit être Oui/Non.");
             }
-            boolean intervalMode = BossArenaConfig.SCHEDULE_INTERVAL.equalsIgnoreCase(modeText)
+            String scheduleMode;
+            if (modeText.isEmpty() && existingRow != null) {
+                scheduleMode = existingRow.isManualMode()
+                        ? BossArenaConfig.SCHEDULE_MANUAL
+                        : (existingRow.isIntervalMode()
+                        ? BossArenaConfig.SCHEDULE_INTERVAL
+                        : BossArenaConfig.SCHEDULE_AFTER_DEATH);
+            } else if (BossArenaConfig.SCHEDULE_MANUAL.equalsIgnoreCase(modeText)
+                    || "manuel".equalsIgnoreCase(modeText)) {
+                scheduleMode = BossArenaConfig.SCHEDULE_MANUAL;
+            } else if (BossArenaConfig.SCHEDULE_INTERVAL.equalsIgnoreCase(modeText)
                     || BossArenaConfig.SCHEDULE_FIXED_TIMES.equalsIgnoreCase(modeText)
                     || "intervalle".equalsIgnoreCase(modeText)
                     || "planifié".equalsIgnoreCase(modeText)
                     || "planifie".equalsIgnoreCase(modeText)
                     || "heures".equalsIgnoreCase(modeText)
-                    || "fixed".equalsIgnoreCase(modeText);
+                    || "fixed".equalsIgnoreCase(modeText)) {
+                scheduleMode = BossArenaConfig.SCHEDULE_INTERVAL;
+            } else {
+                scheduleMode = BossArenaConfig.SCHEDULE_AFTER_DEATH;
+            }
+            boolean intervalMode = BossArenaConfig.SCHEDULE_INTERVAL.equals(scheduleMode);
+            boolean manualMode = BossArenaConfig.SCHEDULE_MANUAL.equals(scheduleMode);
             Boolean requirePlayer = requireText.isEmpty() ? Boolean.FALSE : parseToggleInput(requireText);
             Boolean announceGlobal = announceGlobalText.isEmpty()
                     ? (existingRow != null && existingRow.announceWorldWide)
@@ -3155,7 +3472,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     0L,
                     Long.MAX_VALUE
             );
-            if (intervalMode && BossArenaConfig.resolveIntervalSeconds(intervalHours, intervalDays, intervalSecondsVal) <= 0L) {
+            if (intervalMode && !manualMode
+                    && BossArenaConfig.resolveIntervalSeconds(intervalHours, intervalDays, intervalSecondsVal) <= 0L) {
                 throw new IllegalArgumentException("Ligne " + row + " : l'intervalle (h/j/s) doit être > 0.");
             }
             long arrivalHours = parseRequiredLong(
@@ -3188,7 +3506,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     1L,
                     64L
             );
-            if (!intervalMode && BossArenaConfig.resolveSeconds(everyHours, everyMinutes, everySeconds) <= 0L) {
+            if (!intervalMode && !manualMode
+                    && BossArenaConfig.resolveSeconds(everyHours, everyMinutes, everySeconds) <= 0L) {
                 throw new IllegalArgumentException("Ligne " + row + " : le délai de respawn doit être > 0.");
             }
 
@@ -3213,7 +3532,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             entry.enabled = enabled;
             entry.bossId = bossId;
             entry.arenaId = arenaId;
-            entry.scheduleMode = intervalMode ? BossArenaConfig.SCHEDULE_INTERVAL : BossArenaConfig.SCHEDULE_AFTER_DEATH;
+            entry.scheduleMode = scheduleMode;
             entry.spawnIntervalHours = everyHours;
             entry.spawnIntervalMinutes = everyMinutes;
             entry.spawnIntervalSeconds = everySeconds;
@@ -3272,23 +3591,21 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append("@BossEditSpeed", "#BossEditSpeed.Value")
                 .append("@BossEditSize", "#BossEditSize.Value")
                 .append("@BossEditAttackRate", "#BossEditAttackRate.Value")
-                .append("@BossEditAbilityCooldown", "#BossEditAbilityCooldown.Value")
                 .append("@BossEditKnockbackGiven", "#BossEditKnockbackGiven.Value")
                 .append("@BossEditKnockbackTaken", "#BossEditKnockbackTaken.Value")
-                .append("@BossEditTurnRate", "#BossEditTurnRate.Value")
                 .append("@BossEditRegen", "#BossEditRegen.Value")
                 .append("@BossEditPpHp", "#BossEditPpHp.Value")
                 .append("@BossEditPpDamage", "#BossEditPpDamage.Value")
                 .append("@BossEditPpSpeed", "#BossEditPpSpeed.Value")
                 .append("@BossEditPpSize", "#BossEditPpSize.Value")
                 .append("@BossEditPpAttackRate", "#BossEditPpAttackRate.Value")
-                .append("@BossEditPpAbilityCooldown", "#BossEditPpAbilityCooldown.Value")
                 .append("@BossEditPpKnockbackGiven", "#BossEditPpKnockbackGiven.Value")
                 .append("@BossEditPpKnockbackTaken", "#BossEditPpKnockbackTaken.Value")
-                .append("@BossEditPpTurnRate", "#BossEditPpTurnRate.Value")
                 .append("@BossEditPpRegen", "#BossEditPpRegen.Value")
                 .append("@BossSpawnTrigger", "#BossSpawnTrigger.Value")
                 .append("@BossSpawnTriggerValue", "#BossSpawnTriggerValue.Value")
+                .append("@BossSpawnSpreadRandom", "#BossSpawnSpreadRandom.Value")
+                .append("@BossSpawnSpreadRadius", "#BossSpawnSpreadRadius.Value")
                 .append("@BossWaveRandomLocations", "#BossWaveRandomLocations.Value")
                 .append("@BossWaveRandomRadius", "#BossWaveRandomRadius.Value")
                 .append("@BossEditMusic", "#BossEditMusic.Value")
@@ -3311,6 +3628,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         // row-1 codec slots (@BossWaveEvery1/@BossWaveValue1/@BossWaveRepeatCount1/@BossWaveRepeatSec1).
         EventData snapshot = new EventData()
                 .append("Action", action)
+                .append("@BossWavesEnabled", "#BossWavesEnabled.Value")
                 .append("@BossWaveEvery1", "#BossWaveTriggerField.Value")
                 .append("@BossWaveValue1", "#BossWaveTriggerValueField.Value")
                 .append("@BossWaveRepeatCount1", "#BossWaveRepeatCountField.Value")
@@ -3640,13 +3958,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     MULT_SCALE_MAX,
                     "Mult cadence d'attaque doit être entre 0.10 et 10.00."
             );
-            outBoss.modifiers.abilityCooldown = requireSliderFloat(
-                    data.bossEditAbilityCooldown,
-                    outBoss.modifiers.abilityCooldown,
-                    MULT_SCALE_MIN,
-                    MULT_SCALE_MAX,
-                    "Mult recharge capacité doit être entre 0.10 et 10.00."
-            );
+            // Recharge / Rotation UI removed — keep existing stored values.
             outBoss.modifiers.knockbackGiven = requireSliderFloat(
                     data.bossEditKnockbackGiven,
                     outBoss.modifiers.knockbackGiven,
@@ -3661,93 +3973,38 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     MULT_SCALE_MAX,
                     "Mult knockback reçu doit être entre 0.10 et 10.00."
             );
-            outBoss.modifiers.turnRate = requireSliderFloat(
-                    data.bossEditTurnRate,
-                    outBoss.modifiers.turnRate,
-                    MULT_SCALE_MIN,
-                    MULT_SCALE_MAX,
-                    "Mult vitesse rotation doit être entre 0.10 et 10.00."
-            );
-            outBoss.modifiers.regen = requireSliderFloat(
+            outBoss.modifiers.regen = BossRegen.normalizeHpPerSecond(requireSliderFloat(
                     data.bossEditRegen,
                     outBoss.modifiers.regen,
-                    MULT_SCALE_MIN,
-                    MULT_SCALE_MAX,
-                    "Mult régén doit être entre 0.10 et 10.00."
-            );
-            outBoss.perPlayerIncrease.hp = requireSliderFloat(
-                    data.bossEditPpHp,
-                    outBoss.perPlayerIncrease.hp,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "PV/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.damage = requireSliderFloat(
-                    data.bossEditPpDamage,
-                    outBoss.perPlayerIncrease.damage,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Dégâts/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.movementSpeed = requireSliderFloat(
-                    data.bossEditPpSpeed,
-                    outBoss.perPlayerIncrease.movementSpeed,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Vitesse/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.size = requireSliderFloat(
-                    data.bossEditPpSize,
-                    outBoss.perPlayerIncrease.size,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Taille/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.attackRate = requireSliderFloat(
-                    data.bossEditPpAttackRate,
-                    outBoss.perPlayerIncrease.attackRate,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Attaque/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.abilityCooldown = requireSliderFloat(
-                    data.bossEditPpAbilityCooldown,
-                    outBoss.perPlayerIncrease.abilityCooldown,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Recharge/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.knockbackGiven = requireSliderFloat(
-                    data.bossEditPpKnockbackGiven,
-                    outBoss.perPlayerIncrease.knockbackGiven,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Recul+/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.knockbackTaken = requireSliderFloat(
-                    data.bossEditPpKnockbackTaken,
-                    outBoss.perPlayerIncrease.knockbackTaken,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Recul-/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.turnRate = requireSliderFloat(
-                    data.bossEditPpTurnRate,
-                    outBoss.perPlayerIncrease.turnRate,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Rotation/joueurs doit être entre 0.00 et 5.00."
-            );
-            outBoss.perPlayerIncrease.regen = requireSliderFloat(
+                    REGEN_MIN,
+                    REGEN_MAX,
+                    "Régén PV/s doit être entre 0 et 1000."
+            ));
+            outBoss.perPlayerIncrease.hp = requirePerPlayerSlider(
+                    data.bossEditPpHp, outBoss.perPlayerIncrease.hp, "PV/joueurs");
+            outBoss.perPlayerIncrease.damage = requirePerPlayerSlider(
+                    data.bossEditPpDamage, outBoss.perPlayerIncrease.damage, "Dégâts/joueurs");
+            outBoss.perPlayerIncrease.movementSpeed = requirePerPlayerSlider(
+                    data.bossEditPpSpeed, outBoss.perPlayerIncrease.movementSpeed, "Vitesse/joueurs");
+            outBoss.perPlayerIncrease.size = requirePerPlayerSlider(
+                    data.bossEditPpSize, outBoss.perPlayerIncrease.size, "Taille/joueurs");
+            outBoss.perPlayerIncrease.attackRate = requirePerPlayerSlider(
+                    data.bossEditPpAttackRate, outBoss.perPlayerIncrease.attackRate, "Attaque/joueurs");
+            outBoss.perPlayerIncrease.knockbackGiven = requirePerPlayerSlider(
+                    data.bossEditPpKnockbackGiven, outBoss.perPlayerIncrease.knockbackGiven, "Recul+/joueurs");
+            outBoss.perPlayerIncrease.knockbackTaken = requirePerPlayerSlider(
+                    data.bossEditPpKnockbackTaken, outBoss.perPlayerIncrease.knockbackTaken, "Recul-/joueurs");
+            outBoss.perPlayerIncrease.regen = BossRegen.normalizeHpPerSecond(requireSliderFloat(
                     data.bossEditPpRegen,
                     outBoss.perPlayerIncrease.regen,
-                    MULT_PERS_MIN,
-                    MULT_PERS_MAX,
-                    "Régén/joueurs doit être entre 0.00 et 5.00."
-            );
+                    REGEN_MIN,
+                    REGEN_MAX,
+                    "Régén/j PV/s doit être entre 0 et 1000."
+            ));
             if (outBoss.extraMobs == null) {
                 outBoss.extraMobs = new BossDefinition.ExtraMobs();
             }
+            applyBossSpawnSpreadFromData(outBoss, data);
             applyWaveSpawnSettingsFromData(outBoss.extraMobs, data);
             outBoss.extraMobs.waves = parseRequiredInt(
                     resolvedOrFallback(data.bossEditWaves, Integer.toString(Math.max(-1, outBoss.extraMobs.waves))),
@@ -3879,22 +4136,15 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         if (data.bossEditAttackRate != null && Float.isFinite(data.bossEditAttackRate)) {
             boss.modifiers.attackRate = BossArenaConfigUiControls.clampFloat(data.bossEditAttackRate, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
-        if (data.bossEditAbilityCooldown != null && Float.isFinite(data.bossEditAbilityCooldown)) {
-            boss.modifiers.abilityCooldown = BossArenaConfigUiControls.clampFloat(data.bossEditAbilityCooldown, MULT_SCALE_MIN, MULT_SCALE_MAX);
-        }
         if (data.bossEditKnockbackGiven != null && Float.isFinite(data.bossEditKnockbackGiven)) {
             boss.modifiers.knockbackGiven = BossArenaConfigUiControls.clampFloat(data.bossEditKnockbackGiven, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
         if (data.bossEditKnockbackTaken != null && Float.isFinite(data.bossEditKnockbackTaken)) {
             boss.modifiers.knockbackTaken = BossArenaConfigUiControls.clampFloat(data.bossEditKnockbackTaken, MULT_SCALE_MIN, MULT_SCALE_MAX);
         }
-        if (data.bossEditTurnRate != null && Float.isFinite(data.bossEditTurnRate)) {
-            boss.modifiers.turnRate = BossArenaConfigUiControls.clampFloat(data.bossEditTurnRate, MULT_SCALE_MIN, MULT_SCALE_MAX);
-        }
         if (data.bossEditRegen != null && Float.isFinite(data.bossEditRegen)) {
-            boss.modifiers.regen = BossArenaConfigUiControls.clampFloat(data.bossEditRegen, MULT_SCALE_MIN, MULT_SCALE_MAX);
+            boss.modifiers.regen = BossArenaConfigUiControls.clampFloat(data.bossEditRegen, REGEN_MIN, REGEN_MAX);
         }
-
         if (data.bossEditPpHp != null && Float.isFinite(data.bossEditPpHp)) {
             boss.perPlayerIncrease.hp = BossArenaConfigUiControls.clampFloat(data.bossEditPpHp, MULT_PERS_MIN, MULT_PERS_MAX);
         }
@@ -3910,20 +4160,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         if (data.bossEditPpAttackRate != null && Float.isFinite(data.bossEditPpAttackRate)) {
             boss.perPlayerIncrease.attackRate = BossArenaConfigUiControls.clampFloat(data.bossEditPpAttackRate, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        if (data.bossEditPpAbilityCooldown != null && Float.isFinite(data.bossEditPpAbilityCooldown)) {
-            boss.perPlayerIncrease.abilityCooldown = BossArenaConfigUiControls.clampFloat(data.bossEditPpAbilityCooldown, MULT_PERS_MIN, MULT_PERS_MAX);
-        }
         if (data.bossEditPpKnockbackGiven != null && Float.isFinite(data.bossEditPpKnockbackGiven)) {
             boss.perPlayerIncrease.knockbackGiven = BossArenaConfigUiControls.clampFloat(data.bossEditPpKnockbackGiven, MULT_PERS_MIN, MULT_PERS_MAX);
         }
         if (data.bossEditPpKnockbackTaken != null && Float.isFinite(data.bossEditPpKnockbackTaken)) {
             boss.perPlayerIncrease.knockbackTaken = BossArenaConfigUiControls.clampFloat(data.bossEditPpKnockbackTaken, MULT_PERS_MIN, MULT_PERS_MAX);
         }
-        if (data.bossEditPpTurnRate != null && Float.isFinite(data.bossEditPpTurnRate)) {
-            boss.perPlayerIncrease.turnRate = BossArenaConfigUiControls.clampFloat(data.bossEditPpTurnRate, MULT_PERS_MIN, MULT_PERS_MAX);
-        }
         if (data.bossEditPpRegen != null && Float.isFinite(data.bossEditPpRegen)) {
-            boss.perPlayerIncrease.regen = BossArenaConfigUiControls.clampFloat(data.bossEditPpRegen, MULT_PERS_MIN, MULT_PERS_MAX);
+            boss.perPlayerIncrease.regen = BossArenaConfigUiControls.clampFloat(data.bossEditPpRegen, REGEN_MIN, REGEN_MAX);
         }
         Integer waves = parseOptionalInt(data.bossEditWaves);
         if (waves != null && waves >= -1) {
@@ -3988,6 +4232,18 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             }
             if ("boss_wave_random_toggle".equals(action)) {
                 extra.useRandomSpawnLocations = !extra.useRandomSpawnLocations;
+            } else if ("boss_waves_enabled_toggle".equals(action)) {
+                List<BossDefinition.ExtraMobs.ScheduledWave> waves = readEditableWaves(extra);
+                BossDefinition.ExtraMobs.ScheduledWave current;
+                if (bossWavePageIndex >= 0 && bossWavePageIndex < waves.size()) {
+                    current = waves.get(bossWavePageIndex);
+                } else {
+                    current = newEmptyScheduledWave();
+                    waves.add(current);
+                    bossWavePageIndex = waves.size() - 1;
+                }
+                current.enabled = !current.enabled;
+                extra.scheduledWaves = waves;
             }
             extra.sanitize();
             rebuild();
@@ -4231,21 +4487,19 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         cmd.set("#BossEditSizeValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.size, MULT_SIZE_MIN, MULT_SIZE_MAX)));
         cmd.set("#BossEditSpeedValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.movementSpeed, MULT_SCALE_MIN, MULT_SCALE_MAX)));
         cmd.set("#BossEditAttackRateValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.attackRate, MULT_SCALE_MIN, MULT_SCALE_MAX)));
-        cmd.set("#BossEditAbilityCooldownValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.abilityCooldown, MULT_SCALE_MIN, MULT_SCALE_MAX)));
         cmd.set("#BossEditKnockbackGivenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.knockbackGiven, MULT_SCALE_MIN, MULT_SCALE_MAX)));
         cmd.set("#BossEditKnockbackTakenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.knockbackTaken, MULT_SCALE_MIN, MULT_SCALE_MAX)));
-        cmd.set("#BossEditTurnRateValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.turnRate, MULT_SCALE_MIN, MULT_SCALE_MAX)));
-        cmd.set("#BossEditRegenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.modifiers.regen, MULT_SCALE_MIN, MULT_SCALE_MAX)));
+        cmd.set("#BossEditRegenValue.Text", BossRegen.formatLabel(
+                BossArenaConfigUiControls.clampFloat(boss.modifiers.regen, REGEN_MIN, REGEN_MAX)));
         cmd.set("#BossEditPpHpValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.hp, MULT_PERS_MIN, MULT_PERS_MAX)));
         cmd.set("#BossEditPpDamageValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.damage, MULT_PERS_MIN, MULT_PERS_MAX)));
         cmd.set("#BossEditPpSizeValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.size, MULT_PERS_MIN, MULT_PERS_MAX)));
         cmd.set("#BossEditPpSpeedValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.movementSpeed, MULT_PERS_MIN, MULT_PERS_MAX)));
         cmd.set("#BossEditPpAttackRateValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.attackRate, MULT_PERS_MIN, MULT_PERS_MAX)));
-        cmd.set("#BossEditPpAbilityCooldownValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.abilityCooldown, MULT_PERS_MIN, MULT_PERS_MAX)));
         cmd.set("#BossEditPpKnockbackGivenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.knockbackGiven, MULT_PERS_MIN, MULT_PERS_MAX)));
         cmd.set("#BossEditPpKnockbackTakenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.knockbackTaken, MULT_PERS_MIN, MULT_PERS_MAX)));
-        cmd.set("#BossEditPpTurnRateValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.turnRate, MULT_PERS_MIN, MULT_PERS_MAX)));
-        cmd.set("#BossEditPpRegenValue.Text", formatFloat(BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.regen, MULT_PERS_MIN, MULT_PERS_MAX)));
+        cmd.set("#BossEditPpRegenValue.Text", BossRegen.formatLabel(
+                BossArenaConfigUiControls.clampFloat(boss.perPlayerIncrease.regen, REGEN_MIN, REGEN_MAX)));
         sendUpdate(cmd, false);
     }
 
@@ -4299,6 +4553,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
     private static BossDefinition.ExtraMobs.ScheduledWave newEmptyScheduledWave() {
         BossDefinition.ExtraMobs.ScheduledWave wave = new BossDefinition.ExtraMobs.ScheduledWave();
+        wave.enabled = true;
         wave.trigger = BossDefinition.ExtraMobs.TRIGGER_BEFORE_BOSS;
         wave.triggerValue = 0.0d;
         wave.repeatCount = 1;
@@ -4307,12 +4562,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         return wave;
     }
 
-    /** Returns a mutable, deep-copied list of the boss's scheduled waves. */
+    /** Returns a mutable, deep-copied list of the boss's scheduled waves (including disabled). */
     private static List<BossDefinition.ExtraMobs.ScheduledWave> readEditableWaves(BossDefinition.ExtraMobs extra) {
         if (extra == null) {
             return new ArrayList<>();
         }
-        return new ArrayList<>(extra.getResolvedScheduledWaves());
+        return new ArrayList<>(extra.getAllScheduledWaves());
     }
 
     /** Builds a ScheduledWave from the current page header (row-1 transport slots) and per-row adds. */
@@ -4374,6 +4629,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         double repeatSec = 0.0d;
 
         BossDefinition.ExtraMobs.ScheduledWave wave = new BossDefinition.ExtraMobs.ScheduledWave();
+        wave.enabled = fallback == null || fallback.enabled;
+        String enabledText = optionalText(data.bossWavesEnabled);
+        if (!enabledText.isEmpty() && !looksLikeUiBindingExpression(enabledText)) {
+            Boolean parsedEnabled = parseToggleInput(enabledText);
+            if (parsedEnabled != null) {
+                wave.enabled = parsedEnabled;
+            }
+        }
         wave.trigger = trigger;
         wave.triggerValue = triggerValue;
         wave.repeatCount = repeatCount;
@@ -4476,13 +4739,13 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             BossDefinition.ExtraMobs extra = bossEditorState.boss.extraMobs;
             applyWaveSpawnSettingsFromData(extra, data);
             applyCurrentWavePage(extra, data);
-            int resolvedSize = extra.getResolvedScheduledWaves().size();
+            int waveCount = extra.getAllScheduledWaves().size();
             int target = bossWavePageIndex + delta;
             if (target < 0) {
                 target = 0;
             }
-            if (target > resolvedSize) {
-                target = resolvedSize;
+            if (target > waveCount) {
+                target = waveCount;
             }
             bossWavePageIndex = target;
             bossStatusText = "";
@@ -4518,7 +4781,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             BossDefinition.ExtraMobs extra = bossEditorState.boss.extraMobs;
             applyWaveSpawnSettingsFromData(extra, data);
             applyCurrentWavePage(extra, data);
-            bossWavePageIndex = extra.getResolvedScheduledWaves().size();
+            bossWavePageIndex = extra.getAllScheduledWaves().size();
             bossStatusText = "";
             rebuild();
         } catch (IllegalArgumentException ex) {
@@ -4570,13 +4833,52 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             applyWaveSpawnSettingsFromData(extra, data);
             applyCurrentWavePage(extra, data);
             extra.sanitize();
-            bossWavesOverlayOpen = false;
-            bossStatusText = "Vagues boss mises à jour. Cliquez sur Enregistrer pour sauvegarder.";
+            persistBossEditorDraftToDisk();
+            bossStatusText = "Boss '" + bossEditorState.boss.bossName + "' enregistré (vagues).";
             rebuild();
         } catch (IllegalArgumentException ex) {
             bossStatusText = ex.getMessage();
             rebuild();
         }
+    }
+
+    /** Writes the in-memory boss editor draft (definition + loot) to registries and disk. */
+    private void persistBossEditorDraftToDisk() {
+        if (bossEditorState == null || bossEditorState.boss == null) {
+            throw new IllegalArgumentException("Aucun boss en cours d'édition.");
+        }
+
+        BossDefinition outBoss = cloneBoss(bossEditorState.boss);
+        if (outBoss.bossName == null || outBoss.bossName.isBlank()) {
+            throw new IllegalArgumentException("BossID ne peut pas être vide.");
+        }
+        if (outBoss.npcId == null || outBoss.npcId.isBlank()) {
+            throw new IllegalArgumentException("ID PNJ ne peut pas être vide.");
+        }
+        if (outBoss.extraMobs != null) {
+            outBoss.extraMobs.sanitize();
+        }
+
+        LootTable outLoot = cloneLoot(bossEditorState.loot, outBoss.bossName);
+        if (outLoot.items == null) {
+            outLoot.items = new ArrayList<>();
+        }
+
+        String oldName = bossEditorState.originalBossName;
+        boolean nameChanged = oldName != null && !oldName.equalsIgnoreCase(outBoss.bossName);
+        if ((oldName == null || nameChanged) && BossRegistry.exists(outBoss.bossName)) {
+            throw new IllegalArgumentException("Le boss '" + outBoss.bossName + "' existe déjà.");
+        }
+        if (nameChanged) {
+            BossRegistry.remove(oldName);
+            LootRegistry.remove(oldName);
+        }
+
+        BossRegistry.register(outBoss);
+        LootRegistry.register(outLoot);
+        plugin.saveBossDefinitions();
+        plugin.saveLootTables();
+        bossEditorState = new BossEditorState(outBoss.bossName, cloneBoss(outBoss), cloneLoot(outLoot, outBoss.bossName));
     }
 
 
@@ -4842,14 +5144,17 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         private final ShopLocationRef shopLocation;
         private final List<ShopContractDraft> contracts;
         private String vendorName;
+        private String currencyItemId;
         private int listOffset;
 
         private ShopLocationEditorState(ShopLocationRef shopLocation,
                                         List<ShopContractDraft> contracts,
-                                        String vendorName) {
+                                        String vendorName,
+                                        String currencyItemId) {
             this.shopLocation = shopLocation;
             this.contracts = contracts != null ? contracts : new ArrayList<>();
             this.vendorName = vendorName;
+            this.currencyItemId = currencyItemId != null ? currencyItemId : "";
             this.listOffset = 0;
         }
     }
@@ -4896,14 +5201,17 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     }
 
     private static final class BossWavesSummary {
-        private final String addLine1;
-        private final String addLine2;
-        private final String metaLine;
+        private final String[] lines;
 
-        private BossWavesSummary(String addLine1, String addLine2, String metaLine) {
-            this.addLine1 = addLine1;
-            this.addLine2 = addLine2;
-            this.metaLine = metaLine;
+        private BossWavesSummary(String[] lines) {
+            this.lines = lines != null ? lines : new String[0];
+        }
+
+        private String lineAt(int index) {
+            if (index < 0 || index >= lines.length || lines[index] == null) {
+                return "";
+            }
+            return lines[index];
         }
     }
 
@@ -4935,6 +5243,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append(new KeyedCodec<>("Action", Codec.STRING), (d, v) -> d.action = v, d -> d.action).add()
 
                 .append(new KeyedCodec<>("@ArenaName", Codec.STRING), (d, v) -> d.arenaName = v, d -> d.arenaName).add()
+                .append(new KeyedCodec<>("@ArenaWorld", Codec.STRING), (d, v) -> d.arenaWorld = v, d -> d.arenaWorld).add()
                 .append(new KeyedCodec<>("@ArenaX", Codec.STRING), (d, v) -> d.arenaX = v, d -> d.arenaX).add()
                 .append(new KeyedCodec<>("@ArenaY", Codec.STRING), (d, v) -> d.arenaY = v, d -> d.arenaY).add()
                 .append(new KeyedCodec<>("@ArenaZ", Codec.STRING), (d, v) -> d.arenaZ = v, d -> d.arenaZ).add()
@@ -4951,6 +5260,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append(new KeyedCodec<>("@ArenaProxCooldown", Codec.STRING), (d, v) -> d.arenaProxCooldown = v, d -> d.arenaProxCooldown).add()
                 .append(new KeyedCodec<>("@ShopEditArenaId", Codec.STRING), (d, v) -> d.shopEditArenaId = v, d -> d.shopEditArenaId).add()
                 .append(new KeyedCodec<>("@ShopEditVendorName", Codec.STRING), (d, v) -> d.shopEditVendorName = v, d -> d.shopEditVendorName).add()
+                .append(new KeyedCodec<>("@ShopEditCurrencyItem", Codec.STRING), (d, v) -> d.shopEditCurrencyItem = v, d -> d.shopEditCurrencyItem).add()
                 .append(new KeyedCodec<>("@ShopEditBoss1", Codec.STRING), (d, v) -> d.shopEditBoss1 = v, d -> d.shopEditBoss1).add()
                 .append(new KeyedCodec<>("@ShopEditBoss2", Codec.STRING), (d, v) -> d.shopEditBoss2 = v, d -> d.shopEditBoss2).add()
                 .append(new KeyedCodec<>("@ShopEditBoss3", Codec.STRING), (d, v) -> d.shopEditBoss3 = v, d -> d.shopEditBoss3).add()
@@ -4967,6 +5277,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append(new KeyedCodec<>("@ShopEditArena6", Codec.STRING), (d, v) -> d.shopEditArena6 = v, d -> d.shopEditArena6).add()
                 .append(new KeyedCodec<>("@ShopEditArena7", Codec.STRING), (d, v) -> d.shopEditArena7 = v, d -> d.shopEditArena7).add()
                 .append(new KeyedCodec<>("@ShopEditArena8", Codec.STRING), (d, v) -> d.shopEditArena8 = v, d -> d.shopEditArena8).add()
+                .append(new KeyedCodec<>("@ShopEditBossPrice1", Codec.STRING), (d, v) -> d.shopEditBossPrice1 = v, d -> d.shopEditBossPrice1).add()
+                .append(new KeyedCodec<>("@ShopEditBossPrice2", Codec.STRING), (d, v) -> d.shopEditBossPrice2 = v, d -> d.shopEditBossPrice2).add()
+                .append(new KeyedCodec<>("@ShopEditBossPrice3", Codec.STRING), (d, v) -> d.shopEditBossPrice3 = v, d -> d.shopEditBossPrice3).add()
+                .append(new KeyedCodec<>("@ShopEditBossPrice4", Codec.STRING), (d, v) -> d.shopEditBossPrice4 = v, d -> d.shopEditBossPrice4).add()
+                .append(new KeyedCodec<>("@ShopEditBossPrice5", Codec.STRING), (d, v) -> d.shopEditBossPrice5 = v, d -> d.shopEditBossPrice5).add()
+                .append(new KeyedCodec<>("@ShopEditBossPrice6", Codec.STRING), (d, v) -> d.shopEditBossPrice6 = v, d -> d.shopEditBossPrice6).add()
+                .append(new KeyedCodec<>("@ShopEditBossPrice7", Codec.STRING), (d, v) -> d.shopEditBossPrice7 = v, d -> d.shopEditBossPrice7).add()
+                .append(new KeyedCodec<>("@ShopEditBossPrice8", Codec.STRING), (d, v) -> d.shopEditBossPrice8 = v, d -> d.shopEditBossPrice8).add()
 
                 .append(new KeyedCodec<>("@BossEditName", Codec.STRING), (d, v) -> d.bossEditName = v, d -> d.bossEditName).add()
                 .append(new KeyedCodec<>("@BossEditNpcId", Codec.STRING), (d, v) -> d.bossEditNpcId = v, d -> d.bossEditNpcId).add()
@@ -5001,8 +5319,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
                 .append(new KeyedCodec<>("@BossSpawnTrigger", Codec.STRING), (d, v) -> d.bossSpawnTrigger = v, d -> d.bossSpawnTrigger).add()
                 .append(new KeyedCodec<>("@BossSpawnTriggerValue", Codec.STRING), (d, v) -> d.bossSpawnTriggerValue = v, d -> d.bossSpawnTriggerValue).add()
+                .append(new KeyedCodec<>("@BossSpawnSpreadRandom", Codec.STRING), (d, v) -> d.bossSpawnSpreadRandom = v, d -> d.bossSpawnSpreadRandom).add()
+                .append(new KeyedCodec<>("@BossSpawnSpreadRadius", Codec.STRING), (d, v) -> d.bossSpawnSpreadRadius = v, d -> d.bossSpawnSpreadRadius).add()
                 .append(new KeyedCodec<>("@BossWaveRandomLocations", Codec.STRING), (d, v) -> d.bossWaveRandomLocations = v, d -> d.bossWaveRandomLocations).add()
                 .append(new KeyedCodec<>("@BossWaveRandomRadius", Codec.STRING), (d, v) -> d.bossWaveRandomRadius = v, d -> d.bossWaveRandomRadius).add()
+                .append(new KeyedCodec<>("@BossWavesEnabled", Codec.STRING), (d, v) -> d.bossWavesEnabled = v, d -> d.bossWavesEnabled).add()
                 .append(new KeyedCodec<>("@BossEditMusic", Codec.STRING), (d, v) -> d.bossEditMusic = v, d -> d.bossEditMusic).add()
                 .append(new KeyedCodec<>("@BossEditMusicRadius", Codec.STRING), (d, v) -> d.bossEditMusicRadius = v, d -> d.bossEditMusicRadius).add()
                 .append(new KeyedCodec<>("@BossWaveTimeSec", Codec.STRING), (d, v) -> d.bossWaveTimeSec = v, d -> d.bossWaveTimeSec).add()
@@ -5170,6 +5491,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .build();
         public String action;
         public String arenaName;
+        public String arenaWorld;
         public String arenaX;
         public String arenaY;
         public String arenaZ;
@@ -5186,6 +5508,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String arenaProxCooldown;
         public String shopEditArenaId;
         public String shopEditVendorName;
+        public String shopEditCurrencyItem;
         public String shopEditBoss1;
         public String shopEditBoss2;
         public String shopEditBoss3;
@@ -5202,6 +5525,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String shopEditArena6;
         public String shopEditArena7;
         public String shopEditArena8;
+        public String shopEditBossPrice1;
+        public String shopEditBossPrice2;
+        public String shopEditBossPrice3;
+        public String shopEditBossPrice4;
+        public String shopEditBossPrice5;
+        public String shopEditBossPrice6;
+        public String shopEditBossPrice7;
+        public String shopEditBossPrice8;
         public String bossEditName;
         public String bossEditNpcId;
         public String bossEditTier;
@@ -5233,9 +5564,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String bossEditExtraWaves;
         public String bossEditExtraMobsPerWave;
         public String bossSpawnTrigger;
+        public String bossSpawnSpreadRandom;
+        public String bossSpawnSpreadRadius;
         public String bossSpawnTriggerValue;
         public String bossWaveRandomLocations;
         public String bossWaveRandomRadius;
+        public String bossWavesEnabled;
         public String bossEditMusic;
         public String bossEditMusicRadius;
         public String bossWaveTimeSec;
@@ -5417,6 +5751,20 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 6 -> shopEditArena6;
                 case 7 -> shopEditArena7;
                 case 8 -> shopEditArena8;
+                default -> null;
+            };
+        }
+
+        public String getShopEditPrice(int row) {
+            return switch (row) {
+                case 1 -> shopEditBossPrice1;
+                case 2 -> shopEditBossPrice2;
+                case 3 -> shopEditBossPrice3;
+                case 4 -> shopEditBossPrice4;
+                case 5 -> shopEditBossPrice5;
+                case 6 -> shopEditBossPrice6;
+                case 7 -> shopEditBossPrice7;
+                case 8 -> shopEditBossPrice8;
                 default -> null;
             };
         }

@@ -130,6 +130,7 @@ public final class BossWaveNotificationService {
                 showVictoryOnFinish,
                 notificationRadiusBlocks,
                 null,
+                0,
                 0
         );
     }
@@ -146,6 +147,36 @@ public final class BossWaveNotificationService {
                                              double notificationRadiusBlocks,
                                              UUID eventId,
                                              int currentWaveNumber) {
+        notifyBossAliveStatus(
+                world,
+                eventCenter,
+                bossName,
+                aliveBossCount,
+                activeAdds,
+                context,
+                remainingCountdownMillis,
+                forceActiveState,
+                showVictoryOnFinish,
+                notificationRadiusBlocks,
+                eventId,
+                currentWaveNumber,
+                0
+        );
+    }
+
+    public static void notifyBossAliveStatus(World world,
+                                             Vector3d eventCenter,
+                                             String bossName,
+                                             int aliveBossCount,
+                                             int activeAdds,
+                                             String context,
+                                             long remainingCountdownMillis,
+                                             boolean forceActiveState,
+                                             boolean showVictoryOnFinish,
+                                             double notificationRadiusBlocks,
+                                             UUID eventId,
+                                             int currentWaveNumber,
+                                             int totalWaveCount) {
         if (world == null || eventCenter == null) {
             return;
         }
@@ -178,11 +209,30 @@ public final class BossWaveNotificationService {
             return;
         }
 
-        String phaseTitle = bossesAlive > 0
-                ? ("Boss : " + bossDisplay)
-                : ("Vague " + Math.max(1, currentWaveNumber));
+        int waveNow = Math.max(0, currentWaveNumber);
+        int waveTotal = Math.max(0, totalWaveCount);
+        if (waveTotal > 0 && waveNow > waveTotal) {
+            waveTotal = waveNow;
+        }
+        String waveLabel = formatWaveProgress(waveNow, waveTotal);
+
+        String phaseTitle;
+        if (bossesAlive > 0) {
+            phaseTitle = "Boss : " + bossDisplay;
+        } else if (waveLabel != null) {
+            phaseTitle = waveLabel;
+        } else {
+            phaseTitle = "Boss : " + bossDisplay;
+        }
         Message title = toPlainMessage(stripColorCodes(phaseTitle));
-        Message subtitle = toPlainMessage(stripColorCodes("Monstres restants : " + monstersAlive));
+
+        String subtitleText;
+        if (waveLabel != null && bossesAlive > 0) {
+            subtitleText = waveLabel + " · Monstres restants : " + monstersAlive;
+        } else {
+            subtitleText = "Monstres restants : " + monstersAlive;
+        }
+        Message subtitle = toPlainMessage(stripColorCodes(subtitleText));
         showToNearbyPlayers(
                 world,
                 eventCenter,
@@ -193,6 +243,17 @@ public final class BossWaveNotificationService {
         );
     }
 
+    /** Returns e.g. {@code Vague 4/5}, or {@code Vague 4} when total is unknown, or null if no wave yet. */
+    static String formatWaveProgress(int currentWaveNumber, int totalWaveCount) {
+        if (currentWaveNumber <= 0) {
+            return null;
+        }
+        if (totalWaveCount > 0) {
+            return "Vague " + currentWaveNumber + "/" + totalWaveCount;
+        }
+        return "Vague " + currentWaveNumber;
+    }
+
     public static void notifyWaveSpawn(World world,
                                        Vector3d eventCenter,
                                        String bossName,
@@ -200,6 +261,18 @@ public final class BossWaveNotificationService {
                                        int spawnedNow,
                                        int activeAdds,
                                        long remainingCountdownMillis) {
+        notifyWaveSpawn(world, eventCenter, bossName, waveNumber, 0, spawnedNow, activeAdds, remainingCountdownMillis, 1);
+    }
+
+    public static void notifyWaveSpawn(World world,
+                                       Vector3d eventCenter,
+                                       String bossName,
+                                       int waveNumber,
+                                       int totalWaveCount,
+                                       int spawnedNow,
+                                       int activeAdds,
+                                       long remainingCountdownMillis,
+                                       int aliveBossCount) {
         if (world == null || eventCenter == null || spawnedNow <= 0) {
             return;
         }
@@ -207,10 +280,16 @@ public final class BossWaveNotificationService {
                 world,
                 eventCenter,
                 bossName,
-                1,
+                Math.max(0, aliveBossCount),
                 activeAdds,
                 "Wave " + waveNumber + " spawned: " + spawnedNow,
-                remainingCountdownMillis
+                remainingCountdownMillis,
+                true,
+                true,
+                -1.0d,
+                null,
+                waveNumber,
+                totalWaveCount
         );
     }
 

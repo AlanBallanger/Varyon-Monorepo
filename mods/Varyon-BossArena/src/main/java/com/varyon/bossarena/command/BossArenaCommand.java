@@ -271,7 +271,7 @@ public final class BossArenaCommand extends AbstractCommand {
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
         ctx.sendMessage(Message.raw(
-                "Use: /bossarena arena <create|delete|list> OR /bossarena spawn <bossId> <arenaId|here> OR /bossarena reload OR /bossarena config OR /bossarena shop [place|remove] OR /bossarena cleanup"
+                "Use: /bossarena arena <create|delete|list> OR /bossarena spawn <bossId> <arenaId|here> OR /bossarena reload OR /bossarena config OR /bossarena shop [place|remove <id>] OR /bossarena cleanup"
         ));
         return CompletableFuture.completedFuture(null);
     }
@@ -619,7 +619,7 @@ public final class BossArenaCommand extends AbstractCommand {
         private final BossArenaPlugin plugin;
 
         ShopRoot(BossArenaPlugin plugin) {
-            super("shop", "Ouvre la boutique, ou : place | remove");
+            super("shop", "Ouvre la boutique, ou : place | remove <id>");
             this.plugin = plugin;
             requireAdminPermission(this);
             addSubCommand(new ShopPlace(plugin));
@@ -674,56 +674,76 @@ public final class BossArenaCommand extends AbstractCommand {
 
     private static final class ShopRemove extends AbstractCommand {
         private final BossArenaPlugin plugin;
+        private final RequiredArg<String> idArg;
 
         ShopRemove(BossArenaPlugin plugin) {
-            super("remove", "Supprime le PNJ boutique le plus proche : /ba shop remove");
+            super("remove", "Supprime une boutique par id : /ba shop remove <nom|uuid>");
             this.plugin = plugin;
+            requireAdminPermission(this);
+            this.idArg = withRequiredArg("id", "Nom ou UUID de la boutique à supprimer", ArgTypes.STRING);
         }
 
         @Override
         protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-            if (!ctx.isPlayer()) {
-                ctx.sendMessage(Message.raw("Commande réservée aux joueurs"));
+            String shopId = ctx.get(idArg);
+            if (shopId == null || shopId.isBlank()) {
+                ctx.sendMessage(Message.raw("Usage: /ba shop remove <nom|uuid>"));
+                return CompletableFuture.completedFuture(null);
+            }
+            if (plugin.getShopConfig() == null) {
+                ctx.sendMessage(Message.raw("Config boutique indisponible."));
                 return CompletableFuture.completedFuture(null);
             }
 
-            Ref<EntityStore> delRef = ctx.senderAsPlayerRef();
-            if (delRef == null || !delRef.isValid()) {
-                ctx.sendMessage(Message.raw("Impossible de résoudre le joueur"));
+            var location = plugin.getShopConfig().findShopById(shopId.trim());
+            if (location == null) {
+                ctx.sendMessage(Message.raw("Aucune boutique '" + shopId.trim() + "'. Vérifiez le nom ou l'UUID dans /ba config."));
                 return CompletableFuture.completedFuture(null);
             }
-            World world = resolveWorldFromPlayerRef(delRef);
+
+            String worldName = location.worldName != null ? location.worldName.trim() : "";
+            World world = !worldName.isEmpty() ? Universe.get().getWorld(worldName) : null;
+            if (world == null && ctx.isPlayer()) {
+                Ref<EntityStore> playerRef = ctx.senderAsPlayerRef();
+                world = resolveWorldFromPlayerRef(playerRef);
+            }
             if (world == null) {
-                ctx.sendMessage(Message.raw("Impossible de résoudre le monde du joueur"));
+                // Config-only cleanup when the world is offline.
+                boolean removed = plugin.getShopConfig().removeShop(location);
+                if (removed) {
+                    plugin.saveShopConfig();
+                    ctx.sendMessage(Message.raw("Boutique retirée de la config (monde hors-ligne) : " + location));
+                } else {
+                    ctx.sendMessage(Message.raw("Échec de suppression de la boutique '" + shopId.trim() + "'."));
+                }
                 return CompletableFuture.completedFuture(null);
             }
 
+            final World targetWorld = world;
+            final String locationUuid = location.uuid != null ? location.uuid.trim() : "";
             return CompletableFuture.runAsync(() -> {
-                Store<EntityStore> store = delRef.getStore();
-                Player player = store.getComponent(delRef, Player.getComponentType());
-                Vector3d playerPosition = getPlayerPosition(player);
-                UUID nearest = findNearestShopNpcUuid(plugin, world, playerPosition);
-                if (nearest == null) {
-                    boolean removedShopLocation = false;
-                    if (plugin.getShopConfig() != null) {
-                        int x = (int) Math.floor(playerPosition.x);
-                        int y = (int) Math.floor(playerPosition.y);
-                        int z = (int) Math.floor(playerPosition.z);
-                        removedShopLocation = plugin.getShopConfig().removeNearestShopLocation(world.getName(), x, y, z, 4);
-                        if (removedShopLocation) {
-                            plugin.saveShopConfig();
-                        }
+                UUID entityUuid = null;
+                if (!locationUuid.isEmpty()) {
+                    try {
+                        entityUuid = UUID.fromString(locationUuid);
+                    } catch (IllegalArgumentException ignored) {
+                        entityUuid = null;
                     }
-                    if (removedShopLocation) {
-                        ctx.sendMessage(Message.raw("Aucun PNJ boutique suivi. Entrée d'emplacement la plus proche supprimée près de vous."));
-                    } else {
-                        ctx.sendMessage(Message.raw("Aucun PNJ boutique suivi dans ce monde."));
-                    }
+                }
+                if (entityUuid != null) {
+                    deleteShopNpcEntity(ctx, plugin, targetWorld, entityUuid);
                     return;
                 }
-
-                deleteShopNpcEntity(ctx, plugin, world, nearest);
-            }, world);
+                boolean removed = plugin.getShopConfig().removeShop(location)
+                        || plugin.getShopConfig().removeShopLocation(
+                        targetWorld.getName(), location.x, location.y, location.z);
+                if (removed) {
+                    plugin.saveShopConfig();
+                    ctx.sendMessage(Message.raw("Boutique retirée de la config (pas d'UUID entité) : " + location));
+                } else {
+                    ctx.sendMessage(Message.raw("Échec de suppression de la boutique '" + shopId.trim() + "'."));
+                }
+            }, targetWorld);
         }
     }
 

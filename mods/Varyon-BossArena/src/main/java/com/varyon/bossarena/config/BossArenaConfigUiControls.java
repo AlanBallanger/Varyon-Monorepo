@@ -1,5 +1,6 @@
 package com.varyon.bossarena.config;
 
+import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.ui.PatchStyle;
 import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
@@ -11,12 +12,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /** Shared UI helpers for BossArena config toggles, tiers, and NPC search lists. */
 final class BossArenaConfigUiControls {
     static final String[] TIERS = {"common", "uncommon", "rare", "epic", "legendary"};
     static final int MAX_BOSS_NPC_PICKS = 8;
     static final int MAX_WAVE_NPC_PICKS = 8;
+    static final int MAX_ITEM_PICKS = 8;
 
     private static final String ON_BG = "#1f7d4b";
     private static final String ON_HOVER = "#2b9a5f";
@@ -102,6 +105,75 @@ final class BossArenaConfigUiControls {
             NPCPlugin plugin = NPCPlugin.get();
             List<String> all = plugin != null ? plugin.getRoleTemplateNames(true) : null;
             return all == null ? List.of() : all;
+        } catch (Throwable ignored) {
+            return List.of();
+        }
+    }
+
+    @Nonnull
+    static List<String> filterItemIds(@Nullable String query, int limit) {
+        List<String> all = allItemIds();
+        if (all.isEmpty()) {
+            return List.of();
+        }
+        String needle = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        List<String> matches = new ArrayList<>();
+        for (String itemId : all) {
+            if (itemId == null || itemId.isBlank()) {
+                continue;
+            }
+            if (needle.isEmpty() || itemId.toLowerCase(Locale.ROOT).contains(needle)) {
+                matches.add(itemId);
+                if (matches.size() >= Math.max(1, limit) * 4) {
+                    break;
+                }
+            }
+        }
+        Collections.sort(matches, String.CASE_INSENSITIVE_ORDER);
+        if (matches.size() > limit) {
+            return matches.subList(0, limit);
+        }
+        return matches;
+    }
+
+    static boolean isExactItemId(@Nullable String query) {
+        if (query == null || query.isBlank()) {
+            return false;
+        }
+        String needle = query.trim();
+        try {
+            Item item = Item.getAssetMap() != null ? Item.getAssetMap().getAsset(needle) : null;
+            if (item != null) {
+                return true;
+            }
+        } catch (Throwable ignored) {
+            // fall through to scan
+        }
+        for (String itemId : allItemIds()) {
+            if (itemId != null && itemId.equalsIgnoreCase(needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<String> allItemIds() {
+        try {
+            var assetMap = Item.getAssetMap();
+            if (assetMap == null) {
+                return List.of();
+            }
+            Map<String, Item> map = assetMap.getAssetMap();
+            if (map == null || map.isEmpty()) {
+                return List.of();
+            }
+            List<String> ids = new ArrayList<>(map.size());
+            for (String id : map.keySet()) {
+                if (id != null && !id.isBlank()) {
+                    ids.add(id);
+                }
+            }
+            return ids;
         } catch (Throwable ignored) {
             return List.of();
         }

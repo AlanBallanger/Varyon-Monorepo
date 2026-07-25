@@ -20,6 +20,7 @@ public final class BossRegistry {
             if (def.perPlayerIncrease == null) {
                 def.perPlayerIncrease = new BossDefinition.PerPlayerIncrease();
             }
+            sanitizePerPlayerMultipliers(def.perPlayerIncrease);
             if (def.extraMobs == null) {
                 def.extraMobs = new BossDefinition.ExtraMobs();
             }
@@ -27,6 +28,32 @@ public final class BossRegistry {
             def.extraMobs.sanitize();
             BOSSES.put(def.bossName.toLowerCase(), def);
         }
+    }
+
+    /** Legacy 0 meant "off"; new model uses base × per × players (min 0.5 in UI). */
+    private static void sanitizePerPlayerMultipliers(BossDefinition.PerPlayerIncrease pp) {
+        pp.hp = normalizePerPlayerMultiplier(pp.hp);
+        pp.damage = normalizePerPlayerMultiplier(pp.damage);
+        pp.movementSpeed = normalizePerPlayerMultiplier(pp.movementSpeed);
+        pp.size = normalizePerPlayerMultiplier(pp.size);
+        pp.attackRate = normalizePerPlayerMultiplier(pp.attackRate);
+        pp.abilityCooldown = normalizePerPlayerMultiplier(pp.abilityCooldown);
+        pp.knockbackGiven = normalizePerPlayerMultiplier(pp.knockbackGiven);
+        pp.knockbackTaken = normalizePerPlayerMultiplier(pp.knockbackTaken);
+        pp.turnRate = normalizePerPlayerMultiplier(pp.turnRate);
+    }
+
+    private static float normalizePerPlayerMultiplier(float value) {
+        if (!Float.isFinite(value) || value <= 0.0f) {
+            return 1.0f;
+        }
+        if (value < 0.5f) {
+            return 0.5f;
+        }
+        if (value > 4.0f) {
+            return 4.0f;
+        }
+        return value;
     }
 
     private static String normalizeTier(String input) {

@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 public final class BossTimedSpawnScheduler {
@@ -63,6 +64,7 @@ public final class BossTimedSpawnScheduler {
     private final Object persistenceLock = new Object();
     private TimedBossMapMarkerService mapMarkerService;
     private volatile Consumer<BossArenaConfig.TimedBossSpawn> oneShotDisableHandler;
+    private volatile Supplier<BossArenaConfig> configSupplier;
     private volatile Path persistencePath;
     private volatile Map<String, Long> persistedNextSpawnByLabel = Map.of();
     private volatile List<TimedSpawnState> states = List.of();
@@ -293,6 +295,10 @@ public final class BossTimedSpawnScheduler {
         this.oneShotDisableHandler = oneShotDisableHandler;
     }
 
+    public void setConfigSupplier(Supplier<BossArenaConfig> configSupplier) {
+        this.configSupplier = configSupplier;
+    }
+
     public synchronized void initializePersistence(Path stateFilePath) {
         this.persistencePath = stateFilePath;
         if (stateFilePath == null) {
@@ -344,7 +350,7 @@ public final class BossTimedSpawnScheduler {
             int index = 0;
             for (BossArenaConfig.TimedBossSpawn rule : configured) {
                 index++;
-                if (rule == null || !rule.enabled) {
+                if (rule == null || !rule.enabled || rule.isManualMode()) {
                     continue;
                 }
                 BossArenaConfig.TimedBossSpawn snapshot = copyRule(rule);
@@ -438,24 +444,68 @@ public final class BossTimedSpawnScheduler {
     }
 
     /**
-     * Force-spawn a rule by 1-based UI row index. Ignores min players, proximity, and alive-boss gates.
+     * Force-spawn a rule by 1-based UI/config row index.
+     * Works for Manual rules too (they are not kept in the auto-scheduler state list).
+     * Ignores min players, proximity, and alive-boss gates.
      * @return status message for UI
      */
     public synchronized String forceSpawnByRow(int rowIndex1Based) {
-        List<TimedSpawnState> snapshot = states;
-        if (rowIndex1Based < 1 || rowIndex1Based > snapshot.size()) {
+        BossArenaConfig.TimedBossSpawn rule = resolveConfiguredRule(rowIndex1Based);
+        if (rule == null) {
             return "Règle introuvable.";
         }
-        TimedSpawnState state = snapshot.get(rowIndex1Based - 1);
-        if (state == null || state.rule == null) {
-            return "Règle invalide.";
+        if (optional(rule.bossId).isEmpty() || optional(rule.arenaId).isEmpty()) {
+            return "Renseignez Boss et Arène avant Apparition.";
         }
+
+        TimedSpawnState state = findStateForRule(rule, rowIndex1Based);
+        if (state == null) {
+            // Ephemeral state for Manual (or otherwise non-scheduled) rules.
+            state = new TimedSpawnState(copyRule(rule), System.currentTimeMillis(), resolveRuleLabel(rule, rowIndex1Based));
+        }
+
         long now = System.currentTimeMillis();
         boolean ok = evaluateSpawn(state, now, true);
         if (ok) {
             persistState();
         }
         return ok ? "Apparition forcée lancée." : "Apparition forcée impossible (boss/arène/monde).";
+    }
+
+    private BossArenaConfig.TimedBossSpawn resolveConfiguredRule(int rowIndex1Based) {
+        Supplier<BossArenaConfig> supplier = configSupplier;
+        BossArenaConfig config = supplier != null ? supplier.get() : null;
+        if (config == null) {
+            return null;
+        }
+        List<BossArenaConfig.TimedBossSpawn> rules = config.getTimedBossSpawns();
+        if (rowIndex1Based < 1 || rowIndex1Based > rules.size()) {
+            return null;
+        }
+        return rules.get(rowIndex1Based - 1);
+    }
+
+    private TimedSpawnState findStateForRule(BossArenaConfig.TimedBossSpawn rule, int rowIndex1Based) {
+        if (rule == null) {
+            return null;
+        }
+        String expectedLabel = resolveRuleLabel(rule, rowIndex1Based).toLowerCase(Locale.ROOT);
+        String bossId = optional(rule.bossId);
+        String arenaId = optional(rule.arenaId);
+        for (TimedSpawnState state : states) {
+            if (state == null || state.rule == null) {
+                continue;
+            }
+            if (expectedLabel.equals(state.label)) {
+                return state;
+            }
+            if (!bossId.isEmpty()
+                    && bossId.equalsIgnoreCase(optional(state.rule.bossId))
+                    && arenaId.equalsIgnoreCase(optional(state.rule.arenaId))) {
+                return state;
+            }
+        }
+        return null;
     }
 
     private boolean evaluateSpawn(TimedSpawnState state, long now) {

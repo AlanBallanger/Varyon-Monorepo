@@ -1,7 +1,11 @@
 package com.varyon.bossarena.system;
 
 import com.varyon.bossarena.boss.BossModifiers;
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.dependency.Dependency;
+import com.hypixel.hytale.component.dependency.Order;
+import com.hypixel.hytale.component.dependency.SystemDependency;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.component.system.tick.TickingSystem;
@@ -15,11 +19,11 @@ import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.movement.controllers.MotionController;
 import com.hypixel.hytale.server.npc.movement.controllers.MotionControllerBase;
 import com.hypixel.hytale.server.npc.role.Role;
+import com.hypixel.hytale.server.npc.systems.RoleSystems;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,20 +36,35 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
     private static final float UPDATE_INTERVAL_SECONDS = 0.25f;
     private static final float EPSILON = 0.0001f;
-    private static final float NPC_SPEED_UNSET = Float.MAX_VALUE;
     private static final Field NPC_CACHED_SPEED_FIELD = resolveCachedSpeedField();
     private static final Field INTERACTION_MANAGER_COOLDOWN_HANDLER_FIELD = resolveField(InteractionManager.class, "cooldownHandler");
     private static final Field COOLDOWN_HANDLER_COOLDOWNS_FIELD = resolveField(CooldownHandler.class, "cooldowns");
     private static final Field MOTION_CONTROLLER_MAX_HEAD_ROTATION_SPEED_FIELD = resolveField(MotionControllerBase.class, "maxHeadRotationSpeed");
 
+    private static final float REGEN_INTERVAL_SECONDS = 1.0f;
+
     private final BossTrackingSystem trackingSystem;
-    private final Map<UUID, Float> lastHealthByEntity = new ConcurrentHashMap<>();
     private final Map<MotionControllerBase, Float> baseTurnRateByController =
             Collections.synchronizedMap(new WeakHashMap<>());
-    private float elapsedSeconds;
+    /** Per-world timers so multi-world ticks don't accelerate regen/scalers. */
+    private final Map<String, Float> elapsedByWorld = new ConcurrentHashMap<>();
+    private final Map<String, Float> regenElapsedByWorld = new ConcurrentHashMap<>();
 
     public BossSpeedScalingSystem(BossTrackingSystem trackingSystem) {
         this.trackingSystem = trackingSystem;
+    }
+
+    /**
+     * Speed must be written after the engine clears the NPC speed cache and before behaviour/steer
+     * reads it — otherwise the boss speed multiplier is wiped every NPC tick.
+     */
+    @Nonnull
+    @Override
+    public Set<Dependency<EntityStore>> getDependencies() {
+        return Set.of(
+                new SystemDependency<>(Order.AFTER, RoleSystems.PreBehaviourSupportTickSystem.class),
+                new SystemDependency<>(Order.BEFORE, RoleSystems.BehaviourTickSystem.class)
+        );
     }
 
     private static float clampMultiplier(float value) {
@@ -79,26 +98,50 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
 
     @Override
     public void tick(float dt, int index, @Nonnull Store<EntityStore> store) {
-        if (trackingSystem == null || NPC_CACHED_SPEED_FIELD == null) {
+        if (trackingSystem == null) {
             return;
         }
 
-        elapsedSeconds += Math.max(0f, dt);
-        if (elapsedSeconds < UPDATE_INTERVAL_SECONDS) {
+        EntityStore external = store.getExternalData();
+        World tickWorld = external != null ? external.getWorld() : null;
+        if (tickWorld == null || !tickWorld.isAlive()) {
             return;
         }
-        elapsedSeconds = 0f;
+        String worldKey = tickWorld.getName();
+        if (worldKey == null || worldKey.isBlank()) {
+            worldKey = Integer.toHexString(System.identityHashCode(tickWorld));
+        }
 
-        Set<UUID> activeTrackedEntities = new HashSet<>();
+        float frameDt = Math.max(0f, dt);
+        float scalerElapsed = elapsedByWorld.merge(worldKey, frameDt, Float::sum);
+        float regenElapsed = regenElapsedByWorld.merge(worldKey, frameDt, Float::sum);
+
+        boolean applyRegenTick = false;
+        if (regenElapsed >= REGEN_INTERVAL_SECONDS) {
+            regenElapsedByWorld.put(worldKey, 0f);
+            applyRegenTick = true;
+        }
+        // Speed must re-apply every tick: PreBehaviour clears the NPC speed cache each frame.
+        boolean applySpeed = NPC_CACHED_SPEED_FIELD != null;
+        boolean applyPeriodicScalers = false;
+        if (scalerElapsed >= UPDATE_INTERVAL_SECONDS) {
+            elapsedByWorld.put(worldKey, 0f);
+            applyPeriodicScalers = true;
+        }
+        if (!applySpeed && !applyPeriodicScalers && !applyRegenTick) {
+            return;
+        }
 
         for (Map.Entry<UUID, BossTrackingSystem.BossData> entry : trackingSystem.snapshotTrackedBosses().entrySet()) {
             UUID entityUuid = entry.getKey();
             BossTrackingSystem.BossData data = entry.getValue();
-            if (entityUuid == null || data == null) {
+            if (entityUuid == null || data == null || data.world != tickWorld) {
                 continue;
             }
-            activeTrackedEntities.add(entityUuid);
-            applyRuntimeScalers(entityUuid, data.world, data.modifiers);
+            applyRuntimeScalers(
+                    entityUuid, store, external, tickWorld, data.modifiers,
+                    applySpeed, applyPeriodicScalers, applyRegenTick
+            );
         }
 
         for (Map.Entry<UUID, UUID> entry : trackingSystem.snapshotTrackedAdds().entrySet()) {
@@ -114,32 +157,47 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
                 BossTrackingSystem.BossEventContext eventContext = trackingSystem.getEventContext(bossUuid);
                 world = eventContext != null ? eventContext.world : null;
             }
-            if (world == null) {
+            if (world != tickWorld) {
                 continue;
             }
 
             BossModifiers addModifiers = trackingSystem.getEntityModifiers(addUuid);
-            activeTrackedEntities.add(addUuid);
-            applyRuntimeScalers(addUuid, world, addModifiers);
+            applyRuntimeScalers(
+                    addUuid, store, external, tickWorld, addModifiers,
+                    applySpeed, applyPeriodicScalers, applyRegenTick
+            );
         }
-
-        lastHealthByEntity.keySet().retainAll(activeTrackedEntities);
     }
 
-    private void applyRuntimeScalers(UUID entityUuid, World world, BossModifiers modifiers) {
-        if (entityUuid == null || world == null || modifiers == null) {
+    private void applyRuntimeScalers(
+            UUID entityUuid,
+            Store<EntityStore> store,
+            EntityStore external,
+            World world,
+            BossModifiers modifiers,
+            boolean applySpeed,
+            boolean applyPeriodicScalers,
+            boolean applyRegenTick
+    ) {
+        if (entityUuid == null || store == null || world == null || modifiers == null) {
             return;
         }
 
-        applySpeedMultiplier(entityUuid, world, modifiers);
-        applyTurnRateMultiplier(entityUuid, world, modifiers);
-        applyInteractionCooldownScaling(entityUuid, world, modifiers);
-        applyRegenerationScaling(entityUuid, world, modifiers);
+        if (applySpeed) {
+            applySpeedMultiplier(entityUuid, world, modifiers);
+        }
+        if (applyPeriodicScalers) {
+            applyTurnRateMultiplier(entityUuid, world, modifiers);
+            applyInteractionCooldownScaling(entityUuid, world, modifiers);
+        }
+        if (applyRegenTick) {
+            applyFlatRegeneration(entityUuid, store, external, modifiers);
+        }
     }
 
     private void applySpeedMultiplier(UUID entityUuid, World world, BossModifiers modifiers) {
         float speedMultiplier = clampMultiplier(modifiers.speedMultiplier());
-        if (!Float.isFinite(speedMultiplier)) {
+        if (!Float.isFinite(speedMultiplier) || Math.abs(speedMultiplier - 1.0f) <= EPSILON) {
             return;
         }
 
@@ -155,21 +213,18 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
                 return;
             }
 
+            // PreBehaviour already invalidated the cache; rebuild natural speed from effects, then buff.
             npcEntity.invalidateCachedHorizontalSpeedMultiplier();
             float naturalSpeed = npcEntity.getCurrentHorizontalSpeedMultiplier(entityRef, worldStore);
             if (!Float.isFinite(naturalSpeed)) {
                 naturalSpeed = 1.0f;
             }
             float desiredSpeed = clampMultiplier(naturalSpeed * speedMultiplier);
-            float current = NPC_CACHED_SPEED_FIELD.getFloat(npcEntity);
-
-            if (Math.abs(current - desiredSpeed) > EPSILON || current == NPC_SPEED_UNSET) {
-                if (desiredSpeed < 0.1f) {
-                    LOGGER.warning("Setting very low speed (" + desiredSpeed + ") for boss " + entityUuid +
-                            ". Natural: " + naturalSpeed + ", Multiplier: " + speedMultiplier);
-                }
-                NPC_CACHED_SPEED_FIELD.setFloat(npcEntity, desiredSpeed);
+            if (desiredSpeed < 0.1f) {
+                LOGGER.warning("Setting very low speed (" + desiredSpeed + ") for boss " + entityUuid +
+                        ". Natural: " + naturalSpeed + ", Multiplier: " + speedMultiplier);
             }
+            NPC_CACHED_SPEED_FIELD.setFloat(npcEntity, desiredSpeed);
         } catch (Exception e) {
             LOGGER.log(Level.FINE, "Failed to apply movement speed scaling for entity " + entityUuid, e);
         }
@@ -288,27 +343,35 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
         }
     }
 
-    private void applyRegenerationScaling(UUID entityUuid, World world, BossModifiers modifiers) {
-        float regenMultiplier = clampMultiplier(modifiers.regenMultiplier());
-        if (!Float.isFinite(regenMultiplier)) {
-            regenMultiplier = 1.0f;
+    /** Restores flat HP every second from {@link BossModifiers#regenMultiplier()} (HP/s semantic). */
+    private void applyFlatRegeneration(
+            UUID entityUuid,
+            Store<EntityStore> store,
+            EntityStore external,
+            BossModifiers modifiers
+    ) {
+        float regenHp = modifiers.regenMultiplier();
+        if (!Float.isFinite(regenHp) || regenHp <= EPSILON) {
+            return;
+        }
+        if (trackingSystem.isTracked(entityUuid) && trackingSystem.isBossDamageLockedByHpWave(entityUuid)) {
+            return;
         }
 
         try {
-            var entityRef = world.getEntityRef(entityUuid);
+            Ref<EntityStore> entityRef = external != null ? external.getRefFromUUID(entityUuid) : null;
             if (entityRef == null || !entityRef.isValid()) {
                 return;
             }
 
-            Store<EntityStore> worldStore = world.getEntityStore().getStore();
-            Object statMapObj = worldStore.getComponent(entityRef, EntityStatMap.getComponentType());
+            Object statMapObj = store.getComponent(entityRef, EntityStatMap.getComponentType());
             if (!(statMapObj instanceof EntityStatMap statMap)) {
                 return;
             }
 
             int healthIndex = DefaultEntityStatTypes.getHealth();
-            if (healthIndex <= 0) {
-                healthIndex = 1;
+            if (healthIndex < 0) {
+                return;
             }
 
             EntityStatValue health = statMap.get(healthIndex);
@@ -317,31 +380,24 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
             }
 
             float current = health.get();
-            if (!Float.isFinite(current)) {
+            float max = health.getMax();
+            float min = health.getMin();
+            // Do not revive / pad a dying boss.
+            if (!Float.isFinite(current) || !Float.isFinite(max)
+                    || current <= min + EPSILON
+                    || current >= max - EPSILON) {
                 return;
             }
 
-            Float previous = lastHealthByEntity.put(entityUuid, current);
-            if (previous == null || !Float.isFinite(previous) || Math.abs(regenMultiplier - 1.0f) <= EPSILON) {
-                return;
+            // Predictable.ALL is required so clients / HP bars see the heal (NONE stays local-ish).
+            float applied = statMap.addStatValue(EntityStatMap.Predictable.ALL, healthIndex, regenHp);
+            if (!Float.isFinite(applied) || applied + EPSILON < current) {
+                // Fallback if Add path is ignored for this entity.
+                float target = Math.min(max, current + regenHp);
+                statMap.setStatValue(EntityStatMap.Predictable.ALL, healthIndex, target);
             }
-
-            float gained = current - previous;
-            if (gained <= EPSILON) {
-                return;
-            }
-
-            float scaledGain = gained * regenMultiplier;
-            float target = previous + scaledGain;
-            target = Math.max(health.getMin(), Math.min(health.getMax(), target));
-            if (Math.abs(target - current) <= EPSILON || !Float.isFinite(target)) {
-                return;
-            }
-
-            statMap.setStatValue(healthIndex, target);
-            lastHealthByEntity.put(entityUuid, target);
         } catch (Exception e) {
-            LOGGER.log(Level.FINE, "Failed to apply regeneration scaling for entity " + entityUuid, e);
+            LOGGER.log(Level.WARNING, "Failed to apply flat regeneration for entity " + entityUuid, e);
         }
     }
 }

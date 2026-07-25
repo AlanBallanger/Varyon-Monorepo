@@ -408,7 +408,9 @@ public final class BossArenaConfig {
                 }
             }
 
-            if (clean.isAfterDeathMode()) {
+            if (clean.isManualMode()) {
+                clean.scheduleMode = SCHEDULE_MANUAL;
+            } else if (clean.isAfterDeathMode()) {
                 long totalSeconds = resolveSeconds(
                         clean.spawnIntervalHours,
                         clean.spawnIntervalMinutes,
@@ -435,12 +437,16 @@ public final class BossArenaConfig {
 
     private static String normalizeScheduleMode(String raw) {
         String value = optional(raw).toUpperCase(Locale.ROOT);
+        if (SCHEDULE_MANUAL.equals(value) || "MANUEL".equals(value)) {
+            return SCHEDULE_MANUAL;
+        }
         if (SCHEDULE_INTERVAL.equals(value)
                 || SCHEDULE_FIXED_TIMES.equals(value)
                 || "FIXED".equals(value)
                 || "HEURES".equals(value)
                 || "CLOCK".equals(value)
-                || "INTERVALLE".equals(value)) {
+                || "INTERVALLE".equals(value)
+                || "PLANIFIE".equals(value)) {
             return SCHEDULE_INTERVAL;
         }
         return SCHEDULE_AFTER_DEATH;
@@ -625,6 +631,8 @@ public final class BossArenaConfig {
 
     public static final String SCHEDULE_AFTER_DEATH = "AFTER_DEATH";
     public static final String SCHEDULE_INTERVAL = "INTERVAL";
+    /** Manual pop only — no auto schedule. */
+    public static final String SCHEDULE_MANUAL = "MANUAL";
     /** Legacy alias; sanitized to {@link #SCHEDULE_INTERVAL}. */
     public static final String SCHEDULE_FIXED_TIMES = "FIXED_TIMES";
     public static final String INTERVAL_UNIT_HOUR = "HOUR";
@@ -636,7 +644,10 @@ public final class BossArenaConfig {
         public boolean enabled = true;
         public String bossId = "";
         public String arenaId = "";
-        /** {@link BossArenaConfig#SCHEDULE_AFTER_DEATH} or {@link BossArenaConfig#SCHEDULE_INTERVAL}. */
+        /**
+         * {@link BossArenaConfig#SCHEDULE_AFTER_DEATH}, {@link BossArenaConfig#SCHEDULE_INTERVAL},
+         * or {@link BossArenaConfig#SCHEDULE_MANUAL}.
+         */
         public String scheduleMode = SCHEDULE_AFTER_DEATH;
         /** Delay after death. Used when scheduleMode is AFTER_DEATH. */
         public long spawnIntervalHours = 1L;
@@ -680,6 +691,10 @@ public final class BossArenaConfig {
             return SCHEDULE_INTERVAL.equalsIgnoreCase(mode) || SCHEDULE_FIXED_TIMES.equalsIgnoreCase(mode);
         }
 
+        public boolean isManualMode() {
+            return SCHEDULE_MANUAL.equalsIgnoreCase(optional(scheduleMode));
+        }
+
         /** @deprecated use {@link #isIntervalMode()} */
         @Deprecated
         public boolean isFixedTimesMode() {
@@ -687,7 +702,7 @@ public final class BossArenaConfig {
         }
 
         public boolean isAfterDeathMode() {
-            return !isIntervalMode();
+            return !isIntervalMode() && !isManualMode();
         }
     }
 

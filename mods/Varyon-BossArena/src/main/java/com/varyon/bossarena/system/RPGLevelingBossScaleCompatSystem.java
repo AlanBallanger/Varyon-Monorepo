@@ -1,14 +1,13 @@
 package com.varyon.bossarena.system;
 
 import com.varyon.bossarena.BossArenaPlugin;
-import com.varyon.bossarena.spawn.BossSpawnService;
+import com.varyon.bossarena.util.BossHealthScale;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.system.tick.TickingSystem;
 import com.hypixel.hytale.server.core.plugin.PluginManager;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
-import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
-import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.common.semver.SemverRange;
 
@@ -23,14 +22,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Keeps BossArena HP/level overrides on tracked bosses when RPGLeveling is present.
- * We intentionally avoid maximizing current HP here to prevent accidental mid-fight heals.
+ * Keeps BossArena HP/level overrides on tracked bosses when RPGLeveling / zone scaling is present.
+ * Re-applies the baked world HP factor so zone scale is not lost when competing modifiers are stripped.
  */
 public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<EntityStore> {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
-    private static final String RPG_LEVELING_HP_MODIFIER_KEY = "RPGLeveling.HPModifier";
     private static final float RESYNC_INTERVAL_SECONDS = 0.25f;
-    private static final float EPSILON = 0.0001f;
 
     private final BossTrackingSystem trackingSystem;
     private float elapsedSeconds;
@@ -58,19 +55,20 @@ public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<Entity
         }
         elapsedSeconds = 0f;
 
-        if (!isRpgLevelingLoaded()) {
-            return;
-        }
-
         Map<UUID, BossTrackingSystem.BossData> trackedBosses = trackingSystem.snapshotTrackedBosses();
         Set<UUID> activeBossUuids = new HashSet<>(trackedBosses.keySet());
-        Object rpgPluginInstance = resolveRpgLevelingPluginInstance();
+        boolean rpgLoaded = isRpgLevelingLoaded();
+        Object rpgPluginInstance = rpgLoaded ? resolveRpgLevelingPluginInstance() : null;
 
         for (Map.Entry<UUID, BossTrackingSystem.BossData> entry : trackedBosses.entrySet()) {
             enforceBossHpScale(entry.getKey(), entry.getValue());
-            enforceBossLevelOverride(entry.getKey(), entry.getValue(), rpgPluginInstance);
+            if (rpgLoaded) {
+                enforceBossLevelOverride(entry.getKey(), entry.getValue(), rpgPluginInstance);
+            }
         }
-        pruneStaleLevelOverrides(activeBossUuids, rpgPluginInstance);
+        if (rpgLoaded) {
+            pruneStaleLevelOverrides(activeBossUuids, rpgPluginInstance);
+        }
     }
 
     private void enforceBossHpScale(UUID bossUuid, BossTrackingSystem.BossData bossData) {
@@ -93,42 +91,48 @@ public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<Entity
             }
 
             int healthIndex = DefaultEntityStatTypes.getHealth();
-            Modifier rpgModifier = statMap.getModifier(healthIndex, RPG_LEVELING_HP_MODIFIER_KEY);
-            if (rpgModifier != null) {
-                statMap.removeModifier(healthIndex, RPG_LEVELING_HP_MODIFIER_KEY);
-                LOGGER.log(
-                        Level.INFO,
-                        "BossArena compat removed RPGLeveling HP modifier for boss {0}: removed={1}",
-                        new Object[]{
-                                bossUuid,
-                                describeModifier(rpgModifier)
-                        }
-                );
+            EntityStatValue healthBefore = statMap.get(healthIndex);
+            float currentBefore = healthBefore != null ? healthBefore.get() : 0f;
+            float maxBefore = healthBefore != null ? healthBefore.getMax() : 0f;
+            boolean wasFull = healthBefore != null && maxBefore > 0f && currentBefore + 1f >= maxBefore;
+
+            float knownFactor = bossData.worldHealthFactor;
+            float worldFactor = BossHealthScale.apply(statMap, desiredMultiplier, knownFactor);
+            if (worldFactor > 0.01f && Math.abs(worldFactor - knownFactor) > 0.0001f) {
+                trackingSystem.setWorldHealthFactor(bossUuid, worldFactor);
             }
 
-            Modifier existing = statMap.getModifier(healthIndex, BossSpawnService.HEALTH_MODIFIER_KEY);
-            if (existing instanceof StaticModifier staticModifier
-                    && staticModifier.getTarget() == Modifier.ModifierTarget.MAX
-                    && staticModifier.getCalculationType() == StaticModifier.CalculationType.MULTIPLICATIVE
-                    && nearlyEqual(staticModifier.getAmount(), desiredMultiplier)) {
+            EntityStatValue healthAfter = statMap.get(healthIndex);
+            if (healthAfter == null) {
                 return;
             }
-
-            StaticModifier bossHealthModifier = new StaticModifier(
-                    Modifier.ModifierTarget.MAX,
-                    StaticModifier.CalculationType.MULTIPLICATIVE,
-                    desiredMultiplier
-            );
-            statMap.putModifier(healthIndex, BossSpawnService.HEALTH_MODIFIER_KEY, bossHealthModifier);
-            LOGGER.log(
-                    Level.INFO,
-                    "BossArena compat reapplied HP modifier for boss {0}: existing={1}, desired={2}",
-                    new Object[]{
-                            bossUuid,
-                            describeModifier(existing),
-                            String.format("%.4f", desiredMultiplier)
-                    }
-            );
+            float maxAfter = healthAfter.getMax();
+            float currentAfter = healthAfter.get();
+            float minAfter = healthAfter.getMin();
+            if (!Float.isFinite(currentAfter) || currentAfter <= minAfter + 1f) {
+                return;
+            }
+            float bakedFactor = Math.max(0.01f, worldFactor);
+            float baseApprox = maxAfter / (bakedFactor * desiredMultiplier);
+            boolean stuckAtBasePool = (bakedFactor * desiredMultiplier) > 1.01f
+                    && maxAfter > baseApprox * 1.5f
+                    && Math.abs(currentAfter - baseApprox) <= 1f;
+            if (wasFull || stuckAtBasePool) {
+                if (currentAfter + 0.5f < maxAfter) {
+                    statMap.maximizeStatValue(EntityStatMap.Predictable.ALL, healthIndex);
+                    LOGGER.log(
+                            Level.INFO,
+                            "BossArena compat filled scaled HP for boss {0}: {1} -> {2} (bossMult={3}, worldFactor={4})",
+                            new Object[]{
+                                    bossUuid,
+                                    String.format("%.1f/%.1f", currentAfter, maxAfter),
+                                    String.format("%.1f/%.1f", healthAfter.get(), healthAfter.getMax()),
+                                    String.format("%.4f", desiredMultiplier),
+                                    String.format("%.4f", worldFactor)
+                            }
+                    );
+                }
+            }
         } catch (Exception e) {
             LOGGER.log(Level.FINE, "Failed to enforce boss HP scale compatibility for " + bossUuid, e);
         }
@@ -228,24 +232,6 @@ public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<Entity
         rpgLevelApiResolved = false;
     }
 
-    private static boolean nearlyEqual(float a, float b) {
-        return Math.abs(a - b) < EPSILON;
-    }
-
-    private static String describeModifier(Modifier modifier) {
-        if (modifier == null) {
-            return "null";
-        }
-        if (modifier instanceof StaticModifier staticModifier) {
-            return staticModifier.getTarget()
-                    + "/"
-                    + staticModifier.getCalculationType()
-                    + "/"
-                    + String.format("%.4f", staticModifier.getAmount());
-        }
-        return modifier.getClass().getSimpleName();
-    }
-
     private boolean isRpgLevelingLoaded() {
         PluginManager pluginManager = PluginManager.get();
         boolean loaded = pluginManager != null
@@ -254,7 +240,6 @@ public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<Entity
             if (!loaded) {
                 resetRpgLevelingCompatState();
             } else if (loadStateKnown && !lastRpgLevelingLoaded) {
-                // Plugin transitioned from unloaded to loaded; resolve API again.
                 rpgLevelApiResolved = false;
             }
             LOGGER.info("BossArena compat RPGLeveling loaded state: " + loaded);

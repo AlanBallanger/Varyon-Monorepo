@@ -132,6 +132,7 @@ public class BossDeathSystem extends DeathSystems.OnDeathSystem {
 
         LOGGER.info("Boss died but event still has " + aliveBosses + " boss(es) and " + activeAdds + " add(s) alive.");
         if (eventContext != null) {
+            UUID eventId = trackingSystem.getEventIdForTrackedEntity(bossUuid);
             BossWaveNotificationService.notifyBossAliveStatus(
                     eventContext.world,
                     eventContext.spawnLocation,
@@ -139,7 +140,13 @@ public class BossDeathSystem extends DeathSystems.OnDeathSystem {
                     aliveBosses,
                     activeAdds,
                     null,
-                    eventContext.remainingCountdownMillis
+                    eventContext.remainingCountdownMillis,
+                    true,
+                    true,
+                    -1.0d,
+                    eventId,
+                    trackingSystem.getEventCurrentWave(eventId),
+                    trackingSystem.getEventTotalWaves(eventId)
             );
         }
     }
@@ -180,6 +187,7 @@ public class BossDeathSystem extends DeathSystems.OnDeathSystem {
         }
 
         if (eventContext != null) {
+            UUID eventId = trackingSystem.getEventIdForTrackedEntity(bossUuid);
             BossWaveNotificationService.notifyBossAliveStatus(
                     eventContext.world,
                     eventContext.spawnLocation,
@@ -187,7 +195,13 @@ public class BossDeathSystem extends DeathSystems.OnDeathSystem {
                     remainingBosses,
                     remainingAdds,
                     null,
-                    eventContext.remainingCountdownMillis
+                    eventContext.remainingCountdownMillis,
+                    true,
+                    true,
+                    -1.0d,
+                    eventId,
+                    trackingSystem.getEventCurrentWave(eventId),
+                    trackingSystem.getEventTotalWaves(eventId)
             );
         }
     }

@@ -107,6 +107,7 @@ public final class BossLootChestOpener {
 
         window.registerCloseEvent((event) -> {
             windows.remove(playerUuid, window);
+            BossLootHandler.syncPlayerLootContainer(world, chestPosition, playerUuid);
             BlockType currentBlockType = world.getBlockType(pos);
             BossLootHandler.cleanupChestIfEmpty(world, chestPosition);
             if (windows.isEmpty()) {

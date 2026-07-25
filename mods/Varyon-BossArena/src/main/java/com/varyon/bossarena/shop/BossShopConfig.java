@@ -743,6 +743,51 @@ public final class BossShopConfig {
         return before != shops.size();
     }
 
+    /** Finds a shop by display name (exact) or entity UUID (exact / prefix of 8+ chars). */
+    public ShopLocation findShopById(String id) {
+        String needle = optional(id);
+        if (needle.isEmpty() || shops == null || shops.isEmpty()) {
+            return null;
+        }
+        ShopLocation uuidExact = null;
+        ShopLocation uuidPrefix = null;
+        ShopLocation nameExact = null;
+        for (ShopLocation location : shops) {
+            if (location == null) {
+                continue;
+            }
+            String uuid = optional(location.uuid);
+            String name = optional(location.name);
+            if (!uuid.isEmpty() && uuid.equalsIgnoreCase(needle)) {
+                uuidExact = location;
+                break;
+            }
+            if (nameExact == null && !name.isEmpty() && name.equalsIgnoreCase(needle)) {
+                nameExact = location;
+            }
+            if (uuidPrefix == null
+                    && needle.length() >= 8
+                    && !uuid.isEmpty()
+                    && uuid.regionMatches(true, 0, needle, 0, needle.length())) {
+                uuidPrefix = location;
+            }
+        }
+        if (uuidExact != null) {
+            return uuidExact;
+        }
+        if (nameExact != null) {
+            return nameExact;
+        }
+        return uuidPrefix;
+    }
+
+    public boolean removeShop(ShopLocation target) {
+        if (target == null || shops == null || shops.isEmpty()) {
+            return false;
+        }
+        return shops.remove(target);
+    }
+
     public List<String> getShopNpcUuids() {
         List<String> out = new ArrayList<>();
         if (shops == null || shops.isEmpty()) {

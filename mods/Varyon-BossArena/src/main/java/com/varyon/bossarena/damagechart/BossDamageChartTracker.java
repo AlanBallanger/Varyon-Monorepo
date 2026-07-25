@@ -7,27 +7,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.DoubleAdder;
 
 /**
- * Thread-safe per-event damage tally: eventId -> (playerUuid -> totalDamage).
+ * Thread-safe per-event damage tally: eventId -> (playerUuid -> total HP removed).
  * Used by BossDamageChartRecordingSystem and read at event completion in BossLootHandler.
  */
 public final class BossDamageChartTracker {
 
-    /** eventId -> (playerUuid -> total damage). */
-    private final Map<UUID, Map<UUID, LongAdder>> byEvent = new ConcurrentHashMap<>();
+    /** eventId -> (playerUuid -> total HP removed). */
+    private final Map<UUID, Map<UUID, DoubleAdder>> byEvent = new ConcurrentHashMap<>();
 
     /**
-     * Add damage for a player in an event. Safe to call from the damage system (world thread).
+     * Add HP removed for a player in an event. Safe to call from the damage system (world thread).
      */
-    public void addDamage(UUID eventId, UUID playerUuid, long amount) {
-        if (eventId == null || playerUuid == null || amount <= 0) {
+    public void addDamage(UUID eventId, UUID playerUuid, double amount) {
+        if (eventId == null || playerUuid == null || !Double.isFinite(amount) || amount <= 0.0d) {
             return;
         }
         byEvent
                 .computeIfAbsent(eventId, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(playerUuid, k -> new LongAdder())
+                .computeIfAbsent(playerUuid, k -> new DoubleAdder())
                 .add(amount);
     }
 
@@ -36,12 +36,12 @@ public final class BossDamageChartTracker {
         if (eventId == null || playerUuid == null) {
             return 0L;
         }
-        Map<UUID, LongAdder> perPlayer = byEvent.get(eventId);
+        Map<UUID, DoubleAdder> perPlayer = byEvent.get(eventId);
         if (perPlayer == null) {
             return 0L;
         }
-        LongAdder adder = perPlayer.get(playerUuid);
-        return adder == null ? 0L : Math.max(0L, adder.sum());
+        DoubleAdder adder = perPlayer.get(playerUuid);
+        return adder == null ? 0L : Math.max(0L, Math.round(adder.sum()));
     }
 
     /**
@@ -52,14 +52,14 @@ public final class BossDamageChartTracker {
         if (eventId == null) {
             return List.of();
         }
-        Map<UUID, LongAdder> perPlayer = byEvent.remove(eventId);
+        Map<UUID, DoubleAdder> perPlayer = byEvent.remove(eventId);
         if (perPlayer == null || perPlayer.isEmpty()) {
             return List.of();
         }
         List<DamageEntry> list = new ArrayList<>();
-        for (Map.Entry<UUID, LongAdder> e : perPlayer.entrySet()) {
-            long total = e.getValue().sum();
-            if (total > 0) {
+        for (Map.Entry<UUID, DoubleAdder> e : perPlayer.entrySet()) {
+            long total = Math.round(e.getValue().sum());
+            if (total > 0L) {
                 list.add(new DamageEntry(e.getKey(), total));
             }
         }
