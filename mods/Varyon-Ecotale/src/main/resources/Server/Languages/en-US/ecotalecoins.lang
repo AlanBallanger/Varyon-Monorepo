@@ -28,3 +28,12 @@ items.coin_adamantite.description=Worth 10,000
 
 items.coin_mithril.name=Mithril Coin
 items.coin_mithril.description=Worth 100,000
+
+items.token_coincoin.name=CoinCoin Token
+items.token_coincoin.description=A special token
+
+items.token_faction.name=Faction Token
+items.token_faction.description=A faction token
+
+items.token_building.name=Building Token
+items.token_building.description=A building token

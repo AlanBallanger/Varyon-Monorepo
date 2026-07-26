@@ -28,3 +28,12 @@ items.coin_adamantite.description=Vaut 10 000
 
 items.coin_mithril.name=Pièce de Mithril
 items.coin_mithril.description=Vaut 100 000
+
+items.token_coincoin.name=Jeton CoinCoin
+items.token_coincoin.description=Un jeton spécial
+
+items.token_faction.name=Jeton de Faction
+items.token_faction.description=Un jeton de faction
+
+items.token_building.name=Jeton de Construction
+items.token_building.description=Un jeton de construction
