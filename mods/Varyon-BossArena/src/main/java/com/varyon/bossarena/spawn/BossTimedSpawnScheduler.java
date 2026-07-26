@@ -7,6 +7,7 @@ import com.varyon.bossarena.data.BossDefinition;
 import com.varyon.bossarena.data.BossRegistry;
 import com.varyon.bossarena.system.BossTrackingSystem;
 import com.varyon.bossarena.system.BossWaveNotificationService;
+import com.varyon.bossarena.util.EntityComponents;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.joml.Vector3d;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,6 +53,11 @@ public final class BossTimedSpawnScheduler {
     private static final long PROXIMITY_RETRY_SECONDS = 10L;
     /** Sentinel next-spawn epoch while waiting for boss death (AFTER_DEATH mode). */
     private static final long WAIT_FOR_DEATH_EPOCH_MS = Long.MAX_VALUE / 4L;
+    /** Chat reminder lead time before scheduled spawn. */
+    private static final long REMINDER_LEAD_MS = TimeUnit.MINUTES.toMillis(5L);
+    private static final long WAITING_PLAYERS_TITLE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(30L);
+    private static final long GRACE_TITLE_REFRESH_MS = TimeUnit.SECONDS.toMillis(5L);
+    private final Random bossPoolRandom = new Random();
     private final BossSpawnService bossSpawnService;
     private final BossTrackingSystem trackingSystem;
     private final Map<String, PendingSpawnState> pendingSpawnByKey = new ConcurrentHashMap<>();
@@ -107,11 +114,17 @@ public final class BossTimedSpawnScheduler {
             }
         }
 
-        String expectedBossName = resolveExpectedBossName(rule.bossId);
-        if (expectedBossName.isEmpty()) {
+        String trackedBoss = optional(data.bossName);
+        if (trackedBoss.isEmpty()) {
             return false;
         }
-        return optional(data.bossName).equalsIgnoreCase(expectedBossName);
+        for (BossArenaConfig.BossPoolEntry entry : rule.resolveBossPool()) {
+            String expectedBossName = resolveExpectedBossName(entry.bossId);
+            if (!expectedBossName.isEmpty() && trackedBoss.equalsIgnoreCase(expectedBossName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String resolveExpectedBossName(String configuredBossId) {
@@ -130,12 +143,23 @@ public final class BossTimedSpawnScheduler {
         if (rule == null) {
             return "";
         }
-        String boss = optional(rule.bossId).toLowerCase(Locale.ROOT);
         String arena = optional(rule.arenaId).toLowerCase(Locale.ROOT);
-        if (boss.isEmpty() || arena.isEmpty()) {
+        List<BossArenaConfig.BossPoolEntry> pool = rule.resolveBossPool();
+        if (arena.isEmpty() || pool.isEmpty()) {
             return "";
         }
-        return boss + "@" + arena;
+        List<String> bosses = new ArrayList<>();
+        for (BossArenaConfig.BossPoolEntry entry : pool) {
+            String id = optional(entry.bossId).toLowerCase(Locale.ROOT);
+            if (!id.isEmpty()) {
+                bosses.add(id);
+            }
+        }
+        if (bosses.isEmpty()) {
+            return "";
+        }
+        bosses.sort(String::compareTo);
+        return String.join(",", bosses) + "@" + arena;
     }
 
     private static World resolveWorld(String worldName) {
@@ -214,9 +238,13 @@ public final class BossTimedSpawnScheduler {
         if (!id.isEmpty()) {
             return id;
         }
-        String boss = optional(rule.bossId);
+        List<BossArenaConfig.BossPoolEntry> pool = rule.resolveBossPool();
         String arena = optional(rule.arenaId);
-        if (!boss.isEmpty() || !arena.isEmpty()) {
+        if (!pool.isEmpty() || !arena.isEmpty()) {
+            String boss = pool.isEmpty() ? optional(rule.bossId) : optional(pool.get(0).bossId);
+            if (pool.size() > 1) {
+                boss = boss + "+" + (pool.size() - 1);
+            }
             return boss + "@" + arena;
         }
         return "rule_" + index;
@@ -227,6 +255,13 @@ public final class BossTimedSpawnScheduler {
         out.id = source.id;
         out.enabled = source.enabled;
         out.bossId = source.bossId;
+        out.bossPool = new ArrayList<>();
+        for (BossArenaConfig.BossPoolEntry entry : source.resolveBossPool()) {
+            BossArenaConfig.BossPoolEntry copy = new BossArenaConfig.BossPoolEntry();
+            copy.bossId = entry.bossId;
+            copy.weight = Math.max(1, entry.weight);
+            out.bossPool.add(copy);
+        }
         out.arenaId = source.arenaId;
         out.scheduleMode = source.scheduleMode;
         out.spawnIntervalHours = source.spawnIntervalHours;
@@ -242,14 +277,18 @@ public final class BossTimedSpawnScheduler {
         out.arrivalWindowSeconds = source.arrivalWindowSeconds;
         out.fixedTimes = source.fixedTimes == null ? new ArrayList<>() : new ArrayList<>(source.fixedTimes);
         out.oneShot = false;
-        out.requirePlayerInRadius = source.requirePlayerInRadius;
-        out.minPlayers = Math.max(1, source.minPlayers);
+        out.requirePlayerInRadius = false;
+        out.minPlayers = Math.max(0, source.minPlayers);
         out.preventDuplicateWhileAlive = source.preventDuplicateWhileAlive;
         out.despawnAfterHours = source.despawnAfterHours;
         out.despawnAfterMinutes = source.despawnAfterMinutes;
         out.announceWorldWide = source.announceWorldWide;
         out.announceCurrentWorld = source.announceCurrentWorld;
         out.worldAnnouncementText = source.worldAnnouncementText;
+        out.reminderAnnouncementText = source.reminderAnnouncementText;
+        out.gracePeriodEnabled = source.gracePeriodEnabled;
+        out.gracePeriodSeconds = Math.max(0L, source.gracePeriodSeconds);
+        out.graceTitleText = source.graceTitleText;
         return out;
     }
 
@@ -400,6 +439,7 @@ public final class BossTimedSpawnScheduler {
                 if (updateAfterDeathSchedule(state, now)) {
                     changed = true;
                 }
+                maybeSendTimedReminder(state, now);
                 if (now < state.nextSpawnEpochMs) {
                     continue;
                 }
@@ -436,11 +476,69 @@ public final class BossTimedSpawnScheduler {
             long delayMs = resolveSpawnIntervalMillis(rule);
             state.sawAliveBoss = false;
             state.nextSpawnEpochMs = now + delayMs;
+            state.reminderSent = false;
             LOGGER.info("Timed spawn '" + state.label + "': boss dead, next spawn in "
                     + Math.max(1L, TimeUnit.MILLISECONDS.toSeconds(delayMs)) + " second(s).");
             return true;
         }
         return false;
+    }
+
+    /**
+     * Send a one-shot chat reminder in the 5-minute window before {@code nextSpawnEpochMs}.
+     * Skips Manual, empty text, no announce scope, forced paths, and parked AFTER_DEATH waits.
+     */
+    private void maybeSendTimedReminder(TimedSpawnState state, long now) {
+        if (state == null || state.reminderSent) {
+            return;
+        }
+        BossArenaConfig.TimedBossSpawn rule = state.rule;
+        if (rule == null || !rule.enabled || rule.isManualMode()) {
+            return;
+        }
+        if (!rule.isIntervalMode() && !rule.isAfterDeathMode()) {
+            return;
+        }
+        String reminderText = optional(rule.reminderAnnouncementText);
+        if (reminderText.isEmpty()) {
+            return;
+        }
+        if (!rule.announceWorldWide && !rule.announceCurrentWorld) {
+            return;
+        }
+        long due = state.nextSpawnEpochMs;
+        if (due <= 0L || due >= WAIT_FOR_DEATH_EPOCH_MS) {
+            return;
+        }
+        if (now < due - REMINDER_LEAD_MS || now >= due) {
+            return;
+        }
+
+        String configuredBossId = ensureRolledBossId(state, rule);
+        String configuredArenaId = optional(rule.arenaId);
+        if (configuredBossId.isEmpty() || configuredArenaId.isEmpty()) {
+            return;
+        }
+        Arena arena = ArenaRegistry.get(configuredArenaId);
+        if (arena == null) {
+            return;
+        }
+        World world = resolveWorld(arena.worldName);
+        if (world == null) {
+            return;
+        }
+
+        state.reminderSent = true;
+        BossWaveNotificationService.notifyTimedSpawn(
+                resolveExpectedBossName(configuredBossId),
+                configuredArenaId,
+                world,
+                reminderText,
+                rule.announceWorldWide,
+                rule.announceCurrentWorld
+        );
+        LOGGER.info("Timed spawn reminder sent for '" + state.label + "' (due in "
+                + Math.max(0L, (due - now) / 1000L) + "s).");
     }
 
     /**
@@ -454,8 +552,8 @@ public final class BossTimedSpawnScheduler {
         if (rule == null) {
             return "Règle introuvable.";
         }
-        if (optional(rule.bossId).isEmpty() || optional(rule.arenaId).isEmpty()) {
-            return "Renseignez Boss et Arène avant Apparition.";
+        if (rule.resolveBossPool().isEmpty() || optional(rule.arenaId).isEmpty()) {
+            return "Renseignez le pool de boss et l'Arène avant Apparition.";
         }
 
         TimedSpawnState state = findStateForRule(rule, rowIndex1Based);
@@ -490,8 +588,7 @@ public final class BossTimedSpawnScheduler {
             return null;
         }
         String expectedLabel = resolveRuleLabel(rule, rowIndex1Based).toLowerCase(Locale.ROOT);
-        String bossId = optional(rule.bossId);
-        String arenaId = optional(rule.arenaId);
+        String spawnKey = resolveSpawnKey(rule);
         for (TimedSpawnState state : states) {
             if (state == null || state.rule == null) {
                 continue;
@@ -499,9 +596,7 @@ public final class BossTimedSpawnScheduler {
             if (expectedLabel.equals(state.label)) {
                 return state;
             }
-            if (!bossId.isEmpty()
-                    && bossId.equalsIgnoreCase(optional(state.rule.bossId))
-                    && arenaId.equalsIgnoreCase(optional(state.rule.arenaId))) {
+            if (!spawnKey.isEmpty() && spawnKey.equals(resolveSpawnKey(state.rule))) {
                 return state;
             }
         }
@@ -552,16 +647,17 @@ public final class BossTimedSpawnScheduler {
             }
         }
 
-        String configuredBossId = optional(rule.bossId);
+        String configuredBossId = ensureRolledBossId(state, rule);
         String configuredArenaId = optional(rule.arenaId);
         if (configuredBossId.isEmpty() || configuredArenaId.isEmpty()) {
-            LOGGER.warning("Timed spawn rule '" + state.label + "' is missing bossId or arenaId.");
+            LOGGER.warning("Timed spawn rule '" + state.label + "' is missing boss pool or arenaId.");
             return false;
         }
 
         BossDefinition def = BossRegistry.get(configuredBossId);
         if (def == null) {
             LOGGER.warning("Timed spawn rule '" + state.label + "' references unknown bossId '" + configuredBossId + "'.");
+            state.rolledBossId = "";
             return false;
         }
 
@@ -580,89 +676,12 @@ public final class BossTimedSpawnScheduler {
         }
 
         if (!force) {
-            // Require at least minPlayers online in the target world.
-            int online = countOnlinePlayers(world);
-            int required = Math.max(1, rule.minPlayers);
-            if (online < required) {
-                // Planifié: open/consume arrival window even while waiting for min players.
-                if (rule.isIntervalMode() && state.arrivalDeadlineMs <= 0L) {
-                    state.arrivalDeadlineMs = now + resolveArrivalWindowMillis(rule);
-                }
-                if (rule.isIntervalMode()
-                        && state.arrivalDeadlineMs > 0L
-                        && now >= state.arrivalDeadlineMs) {
-                    state.arrivalDeadlineMs = 0L;
-                    state.nextSpawnEpochMs = now + resolveSpawnIntervalMillis(rule);
-                    LOGGER.info("Timed spawn '" + state.label
-                            + "': délai d'arrivée écoulé (pas assez de joueurs), spawn annulé jusqu'au prochain intervalle.");
-                    return true;
-                }
-                state.nextSpawnEpochMs = now + TimeUnit.SECONDS.toMillis(NO_PLAYER_RETRY_SECONDS);
-                LOGGER.info("Timed spawn for '" + state.label + "' deferred: " + online + "/" + required
-                        + " joueur(s) dans le monde '" + world.getName() + "'.");
+            if (!awaitNearbyPlayersAndGrace(state, rule, world, arena, configuredArenaId, configuredBossId, now, retryMs)) {
                 return true;
-            }
-
-            if (rule.isIntervalMode()) {
-                // Planifié: after the due time, players must reach the arena (Rayon Décl) within Arrivée.
-                double proximityRadius = arena.getProximityRadius();
-                if (proximityRadius <= 0.0d) {
-                    LOGGER.warning("Timed spawn '" + state.label
-                            + "' (Planifié) requires Rayon Décl > 0 on arena '" + configuredArenaId + "'.");
-                    state.nextSpawnEpochMs = now + retryMs;
-                    return true;
-                }
-                Vector3d center = arena.getPosition();
-                boolean playerHere = hasPlayerWithinRadius(world, center, proximityRadius);
-                if (playerHere) {
-                    state.arrivalDeadlineMs = 0L;
-                    LOGGER.info("Timed spawn '" + state.label
-                            + "': joueur dans le Rayon Décl de '" + configuredArenaId + "', spawn.");
-                } else {
-                    long windowMs = resolveArrivalWindowMillis(rule);
-                    if (state.arrivalDeadlineMs <= 0L) {
-                        state.arrivalDeadlineMs = now + windowMs;
-                        LOGGER.info("Timed spawn '" + state.label + "': fenêtre d'arrivée ouverte ("
-                                + Math.max(0L, windowMs / 1000L) + "s) — en attente d'un joueur à l'arène.");
-                    }
-                    if (windowMs <= 0L || now >= state.arrivalDeadlineMs) {
-                        state.arrivalDeadlineMs = 0L;
-                        state.nextSpawnEpochMs = now + resolveSpawnIntervalMillis(rule);
-                        LOGGER.info("Timed spawn '" + state.label
-                                + "': aucun joueur à l'arène à temps — spawn annulé jusqu'au prochain intervalle.");
-                        return true;
-                    }
-                    state.nextSpawnEpochMs = Math.min(state.arrivalDeadlineMs, now + retryMs);
-                    double closest = closestPlayerDistance(world, center);
-                    long remainSec = Math.max(0L, (state.arrivalDeadlineMs - now) / 1000L);
-                    LOGGER.info("Timed spawn '" + state.label + "' waiting for player within "
-                            + proximityRadius + " blocks (" + remainSec + "s left). Closest: "
-                            + (closest < Double.MAX_VALUE ? String.format("%.0f blocks", closest) : "none"));
-                    return true;
-                }
-            } else if (rule.requirePlayerInRadius) {
-                // Temps réapparition: optional proximity gate (no arrival deadline).
-                double proximityRadius = arena.getProximityRadius();
-                if (proximityRadius <= 0.0d) {
-                    LOGGER.warning("Timed spawn '" + state.label + "' requires a player but arena '"
-                            + configuredArenaId + "' has Rayon Décl <= 0. Retrying.");
-                    state.nextSpawnEpochMs = now + retryMs;
-                    return true;
-                }
-                Vector3d center = arena.getPosition();
-                if (!hasPlayerWithinRadius(world, center, proximityRadius)) {
-                    state.nextSpawnEpochMs = now + retryMs;
-                    double closest = closestPlayerDistance(world, center);
-                    LOGGER.info("Timed spawn '" + state.label + "' waiting for player within "
-                            + proximityRadius + " blocks of arena '" + configuredArenaId + "' (center "
-                            + String.format("%.0f, %.0f, %.0f", center.x, center.y, center.z) + " in " + world.getName()
-                            + "). Closest player: " + (closest < Double.MAX_VALUE ? String.format("%.0f blocks", closest) : "none") + ". Re-checking in " + PROXIMITY_RETRY_SECONDS + "s.");
-                    return true;
-                }
-                LOGGER.info("Timed spawn '" + state.label + "': player in proximity of arena '" + configuredArenaId + "', spawning boss.");
             }
         } else {
             state.arrivalDeadlineMs = 0L;
+            clearGraceState(state);
         }
 
         if (!force && rule.preventDuplicateWhileAlive) {
@@ -725,16 +744,219 @@ public final class BossTimedSpawnScheduler {
             }
         });
 
+        clearGraceState(state);
+        state.rolledBossId = "";
+        state.lastWaitingPlayersTitleMs = 0L;
+        state.prevNearbyPlayerUuids = Set.of();
         if (rule.isAfterDeathMode()) {
             // Keep schedule parked while the encounter starts. For deferred pre-boss waves the primary
             // boss is not alive yet — mark encounter active via pending/awaiting instead of a fake death cycle.
             state.sawAliveBoss = true;
             state.nextSpawnEpochMs = WAIT_FOR_DEATH_EPOCH_MS;
+            state.reminderSent = false;
         } else {
             state.arrivalDeadlineMs = 0L;
             state.nextSpawnEpochMs = now + resolveSpawnIntervalMillis(rule);
+            if (!force) {
+                state.reminderSent = false;
+            }
         }
         return true;
+    }
+
+    private String ensureRolledBossId(TimedSpawnState state, BossArenaConfig.TimedBossSpawn rule) {
+        String existing = optional(state.rolledBossId);
+        if (!existing.isEmpty() && rule.poolContainsBoss(existing)) {
+            return existing;
+        }
+        String picked = rule.pickWeightedBossId(bossPoolRandom);
+        state.rolledBossId = picked;
+        if (!picked.isEmpty()) {
+            LOGGER.info("Timed spawn '" + state.label + "': pool rolled boss '" + picked + "'.");
+        }
+        return picked;
+    }
+
+    /**
+     * Nearby-player gate + optional grace countdown.
+     * @return true when spawn may proceed now
+     */
+    private boolean awaitNearbyPlayersAndGrace(TimedSpawnState state,
+                                               BossArenaConfig.TimedBossSpawn rule,
+                                               World world,
+                                               Arena arena,
+                                               String configuredArenaId,
+                                               String configuredBossId,
+                                               long now,
+                                               long retryMs) {
+        int required = Math.max(0, rule.minPlayers);
+        boolean graceEnabled = rule.gracePeriodEnabled
+                && (rule.isIntervalMode() || rule.isAfterDeathMode());
+        long graceSeconds = Math.max(0L, rule.gracePeriodSeconds);
+        boolean needsRadius = required > 0 || graceEnabled;
+
+        double proximityRadius = arena.getProximityRadius();
+        Vector3d center = arena.getPosition();
+        if (needsRadius && proximityRadius <= 0.0d) {
+            LOGGER.warning("Timed spawn '" + state.label + "' needs Rayon Décl > 0 on arena '"
+                    + configuredArenaId + "' (Joueurs/Grâce).");
+            state.nextSpawnEpochMs = now + retryMs;
+            return false;
+        }
+
+        Set<UUID> nearby = collectNearbyPlayerUuids(world, center, proximityRadius);
+        int nearbyCount = nearby.size();
+        boolean someoneEntered = false;
+        for (UUID uuid : nearby) {
+            if (!state.prevNearbyPlayerUuids.contains(uuid)) {
+                someoneEntered = true;
+                break;
+            }
+        }
+        state.prevNearbyPlayerUuids = nearby;
+
+        // Planifié: open / expire arrival window while waiting.
+        if (rule.isIntervalMode()) {
+            long windowMs = resolveArrivalWindowMillis(rule);
+            if (state.arrivalDeadlineMs <= 0L) {
+                state.arrivalDeadlineMs = now + windowMs;
+                LOGGER.info("Timed spawn '" + state.label + "': fenêtre d'arrivée ouverte ("
+                        + Math.max(0L, windowMs / 1000L) + "s).");
+            }
+            boolean thresholdMet = required == 0
+                    ? (!graceEnabled || nearbyCount >= 1)
+                    : nearbyCount >= required;
+            if (!thresholdMet
+                    && (windowMs <= 0L || now >= state.arrivalDeadlineMs)) {
+                state.arrivalDeadlineMs = 0L;
+                clearGraceState(state);
+                state.nextSpawnEpochMs = now + resolveSpawnIntervalMillis(rule);
+                state.reminderSent = false;
+                LOGGER.info("Timed spawn '" + state.label
+                        + "': delai d'arrivee ecoule - spawn annule jusqu'au prochain intervalle.");
+                return false;
+            }
+        }
+
+        boolean thresholdMet = required == 0
+                ? (!graceEnabled || nearbyCount >= 1)
+                : nearbyCount >= required;
+
+        if (!thresholdMet) {
+            clearGraceState(state);
+            if (rule.isIntervalMode() && required > 0 && nearbyCount > 0) {
+                maybeNotifyWaitingPlayers(state, world, center, proximityRadius, required, someoneEntered, now);
+            }
+            state.nextSpawnEpochMs = now + (rule.isIntervalMode() ? retryMs : TimeUnit.SECONDS.toMillis(NO_PLAYER_RETRY_SECONDS));
+            if (rule.isIntervalMode() && state.arrivalDeadlineMs > 0L) {
+                state.nextSpawnEpochMs = Math.min(state.nextSpawnEpochMs, state.arrivalDeadlineMs);
+            }
+            LOGGER.info("Timed spawn '" + state.label + "' waiting nearby players: "
+                    + nearbyCount + "/" + Math.max(1, required) + " in Rayon Décl.");
+            return false;
+        }
+
+        if (graceEnabled && graceSeconds > 0L) {
+            if (state.graceDeadlineMs <= 0L) {
+                state.graceDeadlineMs = now + TimeUnit.SECONDS.toMillis(graceSeconds);
+                state.lastGraceTitleMs = 0L;
+                LOGGER.info("Timed spawn '" + state.label + "': grâce démarrée (" + graceSeconds + "s).");
+            }
+            if (now < state.graceDeadlineMs) {
+                maybeNotifyGraceTitle(state, rule, world, center, proximityRadius,
+                        configuredBossId, configuredArenaId, now);
+                state.nextSpawnEpochMs = Math.min(state.graceDeadlineMs, now + GRACE_TITLE_REFRESH_MS);
+                return false;
+            }
+            // Grace elapsed — spawn.
+            state.arrivalDeadlineMs = 0L;
+            clearGraceState(state);
+            return true;
+        }
+
+        // Ready, no grace (or grace seconds = 0).
+        state.arrivalDeadlineMs = 0L;
+        clearGraceState(state);
+        return true;
+    }
+
+    private static void clearGraceState(TimedSpawnState state) {
+        state.graceDeadlineMs = 0L;
+        state.lastGraceTitleMs = 0L;
+    }
+
+    private void maybeNotifyWaitingPlayers(TimedSpawnState state,
+                                           World world,
+                                           Vector3d center,
+                                           double radius,
+                                           int required,
+                                           boolean someoneEntered,
+                                           long now) {
+        if (!someoneEntered && state.lastWaitingPlayersTitleMs > 0L
+                && (now - state.lastWaitingPlayersTitleMs) < WAITING_PLAYERS_TITLE_INTERVAL_MS) {
+            return;
+        }
+        state.lastWaitingPlayersTitleMs = now;
+        BossWaveNotificationService.notifyTimedWaitingPlayersTitle(world, center, radius, required);
+    }
+
+    private void maybeNotifyGraceTitle(TimedSpawnState state,
+                                       BossArenaConfig.TimedBossSpawn rule,
+                                       World world,
+                                       Vector3d center,
+                                       double radius,
+                                       String configuredBossId,
+                                       String configuredArenaId,
+                                       long now) {
+        if (state.lastGraceTitleMs > 0L && (now - state.lastGraceTitleMs) < GRACE_TITLE_REFRESH_MS) {
+            return;
+        }
+        state.lastGraceTitleMs = now;
+        long remaining = Math.max(0L, state.graceDeadlineMs - now);
+        BossWaveNotificationService.notifyTimedGraceTitle(
+                world,
+                center,
+                radius,
+                resolveExpectedBossName(configuredBossId),
+                configuredArenaId,
+                rule.graceTitleText,
+                remaining
+        );
+    }
+
+    private static Set<UUID> collectNearbyPlayerUuids(World world, Vector3d center, double radius) {
+        Set<UUID> out = new HashSet<>();
+        if (world == null || center == null || radius <= 0.0d) {
+            return out;
+        }
+        double radiusSq = radius * radius;
+        try {
+            for (var playerRef : world.getPlayerRefs()) {
+                if (playerRef == null || !playerRef.isValid()) {
+                    continue;
+                }
+                var transform = playerRef.getTransform();
+                if (transform == null) {
+                    continue;
+                }
+                org.joml.Vector3d rawPos = transform.getPosition();
+                if (rawPos == null) {
+                    continue;
+                }
+                double dx = rawPos.x - center.x;
+                double dy = rawPos.y - center.y;
+                double dz = rawPos.z - center.z;
+                if ((dx * dx) + (dy * dy) + (dz * dz) > radiusSq) {
+                    continue;
+                }
+                UUID uuid = EntityComponents.uuid(playerRef);
+                if (uuid != null) {
+                    out.add(uuid);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return out;
     }
 
     private static boolean hasAnyOnlinePlayer(World world) {
@@ -926,16 +1148,15 @@ public final class BossTimedSpawnScheduler {
         if (rule == null || trackingSystem == null) {
             return false;
         }
-        String expectedBoss = optional(rule.bossId);
-        String expectedArena = optional(rule.arenaId);
-        if (expectedBoss.isEmpty()) {
+        if (rule.resolveBossPool().isEmpty()) {
             return false;
         }
+        String expectedArena = optional(rule.arenaId);
         for (BossTrackingSystem.ActiveEventStatus event : trackingSystem.snapshotActiveEvents()) {
             if (event == null || !event.awaitingPrimaryBossSpawn) {
                 continue;
             }
-            if (!expectedBoss.equalsIgnoreCase(optional(event.bossName))) {
+            if (!rule.poolContainsBoss(optional(event.bossName))) {
                 continue;
             }
             if (!expectedArena.isEmpty()
@@ -1160,6 +1381,15 @@ public final class BossTimedSpawnScheduler {
         private volatile boolean sawAliveBoss;
         /** Planifié: deadline epoch for a player to reach the arena after the due time (0 = closed). */
         private volatile long arrivalDeadlineMs;
+        /** True after the 5-minute pre-spawn reminder was sent for the current cycle. */
+        private volatile boolean reminderSent;
+        /** Grace countdown end epoch (0 = not in grace). */
+        private volatile long graceDeadlineMs;
+        private volatile long lastGraceTitleMs;
+        private volatile long lastWaitingPlayersTitleMs;
+        private volatile Set<UUID> prevNearbyPlayerUuids = Set.of();
+        /** Weighted pool pick for the current spawn cycle (announce/grace/reminder/spawn). */
+        private volatile String rolledBossId = "";
 
         private TimedSpawnState(BossArenaConfig.TimedBossSpawn rule, long nextSpawnEpochMs, String label) {
             this.rule = rule;
@@ -1167,6 +1397,12 @@ public final class BossTimedSpawnScheduler {
             this.nextSpawnEpochMs = Math.max(0L, nextSpawnEpochMs);
             this.sawAliveBoss = false;
             this.arrivalDeadlineMs = 0L;
+            this.reminderSent = false;
+            this.graceDeadlineMs = 0L;
+            this.lastGraceTitleMs = 0L;
+            this.lastWaitingPlayersTitleMs = 0L;
+            this.prevNearbyPlayerUuids = Set.of();
+            this.rolledBossId = "";
         }
     }
 }

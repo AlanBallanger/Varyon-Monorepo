@@ -18,6 +18,10 @@ import java.util.logging.Logger;
 
 public final class BossArenaConfig {
     public static final String DEFAULT_TIMED_ANNOUNCEMENT_TEXT = "[$World] $Boss event started at $Arena";
+    public static final String DEFAULT_TIMED_REMINDER_TEXT =
+            "&e[$World] &6$Boss &eapparaît dans 5 minutes (&b$Arena&e)!";
+    public static final String DEFAULT_TIMED_GRACE_TITLE_TEXT =
+            "&eLe combat de boss commence dans &6$time&e !";
     public static final String DEFAULT_TIMED_MAP_MARKER_IMAGE = "map_marker.png";
     public static final String DEFAULT_TIMED_MAP_MARKER_NAME_TEMPLATE = "Timed Boss: $Boss @ $Arena";
     public static final String DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE = "$PhaseTitle";
@@ -350,6 +354,10 @@ public final class BossArenaConfig {
             clean.id = optional(raw.id);
             clean.enabled = raw.enabled;
             clean.bossId = optional(raw.bossId);
+            clean.bossPool = sanitizeBossPool(raw.bossPool, clean.bossId);
+            if (!clean.bossPool.isEmpty()) {
+                clean.bossId = optional(clean.bossPool.get(0).bossId);
+            }
             clean.arenaId = optional(raw.arenaId);
             clean.scheduleMode = normalizeScheduleMode(raw.scheduleMode);
             clean.spawnIntervalHours = Math.max(0L, raw.spawnIntervalHours);
@@ -365,8 +373,9 @@ public final class BossArenaConfig {
             clean.arrivalWindowSeconds = Math.max(0L, raw.arrivalWindowSeconds);
             clean.fixedTimes = sanitizeFixedTimes(raw.fixedTimes);
             clean.oneShot = false;
-            clean.requirePlayerInRadius = raw.requirePlayerInRadius;
-            clean.minPlayers = Math.max(1, raw.minPlayers);
+            // Legacy proximity toggle ignored: Joueurs=0 means no player gate.
+            clean.requirePlayerInRadius = false;
+            clean.minPlayers = Math.max(0, raw.minPlayers);
             clean.preventDuplicateWhileAlive = true;
             clean.despawnAfterHours = Math.max(0L, raw.despawnAfterHours);
             clean.despawnAfterMinutes = Math.max(0L, raw.despawnAfterMinutes);
@@ -378,6 +387,14 @@ public final class BossArenaConfig {
             clean.worldAnnouncementText = optional(raw.worldAnnouncementText);
             if (clean.worldAnnouncementText.isEmpty()) {
                 clean.worldAnnouncementText = DEFAULT_TIMED_ANNOUNCEMENT_TEXT;
+            }
+            // Empty reminder = disabled (do not force a default).
+            clean.reminderAnnouncementText = optional(raw.reminderAnnouncementText);
+            clean.gracePeriodEnabled = raw.gracePeriodEnabled;
+            clean.gracePeriodSeconds = Math.max(0L, raw.gracePeriodSeconds);
+            clean.graceTitleText = optional(raw.graceTitleText);
+            if (clean.graceTitleText.isEmpty()) {
+                clean.graceTitleText = DEFAULT_TIMED_GRACE_TITLE_TEXT;
             }
 
             // Legacy FIXED_TIMES créneaux → 1 jour.
@@ -431,6 +448,45 @@ public final class BossArenaConfig {
             }
 
             out.add(clean);
+        }
+        return out;
+    }
+
+    private static List<BossPoolEntry> sanitizeBossPool(List<BossPoolEntry> source, String legacyBossId) {
+        List<BossPoolEntry> out = new ArrayList<>();
+        if (source != null) {
+            for (BossPoolEntry raw : source) {
+                if (raw == null) {
+                    continue;
+                }
+                String bossId = optional(raw.bossId);
+                if (bossId.isEmpty()) {
+                    continue;
+                }
+                boolean duplicate = false;
+                for (BossPoolEntry existing : out) {
+                    if (bossId.equalsIgnoreCase(optional(existing.bossId))) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if (duplicate) {
+                    continue;
+                }
+                BossPoolEntry clean = new BossPoolEntry();
+                clean.bossId = bossId;
+                clean.weight = Math.max(1, raw.weight);
+                out.add(clean);
+            }
+        }
+        if (out.isEmpty()) {
+            String legacy = optional(legacyBossId);
+            if (!legacy.isEmpty()) {
+                BossPoolEntry single = new BossPoolEntry();
+                single.bossId = legacy;
+                single.weight = 1;
+                out.add(single);
+            }
         }
         return out;
     }
@@ -639,10 +695,19 @@ public final class BossArenaConfig {
     public static final String INTERVAL_UNIT_DAY = "DAY";
     public static final String INTERVAL_UNIT_SECOND = "SECOND";
 
+    public static final class BossPoolEntry {
+        public String bossId = "";
+        /** Relative weight for weighted random (≥ 1). */
+        public int weight = 1;
+    }
+
     public static final class TimedBossSpawn {
         public String id = "";
         public boolean enabled = true;
+        /** Legacy single boss id (kept in sync with first {@link #bossPool} entry). */
         public String bossId = "";
+        /** Weighted pool of bosses; one is rolled on each spawn. */
+        public List<BossPoolEntry> bossPool = new ArrayList<>();
         public String arenaId = "";
         /**
          * {@link BossArenaConfig#SCHEDULE_AFTER_DEATH}, {@link BossArenaConfig#SCHEDULE_INTERVAL},
@@ -672,10 +737,10 @@ public final class BossArenaConfig {
         public List<String> fixedTimes = new ArrayList<>();
         /** Legacy one-shot flag (ignored). */
         public boolean oneShot = false;
-        /** Wait until a player is within the arena Rayon Décl before spawning. */
+        /** Legacy; ignored. Use {@link #minPlayers} (0 = spawn without player gate). */
         public boolean requirePlayerInRadius = false;
-        /** Minimum players online in the arena world required before spawn (default 1). */
-        public int minPlayers = 1;
+        /** Minimum players online in the arena world required before spawn (0 = no gate). */
+        public int minPlayers = 0;
         public boolean preventDuplicateWhileAlive = true;
         public long despawnAfterHours = 0L;
         public long despawnAfterMinutes = 5L;
@@ -685,6 +750,13 @@ public final class BossArenaConfig {
         public boolean announceCurrentWorld = false;
         // Optional custom message for global announcement.
         public String worldAnnouncementText = DEFAULT_TIMED_ANNOUNCEMENT_TEXT;
+        /** Optional chat reminder sent 5 minutes before scheduled spawn. Empty = no reminder. */
+        public String reminderAnnouncementText = DEFAULT_TIMED_REMINDER_TEXT;
+        /** When true, wait {@link #gracePeriodSeconds} after nearby player threshold before spawn. */
+        public boolean gracePeriodEnabled = false;
+        public long gracePeriodSeconds = 30L;
+        /** Title shown during grace; supports $time (mm:ss), $Boss, $Arena, $World. */
+        public String graceTitleText = DEFAULT_TIMED_GRACE_TITLE_TEXT;
 
         public boolean isIntervalMode() {
             String mode = optional(scheduleMode);
@@ -703,6 +775,50 @@ public final class BossArenaConfig {
 
         public boolean isAfterDeathMode() {
             return !isIntervalMode() && !isManualMode();
+        }
+
+        /** Non-empty sanitized pool (falls back to {@link #bossId}). */
+        public List<BossPoolEntry> resolveBossPool() {
+            return sanitizeBossPool(bossPool, bossId);
+        }
+
+        public boolean poolContainsBoss(String candidateBossId) {
+            String needle = optional(candidateBossId);
+            if (needle.isEmpty()) {
+                return false;
+            }
+            for (BossPoolEntry entry : resolveBossPool()) {
+                if (needle.equalsIgnoreCase(optional(entry.bossId))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Weighted random pick from the pool. Returns empty string if the pool is empty.
+         */
+        public String pickWeightedBossId(java.util.Random random) {
+            List<BossPoolEntry> pool = resolveBossPool();
+            if (pool.isEmpty()) {
+                return "";
+            }
+            if (pool.size() == 1) {
+                return optional(pool.get(0).bossId);
+            }
+            int total = 0;
+            for (BossPoolEntry entry : pool) {
+                total += Math.max(1, entry.weight);
+            }
+            int roll = random.nextInt(Math.max(1, total));
+            int cursor = 0;
+            for (BossPoolEntry entry : pool) {
+                cursor += Math.max(1, entry.weight);
+                if (roll < cursor) {
+                    return optional(entry.bossId);
+                }
+            }
+            return optional(pool.get(pool.size() - 1).bossId);
         }
     }
 

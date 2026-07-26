@@ -6,6 +6,7 @@ import com.varyon.bossarena.data.Arena;
 import com.varyon.bossarena.data.ArenaRegistry;
 import com.varyon.bossarena.data.BossDefinition;
 import com.varyon.bossarena.data.BossRegistry;
+import com.varyon.bossarena.compat.VaryonMobScale;
 import com.varyon.bossarena.util.BossScaler;
 import com.varyon.bossarena.util.VecUtil;
 import com.varyon.bossarena.boss.BossModifiers;
@@ -524,10 +525,11 @@ public final class BossSpawnService {
                         }
                     }
 
+                    BossModifiers combinedMods = VaryonMobScale.absorbInto(store, npcRef, mods);
                     tracking.track(
                             uuid,
                             def.bossName,
-                            mods,
+                            combinedMods,
                             arenaId,
                             world,
                             spreadPos,
@@ -542,7 +544,7 @@ public final class BossSpawnService {
                         tracking.untrack(uuid);
                         continue;
                     }
-                    applyModifiers(store, npcRef, mods, uuid);
+                    applyModifiers(store, npcRef, combinedMods, uuid);
                     disableDefaultEntityLoot(store, npcRef, def.bossName + "#" + (i + 1));
 
                     // Diagnostic logging for NPC behavior
@@ -659,9 +661,10 @@ public final class BossSpawnService {
                     if (!Float.isFinite(hpMult) || hpMult <= 0f) {
                         hpMult = 1.0f;
                     }
-                    float knownFactor = entityUuid != null ? tracking.getWorldHealthFactor(entityUuid) : 0.0f;
+                    // Varyon combat scale is already folded into hpMult via VaryonMobScale.absorbInto.
+                    // Force worldFactor=1 so Varyon_Health is stripped without double-counting.
                     float worldFactor = com.varyon.bossarena.util.BossHealthScale.apply(
-                            statMap, hpMult, knownFactor);
+                            statMap, hpMult, 1.0f);
                     if (entityUuid != null) {
                         tracking.setWorldHealthFactor(entityUuid, worldFactor);
                     }
@@ -671,8 +674,7 @@ public final class BossSpawnService {
                     float maxHealth = healthValue != null ? healthValue.getMax() : 0;
 
                     LOGGER.info("Applied HP multiplier: " + hpMult
-                            + " (worldFactor=" + worldFactor
-                            + ", effective=" + (worldFactor * hpMult) + ")");
+                            + " (includes Varyon zone scale when present)");
                     LOGGER.info("Current HP: " + currentHealth + " / Max HP: " + maxHealth);
                 } else {
                     LOGGER.warning("Health stat not found!");
@@ -1548,10 +1550,12 @@ public final class BossSpawnService {
                         1.0f,
                         1.0f
                 );
-                Object addUuidObj = world.getEntityStore().getStore().getComponent(addRef, UUIDComponent.getComponentType());
+                var addStore = world.getEntityStore().getStore();
+                Object addUuidObj = addStore.getComponent(addRef, UUIDComponent.getComponentType());
                 UUID addUuid = addUuidObj instanceof UUIDComponent addUuidComp ? addUuidComp.getUuid() : null;
-                applyModifiers(world.getEntityStore().getStore(), addRef, addMods, addUuid);
-                disableDefaultEntityLoot(world.getEntityStore().getStore(), addRef, add.npcId);
+                BossModifiers combinedAddMods = VaryonMobScale.absorbInto(addStore, addRef, addMods);
+                applyModifiers(addStore, addRef, combinedAddMods, addUuid);
+                disableDefaultEntityLoot(addStore, addRef, add.npcId);
                 if (!addRef.isValid()) {
                     LOGGER.warning("Spawned add '" + add.npcId + "' became invalid during setup; skipping tracking.");
                     continue;
@@ -1560,10 +1564,10 @@ public final class BossSpawnService {
                 if (addUuid != null) {
                     spawnedAddUuids.add(addUuid);
                     if (bossUuid != null) {
-                        tracking.trackAdd(bossUuid, addUuid, addMods);
+                        tracking.trackAdd(bossUuid, addUuid, combinedAddMods);
                         trackedAddsSpawned++;
                     } else {
-                        pendingDetachedAddModifiers.put(addUuid, addMods);
+                        pendingDetachedAddModifiers.put(addUuid, combinedAddMods);
                     }
                 }
 

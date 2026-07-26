@@ -114,7 +114,7 @@ final class BossFightMusicAssetGenerator {
             PluginManifest m = new PluginManifest();
             m.setGroup("com.varyon");
             m.setName("Varyon-BossArena-music");
-            m.setDescription("Pack généré — musiques de combat BossArena");
+            m.setDescription("Pack genere - musiques de combat BossArena");
             BossArenaPlugin plugin = BossArenaPlugin.getInstance();
             if (plugin != null && plugin.getManifest() != null && plugin.getManifest().getVersion() != null) {
                 m.setVersion(plugin.getManifest().getVersion());

@@ -8,6 +8,7 @@ public class ShopEntry {
     public String arenaId;
     public String bossId;
     public int cost;
+    public int silentCost;
     public String displayName;
     public String description;
 

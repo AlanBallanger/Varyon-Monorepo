@@ -4,16 +4,12 @@ import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.SystemGroup;
-import com.hypixel.hytale.component.dependency.Dependency;
-import com.hypixel.hytale.component.dependency.Order;
-import com.hypixel.hytale.component.dependency.SystemDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.modules.entity.AllLegacyLivingEntityTypesQuery;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageEventSystem;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageModule;
-import com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
@@ -25,12 +21,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
 /**
- * Snapshots target HP before {@link DamageSystems.ApplyDamage} so the recording system
+ * Snapshots target HP in the filter phase (before ApplyDamage) so the recording system
  * can credit the real HP removed.
  */
 public final class BossDamageChartHpSnapshotSystem extends DamageEventSystem {
@@ -39,8 +34,6 @@ public final class BossDamageChartHpSnapshotSystem extends DamageEventSystem {
             Collections.synchronizedMap(new WeakHashMap<>());
 
     private final BossTrackingSystem trackingSystem;
-    private final Set<Dependency<EntityStore>> dependencies =
-            Set.of(new SystemDependency<>(Order.BEFORE, DamageSystems.ApplyDamage.class));
 
     public BossDamageChartHpSnapshotSystem(BossTrackingSystem trackingSystem) {
         this.trackingSystem = trackingSystem;
@@ -63,13 +56,9 @@ public final class BossDamageChartHpSnapshotSystem extends DamageEventSystem {
     @Override
     @Nullable
     public SystemGroup<EntityStore> getGroup() {
+        // Filter already runs before ApplyDamage — do not also declare BEFORE ApplyDamage
+        // (cross-group edges create a cyclic dependency graph).
         return DamageModule.get().getFilterDamageGroup();
-    }
-
-    @Override
-    @Nonnull
-    public Set<Dependency<EntityStore>> getDependencies() {
-        return dependencies;
     }
 
     @Override

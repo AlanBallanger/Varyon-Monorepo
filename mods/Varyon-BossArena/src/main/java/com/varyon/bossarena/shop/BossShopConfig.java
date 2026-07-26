@@ -371,6 +371,7 @@ public final class BossShopConfig {
             clean.bossId = bossId;
             clean.arenaId = arenaId;
             clean.cost = Math.max(0, raw.cost);
+            clean.silentCost = Math.max(0, raw.silentCost);
             out.add(clean);
         }
         return out;
@@ -1031,7 +1032,10 @@ public final class BossShopConfig {
     public static final class ShopContract {
         public String bossId = "";
         public String arenaId = "";
+        /** Classic invoke price (announce + grace when timed rule matches). */
         public int cost = 0;
+        /** Silent invoke price (no announce, no grace). */
+        public int silentCost = 0;
     }
 
     public static final class ContractPrice {

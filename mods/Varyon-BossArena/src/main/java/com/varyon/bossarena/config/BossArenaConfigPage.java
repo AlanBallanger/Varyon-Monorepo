@@ -79,6 +79,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private static final float REGEN_MIN = BossRegen.MIN_HP_PER_SECOND;
     private static final float REGEN_MAX = BossRegen.MAX_HP_PER_SECOND;
     private static final int MAX_TIMED_SPAWN_ROWS = 6;
+    private static final int MAX_BOSS_POOL_ROWS = 8;
     private static final int BOSS_SCROLL_THUMB_STEPS = 10;
     private static final Pattern ARENA_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
     private static final int MAX_SHOP_CURRENCY_PICKS = BossArenaConfigUiControls.MAX_ITEM_PICKS;
@@ -108,6 +109,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private ShopLocationEditorState shopLocationEditorState;
     /** Currency item suggestions while typing in the shop editor. */
     private boolean shopCurrencyPicksOpen;
+    /** Weighted boss-pool editor for a planification rule row. */
+    private BossPoolEditorState bossPoolEditorState;
 
     private BossArenaConfigPage(PlayerRef playerRef, BossArenaPlugin plugin, String tab) {
         super(playerRef, CustomPageLifetime.CanDismiss, ConfigEventData.CODEC);
@@ -1188,7 +1191,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         cmd.append(LAYOUT);
 
         cmd.set("#TitleLabel.Text", "Config BossArena");
-        cmd.set("#SubtitleLabel.Text", "Configurer boss, boutique et arènes");
+        cmd.set("#SubtitleLabel.Text", "Configurer boss, marchands et arènes");
 
         boolean bossesTab = TAB_BOSSES.equals(selectedTab);
         boolean arenasTab = TAB_ARENAS.equals(selectedTab);
@@ -1279,12 +1282,33 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 handleTimedFieldToggle(action.substring("timed_toggle_mode_".length()), data, "mode");
             } else if (action.startsWith("timed_toggle_require_")) {
                 handleTimedFieldToggle(action.substring("timed_toggle_require_".length()), data, "require");
+            } else if (action.startsWith("timed_toggle_grace_")) {
+                handleTimedFieldToggle(action.substring("timed_toggle_grace_".length()), data, "grace");
             } else if (action.startsWith("timed_toggle_announce_global_")) {
                 handleTimedFieldToggle(action.substring("timed_toggle_announce_global_".length()), data, "announce_global");
             } else if (action.startsWith("timed_toggle_announce_world_")) {
                 handleTimedFieldToggle(action.substring("timed_toggle_announce_world_".length()), data, "announce_world");
             } else if (action.startsWith("timed_pop_")) {
                 handleTimedPop(action.substring("timed_pop_".length()));
+            } else if (action.startsWith("timed_pool_open_")) {
+                handleTimedPoolOpen(action.substring("timed_pool_open_".length()), data);
+            } else if ("timed_pool_close".equals(action)) {
+                bossPoolEditorState = null;
+                rebuild();
+            } else if ("timed_pool_apply".equals(action)) {
+                handleTimedPoolApply();
+            } else if ("timed_pool_add".equals(action)) {
+                handleTimedPoolAdd(data);
+            } else if ("timed_pool_prev".equals(action)) {
+                handleTimedPoolPage(-1);
+            } else if ("timed_pool_next".equals(action)) {
+                handleTimedPoolPage(1);
+            } else if (action.startsWith("timed_pool_toggle_")) {
+                handleTimedPoolToggle(action.substring("timed_pool_toggle_".length()));
+            } else if (action.startsWith("timed_pool_wdec_")) {
+                handleTimedPoolWeight(action.substring("timed_pool_wdec_".length()), -1);
+            } else if (action.startsWith("timed_pool_winc_")) {
+                handleTimedPoolWeight(action.substring("timed_pool_winc_".length()), 1);
             }
             return;
         }
@@ -1300,14 +1324,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         cmd.set("#ShopOverflowLabel.Visible", shopLocations.size() > MAX_SHOP_ROWS);
         if (shopLocations.size() > MAX_SHOP_ROWS) {
-            cmd.set("#ShopOverflowLabel.Text", "+" + (shopLocations.size() - MAX_SHOP_ROWS) + " emplacements boutique non affichés sur cette page.");
+            cmd.set("#ShopOverflowLabel.Text", "+" + (shopLocations.size() - MAX_SHOP_ROWS) + " marchands non affichés sur cette page.");
         } else {
             cmd.set("#ShopOverflowLabel.Text", "");
         }
 
         cmd.set("#ShopEmptyLabel.Visible", shopLocations.isEmpty());
         if (shopLocations.isEmpty()) {
-            cmd.set("#ShopEmptyLabel.Text", "Aucun emplacement boutique trouvé pour ce monde.");
+            cmd.set("#ShopEmptyLabel.Text", "Aucun marchand configuré.");
         }
 
         for (int row = 1; row <= MAX_SHOP_ROWS; row++) {
@@ -1320,6 +1344,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
             ShopLocationView shopLocation = shopLocations.get(row - 1);
             shopRows.add(new ShopLocationRef(shopLocation.worldName, shopLocation.x, shopLocation.y, shopLocation.z));
+            cmd.set("#ShopWorld" + suffix + ".Text", safeText(shopLocation.worldName));
             cmd.set("#ShopArena" + suffix + ".Text", shopLocation.arenaLabel);
             cmd.set("#ShopDistance" + suffix + ".Text", shopLocation.distanceLabel);
             cmd.set("#ShopBosses" + suffix + ".Text", Integer.toString(shopLocation.contractCount));
@@ -1369,14 +1394,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             if (locationWorld.isEmpty()) {
                 continue;
             }
-            if (currentWorld != null && !locationWorld.equalsIgnoreCase(currentWorld)) {
-                continue;
-            }
 
             int contractCount = location.contracts == null ? 0 : location.contracts.size();
 
             Double distance = null;
-            if (playerPosition != null) {
+            boolean sameWorld = currentWorld != null && locationWorld.equalsIgnoreCase(currentWorld);
+            if (sameWorld && playerPosition != null) {
                 double dx = playerPosition.x - location.x;
                 double dy = playerPosition.y - location.y;
                 double dz = playerPosition.z - location.z;
@@ -1387,9 +1410,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             if (shopName.isEmpty()) {
                 String uuid = optionalText(location.uuid);
                 if (!uuid.isEmpty()) {
-                    shopName = "Boutique " + (uuid.length() > 8 ? uuid.substring(0, 8) : uuid);
+                    shopName = "Marchand " + (uuid.length() > 8 ? uuid.substring(0, 8) : uuid);
                 } else {
-                    shopName = "Shop";
+                    shopName = "Marchand";
                 }
             }
 
@@ -1411,32 +1434,37 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             ));
         }
 
+        final String playerWorld = currentWorld;
         out.sort(Comparator
-                .comparing((ShopLocationView row) -> row.distance == null)
+                .comparing((ShopLocationView row) -> playerWorld == null
+                        || !optionalText(row.worldName).equalsIgnoreCase(playerWorld))
+                .thenComparing(row -> row.distance == null)
                 .thenComparing(row -> row.distance == null ? Double.MAX_VALUE : row.distance)
+                .thenComparing(row -> optionalText(row.worldName).toLowerCase(Locale.ROOT))
                 .thenComparing(row -> row.arenaLabel.toLowerCase(Locale.ROOT)));
 
-        // Only the shop nearest to the player gets " (nearest)" in the label.
-        if (!out.isEmpty() && out.get(0).distance != null) {
-            ShopLocationView first = out.get(0);
-            out.set(0, new ShopLocationView(
-                    first.arenaLabel + " (nearest)",
-                    first.distanceLabel,
-                    first.distance,
-                    first.worldName,
-                    first.x,
-                    first.y,
-                    first.z,
-                    first.contractCount
-            ));
+        // Nearest merchant in the player's current world.
+        if (playerWorld != null) {
+            for (int i = 0; i < out.size(); i++) {
+                ShopLocationView row = out.get(i);
+                if (row.distance == null || !playerWorld.equalsIgnoreCase(row.worldName)) {
+                    continue;
+                }
+                out.set(i, new ShopLocationView(
+                        row.arenaLabel + " (plus proche)",
+                        row.distanceLabel,
+                        row.distance,
+                        row.worldName,
+                        row.x,
+                        row.y,
+                        row.z,
+                        row.contractCount
+                ));
+                break;
+            }
         }
 
-        if (currentWorld == null) {
-            shopStatusText = "Impossible de résoudre le monde du joueur ; affichage de tous les emplacements boutique.";
-        } else {
-            shopStatusText = "Emplacements boutique du monde '" + currentWorld + "', les plus proches d'abord.";
-        }
-
+        shopStatusText = "Tous les marchands (tous les mondes). Monde actuel en premier.";
         return out;
     }
 
@@ -1501,7 +1529,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private void handleShopEditOpen(String rowToken) {
         int row = parseRow(rowToken);
         if (row < 1 || row > shopRows.size()) {
-            shopStatusText = "Sélection de ligne boutique invalide.";
+            shopStatusText = "Sélection de ligne marchand invalide.";
             rebuild();
             return;
         }
@@ -1509,14 +1537,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         ShopLocationRef shopLocation = shopRows.get(row - 1);
         BossShopConfig shopConfig = plugin.getShopConfig();
         if (shopConfig == null) {
-            shopStatusText = "Config boutique indisponible.";
+            shopStatusText = "Config marchands indisponible.";
             rebuild();
             return;
         }
 
         BossShopConfig.ShopLocation location = shopConfig.getShopLocation(shopLocation.worldName, shopLocation.x, shopLocation.y, shopLocation.z);
         if (location == null) {
-            shopStatusText = "L'emplacement boutique sélectionné n'existe plus dans la config.";
+            shopStatusText = "Le marchand sélectionné n'existe plus dans la config.";
             rebuild();
             return;
         }
@@ -1531,6 +1559,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 draft.bossId = optionalText(contract.bossId);
                 draft.arenaId = optionalText(contract.arenaId);
                 draft.cost = Math.max(0, contract.cost);
+                draft.silentCost = Math.max(0, contract.silentCost);
                 drafts.add(draft);
             }
         }
@@ -1562,7 +1591,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
         syncShopContractDraftsFromData(data);
         if (shopLocationEditorState.contracts.size() >= MAX_SHOP_CONTRACT_ROWS) {
-            shopStatusText = "Maximum de " + MAX_SHOP_CONTRACT_ROWS + " contrats par boutique.";
+            shopStatusText = "Maximum de " + MAX_SHOP_CONTRACT_ROWS + " contrats par marchand.";
             rebuild();
             return;
         }
@@ -1687,7 +1716,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         setShopOverlayAnchor(cmd, "#ShopEditHeaderBoss", 98, headerTop, 280, 22);
         setShopOverlayAnchor(cmd, "#ShopEditHeaderArena", 390, headerTop, 220, 22);
-        setShopOverlayAnchor(cmd, "#ShopEditHeaderPrice", 626, headerTop, 180, 22);
+        setShopOverlayAnchor(cmd, "#ShopEditHeaderPrice", 626, headerTop, 90, 22);
+        setShopOverlayAnchor(cmd, "#ShopEditHeaderSilentPrice", 722, headerTop, 100, 22);
 
         for (int row = 1; row <= MAX_SHOP_CONTRACT_ROWS; row++) {
             setShopOverlayAnchor(
@@ -1742,6 +1772,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             if (parsedCost != null) {
                 draft.cost = Math.max(0, parsedCost);
             }
+            Integer parsedSilentCost = parseOptionalInt(data.getShopEditSilentPrice(row));
+            if (parsedSilentCost != null) {
+                draft.silentCost = Math.max(0, parsedSilentCost);
+            }
         }
     }
 
@@ -1754,6 +1788,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             event.append("@ShopEditBoss" + suffix, "#ShopEditBoss" + suffix + ".Value");
             event.append("@ShopEditArena" + suffix, "#ShopEditArena" + suffix + ".Value");
             event.append("@ShopEditBossPrice" + suffix, "#ShopEditBossPrice" + suffix + ".Value");
+            event.append("@ShopEditSilentPrice" + suffix, "#ShopEditSilentPrice" + suffix + ".Value");
         }
         return event;
     }
@@ -1765,7 +1800,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         BossShopConfig shopConfig = plugin.getShopConfig();
         if (shopConfig == null) {
-            shopStatusText = "Config boutique indisponible.";
+            shopStatusText = "Config marchands indisponible.";
             rebuild();
             return;
         }
@@ -1773,7 +1808,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         ShopLocationRef shopLocation = shopLocationEditorState.shopLocation;
         BossShopConfig.ShopLocation location = shopConfig.getShopLocation(shopLocation.worldName, shopLocation.x, shopLocation.y, shopLocation.z);
         if (location == null) {
-            shopStatusText = "L'emplacement boutique sélectionné n'existe plus dans la config.";
+            shopStatusText = "Le marchand sélectionné n'existe plus dans la config.";
             rebuild();
             return;
         }
@@ -1823,11 +1858,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             contract.bossId = bossId;
             contract.arenaId = arenaId;
             contract.cost = Math.max(0, draft.cost);
+            contract.silentCost = Math.max(0, draft.silentCost);
             saved.add(contract);
         }
 
         location.name = configuredVendorName.isEmpty()
-                ? ("Boutique " + shopLocation.x + "," + shopLocation.y + "," + shopLocation.z)
+                ? ("Marchand " + shopLocation.x + "," + shopLocation.y + "," + shopLocation.z)
                 : configuredVendorName;
         location.contracts = saved;
         location.arenaId = "";
@@ -1839,7 +1875,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         plugin.saveShopConfig();
         plugin.refreshShopNpcInteractionHint(location);
-        shopStatusText = "Emplacement boutique enregistré (" + shopLocation.x + ", " + shopLocation.y + ", " + shopLocation.z
+        shopStatusText = "Marchand enregistré (" + shopLocation.x + ", " + shopLocation.y + ", " + shopLocation.z
                 + ") avec " + saved.size() + " contrat(s). Monnaie: " + currencyItemId + ".";
         shopLocationEditorState = null;
         shopCurrencyPicksOpen = false;
@@ -1855,11 +1891,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         ShopLocationRef shopLocation = state.shopLocation;
         cmd.set(
                 "#ShopEditorTitle.Text",
-                "Boutique (" + shopLocation.x + ", " + shopLocation.y + ", " + shopLocation.z + ")  [" + safeText(shopLocation.worldName) + "]"
+                "Marchand (" + shopLocation.x + ", " + shopLocation.y + ", " + shopLocation.z + ")  [" + safeText(shopLocation.worldName) + "]"
         );
         cmd.set(
                 "#ShopEditorHint.Text",
-                "Contrats: boss + arène + prix. Tapez l'item monnaie pour chercher."
+                "Contrats: boss + arène + prix classique + prix silencieux. Tapez l'item monnaie pour chercher."
             );
         cmd.set("#ShopEditorVendorName.Value", optionalText(state.vendorName));
         cmd.set("#ShopEditorCurrencyItem.Value", optionalText(state.currencyItemId));
@@ -1905,6 +1941,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             cmd.set("#ShopEditArena" + suffix + ".Entries", withExtraDropdownValue(arenaEntries, arenaId, ArenaRegistry.get(arenaId) == null));
             cmd.set("#ShopEditArena" + suffix + ".Value", arenaId);
             cmd.set("#ShopEditBossPrice" + suffix + ".Value", Integer.toString(Math.max(0, draft.cost)));
+            cmd.set("#ShopEditSilentPrice" + suffix + ".Value", Integer.toString(Math.max(0, draft.silentCost)));
 
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
@@ -2950,10 +2987,20 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
 
         String announceText = BossArenaConfig.DEFAULT_TIMED_ANNOUNCEMENT_TEXT;
+        String reminderText = BossArenaConfig.DEFAULT_TIMED_REMINDER_TEXT;
+        String graceText = BossArenaConfig.DEFAULT_TIMED_GRACE_TITLE_TEXT;
         if (!rows.isEmpty() && rows.get(0) != null) {
             announceText = resolvedOrFallback(
                     rows.get(0).worldAnnouncementText,
                     BossArenaConfig.DEFAULT_TIMED_ANNOUNCEMENT_TEXT
+            );
+            // Empty reminder is intentional (disabled); keep blank in UI.
+            if (rows.get(0).reminderAnnouncementText != null) {
+                reminderText = rows.get(0).reminderAnnouncementText;
+            }
+            graceText = resolvedOrFallback(
+                    rows.get(0).graceTitleText,
+                    BossArenaConfig.DEFAULT_TIMED_GRACE_TITLE_TEXT
             );
         }
 
@@ -2972,7 +3019,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedAddButton", EventData.of("Action", "timed_add"));
 
-        List<DropdownEntryInfo> bossEntries = bossDropdownEntries();
         List<DropdownEntryInfo> arenaEntries = arenaDropdownEntries();
 
         for (int row = 1; row <= MAX_TIMED_SPAWN_ROWS; row++) {
@@ -2988,9 +3034,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             boolean manual = entry != null && entry.isManualMode();
             boolean afterDeath = entry == null || entry.isAfterDeathMode();
             boolean enabled = entry == null || entry.enabled;
-            boolean requirePlayer = entry != null && entry.requirePlayerInRadius;
             boolean announceGlobal = entry != null && entry.announceWorldWide;
             boolean announceWorld = entry != null && entry.announceCurrentWorld && !announceGlobal;
+            boolean graceEnabled = entry != null && entry.gracePeriodEnabled;
+            long graceSeconds = entry != null ? Math.max(0L, entry.gracePeriodSeconds) : 30L;
             cmd.set("#TimedEnabled" + suffix + ".Value", enabled ? "true" : "false");
             BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedEnabledToggle" + suffix, enabled);
             String modeValue = manual
@@ -3000,16 +3047,20 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             cmd.set("#TimedModeToggle" + suffix + ".Text",
                     manual ? "Manuel" : (interval ? "Planifié" : "Temps réapparition"));
 
-            String bossId = safeText(entry != null ? entry.bossId : "");
+            List<BossArenaConfig.BossPoolEntry> pool = entry != null ? entry.resolveBossPool() : List.of();
+            String bossId = pool.isEmpty() ? "" : safeText(pool.get(0).bossId);
             String arenaId = safeText(entry != null ? entry.arenaId : "");
-            cmd.set("#TimedBossId" + suffix + ".Entries", withExtraDropdownValue(bossEntries, bossId, BossRegistry.get(bossId) == null));
             cmd.set("#TimedBossId" + suffix + ".Value", bossId);
+            cmd.set("#TimedBossPool" + suffix + ".Text", formatBossPoolButtonLabel(pool));
             cmd.set("#TimedArenaId" + suffix + ".Entries", withExtraDropdownValue(arenaEntries, arenaId, ArenaRegistry.get(arenaId) == null));
             cmd.set("#TimedArenaId" + suffix + ".Value", arenaId);
 
-            cmd.set("#TimedMinPlayers" + suffix + ".Value", Integer.toString(entry != null ? Math.max(1, entry.minPlayers) : 1));
-            cmd.set("#TimedRequirePlayer" + suffix + ".Value", requirePlayer ? "true" : "false");
-            BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedRequirePlayerToggle" + suffix, requirePlayer);
+            cmd.set("#TimedMinPlayers" + suffix + ".Value", Integer.toString(entry != null ? Math.max(0, entry.minPlayers) : 0));
+            cmd.set("#TimedGraceEnabled" + suffix + ".Value", graceEnabled ? "true" : "false");
+            BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedGraceToggle" + suffix, graceEnabled);
+            cmd.set("#TimedGraceSeconds" + suffix + ".Value", Long.toString(graceSeconds));
+            cmd.set("#TimedRequirePlayer" + suffix + ".Value", "false");
+            cmd.set("#TimedRequirePlayerToggle" + suffix + ".Visible", false);
             cmd.set("#TimedPreventDup" + suffix + ".Value", "true");
             cmd.set("#TimedDespawnHours" + suffix + ".Value", "0");
             long despawnMinutesTotal = entry != null
@@ -3065,12 +3116,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     buildBossTimedSnapshotEvent("timed_toggle_enabled_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedModeToggle" + suffix,
                     buildBossTimedSnapshotEvent("timed_toggle_mode_" + row));
-            events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedRequirePlayerToggle" + suffix,
-                    buildBossTimedSnapshotEvent("timed_toggle_require_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedGraceToggle" + suffix,
+                    buildBossTimedSnapshotEvent("timed_toggle_grace_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedAnnounceGlobalToggle" + suffix,
                     buildBossTimedSnapshotEvent("timed_toggle_announce_global_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedAnnounceWorldToggle" + suffix,
                     buildBossTimedSnapshotEvent("timed_toggle_announce_world_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedBossPool" + suffix,
+                    buildBossTimedSnapshotEvent("timed_pool_open_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedPop" + suffix,
                     EventData.of("Action", "timed_pop_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedDelete" + suffix,
@@ -3078,8 +3131,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
 
         cmd.set("#TimedAnnounceText.Value", announceText);
+        cmd.set("#TimedReminderText.Value", reminderText);
+        cmd.set("#TimedGraceText.Value", graceText);
         events.addEventBinding(CustomUIEventBindingType.Activating, "#BossTimedSaveButton",
                 buildBossTimedSnapshotEvent("boss_timed_save"));
+        buildBossPoolOverlay(cmd, events);
     }
 
     @Nonnull
@@ -3128,9 +3184,13 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     .append("@BossWaveDamage" + suffix, "#TimedDespawnHours" + suffix + ".Value")
                     .append("@BossWaveSize" + suffix, "#TimedDespawnMinutes" + suffix + ".Value")
                     .append("@TimedAnnounceGlobal" + suffix, "#TimedAnnounceGlobal" + suffix + ".Value")
-                    .append("@TimedAnnounceWorld" + suffix, "#TimedAnnounceWorld" + suffix + ".Value");
+                    .append("@TimedAnnounceWorld" + suffix, "#TimedAnnounceWorld" + suffix + ".Value")
+                    .append("@TimedGraceEnabled" + suffix, "#TimedGraceEnabled" + suffix + ".Value")
+                    .append("@TimedGraceSeconds" + suffix, "#TimedGraceSeconds" + suffix + ".Value");
         }
         snapshot.append("@TimedAnnounceText", "#TimedAnnounceText.Value");
+        snapshot.append("@TimedReminderText", "#TimedReminderText.Value");
+        snapshot.append("@TimedGraceText", "#TimedGraceText.Value");
         return snapshot;
     }
 
@@ -3159,7 +3219,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         entry.arrivalWindowHours = 0L;
         entry.arrivalWindowMinutes = 15L;
         entry.arrivalWindowSeconds = 0L;
-        entry.minPlayers = 1;
+        entry.minPlayers = 0;
+        entry.requirePlayerInRadius = false;
+        entry.gracePeriodEnabled = false;
+        entry.gracePeriodSeconds = 30L;
         entry.preventDuplicateWhileAlive = true;
         entry.despawnAfterHours = 0L;
         entry.despawnAfterMinutes = 5L;
@@ -3168,12 +3231,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         entry.announceCurrentWorld = false;
         if (!rows.isEmpty() && rows.get(0) != null) {
             entry.worldAnnouncementText = rows.get(0).worldAnnouncementText;
+            entry.reminderAnnouncementText = rows.get(0).reminderAnnouncementText;
+            entry.graceTitleText = rows.get(0).graceTitleText;
         }
         rows.add(entry);
         cfg.timedBossSpawns = rows;
         cfg.save();
         plugin.refreshTimedBossSpawns();
-        bossStatusText = "Règle ajoutée. Renseignez Boss / Arène puis Enregistrer.";
+        bossStatusText = "Règle ajoutée. Renseignez le pool de boss / Arène puis Enregistrer.";
         rebuild();
     }
 
@@ -3217,6 +3282,304 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         rebuild();
     }
 
+    private void handleTimedPoolOpen(String rowToken, ConfigEventData data) {
+        int row;
+        try {
+            row = Integer.parseInt(rowToken);
+        } catch (NumberFormatException ex) {
+            return;
+        }
+        try {
+            List<BossArenaConfig.TimedBossSpawn> parsed = parseTimedRowsFromEvent(data, false);
+            persistTimedRows(parsed, data, false);
+        } catch (IllegalArgumentException ex) {
+            bossStatusText = ex.getMessage();
+            rebuild();
+            return;
+        }
+        BossArenaConfig cfg = plugin.getConfig();
+        if (cfg == null) {
+            return;
+        }
+        List<BossArenaConfig.TimedBossSpawn> rows = cfg.getTimedBossSpawns();
+        if (row < 1 || row > rows.size()) {
+            bossStatusText = "Règle introuvable pour le pool.";
+            rebuild();
+            return;
+        }
+        BossArenaConfig.TimedBossSpawn entry = rows.get(row - 1);
+        LinkedHashMap<String, Integer> selected = new LinkedHashMap<>();
+        for (BossArenaConfig.BossPoolEntry poolEntry : entry.resolveBossPool()) {
+            String id = optionalText(poolEntry.bossId);
+            if (!id.isEmpty()) {
+                selected.put(id, Math.max(1, poolEntry.weight));
+            }
+        }
+        bossPoolEditorState = new BossPoolEditorState(row, listRegisteredBossIds(), selected);
+        if (bossPoolEditorState.bossIds.isEmpty()) {
+            bossPoolEditorState.statusText = "Aucun boss enregistre. Creez-en dans l'onglet Bosses.";
+        }
+        rebuild();
+    }
+
+    private void handleTimedPoolAdd(ConfigEventData data) {
+        if (bossPoolEditorState == null) {
+            return;
+        }
+        String pick = optionalText(data.bossPoolPick);
+        if (looksLikeUiBindingExpression(pick)) {
+            pick = "";
+        }
+        if (pick.isEmpty()) {
+            bossPoolEditorState.statusText = "Choisissez un boss dans la liste puis Ajouter.";
+            rebuild();
+            return;
+        }
+        String canonical = resolveRegisteredBossName(pick);
+        if (canonical.isEmpty()) {
+            bossPoolEditorState.statusText = "Boss inconnu: " + pick;
+            rebuild();
+            return;
+        }
+        if (bossPoolEditorState.findSelectedWeight(canonical) != null) {
+            bossPoolEditorState.statusText = canonical + " est deja dans le pool (passez-le ON).";
+            rebuild();
+            return;
+        }
+        bossPoolEditorState.putSelected(canonical, 1);
+        bossPoolEditorState.ensureBossListed(canonical);
+        bossPoolEditorState.statusText = "Ajoute: " + canonical;
+        rebuild();
+    }
+
+    private void handleTimedPoolApply() {
+        if (bossPoolEditorState == null) {
+            return;
+        }
+        BossArenaConfig cfg = plugin.getConfig();
+        if (cfg == null) {
+            return;
+        }
+        List<BossArenaConfig.TimedBossSpawn> rows = cfg.getTimedBossSpawns();
+        int row = bossPoolEditorState.ruleRow;
+        if (row < 1 || row > rows.size()) {
+            bossStatusText = "Règle introuvable.";
+            bossPoolEditorState = null;
+            rebuild();
+            return;
+        }
+        List<BossArenaConfig.BossPoolEntry> pool = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : bossPoolEditorState.selectedWeights.entrySet()) {
+            String id = optionalText(entry.getKey());
+            if (id.isEmpty()) {
+                continue;
+            }
+            BossArenaConfig.BossPoolEntry poolEntry = new BossArenaConfig.BossPoolEntry();
+            poolEntry.bossId = id;
+            poolEntry.weight = Math.max(1, entry.getValue() == null ? 1 : entry.getValue());
+            pool.add(poolEntry);
+        }
+        if (pool.isEmpty()) {
+            bossPoolEditorState.statusText = "Sélectionnez au moins un boss.";
+            rebuild();
+            return;
+        }
+        BossArenaConfig.TimedBossSpawn rule = rows.get(row - 1);
+        rule.bossPool = pool;
+        rule.bossId = optionalText(pool.get(0).bossId);
+        cfg.timedBossSpawns = rows;
+        cfg.save();
+        plugin.refreshTimedBossSpawns();
+        bossPoolEditorState = null;
+        bossStatusText = "Pool enregistré (" + pool.size() + " boss).";
+        rebuild();
+    }
+
+    private void handleTimedPoolPage(int delta) {
+        if (bossPoolEditorState == null) {
+            return;
+        }
+        int maxOffset = Math.max(0, bossPoolEditorState.bossIds.size() - MAX_BOSS_POOL_ROWS);
+        bossPoolEditorState.pageOffset = Math.max(0, Math.min(maxOffset, bossPoolEditorState.pageOffset + (delta * MAX_BOSS_POOL_ROWS)));
+        rebuild();
+    }
+
+    private void handleTimedPoolToggle(String rowToken) {
+        if (bossPoolEditorState == null) {
+            return;
+        }
+        int row;
+        try {
+            row = Integer.parseInt(rowToken);
+        } catch (NumberFormatException ex) {
+            return;
+        }
+        int index = bossPoolEditorState.pageOffset + row - 1;
+        if (index < 0 || index >= bossPoolEditorState.bossIds.size()) {
+            return;
+        }
+        String bossId = bossPoolEditorState.bossIds.get(index);
+        if (bossPoolEditorState.findSelectedWeight(bossId) != null) {
+            bossPoolEditorState.removeSelected(bossId);
+        } else {
+            bossPoolEditorState.putSelected(bossId, 1);
+        }
+        rebuild();
+    }
+
+    private void handleTimedPoolWeight(String rowToken, int delta) {
+        if (bossPoolEditorState == null) {
+            return;
+        }
+        int row;
+        try {
+            row = Integer.parseInt(rowToken);
+        } catch (NumberFormatException ex) {
+            return;
+        }
+        int index = bossPoolEditorState.pageOffset + row - 1;
+        if (index < 0 || index >= bossPoolEditorState.bossIds.size()) {
+            return;
+        }
+        String bossId = bossPoolEditorState.bossIds.get(index);
+        Integer current = bossPoolEditorState.findSelectedWeight(bossId);
+        if (current == null) {
+            return;
+        }
+        bossPoolEditorState.putSelected(bossId, Math.max(1, current + delta));
+        rebuild();
+    }
+
+    private void buildBossPoolOverlay(UICommandBuilder cmd, UIEventBuilder events) {
+        boolean open = bossPoolEditorState != null;
+        cmd.set("#BossPoolOverlay.Visible", open);
+        if (!open) {
+            return;
+        }
+        bossPoolEditorState.mergeRegisteredBosses(listRegisteredBossIds());
+        cmd.set("#BossPoolTitle.Text", "Pool de boss - regle " + bossPoolEditorState.ruleRow);
+        cmd.set("#BossPoolStatusLabel.Text",
+                bossPoolEditorState.statusText == null ? "" : bossPoolEditorState.statusText);
+        int total = bossPoolEditorState.bossIds.size();
+        int page = total == 0 ? 1 : (bossPoolEditorState.pageOffset / MAX_BOSS_POOL_ROWS) + 1;
+        int pages = Math.max(1, (total + MAX_BOSS_POOL_ROWS - 1) / MAX_BOSS_POOL_ROWS);
+        cmd.set("#BossPoolPageLabel.Text", "Page " + page + "/" + pages
+                + " | selection: " + bossPoolEditorState.selectedWeights.size()
+                + " / " + total);
+
+        List<DropdownEntryInfo> pickEntries = new ArrayList<>();
+        pickEntries.add(new DropdownEntryInfo(LocalizableString.fromString("(choisir un boss)"), ""));
+        for (String id : bossPoolEditorState.bossIds) {
+            if (bossPoolEditorState.findSelectedWeight(id) == null) {
+                pickEntries.add(new DropdownEntryInfo(LocalizableString.fromString(id), id));
+            }
+        }
+        cmd.set("#BossPoolPick.Entries", pickEntries);
+        cmd.set("#BossPoolPick.Value", "");
+
+        for (int row = 1; row <= MAX_BOSS_POOL_ROWS; row++) {
+            String suffix = Integer.toString(row);
+            int index = bossPoolEditorState.pageOffset + row - 1;
+            boolean visible = index < bossPoolEditorState.bossIds.size();
+            cmd.set("#BossPoolRow" + suffix + ".Visible", visible);
+            if (!visible) {
+                continue;
+            }
+            String bossId = bossPoolEditorState.bossIds.get(index);
+            Integer selectedWeight = bossPoolEditorState.findSelectedWeight(bossId);
+            boolean selected = selectedWeight != null;
+            int weight = selected ? Math.max(1, selectedWeight) : 1;
+            cmd.set("#BossPoolName" + suffix + ".Text", bossId);
+            BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#BossPoolToggle" + suffix, selected);
+            cmd.set("#BossPoolWeight" + suffix + ".Text", Integer.toString(weight));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#BossPoolToggle" + suffix,
+                    EventData.of("Action", "timed_pool_toggle_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#BossPoolWeightDec" + suffix,
+                    EventData.of("Action", "timed_pool_wdec_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#BossPoolWeightInc" + suffix,
+                    EventData.of("Action", "timed_pool_winc_" + row));
+        }
+
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#BossPoolCloseButton",
+                EventData.of("Action", "timed_pool_close"));
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#BossPoolApplyButton",
+                EventData.of("Action", "timed_pool_apply"));
+        events.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#BossPoolAddButton",
+                new EventData().append("Action", "timed_pool_add").append("@BossPoolPick", "#BossPoolPick.Value")
+        );
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#BossPoolPrevButton",
+                EventData.of("Action", "timed_pool_prev"));
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#BossPoolNextButton",
+                EventData.of("Action", "timed_pool_next"));
+    }
+
+    @Nonnull
+    private static List<String> listRegisteredBossIds() {
+        List<BossDefinition> bosses = new ArrayList<>(BossRegistry.getAll().values());
+        bosses.sort(Comparator.comparing(
+                b -> b == null || b.bossName == null ? "" : b.bossName,
+                String.CASE_INSENSITIVE_ORDER
+        ));
+        List<String> ids = new ArrayList<>();
+        for (BossDefinition boss : bosses) {
+            if (boss == null) {
+                continue;
+            }
+            String id = safeText(boss.bossName);
+            if (!id.isEmpty()) {
+                ids.add(id);
+            }
+        }
+        return ids;
+    }
+
+    @Nonnull
+    private static String resolveRegisteredBossName(String raw) {
+        String needle = optionalText(raw);
+        if (needle.isEmpty()) {
+            return "";
+        }
+        BossDefinition exact = BossRegistry.get(needle);
+        if (exact != null && exact.bossName != null && !exact.bossName.isBlank()) {
+            return exact.bossName.trim();
+        }
+        for (String id : listRegisteredBossIds()) {
+            if (needle.equalsIgnoreCase(id)) {
+                return id;
+            }
+        }
+        return "";
+    }
+
+    @Nonnull
+    private static List<BossArenaConfig.BossPoolEntry> copyBossPool(BossArenaConfig.TimedBossSpawn source) {
+        List<BossArenaConfig.BossPoolEntry> out = new ArrayList<>();
+        if (source == null) {
+            return out;
+        }
+        for (BossArenaConfig.BossPoolEntry entry : source.resolveBossPool()) {
+            BossArenaConfig.BossPoolEntry copy = new BossArenaConfig.BossPoolEntry();
+            copy.bossId = entry.bossId;
+            copy.weight = Math.max(1, entry.weight);
+            out.add(copy);
+        }
+        return out;
+    }
+
+    @Nonnull
+    private static String formatBossPoolButtonLabel(List<BossArenaConfig.BossPoolEntry> pool) {
+        if (pool == null || pool.isEmpty()) {
+            return "Pool (0)";
+        }
+        if (pool.size() == 1) {
+            String id = safeText(pool.get(0).bossId);
+            return id.isEmpty() ? "Pool (1)" : id;
+        }
+        return "Pool (" + pool.size() + ")";
+    }
+
     private void handleTimedFieldToggle(String rowToken, ConfigEventData data, String field) {
         int row;
         try {
@@ -3249,7 +3612,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                         entry.scheduleMode = BossArenaConfig.SCHEDULE_AFTER_DEATH;
                     }
                 }
-                case "require" -> entry.requirePlayerInRadius = !entry.requirePlayerInRadius;
+                case "grace" -> entry.gracePeriodEnabled = !entry.gracePeriodEnabled;
                 case "announce_global" -> {
                     entry.announceWorldWide = !entry.announceWorldWide;
                     if (entry.announceWorldWide) {
@@ -3298,11 +3661,24 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         String announceText = announceTextRaw.isEmpty()
                 ? BossArenaConfig.DEFAULT_TIMED_ANNOUNCEMENT_TEXT
                 : announceTextRaw;
+        String reminderTextRaw = optionalText(data.timedReminderText);
+        if (looksLikeUiBindingExpression(reminderTextRaw)) {
+            reminderTextRaw = "";
+        }
+        String graceTextRaw = optionalText(data.timedGraceText);
+        if (looksLikeUiBindingExpression(graceTextRaw)) {
+            graceTextRaw = "";
+        }
+        String graceText = graceTextRaw.isEmpty()
+                ? BossArenaConfig.DEFAULT_TIMED_GRACE_TITLE_TEXT
+                : graceTextRaw;
         for (BossArenaConfig.TimedBossSpawn entry : rows) {
             if (entry == null) {
                 continue;
             }
             entry.worldAnnouncementText = announceText;
+            entry.reminderAnnouncementText = reminderTextRaw;
+            entry.graceTitleText = graceText;
         }
         cfg.timedBossSpawns = rows;
         cfg.save();
@@ -3323,6 +3699,24 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 ? resolvedOrFallback(existingFirst.worldAnnouncementText, BossArenaConfig.DEFAULT_TIMED_ANNOUNCEMENT_TEXT)
                 : BossArenaConfig.DEFAULT_TIMED_ANNOUNCEMENT_TEXT)
                 : announceTextRaw;
+
+        String reminderTextRaw = optionalText(data.timedReminderText);
+        if (looksLikeUiBindingExpression(reminderTextRaw)) {
+            reminderTextRaw = existingFirst != null
+                    ? optionalText(existingFirst.reminderAnnouncementText)
+                    : BossArenaConfig.DEFAULT_TIMED_REMINDER_TEXT;
+        }
+        final String resolvedReminderText = reminderTextRaw;
+
+        String graceTextRaw = optionalText(data.timedGraceText);
+        if (looksLikeUiBindingExpression(graceTextRaw)) {
+            graceTextRaw = existingFirst != null
+                    ? optionalText(existingFirst.graceTitleText)
+                    : BossArenaConfig.DEFAULT_TIMED_GRACE_TITLE_TEXT;
+        }
+        final String resolvedGraceText = graceTextRaw.isEmpty()
+                ? BossArenaConfig.DEFAULT_TIMED_GRACE_TITLE_TEXT
+                : graceTextRaw;
 
         int visibleCount = Math.min(MAX_TIMED_SPAWN_ROWS, existing.size());
         List<BossArenaConfig.TimedBossSpawn> out = new ArrayList<>();
@@ -3347,6 +3741,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             String despawnMinutesText = optionalText(data.getBossWaveSize(row));
             String announceGlobalText = optionalText(data.getTimedAnnounceGlobal(row));
             String announceWorldText = optionalText(data.getTimedAnnounceWorld(row));
+            String graceEnabledText = optionalText(data.getTimedGraceEnabled(row));
+            String graceSecondsText = optionalText(data.getTimedGraceSeconds(row));
 
             if (looksLikeUiBindingExpression(enabledText)
                     || looksLikeUiBindingExpression(modeText)
@@ -3366,7 +3762,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     || looksLikeUiBindingExpression(despawnHoursText)
                     || looksLikeUiBindingExpression(despawnMinutesText)
                     || looksLikeUiBindingExpression(announceGlobalText)
-                    || looksLikeUiBindingExpression(announceWorldText)) {
+                    || looksLikeUiBindingExpression(announceWorldText)
+                    || looksLikeUiBindingExpression(graceEnabledText)
+                    || looksLikeUiBindingExpression(graceSecondsText)) {
                 // Keep existing row if UI bindings failed
                 if (existingRow != null) {
                     out.add(existingRow);
@@ -3374,12 +3772,19 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 continue;
             }
 
+            List<BossArenaConfig.BossPoolEntry> pool = copyBossPool(existingRow);
+            if (pool.isEmpty() && !bossId.isEmpty()) {
+                BossArenaConfig.BossPoolEntry single = new BossArenaConfig.BossPoolEntry();
+                single.bossId = bossId;
+                single.weight = 1;
+                pool.add(single);
+            }
             if (requireIds) {
-                if (bossId.isEmpty() && arenaId.isEmpty()) {
+                if (pool.isEmpty() && arenaId.isEmpty()) {
                     continue;
                 }
-                if (bossId.isEmpty() || arenaId.isEmpty()) {
-                    throw new IllegalArgumentException("Ligne " + row + " : Boss et Arène sont requis.");
+                if (pool.isEmpty() || arenaId.isEmpty()) {
+                    throw new IllegalArgumentException("Ligne " + row + " : Pool de boss et Arène sont requis.");
                 }
             }
 
@@ -3410,14 +3815,16 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             }
             boolean intervalMode = BossArenaConfig.SCHEDULE_INTERVAL.equals(scheduleMode);
             boolean manualMode = BossArenaConfig.SCHEDULE_MANUAL.equals(scheduleMode);
-            Boolean requirePlayer = requireText.isEmpty() ? Boolean.FALSE : parseToggleInput(requireText);
             Boolean announceGlobal = announceGlobalText.isEmpty()
                     ? (existingRow != null && existingRow.announceWorldWide)
                     : parseToggleInput(announceGlobalText);
             Boolean announceWorld = announceWorldText.isEmpty()
                     ? (existingRow != null && existingRow.announceCurrentWorld)
                     : parseToggleInput(announceWorldText);
-            if (requirePlayer == null || announceGlobal == null || announceWorld == null) {
+            Boolean graceEnabled = graceEnabledText.isEmpty()
+                    ? (existingRow != null && existingRow.gracePeriodEnabled)
+                    : parseToggleInput(graceEnabledText);
+            if (announceGlobal == null || announceWorld == null || graceEnabled == null) {
                 throw new IllegalArgumentException("Ligne " + row + " : bascule invalide.");
             }
             if (announceGlobal) {
@@ -3501,10 +3908,18 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     Long.MAX_VALUE
             );
             int minPlayers = (int) parseRequiredLong(
-                    minPlayersText.isEmpty() ? "1" : minPlayersText,
-                    "Ligne " + row + " : Joueurs doit être un entier >= 1.",
-                    1L,
+                    minPlayersText.isEmpty() ? "0" : minPlayersText,
+                    "Ligne " + row + " : Joueurs doit être un entier >= 0 (0 = spawn sans contrainte).",
+                    0L,
                     64L
+            );
+            long graceSeconds = parseRequiredLong(
+                    graceSecondsText.isEmpty()
+                            ? Long.toString(existingRow != null ? Math.max(0L, existingRow.gracePeriodSeconds) : 30L)
+                            : graceSecondsText,
+                    "Ligne " + row + " : Grâce (sec) invalide.",
+                    0L,
+                    3600L
             );
             if (!intervalMode && !manualMode
                     && BossArenaConfig.resolveSeconds(everyHours, everyMinutes, everySeconds) <= 0L) {
@@ -3530,7 +3945,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
             BossArenaConfig.TimedBossSpawn entry = new BossArenaConfig.TimedBossSpawn();
             entry.enabled = enabled;
-            entry.bossId = bossId;
+            entry.bossPool = pool;
+            entry.bossId = pool.isEmpty() ? "" : optionalText(pool.get(0).bossId);
             entry.arenaId = arenaId;
             entry.scheduleMode = scheduleMode;
             entry.spawnIntervalHours = everyHours;
@@ -3545,7 +3961,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             entry.arrivalWindowSeconds = arrivalSeconds;
             entry.fixedTimes = new ArrayList<>();
             entry.oneShot = false;
-            entry.requirePlayerInRadius = requirePlayer;
+            entry.requirePlayerInRadius = false;
             entry.minPlayers = minPlayers;
             entry.preventDuplicateWhileAlive = true;
             entry.despawnAfterHours = 0L;
@@ -3553,6 +3969,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             entry.announceWorldWide = announceGlobal;
             entry.announceCurrentWorld = announceWorld;
             entry.worldAnnouncementText = resolvedAnnounceText;
+            entry.reminderAnnouncementText = resolvedReminderText;
+            entry.gracePeriodEnabled = graceEnabled;
+            entry.gracePeriodSeconds = graceSeconds;
+            entry.graceTitleText = resolvedGraceText;
             out.add(entry);
         }
 
@@ -5138,6 +5558,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         private String bossId = "";
         private String arenaId = "";
         private int cost = 0;
+        private int silentCost = 0;
     }
 
     private static final class ShopLocationEditorState {
@@ -5156,6 +5577,107 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             this.vendorName = vendorName;
             this.currencyItemId = currencyItemId != null ? currencyItemId : "";
             this.listOffset = 0;
+        }
+    }
+
+    private static final class BossPoolEditorState {
+        private final int ruleRow;
+        private final List<String> bossIds;
+        private final LinkedHashMap<String, Integer> selectedWeights;
+        private int pageOffset;
+        private String statusText = "";
+
+        private BossPoolEditorState(int ruleRow,
+                                    List<String> bossIds,
+                                    LinkedHashMap<String, Integer> selectedWeights) {
+            this.ruleRow = ruleRow;
+            this.bossIds = new ArrayList<>();
+            this.selectedWeights = new LinkedHashMap<>();
+            this.pageOffset = 0;
+            if (selectedWeights != null) {
+                for (Map.Entry<String, Integer> entry : selectedWeights.entrySet()) {
+                    String id = optionalText(entry.getKey());
+                    if (!id.isEmpty()) {
+                        this.selectedWeights.put(id, Math.max(1, entry.getValue() == null ? 1 : entry.getValue()));
+                    }
+                }
+            }
+            mergeRegisteredBosses(bossIds);
+        }
+
+        private void mergeRegisteredBosses(List<String> registered) {
+            LinkedHashSet<String> merged = new LinkedHashSet<>();
+            if (registered != null) {
+                for (String id : registered) {
+                    String clean = optionalText(id);
+                    if (!clean.isEmpty()) {
+                        merged.add(clean);
+                    }
+                }
+            }
+            for (String id : selectedWeights.keySet()) {
+                if (!containsIgnoreCase(merged, id)) {
+                    merged.add(id);
+                }
+            }
+            bossIds.clear();
+            bossIds.addAll(merged);
+            bossIds.sort(String.CASE_INSENSITIVE_ORDER);
+            int maxOffset = Math.max(0, bossIds.size() - MAX_BOSS_POOL_ROWS);
+            pageOffset = Math.max(0, Math.min(maxOffset, pageOffset));
+        }
+
+        private void ensureBossListed(String bossId) {
+            String id = optionalText(bossId);
+            if (id.isEmpty() || containsIgnoreCase(bossIds, id)) {
+                return;
+            }
+            bossIds.add(id);
+            bossIds.sort(String.CASE_INSENSITIVE_ORDER);
+        }
+
+        private Integer findSelectedWeight(String bossId) {
+            String needle = optionalText(bossId);
+            if (needle.isEmpty()) {
+                return null;
+            }
+            for (Map.Entry<String, Integer> entry : selectedWeights.entrySet()) {
+                if (needle.equalsIgnoreCase(optionalText(entry.getKey()))) {
+                    return entry.getValue();
+                }
+            }
+            return null;
+        }
+
+        private void putSelected(String bossId, int weight) {
+            String id = optionalText(bossId);
+            if (id.isEmpty()) {
+                return;
+            }
+            removeSelected(id);
+            selectedWeights.put(id, Math.max(1, weight));
+        }
+
+        private void removeSelected(String bossId) {
+            String needle = optionalText(bossId);
+            if (needle.isEmpty()) {
+                return;
+            }
+            selectedWeights.entrySet().removeIf(entry ->
+                    needle.equalsIgnoreCase(optionalText(entry.getKey())));
+        }
+
+        private static boolean containsIgnoreCase(Iterable<String> values, String needle) {
+            String target = optionalText(needle);
+            if (target.isEmpty()) {
+                return false;
+            }
+            for (String value : values) {
+                if (target.equalsIgnoreCase(optionalText(value))) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -5285,6 +5807,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append(new KeyedCodec<>("@ShopEditBossPrice6", Codec.STRING), (d, v) -> d.shopEditBossPrice6 = v, d -> d.shopEditBossPrice6).add()
                 .append(new KeyedCodec<>("@ShopEditBossPrice7", Codec.STRING), (d, v) -> d.shopEditBossPrice7 = v, d -> d.shopEditBossPrice7).add()
                 .append(new KeyedCodec<>("@ShopEditBossPrice8", Codec.STRING), (d, v) -> d.shopEditBossPrice8 = v, d -> d.shopEditBossPrice8).add()
+                .append(new KeyedCodec<>("@ShopEditSilentPrice1", Codec.STRING), (d, v) -> d.shopEditSilentPrice1 = v, d -> d.shopEditSilentPrice1).add()
+                .append(new KeyedCodec<>("@ShopEditSilentPrice2", Codec.STRING), (d, v) -> d.shopEditSilentPrice2 = v, d -> d.shopEditSilentPrice2).add()
+                .append(new KeyedCodec<>("@ShopEditSilentPrice3", Codec.STRING), (d, v) -> d.shopEditSilentPrice3 = v, d -> d.shopEditSilentPrice3).add()
+                .append(new KeyedCodec<>("@ShopEditSilentPrice4", Codec.STRING), (d, v) -> d.shopEditSilentPrice4 = v, d -> d.shopEditSilentPrice4).add()
+                .append(new KeyedCodec<>("@ShopEditSilentPrice5", Codec.STRING), (d, v) -> d.shopEditSilentPrice5 = v, d -> d.shopEditSilentPrice5).add()
+                .append(new KeyedCodec<>("@ShopEditSilentPrice6", Codec.STRING), (d, v) -> d.shopEditSilentPrice6 = v, d -> d.shopEditSilentPrice6).add()
+                .append(new KeyedCodec<>("@ShopEditSilentPrice7", Codec.STRING), (d, v) -> d.shopEditSilentPrice7 = v, d -> d.shopEditSilentPrice7).add()
+                .append(new KeyedCodec<>("@ShopEditSilentPrice8", Codec.STRING), (d, v) -> d.shopEditSilentPrice8 = v, d -> d.shopEditSilentPrice8).add()
 
                 .append(new KeyedCodec<>("@BossEditName", Codec.STRING), (d, v) -> d.bossEditName = v, d -> d.bossEditName).add()
                 .append(new KeyedCodec<>("@BossEditNpcId", Codec.STRING), (d, v) -> d.bossEditNpcId = v, d -> d.bossEditNpcId).add()
@@ -5448,6 +5978,21 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append(new KeyedCodec<>("@TimedAnnounceWorld5", Codec.STRING), (d, v) -> d.timedAnnounceWorld5 = v, d -> d.timedAnnounceWorld5).add()
                 .append(new KeyedCodec<>("@TimedAnnounceWorld6", Codec.STRING), (d, v) -> d.timedAnnounceWorld6 = v, d -> d.timedAnnounceWorld6).add()
                 .append(new KeyedCodec<>("@TimedAnnounceText", Codec.STRING), (d, v) -> d.timedAnnounceText = v, d -> d.timedAnnounceText).add()
+                .append(new KeyedCodec<>("@TimedReminderText", Codec.STRING), (d, v) -> d.timedReminderText = v, d -> d.timedReminderText).add()
+                .append(new KeyedCodec<>("@TimedGraceText", Codec.STRING), (d, v) -> d.timedGraceText = v, d -> d.timedGraceText).add()
+                .append(new KeyedCodec<>("@BossPoolPick", Codec.STRING), (d, v) -> d.bossPoolPick = v, d -> d.bossPoolPick).add()
+                .append(new KeyedCodec<>("@TimedGraceEnabled1", Codec.STRING), (d, v) -> d.timedGraceEnabled1 = v, d -> d.timedGraceEnabled1).add()
+                .append(new KeyedCodec<>("@TimedGraceEnabled2", Codec.STRING), (d, v) -> d.timedGraceEnabled2 = v, d -> d.timedGraceEnabled2).add()
+                .append(new KeyedCodec<>("@TimedGraceEnabled3", Codec.STRING), (d, v) -> d.timedGraceEnabled3 = v, d -> d.timedGraceEnabled3).add()
+                .append(new KeyedCodec<>("@TimedGraceEnabled4", Codec.STRING), (d, v) -> d.timedGraceEnabled4 = v, d -> d.timedGraceEnabled4).add()
+                .append(new KeyedCodec<>("@TimedGraceEnabled5", Codec.STRING), (d, v) -> d.timedGraceEnabled5 = v, d -> d.timedGraceEnabled5).add()
+                .append(new KeyedCodec<>("@TimedGraceEnabled6", Codec.STRING), (d, v) -> d.timedGraceEnabled6 = v, d -> d.timedGraceEnabled6).add()
+                .append(new KeyedCodec<>("@TimedGraceSeconds1", Codec.STRING), (d, v) -> d.timedGraceSeconds1 = v, d -> d.timedGraceSeconds1).add()
+                .append(new KeyedCodec<>("@TimedGraceSeconds2", Codec.STRING), (d, v) -> d.timedGraceSeconds2 = v, d -> d.timedGraceSeconds2).add()
+                .append(new KeyedCodec<>("@TimedGraceSeconds3", Codec.STRING), (d, v) -> d.timedGraceSeconds3 = v, d -> d.timedGraceSeconds3).add()
+                .append(new KeyedCodec<>("@TimedGraceSeconds4", Codec.STRING), (d, v) -> d.timedGraceSeconds4 = v, d -> d.timedGraceSeconds4).add()
+                .append(new KeyedCodec<>("@TimedGraceSeconds5", Codec.STRING), (d, v) -> d.timedGraceSeconds5 = v, d -> d.timedGraceSeconds5).add()
+                .append(new KeyedCodec<>("@TimedGraceSeconds6", Codec.STRING), (d, v) -> d.timedGraceSeconds6 = v, d -> d.timedGraceSeconds6).add()
 
                 .append(new KeyedCodec<>("@BossLootName1", Codec.STRING), (d, v) -> d.bossLootName1 = v, d -> d.bossLootName1).add()
                 .append(new KeyedCodec<>("@BossLootMin1", Codec.STRING), (d, v) -> d.bossLootMin1 = v, d -> d.bossLootMin1).add()
@@ -5533,6 +6078,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String shopEditBossPrice6;
         public String shopEditBossPrice7;
         public String shopEditBossPrice8;
+        public String shopEditSilentPrice1;
+        public String shopEditSilentPrice2;
+        public String shopEditSilentPrice3;
+        public String shopEditSilentPrice4;
+        public String shopEditSilentPrice5;
+        public String shopEditSilentPrice6;
+        public String shopEditSilentPrice7;
+        public String shopEditSilentPrice8;
         public String bossEditName;
         public String bossEditNpcId;
         public String bossEditTier;
@@ -5628,6 +6181,21 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String bossWaveRepeatCount6;
         public String bossWaveRepeatSec6;
         public String timedAnnounceText;
+        public String timedReminderText;
+        public String timedGraceText;
+        public String bossPoolPick;
+        public String timedGraceEnabled1;
+        public String timedGraceEnabled2;
+        public String timedGraceEnabled3;
+        public String timedGraceEnabled4;
+        public String timedGraceEnabled5;
+        public String timedGraceEnabled6;
+        public String timedGraceSeconds1;
+        public String timedGraceSeconds2;
+        public String timedGraceSeconds3;
+        public String timedGraceSeconds4;
+        public String timedGraceSeconds5;
+        public String timedGraceSeconds6;
         public String timedAnnounceGlobal1;
         public String timedAnnounceGlobal2;
         public String timedAnnounceGlobal3;
@@ -5751,6 +6319,20 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 6 -> shopEditArena6;
                 case 7 -> shopEditArena7;
                 case 8 -> shopEditArena8;
+                default -> null;
+            };
+        }
+
+        public String getShopEditSilentPrice(int row) {
+            return switch (row) {
+                case 1 -> shopEditSilentPrice1;
+                case 2 -> shopEditSilentPrice2;
+                case 3 -> shopEditSilentPrice3;
+                case 4 -> shopEditSilentPrice4;
+                case 5 -> shopEditSilentPrice5;
+                case 6 -> shopEditSilentPrice6;
+                case 7 -> shopEditSilentPrice7;
+                case 8 -> shopEditSilentPrice8;
                 default -> null;
             };
         }
@@ -5954,6 +6536,30 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedRequirePlayer4;
                 case 5 -> timedRequirePlayer5;
                 case 6 -> timedRequirePlayer6;
+                default -> null;
+            };
+        }
+
+        public String getTimedGraceEnabled(int row) {
+            return switch (row) {
+                case 1 -> timedGraceEnabled1;
+                case 2 -> timedGraceEnabled2;
+                case 3 -> timedGraceEnabled3;
+                case 4 -> timedGraceEnabled4;
+                case 5 -> timedGraceEnabled5;
+                case 6 -> timedGraceEnabled6;
+                default -> null;
+            };
+        }
+
+        public String getTimedGraceSeconds(int row) {
+            return switch (row) {
+                case 1 -> timedGraceSeconds1;
+                case 2 -> timedGraceSeconds2;
+                case 3 -> timedGraceSeconds3;
+                case 4 -> timedGraceSeconds4;
+                case 5 -> timedGraceSeconds5;
+                case 6 -> timedGraceSeconds6;
                 default -> null;
             };
         }

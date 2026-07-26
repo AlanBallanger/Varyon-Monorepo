@@ -7,34 +7,51 @@ import com.varyon.bossarena.data.ArenaRegistry;
 import com.varyon.bossarena.data.BossDefinition;
 import com.varyon.bossarena.data.BossRegistry;
 import com.varyon.bossarena.spawn.BossSpawnService;
+import com.varyon.bossarena.system.BossWaveNotificationService;
 import com.varyon.bossarena.util.EntityComponents;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.choices.ChoiceInteraction;
-import com.hypixel.hytale.server.core.inventory.Inventory;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.joml.Vector3d;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
+    private static final ScheduledExecutorService GRACE_EXECUTOR =
+            Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "BossArena-ShopGrace");
+                t.setDaemon(true);
+                return t;
+            });
+    private static final long GRACE_TITLE_REFRESH_SECONDS = 5L;
 
     private final String bossId;
     private final String arenaId;
     private final int cost;
+    private final boolean silent;
 
     public BossArenaShopPurchaseInteraction(String bossId, String arenaId, int cost) {
+        this(bossId, arenaId, cost, false);
+    }
+
+    public BossArenaShopPurchaseInteraction(String bossId, String arenaId, int cost, boolean silent) {
         this.bossId = bossId;
         this.arenaId = arenaId;
         this.cost = Math.max(cost, 0);
+        this.silent = silent;
     }
 
     @Override
@@ -45,11 +62,11 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
         }
 
         if (bossId == null || bossId.isBlank()) {
-            playerRef.sendMessage(Message.raw("Entrée boutique sans bossId."));
+            playerRef.sendMessage(Message.raw("Entrée marchand sans bossId."));
             return;
         }
         if (arenaId == null || arenaId.isBlank()) {
-            playerRef.sendMessage(Message.raw("Entrée boutique sans arenaId."));
+            playerRef.sendMessage(Message.raw("Entrée marchand sans arenaId."));
             return;
         }
 
@@ -71,6 +88,8 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
             return;
         }
 
+        BossArenaConfig.TimedBossSpawn timedRule = findMatchingTimedRule(plugin, bossId, arenaId);
+
         world.execute(() -> {
             BossSpawnService spawnService = plugin.getBossSpawnService();
             if (spawnService == null) {
@@ -91,24 +110,142 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
                 }
             }
 
-            var uuid = spawnService.spawnBossFromJson(
-                    playerRef,
-                    bossId,
-                    world,
-                    arena.getPosition(),
-                    arenaId
-            );
-
-            if (uuid == null) {
-                playerRef.sendMessage(Message.raw("Échec du spawn du boss : " + bossId));
-            } else if (BossSpawnService.DEFERRED_SPAWN_UUID.equals(uuid)) {
-                playerRef.sendMessage(Message.raw("Séquence lancée pour le boss : " + bossId + ". Le boss apparaîtra après les vagues pré-boss."));
-            } else {
-                playerRef.sendMessage(Message.raw("Boss invoqué : " + bossId));
+            long graceSeconds = (!silent && timedRule != null && timedRule.gracePeriodEnabled)
+                    ? Math.max(0L, timedRule.gracePeriodSeconds)
+                    : 0L;
+            if (graceSeconds > 0L) {
+                playerRef.sendMessage(Message.raw("Invocation classique : grâce de " + graceSeconds + "s…"));
+                beginGraceThenSpawn(spawnService, playerRef, world, arena, timedRule, graceSeconds);
+                return;
             }
+
+            finishSpawn(spawnService, playerRef, world, arena, timedRule, !silent);
         });
 
-        LOGGER.info("Shop purchase: " + playerRef + " -> " + bossId + " @ " + arenaId + ", cost=" + cost);
+        LOGGER.info("Shop purchase: " + playerRef + " -> " + bossId + " @ " + arenaId
+                + ", cost=" + cost + ", silent=" + silent);
+    }
+
+    private void beginGraceThenSpawn(BossSpawnService spawnService,
+                                     PlayerRef playerRef,
+                                     World world,
+                                     Arena arena,
+                                     BossArenaConfig.TimedBossSpawn timedRule,
+                                     long graceSeconds) {
+        final long deadlineMs = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(graceSeconds);
+        final double radius = Math.max(0.0d, arena.getProximityRadius());
+        final Vector3d center = arena.getPosition();
+        final String graceText = timedRule != null ? timedRule.graceTitleText : null;
+
+        Runnable tick = new Runnable() {
+            @Override
+            public void run() {
+                long now = System.currentTimeMillis();
+                long remaining = Math.max(0L, deadlineMs - now);
+                if (remaining > 0L && radius > 0.0d && center != null) {
+                    BossWaveNotificationService.notifyTimedGraceTitle(
+                            world,
+                            center,
+                            radius,
+                            resolveBossDisplayName(bossId),
+                            arenaId,
+                            graceText,
+                            remaining
+                    );
+                }
+                if (now < deadlineMs) {
+                    GRACE_EXECUTOR.schedule(this, GRACE_TITLE_REFRESH_SECONDS, TimeUnit.SECONDS);
+                    return;
+                }
+                world.execute(() -> {
+                    if (spawnService.hasAnyEventInProgress()) {
+                        playerRef.sendMessage(Message.raw("Un événement boss a démarré pendant la grâce. Invocation annulée (paiement non remboursé)."));
+                        return;
+                    }
+                    finishSpawn(spawnService, playerRef, world, arena, timedRule, true);
+                });
+            }
+        };
+        GRACE_EXECUTOR.execute(tick);
+    }
+
+    private void finishSpawn(BossSpawnService spawnService,
+                             PlayerRef playerRef,
+                             World world,
+                             Arena arena,
+                             BossArenaConfig.TimedBossSpawn timedRule,
+                             boolean allowAnnounce) {
+        var uuid = spawnService.spawnBossFromJson(
+                playerRef,
+                bossId,
+                world,
+                arena.getPosition(),
+                arenaId
+        );
+
+        if (uuid == null) {
+            playerRef.sendMessage(Message.raw("Échec du spawn du boss : " + bossId));
+            return;
+        }
+
+        if (allowAnnounce && timedRule != null
+                && (timedRule.announceWorldWide || timedRule.announceCurrentWorld)) {
+            BossWaveNotificationService.notifyTimedSpawn(
+                    resolveBossDisplayName(bossId),
+                    arenaId,
+                    world,
+                    timedRule.worldAnnouncementText,
+                    timedRule.announceWorldWide,
+                    timedRule.announceCurrentWorld
+            );
+        }
+
+        if (BossSpawnService.DEFERRED_SPAWN_UUID.equals(uuid)) {
+            playerRef.sendMessage(Message.raw((silent ? "Invocation silencieuse" : "Séquence")
+                    + " lancée pour le boss : " + bossId + ". Le boss apparaîtra après les vagues pré-boss."));
+        } else {
+            playerRef.sendMessage(Message.raw((silent ? "Boss invoqué en silence : " : "Boss invoqué : ") + bossId));
+        }
+    }
+
+    private static BossArenaConfig.TimedBossSpawn findMatchingTimedRule(BossArenaPlugin plugin,
+                                                                        String bossId,
+                                                                        String arenaId) {
+        BossArenaConfig config = plugin.getConfig();
+        if (config == null) {
+            return null;
+        }
+        List<BossArenaConfig.TimedBossSpawn> rules = config.getTimedBossSpawns();
+        if (rules == null || rules.isEmpty()) {
+            return null;
+        }
+        String boss = bossId == null ? "" : bossId.trim();
+        String arena = arenaId == null ? "" : arenaId.trim();
+        BossArenaConfig.TimedBossSpawn fallback = null;
+        for (BossArenaConfig.TimedBossSpawn rule : rules) {
+            if (rule == null) {
+                continue;
+            }
+            String ruleArena = rule.arenaId == null ? "" : rule.arenaId.trim();
+            if (!arena.equalsIgnoreCase(ruleArena) || !rule.poolContainsBoss(boss)) {
+                continue;
+            }
+            if (rule.enabled) {
+                return rule;
+            }
+            if (fallback == null) {
+                fallback = rule;
+            }
+        }
+        return fallback;
+    }
+
+    private static String resolveBossDisplayName(String configuredBossId) {
+        BossDefinition def = BossRegistry.get(configuredBossId);
+        if (def != null && def.bossName != null && !def.bossName.isBlank()) {
+            return def.bossName.trim();
+        }
+        return configuredBossId == null ? "Boss" : configuredBossId.trim();
     }
 
     private static ChargeResult chargeCost(BossArenaPlugin plugin, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef playerRef, int amount) {

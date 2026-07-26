@@ -259,22 +259,27 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
     }
 
     private static String buildCostText(int cost, String currencyItemId, String provider) {
+        return buildCostText("Prix", cost, currencyItemId, provider);
+    }
+
+    private static String buildCostText(String label, int cost, String currencyItemId, String provider) {
+        String prefix = (label == null || label.isBlank()) ? "Prix" : label.trim();
         if (cost <= 0) {
-            return "Prix : Gratuit";
+            return prefix + " : Gratuit";
         }
         if (ShopCurrencySupport.PROVIDER_HYMARKET.equals(provider)) {
-            return "Prix : " + ShopCurrencySupport.formatHyMarketCost(cost);
+            return prefix + " : " + ShopCurrencySupport.formatHyMarketCost(cost);
         }
         if (ShopCurrencySupport.PROVIDER_ECOTALE.equals(provider)) {
-            return "Prix : " + ShopCurrencySupport.formatEcotaleCost(cost);
+            return prefix + " : " + ShopCurrencySupport.formatEcotaleCost(cost);
         }
         if (ShopCurrencySupport.PROVIDER_ECONOMY_SYSTEM.equals(provider)) {
-            return "Prix : " + ShopCurrencySupport.formatEconomySystemCost(cost);
+            return prefix + " : " + ShopCurrencySupport.formatEconomySystemCost(cost);
         }
         if (currencyItemId == null || currencyItemId.isBlank()) {
-            return "Prix : " + cost;
+            return prefix + " : " + cost;
         }
-        return "Prix : " + cost + " " + ItemNameResolver.resolveCommonName(currencyItemId);
+        return prefix + " : " + cost + " " + ItemNameResolver.resolveCommonName(currencyItemId);
     }
 
     @Nonnull
@@ -304,12 +309,14 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
             out.bossId = source.bossId;
             out.arenaId = source.arenaId;
             out.cost = Math.max(source.cost, 0);
+            out.silentCost = Math.max(source.silentCost, 0);
             out.displayName = source.displayName;
             out.description = source.description;
             out.icon = source.icon;
         } else {
             out.enabled = false;
             out.cost = 0;
+            out.silentCost = 0;
             out.bossId = "";
             out.arenaId = "";
             out.icon = "";
@@ -348,26 +355,36 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
                 : null;
         cmd.set("#TitleLabel.Text", "Hall des défis de " + resolveVendorDisplayName());
         cmd.set("#SubtitleLabel.Text", "Choisissez un rang et invoquez un boss");
+        cmd.set("#SilentHintLabel.Text",
+                "Silencieux : même invocation sans annonce chat ni période de grâce (prix séparé).");
 
         events.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton", EventData.of("Action", "close"));
+
+        ensureSelectedTierHasContracts();
 
         for (String tier : BossShopItems.TIER_ORDER) {
             String selector = "#TierBtn" + tier;
             String borderSelector = "#TierBorder" + tier;
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    selector,
-                    EventData.of("Action", "tier_" + tier)
-            );
+            boolean hasContracts = !resolveDisplayedEntriesForTier(tier).isEmpty();
+            cmd.set(selector + ".Disabled", !hasContracts);
+            if (hasContracts) {
+                events.addEventBinding(
+                        CustomUIEventBindingType.Activating,
+                        selector,
+                        EventData.of("Action", "tier_" + tier)
+                );
+            }
 
             String title = BossShopItems.displayTier(tier);
             cmd.set(selector + ".Text", title);
-            cmd.set(borderSelector + ".Visible", tier.equals(selectedTier));
+            cmd.set(borderSelector + ".Visible", hasContracts && tier.equals(selectedTier));
         }
 
         List<ShopEntry> displayed = resolveDisplayedEntriesForTier(selectedTier);
-        int visibleSlots = Math.min(BossShopItems.SLOTS_PER_TIER, Math.max(1, displayed.size()));
         boolean noDisplayedEntries = displayed.isEmpty();
+        int visibleSlots = noDisplayedEntries
+                ? 1
+                : Math.min(BossShopItems.SLOTS_PER_TIER, Math.max(1, displayed.size()));
 
         for (int slot = 1; slot <= BossShopItems.SLOTS_PER_TIER; slot++) {
             String suffix = Integer.toString(slot);
@@ -376,38 +393,74 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
             if (!slotVisible) {
                 cmd.set("#BuyBtn" + suffix + ".Visible", false);
                 cmd.set("#BuyBtn" + suffix + ".Disabled", true);
+                cmd.set("#SilentBtn" + suffix + ".Visible", false);
+                cmd.set("#SilentBtn" + suffix + ".Disabled", true);
+                cmd.set("#ItemPrice" + suffix + ".Visible", false);
+                cmd.set("#ItemSilentPrice" + suffix + ".Visible", false);
+                cmd.set("#ItemDesc" + suffix + ".Visible", false);
                 continue;
             }
 
-            ShopEntry entry;
             if (noDisplayedEntries) {
-                entry = new ShopEntry();
-                entry.enabled = false;
-                entry.displayName = "Aucun contrat";
-                entry.description = "Aucun boss n'est activé pour cette boutique et ce rang.";
-                entry.cost = 0;
-                entry.bossId = "";
-                entry.arenaId = "";
-            } else {
-                entry = displayed.get(slot - 1);
+                cmd.set("#ItemName" + suffix + ".Text", "Aucun contrat");
+                cmd.set("#ItemPrice" + suffix + ".Text", "");
+                cmd.set("#ItemPrice" + suffix + ".Visible", false);
+                cmd.set("#ItemSilentPrice" + suffix + ".Text", "");
+                cmd.set("#ItemSilentPrice" + suffix + ".Visible", false);
+                cmd.set("#ItemDesc" + suffix + ".Text", "");
+                cmd.set("#ItemDesc" + suffix + ".Visible", false);
+                cmd.set("#ItemIcon" + suffix + ".Visible", false);
+                cmd.set("#BuyBtn" + suffix + ".Visible", false);
+                cmd.set("#BuyBtn" + suffix + ".Disabled", true);
+                cmd.set("#SilentBtn" + suffix + ".Visible", false);
+                cmd.set("#SilentBtn" + suffix + ".Disabled", true);
+                continue;
             }
 
+            ShopEntry entry = displayed.get(slot - 1);
             cmd.set("#ItemName" + suffix + ".Text", entry.displayName);
-            cmd.set("#ItemPrice" + suffix + ".Text", buildCostText(entry.cost, currencyItemId, effectiveCurrencyProvider));
+            cmd.set("#ItemPrice" + suffix + ".Visible", true);
+            cmd.set("#ItemPrice" + suffix + ".Text",
+                    buildCostText("Classique", entry.cost, currencyItemId, effectiveCurrencyProvider));
+            cmd.set("#ItemSilentPrice" + suffix + ".Visible", true);
+            cmd.set("#ItemSilentPrice" + suffix + ".Text",
+                    buildCostText("Silencieux", entry.silentCost, currencyItemId, effectiveCurrencyProvider));
+            cmd.set("#ItemDesc" + suffix + ".Visible", true);
             cmd.set("#ItemDesc" + suffix + ".Text", entry.description);
             cmd.set("#ItemIcon" + suffix + ".Visible", false);
 
-            boolean ready = !noDisplayedEntries && entry.enabled && !isBlank(entry.arenaId) && !isBlank(entry.bossId);
+            boolean ready = entry.enabled && !isBlank(entry.arenaId) && !isBlank(entry.bossId);
             boolean needsConfig = entry.enabled && !ready;
+            boolean locked = !entry.enabled || needsConfig;
             cmd.set("#BuyBtn" + suffix + ".Visible", true);
-            cmd.set("#BuyBtn" + suffix + ".Disabled", noDisplayedEntries || !entry.enabled || needsConfig);
+            cmd.set("#BuyBtn" + suffix + ".Disabled", locked);
             cmd.set("#BuyBtn" + suffix + ".Text", !entry.enabled ? "Verrouillé" : (needsConfig ? "À configurer" : "Invoquer"));
+            cmd.set("#SilentBtn" + suffix + ".Visible", true);
+            cmd.set("#SilentBtn" + suffix + ".Disabled", locked);
+            cmd.set("#SilentBtn" + suffix + ".Text", locked ? "-" : "Silencieux");
 
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
                     "#BuyBtn" + suffix,
                     EventData.of("Action", "buy_" + suffix)
             );
+            events.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    "#SilentBtn" + suffix,
+                    EventData.of("Action", "silent_" + suffix)
+            );
+        }
+    }
+
+    private void ensureSelectedTierHasContracts() {
+        if (!resolveDisplayedEntriesForTier(selectedTier).isEmpty()) {
+            return;
+        }
+        for (String tier : BossShopItems.TIER_ORDER) {
+            if (!resolveDisplayedEntriesForTier(tier).isEmpty()) {
+                selectedTier = tier;
+                return;
+            }
         }
     }
 
@@ -427,7 +480,7 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
 
         if (action.startsWith("tier_")) {
             String tier = action.substring("tier_".length()).toLowerCase(Locale.ROOT);
-            if (BossShopItems.isValidTier(tier)) {
+            if (BossShopItems.isValidTier(tier) && !resolveDisplayedEntriesForTier(tier).isEmpty()) {
                 selectedTier = tier;
                 rebuild();
             }
@@ -437,22 +490,32 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
         if (action.startsWith("buy_")) {
             try {
                 int slot = Integer.parseInt(action.substring("buy_".length()));
-                handlePurchase(ref, store, slot);
+                handlePurchase(ref, store, slot, false);
             } catch (NumberFormatException ignored) {
                 LOGGER.warning("BossArena shop: invalid buy action payload: " + action);
+            }
+            return;
+        }
+
+        if (action.startsWith("silent_")) {
+            try {
+                int slot = Integer.parseInt(action.substring("silent_".length()));
+                handlePurchase(ref, store, slot, true);
+            } catch (NumberFormatException ignored) {
+                LOGGER.warning("BossArena shop: invalid silent action payload: " + action);
             }
         }
     }
 
-    private void handlePurchase(Ref<EntityStore> ref, Store<EntityStore> store, int slot) {
+    private void handlePurchase(Ref<EntityStore> ref, Store<EntityStore> store, int slot, boolean silent) {
         List<ShopEntry> displayed = resolveDisplayedEntriesForTier(selectedTier);
         if (displayed.isEmpty()) {
-            playerRef.sendMessage(Message.raw("Aucun boss n'est activé pour cette boutique et ce rang."));
+            playerRef.sendMessage(Message.raw("Aucun boss n'est activé pour ce marchand et ce rang."));
             return;
         }
 
         if (slot < 1 || slot > displayed.size()) {
-            playerRef.sendMessage(Message.raw("Emplacement boutique invalide."));
+            playerRef.sendMessage(Message.raw("Emplacement marchand invalide."));
             return;
         }
 
@@ -468,7 +531,9 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
             return;
         }
 
-        new BossArenaShopPurchaseInteraction(entry.bossId, entry.arenaId, entry.cost).run(store, ref, playerRef);
+        int charge = silent ? Math.max(0, entry.silentCost) : Math.max(0, entry.cost);
+        new BossArenaShopPurchaseInteraction(entry.bossId, entry.arenaId, charge, silent)
+                .run(store, ref, playerRef);
         close();
     }
 
@@ -503,6 +568,7 @@ public final class BossArenaShopPage extends InteractiveCustomUIPage<BossArenaSh
                     out.bossId = boss.bossName;
                     out.arenaId = contract.arenaId.trim();
                     out.cost = Math.max(0, contract.cost);
+                    out.silentCost = Math.max(0, contract.silentCost);
                     out.displayName = configured != null && !isBlank(configured.displayName)
                             ? configured.displayName
                             : boss.bossName;

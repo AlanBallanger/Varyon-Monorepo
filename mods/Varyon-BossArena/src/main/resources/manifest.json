@@ -9,7 +9,9 @@
   "Website": "",
   "Main": "${plugin_main_entrypoint}",
   "Dependencies": {},
-  "OptionalDependencies": {},
+  "OptionalDependencies": {
+    "Varyon:Varyon": "*"
+  },
   "DisabledByDefault": false,
   "IncludesAssetPack": true,
   "ServerVersion": "${server_version}"

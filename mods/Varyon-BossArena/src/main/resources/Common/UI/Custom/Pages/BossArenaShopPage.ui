@@ -92,7 +92,8 @@ Group {
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+      Disabled: (Background: #1a2433, LabelStyle: (FontSize: 14, TextColor: #5f6f86, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
     );
   }
 
@@ -102,7 +103,8 @@ Group {
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+      Disabled: (Background: #1a2433, LabelStyle: (FontSize: 14, TextColor: #5f6f86, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
     );
   }
 
@@ -112,7 +114,8 @@ Group {
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+      Disabled: (Background: #1a2433, LabelStyle: (FontSize: 14, TextColor: #5f6f86, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
     );
   }
 
@@ -122,7 +125,8 @@ Group {
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+      Disabled: (Background: #1a2433, LabelStyle: (FontSize: 14, TextColor: #5f6f86, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
     );
   }
 
@@ -132,7 +136,8 @@ Group {
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      Pressed: (Background: #4f79ab, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+      Disabled: (Background: #1a2433, LabelStyle: (FontSize: 14, TextColor: #5f6f86, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
     );
   }
 
@@ -151,25 +156,42 @@ Group {
     }
 
     Label #ItemPrice1 {
-      Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
+      Anchor: (Left: 24, Top: 48, Width: 370, Height: 20);
       Text: "Prix";
-      Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
+      Style: (FontSize: 14, TextColor: #ffd88f, RenderBold: true);
+    }
+
+    Label #ItemSilentPrice1 {
+      Anchor: (Left: 24, Top: 68, Width: 370, Height: 20);
+      Text: "Silencieux";
+      Style: (FontSize: 13, TextColor: #b2c0d2, RenderBold: true);
     }
 
     Label #ItemDesc1 {
-      Anchor: (Left: 24, Top: 82, Width: 370, Height: 46);
+      Anchor: (Left: 24, Top: 90, Width: 370, Height: 40);
       Text: "Description";
       Style: (FontSize: 13, TextColor: #b1bfd4);
     }
 
     TextButton #BuyBtn1 {
-      Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
+      Anchor: (Left: 416, Top: 36, Width: 150, Height: 36);
       Text: "Invoquer";
       Style: TextButtonStyle(
-        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Pressed: (Background: #17633c, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Disabled: (Background: #334358, LabelStyle: (FontSize: 15, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #17633c, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      );
+    }
+
+    TextButton #SilentBtn1 {
+      Anchor: (Left: 416, Top: 80, Width: 150, Height: 36);
+      Text: "Silencieux";
+      Style: TextButtonStyle(
+        Default: (Background: #3a4a62, LabelStyle: (FontSize: 13, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #4a5f7d, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #2a3d58, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
       );
     }
   }
@@ -189,25 +211,42 @@ Group {
     }
 
     Label #ItemPrice2 {
-      Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
+      Anchor: (Left: 24, Top: 48, Width: 370, Height: 20);
       Text: "Prix";
-      Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
+      Style: (FontSize: 14, TextColor: #ffd88f, RenderBold: true);
+    }
+
+    Label #ItemSilentPrice2 {
+      Anchor: (Left: 24, Top: 68, Width: 370, Height: 20);
+      Text: "Silencieux";
+      Style: (FontSize: 13, TextColor: #b2c0d2, RenderBold: true);
     }
 
     Label #ItemDesc2 {
-      Anchor: (Left: 24, Top: 82, Width: 370, Height: 46);
+      Anchor: (Left: 24, Top: 90, Width: 370, Height: 40);
       Text: "Description";
       Style: (FontSize: 13, TextColor: #b1bfd4);
     }
 
     TextButton #BuyBtn2 {
-      Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
+      Anchor: (Left: 416, Top: 36, Width: 150, Height: 36);
       Text: "Invoquer";
       Style: TextButtonStyle(
-        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Pressed: (Background: #17633c, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Disabled: (Background: #334358, LabelStyle: (FontSize: 15, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #17633c, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      );
+    }
+
+    TextButton #SilentBtn2 {
+      Anchor: (Left: 416, Top: 80, Width: 150, Height: 36);
+      Text: "Silencieux";
+      Style: TextButtonStyle(
+        Default: (Background: #3a4a62, LabelStyle: (FontSize: 13, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #4a5f7d, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #2a3d58, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
       );
     }
   }
@@ -227,25 +266,42 @@ Group {
     }
 
     Label #ItemPrice3 {
-      Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
+      Anchor: (Left: 24, Top: 48, Width: 370, Height: 20);
       Text: "Prix";
-      Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
+      Style: (FontSize: 14, TextColor: #ffd88f, RenderBold: true);
+    }
+
+    Label #ItemSilentPrice3 {
+      Anchor: (Left: 24, Top: 68, Width: 370, Height: 20);
+      Text: "Silencieux";
+      Style: (FontSize: 13, TextColor: #b2c0d2, RenderBold: true);
     }
 
     Label #ItemDesc3 {
-      Anchor: (Left: 24, Top: 82, Width: 370, Height: 46);
+      Anchor: (Left: 24, Top: 90, Width: 370, Height: 40);
       Text: "Description";
       Style: (FontSize: 13, TextColor: #b1bfd4);
     }
 
     TextButton #BuyBtn3 {
-      Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
+      Anchor: (Left: 416, Top: 36, Width: 150, Height: 36);
       Text: "Invoquer";
       Style: TextButtonStyle(
-        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Pressed: (Background: #17633c, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Disabled: (Background: #334358, LabelStyle: (FontSize: 15, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #17633c, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      );
+    }
+
+    TextButton #SilentBtn3 {
+      Anchor: (Left: 416, Top: 80, Width: 150, Height: 36);
+      Text: "Silencieux";
+      Style: TextButtonStyle(
+        Default: (Background: #3a4a62, LabelStyle: (FontSize: 13, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #4a5f7d, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #2a3d58, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
       );
     }
   }
@@ -265,25 +321,42 @@ Group {
     }
 
     Label #ItemPrice4 {
-      Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
+      Anchor: (Left: 24, Top: 48, Width: 370, Height: 20);
       Text: "Prix";
-      Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
+      Style: (FontSize: 14, TextColor: #ffd88f, RenderBold: true);
+    }
+
+    Label #ItemSilentPrice4 {
+      Anchor: (Left: 24, Top: 68, Width: 370, Height: 20);
+      Text: "Silencieux";
+      Style: (FontSize: 13, TextColor: #b2c0d2, RenderBold: true);
     }
 
     Label #ItemDesc4 {
-      Anchor: (Left: 24, Top: 82, Width: 370, Height: 46);
+      Anchor: (Left: 24, Top: 90, Width: 370, Height: 40);
       Text: "Description";
       Style: (FontSize: 13, TextColor: #b1bfd4);
     }
 
     TextButton #BuyBtn4 {
-      Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
+      Anchor: (Left: 416, Top: 36, Width: 150, Height: 36);
       Text: "Invoquer";
       Style: TextButtonStyle(
-        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Pressed: (Background: #17633c, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Disabled: (Background: #334358, LabelStyle: (FontSize: 15, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #17633c, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      );
+    }
+
+    TextButton #SilentBtn4 {
+      Anchor: (Left: 416, Top: 80, Width: 150, Height: 36);
+      Text: "Silencieux";
+      Style: TextButtonStyle(
+        Default: (Background: #3a4a62, LabelStyle: (FontSize: 13, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #4a5f7d, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #2a3d58, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
       );
     }
   }
@@ -303,27 +376,51 @@ Group {
     }
 
     Label #ItemPrice5 {
-      Anchor: (Left: 24, Top: 52, Width: 370, Height: 24);
+      Anchor: (Left: 24, Top: 48, Width: 370, Height: 20);
       Text: "Prix";
-      Style: (FontSize: 15, TextColor: #ffd88f, RenderBold: true);
+      Style: (FontSize: 14, TextColor: #ffd88f, RenderBold: true);
+    }
+
+    Label #ItemSilentPrice5 {
+      Anchor: (Left: 24, Top: 68, Width: 370, Height: 20);
+      Text: "Silencieux";
+      Style: (FontSize: 13, TextColor: #b2c0d2, RenderBold: true);
     }
 
     Label #ItemDesc5 {
-      Anchor: (Left: 24, Top: 82, Width: 370, Height: 46);
+      Anchor: (Left: 24, Top: 90, Width: 370, Height: 40);
       Text: "Description";
       Style: (FontSize: 13, TextColor: #b1bfd4);
     }
 
     TextButton #BuyBtn5 {
-      Anchor: (Left: 416, Top: 52, Width: 150, Height: 46);
+      Anchor: (Left: 416, Top: 36, Width: 150, Height: 36);
       Text: "Invoquer";
       Style: TextButtonStyle(
-        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Pressed: (Background: #17633c, LabelStyle: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-        Disabled: (Background: #334358, LabelStyle: (FontSize: 15, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        Default: (Background: #1f7d4b, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #17633c, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
       );
     }
+
+    TextButton #SilentBtn5 {
+      Anchor: (Left: 416, Top: 80, Width: 150, Height: 36);
+      Text: "Silencieux";
+      Style: TextButtonStyle(
+        Default: (Background: #3a4a62, LabelStyle: (FontSize: 13, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Hovered: (Background: #4a5f7d, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Pressed: (Background: #2a3d58, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+        Disabled: (Background: #334358, LabelStyle: (FontSize: 13, TextColor: #8ea0bb, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+      );
+    }
+
+  Label #SilentHintLabel {
+    Anchor: (Left: 368, Top: 920, Width: 1100, Height: 36);
+    Text: "Silencieux : même invocation sans annonce chat ni période de grâce (prix séparé).";
+    Style: (FontSize: 13, TextColor: #8ea1bb);
+  }
+
   }
   }
   }

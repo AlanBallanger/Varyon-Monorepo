@@ -26,6 +26,7 @@ dependencies {
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("com.google.code.gson:gson:2.11.0")
     compileOnly(files(resolvedHytaleServerJar))
+    compileOnly(project(":mods:Varyon"))
 }
 
 java {

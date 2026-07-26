@@ -30,6 +30,8 @@ public final class BossWaveNotificationService {
     private static final float FINAL_CLEAR_DURATION_SECONDS = 2.5f;
     private static final float WORLD_ALERT_DURATION_SECONDS = 4.0f;
     private static final long WORLD_ALERT_DURATION_MILLIS = (long) (WORLD_ALERT_DURATION_SECONDS * 1000f);
+    /** Slightly above the 5s scheduler tick so grace / waiting titles stay visible between refreshes. */
+    private static final float TIMED_ARENA_TITLE_DURATION_SECONDS = 6.0f;
     private static final Map<UUID, Long> TIMED_ALERT_SUPPRESS_UNTIL = new ConcurrentHashMap<>();
     private static final Pattern PLACEHOLDER_PATTERN =
             Pattern.compile("\\$([A-Za-z][A-Za-z0-9_]*)|\\{([A-Za-z][A-Za-z0-9_]*)\\}");
@@ -494,17 +496,117 @@ public final class BossWaveNotificationService {
         return false;
     }
 
+    /**
+     * Title for players inside the arena Rayon Décl during the pre-spawn grace countdown.
+     * {@code $time} is formatted as {@code mm:ss}.
+     */
+    public static void notifyTimedGraceTitle(World world,
+                                             Vector3d arenaCenter,
+                                             double radiusBlocks,
+                                             String bossName,
+                                             String arenaId,
+                                             String customTemplate,
+                                             long remainingMillis) {
+        if (world == null || arenaCenter == null || radiusBlocks <= 0.0d) {
+            return;
+        }
+        String bossDisplay = safeBossDisplayName(bossName);
+        String arenaDisplay = safeText(arenaId, "Arena");
+        String worldDisplay = safeText(world.getName(), "World");
+        String template = customTemplate == null || customTemplate.isBlank()
+                ? BossArenaConfig.DEFAULT_TIMED_GRACE_TITLE_TEXT
+                : customTemplate.trim();
+        String titleText = applyTimedAnnouncementPlaceholders(
+                template,
+                bossDisplay,
+                arenaDisplay,
+                worldDisplay,
+                formatCountdownValue(remainingMillis)
+        );
+        if (titleText.isBlank()) {
+            return;
+        }
+        Message title = toPlainMessage(stripColorCodes(titleText));
+        Message subtitle = toPlainMessage(bossDisplay);
+        showTitleInRadius(world, arenaCenter, radiusBlocks, title, subtitle, TIMED_ARENA_TITLE_DURATION_SECONDS);
+    }
+
+    /** Fixed waiting title when Planifié needs more players in the Rayon Décl. */
+    public static void notifyTimedWaitingPlayersTitle(World world,
+                                                      Vector3d arenaCenter,
+                                                      double radiusBlocks,
+                                                      int requiredPlayers) {
+        if (world == null || arenaCenter == null || radiusBlocks <= 0.0d || requiredPlayers <= 0) {
+            return;
+        }
+        String titleText = "Vous devez être " + requiredPlayers
+                + " joueurs minimum pour que le combat se lance";
+        Message title = toPlainMessage(titleText);
+        showTitleInRadius(world, arenaCenter, radiusBlocks, title, null, TIMED_ARENA_TITLE_DURATION_SECONDS);
+    }
+
+    private static void showTitleInRadius(World world,
+                                          Vector3d center,
+                                          double radiusBlocks,
+                                          Message title,
+                                          Message subtitle,
+                                          float durationSeconds) {
+        double radiusSq = radiusBlocks * radiusBlocks;
+        for (PlayerRef playerRef : world.getPlayerRefs()) {
+            if (playerRef == null || !playerRef.isValid()) {
+                continue;
+            }
+            Transform transform = playerRef.getTransform();
+            org.joml.Vector3d rawPlayerPos = transform != null ? transform.getPosition() : null;
+            if (rawPlayerPos == null) {
+                continue;
+            }
+            double dx = rawPlayerPos.x - center.x;
+            double dy = rawPlayerPos.y - center.y;
+            double dz = rawPlayerPos.z - center.z;
+            if ((dx * dx) + (dy * dy) + (dz * dz) > radiusSq) {
+                continue;
+            }
+            try {
+                EventTitleUtil.hideEventTitleFromPlayer(playerRef, 0f);
+                if (title != null || subtitle != null) {
+                    EventTitleUtil.showEventTitleToPlayer(
+                            playerRef,
+                            title,
+                            subtitle,
+                            true,
+                            null,
+                            durationSeconds,
+                            0f,
+                            0f
+                    );
+                }
+            } catch (Exception e) {
+                LOGGER.fine(() -> "Failed to show timed arena title: " + e.getMessage());
+            }
+        }
+    }
+
     private static String applyTimedAnnouncementPlaceholders(String template,
                                                              String bossDisplay,
                                                              String arenaDisplay,
                                                              String worldDisplay) {
+        return applyTimedAnnouncementPlaceholders(template, bossDisplay, arenaDisplay, worldDisplay, null);
+    }
+
+    private static String applyTimedAnnouncementPlaceholders(String template,
+                                                             String bossDisplay,
+                                                             String arenaDisplay,
+                                                             String worldDisplay,
+                                                             String timeDisplay) {
         if (template == null || template.isBlank()) {
             return "";
         }
         Map<String, String> values = Map.of(
                 "boss", defaultIfBlank(bossDisplay, "Boss"),
                 "arena", defaultIfBlank(arenaDisplay, "Arena"),
-                "world", defaultIfBlank(worldDisplay, "World")
+                "world", defaultIfBlank(worldDisplay, "World"),
+                "time", defaultIfBlank(timeDisplay, "")
         );
         return renderTemplate(template, values);
     }

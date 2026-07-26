@@ -38,7 +38,7 @@ Group {
 
   Label #SubtitleLabel {
     Anchor: (Left: 368, Top: 150, Width: 880, Height: 26);
-    Text: "Configurer boss, boutique et arènes";
+    Text: "Configurer boss, marchands et arènes";
     Style: (FontSize: 15, TextColor: #b2c0d2);
   }
 
@@ -114,7 +114,7 @@ Group {
 
   TextButton #ShopTab {
     Anchor: (Left: 1263, Top: 223, Width: 288, Height: 42);
-    Text: "Boutique";
+    Text: "Marchands";
     Style: TextButtonStyle(
       Default: (Background: #2b4568, LabelStyle: (FontSize: 14, TextColor: #d8e3f4, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
       Hovered: (Background: #3f6391, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -729,39 +729,37 @@ Group {
         );
       }
 
-      Label #BossTimedHint1 { Anchor: (Left: 32, Top: 64, Width: 1100, Height: 16); Text: "Temps réapparition : délai h/min/s. Planifié : intervalle h/j/s + arrivée + disparition. Manuel : pas d'auto-planning, Apparition = forcé."; Style: (FontSize: 12, TextColor: #8ea1bb); }
+      Label #BossTimedHint1 { Anchor: (Left: 32, Top: 64, Width: 1100, Height: 16); Text: "Joueurs = proches arène (0 = libre). Grâce = countdown title avant pop. Planifié : msg si pas assez de joueurs. Manuel : Apparition forcé."; Style: (FontSize: 12, TextColor: #8ea1bb); }
 
       Label #BossTimedHeaderEnabled { Anchor: (Left: 40, Top: 90, Width: 48, Height: 20); Text: "Actif"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
-      Label #BossTimedHeaderMode { Anchor: (Left: 94, Top: 90, Width: 100, Height: 20); Text: "Mode"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
-      Label #BossTimedHeaderBossId { Anchor: (Left: 200, Top: 90, Width: 200, Height: 20); Text: "Boss"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderMode { Anchor: (Left: 94, Top: 90, Width: 145, Height: 20); Text: "Mode"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderBossId { Anchor: (Left: 246, Top: 90, Width: 200, Height: 20); Text: "Pool boss"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
       Label #BossTimedHeaderArenaId { Anchor: (Left: 408, Top: 90, Width: 130, Height: 20); Text: "Arène"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
-      Label #BossTimedHeaderMinPlayers { Anchor: (Left: 544, Top: 90, Width: 40, Height: 20); Text: "Joueurs"; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
-      Label #BossTimedHeaderRequire { Anchor: (Left: 590, Top: 90, Width: 70, Height: 20); Text: "Près arène"; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderMinPlayers { Anchor: (Left: 544, Top: 90, Width: 48, Height: 20); Text: "Joueurs"; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderGrace { Anchor: (Left: 590, Top: 90, Width: 48, Height: 20); Text: "Grâce"; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderGraceSec { Anchor: (Left: 642, Top: 90, Width: 36, Height: 20); Text: "Sec"; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderRequire { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Text: ""; Visible: false; Style: (FontSize: 1, TextColor: #8ea1bb); }
       Label #BossTimedHeaderDespawnH { Anchor: (Left: 40, Top: 1, Width: 1, Height: 1); Text: ""; Visible: false; Style: (FontSize: 1, TextColor: #8ea1bb); }
       Label #BossTimedHeaderDespawnM { Anchor: (Left: 40, Top: 1, Width: 1, Height: 1); Text: ""; Visible: false; Style: (FontSize: 1, TextColor: #8ea1bb); }
-      Label #BossTimedHeaderAnnounceGlobal { Anchor: (Left: 666, Top: 90, Width: 70, Height: 20); Text: "Ann Glob"; Style: (FontSize: 10, TextColor: #8ea1bb, RenderBold: true); }
-      Label #BossTimedHeaderAnnounceWorld { Anchor: (Left: 742, Top: 90, Width: 70, Height: 20); Text: "Ann Monde"; Style: (FontSize: 10, TextColor: #8ea1bb, RenderBold: true); }
-      Label #BossTimedHeaderPop { Anchor: (Left: 818, Top: 90, Width: 80, Height: 20); Text: "Apparition"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
-      Label #BossTimedHeaderDelete { Anchor: (Left: 904, Top: 90, Width: 40, Height: 20); Text: "Suppr"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderAnnounceGlobal { Anchor: (Left: 690, Top: 90, Width: 70, Height: 20); Text: "Ann Glob"; Style: (FontSize: 10, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderAnnounceWorld { Anchor: (Left: 766, Top: 90, Width: 70, Height: 20); Text: "Ann Monde"; Style: (FontSize: 10, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderPop { Anchor: (Left: 842, Top: 90, Width: 70, Height: 20); Text: "Apparition"; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossTimedHeaderDelete { Anchor: (Left: 918, Top: 90, Width: 32, Height: 20); Text: "Suppr"; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
       Label #BossTimedHeaderEveryH { Anchor: (Left: 40, Top: 1, Width: 1, Height: 1); Text: ""; Visible: false; Style: (FontSize: 1, TextColor: #8ea1bb); }
       Label #BossTimedHeaderEveryM { Anchor: (Left: 40, Top: 1, Width: 1, Height: 1); Text: ""; Visible: false; Style: (FontSize: 1, TextColor: #8ea1bb); }
       Label #BossTimedHeaderTimes { Anchor: (Left: 40, Top: 1, Width: 1, Height: 1); Text: ""; Visible: false; Style: (FontSize: 1, TextColor: #8ea1bb); }
       Label #BossTimedHeaderOneShot { Anchor: (Left: 40, Top: 1, Width: 1, Height: 1); Text: ""; Visible: false; Style: (FontSize: 1, TextColor: #8ea1bb); }
 
       Panel #BossTimedRow1 {
-        Anchor: (Left: 32, Top: 118, Width: 1136, Height: 72);
+        Anchor: (Left: 32, Top: 110, Width: 1136, Height: 68);
         Background: #1a2b41;
         Visible: false;
         TextField #TimedEnabled1 { Anchor: (Left: 8, Top: 8, Width: 1, Height: 1); Value: "true"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedEnabledToggle1 { Anchor: (Left: 8, Top: 10, Width: 48, Height: 26); Text: "Oui"; Style: TextButtonStyle(Default: (Background: #1f7d4b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #17633c, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedMode1 { Anchor: (Left: 62, Top: 8, Width: 1, Height: 1); Value: "AFTER_DEATH"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedModeToggle1 { Anchor: (Left: 62, Top: 10, Width: 145, Height: 26); Text: "Temps réapparition"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        DropdownBox #TimedBossId1 {
-          Anchor: (Left: 214, Top: 8, Width: 200, Height: 30);
-          Style: $C.@DefaultDropdownBoxStyle;
-          Value: "";
-          DropdownEntry { Value: ""; Text: "(boss)"; }
-        }
+        TextField #TimedBossId1 { Anchor: (Left: 214, Top: 8, Width: 1, Height: 1); Value: ""; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedBossPool1 { Anchor: (Left: 214, Top: 8, Width: 200, Height: 30); Text: "Pool (0)"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         DropdownBox #TimedArenaId1 {
           Anchor: (Left: 376, Top: 8, Width: 130, Height: 30);
           Style: $C.@DefaultDropdownBoxStyle;
@@ -770,17 +768,20 @@ Group {
         }
         TextField #TimedMinPlayers1 { Anchor: (Left: 512, Top: 8, Width: 36, Height: 30); Value: "1"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextField #TimedRequirePlayer1 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedRequirePlayerToggle1 { Anchor: (Left: 558, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedRequirePlayerToggle1 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Visible: false; Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedDespawnHours1 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Value: "0"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextField #TimedDespawnMinutes1 { Anchor: (Left: 722, Top: 40, Width: 44, Height: 26); Value: "5"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
         Label #TimedDespawnLabel1 { Anchor: (Left: 556, Top: 44, Width: 160, Height: 20); Text: "Temps avant disparition"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         Label #TimedDespawnMinutesUnit1 { Anchor: (Left: 770, Top: 44, Width: 28, Height: 20); Text: "min"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb); }
-        TextField #TimedAnnounceGlobal1 { Anchor: (Left: 666, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceGlobalToggle1 { Anchor: (Left: 666, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextField #TimedAnnounceWorld1 { Anchor: (Left: 742, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceWorldToggle1 { Anchor: (Left: 742, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedPop1 { Anchor: (Left: 818, Top: 8, Width: 80, Height: 30); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedDelete1 { Anchor: (Left: 904, Top: 8, Width: 40, Height: 30); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 16, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceEnabled1 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedGraceToggle1 { Anchor: (Left: 558, Top: 10, Width: 48, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceSeconds1 { Anchor: (Left: 610, Top: 10, Width: 40, Height: 26); Value: "30"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
+        TextField #TimedAnnounceGlobal1 { Anchor: (Left: 658, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceGlobalToggle1 { Anchor: (Left: 658, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedAnnounceWorld1 { Anchor: (Left: 734, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceWorldToggle1 { Anchor: (Left: 734, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedPop1 { Anchor: (Left: 810, Top: 10, Width: 70, Height: 26); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedDelete1 { Anchor: (Left: 886, Top: 10, Width: 32, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 14, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
 
         Label #TimedAfterDeathLabel1 { Anchor: (Left: 8, Top: 44, Width: 120, Height: 20); Text: "Délai respawn"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         TextField #TimedEveryHours1 { Anchor: (Left: 130, Top: 40, Width: 40, Height: 26); Value: "1"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
@@ -817,19 +818,15 @@ Group {
       }
 
       Panel #BossTimedRow2 {
-        Anchor: (Left: 32, Top: 198, Width: 1136, Height: 72);
+        Anchor: (Left: 32, Top: 180, Width: 1136, Height: 68);
         Background: #1a2b41;
         Visible: false;
         TextField #TimedEnabled2 { Anchor: (Left: 8, Top: 8, Width: 1, Height: 1); Value: "true"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedEnabledToggle2 { Anchor: (Left: 8, Top: 10, Width: 48, Height: 26); Text: "Oui"; Style: TextButtonStyle(Default: (Background: #1f7d4b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #17633c, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedMode2 { Anchor: (Left: 62, Top: 8, Width: 1, Height: 1); Value: "AFTER_DEATH"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedModeToggle2 { Anchor: (Left: 62, Top: 10, Width: 145, Height: 26); Text: "Temps réapparition"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        DropdownBox #TimedBossId2 {
-          Anchor: (Left: 214, Top: 8, Width: 200, Height: 30);
-          Style: $C.@DefaultDropdownBoxStyle;
-          Value: "";
-          DropdownEntry { Value: ""; Text: "(boss)"; }
-        }
+        TextField #TimedBossId2 { Anchor: (Left: 214, Top: 8, Width: 1, Height: 1); Value: ""; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedBossPool2 { Anchor: (Left: 214, Top: 8, Width: 200, Height: 30); Text: "Pool (0)"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         DropdownBox #TimedArenaId2 {
           Anchor: (Left: 376, Top: 8, Width: 130, Height: 30);
           Style: $C.@DefaultDropdownBoxStyle;
@@ -838,17 +835,20 @@ Group {
         }
         TextField #TimedMinPlayers2 { Anchor: (Left: 512, Top: 8, Width: 36, Height: 30); Value: "1"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextField #TimedRequirePlayer2 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedRequirePlayerToggle2 { Anchor: (Left: 558, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedRequirePlayerToggle2 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Visible: false; Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedDespawnHours2 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Value: "0"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextField #TimedDespawnMinutes2 { Anchor: (Left: 722, Top: 40, Width: 44, Height: 26); Value: "5"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
         Label #TimedDespawnLabel2 { Anchor: (Left: 556, Top: 44, Width: 160, Height: 20); Text: "Temps avant disparition"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         Label #TimedDespawnMinutesUnit2 { Anchor: (Left: 770, Top: 44, Width: 28, Height: 20); Text: "min"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb); }
-        TextField #TimedAnnounceGlobal2 { Anchor: (Left: 666, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceGlobalToggle2 { Anchor: (Left: 666, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextField #TimedAnnounceWorld2 { Anchor: (Left: 742, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceWorldToggle2 { Anchor: (Left: 742, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedPop2 { Anchor: (Left: 818, Top: 8, Width: 80, Height: 30); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedDelete2 { Anchor: (Left: 904, Top: 8, Width: 40, Height: 30); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 16, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceEnabled2 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedGraceToggle2 { Anchor: (Left: 558, Top: 10, Width: 48, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceSeconds2 { Anchor: (Left: 610, Top: 10, Width: 40, Height: 26); Value: "30"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
+        TextField #TimedAnnounceGlobal2 { Anchor: (Left: 658, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceGlobalToggle2 { Anchor: (Left: 658, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedAnnounceWorld2 { Anchor: (Left: 734, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceWorldToggle2 { Anchor: (Left: 734, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedPop2 { Anchor: (Left: 810, Top: 10, Width: 70, Height: 26); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedDelete2 { Anchor: (Left: 886, Top: 10, Width: 32, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 14, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
 
         Label #TimedAfterDeathLabel2 { Anchor: (Left: 8, Top: 44, Width: 120, Height: 20); Text: "Délai respawn"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         TextField #TimedEveryHours2 { Anchor: (Left: 130, Top: 40, Width: 40, Height: 26); Value: "1"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
@@ -885,19 +885,15 @@ Group {
       }
 
       Panel #BossTimedRow3 {
-        Anchor: (Left: 32, Top: 278, Width: 1136, Height: 72);
+        Anchor: (Left: 32, Top: 250, Width: 1136, Height: 68);
         Background: #1a2b41;
         Visible: false;
         TextField #TimedEnabled3 { Anchor: (Left: 8, Top: 8, Width: 1, Height: 1); Value: "true"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedEnabledToggle3 { Anchor: (Left: 8, Top: 10, Width: 48, Height: 26); Text: "Oui"; Style: TextButtonStyle(Default: (Background: #1f7d4b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #17633c, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedMode3 { Anchor: (Left: 62, Top: 8, Width: 1, Height: 1); Value: "AFTER_DEATH"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedModeToggle3 { Anchor: (Left: 62, Top: 10, Width: 145, Height: 26); Text: "Temps réapparition"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        DropdownBox #TimedBossId3 {
-          Anchor: (Left: 214, Top: 8, Width: 200, Height: 30);
-          Style: $C.@DefaultDropdownBoxStyle;
-          Value: "";
-          DropdownEntry { Value: ""; Text: "(boss)"; }
-        }
+        TextField #TimedBossId3 { Anchor: (Left: 214, Top: 8, Width: 1, Height: 1); Value: ""; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedBossPool3 { Anchor: (Left: 214, Top: 8, Width: 200, Height: 30); Text: "Pool (0)"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         DropdownBox #TimedArenaId3 {
           Anchor: (Left: 376, Top: 8, Width: 130, Height: 30);
           Style: $C.@DefaultDropdownBoxStyle;
@@ -906,17 +902,20 @@ Group {
         }
         TextField #TimedMinPlayers3 { Anchor: (Left: 512, Top: 8, Width: 36, Height: 30); Value: "1"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextField #TimedRequirePlayer3 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedRequirePlayerToggle3 { Anchor: (Left: 558, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedRequirePlayerToggle3 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Visible: false; Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedDespawnHours3 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Value: "0"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextField #TimedDespawnMinutes3 { Anchor: (Left: 722, Top: 40, Width: 44, Height: 26); Value: "5"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
         Label #TimedDespawnLabel3 { Anchor: (Left: 556, Top: 44, Width: 160, Height: 20); Text: "Temps avant disparition"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         Label #TimedDespawnMinutesUnit3 { Anchor: (Left: 770, Top: 44, Width: 28, Height: 20); Text: "min"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb); }
-        TextField #TimedAnnounceGlobal3 { Anchor: (Left: 666, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceGlobalToggle3 { Anchor: (Left: 666, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextField #TimedAnnounceWorld3 { Anchor: (Left: 742, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceWorldToggle3 { Anchor: (Left: 742, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedPop3 { Anchor: (Left: 818, Top: 8, Width: 80, Height: 30); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedDelete3 { Anchor: (Left: 904, Top: 8, Width: 40, Height: 30); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 16, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceEnabled3 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedGraceToggle3 { Anchor: (Left: 558, Top: 10, Width: 48, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceSeconds3 { Anchor: (Left: 610, Top: 10, Width: 40, Height: 26); Value: "30"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
+        TextField #TimedAnnounceGlobal3 { Anchor: (Left: 658, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceGlobalToggle3 { Anchor: (Left: 658, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedAnnounceWorld3 { Anchor: (Left: 734, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceWorldToggle3 { Anchor: (Left: 734, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedPop3 { Anchor: (Left: 810, Top: 10, Width: 70, Height: 26); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedDelete3 { Anchor: (Left: 886, Top: 10, Width: 32, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 14, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
 
         Label #TimedAfterDeathLabel3 { Anchor: (Left: 8, Top: 44, Width: 120, Height: 20); Text: "Délai respawn"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         TextField #TimedEveryHours3 { Anchor: (Left: 130, Top: 40, Width: 40, Height: 26); Value: "1"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
@@ -953,19 +952,15 @@ Group {
       }
 
       Panel #BossTimedRow4 {
-        Anchor: (Left: 32, Top: 358, Width: 1136, Height: 72);
+        Anchor: (Left: 32, Top: 320, Width: 1136, Height: 68);
         Background: #1a2b41;
         Visible: false;
         TextField #TimedEnabled4 { Anchor: (Left: 8, Top: 8, Width: 1, Height: 1); Value: "true"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedEnabledToggle4 { Anchor: (Left: 8, Top: 10, Width: 48, Height: 26); Text: "Oui"; Style: TextButtonStyle(Default: (Background: #1f7d4b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #17633c, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedMode4 { Anchor: (Left: 62, Top: 8, Width: 1, Height: 1); Value: "AFTER_DEATH"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedModeToggle4 { Anchor: (Left: 62, Top: 10, Width: 145, Height: 26); Text: "Temps réapparition"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        DropdownBox #TimedBossId4 {
-          Anchor: (Left: 214, Top: 8, Width: 200, Height: 30);
-          Style: $C.@DefaultDropdownBoxStyle;
-          Value: "";
-          DropdownEntry { Value: ""; Text: "(boss)"; }
-        }
+        TextField #TimedBossId4 { Anchor: (Left: 214, Top: 8, Width: 1, Height: 1); Value: ""; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedBossPool4 { Anchor: (Left: 214, Top: 8, Width: 200, Height: 30); Text: "Pool (0)"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         DropdownBox #TimedArenaId4 {
           Anchor: (Left: 376, Top: 8, Width: 130, Height: 30);
           Style: $C.@DefaultDropdownBoxStyle;
@@ -974,17 +969,20 @@ Group {
         }
         TextField #TimedMinPlayers4 { Anchor: (Left: 512, Top: 8, Width: 36, Height: 30); Value: "1"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextField #TimedRequirePlayer4 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedRequirePlayerToggle4 { Anchor: (Left: 558, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedRequirePlayerToggle4 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Visible: false; Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedDespawnHours4 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Value: "0"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextField #TimedDespawnMinutes4 { Anchor: (Left: 722, Top: 40, Width: 44, Height: 26); Value: "5"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
         Label #TimedDespawnLabel4 { Anchor: (Left: 556, Top: 44, Width: 160, Height: 20); Text: "Temps avant disparition"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         Label #TimedDespawnMinutesUnit4 { Anchor: (Left: 770, Top: 44, Width: 28, Height: 20); Text: "min"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb); }
-        TextField #TimedAnnounceGlobal4 { Anchor: (Left: 666, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceGlobalToggle4 { Anchor: (Left: 666, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextField #TimedAnnounceWorld4 { Anchor: (Left: 742, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceWorldToggle4 { Anchor: (Left: 742, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedPop4 { Anchor: (Left: 818, Top: 8, Width: 80, Height: 30); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedDelete4 { Anchor: (Left: 904, Top: 8, Width: 40, Height: 30); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 16, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceEnabled4 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedGraceToggle4 { Anchor: (Left: 558, Top: 10, Width: 48, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceSeconds4 { Anchor: (Left: 610, Top: 10, Width: 40, Height: 26); Value: "30"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
+        TextField #TimedAnnounceGlobal4 { Anchor: (Left: 658, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceGlobalToggle4 { Anchor: (Left: 658, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedAnnounceWorld4 { Anchor: (Left: 734, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceWorldToggle4 { Anchor: (Left: 734, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedPop4 { Anchor: (Left: 810, Top: 10, Width: 70, Height: 26); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedDelete4 { Anchor: (Left: 886, Top: 10, Width: 32, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 14, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
 
         Label #TimedAfterDeathLabel4 { Anchor: (Left: 8, Top: 44, Width: 120, Height: 20); Text: "Délai respawn"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         TextField #TimedEveryHours4 { Anchor: (Left: 130, Top: 40, Width: 40, Height: 26); Value: "1"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
@@ -1021,19 +1019,15 @@ Group {
       }
 
       Panel #BossTimedRow5 {
-        Anchor: (Left: 32, Top: 438, Width: 1136, Height: 72);
+        Anchor: (Left: 32, Top: 390, Width: 1136, Height: 68);
         Background: #1a2b41;
         Visible: false;
         TextField #TimedEnabled5 { Anchor: (Left: 8, Top: 8, Width: 1, Height: 1); Value: "true"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedEnabledToggle5 { Anchor: (Left: 8, Top: 10, Width: 48, Height: 26); Text: "Oui"; Style: TextButtonStyle(Default: (Background: #1f7d4b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #17633c, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedMode5 { Anchor: (Left: 62, Top: 8, Width: 1, Height: 1); Value: "AFTER_DEATH"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedModeToggle5 { Anchor: (Left: 62, Top: 10, Width: 145, Height: 26); Text: "Temps réapparition"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        DropdownBox #TimedBossId5 {
-          Anchor: (Left: 214, Top: 8, Width: 200, Height: 30);
-          Style: $C.@DefaultDropdownBoxStyle;
-          Value: "";
-          DropdownEntry { Value: ""; Text: "(boss)"; }
-        }
+        TextField #TimedBossId5 { Anchor: (Left: 214, Top: 8, Width: 1, Height: 1); Value: ""; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedBossPool5 { Anchor: (Left: 214, Top: 8, Width: 200, Height: 30); Text: "Pool (0)"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         DropdownBox #TimedArenaId5 {
           Anchor: (Left: 376, Top: 8, Width: 130, Height: 30);
           Style: $C.@DefaultDropdownBoxStyle;
@@ -1042,17 +1036,20 @@ Group {
         }
         TextField #TimedMinPlayers5 { Anchor: (Left: 512, Top: 8, Width: 36, Height: 30); Value: "1"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextField #TimedRequirePlayer5 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedRequirePlayerToggle5 { Anchor: (Left: 558, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedRequirePlayerToggle5 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Visible: false; Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedDespawnHours5 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Value: "0"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextField #TimedDespawnMinutes5 { Anchor: (Left: 722, Top: 40, Width: 44, Height: 26); Value: "5"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
         Label #TimedDespawnLabel5 { Anchor: (Left: 556, Top: 44, Width: 160, Height: 20); Text: "Temps avant disparition"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         Label #TimedDespawnMinutesUnit5 { Anchor: (Left: 770, Top: 44, Width: 28, Height: 20); Text: "min"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb); }
-        TextField #TimedAnnounceGlobal5 { Anchor: (Left: 666, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceGlobalToggle5 { Anchor: (Left: 666, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextField #TimedAnnounceWorld5 { Anchor: (Left: 742, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceWorldToggle5 { Anchor: (Left: 742, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedPop5 { Anchor: (Left: 818, Top: 8, Width: 80, Height: 30); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedDelete5 { Anchor: (Left: 904, Top: 8, Width: 40, Height: 30); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 16, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceEnabled5 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedGraceToggle5 { Anchor: (Left: 558, Top: 10, Width: 48, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceSeconds5 { Anchor: (Left: 610, Top: 10, Width: 40, Height: 26); Value: "30"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
+        TextField #TimedAnnounceGlobal5 { Anchor: (Left: 658, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceGlobalToggle5 { Anchor: (Left: 658, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedAnnounceWorld5 { Anchor: (Left: 734, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceWorldToggle5 { Anchor: (Left: 734, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedPop5 { Anchor: (Left: 810, Top: 10, Width: 70, Height: 26); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedDelete5 { Anchor: (Left: 886, Top: 10, Width: 32, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 14, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
 
         Label #TimedAfterDeathLabel5 { Anchor: (Left: 8, Top: 44, Width: 120, Height: 20); Text: "Délai respawn"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         TextField #TimedEveryHours5 { Anchor: (Left: 130, Top: 40, Width: 40, Height: 26); Value: "1"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
@@ -1089,19 +1086,15 @@ Group {
       }
 
       Panel #BossTimedRow6 {
-        Anchor: (Left: 32, Top: 518, Width: 1136, Height: 72);
+        Anchor: (Left: 32, Top: 460, Width: 1136, Height: 68);
         Background: #1a2b41;
         Visible: false;
         TextField #TimedEnabled6 { Anchor: (Left: 8, Top: 8, Width: 1, Height: 1); Value: "true"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedEnabledToggle6 { Anchor: (Left: 8, Top: 10, Width: 48, Height: 26); Text: "Oui"; Style: TextButtonStyle(Default: (Background: #1f7d4b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #17633c, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedMode6 { Anchor: (Left: 62, Top: 8, Width: 1, Height: 1); Value: "AFTER_DEATH"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextButton #TimedModeToggle6 { Anchor: (Left: 62, Top: 10, Width: 145, Height: 26); Text: "Temps réapparition"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        DropdownBox #TimedBossId6 {
-          Anchor: (Left: 214, Top: 8, Width: 200, Height: 30);
-          Style: $C.@DefaultDropdownBoxStyle;
-          Value: "";
-          DropdownEntry { Value: ""; Text: "(boss)"; }
-        }
+        TextField #TimedBossId6 { Anchor: (Left: 214, Top: 8, Width: 1, Height: 1); Value: ""; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedBossPool6 { Anchor: (Left: 214, Top: 8, Width: 200, Height: 30); Text: "Pool (0)"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 11, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         DropdownBox #TimedArenaId6 {
           Anchor: (Left: 376, Top: 8, Width: 130, Height: 30);
           Style: $C.@DefaultDropdownBoxStyle;
@@ -1110,17 +1103,20 @@ Group {
         }
         TextField #TimedMinPlayers6 { Anchor: (Left: 512, Top: 8, Width: 36, Height: 30); Value: "1"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextField #TimedRequirePlayer6 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedRequirePlayerToggle6 { Anchor: (Left: 558, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedRequirePlayerToggle6 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Visible: false; Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
         TextField #TimedDespawnHours6 { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Value: "0"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
         TextField #TimedDespawnMinutes6 { Anchor: (Left: 722, Top: 40, Width: 44, Height: 26); Value: "5"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
         Label #TimedDespawnLabel6 { Anchor: (Left: 556, Top: 44, Width: 160, Height: 20); Text: "Temps avant disparition"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         Label #TimedDespawnMinutesUnit6 { Anchor: (Left: 770, Top: 44, Width: 28, Height: 20); Text: "min"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb); }
-        TextField #TimedAnnounceGlobal6 { Anchor: (Left: 666, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceGlobalToggle6 { Anchor: (Left: 666, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextField #TimedAnnounceWorld6 { Anchor: (Left: 742, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
-        TextButton #TimedAnnounceWorldToggle6 { Anchor: (Left: 742, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedPop6 { Anchor: (Left: 818, Top: 8, Width: 80, Height: 30); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
-        TextButton #TimedDelete6 { Anchor: (Left: 904, Top: 8, Width: 40, Height: 30); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 16, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 16, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceEnabled6 { Anchor: (Left: 558, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedGraceToggle6 { Anchor: (Left: 558, Top: 10, Width: 48, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedGraceSeconds6 { Anchor: (Left: 610, Top: 10, Width: 40, Height: 26); Value: "30"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 4); Background: #122036; }
+        TextField #TimedAnnounceGlobal6 { Anchor: (Left: 658, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceGlobalToggle6 { Anchor: (Left: 658, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextField #TimedAnnounceWorld6 { Anchor: (Left: 734, Top: 8, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
+        TextButton #TimedAnnounceWorldToggle6 { Anchor: (Left: 734, Top: 10, Width: 70, Height: 26); Text: "Non"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedPop6 { Anchor: (Left: 810, Top: 10, Width: 70, Height: 26); Text: "Apparition"; Style: TextButtonStyle(Default: (Background: #6b4a1f, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #8a6028, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #543910, LabelStyle: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #TimedDelete6 { Anchor: (Left: 886, Top: 10, Width: 32, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 14, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
 
         Label #TimedAfterDeathLabel6 { Anchor: (Left: 8, Top: 44, Width: 120, Height: 20); Text: "Délai respawn"; Visible: false; Style: (FontSize: 11, TextColor: #8ea1bb, RenderBold: true); }
         TextField #TimedEveryHours6 { Anchor: (Left: 130, Top: 40, Width: 40, Height: 26); Value: "1"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
@@ -1167,26 +1163,211 @@ Group {
         Style: (FontSize: 16, TextColor: #b2c0d2);
       }
 
-      Label #TimedAnnounceTextLabel { Anchor: (Left: 32, Top: 610, Width: 280, Height: 20); Text: "Texte d'annonce (&a &l &o)"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
-      TextField #TimedAnnounceText { Anchor: (Left: 320, Top: 608, Width: 720, Height: 26); Value: "&6[$World] &e$Boss &7started at &b$Arena"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+      Label #TimedAnnounceTextLabel { Anchor: (Left: 32, Top: 560, Width: 280, Height: 20); Text: "Texte d'annonce (&a &l &o)"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+      TextField #TimedAnnounceText { Anchor: (Left: 320, Top: 558, Width: 720, Height: 26); Value: "&6[$World] &e$Boss &7started at &b$Arena"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+      Label #TimedReminderTextLabel { Anchor: (Left: 32, Top: 588, Width: 280, Height: 20); Text: "Texte de rappel 5 min (&a &l &o)"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+      TextField #TimedReminderText { Anchor: (Left: 320, Top: 586, Width: 720, Height: 26); Value: "&e[$World] &6$Boss &eapparaît dans 5 minutes (&b$Arena&e)!"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+      Label #TimedGraceTextLabel { Anchor: (Left: 32, Top: 616, Width: 280, Height: 20); Text: "Texte grâce ($time mm:ss)"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+      TextField #TimedGraceText { Anchor: (Left: 320, Top: 614, Width: 720, Height: 26); Value: "&eLe combat de boss commence dans &6$time&e !"; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
       TextField #TimedAnnounceServerWide { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
       TextField #TimedAnnounceWorldWide { Anchor: (Left: 1, Top: 1, Width: 1, Height: 1); Value: "false"; Visible: false; Style: (FontSize: 12, TextColor: #e6eefc); Background: #122036; }
 
       Label #BossTimedOverflowLabel {
-        Anchor: (Left: 32, Top: 640, Width: 860, Height: 24);
+        Anchor: (Left: 32, Top: 644, Width: 860, Height: 24);
         Text: "";
         Visible: false;
         Style: (FontSize: 13, TextColor: #ffd88f);
       }
 
       Label #BossTimedStatusLabel {
-        Anchor: (Left: 32, Top: 580, Width: 900, Height: 22);
+        Anchor: (Left: 32, Top: 534, Width: 900, Height: 22);
         Text: "";
         Style: (FontSize: 13, TextColor: #b2c0d2);
       }
 
+
+    Group #BossPoolOverlay {
+      Anchor: (Left: 0, Top: 0, Width: 1200, Height: 660);
+      Visible: false;
+
+      Panel #BossPoolBackdrop {
+        Anchor: (Left: 0, Top: 0, Width: 1200, Height: 660);
+        Background: #05090f(0.75);
+      }
+
+      Panel #BossPoolWindow {
+        Anchor: (Left: 220, Top: 60, Width: 760, Height: 540);
+        Background: #0f1725;
+      }
+
+      Label #BossPoolTitle {
+        Anchor: (Left: 248, Top: 84, Width: 520, Height: 30);
+        Text: "Pool de boss";
+        Style: (FontSize: 22, TextColor: #f3f7ff, RenderBold: true);
+      }
+
+      Label #BossPoolHint {
+        Anchor: (Left: 248, Top: 118, Width: 700, Height: 18);
+        Text: "ON = dans le pool. Ajouter via la liste, ou creez des boss dans l'onglet Bosses.";
+        Style: (FontSize: 12, TextColor: #8ea1bb);
+      }
+
+      TextButton #BossPoolCloseButton {
+        Anchor: (Left: 820, Top: 84, Width: 120, Height: 34);
+        Text: "Fermer";
+        Style: TextButtonStyle(
+          Default: (Background: #2a3d58, LabelStyle: (FontSize: 13, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Hovered: (Background: #38567b, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        );
+      }
+
+      TextButton #BossPoolApplyButton {
+        Anchor: (Left: 680, Top: 84, Width: 120, Height: 34);
+        Text: "Appliquer";
+        Style: TextButtonStyle(
+          Default: (Background: #1f7d4b, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Pressed: (Background: #17633c, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        );
+      }
+
+      DropdownBox #BossPoolPick {
+        Anchor: (Left: 248, Top: 142, Width: 420, Height: 28);
+        Style: $C.@DefaultDropdownBoxStyle;
+        Value: "";
+        DropdownEntry { Value: ""; Text: "(choisir un boss)"; }
+      }
+      TextButton #BossPoolAddButton {
+        Anchor: (Left: 680, Top: 142, Width: 120, Height: 28);
+        Text: "Ajouter";
+        Style: TextButtonStyle(
+          Default: (Background: #1f7d4b, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Hovered: (Background: #2b9a5f, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Pressed: (Background: #17633c, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        );
+      }
+
+      Label #BossPoolHeaderName { Anchor: (Left: 248, Top: 178, Width: 320, Height: 20); Text: "Boss"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossPoolHeaderOn { Anchor: (Left: 578, Top: 178, Width: 60, Height: 20); Text: "Actif"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+      Label #BossPoolHeaderWeight { Anchor: (Left: 658, Top: 178, Width: 120, Height: 20); Text: "Poids"; Style: (FontSize: 12, TextColor: #8ea1bb, RenderBold: true); }
+
+      Panel #BossPoolRow1 {
+        Anchor: (Left: 248, Top: 202, Width: 700, Height: 32);
+        Visible: false;
+        Background: #1a2b41;
+        Label #BossPoolName1 { Anchor: (Left: 8, Top: 4, Width: 310, Height: 24); Text: ""; Style: (FontSize: 13, TextColor: #e6eefc); }
+        TextButton #BossPoolToggle1 { Anchor: (Left: 330, Top: 3, Width: 56, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #BossPoolWeightDec1 { Anchor: (Left: 410, Top: 3, Width: 36, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        Label #BossPoolWeight1 { Anchor: (Left: 454, Top: 4, Width: 40, Height: 24); Text: "1"; Style: (FontSize: 13, TextColor: #e6eefc, HorizontalAlignment: Center); }
+        TextButton #BossPoolWeightInc1 { Anchor: (Left: 500, Top: 3, Width: 36, Height: 26); Text: "+"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+      }
+      Panel #BossPoolRow2 {
+        Anchor: (Left: 248, Top: 238, Width: 700, Height: 32);
+        Visible: false;
+        Background: #1a2b41;
+        Label #BossPoolName2 { Anchor: (Left: 8, Top: 4, Width: 310, Height: 24); Text: ""; Style: (FontSize: 13, TextColor: #e6eefc); }
+        TextButton #BossPoolToggle2 { Anchor: (Left: 330, Top: 3, Width: 56, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #BossPoolWeightDec2 { Anchor: (Left: 410, Top: 3, Width: 36, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        Label #BossPoolWeight2 { Anchor: (Left: 454, Top: 4, Width: 40, Height: 24); Text: "1"; Style: (FontSize: 13, TextColor: #e6eefc, HorizontalAlignment: Center); }
+        TextButton #BossPoolWeightInc2 { Anchor: (Left: 500, Top: 3, Width: 36, Height: 26); Text: "+"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+      }
+      Panel #BossPoolRow3 {
+        Anchor: (Left: 248, Top: 274, Width: 700, Height: 32);
+        Visible: false;
+        Background: #1a2b41;
+        Label #BossPoolName3 { Anchor: (Left: 8, Top: 4, Width: 310, Height: 24); Text: ""; Style: (FontSize: 13, TextColor: #e6eefc); }
+        TextButton #BossPoolToggle3 { Anchor: (Left: 330, Top: 3, Width: 56, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #BossPoolWeightDec3 { Anchor: (Left: 410, Top: 3, Width: 36, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        Label #BossPoolWeight3 { Anchor: (Left: 454, Top: 4, Width: 40, Height: 24); Text: "1"; Style: (FontSize: 13, TextColor: #e6eefc, HorizontalAlignment: Center); }
+        TextButton #BossPoolWeightInc3 { Anchor: (Left: 500, Top: 3, Width: 36, Height: 26); Text: "+"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+      }
+      Panel #BossPoolRow4 {
+        Anchor: (Left: 248, Top: 310, Width: 700, Height: 32);
+        Visible: false;
+        Background: #1a2b41;
+        Label #BossPoolName4 { Anchor: (Left: 8, Top: 4, Width: 310, Height: 24); Text: ""; Style: (FontSize: 13, TextColor: #e6eefc); }
+        TextButton #BossPoolToggle4 { Anchor: (Left: 330, Top: 3, Width: 56, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #BossPoolWeightDec4 { Anchor: (Left: 410, Top: 3, Width: 36, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        Label #BossPoolWeight4 { Anchor: (Left: 454, Top: 4, Width: 40, Height: 24); Text: "1"; Style: (FontSize: 13, TextColor: #e6eefc, HorizontalAlignment: Center); }
+        TextButton #BossPoolWeightInc4 { Anchor: (Left: 500, Top: 3, Width: 36, Height: 26); Text: "+"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+      }
+      Panel #BossPoolRow5 {
+        Anchor: (Left: 248, Top: 346, Width: 700, Height: 32);
+        Visible: false;
+        Background: #1a2b41;
+        Label #BossPoolName5 { Anchor: (Left: 8, Top: 4, Width: 310, Height: 24); Text: ""; Style: (FontSize: 13, TextColor: #e6eefc); }
+        TextButton #BossPoolToggle5 { Anchor: (Left: 330, Top: 3, Width: 56, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #BossPoolWeightDec5 { Anchor: (Left: 410, Top: 3, Width: 36, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        Label #BossPoolWeight5 { Anchor: (Left: 454, Top: 4, Width: 40, Height: 24); Text: "1"; Style: (FontSize: 13, TextColor: #e6eefc, HorizontalAlignment: Center); }
+        TextButton #BossPoolWeightInc5 { Anchor: (Left: 500, Top: 3, Width: 36, Height: 26); Text: "+"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+      }
+      Panel #BossPoolRow6 {
+        Anchor: (Left: 248, Top: 382, Width: 700, Height: 32);
+        Visible: false;
+        Background: #1a2b41;
+        Label #BossPoolName6 { Anchor: (Left: 8, Top: 4, Width: 310, Height: 24); Text: ""; Style: (FontSize: 13, TextColor: #e6eefc); }
+        TextButton #BossPoolToggle6 { Anchor: (Left: 330, Top: 3, Width: 56, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #BossPoolWeightDec6 { Anchor: (Left: 410, Top: 3, Width: 36, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        Label #BossPoolWeight6 { Anchor: (Left: 454, Top: 4, Width: 40, Height: 24); Text: "1"; Style: (FontSize: 13, TextColor: #e6eefc, HorizontalAlignment: Center); }
+        TextButton #BossPoolWeightInc6 { Anchor: (Left: 500, Top: 3, Width: 36, Height: 26); Text: "+"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+      }
+      Panel #BossPoolRow7 {
+        Anchor: (Left: 248, Top: 418, Width: 700, Height: 32);
+        Visible: false;
+        Background: #1a2b41;
+        Label #BossPoolName7 { Anchor: (Left: 8, Top: 4, Width: 310, Height: 24); Text: ""; Style: (FontSize: 13, TextColor: #e6eefc); }
+        TextButton #BossPoolToggle7 { Anchor: (Left: 330, Top: 3, Width: 56, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #BossPoolWeightDec7 { Anchor: (Left: 410, Top: 3, Width: 36, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        Label #BossPoolWeight7 { Anchor: (Left: 454, Top: 4, Width: 40, Height: 24); Text: "1"; Style: (FontSize: 13, TextColor: #e6eefc, HorizontalAlignment: Center); }
+        TextButton #BossPoolWeightInc7 { Anchor: (Left: 500, Top: 3, Width: 36, Height: 26); Text: "+"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+      }
+      Panel #BossPoolRow8 {
+        Anchor: (Left: 248, Top: 454, Width: 700, Height: 32);
+        Visible: false;
+        Background: #1a2b41;
+        Label #BossPoolName8 { Anchor: (Left: 8, Top: 4, Width: 310, Height: 24); Text: ""; Style: (FontSize: 13, TextColor: #e6eefc); }
+        TextButton #BossPoolToggle8 { Anchor: (Left: 330, Top: 3, Width: 56, Height: 26); Text: "OFF"; Style: TextButtonStyle(Default: (Background: #a33b3b, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #c44a4a, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #822e2e, LabelStyle: (FontSize: 11, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        TextButton #BossPoolWeightDec8 { Anchor: (Left: 410, Top: 3, Width: 36, Height: 26); Text: "-"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+        Label #BossPoolWeight8 { Anchor: (Left: 454, Top: 4, Width: 40, Height: 24); Text: "1"; Style: (FontSize: 13, TextColor: #e6eefc, HorizontalAlignment: Center); }
+        TextButton #BossPoolWeightInc8 { Anchor: (Left: 500, Top: 3, Width: 36, Height: 26); Text: "+"; Style: TextButtonStyle(Default: (Background: #2a3d58, LabelStyle: (FontSize: 14, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #38567b, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
+      }
+
+      TextButton #BossPoolPrevButton {
+        Anchor: (Left: 248, Top: 500, Width: 100, Height: 32);
+        Text: "Prev";
+        Style: TextButtonStyle(
+          Default: (Background: #2a3d58, LabelStyle: (FontSize: 12, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Hovered: (Background: #38567b, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        );
+      }
+
+      TextButton #BossPoolNextButton {
+        Anchor: (Left: 360, Top: 500, Width: 100, Height: 32);
+        Text: "Suiv";
+        Style: TextButtonStyle(
+          Default: (Background: #2a3d58, LabelStyle: (FontSize: 12, TextColor: #e6eefc, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Hovered: (Background: #38567b, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+          Pressed: (Background: #4d77a8, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+        );
+      }
+
+      Label #BossPoolPageLabel {
+        Anchor: (Left: 480, Top: 504, Width: 200, Height: 24);
+        Text: "";
+        Style: (FontSize: 12, TextColor: #8ea1bb);
+      }
+
+      Label #BossPoolStatusLabel {
+        Anchor: (Left: 248, Top: 536, Width: 680, Height: 22);
+        Text: "";
+        Style: (FontSize: 12, TextColor: #b2c0d2);
+      }
+    }
+
       TextButton #BossTimedSaveButton {
-        Anchor: (Left: 1040, Top: 574, Width: 120, Height: 34);
+        Anchor: (Left: 1040, Top: 530, Width: 120, Height: 34);
         Text: "Enregistrer";
         Style: TextButtonStyle(
           Default: (Background: #1f7d4b, LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
@@ -1203,13 +1384,19 @@ Group {
 
     Label #ShopTitleLabel {
       Anchor: (Left: 32, Top: 28, Width: 800, Height: 30);
-      Text: "Tables boutique";
+      Text: "Liste des marchands";
       Style: (FontSize: 24, TextColor: #f3f7ff, RenderBold: true);
     }
 
+    Label #ShopHeaderWorld {
+      Anchor: (Left: 44, Top: 68, Width: 160, Height: 24);
+      Text: "Monde";
+      Style: (FontSize: 14, TextColor: #8ea1bb, RenderBold: true);
+    }
+
     Label #ShopHeaderArena {
-      Anchor: (Left: 44, Top: 68, Width: 520, Height: 24);
-      Text: "Table / Arène";
+      Anchor: (Left: 220, Top: 68, Width: 340, Height: 24);
+      Text: "Marchand / Arène";
       Style: (FontSize: 14, TextColor: #8ea1bb, RenderBold: true);
     }
 
@@ -1254,7 +1441,8 @@ Group {
     Panel #ShopRow1 {
       Anchor: (Left: 32, Top: 96, Width: 1136, Height: 46);
       Background: #1a2b41;
-      Label #ShopArena1 { Anchor: (Left: 16, Top: 8, Width: 520, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
+      Label #ShopWorld1 { Anchor: (Left: 12, Top: 8, Width: 160, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
+      Label #ShopArena1 { Anchor: (Left: 188, Top: 8, Width: 340, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
       Label #ShopDistance1 { Anchor: (Left: 556, Top: 8, Width: 160, Height: 30); Text: "--"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopBosses1 { Anchor: (Left: 744, Top: 8, Width: 140, Height: 30); Text: "0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopEntries1 { Anchor: (Left: 902, Top: 8, Width: 120, Height: 30); Text: "0/0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
@@ -1264,7 +1452,8 @@ Group {
     Panel #ShopRow2 {
       Anchor: (Left: 32, Top: 150, Width: 1136, Height: 46);
       Background: #1a2b41;
-      Label #ShopArena2 { Anchor: (Left: 16, Top: 8, Width: 520, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
+      Label #ShopWorld2 { Anchor: (Left: 12, Top: 8, Width: 160, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
+      Label #ShopArena2 { Anchor: (Left: 188, Top: 8, Width: 340, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
       Label #ShopDistance2 { Anchor: (Left: 556, Top: 8, Width: 160, Height: 30); Text: "--"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopBosses2 { Anchor: (Left: 744, Top: 8, Width: 140, Height: 30); Text: "0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopEntries2 { Anchor: (Left: 902, Top: 8, Width: 120, Height: 30); Text: "0/0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
@@ -1274,7 +1463,8 @@ Group {
     Panel #ShopRow3 {
       Anchor: (Left: 32, Top: 204, Width: 1136, Height: 46);
       Background: #1a2b41;
-      Label #ShopArena3 { Anchor: (Left: 16, Top: 8, Width: 520, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
+      Label #ShopWorld3 { Anchor: (Left: 12, Top: 8, Width: 160, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
+      Label #ShopArena3 { Anchor: (Left: 188, Top: 8, Width: 340, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
       Label #ShopDistance3 { Anchor: (Left: 556, Top: 8, Width: 160, Height: 30); Text: "--"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopBosses3 { Anchor: (Left: 744, Top: 8, Width: 140, Height: 30); Text: "0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopEntries3 { Anchor: (Left: 902, Top: 8, Width: 120, Height: 30); Text: "0/0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
@@ -1284,7 +1474,8 @@ Group {
     Panel #ShopRow4 {
       Anchor: (Left: 32, Top: 258, Width: 1136, Height: 46);
       Background: #1a2b41;
-      Label #ShopArena4 { Anchor: (Left: 16, Top: 8, Width: 520, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
+      Label #ShopWorld4 { Anchor: (Left: 12, Top: 8, Width: 160, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
+      Label #ShopArena4 { Anchor: (Left: 188, Top: 8, Width: 340, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
       Label #ShopDistance4 { Anchor: (Left: 556, Top: 8, Width: 160, Height: 30); Text: "--"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopBosses4 { Anchor: (Left: 744, Top: 8, Width: 140, Height: 30); Text: "0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopEntries4 { Anchor: (Left: 902, Top: 8, Width: 120, Height: 30); Text: "0/0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
@@ -1294,7 +1485,8 @@ Group {
     Panel #ShopRow5 {
       Anchor: (Left: 32, Top: 312, Width: 1136, Height: 46);
       Background: #1a2b41;
-      Label #ShopArena5 { Anchor: (Left: 16, Top: 8, Width: 520, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
+      Label #ShopWorld5 { Anchor: (Left: 12, Top: 8, Width: 160, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
+      Label #ShopArena5 { Anchor: (Left: 188, Top: 8, Width: 340, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
       Label #ShopDistance5 { Anchor: (Left: 556, Top: 8, Width: 160, Height: 30); Text: "--"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopBosses5 { Anchor: (Left: 744, Top: 8, Width: 140, Height: 30); Text: "0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopEntries5 { Anchor: (Left: 902, Top: 8, Width: 120, Height: 30); Text: "0/0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
@@ -1304,7 +1496,8 @@ Group {
     Panel #ShopRow6 {
       Anchor: (Left: 32, Top: 366, Width: 1136, Height: 46);
       Background: #1a2b41;
-      Label #ShopArena6 { Anchor: (Left: 16, Top: 8, Width: 520, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
+      Label #ShopWorld6 { Anchor: (Left: 12, Top: 8, Width: 160, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
+      Label #ShopArena6 { Anchor: (Left: 188, Top: 8, Width: 340, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
       Label #ShopDistance6 { Anchor: (Left: 556, Top: 8, Width: 160, Height: 30); Text: "--"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopBosses6 { Anchor: (Left: 744, Top: 8, Width: 140, Height: 30); Text: "0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopEntries6 { Anchor: (Left: 902, Top: 8, Width: 120, Height: 30); Text: "0/0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
@@ -1314,7 +1507,8 @@ Group {
     Panel #ShopRow7 {
       Anchor: (Left: 32, Top: 420, Width: 1136, Height: 46);
       Background: #1a2b41;
-      Label #ShopArena7 { Anchor: (Left: 16, Top: 8, Width: 520, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
+      Label #ShopWorld7 { Anchor: (Left: 12, Top: 8, Width: 160, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
+      Label #ShopArena7 { Anchor: (Left: 188, Top: 8, Width: 340, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
       Label #ShopDistance7 { Anchor: (Left: 556, Top: 8, Width: 160, Height: 30); Text: "--"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopBosses7 { Anchor: (Left: 744, Top: 8, Width: 140, Height: 30); Text: "0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopEntries7 { Anchor: (Left: 902, Top: 8, Width: 120, Height: 30); Text: "0/0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
@@ -1324,7 +1518,8 @@ Group {
     Panel #ShopRow8 {
       Anchor: (Left: 32, Top: 474, Width: 1136, Height: 46);
       Background: #1a2b41;
-      Label #ShopArena8 { Anchor: (Left: 16, Top: 8, Width: 520, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
+      Label #ShopWorld8 { Anchor: (Left: 12, Top: 8, Width: 160, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
+      Label #ShopArena8 { Anchor: (Left: 188, Top: 8, Width: 340, Height: 30); Text: ""; Style: (FontSize: 14, TextColor: #d8e3f4, VerticalAlignment: Center); }
       Label #ShopDistance8 { Anchor: (Left: 556, Top: 8, Width: 160, Height: 30); Text: "--"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopBosses8 { Anchor: (Left: 744, Top: 8, Width: 140, Height: 30); Text: "0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
       Label #ShopEntries8 { Anchor: (Left: 902, Top: 8, Width: 120, Height: 30); Text: "0/0"; Style: (FontSize: 14, TextColor: #e6eefc, VerticalAlignment: Center); }
@@ -1427,9 +1622,15 @@ Group {
       }
 
       Label #ShopEditHeaderPrice {
-        Anchor: (Left: 626, Top: 214, Width: 180, Height: 22);
+        Anchor: (Left: 626, Top: 214, Width: 90, Height: 22);
         Text: "Prix";
-        Style: (FontSize: 14, TextColor: #8ea1bb, RenderBold: true);
+        Style: (FontSize: 13, TextColor: #8ea1bb, RenderBold: true);
+      }
+
+      Label #ShopEditHeaderSilentPrice {
+        Anchor: (Left: 722, Top: 214, Width: 100, Height: 22);
+        Text: "Prix silenc.";
+        Style: (FontSize: 13, TextColor: #8ea1bb, RenderBold: true);
       }
 
       Panel #ShopEditContractRow1 {
@@ -1448,7 +1649,8 @@ Group {
           Value: "";
           DropdownEntry { Value: ""; Text: "(arène)"; }
         }
-        TextField #ShopEditBossPrice1 { Anchor: (Left: 528, Top: 1, Width: 172, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+        TextField #ShopEditBossPrice1 { Anchor: (Left: 528, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+        TextField #ShopEditSilentPrice1 { Anchor: (Left: 620, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextButton #ShopEditRemove1 { Anchor: (Left: 720, Top: 1, Width: 90, Height: 28); Text: "Retirer"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 12, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
       }
       Panel #ShopEditContractRow2 {
@@ -1467,7 +1669,8 @@ Group {
           Value: "";
           DropdownEntry { Value: ""; Text: "(arène)"; }
         }
-        TextField #ShopEditBossPrice2 { Anchor: (Left: 528, Top: 1, Width: 172, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+        TextField #ShopEditBossPrice2 { Anchor: (Left: 528, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+        TextField #ShopEditSilentPrice2 { Anchor: (Left: 620, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextButton #ShopEditRemove2 { Anchor: (Left: 720, Top: 1, Width: 90, Height: 28); Text: "Retirer"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 12, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
       }
       Panel #ShopEditContractRow3 {
@@ -1486,7 +1689,8 @@ Group {
           Value: "";
           DropdownEntry { Value: ""; Text: "(arène)"; }
         }
-        TextField #ShopEditBossPrice3 { Anchor: (Left: 528, Top: 1, Width: 172, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+        TextField #ShopEditBossPrice3 { Anchor: (Left: 528, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+        TextField #ShopEditSilentPrice3 { Anchor: (Left: 620, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextButton #ShopEditRemove3 { Anchor: (Left: 720, Top: 1, Width: 90, Height: 28); Text: "Retirer"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 12, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
       }
       Panel #ShopEditContractRow4 {
@@ -1505,7 +1709,8 @@ Group {
           Value: "";
           DropdownEntry { Value: ""; Text: "(arène)"; }
         }
-        TextField #ShopEditBossPrice4 { Anchor: (Left: 528, Top: 1, Width: 172, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+        TextField #ShopEditBossPrice4 { Anchor: (Left: 528, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+        TextField #ShopEditSilentPrice4 { Anchor: (Left: 620, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextButton #ShopEditRemove4 { Anchor: (Left: 720, Top: 1, Width: 90, Height: 28); Text: "Retirer"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 12, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
       }
       Panel #ShopEditContractRow5 {
@@ -1524,7 +1729,8 @@ Group {
           Value: "";
           DropdownEntry { Value: ""; Text: "(arène)"; }
         }
-        TextField #ShopEditBossPrice5 { Anchor: (Left: 528, Top: 1, Width: 172, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+        TextField #ShopEditBossPrice5 { Anchor: (Left: 528, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+        TextField #ShopEditSilentPrice5 { Anchor: (Left: 620, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextButton #ShopEditRemove5 { Anchor: (Left: 720, Top: 1, Width: 90, Height: 28); Text: "Retirer"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 12, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
       }
       Panel #ShopEditContractRow6 {
@@ -1543,7 +1749,8 @@ Group {
           Value: "";
           DropdownEntry { Value: ""; Text: "(arène)"; }
         }
-        TextField #ShopEditBossPrice6 { Anchor: (Left: 528, Top: 1, Width: 172, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+        TextField #ShopEditBossPrice6 { Anchor: (Left: 528, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+        TextField #ShopEditSilentPrice6 { Anchor: (Left: 620, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextButton #ShopEditRemove6 { Anchor: (Left: 720, Top: 1, Width: 90, Height: 28); Text: "Retirer"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 12, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
       }
       Panel #ShopEditContractRow7 {
@@ -1562,7 +1769,8 @@ Group {
           Value: "";
           DropdownEntry { Value: ""; Text: "(arène)"; }
         }
-        TextField #ShopEditBossPrice7 { Anchor: (Left: 528, Top: 1, Width: 172, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+        TextField #ShopEditBossPrice7 { Anchor: (Left: 528, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+        TextField #ShopEditSilentPrice7 { Anchor: (Left: 620, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextButton #ShopEditRemove7 { Anchor: (Left: 720, Top: 1, Width: 90, Height: 28); Text: "Retirer"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 12, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
       }
       Panel #ShopEditContractRow8 {
@@ -1581,7 +1789,8 @@ Group {
           Value: "";
           DropdownEntry { Value: ""; Text: "(arène)"; }
         }
-        TextField #ShopEditBossPrice8 { Anchor: (Left: 528, Top: 1, Width: 172, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 8); Background: #122036; }
+        TextField #ShopEditBossPrice8 { Anchor: (Left: 528, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+        TextField #ShopEditSilentPrice8 { Anchor: (Left: 620, Top: 1, Width: 84, Height: 28); Value: "0"; Style: (FontSize: 13, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
         TextButton #ShopEditRemove8 { Anchor: (Left: 720, Top: 1, Width: 90, Height: 28); Text: "Retirer"; Style: TextButtonStyle(Default: (Background: #4a1f32, LabelStyle: (FontSize: 12, TextColor: #ffe3ec, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Hovered: (Background: #663048, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)), Pressed: (Background: #7f3d5a, LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))); }
       }
       Label #ShopEditorOverflowLabel {

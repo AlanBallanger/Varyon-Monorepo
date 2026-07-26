@@ -180,6 +180,10 @@ Each entry:
 - `despawnAfterHours` / `despawnAfterMinutes` — optional forced despawn window for timed bosses.
 - `announceWorldWide` / `announceCurrentWorld` — announce behavior.
 - `worldAnnouncementText` — customizable world announcement with placeholders.
+- `reminderAnnouncementText` — optional chat reminder 5 minutes before spawn (same placeholders/scope; empty = disabled).
+- `gracePeriodEnabled` / `gracePeriodSeconds` — pre-spawn grace countdown (title in Rayon Décl; `$time` = mm:ss).
+- `graceTitleText` — shared grace title template.
+- `minPlayers` — players required **inside Rayon Décl** (0 = no gate; with grace ON, starts when ≥1 nearby).
 
 ### Player-Online Spawn Gating (2.0.2+)
 

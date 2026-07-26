@@ -4,9 +4,6 @@ import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.SystemGroup;
-import com.hypixel.hytale.component.dependency.Dependency;
-import com.hypixel.hytale.component.dependency.Order;
-import com.hypixel.hytale.component.dependency.SystemDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -14,7 +11,6 @@ import com.hypixel.hytale.server.core.modules.entity.AllLegacyLivingEntityTypesQ
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageEventSystem;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageModule;
-import com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
@@ -24,19 +20,16 @@ import com.varyon.bossarena.system.BossTrackingSystem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Set;
 import java.util.UUID;
 
 /**
  * Records player damage to tracked bosses/adds as the real HP removed
- * ({@code hpBefore - hpAfter} around {@link DamageSystems.ApplyDamage}).
+ * ({@code hpBefore - hpAfter} around ApplyDamage).
  */
 public final class BossDamageChartRecordingSystem extends DamageEventSystem {
 
     private final BossTrackingSystem trackingSystem;
     private final BossDamageChartTracker tracker;
-    private final Set<Dependency<EntityStore>> dependencies =
-            Set.of(new SystemDependency<>(Order.AFTER, DamageSystems.ApplyDamage.class));
 
     public BossDamageChartRecordingSystem(BossTrackingSystem trackingSystem, BossDamageChartTracker tracker) {
         this.trackingSystem = trackingSystem;
@@ -46,13 +39,8 @@ public final class BossDamageChartRecordingSystem extends DamageEventSystem {
     @Override
     @Nullable
     public SystemGroup<EntityStore> getGroup() {
-        return DamageModule.get().getFilterDamageGroup();
-    }
-
-    @Override
-    @Nonnull
-    public Set<Dependency<EntityStore>> getDependencies() {
-        return dependencies;
+        // Inspect runs after ApplyDamage. Staying in Filter + AFTER ApplyDamage creates a cycle.
+        return DamageModule.get().getInspectDamageGroup();
     }
 
     @Override
