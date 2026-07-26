@@ -2,7 +2,7 @@ $C = "Common.ui";
 
 $C.@PageOverlay {
 
-  Group #VoidPortalRoot {
+  Group #ZonesPortalRoot {
     Anchor: (Width: 852, Height: 595);
     LayoutMode: Top;
 
@@ -95,25 +95,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead1 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot1 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin1 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount1 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead1 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot1 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin1 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount1 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -145,8 +141,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow1 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot1 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin1 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice1 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -178,8 +180,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow1 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot1 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin1 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice1 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -244,25 +252,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead2 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot2 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin2 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount2 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead2 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot2 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin2 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount2 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -294,8 +298,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow2 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot2 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin2 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice2 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -327,8 +337,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow2 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot2 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin2 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice2 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -393,25 +409,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead3 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot3 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin3 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount3 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead3 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot3 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin3 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount3 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -443,8 +455,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow3 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot3 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin3 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice3 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -476,8 +494,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow3 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot3 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin3 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice3 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -542,25 +566,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead4 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot4 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin4 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount4 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead4 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot4 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin4 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount4 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -592,8 +612,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow4 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot4 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin4 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice4 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -625,8 +651,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow4 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot4 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin4 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice4 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -691,25 +723,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead5 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot5 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin5 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount5 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead5 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot5 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin5 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount5 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -741,8 +769,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow5 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot5 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin5 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice5 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -774,8 +808,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow5 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot5 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin5 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice5 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -847,25 +887,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead6 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot6 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin6 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount6 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead6 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot6 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin6 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount6 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -897,8 +933,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow6 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot6 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin6 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice6 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -930,8 +972,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow6 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot6 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin6 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice6 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -996,25 +1044,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead7 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot7 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin7 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount7 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead7 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot7 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin7 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount7 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -1046,8 +1090,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow7 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot7 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin7 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice7 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -1079,8 +1129,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow7 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot7 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin7 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice7 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -1145,25 +1201,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead8 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot8 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin8 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount8 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead8 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot8 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin8 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount8 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -1195,8 +1247,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow8 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot8 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin8 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice8 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -1228,8 +1286,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow8 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot8 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin8 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice8 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -1294,25 +1358,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead9 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot9 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin9 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount9 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead9 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot9 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin9 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount9 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -1344,8 +1404,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow9 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot9 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin9 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice9 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -1377,8 +1443,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow9 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot9 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin9 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice9 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -1442,25 +1514,21 @@ $C.@PageOverlay {
               OutlineColor: #141228;
               OutlineSize: 1;
               Group {
-                LayoutMode: Middle;
-                Group {
-                  LayoutMode: Left;
-                  Label #ZoneMainLead10 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
-                  Group #ZoneMainCoinSlot10 {
-                    Anchor: (Width: 22, Height: 22);
-                    Padding: (Left: 3, Right: 3);
-                    LayoutMode: Middle;
-                    ItemIcon #ZoneMainCoin10 {
-                      Anchor: (Full: 0);
-                    }
-                  }
-                  Label #ZoneMainAmount10 {
-                    Text: "";
-                    Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
-                  }
+                Anchor: (Full: 0);
+                LayoutMode: CenterMiddle;
+                Label #ZoneMainLead10 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot10 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin10 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount10 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -1492,8 +1560,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZonePvPPriceRow10 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZonePvPCoinSlot10 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZonePvPCoin10 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZonePvPPrice10 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #e8d0d0, HorizontalAlignment: Center, VerticalAlignment: Center);
@@ -1525,8 +1599,14 @@ $C.@PageOverlay {
                       }
                     }
                     Group #ZoneSafePriceRow10 {
-                      LayoutMode: Middle;
-                      Anchor: (Top: 1);
+                      LayoutMode: CenterMiddle;
+                      Anchor: (Top: 1, Height: 16);
+                      Group #ZoneSafeCoinSlot10 {
+                        Anchor: (Width: 14, Height: 14);
+                        Padding: (Right: 3);
+                        LayoutMode: Middle;
+                        ItemIcon #ZoneSafeCoin10 { Anchor: (Width: 14, Height: 14); }
+                      }
                       Label #ZoneSafePrice10 {
                         Text: "";
                         Style: (FontSize: 10, TextColor: #d0ead8, HorizontalAlignment: Center, VerticalAlignment: Center);

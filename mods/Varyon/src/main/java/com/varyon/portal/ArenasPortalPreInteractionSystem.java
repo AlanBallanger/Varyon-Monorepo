@@ -16,11 +16,11 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class VoidPortalPreInteractionSystem extends EntityEventSystem<EntityStore, UseBlockEvent.Pre> {
+public class ArenasPortalPreInteractionSystem extends EntityEventSystem<EntityStore, UseBlockEvent.Pre> {
 
-    private static final String VOID_PORTAL_BLOCK_ID = "Varyon_Portal_Void";
+    private static final String ARENAS_PORTAL_BLOCK_ID = "Varyon_Portal_Arenas";
 
-    public VoidPortalPreInteractionSystem() {
+    public ArenasPortalPreInteractionSystem() {
         super(UseBlockEvent.Pre.class);
     }
 
@@ -31,7 +31,7 @@ public class VoidPortalPreInteractionSystem extends EntityEventSystem<EntityStor
 
         BlockType blockType = event.getBlockType();
         if (blockType == null || blockType.getId() == null) return;
-        if (!blockType.getId().contains(VOID_PORTAL_BLOCK_ID)) return;
+        if (!blockType.getId().contains(ARENAS_PORTAL_BLOCK_ID)) return;
 
         cancelInteractionChain(event.getContext());
     }

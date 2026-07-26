@@ -40,7 +40,7 @@ public final class EconomyCoinItemHelper {
                 }
             }
         } catch (Throwable t) {
-            LOG.log(Level.FINE, "Ecotale copper item id reflection failed", t);
+            LOG.log(Level.WARNING, "Ecotale copper item id reflection failed", t);
         }
         return null;
     }
@@ -48,6 +48,7 @@ public final class EconomyCoinItemHelper {
     public static void applyCoinItem(@Nonnull UICommandBuilder ui, @Nonnull String elementIdSansHash) {
         String slot = "#" + elementIdSansHash;
         String itemId = resolveCoinItemId();
+        LOG.log(Level.WARNING, "applyCoinItem slot=" + slot + " resolvedItemId=" + itemId);
         ui.setNull(slot + ".Background");
         ui.set(slot + ".ItemId", itemId);
     }

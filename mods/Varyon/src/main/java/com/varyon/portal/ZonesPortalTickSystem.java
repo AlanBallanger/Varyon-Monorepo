@@ -23,9 +23,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class VoidPortalTickSystem extends EntityTickingSystem<EntityStore> {
+public class ZonesPortalTickSystem extends EntityTickingSystem<EntityStore> {
 
-    private static final String VOID_PORTAL_BLOCK_ID = "Varyon_Portal_Void";
+    private static final String ZONES_PORTAL_BLOCK_ID = "Varyon_Portal_Zones";
     private static final long OPEN_COOLDOWN_MS = 2000;
     private static final int CHECK_INTERVAL_TICKS = 5;
 
@@ -59,7 +59,7 @@ public class VoidPortalTickSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        if (!isVoidPortalBlock(world, bx, by, bz) && !isVoidPortalBlock(world, bx, by + 1, bz)) {
+        if (!isZonesPortalBlock(world, bx, by, bz) && !isZonesPortalBlock(world, bx, by + 1, bz)) {
             return;
         }
 
@@ -77,19 +77,19 @@ public class VoidPortalTickSystem extends EntityTickingSystem<EntityStore> {
         }
 
         try {
-            VoidPortalUIPage page = new VoidPortalUIPage(playerRef);
+            ZonesPortalUIPage page = new ZonesPortalUIPage(playerRef);
             player.getPageManager().openCustomPage(ref, store, page);
         } catch (Exception ignored) {}
     }
 
-    private boolean isVoidPortalBlock(World world, int x, int y, int z) {
+    private boolean isZonesPortalBlock(World world, int x, int y, int z) {
         try {
             long chunkIndex = ChunkUtil.indexChunkFromBlock(x, z);
             WorldChunk chunk = world.getChunk(chunkIndex);
             if (chunk == null) return false;
             BlockType blockType = chunk.getBlockType(x, y, z);
             return blockType != null && blockType.getId() != null
-                && blockType.getId().contains(VOID_PORTAL_BLOCK_ID);
+                && blockType.getId().contains(ZONES_PORTAL_BLOCK_ID);
         } catch (Exception e) {
             return false;
         }

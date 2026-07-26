@@ -1,6 +1,6 @@
 {
   "TranslationProperties": {
-    "Name": "Void Portal"
+    "Name": "Arenas Portal"
   },
   "Icon": "Icons/ItemsGenerated/Portal_Return.png",
   "Categories": [
@@ -61,7 +61,7 @@
   "Tags": {
     "Type": [
       "Portal",
-      "VoidPortal"
+      "ArenasPortal"
     ]
   },
   "Quality": "Technical",

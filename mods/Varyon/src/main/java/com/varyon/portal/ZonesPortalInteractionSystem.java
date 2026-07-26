@@ -22,14 +22,14 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-public class VoidPortalInteractionSystem extends EntityEventSystem<EntityStore, UseBlockEvent.Post> {
+public class ZonesPortalInteractionSystem extends EntityEventSystem<EntityStore, UseBlockEvent.Post> {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-    private static final String VOID_PORTAL_BLOCK_ID = "Varyon_Portal_Void";
+    private static final String ZONES_PORTAL_BLOCK_ID = "Varyon_Portal_Zones";
     private static final long OPEN_COOLDOWN_MS = 2000;
 
     private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
 
-    public VoidPortalInteractionSystem() {
+    public ZonesPortalInteractionSystem() {
         super(UseBlockEvent.Post.class);
     }
 
@@ -44,7 +44,7 @@ public class VoidPortalInteractionSystem extends EntityEventSystem<EntityStore, 
         if (blockType == null || blockType.getId() == null) {
             return;
         }
-        if (!blockType.getId().contains(VOID_PORTAL_BLOCK_ID)) {
+        if (!blockType.getId().contains(ZONES_PORTAL_BLOCK_ID)) {
             return;
         }
 
@@ -81,11 +81,11 @@ public class VoidPortalInteractionSystem extends EntityEventSystem<EntityStore, 
         }
 
         try {
-            VoidPortalUIPage page = new VoidPortalUIPage(playerRefComp);
+            ZonesPortalUIPage page = new ZonesPortalUIPage(playerRefComp);
             player.getPageManager().openCustomPage(ref, store, page);
-            LOGGER.at(Level.FINE).log("Opened VoidPortalMenu for player " + playerId);
+            LOGGER.at(Level.FINE).log("Opened ZonesPortalMenu for player " + playerId);
         } catch (Exception e) {
-            LOGGER.at(Level.WARNING).log("Failed to open VoidPortalMenu: " + e.getMessage());
+            LOGGER.at(Level.WARNING).log("Failed to open ZonesPortalMenu: " + e.getMessage());
         }
     }
 

@@ -29,17 +29,16 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class VoidPortalUIPage extends InteractiveCustomUIPage<VoidPortalUIPage.EventDataClass> {
+public class ZonesPortalUIPage extends InteractiveCustomUIPage<ZonesPortalUIPage.EventDataClass> {
 
     private static final int WINDOW_WIDTH = 852;
     private static final int WINDOW_HEIGHT = 595;
 
-    private static final String ECON_PRICE_PREFIX = "\u00A4 ";
     private static final String RANDOM_LABEL = "Al\u00e9atoire";
 
     private final PlayerRef ownerRef;
 
-    public VoidPortalUIPage(@Nonnull PlayerRef playerRef) {
+    public ZonesPortalUIPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss, EventDataClass.CODEC);
         this.ownerRef = playerRef;
     }
@@ -68,11 +67,11 @@ public class VoidPortalUIPage extends InteractiveCustomUIPage<VoidPortalUIPage.E
                       @Nonnull UICommandBuilder commandBuilder,
                       @Nonnull UIEventBuilder eventBuilder,
                       @Nonnull Store<EntityStore> store) {
-        commandBuilder.append("VoidPortalMenu.ui");
+        commandBuilder.append("ZonesPortalMenu.ui");
         Anchor windowAnchor = new Anchor();
         windowAnchor.setWidth(Value.of(WINDOW_WIDTH));
         windowAnchor.setHeight(Value.of(WINDOW_HEIGHT));
-        commandBuilder.setObject("#VoidPortalRoot.Anchor", windowAnchor);
+        commandBuilder.setObject("#ZonesPortalRoot.Anchor", windowAnchor);
         commandBuilder.set("#MenuTitle.Text", "T\u00e9l\u00e9portation zones Varyon");
 
         RtpvConfig rtpvConfig = null;
@@ -130,8 +129,10 @@ public class VoidPortalUIPage extends InteractiveCustomUIPage<VoidPortalUIPage.E
                 EconomyCoinItemHelper.applyCoinItem(commandBuilder, "ZoneMainCoin" + i);
                 commandBuilder.set("#ZonePvPPriceRow" + i + ".Visible", true);
                 commandBuilder.set("#ZoneSafePriceRow" + i + ".Visible", true);
-                commandBuilder.set("#ZonePvPPrice" + i + ".Text", ECON_PRICE_PREFIX + baseCost);
-                commandBuilder.set("#ZoneSafePrice" + i + ".Text", ECON_PRICE_PREFIX + safeCost);
+                commandBuilder.set("#ZonePvPPrice" + i + ".Text", String.valueOf(baseCost));
+                commandBuilder.set("#ZoneSafePrice" + i + ".Text", String.valueOf(safeCost));
+                EconomyCoinItemHelper.applyCoinItem(commandBuilder, "ZonePvPCoin" + i);
+                EconomyCoinItemHelper.applyCoinItem(commandBuilder, "ZoneSafeCoin" + i);
             } else {
                 commandBuilder.set("#ZoneMainLead" + i + ".Text", RANDOM_LABEL);
                 commandBuilder.set("#ZoneMainAmount" + i + ".Text", "");

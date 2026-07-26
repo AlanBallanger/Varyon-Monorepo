@@ -38,7 +38,8 @@ import com.varyon.config.EssenceRewardsConfig;
 import com.varyon.death.DeathDetectionSystem;
 import com.varyon.death.DeathPointManager;
 import com.varyon.deposit.DepositBlockInteractionSystem;
-import com.varyon.portal.VoidPortalInteractionSystem;
+import com.varyon.portal.ZonesPortalInteractionSystem;
+import com.varyon.portal.ArenasPortalInteractionSystem;
 import com.varyon.rtpv.RtpvConfirmManager;
 import com.varyon.rtpv.RtpvCooldownStore;
 import com.varyon.util.VaryonPlayerWorldPresence;
@@ -240,11 +241,17 @@ public class VaryonPlugin extends JavaPlugin {
             DepositBlockInteractionSystem depositInteractionSystem = new DepositBlockInteractionSystem(depositBlockManager, depositUIManager);
             this.getEntityStoreRegistry().registerSystem(depositInteractionSystem);
             LOGGER.at(Level.INFO).log("Deposit block system initialized");
-            this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.VoidPortalPreInteractionSystem());
-            VoidPortalInteractionSystem voidPortalInteractionSystem = new VoidPortalInteractionSystem();
-            this.getEntityStoreRegistry().registerSystem(voidPortalInteractionSystem);
-            this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.VoidPortalTickSystem());
-            LOGGER.at(Level.INFO).log("Void portal interaction system initialized");
+            this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.ZonesPortalPreInteractionSystem());
+            ZonesPortalInteractionSystem zonesPortalInteractionSystem = new ZonesPortalInteractionSystem();
+            this.getEntityStoreRegistry().registerSystem(zonesPortalInteractionSystem);
+            this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.ZonesPortalTickSystem());
+            LOGGER.at(Level.INFO).log("Zones portal interaction system initialized");
+
+            this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.ArenasPortalPreInteractionSystem());
+            ArenasPortalInteractionSystem arenasPortalInteractionSystem = new ArenasPortalInteractionSystem();
+            this.getEntityStoreRegistry().registerSystem(arenasPortalInteractionSystem);
+            this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.ArenasPortalTickSystem());
+            LOGGER.at(Level.INFO).log("Arenas portal interaction system initialized");
 
 
             // Initialiser le système de retour au point de mort
