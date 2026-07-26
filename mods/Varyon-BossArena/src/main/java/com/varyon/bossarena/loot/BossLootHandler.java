@@ -1099,12 +1099,38 @@ public class BossLootHandler {
         }
         int localX = x & 31;
         int localZ = z & 31;
+
+        // Strip container components from the LIVE entity BEFORE breakBlock.
+        // breakBlock can clear BlockStateInfo while leaving ItemContainerBlock registered;
+        // ItemContainerBlockSpatialSystem then NPEs on blockInfo.getChunkRef().
+        // getBlockComponentHolder() returns a copy — mutating it after break does not fix the live store.
+        stripLiveChestComponents(chunk, localX, y, localZ);
+
         int filler = chunk.getFiller(localX, y, localZ);
         chunk.breakBlock(localX, y, localZ, filler, 157);
-        Holder<ChunkStore> holder = world.getBlockComponentHolder(x, y, z);
-        if (holder != null) {
-            holder.tryRemoveComponent(BossLootChestBlock.getComponentType());
-            tryRemoveItemContainerBlockComponent(holder);
+    }
+
+    private static void stripLiveChestComponents(WorldChunk chunk, int localX, int y, int localZ) {
+        if (chunk == null) {
+            return;
+        }
+        try {
+            var entityRef = chunk.getBlockComponentEntity(localX, y, localZ);
+            if (entityRef == null) {
+                return;
+            }
+            Store<ChunkStore> chunkStore = entityRef.getStore();
+            if (chunkStore == null) {
+                return;
+            }
+            tryRemoveItemContainerBlockComponentLive(chunkStore, entityRef);
+            ComponentType<ChunkStore, BossLootChestBlock> bossType = BossLootChestBlock.getComponentType();
+            if (bossType != null) {
+                chunkStore.tryRemoveComponent(entityRef, bossType);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING,
+                    "Failed to strip live chest components at local " + localX + "," + y + "," + localZ, e);
         }
     }
 

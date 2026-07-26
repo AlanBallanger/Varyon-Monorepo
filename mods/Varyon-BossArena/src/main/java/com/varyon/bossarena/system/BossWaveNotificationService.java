@@ -308,8 +308,14 @@ public final class BossWaveNotificationService {
                                         String customMessage,
                                         boolean announceServerWide,
                                         boolean announceWorldWide) {
+        LOGGER.info(() -> "notifyTimedSpawn called: boss=" + bossName + " arena=" + arenaId
+                + " world=" + (world != null ? world.getName() : "null")
+                + " serverWide=" + announceServerWide + " worldWide=" + announceWorldWide);
+
         // No announcement when both server-wide and world-wide are disabled; spawn still occurs, only the global alert is skipped.
         if ((!announceServerWide && !announceWorldWide) || world == null) {
+            LOGGER.info(() -> "notifyTimedSpawn skipped: no announcement scope enabled or world is null (world="
+                    + world + ")");
             return;
         }
 
@@ -329,6 +335,7 @@ public final class BossWaveNotificationService {
         if (announceServerWide) {
             Universe universe = Universe.get();
             if (universe == null) {
+                LOGGER.warning("notifyTimedSpawn aborted: server-wide announcement requested but Universe.get() returned null");
                 return;
             }
             targets = universe.getPlayers();
@@ -336,15 +343,22 @@ public final class BossWaveNotificationService {
             targets = world.getPlayerRefs();
         }
 
+        int notified = 0;
+        int skippedInvalid = 0;
+        int chatFailures = 0;
+        int titleFailures = 0;
         for (PlayerRef playerRef : targets) {
             if (playerRef == null || !playerRef.isValid()) {
+                skippedInvalid++;
                 continue;
             }
             suppressLocalStatusTitles(playerRef);
             try {
                 playerRef.sendMessage(toColoredMessage(chatMessage));
             } catch (Exception e) {
-                LOGGER.fine(() -> "Failed to send timed global alert chat message: " + e.getMessage());
+                chatFailures++;
+                LOGGER.warning("Failed to send timed global alert chat message to "
+                        + playerRef.getUuid() + ": " + e.getMessage());
             }
             try {
                 EventTitleUtil.hideEventTitleFromPlayer(playerRef, 0f);
@@ -358,10 +372,22 @@ public final class BossWaveNotificationService {
                         0f,
                         0f
                 );
+                notified++;
             } catch (Exception e) {
-                LOGGER.fine(() -> "Failed to show timed global alert title: " + e.getMessage());
+                titleFailures++;
+                LOGGER.warning("Failed to show timed global alert title to "
+                        + playerRef.getUuid() + ": " + e.getMessage());
             }
         }
+
+        final int notifiedFinal = notified;
+        final int skippedInvalidFinal = skippedInvalid;
+        final int chatFailuresFinal = chatFailures;
+        final int titleFailuresFinal = titleFailures;
+        LOGGER.info(() -> "notifyTimedSpawn done: boss=" + bossDisplay + " arena=" + arenaDisplay
+                + " scope=" + (announceServerWide ? "server" : "world") + " notified=" + notifiedFinal
+                + " skippedInvalid=" + skippedInvalidFinal + " chatFailures=" + chatFailuresFinal
+                + " titleFailures=" + titleFailuresFinal);
     }
 
     private static void showToNearbyPlayers(World world,
@@ -374,6 +400,12 @@ public final class BossWaveNotificationService {
                 ? notificationRadiusBlocks
                 : resolveNotificationRadius();
         long now = System.currentTimeMillis();
+        final String titleTextForLog = title != null ? title.toString() : "null";
+        LOGGER.info(() -> "showToNearbyPlayers: world=" + world.getName() + " center=" + center
+                + " radius=" + radius + " duration=" + durationSeconds + " title=" + titleTextForLog);
+        int shown = 0;
+        int outOfRange = 0;
+        int failures = 0;
         for (PlayerRef playerRef : world.getPlayerRefs()) {
             if (playerRef == null) {
                 continue;
@@ -390,6 +422,7 @@ public final class BossWaveNotificationService {
             Vector3d playerPosition = new Vector3d(rawPlayerPos.x, rawPlayerPos.y, rawPlayerPos.z);
 
             if (playerPosition.distance(center) > radius) {
+                outOfRange++;
                 try {
                     EventTitleUtil.hideEventTitleFromPlayer(playerRef, 0f);
                 } catch (Exception e) {
@@ -412,11 +445,19 @@ public final class BossWaveNotificationService {
                             0f,
                             0f
                     );
+                    shown++;
                 }
             } catch (Exception e) {
-                LOGGER.fine(() -> "Failed to update wave notification visibility: " + e.getMessage());
+                failures++;
+                LOGGER.warning("Failed to update wave notification visibility for "
+                        + playerRef.getUuid() + ": " + e.getMessage());
             }
         }
+        final int shownFinal = shown;
+        final int outOfRangeFinal = outOfRange;
+        final int failuresFinal = failures;
+        LOGGER.info(() -> "showToNearbyPlayers done: shown=" + shownFinal
+                + " outOfRange=" + outOfRangeFinal + " failures=" + failuresFinal);
     }
 
     private static long resolvePlayerDamage(UUID eventId, PlayerRef playerRef) {
@@ -552,6 +593,12 @@ public final class BossWaveNotificationService {
                                           Message subtitle,
                                           float durationSeconds) {
         double radiusSq = radiusBlocks * radiusBlocks;
+        final String titleTextForLog = title != null ? title.toString() : "null";
+        LOGGER.info(() -> "showTitleInRadius: world=" + world.getName() + " center=" + center
+                + " radiusBlocks=" + radiusBlocks + " duration=" + durationSeconds + " title=" + titleTextForLog);
+        int shown = 0;
+        int outOfRange = 0;
+        int failures = 0;
         for (PlayerRef playerRef : world.getPlayerRefs()) {
             if (playerRef == null || !playerRef.isValid()) {
                 continue;
@@ -565,6 +612,7 @@ public final class BossWaveNotificationService {
             double dy = rawPlayerPos.y - center.y;
             double dz = rawPlayerPos.z - center.z;
             if ((dx * dx) + (dy * dy) + (dz * dz) > radiusSq) {
+                outOfRange++;
                 continue;
             }
             try {
@@ -580,11 +628,19 @@ public final class BossWaveNotificationService {
                             0f,
                             0f
                     );
+                    shown++;
                 }
             } catch (Exception e) {
-                LOGGER.fine(() -> "Failed to show timed arena title: " + e.getMessage());
+                failures++;
+                LOGGER.warning("Failed to show timed arena title to "
+                        + playerRef.getUuid() + ": " + e.getMessage());
             }
         }
+        final int shownFinal = shown;
+        final int outOfRangeFinal = outOfRange;
+        final int failuresFinal = failures;
+        LOGGER.info(() -> "showTitleInRadius done: shown=" + shownFinal
+                + " outOfRange=" + outOfRangeFinal + " failures=" + failuresFinal);
     }
 
     private static String applyTimedAnnouncementPlaceholders(String template,

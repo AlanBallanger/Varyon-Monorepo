@@ -28,6 +28,7 @@ import com.varyon.bossarena.loot.BossLootHandler;
 import com.varyon.bossarena.loot.BossLootChestBlock;
 import com.varyon.bossarena.loot.BossLootChestOpener;
 import com.varyon.bossarena.loot.BossLootChestUseSystem;
+import com.varyon.bossarena.loot.OrphanItemContainerBlockCleanupSystem;
 import com.varyon.bossarena.util.BossArenaCleanup;
 import com.varyon.bossarena.loot.OpenBossChestInteraction;
 import com.varyon.bossarena.music.BossFightMusicApplySystem;
@@ -442,6 +443,8 @@ public final class BossArenaPlugin extends JavaPlugin {
                             BossLootChestBlock.CODEC
                     );
             BossLootChestBlock.setComponentType(bossLootChestType);
+            getChunkStoreRegistry().registerSystem(new OrphanItemContainerBlockCleanupSystem());
+            getLogger().atInfo().log("Registered orphan ItemContainerBlock cleanup system");
 
             // Register OpenBossChestInteraction codec with Interaction system
             // The string must match the interaction ID in the JSON
