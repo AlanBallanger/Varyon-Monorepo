@@ -88,14 +88,14 @@ public final class CometLootChestService {
 
         if (isStoneBlock) {
             CometWorldSounds.playCometDestroy(world, blockPos);
-            world.breakBlock(blockPos.x, blockPos.y, blockPos.z, 0);
+            CometLootBlockStateUtil.safeBreakBlock(world, blockPos.x, blockPos.y, blockPos.z);
             return placeChestAt(world, blockPos, rewards);
         }
 
         Vector3i chestPos = findChestPositionInFront(world, blockPos);
         if (chestPos == null) {
             CometWorldSounds.playCometDestroy(world, blockPos);
-            world.breakBlock(blockPos.x, blockPos.y, blockPos.z, 0);
+            CometLootBlockStateUtil.safeBreakBlock(world, blockPos.x, blockPos.y, blockPos.z);
             return placeChestAt(world, blockPos, rewards);
         }
         boolean placed = placeChestAt(world, chestPos, rewards);
@@ -152,7 +152,7 @@ public final class CometLootChestService {
             int localZ = pos.z & 31;
             boolean placed = chunk.setBlock(localX, pos.y, localZ, blockTypeIndex, chestBlockType, 0, 0, 157);
             if (!placed) {
-                world.breakBlock(pos.x, pos.y, pos.z, 0);
+                CometLootBlockStateUtil.safeBreakBlock(world, pos.x, pos.y, pos.z);
                 chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
                 if (chunk == null) {
                     LOGGER.warning("Chunk unavailable after retry for reward chest at " + pos + ".");
@@ -169,12 +169,12 @@ public final class CometLootChestService {
             Object containerState = CometLootBlockStateUtil.newItemContainerState(serverLoader);
             if (containerState == null) {
                 LOGGER.warning("Could not create ItemContainerState for reward chest at " + pos + ".");
-                world.breakBlock(pos.x, pos.y, pos.z, 0);
+                CometLootBlockStateUtil.safeBreakBlock(world, pos.x, pos.y, pos.z);
                 return false;
             }
             if (!CometLootBlockStateUtil.initializeContainer(containerState, chestBlockType)) {
                 LOGGER.info("Chest block " + chestBlockType.getId() + " rejected container init; trying next type.");
-                world.breakBlock(pos.x, pos.y, pos.z, 0);
+                CometLootBlockStateUtil.safeBreakBlock(world, pos.x, pos.y, pos.z);
                 return false;
             }
             CometLootBlockStateUtil.setPositionOnChunk(containerState, chunk, pos);
@@ -191,10 +191,7 @@ public final class CometLootChestService {
             return true;
         } catch (Exception e) {
             LOGGER.warning("Failed to spawn reward chest at " + pos + ": " + e.getMessage());
-            try {
-                world.breakBlock(pos.x, pos.y, pos.z, 0);
-            } catch (Exception ignored) {
-            }
+            CometLootBlockStateUtil.safeBreakBlock(world, pos.x, pos.y, pos.z);
             return false;
         }
     }
@@ -342,7 +339,7 @@ public final class CometLootChestService {
         Vector3i cometPos = cometBlockByChestKey.remove(key);
         if (cometPos != null && world != null) {
             try {
-                world.breakBlock(cometPos.x, cometPos.y, cometPos.z, 0);
+                CometLootBlockStateUtil.safeBreakBlock(world, cometPos.x, cometPos.y, cometPos.z);
             } catch (Exception e) {
                 LOGGER.warning("Failed to remove linked comet block at " + cometPos + " when chest broken: " + e.getMessage());
             }
@@ -412,7 +409,7 @@ public final class CometLootChestService {
 
         boolean removed = false;
         try {
-            removed = world.breakBlock(pos.x, pos.y, pos.z, 0);
+            removed = CometLootBlockStateUtil.safeBreakBlock(world, pos.x, pos.y, pos.z);
             if (!removed) {
                 removed = forceRemoveBlock(world, pos);
             }
@@ -430,7 +427,7 @@ public final class CometLootChestService {
         Vector3i cometPos = cometBlockByChestKey.remove(key);
         if (cometPos != null) {
             try {
-                world.breakBlock(cometPos.x, cometPos.y, cometPos.z, 0);
+                CometLootBlockStateUtil.safeBreakBlock(world, cometPos.x, cometPos.y, cometPos.z);
             } catch (Exception e) {
                 LOGGER.warning("Failed to remove linked comet block at " + cometPos + " on chest expiry: " + e.getMessage());
             }
@@ -458,6 +455,7 @@ public final class CometLootChestService {
 
     private boolean forceRemoveBlock(World world, Vector3i pos) {
         try {
+            CometLootBlockStateUtil.stripLiveItemContainerBlock(world, pos.x, pos.y, pos.z);
             WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
             if (chunk == null) {
                 return false;

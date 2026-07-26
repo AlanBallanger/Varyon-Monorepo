@@ -222,6 +222,13 @@ public class CometModPlugin extends JavaPlugin {
         }
 
         try {
+            getChunkStoreRegistry().registerSystem(new OrphanItemContainerBlockCleanupSystem());
+            LOGGER.info("Registered orphan ItemContainerBlock cleanup system");
+        } catch (Exception e) {
+            LOGGER.warning("Failed to register OrphanItemContainerBlockCleanupSystem: " + e.getMessage());
+        }
+
+        try {
             getEntityStoreRegistry().registerSystem(new CometWaveLootBlockerSystem(waveManager));
         } catch (Exception e) {
             LOGGER.warning("Failed to register CometWaveLootBlockerSystem: " + e.getMessage());

@@ -1,12 +1,16 @@
 package com.varyon.comet.loot;
 
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
-import org.joml.Vector3i;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.joml.Vector3i;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -234,6 +238,54 @@ public final class CometLootBlockStateUtil {
                 clear.invoke(ic);
             }
         } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * Strip {@code ItemContainerBlock} from the live block entity before break/replace.
+     * Leaving it without {@code BlockStateInfo} crashes {@code ItemContainerBlockSpatialSystem}.
+     */
+    @SuppressWarnings("unchecked")
+    public static void stripLiveItemContainerBlock(World world, int x, int y, int z) {
+        if (world == null) {
+            return;
+        }
+        try {
+            WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
+            if (chunk == null) {
+                return;
+            }
+            int localX = x & 31;
+            int localZ = z & 31;
+            Ref<ChunkStore> entityRef = chunk.getBlockComponentEntity(localX, y, localZ);
+            if (entityRef == null) {
+                return;
+            }
+            Store<ChunkStore> store = entityRef.getStore();
+            if (store == null) {
+                return;
+            }
+            Class<?> cls = Class.forName(
+                    "com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock");
+            ComponentType<ChunkStore, ?> type =
+                    (ComponentType<ChunkStore, ?>) cls.getMethod("getComponentType").invoke(null);
+            if (type != null) {
+                store.tryRemoveComponent(entityRef, type);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /** Strip live ItemContainerBlock then break the block. */
+    public static boolean safeBreakBlock(World world, int x, int y, int z) {
+        if (world == null) {
+            return false;
+        }
+        stripLiveItemContainerBlock(world, x, y, z);
+        try {
+            return world.breakBlock(x, y, z, 0);
+        } catch (Throwable t) {
+            return false;
         }
     }
 
