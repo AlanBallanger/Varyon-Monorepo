@@ -33,7 +33,7 @@ public final class MinerXpTable {
     /**
      * Retourne l'item pur à dropper en bonus pour un bloc cassé.
      * Ex: "Ore_Iron_Stone" → "Ore_Iron"
-     *     "Rock_Crystal_Blue" → "Rock_Crystal_Blue"
+     *     "Rock_Crystal_Blue_Block" → "Ingredient_Crystal_Blue"
      *     "Rock_Gem_Diamond" → "Rock_Gem_Diamond"
      */
     public static String resolveOreItemId(String rawId) {
@@ -45,8 +45,14 @@ public final class MinerXpTable {
         if (lower.startsWith("ore_") && parts.length >= 2) {
             return parts[0] + "_" + parts[1];
         }
+        // Crystal blocks drop Ingredient_Crystal_* — never legacy Rock_Crystal_* item ids.
         if (lower.startsWith("rock_crystal_") && parts.length >= 3) {
-            return parts[0] + "_" + parts[1] + "_" + parts[2];
+            String color = parts[2];
+            if (color == null || color.isBlank()) {
+                return null;
+            }
+            return "Ingredient_Crystal_" + Character.toUpperCase(color.charAt(0))
+                    + (color.length() > 1 ? color.substring(1).toLowerCase() : "");
         }
         if (lower.startsWith("rock_gem_") && parts.length >= 3) {
             return parts[0] + "_" + parts[1] + "_" + parts[2];
