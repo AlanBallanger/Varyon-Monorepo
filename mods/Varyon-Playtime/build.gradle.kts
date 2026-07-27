@@ -90,9 +90,21 @@ val fatJar = tasks.register<Jar>("fatJar") {
     }
 }
 
-tasks.named("build") { dependsOn(fatJar) }
+val exportModJar = tasks.register<Copy>("exportModJar") {
+    group = "build"
+    description = "Copie le JAR vers Varyon-Monorepo/build/output"
+    dependsOn(fatJar)
+    from(fatJar)
+    into(rootProject.layout.buildDirectory.dir("output"))
+}
+
+tasks.named("build") {
+    dependsOn(fatJar)
+    finalizedBy(exportModJar)
+}
 
 tasks.named<Jar>("jar") {
+    archiveClassifier.set("thin")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
