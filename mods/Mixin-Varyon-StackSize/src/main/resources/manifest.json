@@ -1,0 +1,12 @@
+{
+  "Group": "fr.varyon.mixinagent",
+  "Name": "Mixin-Varyon-StackSize",
+  "Version": "0.1.0",
+  "ServerVersion": ">=0.5.0 <0.6.0",
+  "Authors": [{"Name": "Varyon Team"}],
+  "Description": "Early plugin (ASM class transformer) — stack max par permission pour Wood_Ash_Trunk (100 -> 200 avec varyon.stack.wood_ash_trunk.200).",
+  "Website": "",
+  "IncludesAssetPack": false,
+  "Dependencies": {},
+  "OptionalDependencies": {}
+}

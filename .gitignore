@@ -24,3 +24,5 @@ libs/
 # Claude Code config (machine-specific)
 .claude/
 .agents/
+
+.worktrees/
