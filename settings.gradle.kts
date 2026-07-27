@@ -33,4 +33,5 @@ include(
     ":mods:Varyon-Progression",
     ":mods:Varyon-Holograms",
     ":mods:Varyon-TravelingCamera",
+    ":mods:Varyon-CrashRestarter",
 )
