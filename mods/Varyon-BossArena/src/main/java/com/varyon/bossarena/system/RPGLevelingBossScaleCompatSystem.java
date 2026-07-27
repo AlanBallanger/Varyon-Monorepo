@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,13 +28,26 @@ import java.util.logging.Logger;
  */
 public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<EntityStore> {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
-    private static final float RESYNC_INTERVAL_SECONDS = 0.25f;
+    private static final long RESYNC_INTERVAL_MS = 250L;
 
     private final BossTrackingSystem trackingSystem;
-    private float elapsedSeconds;
+    /**
+     * tick() may fire more than once per real-time interval, so pacing is done against a wall-clock
+     * timestamp rather than accumulated {@code dt} — summing dt across redundant calls made this
+     * resync run several times too fast, which could re-trigger the "was full" HP fill-up (maximizeStatValue)
+     * shortly after a hit instead of once per 0.25s, making the boss look like it regenerates instantly.
+     */
+    private volatile long nextRunAtMs;
     private boolean lastRpgLevelingLoaded;
     private boolean loadStateKnown;
     private final Map<UUID, Integer> appliedLevelOverrides = new HashMap<>();
+    /**
+     * Last effective (worldFactor × bossMult) applied per boss. Re-asserting the MAX HP modifier
+     * every resync cycle even when nothing changed forces the engine to strip and re-add it, which
+     * can transiently clamp current HP down to the un-multiplied max in between — skip the
+     * strip/re-add entirely when the effective multiplier hasn't moved.
+     */
+    private final Map<UUID, Float> lastEffectiveHpMultiplierByBoss = new ConcurrentHashMap<>();
     private Method rpgGetMethod;
     private Method rpgPutSpawnLevelMethod;
     private Method rpgRemoveSpawnLevelMethod;
@@ -49,14 +63,15 @@ public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<Entity
             return;
         }
 
-        elapsedSeconds += Math.max(0f, dt);
-        if (elapsedSeconds < RESYNC_INTERVAL_SECONDS) {
+        long now = System.currentTimeMillis();
+        if (now < nextRunAtMs) {
             return;
         }
-        elapsedSeconds = 0f;
+        nextRunAtMs = now + RESYNC_INTERVAL_MS;
 
         Map<UUID, BossTrackingSystem.BossData> trackedBosses = trackingSystem.snapshotTrackedBosses();
         Set<UUID> activeBossUuids = new HashSet<>(trackedBosses.keySet());
+        lastEffectiveHpMultiplierByBoss.keySet().retainAll(activeBossUuids);
         boolean rpgLoaded = isRpgLevelingLoaded();
         Object rpgPluginInstance = rpgLoaded ? resolveRpgLevelingPluginInstance() : null;
 
@@ -97,9 +112,26 @@ public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<Entity
             boolean wasFull = healthBefore != null && maxBefore > 0f && currentBefore + 1f >= maxBefore;
 
             float knownFactor = bossData.worldHealthFactor;
-            float worldFactor = BossHealthScale.apply(statMap, desiredMultiplier, knownFactor);
-            if (worldFactor > 0.01f && Math.abs(worldFactor - knownFactor) > 0.0001f) {
-                trackingSystem.setWorldHealthFactor(bossUuid, worldFactor);
+            float effectiveMultiplier = Math.max(0.01f, knownFactor) * desiredMultiplier;
+            Float lastEffective = lastEffectiveHpMultiplierByBoss.get(bossUuid);
+            boolean multiplierUnchanged = lastEffective != null
+                    && Math.abs(lastEffective - effectiveMultiplier) < 0.0001f;
+
+            float worldFactor;
+            if (multiplierUnchanged) {
+                // Nothing to (re)apply: skip the strip/re-add of the MAX modifier entirely, since
+                // that churn is what was clamping current HP down and re-triggering the fill-up below.
+                worldFactor = knownFactor > 0.01f ? knownFactor : 1.0f;
+            } else {
+                // applyModifierOnly (not apply): this resync runs periodically for as long as the boss is
+                // tracked, so it must not unconditionally fill HP back to max — that would erase player
+                // damage every cycle. The wasFull/stuckAtBasePool checks below still catch the legitimate
+                // cases (post-spawn, or HP stuck at a stale pool after a real multiplier change).
+                worldFactor = BossHealthScale.applyModifierOnly(statMap, desiredMultiplier, knownFactor);
+                if (worldFactor > 0.01f && Math.abs(worldFactor - knownFactor) > 0.0001f) {
+                    trackingSystem.setWorldHealthFactor(bossUuid, worldFactor);
+                }
+                lastEffectiveHpMultiplierByBoss.put(bossUuid, Math.max(0.01f, worldFactor) * desiredMultiplier);
             }
 
             EntityStatValue healthAfter = statMap.get(healthIndex);
@@ -114,24 +146,16 @@ public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<Entity
             }
             float bakedFactor = Math.max(0.01f, worldFactor);
             float baseApprox = maxAfter / (bakedFactor * desiredMultiplier);
-            boolean stuckAtBasePool = (bakedFactor * desiredMultiplier) > 1.01f
+            boolean stuckAtBasePool = !multiplierUnchanged
+                    && (bakedFactor * desiredMultiplier) > 1.01f
                     && maxAfter > baseApprox * 1.5f
                     && Math.abs(currentAfter - baseApprox) <= 1f;
-            if (wasFull || stuckAtBasePool) {
-                if (currentAfter + 0.5f < maxAfter) {
-                    statMap.maximizeStatValue(EntityStatMap.Predictable.ALL, healthIndex);
-                    LOGGER.log(
-                            Level.INFO,
-                            "BossArena compat filled scaled HP for boss {0}: {1} -> {2} (bossMult={3}, worldFactor={4})",
-                            new Object[]{
-                                    bossUuid,
-                                    String.format("%.1f/%.1f", currentAfter, maxAfter),
-                                    String.format("%.1f/%.1f", healthAfter.get(), healthAfter.getMax()),
-                                    String.format("%.4f", desiredMultiplier),
-                                    String.format("%.4f", worldFactor)
-                            }
-                    );
-                }
+            if ((wasFull || stuckAtBasePool) && currentAfter + 0.5f < maxAfter) {
+                statMap.maximizeStatValue(EntityStatMap.Predictable.ALL, healthIndex);
+                LOGGER.info("BossArena compat filled HP for boss " + bossUuid
+                        + ": " + currentAfter + "/" + maxAfter
+                        + " (reason=" + (wasFull ? "wasFull" : "stuckAtBasePool")
+                        + ", bossMult=" + desiredMultiplier + ", worldFactor=" + worldFactor + ")");
             }
         } catch (Exception e) {
             LOGGER.log(Level.FINE, "Failed to enforce boss HP scale compatibility for " + bossUuid, e);

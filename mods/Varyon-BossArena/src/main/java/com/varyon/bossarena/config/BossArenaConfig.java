@@ -23,7 +23,7 @@ public final class BossArenaConfig {
     public static final String DEFAULT_TIMED_GRACE_TITLE_TEXT =
             "&eLe combat de boss commence dans &6$time&e !";
     public static final String DEFAULT_TIMED_MAP_MARKER_IMAGE = "map_marker.png";
-    public static final String DEFAULT_TIMED_MAP_MARKER_NAME_TEMPLATE = "Timed Boss: $Boss @ $Arena";
+    public static final String DEFAULT_TIMED_MAP_MARKER_NAME_TEMPLATE = "$Arena";
     public static final String DEFAULT_EVENT_ACTIVE_TITLE_TEMPLATE = "$PhaseTitle";
     public static final String DEFAULT_EVENT_ACTIVE_SUBTITLE_TEMPLATE = "Monstres restants : $MonstersAlive";
     public static final String DEFAULT_EVENT_VICTORY_TITLE_TEMPLATE = "VICTOIRE ! Réclamez votre butin !";

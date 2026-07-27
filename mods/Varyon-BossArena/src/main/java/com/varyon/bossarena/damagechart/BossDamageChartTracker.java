@@ -31,6 +31,18 @@ public final class BossDamageChartTracker {
                 .add(amount);
     }
 
+    /** Snapshot of player UUIDs with a tally in this event, without clearing it. */
+    public List<UUID> snapshotPlayerUuidsForEvent(UUID eventId) {
+        if (eventId == null) {
+            return List.of();
+        }
+        Map<UUID, DoubleAdder> perPlayer = byEvent.get(eventId);
+        if (perPlayer == null || perPlayer.isEmpty()) {
+            return List.of();
+        }
+        return List.copyOf(perPlayer.keySet());
+    }
+
     /** Peek damage dealt by a player in an event without clearing the tally. */
     public long getDamage(UUID eventId, UUID playerUuid) {
         if (eventId == null || playerUuid == null) {

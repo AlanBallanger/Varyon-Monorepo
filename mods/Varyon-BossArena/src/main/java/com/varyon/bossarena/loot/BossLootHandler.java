@@ -207,7 +207,10 @@ public class BossLootHandler {
             if (!snapshot.isEmpty()) {
                 List<DamageChartOpener.DisplayRow> rows = new ArrayList<>();
                 for (BossDamageChartTracker.DamageEntry e : snapshot) {
-                    String name = resolveDisplayName(e.playerUuid(), eligiblePlayers);
+                    // Resolve against every player currently in the world, not just those eligible
+                    // for loot — a player who dealt damage then moved away (or is out of the loot
+                    // radius) is still online and must show their username, not their raw UUID.
+                    String name = resolveDisplayName(e.playerUuid(), playerRefs);
                     rows.add(new DamageChartOpener.DisplayRow(name, e.damage()));
                 }
                 damageChartOpener.openChart(world, eligiblePlayers, rows, bossName, store);
@@ -265,11 +268,11 @@ public class BossLootHandler {
         scheduleUntouchedChestExpiry(world, chestCopy);
     }
 
-    private static String resolveDisplayName(UUID playerUuid, List<PlayerRef> eligiblePlayers) {
+    private static String resolveDisplayName(UUID playerUuid, Iterable<PlayerRef> worldPlayers) {
         if (playerUuid == null) {
             return "Unknown";
         }
-        for (PlayerRef ref : eligiblePlayers) {
+        for (PlayerRef ref : worldPlayers) {
             if (ref != null && playerUuid.equals(EntityComponents.uuid(ref))) {
                 String name = ref.getUsername();
                 return (name != null && !name.isBlank()) ? name : playerUuid.toString();

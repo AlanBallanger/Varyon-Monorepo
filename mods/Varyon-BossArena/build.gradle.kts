@@ -48,8 +48,15 @@ val exportModJar = tasks.register<Copy>("exportModJar") {
     group = "build"
     description = "Copie le JAR vers Varyon-Monorepo/build/output"
     dependsOn(tasks.named("jar"))
-    from(tasks.named<Jar>("jar").flatMap { it.archiveFile })
-    into(rootProject.layout.buildDirectory.dir("output"))
+    val jarFileProvider = tasks.named<Jar>("jar").flatMap { it.archiveFile }
+    val outputDir = rootProject.layout.buildDirectory.dir("output")
+    onlyIf {
+        val jarFile = jarFileProvider.get().asFile
+        val destFile = outputDir.get().asFile.resolve(jarFile.name)
+        jarFile.normalize() != destFile.normalize()
+    }
+    from(jarFileProvider)
+    into(outputDir)
 }
 
 tasks.named("build") {

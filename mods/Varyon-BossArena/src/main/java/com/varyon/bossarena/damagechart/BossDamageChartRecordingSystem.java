@@ -83,11 +83,35 @@ public final class BossDamageChartRecordingSystem extends DamageEventSystem {
             return;
         }
         tracker.addDamage(eventId, playerUuid, removed);
+
+        // This hit is fatal either when the stat map became unreadable (entity already removed
+        // from the store by this hit — despawn/killing-blow branch of resolveHpRemoved), or when
+        // the stat map is still readable but HP dropped to/below its minimum (the common case: the
+        // entity is dying but hasn't been removed from the store yet this tick). Attribute the kill
+        // to whoever dealt this hit.
+        boolean fatal;
+        if (hpBefore != null && Float.isFinite(hpBefore)) {
+            float hpAfter = readCurrentHp(archetypeChunk, index);
+            if (Float.isFinite(hpAfter)) {
+                float min = readMinHp(archetypeChunk, index);
+                fatal = hpAfter <= min;
+            } else {
+                fatal = true;
+            }
+        } else {
+            fatal = false;
+        }
+        if (fatal) {
+            trackingSystem.recordMobKillIfAdd(targetUuid, eventId, playerUuid);
+        }
     }
 
     /**
-     * Prefer measured HP delta; fall back to clamped damage amount if snapshot missing
-     * (e.g. entity already despawned / stat map unavailable after the killing blow).
+     * Prefer measured HP delta; only fall back to the raw damage amount when the entity is
+     * confirmed gone (killing blow / despawn — stat map unreadable after removal). A parried,
+     * blocked, or knockback-only hit leaves HP unchanged and a readable stat map, and must credit
+     * zero rather than the theoretical weapon damage — crediting {@code amount} in that case
+     * inflates the damage chart with hits that dealt no real HP loss.
      */
     private static double resolveHpRemoved(ArchetypeChunk<EntityStore> archetypeChunk,
                                            int index,
@@ -97,12 +121,12 @@ public final class BossDamageChartRecordingSystem extends DamageEventSystem {
         if (hpBefore != null && Float.isFinite(hpBefore)) {
             float hpAfter = readCurrentHp(archetypeChunk, index);
             if (Float.isFinite(hpAfter)) {
+                // Stat map still readable: trust the measured delta, including zero
+                // (parried/blocked/knockback-only hits). Never fall back to amount here.
                 double delta = (double) hpBefore - (double) hpAfter;
-                if (delta > 0.0d) {
-                    return delta;
-                }
+                return Math.max(0.0d, delta);
             }
-            // Killing blow / despawn: credit remaining HP at snapshot time.
+            // Stat map unreadable: entity was actually removed by this hit (killing blow/despawn).
             float min = readMinHp(archetypeChunk, index);
             double remaining = (double) hpBefore - (double) min;
             if (remaining > 0.0d) {
@@ -111,16 +135,10 @@ public final class BossDamageChartRecordingSystem extends DamageEventSystem {
                 }
                 return remaining;
             }
-        }
-        if (!Float.isFinite(amount) || amount <= 0f) {
             return 0.0d;
         }
-        float remaining = readRemainingHp(archetypeChunk, index);
-        if (Float.isFinite(remaining) && remaining >= 0f) {
-            // After apply, remaining is post-hit; cannot clamp usefully — use amount.
-            return amount;
-        }
-        return amount;
+        // No pre-hit snapshot at all: nothing to compare against, so don't guess from amount.
+        return 0.0d;
     }
 
     private static float readCurrentHp(ArchetypeChunk<EntityStore> archetypeChunk, int index) {
@@ -141,19 +159,6 @@ public final class BossDamageChartRecordingSystem extends DamageEventSystem {
         int healthIndex = DefaultEntityStatTypes.getHealth();
         EntityStatValue health = healthIndex >= 0 ? statMap.get(healthIndex) : null;
         return health != null ? health.getMin() : 0f;
-    }
-
-    private static float readRemainingHp(ArchetypeChunk<EntityStore> archetypeChunk, int index) {
-        Object statMapObj = archetypeChunk.getComponent(index, EntityStatMap.getComponentType());
-        if (!(statMapObj instanceof EntityStatMap statMap)) {
-            return Float.NaN;
-        }
-        int healthIndex = DefaultEntityStatTypes.getHealth();
-        EntityStatValue health = healthIndex >= 0 ? statMap.get(healthIndex) : null;
-        if (health == null) {
-            return Float.NaN;
-        }
-        return Math.max(0f, health.get() - health.getMin());
     }
 
     private static UUID extractTargetUuid(int index, ArchetypeChunk<EntityStore> archetypeChunk) {

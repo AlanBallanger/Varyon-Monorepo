@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 /**
  * Central shared state for boss fights: tracked bosses and adds, event data, chunk holds, and persistence.
@@ -44,6 +45,9 @@ public class BossTrackingSystem {
     private final Map<UUID, BossData> trackedBosses = new ConcurrentHashMap<>();
     private final Map<UUID, Set<UUID>> trackedAddsByBoss = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> addToBoss = new ConcurrentHashMap<>();
+    /** Adds whose fatal hit was already counted, to avoid double-counting if multiple hits land on
+     * an already-dying entity before its DeathComponent removes it from tracking. */
+    private final Set<UUID> mobKillCountedFor = ConcurrentHashMap.newKeySet();
     private final Map<UUID, BossModifiers> addModifiers = new ConcurrentHashMap<>();
     /** Baked zone/world HP factor (assetMax × factor × bossMult). Survives before trackAdd. */
     private final Map<UUID, Float> addWorldHealthFactors = new ConcurrentHashMap<>();
@@ -997,6 +1001,88 @@ public class BossTrackingSystem {
         return event != null ? event.totalWaveCount : 0;
     }
 
+    /** Records a mob (wave add) kill for this fight. killerUuid may be null (unattributable fatal hit). */
+    public void recordMobKill(UUID eventId, @Nullable UUID killerUuid) {
+        if (eventId == null) {
+            return;
+        }
+        EventData event = eventsById.get(eventId);
+        if (event == null) {
+            return;
+        }
+        event.totalMobKills.incrementAndGet();
+        if (killerUuid != null) {
+            event.mobKillsByPlayer.computeIfAbsent(killerUuid, k -> new AtomicInteger(0)).incrementAndGet();
+        }
+        markDirty();
+    }
+
+    /** Records the kill only if targetUuid is a tracked wave add (normal or pre-boss). Ignores bosses and untracked entities. */
+    public void recordMobKillIfAdd(UUID targetUuid, UUID eventId, @Nullable UUID killerUuid) {
+        if (targetUuid == null || eventId == null) {
+            return;
+        }
+        if (!isTrackedAdd(targetUuid) && !isPendingPreBossAdd(targetUuid)) {
+            return;
+        }
+        // Guard against multiple hits landing on an already-fatally-hit entity within the same
+        // tick, before its DeathComponent removes it from tracking (which clears this marker).
+        if (!mobKillCountedFor.add(targetUuid)) {
+            return;
+        }
+        recordMobKill(eventId, killerUuid);
+    }
+
+    public int getEventTotalMobKills(UUID eventId) {
+        EventData event = eventId != null ? eventsById.get(eventId) : null;
+        return event != null ? event.totalMobKills.get() : 0;
+    }
+
+    public int getEventMobKillsForPlayer(UUID eventId, UUID playerUuid) {
+        EventData event = eventId != null ? eventsById.get(eventId) : null;
+        if (event == null || playerUuid == null) {
+            return 0;
+        }
+        AtomicInteger counter = event.mobKillsByPlayer.get(playerUuid);
+        return counter != null ? counter.get() : 0;
+    }
+
+    /** Total mobs planned across the whole fight (0 = unknown). Computed once when the event is created. */
+    public void setEventTotalPlannedMobs(UUID eventId, int totalPlannedMobs) {
+        if (eventId == null || totalPlannedMobs < 0) {
+            return;
+        }
+        EventData event = eventsById.get(eventId);
+        if (event == null) {
+            return;
+        }
+        event.totalPlannedMobs = totalPlannedMobs;
+        markDirty();
+    }
+
+    public int getEventTotalPlannedMobs(UUID eventId) {
+        EventData event = eventId != null ? eventsById.get(eventId) : null;
+        return event != null ? event.totalPlannedMobs : 0;
+    }
+
+    /** Mobs planned for the wave currently in progress (0 = unknown / no active wave). */
+    public void setEventCurrentWavePlannedMobs(UUID eventId, int plannedMobs) {
+        if (eventId == null || plannedMobs < 0) {
+            return;
+        }
+        EventData event = eventsById.get(eventId);
+        if (event == null) {
+            return;
+        }
+        event.currentWavePlannedMobs = plannedMobs;
+        markDirty();
+    }
+
+    public int getEventCurrentWavePlannedMobs(UUID eventId) {
+        EventData event = eventId != null ? eventsById.get(eventId) : null;
+        return event != null ? event.currentWavePlannedMobs : 0;
+    }
+
     public void track(UUID uuid, String bossName, BossModifiers mods, String arenaId, World world, Vector3d spawnPos) {
         UUID eventId = createEvent(world, spawnPos, bossName);
         track(uuid, bossName, mods, arenaId, world, spawnPos, null, 0, eventId, spawnPos);
@@ -1169,6 +1255,7 @@ public class BossTrackingSystem {
         if (addUuid == null) {
             return;
         }
+        mobKillCountedFor.remove(addUuid);
         UUID eventId = pendingPreBossAddToEventId.remove(addUuid);
         if (eventId == null) {
             return;
@@ -1217,7 +1304,15 @@ public class BossTrackingSystem {
             return eventId;
         }
         UUID bossUuid = addToBoss.get(entityUuid);
-        return bossUuid != null ? bossToEvent.get(bossUuid) : null;
+        if (bossUuid != null) {
+            eventId = bossToEvent.get(bossUuid);
+            if (eventId != null) {
+                return eventId;
+            }
+        }
+        // Pre-boss wave adds aren't linked to a boss yet — they're only tracked via
+        // pendingPreBossAddToEventId, not addToBoss/bossToEvent.
+        return pendingPreBossAddToEventId.get(entityUuid);
     }
 
     public BossModifiers getEntityModifiers(UUID uuid) {
@@ -1327,7 +1422,10 @@ public class BossTrackingSystem {
                     event.awaitingPrimaryBossSpawn,
                     arenaId,
                     event.currentWaveNumber,
-                    event.totalWaveCount
+                    event.totalWaveCount,
+                    event.totalMobKills.get(),
+                    event.totalPlannedMobs,
+                    event.currentWavePlannedMobs
             ));
         }
         return out;
@@ -1492,6 +1590,7 @@ public class BossTrackingSystem {
             return null;
         }
 
+        mobKillCountedFor.remove(addUuid);
         UUID bossUuid = addToBoss.remove(addUuid);
         if (bossUuid == null) {
             return null;
@@ -1846,6 +1945,12 @@ public class BossTrackingSystem {
         public final int currentWaveNumber;
         /** Planned wave executions; 0 means unknown (e.g. infinite repeats). */
         public final int totalWaveCount;
+        /** Total wave-add kills so far this fight. */
+        public final int totalMobKills;
+        /** Total mobs planned across the whole fight; 0 means unknown (infinite repeat). */
+        public final int totalPlannedMobs;
+        /** Mobs planned for the wave currently in progress; 0 means unknown / no active wave. */
+        public final int currentWavePlannedMobs;
 
         public ActiveEventStatus(UUID eventId,
                                  World world,
@@ -1874,6 +1979,26 @@ public class BossTrackingSystem {
                                  String arenaId,
                                  int currentWaveNumber,
                                  int totalWaveCount) {
+            this(eventId, world, eventCenter, bossName, bossTier, aliveBossCount, activeAddCount,
+                    remainingCountdownMillis, awaitingPrimaryBossSpawn, arenaId, currentWaveNumber, totalWaveCount,
+                    0, 0, 0);
+        }
+
+        public ActiveEventStatus(UUID eventId,
+                                 World world,
+                                 Vector3d eventCenter,
+                                 String bossName,
+                                 String bossTier,
+                                 int aliveBossCount,
+                                 int activeAddCount,
+                                 long remainingCountdownMillis,
+                                 boolean awaitingPrimaryBossSpawn,
+                                 String arenaId,
+                                 int currentWaveNumber,
+                                 int totalWaveCount,
+                                 int totalMobKills,
+                                 int totalPlannedMobs,
+                                 int currentWavePlannedMobs) {
             this.eventId = eventId;
             this.world = world;
             this.eventCenter = eventCenter == null ? null : new Vector3d(eventCenter.x, eventCenter.y, eventCenter.z);
@@ -1886,6 +2011,9 @@ public class BossTrackingSystem {
             this.arenaId = arenaId;
             this.currentWaveNumber = Math.max(0, currentWaveNumber);
             this.totalWaveCount = Math.max(0, totalWaveCount);
+            this.totalMobKills = Math.max(0, totalMobKills);
+            this.totalPlannedMobs = Math.max(0, totalPlannedMobs);
+            this.currentWavePlannedMobs = Math.max(0, currentWavePlannedMobs);
         }
     }
 
@@ -1929,6 +2057,12 @@ public class BossTrackingSystem {
         private volatile String arenaId;
         private volatile int currentWaveNumber;
         private volatile int totalWaveCount;
+        private final AtomicInteger totalMobKills = new AtomicInteger(0);
+        private final Map<UUID, AtomicInteger> mobKillsByPlayer = new ConcurrentHashMap<>();
+        /** Total mobs (wave adds) planned across the whole fight. 0 = unknown (infinite repeat). */
+        private volatile int totalPlannedMobs;
+        /** Mobs planned for the CURRENT wave only. 0 = unknown / no wave active yet. */
+        private volatile int currentWavePlannedMobs;
 
         private EventData(UUID eventId,
                           World world,

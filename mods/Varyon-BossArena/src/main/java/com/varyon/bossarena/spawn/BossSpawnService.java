@@ -375,6 +375,10 @@ public final class BossSpawnService {
             if (plannedWaves > 0) {
                 tracking.setEventTotalWaves(deferredEventId, plannedWaves);
             }
+            int plannedMobs = def.extraMobs != null ? def.extraMobs.countPlannedTotalMobs() : 0;
+            if (plannedMobs > 0) {
+                tracking.setEventTotalPlannedMobs(deferredEventId, plannedMobs);
+            }
         }
 
         String bossSpawnTrigger = (def.extraMobs != null && def.extraMobs.bossSpawnTrigger != null)
@@ -522,6 +526,10 @@ public final class BossSpawnService {
                         int plannedWaves = def.extraMobs != null ? def.extraMobs.countPlannedWaveExecutions() : 0;
                         if (plannedWaves > 0) {
                             tracking.setEventTotalWaves(bossEventId, plannedWaves);
+                        }
+                        int plannedMobs = def.extraMobs != null ? def.extraMobs.countPlannedTotalMobs() : 0;
+                        if (plannedMobs > 0) {
+                            tracking.setEventTotalPlannedMobs(bossEventId, plannedMobs);
                         }
                     }
 
@@ -932,6 +940,15 @@ public final class BossSpawnService {
         );
         if (deferredEventId != null) {
             tracking.setEventCurrentWave(deferredEventId, waveNumber);
+            int wavePlannedMobs = 0;
+            if (execution.wave.adds != null) {
+                for (BossDefinition.ExtraMobs.WaveAdd add : execution.wave.adds) {
+                    if (add != null && add.npcId != null && !add.npcId.isBlank()) {
+                        wavePlannedMobs += Math.max(1, add.mobsPerWave);
+                    }
+                }
+            }
+            tracking.setEventCurrentWavePlannedMobs(deferredEventId, wavePlannedMobs);
         }
         if (!spawned.isEmpty()) {
             synchronized (pendingPreBossAdds) {
@@ -1508,6 +1525,13 @@ public final class BossSpawnService {
             UUID eventIdForWave = tracking.getEventIdForTrackedEntity(bossUuid);
             if (eventIdForWave != null) {
                 tracking.setEventCurrentWave(eventIdForWave, waveNumber);
+                int wavePlannedMobs = 0;
+                for (BossDefinition.ExtraMobs.WaveAdd add : adds) {
+                    if (add != null && add.npcId != null && !add.npcId.isBlank()) {
+                        wavePlannedMobs += Math.max(1, add.mobsPerWave);
+                    }
+                }
+                tracking.setEventCurrentWavePlannedMobs(eventIdForWave, wavePlannedMobs);
             }
         }
 

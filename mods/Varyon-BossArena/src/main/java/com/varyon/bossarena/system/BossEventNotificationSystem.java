@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class BossEventNotificationSystem extends TickingSystem<EntityStore> {
-    private static final float UPDATE_INTERVAL_SECONDS = 1.0f;
+    private static final long UPDATE_INTERVAL_MS = 1000L;
     private static final long MISSING_RECONCILE_GRACE_MS = 15_000L;
     private static final double MISSING_RECONCILE_PLAYER_RADIUS = 192.0d;
 
@@ -29,7 +29,12 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
     private final BossArenaPlugin plugin;
     private final Map<UUID, Long> missingBossSince = new ConcurrentHashMap<>();
     private final Map<UUID, Long> missingAddSince = new ConcurrentHashMap<>();
-    private float elapsedSeconds;
+    /**
+     * tick() may fire more than once per real-time second (observed ~3-4x/s in production logs),
+     * so pacing is done against a wall-clock timestamp rather than accumulated {@code dt} —
+     * summing dt across redundant calls made the interval trigger several times too fast.
+     */
+    private volatile long nextRunAtMs;
 
     public BossEventNotificationSystem(BossTrackingSystem trackingSystem, BossArenaPlugin plugin) {
         this.trackingSystem = trackingSystem;
@@ -92,11 +97,11 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
             return;
         }
 
-        elapsedSeconds += Math.max(0f, dt);
-        if (elapsedSeconds < UPDATE_INTERVAL_SECONDS) {
+        long now = System.currentTimeMillis();
+        if (now < nextRunAtMs) {
             return;
         }
-        elapsedSeconds = 0f;
+        nextRunAtMs = now + UPDATE_INTERVAL_MS;
 
         reconcileMissingTrackedEntities();
 

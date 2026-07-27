@@ -14,6 +14,7 @@ import com.varyon.bossarena.damagechart.BossArenaDamageChartOpener;
 import com.varyon.bossarena.damagechart.BossDamageChartHpSnapshotSystem;
 import com.varyon.bossarena.damagechart.BossDamageChartRecordingSystem;
 import com.varyon.bossarena.damagechart.DamageChartOpener;
+import com.varyon.bossarena.ui.BossDpsHudSystem;
 import com.varyon.bossarena.system.BossTrackingSystem;
 import com.varyon.bossarena.system.BossDeathSystem;
 import com.varyon.bossarena.system.BossDamageScalingSystem;
@@ -301,6 +302,7 @@ public final class BossArenaPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new BossLeashSystem(trackingSystem));
         this.getEntityStoreRegistry().registerSystem(new BossDeathSystem(trackingSystem, this));
         this.getEntityStoreRegistry().registerSystem(new BossEventNotificationSystem(trackingSystem, this));
+        this.getEntityStoreRegistry().registerSystem(new BossDpsHudSystem(trackingSystem, damageChartTracker, this));
         this.getEntityStoreRegistry().registerSystem(new BossEntityRemovedSystem(trackingSystem, this));
         this.getEntityStoreRegistry().registerSystem(new RPGLevelingBossScaleCompatSystem(trackingSystem));
         this.fightMusicManager = new BossFightMusicManager(getModRootDirectory().resolve("music"));

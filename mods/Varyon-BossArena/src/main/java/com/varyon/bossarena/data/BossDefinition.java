@@ -504,6 +504,34 @@ public class BossDefinition {
             return total;
         }
 
+        /**
+         * Total mobs (wave adds) planned across the whole fight.
+         * Returns 0 if any enabled wave repeats infinitely (repeatCount &lt; 0) — total unknown.
+         */
+        public int countPlannedTotalMobs() {
+            List<ScheduledWave> waves = getResolvedScheduledWaves();
+            int total = 0;
+            for (ScheduledWave wave : waves) {
+                if (wave == null) {
+                    continue;
+                }
+                if (wave.repeatCount < 0) {
+                    return 0;
+                }
+                int executions = Math.max(1, wave.repeatCount);
+                int mobsPerExecution = 0;
+                if (wave.adds != null) {
+                    for (WaveAdd add : wave.adds) {
+                        if (add != null && add.npcId != null && !add.npcId.isBlank()) {
+                            mobsPerExecution += Math.max(1, add.mobsPerWave);
+                        }
+                    }
+                }
+                total += executions * mobsPerExecution;
+            }
+            return total;
+        }
+
         public void setPrimaryAdd(String inputNpcId, int inputMobsPerWave) {
             String normalizedNpcId = inputNpcId == null ? "" : inputNpcId.trim();
             npcId = normalizedNpcId;

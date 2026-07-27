@@ -37,7 +37,9 @@ public final class BossScaler {
 
         int players = Math.max(1, playerCount);
 
-        // final = base × (perPlayer × playerCount), e.g. 1.5 with 2 players → ×3
+        // final = base × (1 + (perPlayer - 1) × (players - 1)): perPlayer=1.0 is neutral
+        // (no scaling regardless of player count); perPlayer=1.5 adds +50% of base per
+        // player beyond the first (2 players → ×1.5, 3 players → ×2.0).
         float hp = scaleByPlayers(baseHp, perHp, players);
         float damage = scaleByPlayers(baseDamage, perDamage, players);
         float speed = scaleByPlayers(baseSpeed, perSpeed, players);
@@ -65,15 +67,18 @@ public final class BossScaler {
     }
 
     /**
-     * Multiplies base by {@code perPlayer × playerCount}.
-     * Legacy {@code perPlayer <= 0} keeps base unchanged (scaling off).
+     * Multiplies base by {@code 1 + (perPlayer - 1) × (players - 1)}.
+     * {@code perPlayer == 1.0} (or {@code <= 0}, legacy/unset) is neutral: no scaling regardless
+     * of player count. Values above 1.0 add that fraction of base per player beyond the first.
      */
     private static float scaleByPlayers(float base, float perPlayer, int players) {
         float safeBase = positiveOrDefault(base, 1.0f);
         if (!Float.isFinite(perPlayer) || perPlayer <= 0.0f) {
             return safeBase;
         }
-        return positiveOrDefault(safeBase * perPlayer * players, 1.0f);
+        float extraPlayers = Math.max(0, players - 1);
+        float scaleFactor = 1.0f + (perPlayer - 1.0f) * extraPlayers;
+        return positiveOrDefault(safeBase * scaleFactor, 1.0f);
     }
 
     private static BossModifiers defaultModifiers() {

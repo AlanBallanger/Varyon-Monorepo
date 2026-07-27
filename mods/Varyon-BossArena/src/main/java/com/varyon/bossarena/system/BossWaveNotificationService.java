@@ -1,6 +1,8 @@
 package com.varyon.bossarena.system;
 
 import com.varyon.bossarena.config.BossArenaConfig;
+import com.varyon.bossarena.data.Arena;
+import com.varyon.bossarena.data.ArenaRegistry;
 import com.varyon.bossarena.util.EntityComponents;
 import com.varyon.bossarena.BossArenaPlugin;
 import com.hypixel.hytale.math.vector.Transform;
@@ -211,38 +213,8 @@ public final class BossWaveNotificationService {
             return;
         }
 
-        int waveNow = Math.max(0, currentWaveNumber);
-        int waveTotal = Math.max(0, totalWaveCount);
-        if (waveTotal > 0 && waveNow > waveTotal) {
-            waveTotal = waveNow;
-        }
-        String waveLabel = formatWaveProgress(waveNow, waveTotal);
-
-        String phaseTitle;
-        if (bossesAlive > 0) {
-            phaseTitle = "Boss : " + bossDisplay;
-        } else if (waveLabel != null) {
-            phaseTitle = waveLabel;
-        } else {
-            phaseTitle = "Boss : " + bossDisplay;
-        }
-        Message title = toPlainMessage(stripColorCodes(phaseTitle));
-
-        String subtitleText;
-        if (waveLabel != null && bossesAlive > 0) {
-            subtitleText = waveLabel + " · Monstres restants : " + monstersAlive;
-        } else {
-            subtitleText = "Monstres restants : " + monstersAlive;
-        }
-        Message subtitle = toPlainMessage(stripColorCodes(subtitleText));
-        showToNearbyPlayers(
-                world,
-                eventCenter,
-                title,
-                duration,
-                notificationRadiusBlocks,
-                ignored -> subtitle
-        );
+        // In-combat "Boss : X" / "Monstres restants : X" title removed — this progress is now
+        // shown in the BossDpsHud panel instead (wave progress / kill counts), not as a screen title.
     }
 
     /** Returns e.g. {@code Vague 4/5}, or {@code Vague 4} when total is unknown, or null if no wave yet. */
@@ -331,6 +303,20 @@ public final class BossWaveNotificationService {
         Message title = Message.raw("WORLD BOSS ALERT");
         Message subtitle = Message.raw("Boss : " + bossDisplay + " | Arène : " + arenaDisplay);
 
+        // Players already at the arena get the boss spawn context from the in-arena HUD/notifications —
+        // showing them the world-wide "WORLD BOSS ALERT" title on top is redundant. Chat message still
+        // reaches everyone, only the on-screen title is suppressed for players already inside the arena.
+        Vector3d arenaCenter = null;
+        double arenaRadiusSq = -1.0d;
+        Arena arena = ArenaRegistry.get(arenaId);
+        if (arena != null) {
+            arenaCenter = arena.getPosition();
+            double arenaRadius = arena.getNotificationRadius();
+            arenaRadiusSq = arenaRadius * arenaRadius;
+        }
+        final Vector3d finalArenaCenter = arenaCenter;
+        final double finalArenaRadiusSq = arenaRadiusSq;
+
         Iterable<PlayerRef> targets;
         if (announceServerWide) {
             Universe universe = Universe.get();
@@ -359,6 +345,9 @@ public final class BossWaveNotificationService {
                 chatFailures++;
                 LOGGER.warning("Failed to send timed global alert chat message to "
                         + playerRef.getUuid() + ": " + e.getMessage());
+            }
+            if (isPlayerInsideArena(playerRef, finalArenaCenter, finalArenaRadiusSq)) {
+                continue;
             }
             try {
                 EventTitleUtil.hideEventTitleFromPlayer(playerRef, 0f);
@@ -516,6 +505,21 @@ public final class BossWaveNotificationService {
             return;
         }
         TIMED_ALERT_SUPPRESS_UNTIL.put(playerUuid, System.currentTimeMillis() + WORLD_ALERT_DURATION_MILLIS);
+    }
+
+    private static boolean isPlayerInsideArena(PlayerRef playerRef, Vector3d arenaCenter, double arenaRadiusSq) {
+        if (playerRef == null || arenaCenter == null || arenaRadiusSq <= 0.0d) {
+            return false;
+        }
+        Transform transform = playerRef.getTransform();
+        org.joml.Vector3d rawPos = transform != null ? transform.getPosition() : null;
+        if (rawPos == null) {
+            return false;
+        }
+        double dx = rawPos.x - arenaCenter.x;
+        double dy = rawPos.y - arenaCenter.y;
+        double dz = rawPos.z - arenaCenter.z;
+        return (dx * dx) + (dy * dy) + (dz * dz) <= arenaRadiusSq;
     }
 
     private static boolean isLocalStatusSuppressed(PlayerRef playerRef, long nowEpochMs) {

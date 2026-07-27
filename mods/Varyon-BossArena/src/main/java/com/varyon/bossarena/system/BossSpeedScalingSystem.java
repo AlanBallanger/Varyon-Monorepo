@@ -34,21 +34,27 @@ import java.util.logging.Logger;
 
 public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
-    private static final float UPDATE_INTERVAL_SECONDS = 0.25f;
+    private static final long UPDATE_INTERVAL_MS = 250L;
+    private static final float UPDATE_INTERVAL_SECONDS = UPDATE_INTERVAL_MS / 1000f;
     private static final float EPSILON = 0.0001f;
     private static final Field NPC_CACHED_SPEED_FIELD = resolveCachedSpeedField();
     private static final Field INTERACTION_MANAGER_COOLDOWN_HANDLER_FIELD = resolveField(InteractionManager.class, "cooldownHandler");
     private static final Field COOLDOWN_HANDLER_COOLDOWNS_FIELD = resolveField(CooldownHandler.class, "cooldowns");
     private static final Field MOTION_CONTROLLER_MAX_HEAD_ROTATION_SPEED_FIELD = resolveField(MotionControllerBase.class, "maxHeadRotationSpeed");
 
-    private static final float REGEN_INTERVAL_SECONDS = 1.0f;
+    private static final long REGEN_INTERVAL_MS = 1000L;
 
     private final BossTrackingSystem trackingSystem;
     private final Map<MotionControllerBase, Float> baseTurnRateByController =
             Collections.synchronizedMap(new WeakHashMap<>());
-    /** Per-world timers so multi-world ticks don't accelerate regen/scalers. */
-    private final Map<String, Float> elapsedByWorld = new ConcurrentHashMap<>();
-    private final Map<String, Float> regenElapsedByWorld = new ConcurrentHashMap<>();
+    /**
+     * Per-world wall-clock deadlines so multi-world ticks don't accelerate regen/scalers.
+     * tick() may fire more than once per real-time interval (observed in production), so pacing
+     * is done against System.currentTimeMillis() rather than accumulated {@code dt} — summing dt
+     * across redundant calls made regen apply several times too fast (boss regenerating "at full speed").
+     */
+    private final Map<String, Long> nextScalerRunAtMsByWorld = new ConcurrentHashMap<>();
+    private final Map<String, Long> nextRegenRunAtMsByWorld = new ConcurrentHashMap<>();
 
     public BossSpeedScalingSystem(BossTrackingSystem trackingSystem) {
         this.trackingSystem = trackingSystem;
@@ -112,20 +118,20 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
             worldKey = Integer.toHexString(System.identityHashCode(tickWorld));
         }
 
-        float frameDt = Math.max(0f, dt);
-        float scalerElapsed = elapsedByWorld.merge(worldKey, frameDt, Float::sum);
-        float regenElapsed = regenElapsedByWorld.merge(worldKey, frameDt, Float::sum);
+        long now = System.currentTimeMillis();
 
         boolean applyRegenTick = false;
-        if (regenElapsed >= REGEN_INTERVAL_SECONDS) {
-            regenElapsedByWorld.put(worldKey, 0f);
+        Long nextRegenAt = nextRegenRunAtMsByWorld.get(worldKey);
+        if (nextRegenAt == null || now >= nextRegenAt) {
+            nextRegenRunAtMsByWorld.put(worldKey, now + REGEN_INTERVAL_MS);
             applyRegenTick = true;
         }
         // Speed must re-apply every tick: PreBehaviour clears the NPC speed cache each frame.
         boolean applySpeed = NPC_CACHED_SPEED_FIELD != null;
         boolean applyPeriodicScalers = false;
-        if (scalerElapsed >= UPDATE_INTERVAL_SECONDS) {
-            elapsedByWorld.put(worldKey, 0f);
+        Long nextScalerAt = nextScalerRunAtMsByWorld.get(worldKey);
+        if (nextScalerAt == null || now >= nextScalerAt) {
+            nextScalerRunAtMsByWorld.put(worldKey, now + UPDATE_INTERVAL_MS);
             applyPeriodicScalers = true;
         }
         if (!applySpeed && !applyPeriodicScalers && !applyRegenTick) {

@@ -26,6 +26,27 @@ public final class BossHealthScale {
      * @return world factor to persist on the tracked entity
      */
     public static float apply(EntityStatMap statMap, float bossHpMult, float knownWorldFactor) {
+        // First call for this entity (factor not yet captured): fills to max, since HP hasn't been
+        // dealt any damage yet at this point in the spawn flow.
+        boolean firstCapture = !(knownWorldFactor > MIN_FACTOR);
+        float worldFactor = applyModifierOnly(statMap, bossHpMult, knownWorldFactor);
+        if (firstCapture) {
+            int healthIndex = DefaultEntityStatTypes.getHealth();
+            if (healthIndex >= 0) {
+                fillToMax(statMap, healthIndex);
+            }
+        }
+        return worldFactor;
+    }
+
+    /**
+     * Re-asserts the MAX HP modifier for the given multiplier/world factor without touching the
+     * current HP value. Safe to call repeatedly (e.g. from a periodic resync system) — unlike
+     * {@link #apply}, it never fills the boss back to full HP, so it won't undo player damage.
+     * @param knownWorldFactor {@code <= 0} to capture from current stats; otherwise reuse stored factor
+     * @return world factor to persist on the tracked entity
+     */
+    public static float applyModifierOnly(EntityStatMap statMap, float bossHpMult, float knownWorldFactor) {
         if (statMap == null) {
             return 1.0f;
         }
@@ -53,7 +74,6 @@ public final class BossHealthScale {
                 BossSpawnService.HEALTH_MODIFIER_KEY,
                 healthMod
         );
-        fillToMax(statMap, healthIndex);
         return worldFactor;
     }
 

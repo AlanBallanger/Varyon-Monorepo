@@ -2029,8 +2029,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             cmd.set("#ArenaX" + suffix + ".Value", formatCoord(arena.x));
             cmd.set("#ArenaY" + suffix + ".Value", formatCoord(arena.y));
             cmd.set("#ArenaZ" + suffix + ".Value", formatCoord(arena.z));
-            cmd.set("#ArenaLootRadius" + suffix + ".Value", arena.lootRadius > 0.0d ? formatCoord(arena.lootRadius) : "30");
-            cmd.set("#ArenaProxRadius" + suffix + ".Value", formatCoord(arena.getProximityRadius()));
+            cmd.set("#ArenaRadius" + suffix + ".Value", arena.lootRadius > 0.0d ? formatCoord(arena.lootRadius) : "30");
 
             events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaDelete" + suffix, EventData.of("Action", "arena_delete_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaHere" + suffix, EventData.of("Action", "arena_here_" + row));
@@ -2052,8 +2051,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append("@ArenaX", "#ArenaX" + suffix + ".Value")
                 .append("@ArenaY", "#ArenaY" + suffix + ".Value")
                 .append("@ArenaZ", "#ArenaZ" + suffix + ".Value")
-                .append("@ArenaLootRadius" + suffix, "#ArenaLootRadius" + suffix + ".Value")
-                .append("@ArenaProxRadius", "#ArenaProxRadius" + suffix + ".Value");
+                .append("@ArenaRadius" + suffix, "#ArenaRadius" + suffix + ".Value");
     }
 
     private void addArenaAtPlayerPosition(Ref<EntityStore> ref, Store<EntityStore> store) {
@@ -2250,19 +2248,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
-        String lootRadiusRaw = optionalText(data.getArenaLootRadius(row));
-        double lootRadius = arena.lootRadius > 0.0d ? arena.lootRadius : 30.0d;
-        if (!lootRadiusRaw.isEmpty()) {
-            Double parsed = parseOptionalDouble(lootRadiusRaw);
-            lootRadius = (parsed != null && parsed >= 0.0d) ? parsed : 30.0d;
+        String radiusRaw = optionalText(data.getArenaRadius(row));
+        double radius = arena.lootRadius > 0.0d ? arena.lootRadius : 30.0d;
+        if (!radiusRaw.isEmpty()) {
+            Double parsed = parseOptionalDouble(radiusRaw);
+            radius = (parsed != null && parsed >= 0.0d) ? parsed : 30.0d;
         }
-
-        double proximityRadius = arena.proximityRadius;
-        String proxRadiusRaw = optionalText(data.arenaProxRadius);
-        if (!proxRadiusRaw.isEmpty() && !looksLikeUiBindingExpression(proxRadiusRaw)) {
-            Double parsed = parseOptionalDouble(proxRadiusRaw);
-            proximityRadius = (parsed != null && parsed >= 0.0d) ? parsed : 0.0d;
-        }
+        double lootRadius = radius;
+        double proximityRadius = radius;
 
         String oldArenaId = arena.arenaId;
         boolean nameChanged = oldArenaId == null || !oldArenaId.equalsIgnoreCase(requestedId);
@@ -5769,16 +5762,15 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append(new KeyedCodec<>("@ArenaX", Codec.STRING), (d, v) -> d.arenaX = v, d -> d.arenaX).add()
                 .append(new KeyedCodec<>("@ArenaY", Codec.STRING), (d, v) -> d.arenaY = v, d -> d.arenaY).add()
                 .append(new KeyedCodec<>("@ArenaZ", Codec.STRING), (d, v) -> d.arenaZ = v, d -> d.arenaZ).add()
-                .append(new KeyedCodec<>("@ArenaLootRadius1", Codec.STRING), (d, v) -> d.arenaLootRadius1 = v, d -> d.arenaLootRadius1).add()
-                .append(new KeyedCodec<>("@ArenaLootRadius2", Codec.STRING), (d, v) -> d.arenaLootRadius2 = v, d -> d.arenaLootRadius2).add()
-                .append(new KeyedCodec<>("@ArenaLootRadius3", Codec.STRING), (d, v) -> d.arenaLootRadius3 = v, d -> d.arenaLootRadius3).add()
-                .append(new KeyedCodec<>("@ArenaLootRadius4", Codec.STRING), (d, v) -> d.arenaLootRadius4 = v, d -> d.arenaLootRadius4).add()
-                .append(new KeyedCodec<>("@ArenaLootRadius5", Codec.STRING), (d, v) -> d.arenaLootRadius5 = v, d -> d.arenaLootRadius5).add()
-                .append(new KeyedCodec<>("@ArenaLootRadius6", Codec.STRING), (d, v) -> d.arenaLootRadius6 = v, d -> d.arenaLootRadius6).add()
-                .append(new KeyedCodec<>("@ArenaLootRadius7", Codec.STRING), (d, v) -> d.arenaLootRadius7 = v, d -> d.arenaLootRadius7).add()
-                .append(new KeyedCodec<>("@ArenaLootRadius8", Codec.STRING), (d, v) -> d.arenaLootRadius8 = v, d -> d.arenaLootRadius8).add()
+                .append(new KeyedCodec<>("@ArenaRadius1", Codec.STRING), (d, v) -> d.arenaRadius1 = v, d -> d.arenaRadius1).add()
+                .append(new KeyedCodec<>("@ArenaRadius2", Codec.STRING), (d, v) -> d.arenaRadius2 = v, d -> d.arenaRadius2).add()
+                .append(new KeyedCodec<>("@ArenaRadius3", Codec.STRING), (d, v) -> d.arenaRadius3 = v, d -> d.arenaRadius3).add()
+                .append(new KeyedCodec<>("@ArenaRadius4", Codec.STRING), (d, v) -> d.arenaRadius4 = v, d -> d.arenaRadius4).add()
+                .append(new KeyedCodec<>("@ArenaRadius5", Codec.STRING), (d, v) -> d.arenaRadius5 = v, d -> d.arenaRadius5).add()
+                .append(new KeyedCodec<>("@ArenaRadius6", Codec.STRING), (d, v) -> d.arenaRadius6 = v, d -> d.arenaRadius6).add()
+                .append(new KeyedCodec<>("@ArenaRadius7", Codec.STRING), (d, v) -> d.arenaRadius7 = v, d -> d.arenaRadius7).add()
+                .append(new KeyedCodec<>("@ArenaRadius8", Codec.STRING), (d, v) -> d.arenaRadius8 = v, d -> d.arenaRadius8).add()
                 .append(new KeyedCodec<>("@ArenaProxEnabled", Codec.STRING), (d, v) -> d.arenaProxEnabled = v, d -> d.arenaProxEnabled).add()
-                .append(new KeyedCodec<>("@ArenaProxRadius", Codec.STRING), (d, v) -> d.arenaProxRadius = v, d -> d.arenaProxRadius).add()
                 .append(new KeyedCodec<>("@ArenaProxCooldown", Codec.STRING), (d, v) -> d.arenaProxCooldown = v, d -> d.arenaProxCooldown).add()
                 .append(new KeyedCodec<>("@ShopEditArenaId", Codec.STRING), (d, v) -> d.shopEditArenaId = v, d -> d.shopEditArenaId).add()
                 .append(new KeyedCodec<>("@ShopEditVendorName", Codec.STRING), (d, v) -> d.shopEditVendorName = v, d -> d.shopEditVendorName).add()
@@ -6040,16 +6032,15 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String arenaX;
         public String arenaY;
         public String arenaZ;
-        public String arenaLootRadius1;
-        public String arenaLootRadius2;
-        public String arenaLootRadius3;
-        public String arenaLootRadius4;
-        public String arenaLootRadius5;
-        public String arenaLootRadius6;
-        public String arenaLootRadius7;
-        public String arenaLootRadius8;
+        public String arenaRadius1;
+        public String arenaRadius2;
+        public String arenaRadius3;
+        public String arenaRadius4;
+        public String arenaRadius5;
+        public String arenaRadius6;
+        public String arenaRadius7;
+        public String arenaRadius8;
         public String arenaProxEnabled;
-        public String arenaProxRadius;
         public String arenaProxCooldown;
         public String shopEditArenaId;
         public String shopEditVendorName;
@@ -6672,16 +6663,16 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             };
         }
 
-        public String getArenaLootRadius(int row) {
+        public String getArenaRadius(int row) {
             return switch (row) {
-                case 1 -> arenaLootRadius1;
-                case 2 -> arenaLootRadius2;
-                case 3 -> arenaLootRadius3;
-                case 4 -> arenaLootRadius4;
-                case 5 -> arenaLootRadius5;
-                case 6 -> arenaLootRadius6;
-                case 7 -> arenaLootRadius7;
-                case 8 -> arenaLootRadius8;
+                case 1 -> arenaRadius1;
+                case 2 -> arenaRadius2;
+                case 3 -> arenaRadius3;
+                case 4 -> arenaRadius4;
+                case 5 -> arenaRadius5;
+                case 6 -> arenaRadius6;
+                case 7 -> arenaRadius7;
+                case 8 -> arenaRadius8;
                 default -> "";
             };
         }

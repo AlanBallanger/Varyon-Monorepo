@@ -1,0 +1,442 @@
+Group {
+  Group #DpsHudPanel {
+    Visible: false;
+    Anchor: (Bottom: 16, Left: 16, Width: 250, Height: 292);
+    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.82));
+    LayoutMode: Full;
+
+    Group #DpsHudBorder {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      LayoutMode: Full;
+
+      Group #DpsCornerTL {
+        Anchor: (Left: 2, Top: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border.png", Border: 0);
+      }
+      Group #DpsCornerTR {
+        Anchor: (Right: 2, Top: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_TR.png", Border: 0);
+      }
+      Group #DpsCornerBL {
+        Anchor: (Left: 2, Bottom: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_BL.png", Border: 0);
+      }
+      Group #DpsCornerBR {
+        Anchor: (Right: 2, Bottom: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_BR.png", Border: 0);
+      }
+    }
+
+    Group #DpsHudContent {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      LayoutMode: Top;
+      Padding: (Horizontal: 10, Vertical: 6);
+
+      Group #BossNameRow {
+        Anchor: (Height: 17);
+        LayoutMode: Left;
+
+        Label #DpsTitle {
+          Anchor: (Height: 17);
+          Text: "Kikimètre : ";
+          Style: (FontSize: 13, TextColor: #E8C84A, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+        }
+        Group {
+          FlexWeight: 1;
+          Anchor: (Height: 17);
+          Label #BossName {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Text: " ";
+            Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 3); }
+
+      Group #BossHpBar {
+        Anchor: (Left: 0, Right: 0, Height: 22);
+        Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+        ProgressBar #BossHpBarFill {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Value: 0.0;
+          BarTexturePath: "Elements/Gauge_Fill.png";
+        }
+        Label #BossHpText {
+          Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+          Text: " ";
+          Style: (FontSize: 10, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+        }
+      }
+
+      Label #BossKillsText {
+        Visible: false;
+        Anchor: (Height: 22);
+        Text: " ";
+        Style: (FontSize: 12, TextColor: #F5D547, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+      }
+
+      Group { Anchor: (Height: 5); }
+
+      Group #Separator {
+        Anchor: (Left: 0, Right: 0, Height: 1);
+        Background: #FFFFFF(0.25);
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #Player1Block {
+        Anchor: (Height: 38);
+        LayoutMode: Top;
+
+        Group #Player1InfoRow {
+          Anchor: (Height: 15);
+          LayoutMode: Left;
+          Label #Player1Rank {
+            Anchor: (Height: 15, Width: 20);
+            Text: " ";
+            Style: (FontSize: 11, TextColor: #FFD700, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+          }
+          Group {
+            FlexWeight: 1;
+            Anchor: (Height: 15);
+            Label #Player1Name {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Text: " ";
+              Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+            }
+          }
+          Label #Player1Damage {
+            Anchor: (Height: 15, Width: 92);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #F5D547, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+          Label #Player1Dps {
+            Anchor: (Height: 15, Width: 62);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+        }
+        Group { Anchor: (Height: 3); }
+        Group #Player1Bar {
+          Anchor: (Left: 0, Right: 0, Height: 18);
+          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+          ProgressBar #Player1BarFill {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Value: 0.0;
+            BarTexturePath: "Elements/Gauge_Fill.png";
+          }
+          Label #Player1BarText {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Text: " ";
+            Style: (FontSize: 9, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #PlayerSeparator2 {
+        Anchor: (Left: 0, Right: 0, Height: 1);
+        Background: #FFFFFF(0.12);
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #Player2Block {
+        Anchor: (Height: 38);
+        LayoutMode: Top;
+
+        Group #Player2InfoRow {
+          Anchor: (Height: 15);
+          LayoutMode: Left;
+          Label #Player2Rank {
+            Anchor: (Height: 15, Width: 20);
+            Text: " ";
+            Style: (FontSize: 11, TextColor: #C0C0C0, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+          }
+          Group {
+            FlexWeight: 1;
+            Anchor: (Height: 15);
+            Label #Player2Name {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Text: " ";
+              Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+            }
+          }
+          Label #Player2Damage {
+            Anchor: (Height: 15, Width: 92);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #F5D547, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+          Label #Player2Dps {
+            Anchor: (Height: 15, Width: 62);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+        }
+        Group { Anchor: (Height: 3); }
+        Group #Player2Bar {
+          Anchor: (Left: 0, Right: 0, Height: 18);
+          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+          ProgressBar #Player2BarFill {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Value: 0.0;
+            BarTexturePath: "Elements/Gauge_Fill.png";
+          }
+          Label #Player2BarText {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Text: " ";
+            Style: (FontSize: 9, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #PlayerSeparator3 {
+        Anchor: (Left: 0, Right: 0, Height: 1);
+        Background: #FFFFFF(0.12);
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #Player3Block {
+        Anchor: (Height: 38);
+        LayoutMode: Top;
+
+        Group #Player3InfoRow {
+          Anchor: (Height: 15);
+          LayoutMode: Left;
+          Label #Player3Rank {
+            Anchor: (Height: 15, Width: 20);
+            Text: " ";
+            Style: (FontSize: 11, TextColor: #CD7F32, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+          }
+          Group {
+            FlexWeight: 1;
+            Anchor: (Height: 15);
+            Label #Player3Name {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Text: " ";
+              Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+            }
+          }
+          Label #Player3Damage {
+            Anchor: (Height: 15, Width: 92);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #F5D547, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+          Label #Player3Dps {
+            Anchor: (Height: 15, Width: 62);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+        }
+        Group { Anchor: (Height: 3); }
+        Group #Player3Bar {
+          Anchor: (Left: 0, Right: 0, Height: 18);
+          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+          ProgressBar #Player3BarFill {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Value: 0.0;
+            BarTexturePath: "Elements/Gauge_Fill.png";
+          }
+          Label #Player3BarText {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Text: " ";
+            Style: (FontSize: 9, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #PlayerSeparator4 {
+        Anchor: (Left: 0, Right: 0, Height: 1);
+        Background: #FFFFFF(0.12);
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #Player4Block {
+        Anchor: (Height: 38);
+        LayoutMode: Top;
+
+        Group #Player4InfoRow {
+          Anchor: (Height: 15);
+          LayoutMode: Left;
+          Label #Player4Rank {
+            Anchor: (Height: 15, Width: 20);
+            Text: " ";
+            Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+          }
+          Group {
+            FlexWeight: 1;
+            Anchor: (Height: 15);
+            Label #Player4Name {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Text: " ";
+              Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+            }
+          }
+          Label #Player4Damage {
+            Anchor: (Height: 15, Width: 92);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #F5D547, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+          Label #Player4Dps {
+            Anchor: (Height: 15, Width: 62);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+        }
+        Group { Anchor: (Height: 3); }
+        Group #Player4Bar {
+          Anchor: (Left: 0, Right: 0, Height: 18);
+          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+          ProgressBar #Player4BarFill {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Value: 0.0;
+            BarTexturePath: "Elements/Gauge_Fill.png";
+          }
+          Label #Player4BarText {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Text: " ";
+            Style: (FontSize: 9, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #PlayerSeparator5 {
+        Anchor: (Left: 0, Right: 0, Height: 1);
+        Background: #FFFFFF(0.12);
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #Player5Block {
+        Anchor: (Height: 38);
+        LayoutMode: Top;
+
+        Group #Player5InfoRow {
+          Anchor: (Height: 15);
+          LayoutMode: Left;
+          Label #Player5Rank {
+            Anchor: (Height: 15, Width: 20);
+            Text: " ";
+            Style: (FontSize: 11, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+          }
+          Group {
+            FlexWeight: 1;
+            Anchor: (Height: 15);
+            Label #Player5Name {
+              Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+              Text: " ";
+              Style: (FontSize: 11, TextColor: #F2E8D8, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+            }
+          }
+          Label #Player5Damage {
+            Anchor: (Height: 15, Width: 92);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #F5D547, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+          Label #Player5Dps {
+            Anchor: (Height: 15, Width: 62);
+            Text: " ";
+            Style: (FontSize: 10, TextColor: #C8BEB0, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+          }
+        }
+        Group { Anchor: (Height: 3); }
+        Group #Player5Bar {
+          Anchor: (Left: 0, Right: 0, Height: 18);
+          Background: PatchStyle(TexturePath: "Elements/Gauge.png", Border: 0);
+          ProgressBar #Player5BarFill {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Value: 0.0;
+            BarTexturePath: "Elements/Gauge_Fill.png";
+          }
+          Label #Player5BarText {
+            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+            Text: " ";
+            Style: (FontSize: 9, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+      }
+    }
+  }
+
+  Group #WaveHudPanel {
+    Visible: false;
+    Anchor: (Bottom: 16, Left: 16, Width: 250, Height: 149);
+    Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.82));
+    LayoutMode: Full;
+
+    Group #WaveHudBorder {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      LayoutMode: Full;
+
+      Group #WaveCornerTL {
+        Anchor: (Left: 2, Top: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border.png", Border: 0);
+      }
+      Group #WaveCornerTR {
+        Anchor: (Right: 2, Top: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_TR.png", Border: 0);
+      }
+      Group #WaveCornerBL {
+        Anchor: (Left: 2, Bottom: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_BL.png", Border: 0);
+      }
+      Group #WaveCornerBR {
+        Anchor: (Right: 2, Bottom: 2, Width: 14, Height: 14);
+        Background: PatchStyle(TexturePath: "Elements/Decorated_Border_BR.png", Border: 0);
+      }
+    }
+
+    Group #WaveHudContent {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      LayoutMode: Top;
+      Padding: (Horizontal: 10, Vertical: 8);
+
+      Label #WaveNumberText {
+        Anchor: (Height: 20);
+        Text: " ";
+        Style: (FontSize: 16, TextColor: #E8C84A, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #WaveMobsRemainingText {
+        Anchor: (Height: 17);
+        Text: " ";
+        Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: false, HorizontalAlignment: Start, VerticalAlignment: Center);
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Group #WaveSeparator {
+        Anchor: (Left: 0, Right: 0, Height: 1);
+        Background: #FFFFFF(0.25);
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Label #WaveTotalKilledText {
+        Anchor: (Height: 17);
+        Text: " ";
+        Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: false, HorizontalAlignment: Start, VerticalAlignment: Center);
+      }
+
+      Group { Anchor: (Height: 6); }
+
+      Label #WavePersonalKillsText {
+        Anchor: (Height: 17);
+        Text: " ";
+        Style: (FontSize: 13, TextColor: #F5D547, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+      }
+    }
+  }
+}
