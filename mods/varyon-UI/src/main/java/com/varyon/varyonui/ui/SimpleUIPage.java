@@ -25,6 +25,7 @@ import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.varyon.varyonui.config.AccueilShortcutConfig;
+import com.varyon.varyonui.config.ActuStateConfig;
 import com.varyon.varyonui.config.MenuShortcutTargetConfig;
 import com.varyon.varyonui.config.AdminCommandsConfig;
 import com.varyon.varyonui.config.CommandsConfig;
@@ -205,6 +206,21 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
 
         applyTabIconTextures(commandBuilder);
         applyTabUnderlineVisibility(commandBuilder);
+        commandBuilder.set("#PlaytimeRewardBadge.Visible", hasUnclaimedPlaytimeReward(playerRef.getUuid()));
+    }
+
+    private static boolean hasUnclaimedPlaytimeReward(@Nullable UUID uuid) {
+        if (uuid == null || !PlaytimeBridge.isAvailable() || !PlaytimeBridge.isBackendOperational()) {
+            return false;
+        }
+        long[] rdata = PlaytimeBridge.getDailyRewardData(uuid);
+        long dailyMs = PlaytimeBridge.getDailyPlaytime(uuid);
+        for (int i = 0; i + 1 < rdata.length; i += 2) {
+            if (dailyMs >= rdata[i] && rdata[i + 1] != 1L) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void applyTabUnderlineVisibility(@Nonnull UICommandBuilder commandBuilder) {
@@ -235,7 +251,9 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             EventData.of("Action", "command").append("Command", "/journal"));
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ParametresTab", EventData.of("Action", "tab").append("Tab", "parametres"));
 
-        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#PtClaimAllBtn",  EventData.of("Action", "playtimeclaimall"));
+        if (hasClaimablePlaytimeReward(playerRef.getUuid())) {
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#PtClaimAllBtn",  EventData.of("Action", "playtimeclaimall"));
+        }
         if ("playtime".equals(activeTab) && PlaytimeBridge.isAvailable() && PlaytimeBridge.isBackendOperational()) {
             appendPlaytimeChestButtonEvents(eventBuilder, playerRef.getUuid());
         }
@@ -318,6 +336,26 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             CustomUIEventBindingType.Activating,
             "#ParametresRpgSettingsOpen",
             EventData.of("Action", "command").append("Command", "/vrpg param")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresPartyMenuOpen",
+            EventData.of("Action", "command").append("Command", "/party")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresQuestMenuOpen",
+            EventData.of("Action", "command").append("Command", "/qlconfig")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresActuPopupOn",
+            EventData.of("Action", "actupopuptoggle").append("ActuPopupToggle", "on")
+        );
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ParametresActuPopupOff",
+            EventData.of("Action", "actupopuptoggle").append("ActuPopupToggle", "off")
         );
 
         if (isAdmin) {
@@ -593,6 +631,19 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             menuTarget == MenuShortcutTargetConfig.Target.VARYON);
         applyParametresDmgNumAppearance(commandBuilder, uuid);
         applyParametresActivityBubbleAppearance(commandBuilder, uuid);
+        applyParametresActuPopupAppearance(commandBuilder, uuid);
+    }
+
+    private static void applyParametresActuPopupAppearance(
+            @Nonnull UICommandBuilder commandBuilder,
+            @Nullable UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        applyDualSwitch(commandBuilder,
+            "ParametresActuPopupOn", "ParametresActuPopupOnLabel",
+            "ParametresActuPopupOff", "ParametresActuPopupOffLabel",
+            ActuStateConfig.getInstance().wantsPopup(uuid));
     }
 
     private static void applyParametresActivityBubbleAppearance(
@@ -829,8 +880,6 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         }
     }
 
-    private static final int MAX_NEWS = 10;
-
     private static final String KW_GREEN = "#66bb6a";
     private static final String KW_PURPLE = "#ab47bc";
     private static final String KW_ORANGE = "#ffa726";
@@ -994,17 +1043,34 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
     private void buildNewsContent(@Nonnull UICommandBuilder commandBuilder) {
         List<NewsConfig.NewsEntry> entries = NewsConfig.getInstance().getEntries();
 
-        for (int i = 1; i <= MAX_NEWS; i++) {
-            commandBuilder.set("#NewsEntry" + i + ".Visible", false);
-        }
+        commandBuilder.clear("#MisesAJourContent");
 
-        for (int i = 0; i < entries.size() && i < MAX_NEWS; i++) {
-            int idx = i + 1;
+        for (int i = 0; i < entries.size(); i++) {
             NewsConfig.NewsEntry entry = entries.get(i);
-            commandBuilder.set("#NewsEntry" + idx + ".Visible", true);
+            String idx = String.valueOf(i + 1);
+
+            commandBuilder.appendInline(
+                "#MisesAJourContent",
+                "Group #NewsEntry" + idx + " { LayoutMode: Top; Anchor: (Bottom: 12); }");
+
+            commandBuilder.appendInline(
+                "#NewsEntry" + idx,
+                "Label #NewsDate" + idx + " { Style: (FontSize: 11, TextColor: #6699bb); Anchor: (Bottom: 2); }");
             commandBuilder.set("#NewsDate" + idx + ".TextSpans", Message.raw(entry.getDate()));
+
+            commandBuilder.appendInline(
+                "#NewsEntry" + idx,
+                "Label #NewsTitle" + idx + " { Style: (FontSize: 16, RenderBold: true, TextColor: #aaddff); Anchor: (Bottom: 4); }");
             commandBuilder.set("#NewsTitle" + idx + ".TextSpans", Message.raw(entry.getTitle()));
+
+            commandBuilder.appendInline(
+                "#NewsEntry" + idx,
+                "Label #NewsContent" + idx + " { Style: (FontSize: 13, TextColor: #cccccc, Wrap: true); Anchor: (Bottom: 6, Width: 600); }");
             commandBuilder.set("#NewsContent" + idx + ".TextSpans", Message.raw(entry.getContent()));
+
+            commandBuilder.appendInline(
+                "#NewsEntry" + idx,
+                "Group #NewsSeparator" + idx + " { Anchor: (Height: 1); Background: (Color: #2a3a4a); }");
         }
     }
 
@@ -1081,7 +1147,10 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         cb.set("#PtFirstLoginTitle.TextSpans", Message.raw("Première connexion"));
         cb.set("#PtLastLoginDate.TextSpans", Message.raw(PlaytimeBridge.formatConnectionDate(last)));
         cb.set("#PtFirstLoginDate.TextSpans", Message.raw(PlaytimeBridge.formatConnectionDate(first)));
-        cb.set("#PtClaimAllBtn.TextSpans", Message.raw("Récupérer tout"));
+        boolean canClaimAll = hasClaimablePlaytimeReward(uuid);
+        cb.set("#PtClaimAllBtn.TextSpans", canClaimAll
+            ? Message.raw("Récupérer tout")
+            : Message.raw("Récupérer tout").color("#8899aa"));
 
         buildPlaytimeProgressBar(cb, daily, rdata);
         buildPlaytimeChests(cb, daily, rdata);
@@ -1153,6 +1222,22 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             }
             slot++;
         }
+    }
+
+    private boolean hasClaimablePlaytimeReward(@Nullable UUID uuid) {
+        if (uuid == null || !PlaytimeBridge.isAvailable() || !PlaytimeBridge.isBackendOperational()) {
+            return false;
+        }
+        long[] rdata = PlaytimeBridge.getDailyRewardData(uuid);
+        long dailyMs = PlaytimeBridge.getDailyPlaytime(uuid);
+        for (int i = 0; i < rdata.length; i += 2) {
+            boolean claimed = rdata[i + 1] == 1L;
+            boolean eligible = dailyMs >= rdata[i];
+            if (eligible && !claimed) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void buildPlaytimeChests(@Nonnull UICommandBuilder cb, long dailyMs, long[] rdata) {
@@ -1407,6 +1492,17 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
                 buildTabBar(commandBuilder, eventBuilder, false, ref);
                 sendUpdate(commandBuilder, eventBuilder, false);
             }
+        } else if ("actupopuptoggle".equals(data.action) && data.actuPopupToggle != null) {
+            PlayerRef playerRefComp = store.getComponent(ref, PlayerRef.getComponentType());
+            if (playerRefComp != null && playerRefComp.getUuid() != null) {
+                boolean wantOn = "on".equals(data.actuPopupToggle);
+                ActuStateConfig.getInstance().setWantsPopup(playerRefComp.getUuid(), wantOn);
+                UICommandBuilder commandBuilder = new UICommandBuilder();
+                UIEventBuilder eventBuilder = new UIEventBuilder();
+                buildContent(commandBuilder, eventBuilder, store, ref);
+                buildTabBar(commandBuilder, eventBuilder, false, ref);
+                sendUpdate(commandBuilder, eventBuilder, false);
+            }
         } else if ("playtimeclaim".equals(data.action)
                 && data.playtimeRewardId != null
                 && !data.playtimeRewardId.isBlank()) {
@@ -1510,6 +1606,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
                 .addField(new KeyedCodec<>("MenuShortcutTarget", Codec.STRING), (entry, s) -> entry.menuShortcutTarget = s, entry -> entry.menuShortcutTarget)
                 .addField(new KeyedCodec<>("DmgNumToggle", Codec.STRING), (entry, s) -> entry.dmgNumToggle = s, entry -> entry.dmgNumToggle)
                 .addField(new KeyedCodec<>("ActivityBubbleToggle", Codec.STRING), (entry, s) -> entry.activityBubbleToggle = s, entry -> entry.activityBubbleToggle)
+                .addField(new KeyedCodec<>("ActuPopupToggle", Codec.STRING), (entry, s) -> entry.actuPopupToggle = s, entry -> entry.actuPopupToggle)
                 .addField(new KeyedCodec<>("PlaytimeRewardId", Codec.STRING), (entry, s) -> entry.playtimeRewardId = s, entry -> entry.playtimeRewardId)
                 .build();
 
@@ -1520,6 +1617,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         public String menuShortcutTarget;
         public String dmgNumToggle;
         public String activityBubbleToggle;
+        public String actuPopupToggle;
         public String playtimeRewardId;
     }
 }

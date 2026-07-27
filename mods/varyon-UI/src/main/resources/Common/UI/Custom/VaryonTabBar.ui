@@ -117,7 +117,7 @@ $Sounds = "Sounds.ui";
             Padding: (Right: 2);
 
             Button #MisesAJourTab {
-              TooltipText: "Mises à jour";
+              TooltipText: "Actualités";
               TextTooltipShowDelay: 0.001;
               Anchor: (Top: 0, Left: 0, Right: 0, Bottom: 2);
               Style: ButtonStyle(
@@ -190,9 +190,18 @@ $Sounds = "Sounds.ui";
 
               Group {
                 LayoutMode: Middle;
-                Group #PlaytimeIcon {
+                Group {
                   Anchor: (Width: 44, Height: 44);
-                  Background: "Icons/Temps.png";
+                  LayoutMode: Full;
+                  Group #PlaytimeIcon {
+                    Anchor: (Full: 0);
+                    Background: "Icons/Temps.png";
+                  }
+                  Group #PlaytimeRewardBadge {
+                    Anchor: (Width: 12, Height: 12, Top: -2, Right: -2);
+                    Background: "Icons/Reward_Badge.png";
+                    Visible: false;
+                  }
                 }
               }
             }

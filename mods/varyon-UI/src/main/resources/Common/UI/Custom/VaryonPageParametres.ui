@@ -116,7 +116,24 @@ $Sounds = "Sounds.ui";
                   Background: (Color: @SettingRowBg);
                   Padding: (Full: 12);
                   Group #ParametresNotifBlock {
-                    Anchor: (Left: 0, Right: 0, Height: 4);
+                    LayoutMode: Top;
+                    FlexWeight: 1;
+                    Anchor: (Left: 0, Right: 0);
+
+                    Group #ParametresActuPopupRow {
+                      LayoutMode: Left;
+                      Label { FlexWeight: 1; Text: "Ouverture des actualites"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
+                      Button #ParametresActuPopupOn {
+                        Anchor: (Width: 52, Height: 28, Right: 4);
+                        Style: @SwitchBtnStyle;
+                        Label #ParametresActuPopupOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                      Button #ParametresActuPopupOff {
+                        Anchor: (Width: 52, Height: 28);
+                        Style: @SwitchBtnStyle;
+                        Label #ParametresActuPopupOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                    }
                   }
                 }
               }
@@ -152,6 +169,30 @@ $Sounds = "Sounds.ui";
                         Anchor: (Width: 52, Height: 28);
                         Style: @SwitchBtnStyle;
                         Label #ParametresActivityBubbleOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                    }
+
+                    Group { Anchor: (Height: 1, Bottom: 12, Top: 12); Background: (Color: #FFFFFF(0.08)); }
+
+                    Group #ParametresPartyMenuRow {
+                      LayoutMode: Left;
+                      Label { FlexWeight: 1; Text: "Menu party"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
+                      Button #ParametresPartyMenuOpen {
+                        Anchor: (Width: 102, Height: 28);
+                        Style: @OptionBtnStyle;
+                        Label #ParametresPartyMenuOpenLabel { Text: "Ouvrir"; Anchor: (Full: 0); Style: (FontSize: 13, TextColor: @SettingMuted, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                    }
+
+                    Group { Anchor: (Height: 1, Bottom: 12, Top: 12); Background: (Color: #FFFFFF(0.08)); }
+
+                    Group #ParametresQuestMenuRow {
+                      LayoutMode: Left;
+                      Label { FlexWeight: 1; Text: "Menu quete"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
+                      Button #ParametresQuestMenuOpen {
+                        Anchor: (Width: 102, Height: 28);
+                        Style: @OptionBtnStyle;
+                        Label #ParametresQuestMenuOpenLabel { Text: "Ouvrir"; Anchor: (Full: 0); Style: (FontSize: 13, TextColor: @SettingMuted, HorizontalAlignment: Center, VerticalAlignment: Center); }
                       }
                     }
                   }

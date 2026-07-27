@@ -53,14 +53,11 @@ public class NewsConfig {
                 List<Toml> newsList = toml.getTables("news");
 
                 if (newsList != null) {
-                    int count = 0;
                     for (Toml newsToml : newsList) {
-                        if (count >= 10) break;
                         String date = newsToml.getString("date", "");
                         String title = newsToml.getString("title", "");
                         String content = newsToml.getString("content", "");
                         entries.add(new NewsEntry(date, title, content.trim()));
-                        count++;
                     }
                 }
                 System.out.println("[VaryonUI] Loaded " + entries.size() + " news entries");

@@ -20,6 +20,7 @@ import com.varyon.varyonui.input.VaryonAccueilAltKeyFilter;
 import com.varyon.varyonui.input.VaryonAccueilKeyHelper;
 import com.varyon.varyonui.input.VaryonAccueilOKeyFilter;
 import com.varyon.varyonui.config.AccueilShortcutConfig;
+import com.varyon.varyonui.config.ActuStateConfig;
 import com.varyon.varyonui.config.MenuShortcutTargetConfig;
 import com.varyon.varyonui.config.AdminCommandsConfig;
 import com.varyon.varyonui.config.CommandsConfig;
@@ -28,6 +29,7 @@ import com.varyon.varyonui.config.HomeConfig;
 import com.varyon.varyonui.config.TutorielConfig;
 import com.varyon.varyonui.config.VaryonConfig;
 import com.varyon.varyonui.integration.HytlSkinPreview;
+import com.varyon.varyonui.ui.SimpleUIPage;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -69,6 +71,7 @@ public class VaryonUIPlugin extends JavaPlugin {
         VaryonConfig.getInstance();
         AccueilShortcutConfig.getInstance();
         MenuShortcutTargetConfig.getInstance();
+        ActuStateConfig.getInstance();
 
         CommandManager mgr = CommandManager.get();
         mgr.register(new UICommand("commands", "Ouvre les commandes", "commandes", "c", "command"));
@@ -81,6 +84,8 @@ public class VaryonUIPlugin extends JavaPlugin {
         mgr.register(new UICommand("var", "Ouvre la page Varyon", "varyon", "varyon"));
         mgr.register(new UICommand("playtime-ui", "Ouvre les statistiques de temps de jeu", "playtime", "ptui"));
         mgr.register(new ReloadCommand());
+        mgr.register(new ActuUpdateCommand());
+        mgr.register(new ActuNotifCommand());
 
         accueilOKeyPacketFilter = PacketAdapters.registerInbound(new VaryonAccueilOKeyFilter());
         accueilAltKeyFilter = new VaryonAccueilAltKeyFilter();
@@ -172,10 +177,34 @@ public class VaryonUIPlugin extends JavaPlugin {
                     return;
                 }
                 VaryonMenuHud.attach(player, playerRef);
+                @SuppressWarnings("unchecked")
+                Store<EntityStore> typedStore = (Store<EntityStore>) store;
+                maybeOpenActuPopup(uuid, playerRef, player, typedStore);
             } catch (Exception e) {
                 LOG.log(Level.WARNING, "Failed to register Varyon menu HUD", e);
             }
         });
+    }
+
+    private void maybeOpenActuPopup(
+            @Nonnull UUID uuid,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull Player player,
+            @Nonnull Store<EntityStore> store) {
+        ActuStateConfig actuState = ActuStateConfig.getInstance();
+        if (!actuState.wantsPopup(uuid) || !actuState.hasUnseenUpdate(uuid)) {
+            return;
+        }
+        Ref<EntityStore> ref = (Ref<EntityStore>) playerRef.getReference();
+        if (ref == null || !ref.isValid()) {
+            return;
+        }
+        SimpleUIPage uiPage = new SimpleUIPage(playerRef, "misesajour", false);
+        player.getPageManager().openCustomPage(ref, store, uiPage);
+        player.getHudManager().getCustomHuds().values().forEach(
+                com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud::show
+        );
+        actuState.markSeen(uuid);
     }
 
     public static VaryonUIPlugin getInstance() {
