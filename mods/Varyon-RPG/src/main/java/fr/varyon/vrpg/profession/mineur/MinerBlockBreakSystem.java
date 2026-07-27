@@ -56,8 +56,6 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
     private static final Random RANDOM = new Random();
     private static final int MAX_VEIN = 64;
     private static final double GUARDIAN_SPAWN_RATE_PER_RANK = 0.005;
-    private static final int GUARDIAN_SPAWN_MULTIPLIER_TEMP = 10;
-    private static final double GUARDIAN_SPAWN_RATE_MAX = 0.25;
     private static final int[][] FACE_DIRS = {
         {1,0,0},{-1,0,0},{0,1,0},{0,-1,0},{0,0,1},{0,0,-1}
     };
@@ -105,10 +103,11 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
         if (blockType == null) return;
 
         String rawId = String.valueOf(blockType.getId());
+        boolean isCracked = rawId.toLowerCase().contains("cracked");
         String xpKey = MinerXpTable.resolveXpKey(rawId);
         double baseXp = MinerXpTable.getXp(xpKey);
-        boolean isOre = baseXp > 0;
-        boolean isRock = rawId.toLowerCase().contains("rock");
+        boolean isOre = baseXp > 0 && !isCracked;
+        boolean isRock = rawId.toLowerCase().contains("rock") || isCracked;
         if (!isOre && !isRock) return;
 
         PlayerRef playerRef = archetypeChunk.getComponent(index, playerRefType);
@@ -326,7 +325,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
             }
 
             int guardianRank = acc.getTalentRank(Profession.MINEUR, "9");
-            double guardianChance = Math.min(guardianRank * GUARDIAN_SPAWN_RATE_PER_RANK * GUARDIAN_SPAWN_MULTIPLIER_TEMP, GUARDIAN_SPAWN_RATE_MAX);
+            double guardianChance = guardianRank * GUARDIAN_SPAWN_RATE_PER_RANK;
             if (guardianRank > 0 && event.getTargetBlock() != null && player != null
                     && RANDOM.nextDouble() < guardianChance) {
                 try {

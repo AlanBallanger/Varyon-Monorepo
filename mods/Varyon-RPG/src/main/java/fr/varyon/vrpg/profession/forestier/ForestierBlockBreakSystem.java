@@ -234,7 +234,7 @@ public final class ForestierBlockBreakSystem extends EntityEventSystem<EntitySto
 
             // Node 10 -- Gardien Sylvestre : chance d'invoquer un Forester_Guardian (5% par rang)
             int gardienRank = acc.getTalentRank(Profession.FORESTIER, "10");
-            if (gardienRank > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < gardienRank * 0.05) {
+            if (gardienRank > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < gardienRank * 0.005) {
                 int bx = event.getTargetBlock().x;
                 int by = event.getTargetBlock().y;
                 int bz = event.getTargetBlock().z;

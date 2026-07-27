@@ -186,7 +186,7 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
 
         // Node 11 – Gardiens des Champs : chance de faire apparaître un gardien (5% par rang)
         int guardianRank = acc.getTalentRank(Profession.FERMIER, "11");
-        if (guardianRank > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < guardianRank * 0.05) {
+        if (guardianRank > 0 && event.getTargetBlock() != null && RANDOM.nextDouble() < guardianRank * 0.005) {
             int bx = event.getTargetBlock().x;
             int by = event.getTargetBlock().y;
             int bz = event.getTargetBlock().z;

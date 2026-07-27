@@ -210,7 +210,7 @@ public final class ChasseurKillSystem {
 
                 int alphaRank = acc.getTalentRank(Profession.CHASSEUR, "11");
                 if (alphaRank > 0 && pos != null) {
-                    double alphaChance = alphaRank * 0.05;
+                    double alphaChance = alphaRank * 0.005;
                     if (RANDOM.nextDouble() < alphaChance) {
                         if (dbg) LOGGER.atInfo().log("[ChasseurKill] N11 PredateurAlpha PROC -- spawning Rex_Caven");
                         try {

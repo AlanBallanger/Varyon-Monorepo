@@ -4,8 +4,8 @@
     "Name": "server.items.Bag_Wood_Lesser.name",
     "Description": "server.items.Bag_Wood_Lesser.description"
   },
-  "Icon": "Icons/Items/NoCube_Bag_Wood_Lesser.png",
-  "Texture": "Items/NoCube_Bag_Wood.png",
+  "Icon": "Icons/Items/Bag_Wood_Lesser.png",
+  "Texture": "Items/Bag_Wood.png",
   "Container": {
     "Capacity": 18,
     "ItemTag": "Type=Wood"

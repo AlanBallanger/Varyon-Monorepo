@@ -15,11 +15,38 @@ items.Ingredient_Hide_Corrupted.description = Corrupted-looking hide that seems 
 items.Bag_Ore_Lesser.name = Lesser Foreur Satchel
 items.Bag_Ore_Lesser.description = A reinforced bag for carrying ores without losing them on death.
 
-items.NoCube_Bag_Ore.name = Foreur Satchel
-items.NoCube_Bag_Ore.description = A sturdy bag for carrying ores without losing them on death.
+items.Bag_Ore.name = Foreur Satchel
+items.Bag_Ore.description = A sturdy bag for carrying ores without losing them on death.
 
-items.NoCube_Bag_Ore_Greater.name = Greater Foreur Satchel
-items.NoCube_Bag_Ore_Greater.description = A large robust bag for carrying ores without losing them on death.
+items.Bag_Ore_Greater.name = Greater Foreur Satchel
+items.Bag_Ore_Greater.description = A large robust bag for carrying ores without losing them on death.
+
+items.Bag_Crop_Lesser.name = Lesser Farmer's Satchel
+items.Bag_Crop_Lesser.description = A reinforced bag for carrying crops without losing them on death.
+
+items.Bag_Crop.name = Farmer's Satchel
+items.Bag_Crop.description = A sturdy bag for carrying crops without losing them on death.
+
+items.Bag_Crop_Greater.name = Greater Farmer's Satchel
+items.Bag_Crop_Greater.description = A large robust bag for carrying crops without losing them on death.
+
+items.Bag_Wood_Lesser.name = Lesser Forester's Satchel
+items.Bag_Wood_Lesser.description = A reinforced bag for carrying wood without losing it on death.
+
+items.Bag_Wood.name = Forester's Satchel
+items.Bag_Wood.description = A sturdy bag for carrying wood without losing it on death.
+
+items.Bag_Wood_Greater.name = Greater Forester's Satchel
+items.Bag_Wood_Greater.description = A large robust bag for carrying wood without losing it on death.
+
+items.Bag_Potion_Lesser.name = Lesser Tracker's Pouch
+items.Bag_Potion_Lesser.description = A reinforced bag for carrying potions without losing them on death.
+
+items.Bag_Potion.name = Tracker's Pouch
+items.Bag_Potion.description = A sturdy bag for carrying potions without losing them on death.
+
+items.Bag_Potion_Greater.name = Greater Tracker's Pouch
+items.Bag_Potion_Greater.description = A large robust bag for carrying potions without losing them on death.
 
 items.Varyon_Miners_Helmet.name = Miner's Bulwark Helmet
 items.Varyon_Miners_Helmet.description = Reinforced headgear for hostile galleries.

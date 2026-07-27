@@ -4,8 +4,8 @@
     "Name": "server.items.Bag_Ore_Lesser.name",
     "Description": "server.items.Bag_Ore_Lesser.description"
   },
-  "Icon": "Icons/Items/NoCube_Bag_Ore_Lesser.png",
-  "Texture": "Items/NoCube_Bag_Ore.png",
+  "Icon": "Icons/Items/Bag_Ore_Lesser.png",
+  "Texture": "Items/Bag_Ore.png",
   "Container": {
     "Capacity": 2,
     "ItemTag": "Type=Ore"

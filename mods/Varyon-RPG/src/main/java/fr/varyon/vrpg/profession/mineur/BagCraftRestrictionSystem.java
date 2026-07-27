@@ -28,18 +28,15 @@ public final class BagCraftRestrictionSystem extends EntityEventSystem<EntitySto
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     public static final Set<String> ORE_BAG_IDS = Set.of(
-        "Bag_Ore_Lesser",
-        "NoCube_Bag_Ore", "NoCube_Bag_Ore_Lesser", "NoCube_Bag_Ore_Greater"
+        "Bag_Ore_Lesser"
     );
 
     public static final Set<String> CROP_BAG_IDS = Set.of(
-        "Bag_Crop_Lesser",
-        "NoCube_Bag_Plant", "NoCube_Bag_Plant_Lesser", "NoCube_Bag_Plant_Greater"
+        "Bag_Crop_Lesser"
     );
 
     public static final Set<String> WOOD_BAG_IDS = Set.of(
-        "Bag_Wood_Lesser",
-        "NoCube_Bag_Wood", "NoCube_Bag_Wood_Lesser", "NoCube_Bag_Wood_Greater"
+        "Bag_Wood_Lesser"
     );
 
     private final ProfessionManager professionManager;

@@ -1,19 +1,23 @@
 {
-  "Parent": "NoCube_Bag_Potion_Greater",
-  "Icon": "Icons/Items/NoCube_Bag_Plant_Greater.png",
-  "Texture": "Items/NoCube_Bag_Plant.png",
+  "Parent": "Bag_Potion",
+  "TranslationProperties": {
+    "Name": "server.items.Bag_Crop.name",
+    "Description": "server.items.Bag_Crop.description"
+  },
+  "Icon": "Icons/Items/Bag_Crop.png",
+  "Texture": "Items/Bag_Crop.png",
   "Container": {
-    "Capacity": 36,
+    "Capacity": 27,
     "ItemTag": "Type=Plant"
   },
   "Recipe": {
     "Input": [
       {
         "ItemId": "Ingredient_Fabric_Scrap_Linen",
-        "Quantity": 20
+        "Quantity": 10
       },
       {
-        "ItemId": "Ingredient_Hide_Heavy",
+        "ItemId": "Ingredient_Hide_Medium",
         "Quantity": 2
       },
       {
@@ -34,12 +38,12 @@
   "IconProperties": {
     "Scale": 1,
     "Rotation": [
-      22.5,
-      45,
-      22.5
+      335,
+      128,
+      30
     ],
     "Translation": [
-      0,
+      1,
       -8
     ]
   },

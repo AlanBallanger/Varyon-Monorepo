@@ -4,8 +4,8 @@
     "Name": "server.items.Bag_Crop_Lesser.name",
     "Description": "server.items.Bag_Crop_Lesser.description"
   },
-  "Icon": "Icons/Items/NoCube_Bag_Plant_Lesser.png",
-  "Texture": "Items/NoCube_Bag_Plant.png",
+  "Icon": "Icons/Items/Bag_Crop_Lesser.png",
+  "Texture": "Items/Bag_Crop.png",
   "Container": {
     "Capacity": 18,
     "ItemTag": "Type=Plant"

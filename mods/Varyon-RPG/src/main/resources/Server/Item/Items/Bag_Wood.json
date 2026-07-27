@@ -1,10 +1,14 @@
 {
-    "Parent":  "NoCube_Bag_Potion",
-    "Icon":  "Icons/Items/NoCube_Bag_Soil.png",
-    "Texture":  "Items/NoCube_Bag_Soil.png",
+    "Parent":  "Bag_Potion",
+    "TranslationProperties": {
+        "Name": "server.items.Bag_Wood.name",
+        "Description": "server.items.Bag_Wood.description"
+    },
+    "Icon":  "Icons/Items/Bag_Wood.png",
+    "Texture":  "Items/Bag_Wood.png",
     "Container":  {
                       "Capacity":  27,
-                      "ItemTag":  "Type=Soil"
+                      "ItemTag":  "Type=Wood"
                   },
     "Recipe":  {
                    "Input":  [
@@ -17,7 +21,7 @@
                                      "Quantity":  2
                                  },
                                  {
-                                     "ItemId":  "Soil_Dirt",
+                                     "ResourceTypeId":  "Wood_Trunk",
                                      "Quantity":  2
                                  }
                              ],

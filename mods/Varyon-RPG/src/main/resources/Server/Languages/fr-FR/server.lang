@@ -15,11 +15,38 @@ items.Ingredient_Hide_Corrupted.description = Une peau à l'apparence corrompue,
 items.Bag_Ore_Lesser.name = Petite Besace du Foreur
 items.Bag_Ore_Lesser.description = Un sac renforcé permettant de transporter des minerais sans les perdre à la mort.
 
-items.NoCube_Bag_Ore.name = Besace du Foreur
-items.NoCube_Bag_Ore.description = Un sac solide permettant de transporter des minerais sans les perdre à la mort.
+items.Bag_Ore.name = Besace du Foreur
+items.Bag_Ore.description = Un sac solide permettant de transporter des minerais sans les perdre à la mort.
 
-items.NoCube_Bag_Ore_Greater.name = Grande Besace du Foreur
-items.NoCube_Bag_Ore_Greater.description = Un grand sac robuste permettant de transporter des minerais sans les perdre à la mort.
+items.Bag_Ore_Greater.name = Grande Besace du Foreur
+items.Bag_Ore_Greater.description = Un grand sac robuste permettant de transporter des minerais sans les perdre à la mort.
+
+items.Bag_Crop_Lesser.name = Petite Besace du Paysan
+items.Bag_Crop_Lesser.description = Un sac renforcé permettant de transporter des récoltes sans les perdre à la mort.
+
+items.Bag_Crop.name = Besace du Paysan
+items.Bag_Crop.description = Un sac solide permettant de transporter des récoltes sans les perdre à la mort.
+
+items.Bag_Crop_Greater.name = Grande Besace du Paysan
+items.Bag_Crop_Greater.description = Un grand sac robuste permettant de transporter des récoltes sans les perdre à la mort.
+
+items.Bag_Wood_Lesser.name = Petite Besace du Forestier
+items.Bag_Wood_Lesser.description = Un sac renforcé permettant de transporter du bois sans le perdre à la mort.
+
+items.Bag_Wood.name = Besace du Forestier
+items.Bag_Wood.description = Un sac solide permettant de transporter du bois sans le perdre à la mort.
+
+items.Bag_Wood_Greater.name = Grande Besace du Forestier
+items.Bag_Wood_Greater.description = Un grand sac robuste permettant de transporter du bois sans le perdre à la mort.
+
+items.Bag_Potion_Lesser.name = Petite Bourse du Traqueur
+items.Bag_Potion_Lesser.description = Un sac renforcé permettant de transporter des potions sans les perdre à la mort.
+
+items.Bag_Potion.name = Bourse du Traqueur
+items.Bag_Potion.description = Un sac solide permettant de transporter des potions sans les perdre à la mort.
+
+items.Bag_Potion_Greater.name = Grande Bourse du Traqueur
+items.Bag_Potion_Greater.description = Un grand sac robuste permettant de transporter des potions sans les perdre à la mort.
 
 items.Varyon_Miners_Helmet.name = Casque du mineur
 items.Varyon_Miners_Helmet.description = Casque renforcé pour galeries hostiles.

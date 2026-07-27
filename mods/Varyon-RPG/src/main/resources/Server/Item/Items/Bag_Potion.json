@@ -1,7 +1,7 @@
 {
   "TranslationProperties": {
-    "Name": "server.items.Bag_Potion_Lesser.name",
-    "Description": "server.items.Bag_Potion_Lesser.description"
+    "Name": "server.items.Bag_Potion.name",
+    "Description": "server.items.Bag_Potion.description"
   },
   "PlayerAnimationsId": "Item",
   "Categories": [
@@ -11,16 +11,16 @@
   "IconProperties": {
     "Scale": 1,
     "Rotation": [
-      327,
-      162,
-      0
+      335,
+      128,
+      30
     ],
     "Translation": [
-      2,
-      -10
+      1,
+      -8
     ]
   },
-  "Model": "Items/NoCube_Bag_Resource_Lesser.blockymodel",
+  "Model": "Items/NoCube_Bag_Resource.blockymodel",
   "Texture": "Items/Bag_Potion.png",
   "Scale": 1.5,
   "Tags": {
@@ -29,7 +29,7 @@
     ]
   },
   "Container": {
-    "Capacity": 18,
+    "Capacity": 27,
     "ItemTag": "Type=Potion"
   },
   "Interactions": {
@@ -54,15 +54,15 @@
       ]
     }
   },
-  "Icon": "Icons/Items/Bag_Potion_Lesser.png",
+  "Icon": "Icons/Items/Bag_Potion.png",
   "Recipe": {
     "Input": [
       {
-        "ItemId": "Ingredient_Fibre",
+        "ItemId": "Ingredient_Fabric_Scrap_Linen",
         "Quantity": 10
       },
       {
-        "ItemId": "Ingredient_Hide_Light",
+        "ItemId": "Ingredient_Hide_Medium",
         "Quantity": 2
       },
       {
