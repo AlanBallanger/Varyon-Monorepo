@@ -41,6 +41,8 @@ public class CometSpawnCommand extends AbstractWorldCommand {
     private final OptionalArg<String> themeArg;
     // Optional flag to spawn comet directly above player
     private final OptionalArg<String> onMeArg;
+    // Optional target player to spawn the comet near/on instead of the sender
+    private final OptionalArg<PlayerRef> targetArg;
 
     public CometSpawnCommand() {
         super("spawn", "Spawns a comet near the player. Use --theme <name> to choose the wave theme (see /comet themes).");
@@ -48,6 +50,7 @@ public class CometSpawnCommand extends AbstractWorldCommand {
         this.tierArg = withOptionalArg("tier", "Tier of the comet (Common, Rare, Epic, Legendary, Mythic)", ArgTypes.STRING);
         this.themeArg = withOptionalArg("theme", "Theme of the wave — e.g. Skeleton, Void, Lava. Use /comet themes to list all.", ArgTypes.STRING);
         this.onMeArg = withOptionalArg("onme", "Use --onme true to spawn comet directly above the player", ArgTypes.STRING);
+        this.targetArg = withOptionalArg("target", "Player to target instead of yourself", ArgTypes.PLAYER_REF);
     }
 
     @Override
@@ -119,14 +122,24 @@ public class CometSpawnCommand extends AbstractWorldCommand {
         }
 
         try {
-            // Get player
-            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> _senderRef = context.senderAsPlayerRef();
-            Player player = (_senderRef != null && _senderRef.isValid()) ? _senderRef.getStore().getComponent(_senderRef, Player.getComponentType()) : null;
-            Ref<EntityStore> playerRef = player.getReference();
+            // Resolve target player: explicit --target argument, falling back to the sender
+            Ref<EntityStore> playerRef;
+            if (targetArg.provided(context)) {
+                PlayerRef targetPlayerRef = targetArg.get(context);
+                playerRef = targetPlayerRef != null ? targetPlayerRef.getReference() : null;
+                if (playerRef == null || !playerRef.isValid()) {
+                    context.sendMessage(Message.raw("Error: Target player is not online or could not be found!"));
+                    return;
+                }
+            } else {
+                com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> _senderRef = context.senderAsPlayerRef();
+                Player player = (_senderRef != null && _senderRef.isValid()) ? _senderRef.getStore().getComponent(_senderRef, Player.getComponentType()) : null;
+                playerRef = player.getReference();
 
-            if (playerRef == null || !playerRef.isValid()) {
-                context.sendMessage(Message.raw("Error: Could not get player reference!"));
-                return;
+                if (playerRef == null || !playerRef.isValid()) {
+                    context.sendMessage(Message.raw("Error: Could not get player reference!"));
+                    return;
+                }
             }
 
             // Get player position from TransformComponent
@@ -138,7 +151,8 @@ public class CometSpawnCommand extends AbstractWorldCommand {
                 return;
             }
             Vector3d playerPos = VecUtil.toJoml(transform.getPosition());
-            int varyonRing = VaryonZoneResolver.resolveVaryonRing(player);
+            Player targetPlayer = store.getComponent(playerRef, Player.getComponentType());
+            int varyonRing = VaryonZoneResolver.resolveVaryonRing(targetPlayer);
             int ringForWave = varyonRing > 0 ? varyonRing : 1;
 
             // Check if --onme flag is provided (spawn directly above player)
@@ -278,11 +292,16 @@ public class CometSpawnCommand extends AbstractWorldCommand {
             CometConfig cfgMsg = CometConfig.getInstance();
             String chatTpl = (cfgMsg != null ? cfgMsg.msgCometFallingChatCoords
                     : "[Comète] Une comète %tier% est tombée en %x% ; %y% ; %z%");
+            boolean targetingOther = targetArg.provided(context);
+            String targetName = targetingOther ? targetArg.get(context).getUsername() : null;
             String chatText = tier.applyTierPlaceholders(chatTpl)
                     .replace("%x%", Integer.toString(targetBlockPos.x))
                     .replace("%y%", Integer.toString(targetBlockPos.y))
                     .replace("%z%", Integer.toString(targetBlockPos.z))
-                    + (spawnOnPlayer ? " (directement au-dessus de toi !)" : "")
+                    + (spawnOnPlayer
+                            ? (targetingOther ? " (directement au-dessus de " + targetName + " !)" : " (directement au-dessus de toi !)")
+                            : "")
+                    + (targetingOther ? " (Cible : " + targetName + ")" : "")
                     + (themeId != null ? " (Thème : " + themeNameStr + ")" : "");
             context.sendMessage(Message.raw(chatText));
 
