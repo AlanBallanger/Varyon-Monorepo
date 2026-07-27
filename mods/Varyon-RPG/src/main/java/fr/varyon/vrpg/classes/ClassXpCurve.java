@@ -10,7 +10,7 @@ public final class ClassXpCurve {
         if (level >= MAX_LEVEL) return 0L;
         if (level < 1) level = 1;
         long l = level;
-        return 35L * l * (100L + l * l) / 100L;
+        return 50L * l * (100L + (long) (l * l * 1.2)) / 100L;
     }
 
     private static final int[] TALENT_POINTS_PER_LEVEL = {

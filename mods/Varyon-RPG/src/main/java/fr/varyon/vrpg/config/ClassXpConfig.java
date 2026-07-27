@@ -2,6 +2,7 @@ package fr.varyon.vrpg.config;
 
 import com.hypixel.hytale.logger.HytaleLogger;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,12 +18,53 @@ public final class ClassXpConfig {
     private static double baseKillMultiplier = 1.0;
     private static double minKillXp = 1.0;
 
+    // Zone XP multiplier + soft cap (maxUsefulLevel) per Varyon difficulty zone id (0 = haven/no zone).
+    private static final ZoneXpDef[] ZONE_XP = {
+        new ZoneXpDef(0.5, 5),   // haven
+        new ZoneXpDef(1.0, 8),   // zone_1
+        new ZoneXpDef(1.5, 10),  // zone_2
+        new ZoneXpDef(2.1, 12),  // zone_3
+        new ZoneXpDef(2.8, 15),  // zone_4
+        new ZoneXpDef(3.5, 17),  // zone_5
+        new ZoneXpDef(4.3, 19),  // zone_6
+        new ZoneXpDef(5.5, 21),  // zone_7
+        new ZoneXpDef(7.3, 23),  // zone_8
+        new ZoneXpDef(9.5, 25),  // zone_9
+        new ZoneXpDef(12.0, 27), // zone_10
+    };
+
+    // levelFactor by (playerLevel - maxUsefulLevel) gap: throttles XP once a class outlevels its farming zone.
+    private static final double[] LEVEL_FACTOR_BY_GAP = { 1.0, 0.75, 0.5, 0.25, 0.10 };
+
     private ClassXpConfig() {}
 
     public static int getAntiFarmWindowSeconds() { return antiFarmWindowSeconds; }
     public static int getAntiFarmMaxKillsPerMob() { return antiFarmMaxKillsPerMob; }
     public static double getBaseKillMultiplier() { return baseKillMultiplier; }
     public static double getMinKillXp() { return minKillXp; }
+
+    @Nonnull
+    public static ZoneXpDef getZoneXpDef(int varyonZoneId) {
+        int idx = (varyonZoneId <= 0) ? 0 : Math.min(varyonZoneId, ZONE_XP.length - 1);
+        return ZONE_XP[idx];
+    }
+
+    public static double getLevelFactor(int playerLevel, int maxUsefulLevel) {
+        int gap = playerLevel - maxUsefulLevel;
+        if (gap <= 0) return 1.0;
+        if (gap >= LEVEL_FACTOR_BY_GAP.length) return 0.0;
+        return LEVEL_FACTOR_BY_GAP[gap];
+    }
+
+    public static final class ZoneXpDef {
+        public final double multiplier;
+        public final int maxUsefulLevel;
+
+        public ZoneXpDef(double multiplier, int maxUsefulLevel) {
+            this.multiplier = multiplier;
+            this.maxUsefulLevel = maxUsefulLevel;
+        }
+    }
 
     public static void load(Path dataDir) {
         Path file = dataDir.resolve("config.toml");

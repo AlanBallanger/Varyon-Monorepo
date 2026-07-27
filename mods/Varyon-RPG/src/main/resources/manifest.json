@@ -10,7 +10,9 @@
   "Website": "${plugin_website}",
   "ServerVersion": "${server_version}",
   "Dependencies": {},
-  "OptionalDependencies": {},
+  "OptionalDependencies": {
+    "Varyon:Varyon": "*"
+  },
   "DisabledByDefault": false,
   "IncludesAssetPack": true,
   "LoadOrder": "POSTWORLD",

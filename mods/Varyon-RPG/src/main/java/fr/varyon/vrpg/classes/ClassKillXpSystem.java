@@ -227,9 +227,30 @@ public final class ClassKillXpSystem {
             }
         }
 
-        double finalXp = baseXp * mult;
+        double zoneMultiplier = 1.0;
+        double levelFactor = 1.0;
+        String zoneReason = null;
+        if (fr.varyon.vrpg.integration.VaryonZoneBridge.isPresent()) {
+            var pos = getPosition(attackerRef, store);
+            String worldName = getWorldName(store);
+            if (pos != null && worldName != null) {
+                boolean isVaryonWorld = fr.varyon.vrpg.integration.VaryonZoneBridge.isVaryonWorld(worldName);
+                boolean isHaven = !isVaryonWorld
+                    || fr.varyon.vrpg.integration.VaryonZoneBridge.isInSafeZone(pos.x, pos.z);
+                int zoneId = isHaven ? 0 : fr.varyon.vrpg.integration.VaryonZoneBridge.getZoneId(pos.x, pos.z, worldName);
+
+                ClassXpConfig.ZoneXpDef zoneDef = ClassXpConfig.getZoneXpDef(zoneId);
+                zoneMultiplier = zoneDef.multiplier;
+                levelFactor = ClassXpConfig.getLevelFactor(progress.getLevel(), zoneDef.maxUsefulLevel);
+                zoneReason = "zone=" + zoneId + " x" + String.format("%.2f", zoneMultiplier)
+                    + " levelFactor=" + String.format("%.2f", levelFactor);
+            }
+        }
+
+        double finalXp = baseXp * mult * zoneMultiplier * levelFactor;
         LOGGER.atInfo().log("[ClassKillXp] +" + String.format("%.2f", finalXp) + " xp"
             + " (base=" + String.format("%.2f", baseXp) + (multReason != null ? " x" + multReason : "")
+            + (zoneReason != null ? " " + zoneReason : "")
             + ") class=" + activeClass + " mob=" + MobKillXpResolver.npcRoleKey(npc));
 
         classManager.addXp(uuid, activeClass, finalXp, playerRef);
@@ -290,6 +311,26 @@ public final class ClassKillXpSystem {
         float max = hp.getMax();
         if (max <= 0f) return 0.0;
         return current / max;
+    }
+
+    @Nullable
+    private org.joml.Vector3d getPosition(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
+        try {
+            com.hypixel.hytale.server.core.modules.entity.component.TransformComponent tc =
+                store.getComponent(ref, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
+            return tc != null ? tc.getPosition() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Nullable
+    private String getWorldName(@Nonnull Store<EntityStore> store) {
+        try {
+            return store.getExternalData().getWorld().getName();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private double getDistanceBetween(@Nonnull Ref<EntityStore> refA, @Nonnull Ref<EntityStore> refB,
