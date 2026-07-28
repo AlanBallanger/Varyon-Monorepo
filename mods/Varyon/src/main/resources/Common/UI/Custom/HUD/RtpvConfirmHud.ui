@@ -1,0 +1,39 @@
+Group {
+  LayoutMode: Center;
+  Anchor: (Full: 0);
+
+  Group #RtpvConfirmHud {
+    Visible: false;
+    Anchor: (Width: 560, Height: 64, Bottom: 140);
+    Background: (Color: #1B2635F0);
+    OutlineColor: #3C556E;
+    OutlineSize: 1;
+    LayoutMode: Top;
+    Padding: (Vertical: 8, Horizontal: 16);
+
+    Label #RtpvConfirmTitle {
+      Text: "";
+      Anchor: (Height: 24, Left: 0, Right: 0);
+      Style: (
+        FontSize: 15,
+        RenderBold: true,
+        TextColor: #FFFFFF,
+        HorizontalAlignment: Center,
+        VerticalAlignment: Center,
+        Wrap: true
+      );
+    }
+
+    Label #RtpvConfirmSubtitle {
+      Text: "";
+      Anchor: (Top: 4, Height: 24, Left: 0, Right: 0);
+      Style: (
+        FontSize: 13,
+        TextColor: #C8D6E0,
+        HorizontalAlignment: Center,
+        VerticalAlignment: Center,
+        Wrap: true
+      );
+    }
+  }
+}

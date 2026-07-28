@@ -5,14 +5,12 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -21,10 +19,9 @@ import com.hypixel.hytale.server.core.universe.world.worldgen.IWorldGen;
 import com.hypixel.hytale.server.worldgen.chunk.ChunkGenerator;
 import com.varyon.VaryonPlugin;
 import com.varyon.config.DifficultyZone;
-import com.varyon.portal.RtpvConfirmUIPage;
-import com.varyon.rtpv.RtpvConfirmManager;
 import com.varyon.rtpv.RtpvCooldownStore;
 import com.varyon.rtpv.RtpvJoinManager;
+import com.varyon.rtpv.RtpvRetryService;
 import com.varyon.config.RtpvConfig;
 import com.varyon.config.ZoneConfig;
 import com.varyon.config.ZonePermissionsConfig;
@@ -44,8 +41,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class RtpvCommand extends AbstractPlayerCommand {
@@ -215,7 +210,7 @@ public class RtpvCommand extends AbstractPlayerCommand {
                         " en " + (int) safePosition.x + ", " + (int) safePosition.y + ", " + (int) safePosition.z +
                         (rtpvConfig.isEconomyEnabled() ? " (-" + finalCost + " coins)" : "")).color(Color.GREEN));
 
-                    scheduleConfirmMenu(playerRef, world, zoneNumber, pvpFilter, finalCost);
+                    RtpvRetryService.showConfirmHud(playerRef, world, zoneNumber, pvpFilter, finalCost, 1);
                     RtpvCooldownStore.recordSuccessfulRtpv(playerRef.getUuid());
                     RtpvCooldownStore.incrementConsecutiveRtpv(playerRef.getUuid());
                 } else {
@@ -290,36 +285,4 @@ public class RtpvCommand extends AbstractPlayerCommand {
         FirstSpawnStyleParticleFx.playAt(world, hPos, ref, store, joinDurationSeconds);
     }
 
-    private void scheduleConfirmMenu(
-        @Nonnull PlayerRef playerRef,
-        @Nonnull World world,
-        int zoneNumber,
-        @Nullable Boolean pvpFilter,
-        int paidCost
-    ) {
-        RtpvConfirmManager mgr = RtpvConfirmManager.getInstance();
-        if (mgr == null) {
-            return;
-        }
-        int firstRetryOrdinal = 1;
-
-        ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.schedule(
-            () -> world.execute(() -> {
-                Ref<EntityStore> liveRef = playerRef.getReference();
-                if (liveRef == null || !liveRef.isValid()) {
-                    return;
-                }
-                Store<EntityStore> liveStore = liveRef.getStore();
-                Player livePlayer = liveStore.getComponent(liveRef, Player.getComponentType());
-                if (livePlayer == null) {
-                    return;
-                }
-                livePlayer.getPageManager().openCustomPage(
-                    liveRef, liveStore,
-                    new RtpvConfirmUIPage(playerRef, zoneNumber, pvpFilter, paidCost, firstRetryOrdinal));
-            }),
-            5_000L,
-            TimeUnit.MILLISECONDS);
-        mgr.schedulePendingMenu(playerRef.getUuid(), future);
-    }
 }

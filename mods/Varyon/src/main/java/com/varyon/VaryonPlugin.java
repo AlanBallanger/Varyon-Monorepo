@@ -13,6 +13,8 @@ import com.hypixel.hytale.server.core.event.events.player.DrainPlayerFromWorldEv
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
+import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
+import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
 import com.hypixel.hytale.server.core.modules.entity.damage.event.KillFeedEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -40,8 +42,10 @@ import com.varyon.death.DeathPointManager;
 import com.varyon.deposit.DepositBlockInteractionSystem;
 import com.varyon.portal.ZonesPortalInteractionSystem;
 import com.varyon.portal.ArenasPortalInteractionSystem;
+import com.varyon.hud.RtpvConfirmHud;
 import com.varyon.rtpv.RtpvConfirmManager;
 import com.varyon.rtpv.RtpvCooldownStore;
+import com.varyon.rtpv.RtpvKeyFilter;
 import com.varyon.util.VaryonPlayerWorldPresence;
 import com.varyon.util.VaryonWorldAccess;
 import com.varyon.rtpv.RtpvJoinManager;
@@ -101,6 +105,7 @@ public class VaryonPlugin extends JavaPlugin {
     private DepositUIManager depositUIManager;
     private DeathPointManager deathPointManager;
     private ReturnCommand returnCommand;
+    private PacketFilter rtpvKeyPacketFilter;
 
     public VaryonPlugin(JavaPluginInit init) {
         super(init);
@@ -414,6 +419,7 @@ public class VaryonPlugin extends JavaPlugin {
                     if (confirmMgr != null) {
                         confirmMgr.onPlayerDisconnect(playerRef.getUuid());
                     }
+                    RtpvConfirmHud.cleanup(playerRef.getUuid());
                     RtpvCooldownStore.onPlayerDisconnect(playerRef.getUuid());
                 });
             } else {
@@ -433,6 +439,7 @@ public class VaryonPlugin extends JavaPlugin {
             this.getCommandRegistry().registerCommand(new JoinCommand());
             RtpvJoinManager.setInstance(new RtpvJoinManager());
             RtpvConfirmManager.setInstance(new RtpvConfirmManager());
+            this.rtpvKeyPacketFilter = PacketAdapters.registerInbound(new RtpvKeyFilter());
             LOGGER.at(Level.INFO).log("Commands registered");
 
             LOGGER.at(Level.INFO).log("Varyon initialized with %s zones",
@@ -444,6 +451,14 @@ public class VaryonPlugin extends JavaPlugin {
     }
 
     protected void onDisable() {
+        if (rtpvKeyPacketFilter != null) {
+            try {
+                PacketAdapters.deregisterInbound(rtpvKeyPacketFilter);
+            } catch (Exception e) {
+                LOGGER.at(Level.WARNING).log("Failed to deregister RtpvKeyFilter: " + e.getMessage());
+            }
+            rtpvKeyPacketFilter = null;
+        }
         if (essenceManager != null) {
             essenceManager.shutdown();
         }
