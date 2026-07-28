@@ -68,6 +68,12 @@ public final class BossSpawnService {
     private static final long DEFAULT_REPEAT_INTERVAL_MS = 1_000L;
     private static final long HP_TRIGGER_POLL_INTERVAL_MS = 250L;
     private static final double HP_TRIGGER_EPSILON = 0.01d;
+    /**
+     * Grace delay before the FIRST boss-HP-percent poll after spawn. HP scaling (BossHealthScale.apply,
+     * RPGLevelingBossScaleCompatSystem's 250ms resync) needs a moment to settle current HP at the newly
+     * scaled max; polling immediately can read a stale low percentage and fire "below X%" waves at spawn.
+     */
+    private static final long HP_TRIGGER_INITIAL_GRACE_MS = 600L;
     private static final ScheduledExecutorService EXTRA_WAVE_SCHEDULER =
             Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "BossArena-ExtraWaves");
@@ -683,7 +689,10 @@ public final class BossSpawnService {
 
                     LOGGER.info("Applied HP multiplier: " + hpMult
                             + " (includes Varyon zone scale when present)");
-                    LOGGER.info("Current HP: " + currentHealth + " / Max HP: " + maxHealth);
+                    LOGGER.info("[HPDIAG] spawn-fill boss=" + entityUuid
+                            + " current=" + currentHealth + " max=" + maxHealth
+                            + " pct=" + (maxHealth > 0f ? (currentHealth / maxHealth * 100f) : -1f)
+                            + " worldFactor=" + worldFactor);
                 } else {
                     LOGGER.warning("Health stat not found!");
                 }
@@ -940,11 +949,15 @@ public final class BossSpawnService {
         );
         if (deferredEventId != null) {
             tracking.setEventCurrentWave(deferredEventId, waveNumber);
+            int nearbyCount = PlayerFinder.countPlayersInRadius(world, spawnPos, 40);
+            int playerCount = Math.max(nearbyCount, world.getPlayerCount());
+            float mobsPerPlayerMult = def.extraMobs != null ? def.extraMobs.mobsPerPlayerMult : 1.0f;
             int wavePlannedMobs = 0;
             if (execution.wave.adds != null) {
                 for (BossDefinition.ExtraMobs.WaveAdd add : execution.wave.adds) {
                     if (add != null && add.npcId != null && !add.npcId.isBlank()) {
-                        wavePlannedMobs += Math.max(1, add.mobsPerWave);
+                        int maxBase = Math.max(1, Math.max(add.mobsPerWaveMin, add.mobsPerWaveMax));
+                        wavePlannedMobs += BossDefinition.ExtraMobs.scalePlayerMobCount(maxBase, mobsPerPlayerMult, playerCount);
                     }
                 }
             }
@@ -1290,7 +1303,8 @@ public final class BossSpawnService {
                 nextWaveNumber,
                 remainingRepeatsAfterThreshold,
                 repeatDelayMs,
-                thresholdTriggered
+                thresholdTriggered,
+                HP_TRIGGER_INITIAL_GRACE_MS
         );
     }
 
@@ -1303,7 +1317,8 @@ public final class BossSpawnService {
                                          AtomicInteger nextWaveNumber,
                                          int remainingRepeatsAfterThreshold,
                                          long repeatDelayMs,
-                                         AtomicBoolean thresholdTriggered) {
+                                         AtomicBoolean thresholdTriggered,
+                                         long pollDelayMs) {
         EXTRA_WAVE_SCHEDULER.schedule(() -> world.execute(() -> {
             if (!isBossAlive(world, bossUuid, "boss_hp_percent<=" + formatSeconds(thresholdPercent))) {
                 return;
@@ -1324,7 +1339,8 @@ public final class BossSpawnService {
                         nextWaveNumber,
                         remainingRepeatsAfterThreshold,
                         repeatDelayMs,
-                        thresholdTriggered
+                        thresholdTriggered,
+                        HP_TRIGGER_POLL_INTERVAL_MS
                 );
                 return;
             }
@@ -1340,7 +1356,8 @@ public final class BossSpawnService {
                         nextWaveNumber,
                         remainingRepeatsAfterThreshold,
                         repeatDelayMs,
-                        thresholdTriggered
+                        thresholdTriggered,
+                        HP_TRIGGER_POLL_INTERVAL_MS
                 );
                 return;
             }
@@ -1377,7 +1394,7 @@ public final class BossSpawnService {
                         repeatDelayMs
                 );
             }
-        }), HP_TRIGGER_POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        }), pollDelayMs, TimeUnit.MILLISECONDS);
     }
 
     private void scheduleHpFollowupWave(World world,
@@ -1521,6 +1538,11 @@ public final class BossSpawnService {
 
         LOGGER.info("Executing wave " + waveNumber + " for '" + def.bossName + "' via trigger '" + triggerLabel + "'.");
 
+        int nearbyCount = PlayerFinder.countPlayersInRadius(world, spawnPos, 40);
+        int worldCount = world.getPlayerCount();
+        int playerCount = Math.max(nearbyCount, worldCount);
+        float mobsPerPlayerMult = def.extraMobs != null ? def.extraMobs.mobsPerPlayerMult : 1.0f;
+
         if (bossUuid != null) {
             UUID eventIdForWave = tracking.getEventIdForTrackedEntity(bossUuid);
             if (eventIdForWave != null) {
@@ -1528,7 +1550,8 @@ public final class BossSpawnService {
                 int wavePlannedMobs = 0;
                 for (BossDefinition.ExtraMobs.WaveAdd add : adds) {
                     if (add != null && add.npcId != null && !add.npcId.isBlank()) {
-                        wavePlannedMobs += Math.max(1, add.mobsPerWave);
+                        int maxBase = Math.max(1, Math.max(add.mobsPerWaveMin, add.mobsPerWaveMax));
+                        wavePlannedMobs += BossDefinition.ExtraMobs.scalePlayerMobCount(maxBase, mobsPerPlayerMult, playerCount);
                     }
                 }
                 tracking.setEventCurrentWavePlannedMobs(eventIdForWave, wavePlannedMobs);
@@ -1541,7 +1564,7 @@ public final class BossSpawnService {
             if (add == null || add.npcId == null || add.npcId.isBlank()) {
                 continue;
             }
-            int mobCount = Math.max(1, add.mobsPerWave);
+            int mobCount = BossDefinition.ExtraMobs.rollMobCount(add, mobsPerPlayerMult, playerCount);
             for (int i = 0; i < mobCount; i++) {
                 Vector3d mobPos = computeWaveSpawnPosition(world, spawnPos, def.extraMobs);
 

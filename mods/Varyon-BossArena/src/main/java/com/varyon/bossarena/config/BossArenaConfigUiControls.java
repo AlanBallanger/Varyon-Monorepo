@@ -21,6 +21,18 @@ final class BossArenaConfigUiControls {
     static final int MAX_WAVE_NPC_PICKS = 8;
     static final int MAX_ITEM_PICKS = 8;
 
+    static final float[] PER_PLAYER_STEPS = {1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.75f, 2.0f, 3.0f};
+
+    /** Advances a per-player multiplier to the next value in {@link #PER_PLAYER_STEPS}, wrapping to the first after the last. */
+    static float nextPerPlayerStep(float current) {
+        for (int i = 0; i < PER_PLAYER_STEPS.length; i++) {
+            if (current < PER_PLAYER_STEPS[i] - 0.001f) {
+                return PER_PLAYER_STEPS[i];
+            }
+        }
+        return PER_PLAYER_STEPS[0];
+    }
+
     private static final String ON_BG = "#1f7d4b";
     private static final String ON_HOVER = "#2b9a5f";
     private static final String OFF_BG = "#a33b3b";

@@ -20,13 +20,27 @@ val resolvedHytaleServerJar =
         .firstOrNull { it.isFile && it.length() > 1_000_000L }
         ?: file("libs/HytaleServer.jar")
 
+val resolvedVaryonJar =
+    sequenceOf(
+        System.getenv("VARYON_JAR")?.trim()?.takeIf { it.isNotEmpty() }?.let { file(it) },
+        file("../Varyon/build/libs").takeIf { it.isDirectory }
+            ?.listFiles { f -> f.name.startsWith("Varyon-") && f.name.endsWith(".jar") && !f.name.endsWith("-sources.jar") }
+            ?.maxByOrNull { it.lastModified() },
+    ).filterNotNull()
+        .map { it.normalize() }
+        .firstOrNull { it.isFile }
+
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.2-1")
     compileOnly("org.jspecify:jspecify:1.0.0")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("com.google.code.gson:gson:2.11.0")
     compileOnly(files(resolvedHytaleServerJar))
-    compileOnly(project(":mods:Varyon"))
+    if (findProject(":mods:Varyon") != null) {
+        compileOnly(project(":mods:Varyon"))
+    } else if (resolvedVaryonJar != null) {
+        compileOnly(files(resolvedVaryonJar))
+    }
 }
 
 java {
@@ -78,6 +92,14 @@ tasks.named<JavaCompile>("compileJava") {
                     "  - ${file("../Varyon-Comet/libs/HytaleServer.jar").absolutePath}\n" +
                     "  - ${file("../Varyon/libs/HytaleServer.jar").absolutePath}\n" +
                     "Copie le JAR serveur dans l'un de ces emplacements (souvent > 50 Mo)."
+            )
+        }
+        if (findProject(":mods:Varyon") == null && resolvedVaryonJar == null) {
+            throw GradleException(
+                "Aucun JAR Varyon valide trouvé pour la dépendance compileOnly.\n" +
+                    "Cherché (dans l'ordre) : variable VARYON_JAR, puis :\n" +
+                    "  - ${file("../Varyon/build/libs").absolutePath}\\Varyon-*.jar\n" +
+                    "Build d'abord le mod Varyon (gradlew -p ../Varyon build) pour générer ce JAR."
             )
         }
     }

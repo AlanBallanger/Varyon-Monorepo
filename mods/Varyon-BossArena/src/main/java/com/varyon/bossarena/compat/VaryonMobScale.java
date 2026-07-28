@@ -65,6 +65,8 @@ public final class VaryonMobScale {
             if (scale == null) {
                 scale = Scale.NONE;
             }
+            LOGGER.info("[HPDIAG] absorbInto boss componentPresent=" + (scale != Scale.NONE)
+                    + " hp×" + scale.healthMultiplier() + " dmg×" + scale.damageMultiplier());
             BossModifiers combined = applyWorldScale(safeMods, scale.healthMultiplier(), scale.damageMultiplier());
             VaryonMobScaleBridge.neutralizeCombatMultipliers(store, entityRef);
             if (!scale.isIdentity()) {

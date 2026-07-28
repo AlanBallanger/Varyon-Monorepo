@@ -111,8 +111,7 @@ public class BossDefinition {
         public float knockbackGiven = 1.0f;
         public float knockbackTaken = 1.0f;
         public float turnRate = 1.0f;
-        /** Flat HP/s added per present player (not a multiplier). */
-        public float regen = 0.0f;
+        public float regen = 1.0f;
     }
 
     public static class ExtraMobs {
@@ -138,6 +137,12 @@ public class BossDefinition {
         public boolean wavesEnabled = true;
         public boolean useRandomSpawnLocations = true;
         public double randomSpawnRadius = 15.0d;
+        /**
+         * Extra wave mob count per player beyond the first, as a multiplier: 1.3 = +30% mobs per
+         * additional player. Applied as {@code base × (1 + (mult - 1) × (players - 1))}, rounded to
+         * the nearest integer, same formula as {@link PerPlayerIncrease}.
+         */
+        public float mobsPerPlayerMult = 1.0f;
         // New format: multiple add definitions with per-wave cadence.
         public List<WaveAdd> adds = new ArrayList<>();
         // Trigger-based wave schedule. If empty, legacy fields are auto-migrated.
@@ -196,12 +201,50 @@ public class BossDefinition {
             }
             WaveAdd out = new WaveAdd();
             out.npcId = id;
-            out.mobsPerWave = Math.max(1, add.mobsPerWave);
+            int min = add.mobsPerWaveMin;
+            int max = add.mobsPerWaveMax;
+            if (min < 1 && max < 1) {
+                // Legacy config (pre min/max): fall back to the single mobsPerWave value.
+                min = Math.max(1, add.mobsPerWave);
+                max = min;
+            }
+            min = Math.max(1, min);
+            max = Math.max(min, max);
+            out.mobsPerWaveMin = min;
+            out.mobsPerWaveMax = max;
+            out.mobsPerWave = min;
             out.everyWave = Math.max(1, add.everyWave);
             out.hp = (!Float.isFinite(add.hp) || add.hp <= 0f) ? 1.0f : add.hp;
             out.damage = (!Float.isFinite(add.damage) || add.damage <= 0f) ? 1.0f : add.damage;
             out.size = (!Float.isFinite(add.size) || add.size <= 0f) ? 1.0f : add.size;
             return out;
+        }
+
+        /**
+         * Rolls a random spawn count within {@code [mobsPerWaveMin, mobsPerWaveMax]} (inclusive),
+         * after scaling both bounds by {@code mobsPerPlayerMult} for the given player count.
+         */
+        public static int rollMobCount(WaveAdd add, float mobsPerPlayerMult, int playerCount) {
+            if (add == null) {
+                return 1;
+            }
+            int min = scalePlayerMobCount(Math.max(1, add.mobsPerWaveMin), mobsPerPlayerMult, playerCount);
+            int max = scalePlayerMobCount(Math.max(1, add.mobsPerWaveMax), mobsPerPlayerMult, playerCount);
+            max = Math.max(min, max);
+            if (min == max) {
+                return min;
+            }
+            return min + (int) Math.floor(Math.random() * (max - min + 1));
+        }
+
+        /** {@code round(base × (1 + (mult - 1) × (players - 1)))}, floored at 1. */
+        public static int scalePlayerMobCount(int base, float mobsPerPlayerMult, int playerCount) {
+            if (!Float.isFinite(mobsPerPlayerMult) || mobsPerPlayerMult <= 1.0f) {
+                return base;
+            }
+            int extraPlayers = Math.max(0, playerCount - 1);
+            float scaleFactor = 1.0f + (mobsPerPlayerMult - 1.0f) * extraPlayers;
+            return Math.max(1, Math.round(base * scaleFactor));
         }
 
         private static ScheduledWave sanitizeScheduledWave(ScheduledWave wave) {
@@ -353,6 +396,11 @@ public class BossDefinition {
             }
             if (mobsPerWave < 1) {
                 mobsPerWave = 3;
+            }
+            if (!Float.isFinite(mobsPerPlayerMult) || mobsPerPlayerMult < 1.0f) {
+                mobsPerPlayerMult = 1.0f;
+            } else if (mobsPerPlayerMult > 3.0f) {
+                mobsPerPlayerMult = 3.0f;
             }
             randomSpawnRadius = sanitizeWaveRandomSpawnRadius(randomSpawnRadius);
             if (!Double.isFinite(timedProximityRadius) || timedProximityRadius < 0.0d) {
@@ -523,7 +571,7 @@ public class BossDefinition {
                 if (wave.adds != null) {
                     for (WaveAdd add : wave.adds) {
                         if (add != null && add.npcId != null && !add.npcId.isBlank()) {
-                            mobsPerExecution += Math.max(1, add.mobsPerWave);
+                            mobsPerExecution += Math.max(1, Math.max(add.mobsPerWaveMin, add.mobsPerWaveMax));
                         }
                     }
                 }
@@ -572,7 +620,12 @@ public class BossDefinition {
 
         public static class WaveAdd {
             public String npcId;
+            /** @deprecated superseded by {@link #mobsPerWaveMin}/{@link #mobsPerWaveMax}; kept for legacy config migration. */
+            @Deprecated
             public int mobsPerWave = 3;
+            /** Random spawn count range (inclusive) rolled fresh each time this add fires. */
+            public int mobsPerWaveMin = 3;
+            public int mobsPerWaveMax = 3;
             // 1 = every wave, 2 = every 2nd wave, etc.
             public int everyWave = 1;
             public float hp = 1.0f;

@@ -33,7 +33,7 @@ public final class BossScaler {
         float perKnockbackGiven = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.knockbackGiven : 1.0f, 1.0f);
         float perKnockbackTaken = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.knockbackTaken : 1.0f, 1.0f);
         float perTurnRate = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.turnRate : 1.0f, 1.0f);
-        float perRegen = BossRegen.normalizeHpPerSecond(def.perPlayerIncrease != null ? def.perPlayerIncrease.regen : 0.0f);
+        float perRegen = finiteOrDefault(def.perPlayerIncrease != null ? def.perPlayerIncrease.regen : 1.0f, 1.0f);
 
         int players = Math.max(1, playerCount);
 
@@ -49,8 +49,7 @@ public final class BossScaler {
         float knockbackGiven = scaleByPlayers(baseKnockbackGiven, perKnockbackGiven, players);
         float knockbackTaken = scaleByPlayers(baseKnockbackTaken, perKnockbackTaken, players);
         float turnRate = scaleByPlayers(baseTurnRate, perTurnRate, players);
-        // Regen stays flat HP/s added once per present player.
-        float regen = Math.max(0.0f, baseRegen + (perRegen * players));
+        float regen = scaleRegenByPlayers(baseRegen, perRegen, players);
 
         return new BossModifiers(
                 hp,
@@ -79,6 +78,17 @@ public final class BossScaler {
         float extraPlayers = Math.max(0, players - 1);
         float scaleFactor = 1.0f + (perPlayer - 1.0f) * extraPlayers;
         return positiveOrDefault(safeBase * scaleFactor, 1.0f);
+    }
+
+    /** Same scaling as {@link #scaleByPlayers} but allows a zero base (0 HP/s regen is valid, unlike other stats). */
+    private static float scaleRegenByPlayers(float base, float perPlayer, int players) {
+        float safeBase = Float.isFinite(base) && base >= 0.0f ? base : 0.0f;
+        if (!Float.isFinite(perPlayer) || perPlayer <= 0.0f) {
+            return safeBase;
+        }
+        float extraPlayers = Math.max(0, players - 1);
+        float scaleFactor = 1.0f + (perPlayer - 1.0f) * extraPlayers;
+        return Math.max(0.0f, safeBase * scaleFactor);
     }
 
     private static BossModifiers defaultModifiers() {

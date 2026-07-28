@@ -150,13 +150,21 @@ public final class RPGLevelingBossScaleCompatSystem extends TickingSystem<Entity
                     && (bakedFactor * desiredMultiplier) > 1.01f
                     && maxAfter > baseApprox * 1.5f
                     && Math.abs(currentAfter - baseApprox) <= 1f;
-            if ((wasFull || stuckAtBasePool) && currentAfter + 0.5f < maxAfter) {
+            boolean filled = (wasFull || stuckAtBasePool) && currentAfter + 0.5f < maxAfter;
+            if (filled) {
                 statMap.maximizeStatValue(EntityStatMap.Predictable.ALL, healthIndex);
                 LOGGER.info("BossArena compat filled HP for boss " + bossUuid
                         + ": " + currentAfter + "/" + maxAfter
                         + " (reason=" + (wasFull ? "wasFull" : "stuckAtBasePool")
                         + ", bossMult=" + desiredMultiplier + ", worldFactor=" + worldFactor + ")");
             }
+            LOGGER.info("[HPDIAG] resync boss=" + bossUuid
+                    + " before(cur=" + currentBefore + ",max=" + maxBefore + ",wasFull=" + wasFull + ")"
+                    + " after(cur=" + currentAfter + ",max=" + maxAfter + ")"
+                    + " knownFactor=" + knownFactor + " worldFactorNow=" + worldFactor
+                    + " desiredMult=" + desiredMultiplier + " multiplierUnchanged=" + multiplierUnchanged
+                    + " baseApprox=" + baseApprox + " stuckAtBasePool=" + stuckAtBasePool
+                    + " filled=" + filled);
         } catch (Exception e) {
             LOGGER.log(Level.FINE, "Failed to enforce boss HP scale compatibility for " + bossUuid, e);
         }

@@ -1544,7 +1544,9 @@ public final class BossArenaPlugin extends JavaPlugin {
         exampleBoss.extraMobs.mobsPerWave = 5;
         BossDefinition.ExtraMobs.WaveAdd exampleAdd = new BossDefinition.ExtraMobs.WaveAdd();
         exampleAdd.npcId = "Bat";
-        exampleAdd.mobsPerWave = 5;
+        exampleAdd.mobsPerWaveMin = 3;
+        exampleAdd.mobsPerWaveMax = 7;
+        exampleAdd.mobsPerWave = 3;
         exampleAdd.everyWave = 1;
         exampleBoss.extraMobs.adds.add(exampleAdd);
         exampleBoss.extraMobs.sanitize();
