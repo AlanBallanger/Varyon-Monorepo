@@ -62,6 +62,8 @@ val fatJar = tasks.register<Jar>("fatJar") {
     archiveVersion.set(version.toString())
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
+    inputs.property("sqliteNativePlatform", sqliteNativePlatform)
+
     from(sourceSets.main.get().output)
 
     val implementationJars = configurations.runtimeClasspath.get()

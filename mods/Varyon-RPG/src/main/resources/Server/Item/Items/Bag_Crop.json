@@ -10,6 +10,22 @@
     "Capacity": 27,
     "ItemTag": "Type=Plant"
   },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "PlantAndSoilBagOpen",
+          "AcceptTags": ["Type=Plant", "Type=Soil"]
+        },
+        {
+          "Type": "Simple",
+          "Effects": {
+            "LocalSoundEventId": "SFX_Drop_Armor_Cloth"
+          }
+        }
+      ]
+    }
+  },
   "Recipe": {
     "Input": [
       {

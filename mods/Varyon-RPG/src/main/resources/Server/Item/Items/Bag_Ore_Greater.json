@@ -10,6 +10,22 @@
     "Capacity": 36,
     "ItemTag": "Type=Ore"
   },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "OreAndRockBagOpen",
+          "AcceptTags": ["Type=Ore", "Type=Rock"]
+        },
+        {
+          "Type": "Simple",
+          "Effects": {
+            "LocalSoundEventId": "SFX_Drop_Armor_Cloth"
+          }
+        }
+      ]
+    }
+  },
   "Recipe": {
     "Input": [
       {

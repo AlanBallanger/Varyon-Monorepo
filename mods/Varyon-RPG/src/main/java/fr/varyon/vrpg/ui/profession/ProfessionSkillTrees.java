@@ -117,7 +117,7 @@ public final class ProfessionSkillTrees {
         {"5% gain dura",   "10% gain dura",   "15% gain dura",   "20% gain dura",   "25% gain dura"},       // 6
         {"15% durabilité", "30% durabilité",  "45% durabilité",  "60% durabilité",  "75% durabilité"},      // 7
         {"4min 20s recharge", "3min 20s recharge", "2min 20s recharge", "1min 40s recharge", "1min recharge"},  // 8
-        {"5% invocation",  "10% invocation", "15% invocation",  "20% invocation", "25% invocation"},
+        {"0.5% invocation", "1% invocation",  "1.5% invocation", "2% invocation",  "2.5% invocation"},
         {"12 blocs",       "18 blocs",        "24 blocs",        "30 blocs",        "36 blocs"},            // 10
         {"3h recharge",    "2h30 recharge",   "2h recharge",     "1h30 recharge",   "1h recharge"},         // 11
         {"Lumière permanente activée"},    // 12
@@ -228,7 +228,7 @@ public final class ProfessionSkillTrees {
         {"15% durabilité",       "30% durabilité",       "45% durabilité",       "60% durabilité",       "75% durabilité"},
         {"1% de chance",         "1.25% de chance",      "1.5% de chance",       "1.75% de chance",      "2% de chance"},
         {"Replantation auto arroseurs activée"},
-        {"5% invocation",      "10% invocation",       "15% invocation",       "20% invocation",       "25% invocation"},
+        {"0.5% invocation",    "1% invocation",         "1.5% invocation",      "2% invocation",        "2.5% invocation"},
         {"Fertilisant Chaux débloqué", "Fertilisant Osseux débloqué", "Fertilisant Coquillage débloqué", "Fertilisant Élite débloqué"},
         {"Besace du Paysan activée"},
     };
@@ -318,7 +318,7 @@ public final class ProfessionSkillTrees {
         {"5% loot rare",         "10% loot rare",         "15% loot rare",         "20% loot rare",         "25% loot rare"},
         {"Vision faible",        "Vision modérée",        "Vision renforcée",      "Vision avancée",        "Vision parfaite"},
         {"Grappin Fer, Émeraude, Diamant, Rubis, Saphir, Topaze, Zéphyr débloqués", "Grappin Thorium & Cobalt débloqués", "Grappin Adamantite débloqué"},
-        {"5% invocation",      "10% invocation",        "15% invocation",        "20% invocation",         "25% invocation"},
+        {"0.5% invocation",    "1% invocation",          "1.5% invocation",       "2% invocation",           "2.5% invocation"},
         {"Replantation auto activée"},
         {"Déracinage total activé"},
         {"+20% respiration",     "+40% respiration",      "+60% respiration",      "+80% respiration",      "+100% respiration"},
@@ -412,7 +412,7 @@ public final class ProfessionSkillTrees {
         {"5% endurance",               "10% endurance",               "15% endurance",               "20% endurance",               "25% endurance"},
         {"Vision faible",              "Vision modérée",              "Vision renforcée",            "Vision avancée",              "Vision parfaite"},
         {"Apprivoisement activé"},
-        {"5% invocation",            "10% invocation",              "15% invocation",              "20% invocation",              "25% invocation"},
+        {"0.5% invocation",          "1% invocation",                "1.5% invocation",             "2% invocation",                "2.5% invocation"},
         {"À définir"},
         {"Bourse de chasse activée"},
         {"À définir"},

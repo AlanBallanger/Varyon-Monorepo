@@ -7,8 +7,24 @@
   "Icon": "Icons/Items/Bag_Ore_Lesser.png",
   "Texture": "Items/Bag_Ore.png",
   "Container": {
-    "Capacity": 2,
+    "Capacity": 9,
     "ItemTag": "Type=Ore"
+  },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "OreAndRockBagOpen",
+          "AcceptTags": ["Type=Ore", "Type=Rock"]
+        },
+        {
+          "Type": "Simple",
+          "Effects": {
+            "LocalSoundEventId": "SFX_Drop_Armor_Cloth"
+          }
+        }
+      ]
+    }
   },
   "Recipe": {
     "Input": [

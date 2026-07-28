@@ -294,6 +294,24 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register ClassSkillTriggerInteraction");
         }
 
+        try {
+            getCodecRegistry(Interaction.CODEC)
+                .register(fr.varyon.vrpg.item.MultiTagBagOpenInteraction.TYPE_NAME_ORE_AND_ROCK,
+                    fr.varyon.vrpg.item.MultiTagBagOpenInteraction.class,
+                    fr.varyon.vrpg.item.MultiTagBagOpenInteraction.CODEC);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MultiTagBagOpenInteraction OreAndRock");
+        }
+
+        try {
+            getCodecRegistry(Interaction.CODEC)
+                .register(fr.varyon.vrpg.item.MultiTagBagOpenInteraction.TYPE_NAME_PLANT_AND_SOIL,
+                    fr.varyon.vrpg.item.MultiTagBagOpenInteraction.class,
+                    fr.varyon.vrpg.item.MultiTagBagOpenInteraction.CODEC);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register MultiTagBagOpenInteraction PlantAndSoil");
+        }
+
 
         try {
             this.classManager = new ClassManager(getDataDirectory());
