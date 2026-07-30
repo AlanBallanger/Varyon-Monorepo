@@ -11,6 +11,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +25,14 @@ public class DatabaseManager {
     private final File dataFolder;
     private boolean isMySQL;
     private final Logger logger = LoggerFactory.getLogger("Playtime");
+
+    private static final long DB_ERROR_LOG_BACKOFF_MS = 60_000;
+    private volatile long lastClaimCheckErrorLoggedAt = 0;
+    private volatile long lastMilestoneCheckErrorLoggedAt = 0;
+    private volatile long lastClaimLogErrorLoggedAt = 0;
+    private volatile long lastClaimTimestampsErrorLoggedAt = 0;
+    /** reward.id values already warned about for an unresolved period — logged once, not every cycle. */
+    private final Set<String> unknownPeriodWarned = ConcurrentHashMap.newKeySet();
 
     public boolean isMySQL() {
         return isMySQL;
@@ -156,7 +169,9 @@ public class DatabaseManager {
 
         if (timeClause.isEmpty() && !"all".equalsIgnoreCase(internal)) {
             timeClause = isMySQL ? " AND DATE(claim_date) = CURDATE()" : " AND date(claim_date) = date('now')";
-            logger.warn("Période inconnue pour récompense {}, filtre journalier appliqué.", reward.id);
+            if (unknownPeriodWarned.add(reward.id)) {
+                logger.warn("Période inconnue pour récompense {}, filtre journalier appliqué.", reward.id);
+            }
         }
 
         String query = "SELECT id FROM playtime_rewards_log WHERE uuid = ? AND reward_id = ?" + timeClause;
@@ -168,19 +183,95 @@ public class DatabaseManager {
                 return rs.next();
             }
         } catch (SQLException e) {
-            logger.error("Erreur lors de la vérification d’une récompense", e);
+            long now = System.currentTimeMillis();
+            if (now - lastClaimCheckErrorLoggedAt >= DB_ERROR_LOG_BACKOFF_MS) {
+                lastClaimCheckErrorLoggedAt = now;
+                logger.error("Erreur lors de la vérification d'une récompense (autres occurrences dans la minute qui suit supprimées)", e);
+            }
             return false;
         }
     }
 
-    public void logRewardClaim(String uuid, String rewardId) {
+    /**
+     * Fetches the most recent claim_date per reward_id for a player in a single query, instead of
+     * one query per reward/milestone. Used by the scheduled reward/milestone cycle to avoid
+     * N (players) x M (rewards+milestones) individual DB round-trips every minute.
+     *
+     * @return map of reward_id/milestone_id -> most recent claim epoch millis. Missing entries mean never claimed.
+     */
+    public Map<String, Long> getLatestClaimTimestamps(String uuid) {
+        Map<String, Long> result = new HashMap<>();
+        if (uuid == null || uuid.isBlank()) {
+            return result;
+        }
+        String query = "SELECT reward_id, MAX(claim_date) as last_claim FROM playtime_rewards_log WHERE uuid = ? GROUP BY reward_id";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, uuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String rewardId = rs.getString("reward_id");
+                    Timestamp ts = rs.getTimestamp("last_claim");
+                    if (rewardId != null && ts != null) {
+                        result.put(rewardId, ts.getTime());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            long now = System.currentTimeMillis();
+            if (now - lastClaimTimestampsErrorLoggedAt >= DB_ERROR_LOG_BACKOFF_MS) {
+                lastClaimTimestampsErrorLoggedAt = now;
+                logger.error("Erreur lors de la lecture groupée des récompenses réclamées (autres occurrences dans la minute qui suit supprimées)", e);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Evaluates, from an already-fetched claim timestamp, whether a reward/milestone claimed at
+     * {@code lastClaimMillis} is still considered "claimed" for the given period — mirrors the SQL
+     * time-window logic in {@link #hasClaimedReward} but works in-memory against a batch-fetched map.
+     */
+    public boolean isClaimStillValidForPeriod(long lastClaimMillis, String period, String rewardIdForWarning) {
+        String internal = Playtime.get().getConfigManager().getConfig().resolvePeriodKey(period);
+        if (internal == null) {
+            internal = period == null ? "" : period.trim();
+        }
+        if ("all".equalsIgnoreCase(internal)) {
+            return true;
+        }
+
+        long now = System.currentTimeMillis();
+        if ("weekly".equalsIgnoreCase(internal)) {
+            return now - lastClaimMillis < 7L * 24 * 60 * 60 * 1000;
+        }
+        if ("monthly".equalsIgnoreCase(internal)) {
+            return now - lastClaimMillis < 30L * 24 * 60 * 60 * 1000;
+        }
+        // "daily" or unrecognized period (falls back to daily, same as hasClaimedReward).
+        if (!"daily".equalsIgnoreCase(internal) && rewardIdForWarning != null && unknownPeriodWarned.add(rewardIdForWarning)) {
+            logger.warn("Période inconnue pour récompense {}, filtre journalier appliqué.", rewardIdForWarning);
+        }
+        java.time.LocalDate claimDate = java.time.Instant.ofEpochMilli(lastClaimMillis)
+                .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        return claimDate.equals(today);
+    }
+
+    /** @return true if the claim was actually persisted; false on failure (caller should not treat the reward as granted). */
+    public boolean logRewardClaim(String uuid, String rewardId) {
         String sql = "INSERT INTO playtime_rewards_log (uuid, reward_id) VALUES (?, ?)";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid);
             ps.setString(2, rewardId);
             ps.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            logger.error("Erreur en enregistrant une récompense", e);
+            long now = System.currentTimeMillis();
+            if (now - lastClaimLogErrorLoggedAt >= DB_ERROR_LOG_BACKOFF_MS) {
+                lastClaimLogErrorLoggedAt = now;
+                logger.error("Erreur en enregistrant une récompense (autres occurrences dans la minute qui suit supprimées)", e);
+            }
+            return false;
         }
     }
 
@@ -225,12 +316,17 @@ public class DatabaseManager {
                 return rs.next();
             }
         } catch (SQLException e) {
-            logger.error("Erreur lors de la vérification d'un milestone", e);
+            long now = System.currentTimeMillis();
+            if (now - lastMilestoneCheckErrorLoggedAt >= DB_ERROR_LOG_BACKOFF_MS) {
+                lastMilestoneCheckErrorLoggedAt = now;
+                logger.error("Erreur lors de la vérification d'un milestone (autres occurrences dans la minute qui suit supprimées)", e);
+            }
             return false;
         }
     }
 
-    public void logMilestone(String uuid, String milestoneId) {
-        logRewardClaim(uuid, milestoneId);
+    /** @return true if the milestone claim was actually persisted. */
+    public boolean logMilestone(String uuid, String milestoneId) {
+        return logRewardClaim(uuid, milestoneId);
     }
 }

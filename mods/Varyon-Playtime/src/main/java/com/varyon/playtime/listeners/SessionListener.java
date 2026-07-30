@@ -6,12 +6,23 @@ import com.varyon.playtime.Playtime;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SessionListener {
 
     private static final ConcurrentHashMap<UUID, Long> joinTimes = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<UUID, String> nameCache = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<UUID, Long> historicalCache = new ConcurrentHashMap<>();
+
+    // Bounded pool for the join-time historical playtime lookup — a raw unmanaged Thread per
+    // join meant a reconnect burst (e.g. server restart) could spawn dozens of threads all
+    // competing for the same small HikariCP pool at once.
+    private static final ExecutorService JOIN_LOOKUP_EXECUTOR = Executors.newFixedThreadPool(3, r -> {
+        Thread t = new Thread(r, "Playtime-JoinLookup");
+        t.setDaemon(true);
+        return t;
+    });
 
     public static void onJoin(PlayerConnectEvent event) {
         UUID uuid = event.getPlayerRef().getUuid();
@@ -21,12 +32,10 @@ public class SessionListener {
         joinTimes.put(uuid, now);
         nameCache.put(uuid, name);
 
-        new Thread(
-                        () -> {
-                            long dbTime = Playtime.get().getService().getTotalPlaytime(uuid.toString());
-                            historicalCache.put(uuid, dbTime);
-                        })
-                .start();
+        JOIN_LOOKUP_EXECUTOR.execute(() -> {
+            long dbTime = Playtime.get().getService().getTotalPlaytime(uuid.toString());
+            historicalCache.put(uuid, dbTime);
+        });
     }
 
     public static void onQuit(PlayerDisconnectEvent event) {
@@ -68,6 +77,14 @@ public class SessionListener {
 
     public static long getSessionJoinTime(UUID uuid) {
         return joinTimes.getOrDefault(uuid, 0L);
+    }
+
+    public static java.util.Set<UUID> getOnlineUuids() {
+        return joinTimes.keySet();
+    }
+
+    public static String usernameOf(UUID uuid) {
+        return nameCache.get(uuid);
     }
 
     public static long getLiveTotalTime(UUID uuid) {

@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.bundling.Zip
+
 plugins {
     `maven-publish`
     idea
@@ -55,10 +57,14 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
-val fatJar = tasks.register<Jar>("fatJar") {
-    archiveClassifier.set("")
+// Standard Jar task was found to intermittently/consistently fail to write its output file in
+// this environment (Java 25 + Gradle 9.2.1) despite reporting success. Zip is a reliable
+// substitute already used successfully by sibling modules (Varyon-Damage_Number, Varyon-TravelingCamera).
+val fatJar = tasks.register<Zip>("fatJar") {
     archiveBaseName.set("Varyon-Playtime")
     archiveVersion.set(version.toString())
+    archiveExtension.set("jar")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     from(sourceSets.main.get().output)
@@ -81,13 +87,6 @@ val fatJar = tasks.register<Jar>("fatJar") {
     exclude("**/package-info.class")
     exclude("LICENSE")
     exclude("NOTICE")
-
-    manifest {
-        attributes["Specification-Title"] = rootProject.name
-        attributes["Specification-Version"] = version
-        attributes["Implementation-Title"] = project.name
-        attributes["Implementation-Version"] = version.toString()
-    }
 }
 
 val exportModJar = tasks.register<Copy>("exportModJar") {

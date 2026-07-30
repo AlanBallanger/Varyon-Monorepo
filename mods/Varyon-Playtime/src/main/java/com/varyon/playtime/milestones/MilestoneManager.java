@@ -11,6 +11,7 @@ import com.varyon.playtime.config.PlaytimeConfig.MilestoneSettings;
 import com.varyon.playtime.database.DatabaseManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +45,17 @@ public class MilestoneManager {
         String uuid = player.getUuid().toString();
         long totalPlaytime = PlaytimeAPI.get().getPlaytime(player.getUuid(), "all");
 
+        // One batched query for all milestone claim timestamps instead of one query per milestone
+        // per player per cycle (milestones never expire, so presence in the map is enough).
+        Map<String, Long> claimTimestamps = db.getLatestClaimTimestamps(uuid);
+
         for (Milestone milestone : config.milestones) {
             long required = milestone.toMillis();
             if (required <= 0) {
                 continue;
             }
             String milestoneId = milestone.uniqueId();
-            if (totalPlaytime >= required && !db.hasMilestoneTriggered(uuid, milestoneId)) {
+            if (totalPlaytime >= required && !claimTimestamps.containsKey(milestoneId)) {
                 triggerMilestone(player, milestone, required, config);
             }
         }
@@ -60,7 +65,12 @@ public class MilestoneManager {
     private void triggerMilestone(PlayerRef player, Milestone milestone, long requiredMs, PlaytimeConfig config) {
         String uuid = player.getUuid().toString();
         String milestoneId = milestone.uniqueId();
-        db.logMilestone(uuid, milestoneId);
+        if (!db.logMilestone(uuid, milestoneId)) {
+            // Persistence failed — hasMilestoneTriggered() will still report "not triggered",
+            // so this retries on the next scheduled cycle instead of re-broadcasting every cycle
+            // without ever recording the milestone as reached.
+            return;
+        }
 
         String username = player.getUsername();
         String timeFormatted = PlaytimeAPI.get().formatTime(requiredMs);

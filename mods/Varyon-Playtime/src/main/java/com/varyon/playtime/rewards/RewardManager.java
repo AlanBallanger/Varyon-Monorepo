@@ -12,7 +12,9 @@ import com.varyon.playtime.config.PlaytimeConfig;
 import com.varyon.playtime.config.Reward;
 import com.varyon.playtime.database.DatabaseManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,12 +60,27 @@ public class RewardManager {
     @SuppressWarnings("deprecation")
     private void processPlayer(PlayerRef player) {
         PlaytimeConfig config = Playtime.get().getConfigManager().getConfig();
+        if (config.rewards.isEmpty()) {
+            return;
+        }
         String uuid = player.getUuid().toString();
 
-        for (Reward reward : config.rewards) {
-            long playTime = PlaytimeAPI.get().getPlaytime(player.getUuid(), reward.period);
+        // One batched query for all claim timestamps + one playtime lookup per distinct period,
+        // instead of up to 2 DB round-trips per reward (was up to M*2 queries per player per cycle).
+        Map<String, Long> claimTimestamps = db.getLatestClaimTimestamps(uuid);
+        Map<String, Long> playtimeByPeriod = new HashMap<>();
 
-            if (playTime >= reward.timeRequirement && !db.hasClaimedReward(uuid, reward)) {
+        for (Reward reward : config.rewards) {
+            long playTime = playtimeByPeriod.computeIfAbsent(reward.period,
+                    period -> PlaytimeAPI.get().getPlaytime(player.getUuid(), period));
+
+            if (playTime < reward.timeRequirement) {
+                continue;
+            }
+            Long lastClaim = claimTimestamps.get(reward.id);
+            boolean alreadyClaimed = lastClaim != null
+                    && db.isClaimStillValidForPeriod(lastClaim, reward.period, reward.id);
+            if (!alreadyClaimed) {
                 giveReward(player, reward);
             }
         }
@@ -71,7 +88,12 @@ public class RewardManager {
 
     @SuppressWarnings("deprecation")
     private void giveReward(PlayerRef player, Reward reward) {
-        db.logRewardClaim(player.getUuid().toString(), reward.id);
+        if (!db.logRewardClaim(player.getUuid().toString(), reward.id)) {
+            // Persistence failed — don't run reward commands/broadcast now. hasClaimedReward()
+            // will still report "not claimed", so this retries on the next scheduled cycle
+            // instead of silently granting the reward without ever recording it.
+            return;
+        }
 
         final String username = player.getUsername();
         logger.info("Attribution de la récompense [" + reward.id + "] à " + username);

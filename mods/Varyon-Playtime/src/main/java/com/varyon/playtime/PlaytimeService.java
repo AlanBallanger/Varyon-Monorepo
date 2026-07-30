@@ -11,15 +11,29 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlaytimeService {
 
     private final DatabaseManager db;
     private final boolean isMySQL;
+    private final Logger logger = LoggerFactory.getLogger("Playtime");
+
+    private static final long DB_ERROR_LOG_BACKOFF_MS = 60_000;
+    private volatile long lastErrorLoggedAt = 0;
 
     public PlaytimeService(DatabaseManager db) {
         this.db = db;
         this.isMySQL = db.isMySQL();
+    }
+
+    private void logDbError(String context, SQLException e) {
+        long now = System.currentTimeMillis();
+        if (now - lastErrorLoggedAt >= DB_ERROR_LOG_BACKOFF_MS) {
+            lastErrorLoggedAt = now;
+            logger.error(context + " (autres occurrences dans la minute qui suit supprimées)", e);
+        }
     }
 
     public void saveSession(String uuid, String name, long start, long duration) {
@@ -33,7 +47,7 @@ public class PlaytimeService {
             ps.setLong(4, duration);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logDbError("Erreur lors de l'enregistrement d'une session", e);
         }
     }
 
@@ -54,7 +68,7 @@ public class PlaytimeService {
                 dbTime = rs.getLong(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logDbError("Erreur lors de la lecture du temps de jeu", e);
         }
 
         try {
@@ -65,49 +79,126 @@ public class PlaytimeService {
         return dbTime;
     }
 
+    /**
+     * Computes the player's rank via a SQL COUNT of players with a strictly higher total, instead
+     * of loading up to 1000 players into memory just to count how many rank above this one.
+     */
     public int getRank(String uuid, String type) {
-        Map<String, Long> all = getTopPlayers(type, 1000);
-        int rank = 1;
         long myTime = getPlaytime(uuid, type);
+        java.util.Set<UUID> onlineUuids = SessionListener.getOnlineUuids();
 
-        for (Long time : all.values()) {
-            if (time > myTime) {
-                rank++;
+        String dateFilter = getDateFilter(canonicalPeriod(type));
+        String where = dateFilter.isEmpty() ? "" : "WHERE " + dateFilter.substring(4) + " ";
+        // Exclude online players from the SQL count: their DB-only total could double count against
+        // the live-session comparison done below, since their in-progress time isn't stored yet.
+        String excludeOnline = "";
+        if (!onlineUuids.isEmpty()) {
+            String placeholders = String.join(",", java.util.Collections.nCopies(onlineUuids.size(), "?"));
+            excludeOnline = (where.isEmpty() ? "WHERE " : "AND ") + "uuid NOT IN (" + placeholders + ") ";
+        }
+        String query = "SELECT COUNT(*) FROM (SELECT uuid, SUM(duration) as total FROM playtime_sessions "
+                + where + excludeOnline + "GROUP BY uuid HAVING total > ?) ranked";
+
+        int higherCount = 0;
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            int idx = 1;
+            for (UUID onlineUuid : onlineUuids) {
+                ps.setString(idx++, onlineUuid.toString());
+            }
+            ps.setLong(idx, myTime);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    higherCount = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            logDbError("Erreur lors du calcul du rang", e);
+        }
+
+        // Online players aren't reflected in the DB sum yet (in-progress session) — compare their
+        // live total (DB + current session) directly instead.
+        for (UUID onlineUuid : onlineUuids) {
+            if (onlineUuid.toString().equalsIgnoreCase(uuid)) {
+                continue;
+            }
+            long otherTime = getPlaytime(onlineUuid.toString(), type);
+            if (otherTime > myTime) {
+                higherCount++;
             }
         }
-        return rank;
+
+        return higherCount + 1;
     }
 
     public Map<String, Long> getTopPlayers(String type) {
         return getTopPlayers(type, 10);
     }
 
+    /**
+     * Loads the top {@code limit} players by playtime, plus any currently-online players (whose
+     * in-progress session time isn't in the DB yet and could otherwise push them into the top
+     * results without being fetched), instead of aggregating every lifetime player's full session
+     * history — which used to load and sort the entire playtime_sessions table on every call.
+     */
     public Map<String, Long> getTopPlayers(String type, int limit) {
-        Map<String, Long> tempMap = new HashMap<>();
-
         String dateFilter = getDateFilter(canonicalPeriod(type));
         String where = dateFilter.isEmpty() ? "" : "WHERE " + dateFilter.substring(4) + " ";
 
-        String query =
-                "SELECT uuid, username, SUM(duration) as total FROM playtime_sessions " + where + "GROUP BY uuid";
+        Map<String, RankedPlayer> byUuid = new HashMap<>();
 
-        try (Connection conn = db.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                String rowUuid = rs.getString("uuid");
-                String name = rs.getString("username");
-                long total = rs.getLong("total");
-
-                try {
-                    total += SessionListener.getCurrentSession(UUID.fromString(rowUuid));
-                } catch (Exception ignored) {
+        String topQuery = "SELECT uuid, username, SUM(duration) as total FROM playtime_sessions " + where
+                + "GROUP BY uuid ORDER BY total DESC LIMIT ?";
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(topQuery)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    collectRow(byUuid, rs);
                 }
-
-                tempMap.put(name, total);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logDbError("Erreur lors de la lecture du classement", e);
+        }
+
+        java.util.Set<UUID> onlineUuids = SessionListener.getOnlineUuids();
+        java.util.List<String> missingOnline = new java.util.ArrayList<>();
+        for (UUID uuid : onlineUuids) {
+            if (!byUuid.containsKey(uuid.toString())) {
+                missingOnline.add(uuid.toString());
+            }
+        }
+        if (!missingOnline.isEmpty()) {
+            String placeholders = String.join(",", java.util.Collections.nCopies(missingOnline.size(), "?"));
+            String onlineQuery = "SELECT uuid, username, SUM(duration) as total FROM playtime_sessions "
+                    + where + (where.isEmpty() ? "WHERE " : "AND ") + "uuid IN (" + placeholders + ") GROUP BY uuid";
+            try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(onlineQuery)) {
+                for (int i = 0; i < missingOnline.size(); i++) {
+                    ps.setString(i + 1, missingOnline.get(i));
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        collectRow(byUuid, rs);
+                    }
+                }
+            } catch (SQLException e) {
+                logDbError("Erreur lors de la lecture du classement (joueurs en ligne)", e);
+            }
+            // Online players with no session_date row matching the period filter yet (e.g. brand
+            // new player, first session still in progress) still need to be considered by name.
+            for (String uuidStr : missingOnline) {
+                byUuid.putIfAbsent(uuidStr, new RankedPlayer(uuidStr, SessionListener.usernameOf(UUID.fromString(uuidStr)), 0L));
+            }
+        }
+
+        Map<String, Long> tempMap = new HashMap<>();
+        for (RankedPlayer p : byUuid.values()) {
+            long total = p.total;
+            try {
+                total += SessionListener.getCurrentSession(UUID.fromString(p.uuid));
+            } catch (Exception ignored) {
+            }
+            if (p.username != null) {
+                tempMap.put(p.username, total);
+            }
         }
 
         return tempMap.entrySet().stream()
@@ -115,6 +206,15 @@ public class PlaytimeService {
                 .limit(limit)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
+
+    private static void collectRow(Map<String, RankedPlayer> byUuid, ResultSet rs) throws SQLException {
+        String rowUuid = rs.getString("uuid");
+        String name = rs.getString("username");
+        long total = rs.getLong("total");
+        byUuid.put(rowUuid, new RankedPlayer(rowUuid, name, total));
+    }
+
+    private record RankedPlayer(String uuid, String username, long total) {}
 
     private String getDateFilter(String type) {
         if (isMySQL) {
@@ -155,7 +255,7 @@ public class PlaytimeService {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logDbError("Erreur lors de la lecture de la première connexion", e);
         }
         long onlineStart = 0L;
         try {
@@ -185,7 +285,7 @@ public class PlaytimeService {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logDbError("Erreur lors de la lecture de la dernière connexion", e);
         }
         long onlineStart = 0L;
         try {

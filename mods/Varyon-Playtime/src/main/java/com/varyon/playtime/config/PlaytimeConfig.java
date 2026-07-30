@@ -136,7 +136,8 @@ public class PlaytimeConfig {
         if (input == null) {
             return null;
         }
-        setDefaults();
+        // setDefaults() is already called by ConfigManager on load/reload; calling it again here
+        // on every period resolution was redundant work repeated per player per reward per cycle.
         String t = input.trim();
         if (t.isEmpty()) {
             return null;
