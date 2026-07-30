@@ -67,7 +67,7 @@ public final class EcoLogger {
         try {
             return VaryonEcotalePlugin.getInstance().economyConfig != null && VaryonEcotalePlugin.getInstance().getEconomyConfig().isDebugMode();
         } catch (Exception e) {
-            return true; // Default to debug during startup
+            return false; // Default to no debug in production
         }
     }
 }

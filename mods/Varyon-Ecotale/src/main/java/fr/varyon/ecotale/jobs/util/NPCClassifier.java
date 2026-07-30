@@ -708,23 +708,23 @@ public class NPCClassifier {
     public static void debugClassify(String mobId, NPCEntity npc) {
         ClassificationResult result = classify(mobId, npc);
         
-        JobsLogger.info("═══════════════════════════════════════════════════════════");
-        JobsLogger.info("NPC Classification: %s", mobId);
-        JobsLogger.info("───────────────────────────────────────────────────────────");
-        JobsLogger.info("  Sanitized Name: %s", result.mobName);
-        JobsLogger.info("  Tier: %s", result.tier);
-        JobsLogger.info("  Threat Score: %.1f", result.threatScore);
-        JobsLogger.info("  Confidence: %.1f%%", result.confidence * 100);
-        JobsLogger.info("  Reward Eligible: %s", result.isRewardEligible);
-        JobsLogger.info("  Reason: %s", result.reason);
-        JobsLogger.info("───────────────────────────────────────────────────────────");
-        JobsLogger.info("  Raw Data:");
-        JobsLogger.info("    HP: %d", result.rawData.baseHP);
-        JobsLogger.info("    Est. Damage: %d", result.rawData.estimatedDamage);
-        JobsLogger.info("    Attitude: %s", result.rawData.attitudeGroup);
-        JobsLogger.info("    Has Drops: %s", result.rawData.hasDropList);
-        JobsLogger.info("    Has Combat: %s", result.rawData.hasCombatSupport);
-        JobsLogger.info("    Aggressive: %s", result.rawData.isAggressive);
-        JobsLogger.info("═══════════════════════════════════════════════════════════");
+        JobsLogger.debug("═══════════════════════════════════════════════════════════");
+        JobsLogger.debug("NPC Classification: %s", mobId);
+        JobsLogger.debug("───────────────────────────────────────────────────────────");
+        JobsLogger.debug("  Sanitized Name: %s", result.mobName);
+        JobsLogger.debug("  Tier: %s", result.tier);
+        JobsLogger.debug("  Threat Score: %.1f", result.threatScore);
+        JobsLogger.debug("  Confidence: %.1f%%", result.confidence * 100);
+        JobsLogger.debug("  Reward Eligible: %s", result.isRewardEligible);
+        JobsLogger.debug("  Reason: %s", result.reason);
+        JobsLogger.debug("───────────────────────────────────────────────────────────");
+        JobsLogger.debug("  Raw Data:");
+        JobsLogger.debug("    HP: %d", result.rawData.baseHP);
+        JobsLogger.debug("    Est. Damage: %d", result.rawData.estimatedDamage);
+        JobsLogger.debug("    Attitude: %s", result.rawData.attitudeGroup);
+        JobsLogger.debug("    Has Drops: %s", result.rawData.hasDropList);
+        JobsLogger.debug("    Has Combat: %s", result.rawData.hasCombatSupport);
+        JobsLogger.debug("    Aggressive: %s", result.rawData.isAggressive);
+        JobsLogger.debug("═══════════════════════════════════════════════════════════");
     }
 }

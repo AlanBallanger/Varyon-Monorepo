@@ -322,7 +322,7 @@ public class EcoAdminGui extends InteractiveCustomUIPage<EcoAdminGui.AdminGuiDat
         
         // Handle action buttons from the action panel
         if (data.action != null) {
-            VaryonEcotalePlugin.getInstance().getLogger().at(java.util.logging.Level.INFO).log("EcoAdminGui action received: %s", data.action);
+            VaryonEcotalePlugin.getInstance().getLogger().at(java.util.logging.Level.FINE).log("EcoAdminGui action received: %s", data.action);
             switch (data.action) {
                 case "Close" -> {
                     this.close();

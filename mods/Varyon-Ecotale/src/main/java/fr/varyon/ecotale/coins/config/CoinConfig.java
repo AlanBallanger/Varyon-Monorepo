@@ -127,22 +127,10 @@ public class CoinConfig {
     }
     
     private void showLegacyMigrationWarning() {
-        logger.at(Level.WARNING).log("");
-        logger.at(Level.WARNING).log("╔══════════════════════════════════════════════════════════════════╗");
-        logger.at(Level.WARNING).log("║                    ⚠️ MIGRATION NOTICE ⚠️                         ║");
-        logger.at(Level.WARNING).log("╠══════════════════════════════════════════════════════════════════╣");
-        logger.at(Level.WARNING).log("║ EcotaleCoins v2.0 has CORRECTED coin values:                     ║");
-        logger.at(Level.WARNING).log("║                                                                  ║");
-        logger.at(Level.WARNING).log("║   OLD (v1.0):                    NEW (v2.0):                     ║");
-        logger.at(Level.WARNING).log("║   • Mithril = 10,000             • Adamantite = 10,000           ║");
-        logger.at(Level.WARNING).log("║   • Adamantite = 100,000         • Mithril = 100,000             ║");
-        logger.at(Level.WARNING).log("║                                                                  ║");
-        logger.at(Level.WARNING).log("║ Your existing config is being preserved to avoid disrupting      ║");
-        logger.at(Level.WARNING).log("║ your economy. To adopt correct values, edit config.json          ║");
-        logger.at(Level.WARNING).log("║                                                                  ║");
-        logger.at(Level.WARNING).log("║ Use: /bank admin values  to see current configuration            ║");
-        logger.at(Level.WARNING).log("╚══════════════════════════════════════════════════════════════════╝");
-        logger.at(Level.WARNING).log("");
+        logger.at(Level.WARNING).log("[EcotaleCoins] MIGRATION NOTICE: config.json predates v2.0's corrected coin "
+            + "values (Mithril/Adamantite were swapped). Existing values are kept as-is to avoid disrupting your "
+            + "economy — edit config.json to adopt the new values, or run /bank admin values to review the current "
+            + "configuration.");
     }
     
     /**

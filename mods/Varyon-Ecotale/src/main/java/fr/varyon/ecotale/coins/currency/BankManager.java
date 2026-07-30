@@ -6,6 +6,9 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -15,7 +18,19 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class BankManager {
 
+    private static final long LOCK_CLEANUP_INTERVAL_MINUTES = 30L;
     private static final ConcurrentHashMap<UUID, ReentrantLock> playerLocks = new ConcurrentHashMap<>();
+    private static final ScheduledExecutorService LOCK_CLEANUP_EXECUTOR =
+        Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "VaryonEcotale-BankLockCleanup");
+            t.setDaemon(true);
+            return t;
+        });
+
+    static {
+        LOCK_CLEANUP_EXECUTOR.scheduleAtFixedRate(BankManager::cleanupLocks,
+            LOCK_CLEANUP_INTERVAL_MINUTES, LOCK_CLEANUP_INTERVAL_MINUTES, TimeUnit.MINUTES);
+    }
 
     private BankManager() {}
 

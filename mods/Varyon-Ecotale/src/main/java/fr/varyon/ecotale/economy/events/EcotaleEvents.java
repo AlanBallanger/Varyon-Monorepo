@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
+import fr.varyon.ecotale.economy.util.EcoLogger;
+
 /**
  * Event manager for Ecotale events.
  * 
@@ -95,8 +97,7 @@ public final class EcotaleEvents {
                     ((Consumer<T>) consumer).accept(event);
                 } catch (Exception e) {
                     // Log but don't propagate exceptions from listeners
-                    System.err.println("[Ecotale] Error in event listener: " + e.getMessage());
-                    e.printStackTrace();
+                    EcoLogger.error("Error in event listener for " + event.getClass().getSimpleName(), e);
                 }
             }
         }

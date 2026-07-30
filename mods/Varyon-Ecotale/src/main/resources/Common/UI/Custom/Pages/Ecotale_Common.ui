@@ -1,6 +1,8 @@
 // Ecotale Common Styles
 // Importa este archivo en otras UIs: $E = "Ecotale_Common.ui";
 
+$C = "../Common.ui";
+
 // === Color Palette ===
 @EcoGold = #FFD700;
 @EcoGreen = #32CD32;
@@ -57,28 +59,32 @@
   Default: (Background: (Color: #2b3f66), LabelStyle: @EcoButtonLabelStyle),
   Hovered: (Background: (Color: #35507f), LabelStyle: @EcoButtonLabelStyle),
   Pressed: (Background: (Color: #233553), LabelStyle: @EcoButtonLabelStyle),
-  Disabled: (Background: (Color: #333333), LabelStyle: @EcoButtonLabelStyle)
+  Disabled: (Background: (Color: #333333), LabelStyle: @EcoButtonLabelStyle),
+  Sounds: $C.@ButtonSounds
 );
 
 @EcoButtonGreenStyle = TextButtonStyle(
   Default: (Background: (Color: #1f6b3a), LabelStyle: @EcoButtonLabelStyle),
   Hovered: (Background: (Color: #278348), LabelStyle: @EcoButtonLabelStyle),
   Pressed: (Background: (Color: #19592f), LabelStyle: @EcoButtonLabelStyle),
-  Disabled: (Background: (Color: #333333), LabelStyle: @EcoButtonLabelStyle)
+  Disabled: (Background: (Color: #333333), LabelStyle: @EcoButtonLabelStyle),
+  Sounds: $C.@ButtonSounds
 );
 
 @EcoButtonRedStyle = TextButtonStyle(
   Default: (Background: (Color: #7a2b2b), LabelStyle: @EcoButtonLabelStyle),
   Hovered: (Background: (Color: #933737), LabelStyle: @EcoButtonLabelStyle),
   Pressed: (Background: (Color: #662424), LabelStyle: @EcoButtonLabelStyle),
-  Disabled: (Background: (Color: #333333), LabelStyle: @EcoButtonLabelStyle)
+  Disabled: (Background: (Color: #333333), LabelStyle: @EcoButtonLabelStyle),
+  Sounds: $C.@ButtonSounds
 );
 
 @EcoButtonAccentStyle = TextButtonStyle(
   Default: (Background: (Color: #b8860b), LabelStyle: @EcoButtonLabelStyle),
   Hovered: (Background: (Color: #daa520), LabelStyle: @EcoButtonLabelStyle),
   Pressed: (Background: (Color: #8b6914), LabelStyle: @EcoButtonLabelStyle),
-  Disabled: (Background: (Color: #333333), LabelStyle: @EcoButtonLabelStyle)
+  Disabled: (Background: (Color: #333333), LabelStyle: @EcoButtonLabelStyle),
+  Sounds: $C.@ButtonSounds
 );
 
 // === Card/Container Styles ===

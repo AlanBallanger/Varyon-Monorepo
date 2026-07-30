@@ -131,8 +131,7 @@ public class CraftingRewardSystem extends EntityEventSystem<EntityStore, CraftRe
         MaterialQuantity primaryOutput = recipe.getPrimaryOutput();
         String outputItemId = primaryOutput != null ? primaryOutput.getItemId() : "unknown";
         
-        // HIGH VISIBILITY LOG - ECS event received
-        JobsLogger.info("[CRAFT-ECS] EVENT RECEIVED: %s (qty=%d, output=%s)", 
+        JobsLogger.debug("[CRAFT-ECS] EVENT RECEIVED: %s (qty=%d, output=%s)",
             recipeId != null ? recipeId : "NULL", quantity, outputItemId);
         
         // Guard: System disabled
@@ -265,7 +264,7 @@ public class CraftingRewardSystem extends EntityEventSystem<EntityStore, CraftRe
         totalRewardsGiven.incrementAndGet();
         totalValueInjected.addAndGet(totalValue);
         
-        JobsLogger.info("[CRAFT-REWARD] SUCCESS: %s (x%d) -> %d coins (value=%d)",
+        JobsLogger.debug("[CRAFT-REWARD] SUCCESS: %s (x%d) -> %d coins (value=%d)",
             outputId, quantity, finalCoins, totalValue);
     }
     

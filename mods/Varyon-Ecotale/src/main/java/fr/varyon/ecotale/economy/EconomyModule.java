@@ -5,6 +5,7 @@ import fr.varyon.ecotale.economy.commands.EcoAdminCommand;
 import fr.varyon.ecotale.economy.commands.PayCommand;
 import fr.varyon.ecotale.economy.config.EcotaleConfig;
 import fr.varyon.ecotale.economy.hud.BalanceHud;
+import fr.varyon.ecotale.economy.lib.simplehud.HudScheduler;
 import fr.varyon.ecotale.economy.lib.vaultunlocked.VaultUnlockedPlugin;
 import fr.varyon.ecotale.economy.systems.BalanceHudSystem;
 import fr.varyon.ecotale.economy.util.HudHelper;
@@ -98,6 +99,7 @@ public class EconomyModule implements ModuleInitializer {
             PerformanceMonitor.getInstance().shutdown();
         }
         if (economyManager != null) economyManager.shutdown();
+        HudScheduler.shutdown();
         plugin.getLogger().at(Level.INFO).log("[Varyon-Ecotale] Economy module shutdown.");
     }
 
