@@ -1,3 +1,5 @@
+$C = "../Common.ui";
+
 Group {
   LayoutMode: Left;
   Anchor: (Left: 0, Right: 0, Height: 40, Bottom: 2);
@@ -9,7 +11,8 @@ Group {
     Style: ButtonStyle(
       Default: (Background: (Color: #000000(0))),
       Hovered: (Background: (Color: #000000(0.2))),
-      Pressed: (Background: (Color: #000000(0.3)))
+      Pressed: (Background: (Color: #000000(0.3))),
+      Sounds: $C.@ButtonSounds
     );
     Padding: (Left: 8);
     Group {

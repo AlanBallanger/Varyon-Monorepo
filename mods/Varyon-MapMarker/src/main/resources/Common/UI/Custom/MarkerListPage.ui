@@ -21,7 +21,8 @@ $C.@PageOverlay {
           Anchor: (Width: 24, Height: 24, Top: 2, Right: 8);
           Style: TextButtonStyle(
             Default: (LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-            Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+            Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Sounds: $C.@ButtonSounds
           );
         }
       }
@@ -81,7 +82,8 @@ $C.@PageOverlay {
         Style: ButtonStyle(
           Default: (Background: (Color: #185a28)),
           Hovered: (Background: (Color: #286a38)),
-          Pressed: (Background: (Color: #0f4018))
+          Pressed: (Background: (Color: #0f4018)),
+          Sounds: $C.@ButtonSounds
         );
         OutlineColor: #083818;
         OutlineSize: 1;
