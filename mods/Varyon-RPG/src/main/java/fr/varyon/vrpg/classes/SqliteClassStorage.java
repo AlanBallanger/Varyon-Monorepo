@@ -219,7 +219,9 @@ public final class SqliteClassStorage {
                         if (c == null) continue;
                         String slotId = rs.getString("slot_id");
                         String itemId = rs.getString("item_id");
-                        LOGGER.at(Level.INFO).log("[SkillSlot] LOAD uuid=%s class=%s slot=%s item=%s", uuid, c, slotId, itemId);
+                        if (fr.varyon.vrpg.config.VrpgConfig.isDebugTalents()) {
+                            LOGGER.at(Level.INFO).log("[SkillSlot] LOAD uuid=%s class=%s slot=%s item=%s", uuid, c, slotId, itemId);
+                        }
                         account.getSkillSlots(c).put(slotId, itemId);
                     }
                 }
@@ -422,7 +424,9 @@ public final class SqliteClassStorage {
                 for (PlayerClass c : PlayerClass.values()) {
                     for (Map.Entry<String, String> e : account.getSkillSlots(c).entrySet()) {
                         if (e.getValue() == null || e.getValue().isBlank()) continue;
-                        LOGGER.at(Level.INFO).log("[SkillSlot] SAVE uuid=%s class=%s slot=%s item=%s", uuid, c, e.getKey(), e.getValue());
+                        if (fr.varyon.vrpg.config.VrpgConfig.isDebugTalents()) {
+                            LOGGER.at(Level.INFO).log("[SkillSlot] SAVE uuid=%s class=%s slot=%s item=%s", uuid, c, e.getKey(), e.getValue());
+                        }
                         ins.setString(1, uuid.toString());
                         ins.setString(2, c.getId());
                         ins.setString(3, e.getKey());

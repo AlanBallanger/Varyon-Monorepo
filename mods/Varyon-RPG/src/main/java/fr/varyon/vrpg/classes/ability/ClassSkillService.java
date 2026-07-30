@@ -49,6 +49,26 @@ public final class ClassSkillService {
     private static final com.hypixel.hytale.logger.HytaleLogger LOG =
         com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
 
+    /** Scheduler partagé pour les délais de compétences (salves, impacts différés, etc.) — évite de créer un thread pool par cast. */
+    private static final java.util.concurrent.ScheduledExecutorService SKILL_SCHEDULER =
+        java.util.concurrent.Executors.newScheduledThreadPool(2, r -> {
+            Thread t = new Thread(r, "vrpg-skill-scheduler");
+            t.setDaemon(true);
+            return t;
+        });
+
+    public static void shutdownScheduler() {
+        SKILL_SCHEDULER.shutdown();
+        try {
+            if (!SKILL_SCHEDULER.awaitTermination(1, java.util.concurrent.TimeUnit.SECONDS)) {
+                SKILL_SCHEDULER.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            SKILL_SCHEDULER.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
     @FunctionalInterface
     private interface SkillCaster {
         boolean cast(@Nonnull UUID uuid,
@@ -544,9 +564,7 @@ public final class ClassSkillService {
                 ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, tc.getPosition(), commandBuffer);
                 try {
                     final org.joml.Vector3d vanishPos = new org.joml.Vector3d(tc.getPosition());
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                        Thread t = new Thread(r, "ombre-vanish-sound"); t.setDaemon(true); return t;
-                    }).schedule(() -> ClassSkillSounds.playSkillSound(
+                    SKILL_SCHEDULER.schedule(() -> ClassSkillSounds.playSkillSound(
                         "SFX_Vrpg_OmbreVanish", playerRef, vanishPos, null),
                         100, java.util.concurrent.TimeUnit.MILLISECONDS);
                 } catch (Exception ignored2) {}
@@ -696,11 +714,7 @@ public final class ClassSkillService {
                 if (delugeWorld == null) return false;
 
                 java.util.concurrent.ScheduledExecutorService delugeExec =
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                        Thread t = new Thread(r, "ombre-deluge");
-                        t.setDaemon(true);
-                        return t;
-                    });
+                    SKILL_SCHEDULER;
                 int[] strikesDone = {0};
                 delugeExec.scheduleAtFixedRate(() -> {
                     try {
@@ -808,9 +822,7 @@ public final class ClassSkillService {
                         final com.hypixel.hytale.server.core.universe.world.World fw = stabWorld;
                         final Ref<EntityStore> stabRef = entityRef;
                         final org.joml.Vector3d soundPos = new org.joml.Vector3d(targetPos);
-                        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                            Thread t = new Thread(r, "ombre-stab"); t.setDaemon(true); return t;
-                        }).schedule(() -> fw.execute(() -> {
+                        SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
                             try { AnimationUtils.playAnimation(stabRef, AnimationSlot.Action, "Daggers", "SwingRight", true, store); } catch (Exception ignored3) {}
                             ClassSkillSounds.playSkillSound("SFX_Vrpg_PasDeLOmbre_Strike", playerRef, soundPos, null);
                         }), 100, java.util.concurrent.TimeUnit.MILLISECONDS);
@@ -838,9 +850,7 @@ public final class ClassSkillService {
                 try { java.util.UUID wUuid2 = playerRef.getWorldUuid(); if (wUuid2 != null) dmgWorldRef = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid2); } catch (Exception ignored2) {}
                 if (dmgWorldRef != null) {
                     final com.hypixel.hytale.server.core.universe.world.World dmgWorld = dmgWorldRef;
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                        Thread t = new Thread(r, "ombre-skilldmg"); t.setDaemon(true); return t;
-                    }).schedule(() -> dmgWorld.execute(() -> {
+                    SKILL_SCHEDULER.schedule(() -> dmgWorld.execute(() -> {
                         try {
                             com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
                                 skillTarget, store,
@@ -1761,9 +1771,7 @@ public final class ClassSkillService {
                 if (world != null) {
                     final com.hypixel.hytale.server.core.universe.world.World fw = world;
                     final Store<EntityStore> fStore = store;
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                        Thread t = new Thread(r, "assaut-bestial-strike"); t.setDaemon(true); return t;
-                    }).schedule(() -> fw.execute(() -> {
+                    SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
                         try {
                             AnimationUtils.playAnimation(fEntityRef, AnimationSlot.Action, "Battleaxe", "DownstrikeCharged", true, fStore);
                             ClassSkillSounds.playSkillSound("SFX_Battleaxe_T2_Swing_Charged", fPlayerRef, landPos, null);
@@ -1921,7 +1929,7 @@ public final class ClassSkillService {
             if (targetTc != null) {
                 final org.joml.Vector3d impactPos = new org.joml.Vector3d(targetTc.getPosition());
                 final PlayerRef fpr2 = playerRef;
-                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "berserker-axe-impact"); t.setDaemon(true); return t; })
+                SKILL_SCHEDULER
                     .schedule(() -> ClassSkillSounds.playSkillSound("SFX_Vrpg_AxeImpact", fpr2, impactPos, null),
                         250, java.util.concurrent.TimeUnit.MILLISECONDS);
             }
@@ -1931,7 +1939,7 @@ public final class ClassSkillService {
             if (tc != null) {
                 final org.joml.Vector3d swingPos = new org.joml.Vector3d(tc.getPosition());
                 final PlayerRef fpr = playerRef;
-                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "berserker-axe-sound"); t.setDaemon(true); return t; })
+                SKILL_SCHEDULER
                     .schedule(() -> ClassSkillSounds.playSkillSound("SFX_Vrpg_AxeSwing", fpr, swingPos, null),
                         150, java.util.concurrent.TimeUnit.MILLISECONDS);
             }
@@ -2129,9 +2137,7 @@ public final class ClassSkillService {
                 } catch (Exception ignored2) {}
                 if (world != null) {
                     final com.hypixel.hytale.server.core.universe.world.World fw = world;
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                        Thread t = new Thread(r, "bond-ecrasant-strike"); t.setDaemon(true); return t;
-                    }).schedule(() -> fw.execute(() -> {
+                    SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
                         try {
                             AnimationUtils.playAnimation(fEntityRef, AnimationSlot.Action, "Battleaxe", "DownstrikeCharged", true, fStore);
                             ClassSkillSounds.playSkillSound("SFX_Battleaxe_T2_Swing_Charged", fPlayerRef, landPos, null);
@@ -2328,13 +2334,9 @@ public final class ClassSkillService {
             if (world != null) {
                 final com.hypixel.hytale.server.core.universe.world.World fw = world;
                 final Store<EntityStore> fStore = store;
-                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                    Thread t = new Thread(r, "marteau-pilon-snd1"); t.setDaemon(true); return t;
-                }).schedule(() -> ClassSkillSounds.playSkillSound("SFX_Club_Steel_Impact", fPlayerRef, fPos1, null),
+                SKILL_SCHEDULER.schedule(() -> ClassSkillSounds.playSkillSound("SFX_Club_Steel_Impact", fPlayerRef, fPos1, null),
                     100, java.util.concurrent.TimeUnit.MILLISECONDS);
-                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                    Thread t = new Thread(r, "marteau-pilon-2"); t.setDaemon(true); return t;
-                }).schedule(() -> fw.execute(() -> {
+                SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
                     try {
                         float dmg2 = (fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(fPlayerRef) > 0
                             ? fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(fPlayerRef) : 1f)
@@ -2441,9 +2443,7 @@ public final class ClassSkillService {
                                         final int STEPS = 6;
                                         final long STEP_MS = 40L;
                                         java.util.concurrent.ScheduledExecutorService exec =
-                                            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                                                Thread t = new Thread(r, "rabattage-move"); t.setDaemon(true); return t;
-                                            });
+                                            SKILL_SCHEDULER;
                                         java.util.concurrent.atomic.AtomicInteger step = new java.util.concurrent.atomic.AtomicInteger(0);
                                         exec.scheduleAtFixedRate(() -> fw.execute(() -> {
                                             int s = step.incrementAndGet();
@@ -2472,9 +2472,7 @@ public final class ClassSkillService {
                                     } catch (Exception ignored3) {}
                                     if (stunWorld != null) {
                                         final com.hypixel.hytale.server.core.universe.world.World fw = stunWorld;
-                                        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                                            Thread t = new Thread(r, "rabattage-stun"); t.setDaemon(true); return t;
-                                        }).schedule(() -> fw.execute(() -> {
+                                        SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
                                             try {
                                                 com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
                                                     fStore.getComponent(fTargetRef, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
@@ -2696,9 +2694,7 @@ public final class ClassSkillService {
                 final float fDmg = dmgPerHit;
                 final int fTotalHits = totalHits;
                 java.util.concurrent.ScheduledExecutorService exec =
-                    java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                        Thread t = new Thread(r, "deluge-bagarreur"); t.setDaemon(true); return t;
-                    });
+                    SKILL_SCHEDULER;
                 java.util.concurrent.atomic.AtomicInteger hitNum = new java.util.concurrent.atomic.AtomicInteger(1);
                 String[] anims = {"SwingRight", "SwingLeft", "SwingRight", "SwingLeft", "SwingRight", "SwingLeft"};
                 exec.scheduleAtFixedRate(() -> fw.execute(() -> {
@@ -3038,9 +3034,7 @@ public final class ClassSkillService {
 
             spawnSkillParticle(fr.varyon.vrpg.classes.arcaniste.MeteoreSkill.TELEGRAPH_PARTICLE, fImpact, store);
             spawnMeteorFalling(fRef, fImpact, fw, meteorProjectileId);
-            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                Thread t = new Thread(r, "meteore"); t.setDaemon(true); return t;
-            }).schedule(() -> fw.execute(() -> {
+            SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
                 try {
                     Store<EntityStore> ws = fw.getEntityStore().getStore();
                     removeMeteorProjectile(ws, meteorProjectileId.get(), fImpact);
@@ -3188,7 +3182,7 @@ public final class ClassSkillService {
                     } else {
                         final long fDelay = delayMs * i;
                         final int fi = i;
-                        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "salve-" + fi); t.setDaemon(true); return t; })
+                        SKILL_SCHEDULER
                             .schedule(() -> {
                                 ClassSkillSounds.playSkillSound("SFX_Vrpg_Salve_Launch", fPlayerRef, fPos, null);
                                 spawnMagicProjectile("Projectile_Config_Ice_Bolt", fPos, fDir, fRef, fPlayerRef, fStore, null);
@@ -3295,11 +3289,7 @@ public final class ClassSkillService {
         final org.joml.Vector3d fLanding = new org.joml.Vector3d(landing);
         final com.hypixel.hytale.server.core.universe.world.World fw = world;
         final java.util.concurrent.atomic.AtomicReference<java.util.UUID> fProjectileIdRef = projectileIdRef;
-        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "vaudou-totem");
-            t.setDaemon(true);
-            return t;
-        }).schedule(() -> fw.execute(() -> {
+        SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
             try {
                 Store<EntityStore> store = fw.getEntityStore().getStore();
                 java.util.UUID projectileId = fProjectileIdRef != null ? fProjectileIdRef.get() : null;
@@ -3499,11 +3489,7 @@ public final class ClassSkillService {
     }
 
     private void scheduleRodeurPendingArrowClear(@Nonnull UUID uuid, int arrowType, long delayMs) {
-        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "rodeur-arrow-clear");
-            t.setDaemon(true);
-            return t;
-        }).schedule(() -> {
+        SKILL_SCHEDULER.schedule(() -> {
             if (rodeurState.getPendingArrowType(uuid) == arrowType) {
                 rodeurState.clearPendingArrow(uuid);
             }
@@ -3848,9 +3834,7 @@ public final class ClassSkillService {
             final Ref<EntityStore> fCasterRef = entityRef;
             final com.hypixel.hytale.server.core.universe.world.World fw = world;
 
-            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                Thread t = new Thread(r, "etreinte"); t.setDaemon(true); return t;
-            }).schedule(() -> fw.execute(() -> {
+            SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
                 try {
                     if (!fCasterRef.isValid()) return;
                     Store<EntityStore> ws = fw.getEntityStore().getStore();
@@ -4244,7 +4228,7 @@ public final class ClassSkillService {
                         try { java.util.UUID wId = playerRef.getWorldUuid(); if (wId != null) dmgWorld = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wId); } catch (Exception ignored2) {}
                         if (dmgWorld != null) {
                             final com.hypixel.hytale.server.core.universe.world.World fw = dmgWorld;
-                            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "vaudou-perfide"); t.setDaemon(true); return t; })
+                            SKILL_SCHEDULER
                                 .schedule(() -> fw.execute(() -> {
                                     try {
                                         vaudouState.setPendingSkillDmg(fUuid, finalDmg);
@@ -4381,7 +4365,7 @@ public final class ClassSkillService {
                         if (dmgWorld != null) {
                             final com.hypixel.hytale.server.core.universe.world.World fw = dmgWorld;
                             final float finalDmg = skillDmg;
-                            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "vaudou-ame"); t.setDaemon(true); return t; })
+                            SKILL_SCHEDULER
                                 .schedule(() -> fw.execute(() -> {
                                     try {
                                         vaudouState.setPendingSkillDmg(fUuid, finalDmg);
@@ -4569,9 +4553,7 @@ public final class ClassSkillService {
                     final long fFallMs = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.arrowFallMs();
                     long tickInterval = durationMs / Math.max(1, fArrows - 1);
                     java.util.concurrent.ScheduledExecutorService exec =
-                        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                            Thread t = new Thread(r, "pluie-fleches"); t.setDaemon(true); return t;
-                        });
+                        SKILL_SCHEDULER;
                     int[] ticks = {0};
                     exec.scheduleAtFixedRate(() -> {
                         try {
@@ -4775,9 +4757,7 @@ public final class ClassSkillService {
             if (rafaleWorld == null) return false;
             final com.hypixel.hytale.server.core.universe.world.World fw = rafaleWorld;
             java.util.concurrent.ScheduledExecutorService rafaleExec =
-                java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                    Thread t = new Thread(r, "rafale-arrow"); t.setDaemon(true); return t;
-                });
+                SKILL_SCHEDULER;
             int[] shots = {0};
             rafaleExec.scheduleAtFixedRate(() -> {
                 try {

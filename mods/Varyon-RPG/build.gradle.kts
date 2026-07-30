@@ -1,4 +1,5 @@
 ﻿import java.util.zip.ZipFile
+import org.gradle.api.tasks.bundling.Zip as ZipTask
 
 plugins {
     `maven-publish`
@@ -56,10 +57,14 @@ tasks.named<ProcessResources>("processResources") {
 val sqliteNativePlatform = findProperty("sqlite_native_platform")?.toString()?.trim('/') ?: "Linux/x86_64"
 val sqliteNativePrefix = "org/sqlite/native/$sqliteNativePlatform/"
 
-val fatJar = tasks.register<Jar>("fatJar") {
-    archiveClassifier.set("")
+// Standard Jar task was found to intermittently/consistently fail to write its output file in
+// this environment (Java 25 + Gradle 9.2.1) despite reporting success. Zip is a reliable
+// substitute already used successfully by sibling modules (Varyon-Damage_Number, Varyon-TravelingCamera).
+val fatJar = tasks.register<ZipTask>("fatJar") {
     archiveBaseName.set("Varyon-RPG")
     archiveVersion.set(version.toString())
+    archiveExtension.set("jar")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     inputs.property("sqliteNativePlatform", sqliteNativePlatform)
@@ -83,13 +88,6 @@ val fatJar = tasks.register<Jar>("fatJar") {
     exclude("META-INF/*.SF")
     exclude("module-info.class")
     exclude("**/package-info.class")
-
-    manifest {
-        attributes["Specification-Title"] = rootProject.name
-        attributes["Specification-Version"] = version
-        attributes["Implementation-Title"] = project.name
-        attributes["Implementation-Version"] = version.toString()
-    }
 }
 
 val verifyModJar = tasks.register("verifyModJar") {

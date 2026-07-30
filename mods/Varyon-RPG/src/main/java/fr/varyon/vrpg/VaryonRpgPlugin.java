@@ -636,6 +636,21 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 if (ref != null && arbaImmobilitySystem != null) {
                     arbaImmobilitySystem.removePlayer(ref.getUuid());
                 }
+                if (ref != null && arcanistState != null) {
+                    arcanistState.cleanup(ref.getUuid());
+                }
+                if (ref != null && gardienDeGaiaState != null) {
+                    gardienDeGaiaState.cleanup(ref.getUuid());
+                }
+                if (ref != null && lancierState != null) {
+                    lancierState.cleanup(ref.getUuid());
+                }
+                if (ref != null && bagarreurState != null) {
+                    bagarreurState.cleanup(ref.getUuid());
+                }
+                if (ref != null && ravageurState != null) {
+                    ravageurState.cleanup(ref.getUuid());
+                }
                 if (ref != null && classKillXpSystem != null) {
                     classKillXpSystem.cleanup(ref.getUuid());
                 }
@@ -1265,6 +1280,21 @@ public final class VaryonRpgPlugin extends JavaPlugin {
         if (farmerComboTracker != null) farmerComboTracker.clear();
         if (forestierComboTracker != null) forestierComboTracker.clear();
         if (chasseurComboTracker != null) chasseurComboTracker.clear();
+        try {
+            fr.varyon.vrpg.ui.XpNotifHud.shutdown();
+        } catch (Exception e) {
+            LOGGER.atSevere().withCause(e).log("[VaryonRPG] shutdown XpNotifHud scheduler");
+        }
+        try {
+            fr.varyon.vrpg.ui.AbilitySlotsHud.shutdown();
+        } catch (Exception e) {
+            LOGGER.atSevere().withCause(e).log("[VaryonRPG] shutdown AbilitySlotsHud scheduler");
+        }
+        try {
+            fr.varyon.vrpg.classes.ability.ClassSkillService.shutdownScheduler();
+        } catch (Exception e) {
+            LOGGER.atSevere().withCause(e).log("[VaryonRPG] shutdown ClassSkillService scheduler");
+        }
         instance = null;
     }
 

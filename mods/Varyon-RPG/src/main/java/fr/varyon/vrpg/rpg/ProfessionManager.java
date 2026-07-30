@@ -67,7 +67,9 @@ public final class ProfessionManager extends AbstractPlayerManager<PlayerAccount
             && !plugin.getUiPreferencesManager().get(playerRef.getUuid()).xpNotificationsEnabled) {
             return;
         }
-        LOGGER.at(Level.INFO).log("[XpNotif] %s %s +%s XP", playerRef.getUsername(), profession.name(), xpStr);
+        if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
+            LOGGER.at(Level.INFO).log("[XpNotif] %s %s +%s XP", playerRef.getUsername(), profession.name(), xpStr);
+        }
         try {
             Message msg = Message.raw("+" + xpStr + " XP").color(new Color(0x5BFF7F));
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), msg, null, profession.getIconPath());

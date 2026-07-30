@@ -128,12 +128,14 @@ public final class TalentItemRestrictionSystem extends EntityEventSystem<EntityS
         PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
         boolean allowed = isAllowed(outputId, acc);
 
-        LOGGER.atInfo().log("[TalentRestrict] craft player=" + playerName
-            + " outputId=" + outputId
-            + " hasPerm*=" + hasPermStar
-            + " acc=" + (acc != null ? "ok" : "null")
-            + " allowed=" + allowed
-            + " cancelled=" + !allowed);
+        if (fr.varyon.vrpg.config.VrpgConfig.isDebugTalents()) {
+            LOGGER.atInfo().log("[TalentRestrict] craft player=" + playerName
+                + " outputId=" + outputId
+                + " hasPerm*=" + hasPermStar
+                + " acc=" + (acc != null ? "ok" : "null")
+                + " allowed=" + allowed
+                + " cancelled=" + !allowed);
+        }
 
         if (!allowed) {
             event.setCancelled(true);

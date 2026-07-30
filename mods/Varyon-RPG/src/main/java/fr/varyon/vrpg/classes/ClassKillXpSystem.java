@@ -248,10 +248,12 @@ public final class ClassKillXpSystem {
         }
 
         double finalXp = baseXp * mult * zoneMultiplier * levelFactor;
-        LOGGER.atInfo().log("[ClassKillXp] +" + String.format("%.2f", finalXp) + " xp"
-            + " (base=" + String.format("%.2f", baseXp) + (multReason != null ? " x" + multReason : "")
-            + (zoneReason != null ? " " + zoneReason : "")
-            + ") class=" + activeClass + " mob=" + MobKillXpResolver.npcRoleKey(npc));
+        if (fr.varyon.vrpg.config.VrpgConfig.isDebugTalents()) {
+            LOGGER.atInfo().log("[ClassKillXp] +" + String.format("%.2f", finalXp) + " xp"
+                + " (base=" + String.format("%.2f", baseXp) + (multReason != null ? " x" + multReason : "")
+                + (zoneReason != null ? " " + zoneReason : "")
+                + ") class=" + activeClass + " mob=" + MobKillXpResolver.npcRoleKey(npc));
+        }
 
         classManager.addXp(uuid, activeClass, finalXp, playerRef);
     }

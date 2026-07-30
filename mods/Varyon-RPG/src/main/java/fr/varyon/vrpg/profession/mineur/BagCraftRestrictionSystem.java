@@ -95,12 +95,14 @@ public final class BagCraftRestrictionSystem extends EntityEventSystem<EntitySto
             message = "Besace du Paysan — talent Fermier (nœud 16) requis.";
         }
 
-        LOGGER.atInfo().log("[BagRestrict] craft player=" + playerName
-            + " outputId=" + outputId
-            + " hasPerm*=" + hasPermStar
-            + " acc=" + (acc != null ? "ok" : "null")
-            + " allowed=" + allowed
-            + " cancelled=" + !allowed);
+        if (fr.varyon.vrpg.config.VrpgConfig.isDebugTalents()) {
+            LOGGER.atInfo().log("[BagRestrict] craft player=" + playerName
+                + " outputId=" + outputId
+                + " hasPerm*=" + hasPermStar
+                + " acc=" + (acc != null ? "ok" : "null")
+                + " allowed=" + allowed
+                + " cancelled=" + !allowed);
+        }
 
         if (!allowed) {
             event.setCancelled(true);

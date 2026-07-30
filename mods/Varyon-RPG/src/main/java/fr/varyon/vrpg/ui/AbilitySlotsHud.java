@@ -71,6 +71,18 @@ public final class AbilitySlotsHud extends CustomUIHud {
         if (hud != null) hud.cancelAllCooldownTasks();
     }
 
+    public static void shutdown() {
+        SCHEDULER.shutdown();
+        try {
+            if (!SCHEDULER.awaitTermination(1, TimeUnit.SECONDS)) {
+                SCHEDULER.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            SCHEDULER.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
     @Override
     protected void build(@Nonnull UICommandBuilder builder) {
         builder.append("Hud/AbilitySlots/VRpgAbilitySlots.ui");

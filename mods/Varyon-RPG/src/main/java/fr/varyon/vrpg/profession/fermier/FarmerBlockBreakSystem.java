@@ -232,7 +232,9 @@ public final class FarmerBlockBreakSystem extends EntityEventSystem<EntityStore,
                                   @Nonnull PlayerRef playerRef,
                                   @Nonnull Store<EntityStore> store,
                                   int bx, int by, int bz) {
-        LOGGER.atInfo().log("[GardienChamps] handleGuardianCropBreak – pos(" + bx + "," + by + "," + bz + ")");
+        if (VrpgConfig.isDebugTalents()) {
+            LOGGER.atInfo().log("[GardienChamps] handleGuardianCropBreak – pos(" + bx + "," + by + "," + bz + ")");
+        }
         try {
             Player player = playerRef.getComponent(Player.getComponentType());
             World world = player != null ? player.getWorld() : null;

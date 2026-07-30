@@ -186,7 +186,8 @@ public final class ArbaietrierOutgoingDamageSystem extends DamageEventSystem {
                 if (carreauType == ArbaietrierState.CARREAU_TYPE_EXPLOSIF) {
                     double radius = CarreauExplosifSkill.radius();
                     TransformComponent tcVictim = store.getComponent(victimRef, TransformComponent.getComponentType());
-                    LOG.atInfo().log("[CarreauExplosif] hit NPC victimRef=" + victimRef.getIndex() + " tcVictim=" + (tcVictim != null) + " amount=" + amount + " radius=" + radius);
+                    if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
+                        LOG.atInfo().log("[CarreauExplosif] hit NPC victimRef=" + victimRef.getIndex() + " tcVictim=" + (tcVictim != null) + " amount=" + amount + " radius=" + radius);
                     if (tcVictim != null) {
                         final org.joml.Vector3d center = tcVictim.getPosition();
                         final float aoeAmount = amount;
@@ -218,7 +219,8 @@ public final class ArbaietrierOutgoingDamageSystem extends DamageEventSystem {
                                                 com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, aoeAmount));
                                     } catch (Exception e2) { LOG.atWarning().log("[CarreauExplosif] aoe dmg error: " + e2.getMessage()); }
                                 }, t -> t.getIndex() != fAttackerRef.getIndex());
-                            LOG.atInfo().log("[CarreauExplosif] aoe hit " + aoeHit.get() + " extra targets");
+                            if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
+                                LOG.atInfo().log("[CarreauExplosif] aoe hit " + aoeHit.get() + " extra targets");
                         } catch (Exception e2) { LOG.atWarning().log("[CarreauExplosif] aoe error: " + e2.getMessage()); }
                     }
                 }

@@ -86,11 +86,13 @@ public final class ClassStatEngine {
             }
         }
 
-        LOGGER.at(Level.INFO).log("[ClassStatEngine] %s class=%s spec=%s Nv.%d → HP=%d ATK=%d ARM=%d%% STA=%d crit=%d%% critDmg=+%d%%",
-            uuid.toString().substring(0, 8),
-            activeClass.getId(), spec != null ? spec.getId() : "none", level,
-            stats.maxHp(), stats.atk(), stats.armorPct(), stats.maxStamina(),
-            stats.critChancePct(), stats.critDamagePct());
+        if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
+            LOGGER.at(Level.INFO).log("[ClassStatEngine] %s class=%s spec=%s Nv.%d → HP=%d ATK=%d ARM=%d%% STA=%d crit=%d%% critDmg=+%d%%",
+                uuid.toString().substring(0, 8),
+                activeClass.getId(), spec != null ? spec.getId() : "none", level,
+                stats.maxHp(), stats.atk(), stats.armorPct(), stats.maxStamina(),
+                stats.critChancePct(), stats.critDamagePct());
+        }
 
         return stats;
     }

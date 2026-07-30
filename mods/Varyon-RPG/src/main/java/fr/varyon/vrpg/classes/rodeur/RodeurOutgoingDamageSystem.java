@@ -123,18 +123,16 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
 
                     if (arrowType == RodeurState.ARROW_TYPE_RECUL) {
                         double kb = rodeurState.getPendingArrowKb(uuid);
-                        LOG.atInfo().log("[RodeurKB] RECUL hit — kb=" + kb + " victimRef=" + (victimRef != null ? victimRef.getIndex() : "null") + " attackerRef=" + (attackerRef != null ? attackerRef.getIndex() : "null"));
+                        if (debug) log.append(String.format(" RECUL kb=%.2f", kb));
                         if (kb > 0) {
                             TransformComponent tcVictim = store.getComponent(victimRef, TransformComponent.getComponentType());
                             TransformComponent tcAttacker = store.getComponent(attackerRef, TransformComponent.getComponentType());
-                            LOG.atInfo().log("[RodeurKB] tcVictim=" + tcVictim + " tcAttacker=" + tcAttacker);
                             if (tcVictim != null && tcAttacker != null) {
                                 org.joml.Vector3d d = new org.joml.Vector3d(
                                     tcVictim.getPosition().x - tcAttacker.getPosition().x,
                                     0,
                                     tcVictim.getPosition().z - tcAttacker.getPosition().z);
                                 double dlen = Math.sqrt(d.x*d.x + d.z*d.z);
-                                LOG.atInfo().log("[RodeurKB] dx=" + d.x + " dz=" + d.z + " dlen=" + dlen);
                                 if (dlen > 1e-6) { d.x /= dlen; d.z /= dlen; }
                                 com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent kbComp =
                                     new com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent();
@@ -142,12 +140,12 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                                 kbComp.setVelocityType(com.hypixel.hytale.protocol.ChangeVelocityType.Set);
                                 kbComp.setDuration(0.0f);
                                 damage.putMetaObject(com.hypixel.hytale.server.core.modules.entity.damage.Damage.KNOCKBACK_COMPONENT, kbComp);
-                                LOG.atInfo().log("[RodeurKB] KnockbackComponent applied: vx=" + (d.x * kb) + " vy=5.0 vz=" + (d.z * kb));
-                            } else {
-                                LOG.atInfo().log("[RodeurKB] SKIP — transform null");
+                                if (debug) log.append(String.format(" applied vx=%.2f vy=5.0 vz=%.2f", d.x * kb, d.z * kb));
+                            } else if (debug) {
+                                log.append(" SKIP(transform null)");
                             }
-                        } else {
-                            LOG.atInfo().log("[RodeurKB] SKIP — kb=0");
+                        } else if (debug) {
+                            log.append(" SKIP(kb=0)");
                         }
                         rodeurState.clearPendingArrow(uuid);
                     } else if (arrowType == RodeurState.ARROW_TYPE_MARQUAGE) {
@@ -191,6 +189,7 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                         damage.setAmount(amount);
                     }
                 }
+                if (debug) { log.append(String.format(" → final=%.1f", amount)); LOG.atInfo().log(log.toString()); }
                 return;
             }
 
