@@ -13,11 +13,9 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.varyon.component.MobScalingComponent;
 import com.varyon.config.ConfigManager;
-import com.varyon.config.DifficultyZone;
 import com.varyon.util.ZoneCalculator;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -83,16 +81,10 @@ public class ZoneLevelNameplateSystem extends EntityTickingSystem<EntityStore> {
             }
 
             if (tier < 0) {
-                DifficultyZone zone = ZoneCalculator.getCurrentZone(store, ref, worldName, configManager.getZoneConfig());
-                if (zone != null) {
-                    List<DifficultyZone> zones = configManager.getZoneConfig().getZones();
-                    int zoneIndex = -1;
-                    for (int i = 0; i < zones.size(); i++) {
-                        if (zones.get(i).getZoneId() == zone.getZoneId()) {
-                            zoneIndex = i;
-                            break;
-                        }
-                    }
+                ZoneCalculator.ZoneWithIndex zoneWithIndex =
+                        ZoneCalculator.getCurrentZoneIndexed(store, ref, worldName, configManager.getZoneConfig());
+                if (zoneWithIndex.zone() != null) {
+                    int zoneIndex = zoneWithIndex.index();
                     tier = zoneIndex >= 0 ? (zoneIndex + 1) * 10 - 4 : 1;
                 } else {
                     tier = 1;

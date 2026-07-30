@@ -73,7 +73,6 @@ public class EssenceMiningSystem extends EntityEventSystem<EntityStore, BreakBlo
 
             if (event.getTargetBlock() != null) {
                 boolean placed = placedOreTracker.isPlayerPlaced(world, event.getTargetBlock());
-                LOGGER.at(Level.INFO).log("AntiExploit check: world=" + world + " pos=" + event.getTargetBlock().x + "," + event.getTargetBlock().y + "," + event.getTargetBlock().z + " playerPlaced=" + placed);
                 if (placed) {
                     return;
                 }
@@ -101,8 +100,6 @@ public class EssenceMiningSystem extends EntityEventSystem<EntityStore, BreakBlo
             double current = essenceManager.getEssence(playerUuid);
             int cap = configManager.getZonePermissionsConfig().getEffectiveCap(playerRef, current);
             essenceManager.addEssenceCapped(playerUuid, playerUuid.toString(), essenceGained, cap);
-
-            LOGGER.at(Level.INFO).log("Mine: block=" + blockId + " +" + String.format("%.2f", essenceGained) + " faction points (base=" + baseReward + " zone=" + zoneMultiplier + " loot=" + String.format("%.2f", lootMultiplier) + " pvp=" + pvpMultiplier + ")");
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("Error in EssenceMiningSystem: " + e.getMessage());
         }

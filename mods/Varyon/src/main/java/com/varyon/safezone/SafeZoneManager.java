@@ -30,6 +30,8 @@ public class SafeZoneManager {
     
     private ScheduledFuture<?> rotationTask;
     private ScheduledFuture<?> announcementTask;
+    private static final long ROTATION_ERROR_LOG_BACKOFF_MS = 10000;
+    private volatile long lastRotationErrorLoggedAt = 0;
 
     public SafeZoneManager(@Nonnull SafeZoneConfig config, @Nonnull com.varyon.config.ZoneConfig zoneConfig, @Nonnull Path dataDirectory) {
         this.config = config;
@@ -67,7 +69,11 @@ public class SafeZoneManager {
             try {
                 checkAndRotate();
             } catch (Exception e) {
-                LOGGER.at(Level.WARNING).log("Error in rotation task: " + e.getMessage());
+                long now = System.currentTimeMillis();
+                if (now - lastRotationErrorLoggedAt >= ROTATION_ERROR_LOG_BACKOFF_MS) {
+                    lastRotationErrorLoggedAt = now;
+                    LOGGER.at(Level.WARNING).log("Error in rotation task: " + e.getMessage());
+                }
             }
         }, 1000, 1000, TimeUnit.MILLISECONDS);
     }

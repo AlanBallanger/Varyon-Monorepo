@@ -46,6 +46,8 @@ public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEv
 
     private volatile Method cachedNameMethod;
     private volatile String cachedNameSource;
+    /** Entity classes already scanned without finding a usable name method — skip re-scanning them. */
+    private final Set<Class<?>> unresolvableEntityClasses = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     public EssenceKillSystem(@Nonnull EssenceManager essenceManager, @Nonnull ConfigManager configManager,
                              @Nonnull EssenceRewardsConfig rewardsConfig) {
@@ -117,8 +119,6 @@ public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEv
             double current = essenceManager.getEssence(playerUuid);
             int cap = configManager.getZonePermissionsConfig().getEffectiveCap(playerRef, current);
             essenceManager.addEssenceCapped(playerUuid, playerUuid.toString(), essenceGained, cap);
-
-            LOGGER.at(Level.INFO).log("Kill: mob=" + mobId + " +" + String.format("%.2f", essenceGained) + " faction points (base=" + baseReward + " loot=" + String.format("%.2f", lootMultiplier) + " zone=" + String.format("%.2f", zoneMultiplier) + " pvp=" + pvpMultiplier + ")");
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("Error in EssenceKillSystem: " + e.getMessage());
         }
@@ -139,9 +139,10 @@ public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEv
                 try { entity = EntityUtils.getEntity(ref, store); } catch (Exception ignored) {}
             }
 
-            if (entity != null) {
+            if (entity != null && !unresolvableEntityClasses.contains(entity.getClass())) {
                 String result = scanStringMethods(entity, "Entity");
                 if (result != null) return result;
+                unresolvableEntityClasses.add(entity.getClass());
             }
 
             NPCEntity npc = null;
@@ -150,9 +151,10 @@ public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEv
                 try { npc = commandBuffer.getComponent(ref, NPCEntity.getComponentType()); } catch (Exception ignored) {}
             }
 
-            if (npc != null) {
+            if (npc != null && !unresolvableEntityClasses.contains(npc.getClass())) {
                 String result = scanStringMethods(npc, "NPCEntity");
                 if (result != null) return result;
+                unresolvableEntityClasses.add(npc.getClass());
             }
         } catch (Exception e) {
             LOGGER.at(Level.FINE).log("resolveMobName error: " + e.getMessage());

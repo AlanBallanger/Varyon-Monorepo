@@ -356,27 +356,15 @@ public class ZoneMapImageBuilder {
                 int blockX = minBlockX + ix * 32 / this.imageWidth;
                 int blockZ = minBlockZ + iz * 32 / this.imageHeight;
 
-                // Apply zone overlay LAST (on top of everything)
+                // Apply zone overlay LAST (on top of everything) — border only, no translucent
+                // fill over the whole zone interior (interior left showing plain terrain).
                 DifficultyZone zone = ZoneCalculator.getZoneAtPosition(blockX, blockZ, zoneConfig);
                 if (zone != null && zone.getMaxMultiplier() > 1.0) {
-                    int zoneColor = getColorForZone(zone);
-
-                    // Check if this is a zone border (different zone nearby)
                     int borderThickness = 3; // Border width in blocks
-                    boolean isBorder = isZoneBorder(blockX, blockZ, zone, zoneConfig, borderThickness);
-
-                    if (isBorder) {
+                    if (isZoneBorder(blockX, blockZ, zone, zoneConfig, borderThickness)) {
+                        int zoneColor = getColorForZone(zone);
                         // Draw border with full opacity (no pattern, solid color)
                         blendColor(zoneColor, this.outColor, 1.0f, 0.85f);
-                    } else {
-                        // Apply pattern with configured opacity
-                        String pattern = zoneConfig.getMinimapPattern();
-                        int patternSize = zoneConfig.getMinimapPatternSize();
-
-                        if (shouldApplyPattern(blockX, blockZ, pattern, patternSize)) {
-                            int opacity = zoneConfig.getMinimapOpacity();
-                            blendColor(zoneColor, this.outColor, 1.0f, (float) opacity / 100.0f);
-                        }
                     }
                 }
 

@@ -59,7 +59,22 @@ public class ArenasPortalTickSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        if (!isArenasPortalBlock(world, bx, by, bz) && !isArenasPortalBlock(world, bx, by + 1, bz)) {
+        WorldChunk chunk;
+        try {
+            // Use getChunkIfInMemory (not getChunk) — the latter loads/starts-ticking the chunk on
+            // demand, which mutates the world's Store and crashes with "Store is currently
+            // processing" when called from inside this tick system's own store-processing pass.
+            // A player standing on a portal block always has that chunk already loaded, so this
+            // never needs to trigger a load.
+            long chunkIndex = ChunkUtil.indexChunkFromBlock(bx, bz);
+            chunk = world.getChunkIfInMemory(chunkIndex);
+        } catch (Exception e) {
+            return;
+        }
+        if (chunk == null) {
+            return;
+        }
+        if (!isArenasPortalBlock(chunk, bx, by, bz) && !isArenasPortalBlock(chunk, bx, by + 1, bz)) {
             return;
         }
 
@@ -82,11 +97,12 @@ public class ArenasPortalTickSystem extends EntityTickingSystem<EntityStore> {
         } catch (Exception ignored) {}
     }
 
-    private boolean isArenasPortalBlock(World world, int x, int y, int z) {
+    public void removePlayer(UUID playerId) {
+        cooldowns.remove(playerId);
+    }
+
+    private boolean isArenasPortalBlock(WorldChunk chunk, int x, int y, int z) {
         try {
-            long chunkIndex = ChunkUtil.indexChunkFromBlock(x, z);
-            WorldChunk chunk = world.getChunk(chunkIndex);
-            if (chunk == null) return false;
             BlockType blockType = chunk.getBlockType(x, y, z);
             return blockType != null && blockType.getId() != null
                 && blockType.getId().contains(ARENAS_PORTAL_BLOCK_ID);

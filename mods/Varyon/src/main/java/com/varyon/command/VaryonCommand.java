@@ -6,6 +6,8 @@ import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
+import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -13,6 +15,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.VaryonPlugin;
+import com.varyon.arena.ArenaManager;
 import com.varyon.config.ConfigManager;
 import com.varyon.faction.FactionManager;
 import com.varyon.deposit.DepositBlockManager;
@@ -29,7 +32,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
     private final FactionManager factionManager;
     private final DepositBlockManager depositBlockManager;
 
-    public VaryonCommand(VaryonPlugin plugin, FactionManager factionManager, DepositBlockManager depositBlockManager) {
+    public VaryonCommand(VaryonPlugin plugin, FactionManager factionManager, DepositBlockManager depositBlockManager, ArenaManager arenaManager) {
         super("varyon", "Varyon commands");
         this.plugin = plugin;
         this.factionManager = factionManager;
@@ -43,6 +46,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
         this.addSubCommand(new com.varyon.command.ResetDepositSubCommand(depositBlockManager));
         this.addSubCommand(new WhoIsSubCommand(factionManager));
         this.addSubCommand(new ShopSubCommand());
+        this.addSubCommand(new ArenaCommand(arenaManager));
     }
 
     @NonNullDecl
@@ -86,6 +90,8 @@ public class VaryonCommand extends AbstractAsyncCommand {
                 context.sendMessage(Message.raw("  /varyon resetdeposit : Supprimer tous les blocs de dépôt").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /varyon resetrewards : Reset les cooldowns des récompenses de faction").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /varyon resetbalance : Remettre la jauge globale (points) à 0").color(Color.WHITE));
+                context.sendMessage(Message.raw("  /varyon arena add <nom> : Créer une arène non-PvP (rayon 50) à votre position").color(Color.WHITE));
+                context.sendMessage(Message.raw("  /varyon arena remove [nom] : Supprimer une arène (courante si aucun nom)").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /points give <joueur> <montant> : Donner des points de faction à un joueur").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /points take <joueur> <montant> : Retirer des points de faction à un joueur").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /points setmax <joueur> <montant> : Fixer le stock de points de faction d'un joueur").color(Color.WHITE));

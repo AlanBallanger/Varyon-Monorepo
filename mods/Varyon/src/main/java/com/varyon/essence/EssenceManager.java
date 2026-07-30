@@ -18,16 +18,12 @@ import java.util.logging.Level;
 
 public class EssenceManager {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-    private static final int GAUGE_HOLD_AFTER_MAX_MINUTES = 10;
 
     private final EssenceDatabase database;
     private final Map<UUID, Double> essenceCache = new ConcurrentHashMap<>();
     private final GuildGaugePlayerWindow guildGaugePlayerWindow = new GuildGaugePlayerWindow();
     private final Object globalBalanceLock = new Object();
     private volatile ScheduledFuture<?> guildGaugeSampler;
-    private volatile ScheduledFuture<?> gaugeHoldResetTask;
-    private boolean gaugeHoldActive;
-    private Integer gaugeHoldPinnedBalance;
     private GlobalRewardsManager rewardsManager;
 
     public EssenceManager(@Nonnull File pluginFolder) {
@@ -123,22 +119,12 @@ public class EssenceManager {
         if (sampler != null) {
             sampler.cancel(false);
         }
-        synchronized (globalBalanceLock) {
-            cancelGaugeHoldTaskLocked();
-            gaugeHoldActive = false;
-            gaugeHoldPinnedBalance = null;
-        }
         guildGaugePlayerWindow.clear();
         saveAll();
         database.close();
     }
 
     public int getGlobalBalance() {
-        synchronized (globalBalanceLock) {
-            if (gaugeHoldActive && gaugeHoldPinnedBalance != null) {
-                return gaugeHoldPinnedBalance;
-            }
-        }
         int raw = database.getGlobalBalance();
         return GuildGaugeScale.clamp(raw, getGuildGaugeAbsMax());
     }
@@ -162,16 +148,7 @@ public class EssenceManager {
 
 
     public boolean canApplyGuildContribution(int signedContribution) {
-        if (signedContribution == 0) {
-            return true;
-        }
-        synchronized (globalBalanceLock) {
-            if (!gaugeHoldActive || gaugeHoldPinnedBalance == null) {
-                return true;
-            }
-            int p = gaugeHoldPinnedBalance;
-            return !((p > 0 && signedContribution > 0) || (p < 0 && signedContribution < 0));
-        }
+        return true;
     }
 
     public void addToGlobalBalance(int amount) {
@@ -179,74 +156,42 @@ public class EssenceManager {
             return;
         }
         synchronized (globalBalanceLock) {
-            if (gaugeHoldActive && gaugeHoldPinnedBalance != null) {
-                int p = gaugeHoldPinnedBalance;
-                if ((p > 0 && amount > 0) || (p < 0 && amount < 0)) {
-                    return;
-                }
-                cancelGaugeHoldTaskLocked();
-                gaugeHoldActive = false;
-                gaugeHoldPinnedBalance = null;
-            }
             int max = getGuildGaugeAbsMax();
             int current = GuildGaugeScale.clamp(database.getGlobalBalance(), max);
             int written = GuildGaugeScale.clamp(current + amount, max);
+            if (written == max || written == -max) {
+                written = 0;
+            }
             database.setGlobalBalance(written);
             if (rewardsManager != null) {
                 rewardsManager.checkAndDistributeRewards();
             }
-            if (written == max || written == -max) {
-                startGaugeHoldLocked(written);
-            }
         }
+        broadcastBalanceUpdate();
     }
 
     public void setGlobalBalance(int amount) {
         synchronized (globalBalanceLock) {
-            cancelGaugeHoldTaskLocked();
-            gaugeHoldActive = false;
-            gaugeHoldPinnedBalance = null;
             int max = getGuildGaugeAbsMax();
             int written = GuildGaugeScale.clamp(amount, max);
+            if (written == max || written == -max) {
+                written = 0;
+            }
             database.setGlobalBalance(written);
             if (rewardsManager != null) {
                 rewardsManager.checkAndDistributeRewards();
             }
-            if (written == max || written == -max) {
-                startGaugeHoldLocked(written);
-            }
         }
+        broadcastBalanceUpdate();
     }
 
-    private void cancelGaugeHoldTaskLocked() {
-        ScheduledFuture<?> t = gaugeHoldResetTask;
-        if (t != null) {
-            t.cancel(false);
-            gaugeHoldResetTask = null;
-        }
-    }
-
-    private void startGaugeHoldLocked(int pinnedBalance) {
-        if (gaugeHoldActive) {
-            return;
-        }
-        gaugeHoldActive = true;
-        gaugeHoldPinnedBalance = pinnedBalance;
-        cancelGaugeHoldTaskLocked();
-        gaugeHoldResetTask = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-            synchronized (globalBalanceLock) {
-                gaugeHoldActive = false;
-                gaugeHoldPinnedBalance = null;
-                gaugeHoldResetTask = null;
-                database.setGlobalBalance(0);
+    private void broadcastBalanceUpdate() {
+        try {
+            VaryonPlugin plugin = VaryonPlugin.getInstance();
+            if (plugin != null && plugin.getHudManager() != null) {
+                plugin.getHudManager().broadcastBalanceUpdate();
             }
-            try {
-                VaryonPlugin plugin = VaryonPlugin.getInstance();
-                if (plugin != null && plugin.getHudManager() != null) {
-                    plugin.getHudManager().broadcastBalanceUpdate();
-                }
-            } catch (Exception ignored) {
-            }
-        }, GAUGE_HOLD_AFTER_MAX_MINUTES, TimeUnit.MINUTES);
+        } catch (Exception ignored) {
+        }
     }
 }

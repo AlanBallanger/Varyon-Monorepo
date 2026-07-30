@@ -28,6 +28,7 @@ $C.@PageOverlay {
           Default: (Background: "Icons/ContainerCloseButton.png"),
           Hovered: (Background: "Icons/ContainerCloseButtonHovered.png"),
           Pressed: (Background: "Icons/ContainerCloseButtonPressed.png"),
+          Sounds: $C.@ButtonSounds,
         );
       }
     }
@@ -90,7 +91,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -153,7 +155,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -216,7 +219,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -279,7 +283,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -342,7 +347,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -411,7 +417,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -474,7 +481,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -537,7 +545,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -600,7 +609,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;
@@ -663,7 +673,8 @@ $C.@PageOverlay {
               Style: ButtonStyle(
                 Default: (Background: (Color: #2A2448)),
                 Hovered: (Background: (Color: #2e2a48)),
-                Pressed: (Background: (Color: #18162a))
+                Pressed: (Background: (Color: #18162a)),
+                Sounds: $C.@ButtonSounds
               );
               OutlineColor: #141228;
               OutlineSize: 1;

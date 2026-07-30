@@ -85,7 +85,6 @@ public class ExtractionPortalTickSystem extends EntityTickingSystem<EntityStore>
             World world = ((EntityStore) store.getExternalData()).getWorld();
             ISpawnProvider spawnProvider = world.getWorldConfig().getSpawnProvider();
             if (spawnProvider == null) {
-                LOGGER.at(Level.WARNING).log("No spawn provider for world " + world.getName());
                 return;
             }
 
@@ -121,6 +120,10 @@ public class ExtractionPortalTickSystem extends EntityTickingSystem<EntityStore>
             LOGGER.at(Level.INFO).log("Player " + playerId + " used extraction portal at " + portal.x() + "," + portal.y() + "," + portal.z());
             return;
         }
+    }
+
+    public void removePlayer(UUID playerId) {
+        lastDenyMessage.remove(playerId);
     }
 
     @NullableDecl

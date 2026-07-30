@@ -34,6 +34,7 @@ import com.varyon.command.RtphCommand;
 import com.varyon.command.RtpsCommand;
 import com.varyon.command.ReturnCommand;
 import com.varyon.announce.ChatAnnouncementScheduler;
+import com.varyon.arena.ArenaManager;
 import com.varyon.component.MobScalingComponent;
 import com.varyon.config.ConfigManager;
 import com.varyon.config.EssenceRewardsConfig;
@@ -90,6 +91,7 @@ public class VaryonPlugin extends JavaPlugin {
     private static FactionManager staticFactionManager;
     private static SafeZoneManager staticSafeZoneManager;
     private static SafeZoneNotificationSystem staticSafeZoneNotificationSystem;
+    private static ArenaManager staticArenaManager;
     private static GlobalRewardsManager staticGlobalRewardsManager;
     private static VaryonPlugin staticInstance;
     private ConfigManager configManager;
@@ -97,6 +99,7 @@ public class VaryonPlugin extends JavaPlugin {
     private FactionManager factionManager;
     private SafeZoneManager safeZoneManager;
     private SafeZoneNotificationSystem safeZoneNotificationSystem;
+    private ArenaManager arenaManager;
     private ZoneHUDManager hudManager;
     private ExtractionPortalManager extractionPortalManager;
     private EssenceRewardsConfig essenceRewardsConfig;
@@ -249,15 +252,23 @@ public class VaryonPlugin extends JavaPlugin {
             this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.ZonesPortalPreInteractionSystem());
             ZonesPortalInteractionSystem zonesPortalInteractionSystem = new ZonesPortalInteractionSystem();
             this.getEntityStoreRegistry().registerSystem(zonesPortalInteractionSystem);
-            this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.ZonesPortalTickSystem());
+            com.varyon.portal.ZonesPortalTickSystem zonesPortalTickSystem = new com.varyon.portal.ZonesPortalTickSystem();
+            this.getEntityStoreRegistry().registerSystem(zonesPortalTickSystem);
             LOGGER.at(Level.INFO).log("Zones portal interaction system initialized");
 
             this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.ArenasPortalPreInteractionSystem());
             ArenasPortalInteractionSystem arenasPortalInteractionSystem = new ArenasPortalInteractionSystem();
             this.getEntityStoreRegistry().registerSystem(arenasPortalInteractionSystem);
-            this.getEntityStoreRegistry().registerSystem(new com.varyon.portal.ArenasPortalTickSystem());
+            com.varyon.portal.ArenasPortalTickSystem arenasPortalTickSystem = new com.varyon.portal.ArenasPortalTickSystem();
+            this.getEntityStoreRegistry().registerSystem(arenasPortalTickSystem);
             LOGGER.at(Level.INFO).log("Arenas portal interaction system initialized");
 
+
+            // Initialiser le système d'arènes (zones non-PvP définies par un admin)
+            arenaManager = new ArenaManager(this.getDataDirectory());
+            staticArenaManager = arenaManager;
+            SafeZonePvpSystem.setArenaManager(arenaManager);
+            LOGGER.at(Level.INFO).log("Arena system initialized (" + arenaManager.getArenas().size() + " arena(s))");
 
             // Initialiser le système de retour au point de mort
             deathPointManager = new DeathPointManager(this.getDataDirectory());
@@ -277,6 +288,7 @@ public class VaryonPlugin extends JavaPlugin {
                 
                 safeZoneNotificationSystem = new SafeZoneNotificationSystem(configManager.getSafeZoneConfig(), configManager.getZoneConfig(), configManager.getMessagesConfig());
                 SafeZoneNotificationSystem.setSafeZoneManager(safeZoneManager);
+                SafeZoneNotificationSystem.setArenaManager(arenaManager);
                 this.getEntityStoreRegistry().registerSystem(safeZoneNotificationSystem);
                 staticSafeZoneNotificationSystem = safeZoneNotificationSystem;
                 
@@ -421,12 +433,16 @@ public class VaryonPlugin extends JavaPlugin {
                     }
                     RtpvConfirmHud.cleanup(playerRef.getUuid());
                     RtpvCooldownStore.onPlayerDisconnect(playerRef.getUuid());
+                    zoneTitleSystem.removePlayer(playerRef.getUuid());
+                    extractionTickSystem.removePlayer(playerRef.getUuid());
+                    zonesPortalTickSystem.removePlayer(playerRef.getUuid());
+                    arenasPortalTickSystem.removePlayer(playerRef.getUuid());
                 });
             } else {
                 LOGGER.at(Level.WARNING).log("Zone HUD could not be initialized");
             }
 
-            this.getCommandRegistry().registerCommand(new VaryonCommand(this, factionManager, depositBlockManager));
+            this.getCommandRegistry().registerCommand(new VaryonCommand(this, factionManager, depositBlockManager, arenaManager));
             this.getCommandRegistry().registerCommand(new ExtractCommand("extract"));
             this.getCommandRegistry().registerCommand(new ExtractCommand("ex"));
             this.returnCommand = new ReturnCommand();
@@ -566,6 +582,11 @@ public class VaryonPlugin extends JavaPlugin {
     @Nullable
     public static SafeZoneManager getStaticSafeZoneManager() {
         return staticSafeZoneManager;
+    }
+
+    @Nullable
+    public static ArenaManager getStaticArenaManager() {
+        return staticArenaManager;
     }
 
     @Nullable

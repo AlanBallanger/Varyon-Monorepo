@@ -31,13 +31,17 @@ public class ZoneHUDManager {
     private static final long UPDATE_INTERVAL_MS = 1000;
     private static final int PAGE_SWITCH_TICKS = 5;
 
+    private static final long ERROR_LOG_BACKOFF_MS = 5000;
+
     private final Map<UUID, ZoneHUD> playerHuds = new ConcurrentHashMap<>();
     private final Map<UUID, Player> playerCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastPlayerErrorLoggedAt = new ConcurrentHashMap<>();
     private ZoneConfig zoneConfig;
     private MessagesConfig messagesConfig;
     private ZonePermissionsConfig zonePermsConfig;
     private ScheduledFuture<?> updateTask;
     private int tickCounter = 0;
+    private volatile long lastTaskErrorLoggedAt = 0;
 
     public ZoneHUDManager(@Nonnull ZoneConfig zoneConfig, @Nonnull MessagesConfig messagesConfig,
                           @Nonnull ZonePermissionsConfig zonePermsConfig) {
@@ -61,7 +65,11 @@ public class ZoneHUDManager {
                 boolean switchPage = (tickCounter % PAGE_SWITCH_TICKS == 0);
                 updateAllHuds(switchPage);
             } catch (Exception e) {
-                LOGGER.at(Level.WARNING).log("Error updating HUDs: " + e.getMessage());
+                long now = System.currentTimeMillis();
+                if (now - lastTaskErrorLoggedAt >= ERROR_LOG_BACKOFF_MS) {
+                    lastTaskErrorLoggedAt = now;
+                    LOGGER.at(Level.WARNING).log("Error updating HUDs: " + e.getMessage());
+                }
             }
         }, UPDATE_INTERVAL_MS, UPDATE_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
@@ -108,7 +116,12 @@ public class ZoneHUDManager {
                 if (switchPage) hud.nextPage();
                 hud.updateZoneInfo(zone, distance, inSafe, quadrantName, timeRemaining, switchPage, lootActive, maxEssenceCap);
             } catch (Exception e) {
-                LOGGER.at(Level.WARNING).log("Error updating HUD for player " + playerId + ": " + e.getMessage());
+                long now = System.currentTimeMillis();
+                Long lastLogged = lastPlayerErrorLoggedAt.get(playerId);
+                if (lastLogged == null || now - lastLogged >= ERROR_LOG_BACKOFF_MS) {
+                    lastPlayerErrorLoggedAt.put(playerId, now);
+                    LOGGER.at(Level.WARNING).log("Error updating HUD for player " + playerId + ": " + e.getMessage());
+                }
             }
         }
     }
@@ -133,6 +146,7 @@ public class ZoneHUDManager {
 
         playerHuds.remove(playerId);
         playerCache.remove(playerId);
+        lastPlayerErrorLoggedAt.remove(playerId);
         removeHud(player);
 
         if (!zoneConfig.isWorldEnabled(worldName)) {
@@ -153,6 +167,7 @@ public class ZoneHUDManager {
     public void removePlayer(@Nonnull UUID playerId) {
         playerHuds.remove(playerId);
         Player player = playerCache.remove(playerId);
+        lastPlayerErrorLoggedAt.remove(playerId);
         removeHud(player);
     }
 

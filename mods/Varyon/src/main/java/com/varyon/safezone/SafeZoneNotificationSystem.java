@@ -12,6 +12,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.varyon.arena.ArenaManager;
 import com.varyon.config.MessagesConfig;
 import com.varyon.config.ZoneConfig;
 
@@ -26,6 +27,7 @@ import java.util.logging.Level;
 public class SafeZoneNotificationSystem extends EntityTickingSystem<EntityStore> {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static SafeZoneManager safeZoneManager;
+    private static ArenaManager arenaManager;
     private final Map<UUID, Boolean> playerInSafeZone = new ConcurrentHashMap<>();
     private SafeZoneConfig config;
     private ZoneConfig zoneConfig;
@@ -40,6 +42,10 @@ public class SafeZoneNotificationSystem extends EntityTickingSystem<EntityStore>
 
     public static void setSafeZoneManager(@Nonnull SafeZoneManager manager) {
         safeZoneManager = manager;
+    }
+
+    public static void setArenaManager(@Nonnull ArenaManager manager) {
+        arenaManager = manager;
     }
 
     public void applyReloadedConfigs(@Nonnull SafeZoneConfig safeZoneConfig,
@@ -74,6 +80,9 @@ public class SafeZoneNotificationSystem extends EntityTickingSystem<EntityStore>
         double x = playerRef.getTransform().getPosition().x;
         double z = playerRef.getTransform().getPosition().z;
         boolean isInSafeZone = safeZoneManager.isInSafeZone(x, z);
+        if (!isInSafeZone && arenaManager != null && arenaManager.findArenaAt(worldName, x, z) != null) {
+            isInSafeZone = true;
+        }
         UUID playerId = playerRef.getUuid();
 
         Boolean wasInSafeZone = playerInSafeZone.get(playerId);

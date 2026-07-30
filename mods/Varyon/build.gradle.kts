@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.bundling.Zip
+
 plugins {
     `maven-publish`
     idea
@@ -36,28 +38,25 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.9")
 }
 
-val fatJar = tasks.register<Jar>("fatJar") {
-    archiveClassifier.set("")
+// Standard Jar task was found to intermittently/consistently fail to write its output file in
+// this environment (Java 25 + Gradle 9.2.1) despite reporting success. Zip is a reliable
+// substitute already used successfully by sibling modules (Varyon-Damage_Number, Varyon-TravelingCamera).
+val fatJar = tasks.register<Zip>("fatJar") {
     archiveBaseName.set("Varyon")
     archiveVersion.set("0.1.4")
+    archiveExtension.set("jar")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
     from(sourceSets.main.get().output)
-    
+
     // Inclure seulement les dépendances implementation (toml4j, sqlite-jdbc, slf4j)
     val implementationJars = configurations.runtimeClasspath.get()
         .filter { it.name.contains("toml4j") || it.name.contains("sqlite-jdbc") || it.name.contains("slf4j") }
-    
+
     from({
         implementationJars.map { zipTree(it) }
     })
-    
-    manifest {
-        attributes["Specification-Title"] = rootProject.name
-        attributes["Specification-Version"] = version
-        attributes["Implementation-Title"] = project.name
-        attributes["Implementation-Version"] = version.toString()
-    }
 }
 
 val exportModJar = tasks.register<Copy>("exportModJar") {

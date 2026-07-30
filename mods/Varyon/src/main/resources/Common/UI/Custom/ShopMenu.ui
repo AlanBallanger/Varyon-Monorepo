@@ -20,7 +20,8 @@ $C.@PageOverlay {
           Anchor: (Width: 36, Height: 36, Top: 2, Right: 12);
           Style: TextButtonStyle(
             Default: (LabelStyle: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
-            Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+            Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Sounds: $C.@ButtonSounds
           );
         }
       }
@@ -60,7 +61,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton1 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -92,7 +93,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton2 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -124,7 +125,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton3 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -161,7 +162,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton4 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -193,7 +194,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton5 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -225,7 +226,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton6 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -262,7 +263,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton7 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -294,7 +295,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton8 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -326,7 +327,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton9 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }
@@ -363,7 +364,7 @@ $C.@PageOverlay {
           }
           Button #BuyButton10 {
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)));
+            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
             Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
           }
         }

@@ -18,6 +18,7 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DamageEventSystem;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.varyon.arena.ArenaManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,9 +28,14 @@ public class SafeZonePvpSystem extends DamageEventSystem {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final Query<EntityStore> QUERY = Player.getComponentType();
     private static SafeZoneManager safeZoneManager;
+    private static ArenaManager arenaManager;
 
     public static void setSafeZoneManager(@Nonnull SafeZoneManager manager) {
         safeZoneManager = manager;
+    }
+
+    public static void setArenaManager(@Nonnull ArenaManager manager) {
+        arenaManager = manager;
     }
 
     @Override
@@ -53,6 +59,8 @@ public class SafeZonePvpSystem extends DamageEventSystem {
         if (safeZoneManager == null) {
             return;
         }
+
+        String worldName = ((EntityStore) store.getExternalData()).getWorld().getName();
 
         Player victimPlayer = archetypeChunk.getComponent(index, Player.getComponentType());
         Ref<EntityStore> victimRef = archetypeChunk.getReferenceTo(index);
@@ -95,6 +103,11 @@ public class SafeZonePvpSystem extends DamageEventSystem {
 
         boolean victimInSafeZone = safeZoneManager.isInSafeZone(victimX, victimZ);
         boolean attackerInSafeZone = safeZoneManager.isInSafeZone(attackerX, attackerZ);
+
+        if (arenaManager != null) {
+            victimInSafeZone = victimInSafeZone || arenaManager.findArenaAt(worldName, victimX, victimZ) != null;
+            attackerInSafeZone = attackerInSafeZone || arenaManager.findArenaAt(worldName, attackerX, attackerZ) != null;
+        }
 
         if (victimInSafeZone || attackerInSafeZone) {
             damage.setCancelled(true);
