@@ -34,4 +34,6 @@ include(
     ":mods:Varyon-Holograms",
     ":mods:Varyon-TravelingCamera",
     ":mods:Varyon-CrashRestarter",
+    ":mods:Varyon-TpToWorld",
+    ":mods:Varyon-CraftRestrict",
 )
