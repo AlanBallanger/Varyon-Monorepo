@@ -21,6 +21,7 @@ import com.hypixel.hytale.component.SystemGroup;
 import com.hypixel.hytale.component.dependency.Dependency;
 import com.hypixel.hytale.component.dependency.Order;
 import com.hypixel.hytale.component.dependency.SystemDependency;
+import com.hypixel.hytale.component.dependency.SystemGroupDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.protocol.CombatTextUpdate;
 import com.hypixel.hytale.protocol.EntityUIType;
@@ -74,6 +75,8 @@ public class DamageNumberEST extends DamageEventSystem {
     public static final AtomicInteger DBG_EMITTED        = new AtomicInteger();
     public static final AtomicInteger DBG_ZEROED         = new AtomicInteger();
 
+    private static final boolean DEBUG_ENABLED = Boolean.getBoolean("varyon.damagenumbers.debug");
+
     private volatile ComponentType<EntityStore, Visible> visibleComponentType;
     private volatile ComponentType<EntityStore, UIComponentList> uiComponentListComponentType;
     private final Query<EntityStore> query;
@@ -105,12 +108,21 @@ public class DamageNumberEST extends DamageEventSystem {
     }
 
     private static Set<Dependency<EntityStore>> buildDependencies() {
+        try {
+            DamageModule dm = DamageModule.get();
+            if (dm != null) {
+                return Set.of(
+                        new SystemGroupDependency<>(Order.AFTER, dm.getFilterDamageGroup()),
+                        new SystemDependency<>(Order.BEFORE, DamageSystems.EntityUIEvents.class));
+            }
+        } catch (Throwable ignored) {
+        }
         return Set.of(new SystemDependency<>(Order.BEFORE, DamageSystems.EntityUIEvents.class));
     }
 
     @Override
     public SystemGroup<EntityStore> getGroup() {
-        return DamageModule.get().getFilterDamageGroup();
+        return DamageModule.get().getInspectDamageGroup();
     }
 
     @Override
@@ -129,29 +141,39 @@ public class DamageNumberEST extends DamageEventSystem {
                        Store<EntityStore> store,
                        CommandBuffer<EntityStore> commandBuffer,
                        Damage damage) {
-        DBG_HANDLE_CALLS.incrementAndGet();
+        if (DEBUG_ENABLED) {
+            DBG_HANDLE_CALLS.incrementAndGet();
+        }
         if (damage == null) {
             return;
         }
         float rawAmount = damage.getAmount();
         if (rawAmount == 0f) {
-            DBG_SKIP_AMOUNT0.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_SKIP_AMOUNT0.incrementAndGet();
+            }
             return;
         }
         float displayAmount = Math.abs(rawAmount);
         if (displayAmount <= 0f) {
-            DBG_SKIP_AMOUNT0.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_SKIP_AMOUNT0.incrementAndGet();
+            }
             return;
         }
         if (DamageNumberMeta.shouldSkipCombatText(damage)) {
-            DBG_SKIP_COMBAT_TXT.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_SKIP_COMBAT_TXT.incrementAndGet();
+            }
             damage.setAmount(0f);
             return;
         }
 
         ensureComponentTypes();
         if (visibleComponentType == null || uiComponentListComponentType == null) {
-            DBG_SKIP_NO_COMP.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_SKIP_NO_COMP.incrementAndGet();
+            }
             return;
         }
 
@@ -165,7 +187,9 @@ public class DamageNumberEST extends DamageEventSystem {
             uiList = store.getComponent(targetRef, uiComponentListComponentType);
         }
         if (visible == null || uiList == null) {
-            DBG_SKIP_NO_COMP.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_SKIP_NO_COMP.incrementAndGet();
+            }
             return;
         }
 
@@ -178,19 +202,23 @@ public class DamageNumberEST extends DamageEventSystem {
         }
         if (attackerUuid != null && !DamageNumberDisplaySettings.isEnabled(attackerUuid)) {
             restoreViewerUiIfPresent(store, commandBuffer, visible, targetRef, uiList, attackerRef);
-            DBG_SKIP_NO_VIEWER.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_SKIP_NO_VIEWER.incrementAndGet();
+            }
             return;
         }
 
         List<Map.Entry<Ref<EntityStore>, EntityViewer>> enabledViewers =
             collectEnabledViewerEntries(store, commandBuffer, visible);
         if (enabledViewers.isEmpty()) {
-            DBG_SKIP_NO_VIEWER.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_SKIP_NO_VIEWER.incrementAndGet();
+            }
             return;
         }
 
         String kindId = DamageNumbers.resolveKindId(damage);
-        if (Boolean.getBoolean("varyon.damagenumbers.debug")) {
+        if (DEBUG_ENABLED) {
             System.out.println("[DmgNum] amt=" + displayAmount
                     + " kind=" + kindId
                     + " crit=" + DamageNumberMeta.isCritical(damage)
@@ -199,13 +227,17 @@ public class DamageNumberEST extends DamageEventSystem {
         List<Ref<EntityStore>> viewerRefs = enabledViewers.stream().map(Map.Entry::getKey).toList();
         if (FloatingDamageParticles.trySpawn(store, commandBuffer, targetRef, displayAmount, kindId,
                 viewerRefs, damage)) {
-            DBG_EMITTED.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_EMITTED.incrementAndGet();
+            }
             if ("HEAL".equalsIgnoreCase(kindId)) {
                 HealFloatCoordinator.markFromDamageEvent(targetRef);
             }
             DamageNumberMeta.markSkipCombatText(damage);
             damage.setAmount(0f);
-            DBG_ZEROED.incrementAndGet();
+            if (DEBUG_ENABLED) {
+                DBG_ZEROED.incrementAndGet();
+            }
             return;
         }
 
@@ -222,13 +254,17 @@ public class DamageNumberEST extends DamageEventSystem {
             viewer.queueUpdate(targetRef, update);
         }
 
-        DBG_EMITTED.incrementAndGet();
+        if (DEBUG_ENABLED) {
+            DBG_EMITTED.incrementAndGet();
+        }
         if ("HEAL".equalsIgnoreCase(kindId)) {
             HealFloatCoordinator.markFromDamageEvent(targetRef);
         }
         DamageNumberMeta.markSkipCombatText(damage);
         damage.setAmount(0f);
-        DBG_ZEROED.incrementAndGet();
+        if (DEBUG_ENABLED) {
+            DBG_ZEROED.incrementAndGet();
+        }
     }
 
     public static void queueCombatTextDirect(Store<EntityStore> store,

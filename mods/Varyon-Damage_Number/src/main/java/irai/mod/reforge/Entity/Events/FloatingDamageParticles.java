@@ -14,6 +14,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
@@ -25,7 +26,11 @@ import irai.mod.DynamicFloatingDamageFormatter.DamageNumbers;
 
 public final class FloatingDamageParticles {
 
+    /** Fallback when the entity has no BoundingBox (or a degenerate one) — matches a human-sized mob. */
     private static final double HEIGHT_ABOVE_ENTITY = 1.85;
+    /** Extra clearance added above the entity's own bounding-box height so the number floats above the head. */
+    private static final double HEIGHT_ABOVE_ENTITY_MARGIN = 0.35;
+    private static final double MIN_HEIGHT_ABOVE_ENTITY = 0.5;
     private static final double DIGIT_SPACING = 0.1;
     private static final double ICON_SLOT_WIDTH = 0.138;
     private static final double ICON_NUDGE_TOWARD_DIGITS = 0.055;
@@ -80,7 +85,7 @@ public final class FloatingDamageParticles {
 
         org.joml.Vector3d rawBase = transform.getPosition();
         Vector3d base = new Vector3d(rawBase.x, rawBase.y, rawBase.z);
-        double y = base.y + HEIGHT_ABOVE_ENTITY;
+        double y = base.y + resolveHeightAboveEntity(store, commandBuffer, targetRef);
 
         int digitCount = digits.length();
         int iconSlots = iconSystem != null ? 1 : 0;
@@ -122,6 +127,27 @@ public final class FloatingDamageParticles {
             return false;
         }
         return spawnedFor > 0;
+    }
+
+    /** Scales the float height to the target's actual model height instead of assuming a human-sized mob. */
+    private static double resolveHeightAboveEntity(Store<EntityStore> store,
+                                                   @Nullable CommandBuffer<EntityStore> commandBuffer,
+                                                   Ref<EntityStore> targetRef) {
+        try {
+            ComponentType<EntityStore, BoundingBox> bboxType = BoundingBox.getComponentType();
+            BoundingBox bbox = commandBuffer != null ? commandBuffer.getComponent(targetRef, bboxType) : null;
+            if (bbox == null) {
+                bbox = store.getComponent(targetRef, bboxType);
+            }
+            if (bbox != null && bbox.getBoundingBox() != null) {
+                double entityHeight = bbox.getBoundingBox().height();
+                if (entityHeight > 0.0 && !Double.isNaN(entityHeight) && !Double.isInfinite(entityHeight)) {
+                    return Math.max(MIN_HEIGHT_ABOVE_ENTITY, entityHeight + HEIGHT_ABOVE_ENTITY_MARGIN);
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return HEIGHT_ABOVE_ENTITY;
     }
 
     private static List<Ref<EntityStore>> sanitizedViewerRefs(Store<EntityStore> store,

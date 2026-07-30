@@ -14,15 +14,44 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import irai.mod.DynamicFloatingDamageFormatter.DamageNumbers;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
 public final class HealingFloatTickSystem extends EntityTickingSystem<EntityStore> {
 
     private static final float HEAL_EPSILON = 0.5f;
+    private static final long SWEEP_INTERVAL_SECONDS = 60L;
     private final Map<Ref<EntityStore>, Float> previousHealth = new ConcurrentHashMap<>();
+    private static final ScheduledExecutorService SWEEPER = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "VaryonDamageNumber-HealthTrackSweep");
+        t.setDaemon(true);
+        return t;
+    });
+
+    {
+        SWEEPER.scheduleAtFixedRate(this::sweepInvalidEntries,
+                SWEEP_INTERVAL_SECONDS, SWEEP_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+
+    /** Reclaims entries left behind by entities that despawned without being revisited by tick(). */
+    private void sweepInvalidEntries() {
+        try {
+            Iterator<Ref<EntityStore>> it = previousHealth.keySet().iterator();
+            while (it.hasNext()) {
+                Ref<EntityStore> ref = it.next();
+                if (ref == null || !ref.isValid()) {
+                    it.remove();
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+    }
 
     @Override
     public @Nullable Query<EntityStore> getQuery() {
