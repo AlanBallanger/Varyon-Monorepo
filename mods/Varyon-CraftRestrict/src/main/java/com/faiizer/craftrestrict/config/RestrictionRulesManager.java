@@ -26,14 +26,14 @@ public final class RestrictionRulesManager {
 
     /**
      * Adds a restriction rule, or updates the existing one if a rule with the same
-     * pattern and scope already exists (no duplicates).
+     * pattern and excluded-worlds scope already exists (no duplicates).
      */
-    public static String addRule(String pattern, String worldScope, String permission) {
+    public static String addRule(String pattern, String excludedWorlds, String permission) {
         if (pattern == null || pattern.isBlank()) {
             return null;
         }
         String normalizedPattern = pattern.trim();
-        String normalizedScope = worldScope == null ? "" : worldScope.trim();
+        String normalizedExcluded = excludedWorlds == null ? "" : excludedWorlds.trim();
         String normalizedPermission = permission == null ? "" : permission.trim();
 
         CraftRestrictConfig config = Main.getConfig();
@@ -42,8 +42,8 @@ public final class RestrictionRulesManager {
         for (Map.Entry<String, RestrictionRule> entry : rules.entrySet()) {
             RestrictionRule existing = entry.getValue();
             if (existing.getPattern().equalsIgnoreCase(normalizedPattern)
-                    && existing.getWorldScope().equalsIgnoreCase(normalizedScope)) {
-                entry.setValue(new RestrictionRule(normalizedPattern, normalizedScope, normalizedPermission));
+                    && existing.getExcludedWorlds().equalsIgnoreCase(normalizedExcluded)) {
+                entry.setValue(new RestrictionRule(normalizedPattern, normalizedExcluded, normalizedPermission));
                 config.setRestrictionRules(rules);
                 Main.getPluginInstance().saveConfig();
                 return entry.getKey();
@@ -51,7 +51,7 @@ public final class RestrictionRulesManager {
         }
 
         String id = UUID.randomUUID().toString();
-        rules.put(id, new RestrictionRule(normalizedPattern, normalizedScope, normalizedPermission));
+        rules.put(id, new RestrictionRule(normalizedPattern, normalizedExcluded, normalizedPermission));
         config.setRestrictionRules(rules);
         Main.getPluginInstance().saveConfig();
         return id;
@@ -70,9 +70,9 @@ public final class RestrictionRulesManager {
     }
 
     /**
-     * Updates the scope and permission of an existing rule (its id pattern is kept unchanged).
+     * Updates the excluded-worlds scope and permission of an existing rule (its id pattern is kept unchanged).
      */
-    public static void updateRule(String ruleId, String worldScope, String permission) {
+    public static void updateRule(String ruleId, String excludedWorlds, String permission) {
         if (ruleId == null || ruleId.isBlank()) {
             return;
         }
@@ -82,7 +82,7 @@ public final class RestrictionRulesManager {
         if (existing == null) {
             return;
         }
-        rules.put(ruleId, new RestrictionRule(existing.getPattern(), worldScope == null ? "" : worldScope.trim(), permission == null ? "" : permission.trim()));
+        rules.put(ruleId, new RestrictionRule(existing.getPattern(), excludedWorlds == null ? "" : excludedWorlds.trim(), permission == null ? "" : permission.trim()));
         config.setRestrictionRules(rules);
         Main.getPluginInstance().saveConfig();
     }

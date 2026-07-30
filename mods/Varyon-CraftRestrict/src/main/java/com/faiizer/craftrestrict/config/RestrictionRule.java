@@ -9,8 +9,11 @@ import java.util.List;
 
 /**
  * A single restriction rule: an item/recipe id pattern (exact id, or wildcard using '*'),
- * an optional scope (a comma-separated list of world names, or blank for global) and an
- * optional permission node (reserved for future per-permission/rank restrictions).
+ * an optional scope (a comma-separated list of world names EXCLUDED from the rule, or
+ * blank if the rule applies to every world) and an optional permission node (reserved
+ * for future per-permission/rank restrictions).
+ *
+ * <p>Every world is ON (restricted) by default; toggling a world OFF in the UI excludes it.
  */
 public class RestrictionRule {
 
@@ -19,24 +22,24 @@ public class RestrictionRule {
                     (rule, value, extraInfo) -> rule.pattern = value,
                     (rule, extraInfo) -> rule.pattern).add()
             .append(new KeyedCodec<>("WorldScope", Codec.STRING),
-                    (rule, value, extraInfo) -> rule.worldScope = value,
-                    (rule, extraInfo) -> rule.worldScope).add()
+                    (rule, value, extraInfo) -> rule.excludedWorlds = value,
+                    (rule, extraInfo) -> rule.excludedWorlds).add()
             .append(new KeyedCodec<>("Permission", Codec.STRING),
                     (rule, value, extraInfo) -> rule.permission = value,
                     (rule, extraInfo) -> rule.permission).add()
             .build();
 
     private String pattern = "";
-    /** Comma-separated list of world names this rule applies to, or blank for global (all worlds). */
-    private String worldScope = "";
+    /** Comma-separated list of world names EXCLUDED from this rule, or blank if it applies everywhere. */
+    private String excludedWorlds = "";
     private String permission = "";
 
     public RestrictionRule() {
     }
 
-    public RestrictionRule(String pattern, String worldScope, String permission) {
+    public RestrictionRule(String pattern, String excludedWorlds, String permission) {
         this.pattern = pattern == null ? "" : pattern;
-        this.worldScope = worldScope == null ? "" : worldScope;
+        this.excludedWorlds = excludedWorlds == null ? "" : excludedWorlds;
         this.permission = permission == null ? "" : permission;
     }
 
@@ -51,16 +54,16 @@ public class RestrictionRule {
         return pattern;
     }
 
-    public String getWorldScope() {
-        return worldScope;
+    public String getExcludedWorlds() {
+        return excludedWorlds;
     }
 
-    public List<String> getWorldScopeList() {
-        if (isGlobal()) {
+    public List<String> getExcludedWorldsList() {
+        if (excludedWorlds == null || excludedWorlds.isBlank()) {
             return List.of();
         }
         List<String> worlds = new ArrayList<>();
-        for (String world : worldScope.split(",")) {
+        for (String world : excludedWorlds.split(",")) {
             String trimmed = world.trim();
             if (!trimmed.isEmpty()) {
                 worlds.add(trimmed);
@@ -70,7 +73,7 @@ public class RestrictionRule {
     }
 
     public boolean isGlobal() {
-        return worldScope == null || worldScope.isBlank();
+        return excludedWorlds == null || excludedWorlds.isBlank();
     }
 
     public String getPermission() {
@@ -86,11 +89,11 @@ public class RestrictionRule {
             return true;
         }
         if (worldName == null) {
-            return false;
+            return true;
         }
-        return Arrays.stream(worldScope.split(","))
+        return Arrays.stream(excludedWorlds.split(","))
                 .map(String::trim)
-                .anyMatch(world -> world.equalsIgnoreCase(worldName));
+                .noneMatch(world -> world.equalsIgnoreCase(worldName));
     }
 
     public boolean matchesId(String itemId) {

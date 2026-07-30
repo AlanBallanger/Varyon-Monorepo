@@ -37,7 +37,8 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
 
     @Nullable
     private String editingRuleId;
-    private final Set<String> editingSelectedWorlds = new LinkedHashSet<>();
+    /** Worlds toggled OFF (excluded) for the rule currently being edited. */
+    private final Set<String> editingExcludedWorlds = new LinkedHashSet<>();
 
     private CraftRestrictConfigPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss, CraftRestrictEventData.CODEC);
@@ -128,16 +129,16 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
             return;
         }
         editingRuleId = ruleId;
-        editingSelectedWorlds.clear();
-        editingSelectedWorlds.addAll(rule.getWorldScopeList());
+        editingExcludedWorlds.clear();
+        editingExcludedWorlds.addAll(rule.getExcludedWorldsList());
     }
 
     private void toggleEditingWorld(@Nullable String worldName) {
         if (worldName == null || worldName.isBlank()) {
             return;
         }
-        if (!editingSelectedWorlds.remove(worldName)) {
-            editingSelectedWorlds.add(worldName);
+        if (!editingExcludedWorlds.remove(worldName)) {
+            editingExcludedWorlds.add(worldName);
         }
     }
 
@@ -150,8 +151,8 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
             editingRuleId = null;
             return;
         }
-        String scope = RestrictionRule.joinWorlds(List.copyOf(editingSelectedWorlds));
-        RestrictionRulesManager.updateRule(editingRuleId, scope, permission == null ? "" : permission.trim());
+        String excluded = RestrictionRule.joinWorlds(List.copyOf(editingExcludedWorlds));
+        RestrictionRulesManager.updateRule(editingRuleId, excluded, permission == null ? "" : permission.trim());
         editingRuleId = null;
     }
 
@@ -197,7 +198,7 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
             }
             Map.Entry<String, RestrictionRule> entry = rules.get(row - 1);
             RestrictionRule rule = entry.getValue();
-            String scopeLabel = rule.isGlobal() ? "GLOBAL" : String.join(", ", rule.getWorldScopeList());
+            String scopeLabel = rule.isGlobal() ? "GLOBAL" : "SAUF " + String.join(", ", rule.getExcludedWorldsList());
             String permLabel = rule.hasPermission() ? (" [" + rule.getPermission() + "]") : "";
             cmd.set("#RestrictedLabel" + suffix + ".Text", escape(rule.getPattern() + "  (" + scopeLabel + ")" + permLabel));
             evt.addEventBinding(CustomUIEventBindingType.Activating, "#RestrictedOpen" + suffix,
@@ -231,9 +232,9 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
                 continue;
             }
             String worldName = worlds.get(row - 1);
-            boolean selected = editingSelectedWorlds.contains(worldName);
-            cmd.set("#EditWorldBadgeOn" + suffix + ".Visible", selected);
-            cmd.set("#EditWorldBadgeOff" + suffix + ".Visible", !selected);
+            boolean excluded = editingExcludedWorlds.contains(worldName);
+            cmd.set("#EditWorldBadgeOn" + suffix + ".Visible", !excluded);
+            cmd.set("#EditWorldBadgeOff" + suffix + ".Visible", excluded);
             cmd.set("#EditWorldName" + suffix + ".Text", escape(worldName));
             evt.addEventBinding(CustomUIEventBindingType.Activating, "#EditWorldRow" + suffix,
                     EventData.of("Action", "edit_toggle_world").append("ItemId", worldName), false);
