@@ -28,6 +28,7 @@ Group {
         Background: #343850;
         OutlineColor: #c7b37b;
         OutlineSize: 1;
+        Style: (Sounds: $C.@ButtonSounds);
         Label #RefreshButtonLabel {
           Anchor: (Full: 0);
           Text: "Refresh";
@@ -40,6 +41,7 @@ Group {
         Background: #314c59;
         OutlineColor: #85b6c5;
         OutlineSize: 1;
+        Style: (Sounds: $C.@ButtonSounds);
         Label #CloseButtonLabel {
           Anchor: (Full: 0);
           Text: "Close";
@@ -149,6 +151,7 @@ Group {
         Background: #66582e;
         OutlineColor: #c7b37b;
         OutlineSize: 1;
+        Style: (Sounds: $C.@ButtonSounds);
         Label #MapBulkButtonLabel {
           Anchor: (Full: 0);
           Text: "Map";
@@ -161,6 +164,7 @@ Group {
         Background: #66582e;
         OutlineColor: #c7b37b;
         OutlineSize: 1;
+        Style: (Sounds: $C.@ButtonSounds);
         Label #MinimapBulkButtonLabel {
           Anchor: (Full: 0);
           Text: "Minimap";
@@ -173,6 +177,7 @@ Group {
         Background: #66582e;
         OutlineColor: #c7b37b;
         OutlineSize: 1;
+        Style: (Sounds: $C.@ButtonSounds);
         Label #CompassBulkButtonLabel {
           Anchor: (Full: 0);
           Text: "Compass";
@@ -212,6 +217,7 @@ Group {
           Background: #343850;
           OutlineColor: #c7b37b;
           OutlineSize: 1;
+          Style: (Sounds: $C.@ButtonSounds);
           Label #PrevPageButtonLabel {
             Anchor: (Full: 0);
             Text: "Previous";
@@ -224,6 +230,7 @@ Group {
           Background: #343850;
           OutlineColor: #c7b37b;
           OutlineSize: 1;
+          Style: (Sounds: $C.@ButtonSounds);
           Label #NextPageButtonLabel {
             Anchor: (Full: 0);
             Text: "Next";

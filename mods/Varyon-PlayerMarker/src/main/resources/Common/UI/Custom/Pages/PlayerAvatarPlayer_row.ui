@@ -1,3 +1,5 @@
+$C = "../Common.ui";
+
 Group {
   Anchor: (Height: 84, Bottom: 8);
   Background: #171d29;
@@ -50,6 +52,7 @@ Group {
       Background: #35455f;
       OutlineColor: #c7b37b;
       OutlineSize: 1;
+      Style: (Sounds: $C.@ButtonSounds);
       Label #MapToggleButtonLabel {
         Anchor: (Full: 0);
         Text: "Map: On";
@@ -62,6 +65,7 @@ Group {
       Background: #35455f;
       OutlineColor: #c7b37b;
       OutlineSize: 1;
+      Style: (Sounds: $C.@ButtonSounds);
       Label #MinimapToggleButtonLabel {
         Anchor: (Full: 0);
         Text: "Minimap: On";
@@ -74,6 +78,7 @@ Group {
       Background: #4a3940;
       OutlineColor: #c7b37b;
       OutlineSize: 1;
+      Style: (Sounds: $C.@ButtonSounds);
       Label #CompassToggleButtonLabel {
         Anchor: (Full: 0);
         Text: "Compass: Off";
