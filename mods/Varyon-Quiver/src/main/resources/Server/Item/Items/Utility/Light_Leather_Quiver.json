@@ -1,0 +1,43 @@
+{
+  "Parent": "Utility_Leather_Quiver",
+  "TranslationProperties": {
+    "Name": "server.items.Light_Leather_Quiver.name",
+    "Description": "server.items.Light_Leather_Quiver.description"
+  },
+  "Quality": "Uncommon",
+  "ItemLevel": 15,
+  "Model": "Items/Back/JaysQuiver.blockymodel",
+  "Texture": "Items/Back/Quiver_Texture.png",
+  "PlayerAnimationsId": "Crossbow",
+  "IconProperties": {
+    "Scale": 0.51,
+    "Translation": [0, -19.1],
+    "Rotation": [22.5, 45, 22.5]
+  },
+  "Container": {
+    "Capacity": 6,
+    "ItemTag": "Family=Arrow"
+  },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [
+        { "Type": "OpenItemStackContainer" }
+      ]
+    }
+  },
+  "Recipe": {
+    "TimeSeconds": 5,
+    "Input": [
+      { "ItemId": "Ingredient_Leather_Light", "Quantity": 20 },
+      { "ItemId": "Ingredient_Bar_Iron", "Quantity": 10 }
+    ],
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Id": "Weapon_Bench",
+        "Categories": ["Weapon_Bow"],
+        "RequiredTierLevel": 1
+      }
+    ]
+  }
+}

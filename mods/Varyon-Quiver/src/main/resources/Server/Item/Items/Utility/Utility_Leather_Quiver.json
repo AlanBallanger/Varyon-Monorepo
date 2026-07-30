@@ -1,0 +1,47 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Utility_Leather_Quiver.name",
+    "Description": "server.items.Utility_Leather_Quiver.description"
+  },
+  "Categories": [
+    "Items.Utility"
+  ],
+  "Icon": "Icons/ItemsGenerated/Utility_Leather_Quiver.png",
+  "Quality": "Common",
+  "ItemLevel": 20,
+  "Model": "Items/Back/Quiver.blockymodel",
+  "Texture": "Items/Back/Quiver_Texture.png",
+  "PlayerAnimationsId": "Crossbow",
+  "IconProperties": {
+    "Scale": 0.51,
+    "Translation": [0, -19.1],
+    "Rotation": [22.5, 45, 22.5]
+  },
+  "Tags": {
+    "Family": ["Leather"],
+    "Type": ["Utility"]
+  },
+  "MaxStack": 1,
+  "Utility": {
+    "Usable": true,
+    "Compatible": true
+  },
+  "Container": {
+    "Capacity": 6,
+    "ItemTag": "Family=Arrow"
+  },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [
+        { "Type": "OpenItemStackContainer" }
+      ]
+    }
+  },
+  "InteractionConfig": {
+    "Priorities": {
+      "Secondary": {
+        "MainHand": 1
+      }
+    }
+  }
+}

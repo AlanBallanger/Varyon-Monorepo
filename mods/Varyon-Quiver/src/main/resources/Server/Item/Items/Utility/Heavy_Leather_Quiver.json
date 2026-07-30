@@ -1,0 +1,44 @@
+{
+  "Parent": "Utility_Leather_Quiver",
+  "TranslationProperties": {
+    "Name": "server.items.Heavy_Leather_Quiver.name",
+    "Description": "server.items.Heavy_Leather_Quiver.description"
+  },
+  "Quality": "Epic",
+  "ItemLevel": 45,
+  "Model": "Items/Back/Heavy_Quiver.blockymodel",
+  "Texture": "Items/Back/Heavy_Quiver_Texture.png",
+  "PlayerAnimationsId": "Crossbow",
+  "IconProperties": {
+    "Scale": 0.51,
+    "Translation": [0, -19.1],
+    "Rotation": [22.5, 45, 22.5]
+  },
+  "Container": {
+    "Capacity": 11,
+    "ItemTag": "Family=Arrow"
+  },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [
+        { "Type": "OpenItemStackContainer" }
+      ]
+    }
+  },
+  "Recipe": {
+    "TimeSeconds": 10,
+    "Input": [
+      { "ItemId": "Medium_Leather_Quiver", "Quantity": 1 },
+      { "ItemId": "Ingredient_Leather_Heavy", "Quantity": 15 },
+      { "ItemId": "Ingredient_Bar_Adamantite", "Quantity": 10 }
+    ],
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Id": "Weapon_Bench",
+        "Categories": ["Weapon_Bow"],
+        "RequiredTierLevel": 3
+      }
+    ]
+  }
+}

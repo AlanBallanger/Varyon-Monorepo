@@ -1,0 +1,44 @@
+{
+  "Parent": "Utility_Leather_Quiver",
+  "TranslationProperties": {
+    "Name": "server.items.Medium_Leather_Quiver.name",
+    "Description": "server.items.Medium_Leather_Quiver.description"
+  },
+  "Quality": "Rare",
+  "ItemLevel": 30,
+  "Model": "Items/Back/Medium_Quiver.blockymodel",
+  "Texture": "Items/Back/Medium_Quiver_Texture.png",
+  "PlayerAnimationsId": "Crossbow",
+  "IconProperties": {
+    "Scale": 0.51,
+    "Translation": [0, -19.1],
+    "Rotation": [22.5, 45, 22.5]
+  },
+  "Container": {
+    "Capacity": 8,
+    "ItemTag": "Family=Arrow"
+  },
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [
+        { "Type": "OpenItemStackContainer" }
+      ]
+    }
+  },
+  "Recipe": {
+    "TimeSeconds": 7,
+    "Input": [
+      { "ItemId": "Light_Leather_Quiver", "Quantity": 1 },
+      { "ItemId": "Ingredient_Leather_Medium", "Quantity": 20 },
+      { "ItemId": "Ingredient_Bar_Thorium", "Quantity": 10 }
+    ],
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Id": "Weapon_Bench",
+        "Categories": ["Weapon_Bow"],
+        "RequiredTierLevel": 2
+      }
+    ]
+  }
+}

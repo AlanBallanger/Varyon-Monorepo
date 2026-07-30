@@ -1,0 +1,21 @@
+{
+  "Group": "Varyon",
+  "Name": "Varyon-Quiver",
+  "Version": "1.0.0",
+  "Description": "Quiver for Arrows: off-hand bow/crossbow damage bonus and auto-refill from backpack.",
+  "Main": "fr.varyon.quiver.VaryonQuiverPlugin",
+  "Authors": [
+    {
+      "Name": "Varyon",
+      "Url": ""
+    }
+  ],
+  "Website": "",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "LoadBefore": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": true,
+  "SubPlugins": [],
+  "ServerVersion": "0.5.0"
+}
