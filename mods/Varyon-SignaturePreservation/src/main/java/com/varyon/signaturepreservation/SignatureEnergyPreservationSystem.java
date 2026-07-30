@@ -41,6 +41,21 @@ public final class SignatureEnergyPreservationSystem extends EntityTickingSystem
     private final Map<UUID, AtomicInteger> restoreEpoch = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
+    /** Cached SignatureEnergy stat index — resolved once instead of re-looked-up by name every tick. */
+    private volatile int signatureEnergyIndexCache = Integer.MIN_VALUE;
+
+    private int signatureEnergyIndex() {
+        int cached = signatureEnergyIndexCache;
+        if (cached != Integer.MIN_VALUE) {
+            return cached;
+        }
+        int resolved = EntityStatType.getAssetMap().getIndex("SignatureEnergy");
+        if (resolved != Integer.MIN_VALUE) {
+            signatureEnergyIndexCache = resolved;
+        }
+        return resolved;
+    }
+
     public SignatureEnergyPreservationSystem(VaryonSignaturePreservationConfig config) {
         this.config = config;
     }
@@ -228,7 +243,7 @@ public final class SignatureEnergyPreservationSystem extends EntityTickingSystem
     }
 
     private float getSignatureEnergy(Ref<EntityStore> entityRef, Store<EntityStore> store) {
-        int signatureEnergyIndex = EntityStatType.getAssetMap().getIndex("SignatureEnergy");
+        int signatureEnergyIndex = signatureEnergyIndex();
         if (signatureEnergyIndex == Integer.MIN_VALUE) {
             return 0.0f;
         }
@@ -241,7 +256,7 @@ public final class SignatureEnergyPreservationSystem extends EntityTickingSystem
     }
 
     private void setSignatureEnergy(Ref<EntityStore> entityRef, Store<EntityStore> store, float value) {
-        int signatureEnergyIndex = EntityStatType.getAssetMap().getIndex("SignatureEnergy");
+        int signatureEnergyIndex = signatureEnergyIndex();
         if (signatureEnergyIndex == Integer.MIN_VALUE) {
             debug("setSignatureEnergy FAILED: SignatureEnergy stat not found!");
             return;
