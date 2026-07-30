@@ -1,10 +1,13 @@
+$C = "../Common.ui";
+
 Group {
   Button #PageTabButton {
     Anchor: (Width: 40, Height: 28, Right: 4);
     Padding: (Horizontal: 2, Vertical: 1);
     Background: #2a3544;
     Style: (
-      Hovered: (Background: #3a4a5e)
+      Hovered: (Background: #3a4a5e),
+      Sounds: $C.@ButtonSounds
     );
 
     Label #PageTabLabel {

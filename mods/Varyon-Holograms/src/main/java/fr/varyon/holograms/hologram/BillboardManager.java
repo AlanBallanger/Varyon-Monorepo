@@ -37,7 +37,12 @@ public class BillboardManager {
 
     private record BillboardEntry(UUID entityId, UUID worldId, float customMinDistance, float defaultYaw) {}
 
+    /** Minimum yaw change (radians) before re-allocating/queuing a transform update for a viewer. */
+    private static final float YAW_EPSILON = 0.02f;
+
     private final Map<UUID, BillboardEntry> billboards = new ConcurrentHashMap<>();
+    /** Last yaw sent per (billboard entity, viewer ref), to skip redundant allocation/network updates. */
+    private final Map<UUID, Map<Ref<EntityStore>, Float>> lastYawByViewer = new ConcurrentHashMap<>();
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> task;
 
@@ -54,6 +59,7 @@ public class BillboardManager {
         if (task != null) task.cancel(false);
         if (scheduler != null) scheduler.shutdownNow();
         billboards.clear();
+        lastYawByViewer.clear();
     }
 
     public void register(@Nonnull UUID entityId, @Nonnull UUID worldId, float trackingDistance) {
@@ -67,10 +73,14 @@ public class BillboardManager {
 
     public void unregister(@Nonnull UUID entityId) {
         billboards.remove(entityId);
+        lastYawByViewer.remove(entityId);
     }
 
     public void unregisterAll(@Nonnull Collection<UUID> entityIds) {
-        entityIds.forEach(billboards::remove);
+        entityIds.forEach(id -> {
+            billboards.remove(id);
+            lastYawByViewer.remove(id);
+        });
     }
 
     private void tick() {
@@ -78,7 +88,7 @@ public class BillboardManager {
         Universe universe = Universe.get();
         if (universe == null) return;
 
-        Map<UUID, List<BillboardEntry>> byWorld = new ConcurrentHashMap<>();
+        Map<UUID, List<BillboardEntry>> byWorld = new java.util.HashMap<>();
         for (BillboardEntry entry : billboards.values()) {
             byWorld.computeIfAbsent(entry.worldId(), k -> new ArrayList<>()).add(entry);
         }
@@ -117,6 +127,12 @@ public class BillboardManager {
                     : MIN_TRACKING_DISTANCE;
                 double maxDist = MAX_TRACKING_DISTANCE;
 
+                Map<Ref<EntityStore>, Float> lastYaws = lastYawByViewer.computeIfAbsent(
+                    entry.entityId(), k -> new ConcurrentHashMap<>());
+                // Drop stale entries for viewers no longer watching this billboard, so this map
+                // doesn't accumulate refs for players who moved away/disconnected.
+                lastYaws.keySet().retainAll(visible.visibleTo.keySet());
+
                 for (Map.Entry<Ref<EntityStore>, EntityTrackerSystems.EntityViewer> viewerEntry : visible.visibleTo.entrySet()) {
                     Ref<EntityStore> playerRef = viewerEntry.getKey();
                     EntityTrackerSystems.EntityViewer viewer = viewerEntry.getValue();
@@ -138,15 +154,22 @@ public class BillboardManager {
                         yaw = entry.defaultYaw();
                     }
 
+                    boolean nowVisible = viewer.visible.contains(billboardRef);
+                    Float lastYaw = lastYaws.get(playerRef);
+                    if (nowVisible && lastYaw != null && Math.abs(yaw - lastYaw) < YAW_EPSILON) {
+                        continue; // Angle hasn't changed meaningfully — skip allocation and network update.
+                    }
+
                     ModelTransform transform = new ModelTransform();
                     transform.position = new Position(billboardPos.x, billboardPos.y, billboardPos.z);
                     transform.bodyOrientation = new Direction(yaw, 0f, 0f);
                     transform.lookOrientation = new Direction(yaw, 0f, 0f);
                     TransformUpdate update = new TransformUpdate(transform);
-                    if (!viewer.visible.contains(billboardRef)) {
+                    if (!nowVisible) {
                         viewer.visible.add(billboardRef);
                     }
                     viewer.queueUpdate(billboardRef, update);
+                    lastYaws.put(playerRef, yaw);
                 }
             } catch (Exception e) {
                 LOGGER.at(Level.FINE).log("[Varyon-Holograms] Billboard update error for %s: %s", entry.entityId(), e.getMessage());
@@ -156,9 +179,6 @@ public class BillboardManager {
 
     @Nullable
     private World findWorld(@Nonnull Universe universe, @Nonnull UUID worldId) {
-        for (World world : universe.getWorlds().values()) {
-            if (world.getWorldConfig().getUuid().equals(worldId)) return world;
-        }
-        return null;
+        return universe.getWorld(worldId);
     }
 }

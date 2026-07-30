@@ -148,7 +148,7 @@ $C.@Container {
           Anchor: (Width: 72, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "MUR";
@@ -160,7 +160,7 @@ $C.@Container {
           Anchor: (Width: 72, Height: 28, Right: 16);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "SOL";
@@ -172,7 +172,7 @@ $C.@Container {
           Anchor: (Width: 58, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "NORD";
@@ -184,7 +184,7 @@ $C.@Container {
           Anchor: (Width: 58, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "SUD";
@@ -196,7 +196,7 @@ $C.@Container {
           Anchor: (Width: 58, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "EST";
@@ -208,7 +208,7 @@ $C.@Container {
           Anchor: (Width: 58, Height: 28, Right: 16);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "OUEST";
@@ -220,7 +220,7 @@ $C.@Container {
           Anchor: (Width: 130, Height: 28);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "SUIT DU REGARD";
@@ -301,7 +301,7 @@ $C.@Container {
           Anchor: (Width: 56, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "ON";
@@ -313,7 +313,7 @@ $C.@Container {
           Anchor: (Width: 56, Height: 28, Right: 10);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "OFF";
@@ -346,7 +346,7 @@ $C.@Container {
           Anchor: (Width: 72, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "GAUCHE";
@@ -358,7 +358,7 @@ $C.@Container {
           Anchor: (Width: 56, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "HAUT";
@@ -370,7 +370,7 @@ $C.@Container {
           Anchor: (Width: 72, Height: 28);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
-          Style: (Hovered: (Background: #3a4a5e));
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "INSTANT";
@@ -489,7 +489,7 @@ $C.@Container {
             Anchor: (Width: 118, Height: 26, Right: 4);
             Padding: (Horizontal: 2, Vertical: 1);
             Background: #2a3544;
-            Style: (Hovered: (Background: #3a4a5e));
+            Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
             Label {
               Text: "BILLBOARD";
@@ -501,7 +501,7 @@ $C.@Container {
             Anchor: (Width: 72, Height: 26, Right: 4);
             Padding: (Horizontal: 2, Vertical: 1);
             Background: #2a3544;
-            Style: (Hovered: (Background: #3a4a5e));
+            Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
             Label {
               Text: "1 FACE";
@@ -513,7 +513,7 @@ $C.@Container {
             Anchor: (Width: 78, Height: 26);
             Padding: (Horizontal: 2, Vertical: 1);
             Background: #2a3544;
-            Style: (Hovered: (Background: #3a4a5e));
+            Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
             Label {
               Text: "2 FACES";

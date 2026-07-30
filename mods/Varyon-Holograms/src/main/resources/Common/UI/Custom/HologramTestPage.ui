@@ -28,7 +28,8 @@ $C.@PageOverlay {
         Style: ButtonStyle(
           Default: (Background: (Color: #185a28)),
           Hovered: (Background: (Color: #286a38)),
-          Pressed: (Background: (Color: #0f4018))
+          Pressed: (Background: (Color: #0f4018)),
+          Sounds: $C.@ButtonSounds
         );
         Group {
           LayoutMode: Middle;

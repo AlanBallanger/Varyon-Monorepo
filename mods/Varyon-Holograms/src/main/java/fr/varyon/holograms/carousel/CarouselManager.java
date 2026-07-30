@@ -188,11 +188,7 @@ public class CarouselManager {
     @javax.annotation.Nullable
     private World findWorld(@Nonnull UUID worldId) {
         Universe universe = Universe.get();
-        if (universe == null) return null;
-        for (World world : universe.getWorlds().values()) {
-            if (world.getWorldConfig().getUuid().equals(worldId)) return world;
-        }
-        return null;
+        return universe != null ? universe.getWorld(worldId) : null;
     }
 
     private static final class CarouselRuntime {

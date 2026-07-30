@@ -80,7 +80,7 @@ public class AnimationManager {
         Universe universe = Universe.get();
         if (universe == null) return;
 
-        Map<UUID, List<Map.Entry<UUID, HologramAnimGroup>>> byWorld = new ConcurrentHashMap<>();
+        Map<UUID, List<Map.Entry<UUID, HologramAnimGroup>>> byWorld = new java.util.HashMap<>();
         for (Map.Entry<UUID, HologramAnimGroup> entry : hologramGroups.entrySet()) {
             UUID worldId = entry.getValue().getWorldId();
             byWorld.computeIfAbsent(worldId, k -> new ArrayList<>()).add(entry);
@@ -161,9 +161,6 @@ public class AnimationManager {
 
     @javax.annotation.Nullable
     private World findWorld(@Nonnull Universe universe, @Nonnull UUID worldId) {
-        for (World world : universe.getWorlds().values()) {
-            if (world.getWorldConfig().getUuid().equals(worldId)) return world;
-        }
-        return null;
+        return universe.getWorld(worldId);
     }
 }

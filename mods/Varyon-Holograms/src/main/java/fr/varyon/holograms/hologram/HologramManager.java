@@ -286,18 +286,18 @@ public class HologramManager {
     }
 
     private void spawnHologram(@Nonnull Hologram hologram) {
-        if (!hologram.isVisible()) { LOGGER.at(Level.INFO).log("[Varyon-Holograms] spawnHologram: %s non visible, skip", hologram.getName()); return; }
+        if (!hologram.isVisible()) { LOGGER.at(Level.FINE).log("[Varyon-Holograms] spawnHologram: %s non visible, skip", hologram.getName()); return; }
         World world = findWorld(hologram.getWorldId());
         if (world == null) { LOGGER.at(Level.WARNING).log("[Varyon-Holograms] spawnHologram: monde introuvable pour %s worldId=%s", hologram.getName(), hologram.getWorldId()); return; }
 
-        LOGGER.at(Level.INFO).log("[Varyon-Holograms] spawnHologram: %s -> world=%s pos=%.1f,%.1f,%.1f", hologram.getName(), world.getName(), hologram.getPosition().x, hologram.getPosition().y, hologram.getPosition().z);
+        LOGGER.at(Level.FINE).log("[Varyon-Holograms] spawnHologram: %s -> world=%s pos=%.1f,%.1f,%.1f", hologram.getName(), world.getName(), hologram.getPosition().x, hologram.getPosition().y, hologram.getPosition().z);
         world.execute(() -> {
             try {
                 Vector3d pos = hologram.getPosition();
                 int chunkX = (int) Math.floor(pos.x) >> 5;
                 int chunkZ = (int) Math.floor(pos.z) >> 5;
                 Ref<?> chunkRef = world.getChunkStore().getChunkReference(ChunkUtil.indexChunk(chunkX, chunkZ));
-                if (chunkRef == null || !chunkRef.isValid()) { LOGGER.at(Level.WARNING).log("[Varyon-Holograms] spawnHologram: chunk non chargé chunkX=%d chunkZ=%d pour %s", chunkX, chunkZ, hologram.getName()); return; }
+                if (chunkRef == null || !chunkRef.isValid()) { LOGGER.at(Level.FINE).log("[Varyon-Holograms] spawnHologram: chunk non chargé chunkX=%d chunkZ=%d pour %s, skip", chunkX, chunkZ, hologram.getName()); return; }
 
                 hologram.clearLineEntityIds();
                 carouselBasePositions.remove(hologram.getId());
@@ -808,10 +808,7 @@ public class HologramManager {
 
     @Nullable
     private World findWorld(@Nonnull UUID worldId) {
-        for (World w : Universe.get().getWorlds().values()) {
-            if (w.getWorldConfig().getUuid().equals(worldId)) return w;
-        }
-        return null;
+        return Universe.get().getWorld(worldId);
     }
 
     @Nonnull
@@ -893,6 +890,7 @@ public class HologramManager {
             UUID creatorId = creatorRaw != null ? UUID.fromString(creatorRaw) : null;
             String group = HologramGroups.normalize(extractStrNullable(body, "group"));
             String animation = extractStrNullable(body, "animation");
+            if ("none".equalsIgnoreCase(animation)) animation = null;
             HologramLayout layout = HologramLayout.parse(extractStrNullable(body, "layout"));
             HologramFacing facing = HologramFacing.parse(extractStrNullable(body, "facing"));
             boolean billboard = extractBool(body, "billboard");
