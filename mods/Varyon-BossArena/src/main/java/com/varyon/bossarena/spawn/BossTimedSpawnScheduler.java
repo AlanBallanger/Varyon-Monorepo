@@ -5,6 +5,7 @@ import com.varyon.bossarena.data.Arena;
 import com.varyon.bossarena.data.ArenaRegistry;
 import com.varyon.bossarena.data.BossDefinition;
 import com.varyon.bossarena.data.BossRegistry;
+import com.varyon.bossarena.damagechart.BossDamageChartTracker;
 import com.varyon.bossarena.system.BossTrackingSystem;
 import com.varyon.bossarena.system.BossWaveNotificationService;
 import com.varyon.bossarena.util.EntityComponents;
@@ -70,6 +71,7 @@ public final class BossTimedSpawnScheduler {
             });
     private final Object persistenceLock = new Object();
     private TimedBossMapMarkerService mapMarkerService;
+    private BossDamageChartTracker damageChartTracker;
     private volatile Consumer<BossArenaConfig.TimedBossSpawn> oneShotDisableHandler;
     private volatile Supplier<BossArenaConfig> configSupplier;
     private volatile Path persistencePath;
@@ -328,6 +330,10 @@ public final class BossTimedSpawnScheduler {
 
     public void setMapMarkerService(TimedBossMapMarkerService mapMarkerService) {
         this.mapMarkerService = mapMarkerService;
+    }
+
+    public void setDamageChartTracker(BossDamageChartTracker damageChartTracker) {
+        this.damageChartTracker = damageChartTracker;
     }
 
     public void setOneShotDisableHandler(Consumer<BossArenaConfig.TimedBossSpawn> oneShotDisableHandler) {
@@ -650,7 +656,7 @@ public final class BossTimedSpawnScheduler {
         String configuredBossId = ensureRolledBossId(state, rule);
         String configuredArenaId = optional(rule.arenaId);
         if (configuredBossId.isEmpty() || configuredArenaId.isEmpty()) {
-            LOGGER.warning("Timed spawn rule '" + state.label + "' is missing boss pool or arenaId.");
+            state.nextSpawnEpochMs = Long.MAX_VALUE;
             return false;
         }
 
@@ -658,6 +664,7 @@ public final class BossTimedSpawnScheduler {
         if (def == null) {
             LOGGER.warning("Timed spawn rule '" + state.label + "' references unknown bossId '" + configuredBossId + "'.");
             state.rolledBossId = "";
+            state.nextSpawnEpochMs = now + TimeUnit.MINUTES.toMillis(5L);
             return false;
         }
 
@@ -1104,6 +1111,9 @@ public final class BossTimedSpawnScheduler {
         }
         for (UUID eventBossUuid : bossUuids) {
             trackingSystem.markBossDead(eventBossUuid);
+        }
+        if (damageChartTracker != null && eventSnapshot != null && eventSnapshot.eventId != null) {
+            damageChartTracker.discard(eventSnapshot.eventId);
         }
 
         if (world != null) {

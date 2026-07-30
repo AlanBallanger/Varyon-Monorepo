@@ -68,6 +68,16 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
                                  List<BossDpsHud.PlayerDamageRow> rows, int personalKills, long expiresAtMs) {
     }
 
+    /** Drops all per-player tracking state for a disconnected player. Must run on the world thread. */
+    public void onPlayerDisconnected(UUID playerUuid) {
+        if (playerUuid == null) {
+            return;
+        }
+        playersWithHudShown.remove(playerUuid);
+        consecutiveMissesByPlayer.remove(playerUuid);
+        lastFightSnapshotByPlayer.remove(playerUuid);
+    }
+
     public BossDpsHudSystem(BossTrackingSystem trackingSystem,
                             BossDamageChartTracker damageChartTracker,
                             BossArenaPlugin plugin) {
@@ -103,12 +113,14 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
             UUID primaryBossUuid = resolvePrimaryBossUuid(event.eventId);
             if (primaryBossUuid == null) {
                 LOGGER.fine(() -> "HUD tick: no primary boss UUID resolved for event " + event.eventId);
+                keepLastKnownFightVisible(event, playersUpdatedThisTick, now);
                 continue;
             }
 
             float[] hp = readHp(event.world, primaryBossUuid);
             if (hp == null) {
                 LOGGER.fine(() -> "HUD tick: readHp failed for boss " + primaryBossUuid);
+                keepLastKnownFightVisible(event, playersUpdatedThisTick, now);
                 continue;
             }
 
@@ -185,6 +197,33 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
         }
     }
 
+    /**
+     * The fight is still active but this tick failed to resolve the boss/HP (transient lookup
+     * hiccup — entity ref momentarily invalid, component read race, etc). Re-send each affected
+     * player's last known snapshot for this event instead of silently skipping the update, so a
+     * couple of bad ticks in a row don't burn through hideStaleHuds' miss counter and close the HUD.
+     */
+    private void keepLastKnownFightVisible(BossTrackingSystem.ActiveEventStatus event,
+                                           Set<UUID> playersUpdatedThisTick, long now) {
+        for (var entry : lastFightSnapshotByPlayer.entrySet()) {
+            UUID playerUuid = entry.getKey();
+            FightSnapshot snapshot = entry.getValue();
+            if (!event.eventId.equals(snapshot.eventId())) {
+                continue;
+            }
+            BossDpsHud hud = BossDpsHud.get(playerUuid);
+            if (hud != null) {
+                hud.updateFight(snapshot.bossName(), snapshot.bossHpCurrent(), snapshot.bossHpMax(),
+                        snapshot.rows(), snapshot.personalKills());
+            }
+            playersUpdatedThisTick.add(playerUuid);
+            playersWithHudShown.add(playerUuid);
+            consecutiveMissesByPlayer.remove(playerUuid);
+            entry.setValue(new FightSnapshot(snapshot.eventId(), snapshot.bossName(), snapshot.bossHpCurrent(),
+                    snapshot.bossHpMax(), snapshot.rows(), snapshot.personalKills(), now + POST_KILL_LINGER_MS));
+        }
+    }
+
     private void hideStaleHuds(Set<UUID> playersUpdatedThisTick) {
         playersWithHudShown.removeIf(playerUuid -> {
             if (playersUpdatedThisTick.contains(playerUuid)) {
@@ -233,29 +272,12 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
     }
 
     private UUID resolvePrimaryBossUuid(UUID eventId) {
-        if (eventId == null) {
-            return null;
-        }
-        for (var entry : trackingSystem.snapshotTrackedBosses().entrySet()) {
-            BossTrackingSystem.BossData data = entry.getValue();
-            if (data != null && eventId.equals(data.eventId)) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return trackingSystem.getPrimaryBossUuid(eventId);
     }
 
     private BossTrackingSystem.BossData resolvePrimaryBoss(UUID eventId) {
-        if (eventId == null) {
-            return null;
-        }
-        for (var entry : trackingSystem.snapshotTrackedBosses().entrySet()) {
-            BossTrackingSystem.BossData data = entry.getValue();
-            if (data != null && eventId.equals(data.eventId)) {
-                return data;
-            }
-        }
-        return null;
+        UUID bossUuid = trackingSystem.getPrimaryBossUuid(eventId);
+        return bossUuid != null ? trackingSystem.getBossData(bossUuid) : null;
     }
 
     /** @return {current, max} ou null si l'entité/ses stats sont indisponibles. */

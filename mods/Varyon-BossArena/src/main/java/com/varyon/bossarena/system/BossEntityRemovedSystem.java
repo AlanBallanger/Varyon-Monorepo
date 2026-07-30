@@ -1,6 +1,7 @@
 package com.varyon.bossarena.system;
 
 import com.varyon.bossarena.BossArenaPlugin;
+import com.varyon.bossarena.damagechart.BossDamageChartTracker;
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
@@ -23,10 +24,13 @@ public final class BossEntityRemovedSystem extends RefSystem<EntityStore> {
     private static final Logger LOGGER = Logger.getLogger("BossArena");
     private final BossTrackingSystem trackingSystem;
     private final BossArenaPlugin plugin;
+    private final BossDamageChartTracker damageChartTracker;
 
-    public BossEntityRemovedSystem(BossTrackingSystem trackingSystem, BossArenaPlugin plugin) {
+    public BossEntityRemovedSystem(BossTrackingSystem trackingSystem, BossArenaPlugin plugin,
+                                   BossDamageChartTracker damageChartTracker) {
         this.trackingSystem = trackingSystem;
         this.plugin = plugin;
+        this.damageChartTracker = damageChartTracker;
     }
 
     @Override
@@ -82,9 +86,14 @@ public final class BossEntityRemovedSystem extends RefSystem<EntityStore> {
         if (isBoss) {
             // Snapshot event members before canceling to clean up everything.
             BossTrackingSystem.EventMembersSnapshot snapshot = trackingSystem.snapshotEventMembersForBoss(entityUuid);
+            UUID eventIdForDamageChart = trackingSystem.getEventIdForTrackedEntity(entityUuid);
 
             // Use untrackAndCancel for immediate system cleanup without loot.
             BossTrackingSystem.BossEventContext context = trackingSystem.untrackAndCancel(entityUuid);
+
+            if (damageChartTracker != null && eventIdForDamageChart != null) {
+                damageChartTracker.discard(eventIdForDamageChart);
+            }
 
             if (snapshot != null) {
                 // Clear map markers for all bosses in the event.

@@ -78,10 +78,6 @@ public final class BossFightMusicApplySystem extends EntityTickingSystem<EntityS
         if (playerRef == null || tracker == null || transform == null) {
             return;
         }
-        World world = Universe.get().getWorld(playerRef.getWorldUuid());
-        if (world == null) {
-            return;
-        }
         int baseline = 0;
         UUID playerUuid = playerRef.getUuid();
 
@@ -98,9 +94,15 @@ public final class BossFightMusicApplySystem extends EntityTickingSystem<EntityS
             return;
         }
 
+        // Bail out before any world/session lookup when no boss fight music is active anywhere:
+        // this is the common case for most players most of the time.
         if (!manager.hasActiveSessions()) {
             releaseForcedMusic(playerRef, tracker, baseline, true);
             lastAppliedGeneration.remove(playerUuid);
+            return;
+        }
+        World world = Universe.get().getWorld(playerRef.getWorldUuid());
+        if (world == null) {
             return;
         }
         double x = transform.getPosition().x;

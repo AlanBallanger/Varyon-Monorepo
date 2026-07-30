@@ -60,6 +60,14 @@ public final class BossDpsHud extends CustomUIHud {
         player.getHudManager().removeCustomHud(playerRef, HUD_KEY);
     }
 
+    /**
+     * Drops the tracked instance for a disconnected player without touching the HUD manager
+     * (the player's session/HUDs are already torn down by the engine on disconnect).
+     */
+    public static void forget(@Nonnull UUID uuid) {
+        INSTANCES.remove(uuid);
+    }
+
     @Override
     protected void build(@Nonnull UICommandBuilder builder) {
         builder.append("BossDpsHud.ui");

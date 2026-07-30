@@ -79,6 +79,14 @@ public final class BossDamageChartTracker {
         return Collections.unmodifiableList(list);
     }
 
+    /** Discards an event's damage tally without snapshotting it. Call when an event ends without loot. */
+    public void discard(UUID eventId) {
+        if (eventId == null) {
+            return;
+        }
+        byEvent.remove(eventId);
+    }
+
     public static final class DamageEntry {
         private final UUID playerUuid;
         private final long damage;

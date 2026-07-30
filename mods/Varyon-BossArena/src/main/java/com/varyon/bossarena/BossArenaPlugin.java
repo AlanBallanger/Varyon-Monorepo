@@ -14,6 +14,7 @@ import com.varyon.bossarena.damagechart.BossArenaDamageChartOpener;
 import com.varyon.bossarena.damagechart.BossDamageChartHpSnapshotSystem;
 import com.varyon.bossarena.damagechart.BossDamageChartRecordingSystem;
 import com.varyon.bossarena.damagechart.DamageChartOpener;
+import com.varyon.bossarena.ui.BossDpsHud;
 import com.varyon.bossarena.ui.BossDpsHudSystem;
 import com.varyon.bossarena.system.BossTrackingSystem;
 import com.varyon.bossarena.system.BossDeathSystem;
@@ -23,7 +24,6 @@ import com.varyon.bossarena.system.BossEntityRemovedSystem;
 import com.varyon.bossarena.system.BossLeashSystem;
 import com.varyon.bossarena.system.BossSpeedScalingSystem;
 import com.varyon.bossarena.system.LootSpawnSystem;
-import com.varyon.bossarena.system.RPGLevelingBossScaleCompatSystem;
 import com.varyon.bossarena.loot.LootRegistry;
 import com.varyon.bossarena.loot.BossLootHandler;
 import com.varyon.bossarena.loot.BossLootChestBlock;
@@ -41,6 +41,7 @@ import com.varyon.bossarena.config.BossArenaConfig;
 import com.hypixel.hytale.common.plugin.PluginIdentifier;
 import com.hypixel.hytale.server.core.event.events.entity.LivingEntityUseBlockEvent;
 import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerInteractEvent;
 import com.hypixel.hytale.server.core.event.events.ShutdownEvent;
 import com.hypixel.hytale.event.EventPriority;
@@ -49,6 +50,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.bossarena.util.VecUtil;
 import org.joml.Vector3d;
@@ -110,6 +112,7 @@ public final class BossArenaPlugin extends JavaPlugin {
     private BossTimedSpawnScheduler timedSpawnScheduler;
     private TimedBossMapMarkerService timedBossMapMarkerService;
     private BossFightMusicManager fightMusicManager;
+    private BossDpsHudSystem dpsHudSystem;
     private Path bossesJsonPath;
     private Path arenasJsonPath;
     private Path lootTablesPath;
@@ -302,14 +305,12 @@ public final class BossArenaPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new BossLeashSystem(trackingSystem));
         this.getEntityStoreRegistry().registerSystem(new BossDeathSystem(trackingSystem, this));
         this.getEntityStoreRegistry().registerSystem(new BossEventNotificationSystem(trackingSystem, this));
-        this.getEntityStoreRegistry().registerSystem(new BossDpsHudSystem(trackingSystem, damageChartTracker, this));
-        this.getEntityStoreRegistry().registerSystem(new BossEntityRemovedSystem(trackingSystem, this));
-        this.getEntityStoreRegistry().registerSystem(new RPGLevelingBossScaleCompatSystem(trackingSystem));
+        this.dpsHudSystem = new BossDpsHudSystem(trackingSystem, damageChartTracker, this);
+        this.getEntityStoreRegistry().registerSystem(this.dpsHudSystem);
+        this.getEntityStoreRegistry().registerSystem(new BossEntityRemovedSystem(trackingSystem, this, damageChartTracker));
         this.fightMusicManager = new BossFightMusicManager(getModRootDirectory().resolve("music"));
         this.getEntityStoreRegistry().registerSystem(new BossFightMusicApplySystem(fightMusicManager));
         this.getEntityStoreRegistry().registerSystem(new BossLootChestUseSystem());
-        getLogger().atInfo().log("Registered BossArena HP scale compatibility system "
-                + "(activates only when RPGLeveling is loaded)");
         getLogger().atInfo().log("Successfully registered boss systems");
 
         // Fallback chest open (UseBlockEvent.Pre is the primary path via BossLootChestUseSystem)
@@ -328,6 +329,11 @@ public final class BossArenaPlugin extends JavaPlugin {
                 this::onAddPlayerToWorld
         );
         getLogger().atInfo().log("Registered world player add listener");
+        this.getEventRegistry().registerGlobal(
+                PlayerDisconnectEvent.class,
+                this::onPlayerDisconnect
+        );
+        getLogger().atInfo().log("Registered player disconnect listener");
         this.getEventRegistry().registerGlobal(EventPriority.FIRST, ShutdownEvent.class, event -> {
             getLogger().atInfo().log("ShutdownEvent received (priority FIRST)");
             handleShutdown();
@@ -367,6 +373,7 @@ public final class BossArenaPlugin extends JavaPlugin {
 
         this.bossSpawnService = new BossSpawnService(trackingSystem, config);
         this.timedSpawnScheduler = new BossTimedSpawnScheduler(bossSpawnService, trackingSystem);
+        this.timedSpawnScheduler.setDamageChartTracker(damageChartTracker);
         this.timedBossMapMarkerService = new TimedBossMapMarkerService(this, trackingSystem, timedSpawnScheduler);
         this.timedSpawnScheduler.setMapMarkerService(timedBossMapMarkerService);
         this.timedSpawnScheduler.setOneShotDisableHandler(this::disableTimedRuleOneShot);
@@ -557,8 +564,6 @@ public final class BossArenaPlugin extends JavaPlugin {
             return;
         }
 
-        getLogger().atInfo().log("Player interacted with chest! Block type: " + blockType);
-
         // Get player
         Ref<EntityStore> playerRef = event.getRef();
         Store<EntityStore> store = playerRef.getStore();
@@ -579,7 +584,6 @@ public final class BossArenaPlugin extends JavaPlugin {
         // Prefer loot keyed near the player; OpenBossChestInteraction uses exact block coords.
         Vector3d chestLoc = BossLootHandler.getChestLocationNear(playerWorld, playerPos);
         if (chestLoc == null) {
-            getLogger().atInfo().log("No boss loot chest nearby");
             return;
         }
 
@@ -679,6 +683,20 @@ public final class BossArenaPlugin extends JavaPlugin {
         );
         openShopPage(playerRef, store, player, targetTransform);
         event.setCancelled(true);
+    }
+
+    private void onPlayerDisconnect(PlayerDisconnectEvent event) {
+        if (event == null || event.getPlayerRef() == null) {
+            return;
+        }
+        UUID playerUuid = event.getPlayerRef().getUuid();
+        if (playerUuid == null) {
+            return;
+        }
+        BossDpsHud.forget(playerUuid);
+        if (dpsHudSystem != null) {
+            dpsHudSystem.onPlayerDisconnected(playerUuid);
+        }
     }
 
     private void onAddPlayerToWorld(AddPlayerToWorldEvent event) {

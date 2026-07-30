@@ -57,36 +57,28 @@ public final class BossLeashSystem extends TickingSystem<EntityStore> {
         }
         elapsedByWorld.put(worldKey, 0f);
 
-        for (Map.Entry<UUID, BossTrackingSystem.BossData> entry : trackingSystem.snapshotTrackedBosses().entrySet()) {
+        for (Map.Entry<UUID, BossTrackingSystem.BossData> entry : trackingSystem.snapshotTrackedBosses(tickWorld).entrySet()) {
             UUID bossUuid = entry.getKey();
             BossTrackingSystem.BossData data = entry.getValue();
-            if (bossUuid == null || data == null || data.world != tickWorld) {
+            if (bossUuid == null || data == null) {
                 continue;
             }
             LeashAnchor anchor = resolveBossAnchor(bossUuid, data);
             leashIfNeeded(bossUuid, tickWorld, store, anchor);
         }
 
-        for (Map.Entry<UUID, UUID> entry : trackingSystem.snapshotTrackedAdds().entrySet()) {
+        for (Map.Entry<UUID, UUID> entry : trackingSystem.snapshotTrackedAdds(tickWorld).entrySet()) {
             UUID addUuid = entry.getKey();
             UUID bossUuid = entry.getValue();
             if (addUuid == null || bossUuid == null) {
                 continue;
             }
             BossTrackingSystem.BossData owner = trackingSystem.getBossData(bossUuid);
-            World ownerWorld = owner != null ? owner.world : null;
-            if (ownerWorld == null) {
-                BossTrackingSystem.BossEventContext ctx = trackingSystem.getEventContext(bossUuid);
-                ownerWorld = ctx != null ? ctx.world : null;
-            }
-            if (ownerWorld != tickWorld) {
-                continue;
-            }
             LeashAnchor anchor = resolveBossAnchor(bossUuid, owner);
             leashIfNeeded(addUuid, tickWorld, store, anchor);
         }
 
-        for (Map.Entry<UUID, UUID> entry : trackingSystem.snapshotPendingPreBossAdds().entrySet()) {
+        for (Map.Entry<UUID, UUID> entry : trackingSystem.snapshotPendingPreBossAdds(tickWorld).entrySet()) {
             UUID addUuid = entry.getKey();
             UUID eventId = entry.getValue();
             if (addUuid == null || eventId == null) {

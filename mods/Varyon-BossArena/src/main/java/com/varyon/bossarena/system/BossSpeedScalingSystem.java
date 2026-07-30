@@ -47,6 +47,7 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
     private final BossTrackingSystem trackingSystem;
     private final Map<MotionControllerBase, Float> baseTurnRateByController =
             Collections.synchronizedMap(new WeakHashMap<>());
+    private final Set<UUID> warnedLowSpeedBosses = ConcurrentHashMap.newKeySet();
     /**
      * Per-world wall-clock deadlines so multi-world ticks don't accelerate regen/scalers.
      * tick() may fire more than once per real-time interval (observed in production), so pacing
@@ -138,10 +139,10 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
             return;
         }
 
-        for (Map.Entry<UUID, BossTrackingSystem.BossData> entry : trackingSystem.snapshotTrackedBosses().entrySet()) {
+        for (Map.Entry<UUID, BossTrackingSystem.BossData> entry : trackingSystem.snapshotTrackedBosses(tickWorld).entrySet()) {
             UUID entityUuid = entry.getKey();
             BossTrackingSystem.BossData data = entry.getValue();
-            if (entityUuid == null || data == null || data.world != tickWorld) {
+            if (entityUuid == null || data == null) {
                 continue;
             }
             applyRuntimeScalers(
@@ -150,20 +151,10 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
             );
         }
 
-        for (Map.Entry<UUID, UUID> entry : trackingSystem.snapshotTrackedAdds().entrySet()) {
+        for (Map.Entry<UUID, UUID> entry : trackingSystem.snapshotTrackedAdds(tickWorld).entrySet()) {
             UUID addUuid = entry.getKey();
             UUID bossUuid = entry.getValue();
             if (addUuid == null || bossUuid == null) {
-                continue;
-            }
-
-            BossTrackingSystem.BossData ownerBoss = trackingSystem.getBossData(bossUuid);
-            World world = ownerBoss != null ? ownerBoss.world : null;
-            if (world == null) {
-                BossTrackingSystem.BossEventContext eventContext = trackingSystem.getEventContext(bossUuid);
-                world = eventContext != null ? eventContext.world : null;
-            }
-            if (world != tickWorld) {
                 continue;
             }
 
@@ -227,8 +218,12 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
             }
             float desiredSpeed = clampMultiplier(naturalSpeed * speedMultiplier);
             if (desiredSpeed < 0.1f) {
-                LOGGER.warning("Setting very low speed (" + desiredSpeed + ") for boss " + entityUuid +
-                        ". Natural: " + naturalSpeed + ", Multiplier: " + speedMultiplier);
+                if (warnedLowSpeedBosses.add(entityUuid)) {
+                    LOGGER.warning("Setting very low speed (" + desiredSpeed + ") for boss " + entityUuid +
+                            ". Natural: " + naturalSpeed + ", Multiplier: " + speedMultiplier);
+                }
+            } else {
+                warnedLowSpeedBosses.remove(entityUuid);
             }
             NPC_CACHED_SPEED_FIELD.setFloat(npcEntity, desiredSpeed);
         } catch (Exception e) {

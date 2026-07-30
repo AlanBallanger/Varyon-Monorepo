@@ -53,9 +53,11 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
         }
     }
 
-    private static boolean isMissingReconcileEligible(World world, Vector3d anchor) {
-        if (world == null || anchor == null) {
-            return false;
+    /** Snapshot of player positions in a world, computed once per tick instead of once per tracked entity. */
+    private static java.util.List<Vector3d> collectPlayerPositions(World world) {
+        java.util.List<Vector3d> positions = new java.util.ArrayList<>();
+        if (world == null) {
+            return positions;
         }
         try {
             for (PlayerRef playerRef : world.getPlayerRefs()) {
@@ -80,13 +82,23 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
                 if (rawPlayerPos == null) {
                     continue;
                 }
-                Vector3d playerPos = new Vector3d(rawPlayerPos.x, rawPlayerPos.y, rawPlayerPos.z);
-                if (playerPos.distanceSquared(anchor) <= (MISSING_RECONCILE_PLAYER_RADIUS * MISSING_RECONCILE_PLAYER_RADIUS)) {
-                    return true;
-                }
+                positions.add(new Vector3d(rawPlayerPos.x, rawPlayerPos.y, rawPlayerPos.z));
             }
         } catch (Exception ignored) {
-            // Best effort only; if this fails we skip reconcile.
+            // Best effort only; if this fails we treat it as no nearby players.
+        }
+        return positions;
+    }
+
+    private static boolean isMissingReconcileEligible(java.util.List<Vector3d> playerPositions, Vector3d anchor) {
+        if (playerPositions.isEmpty() || anchor == null) {
+            return false;
+        }
+        double radiusSquared = MISSING_RECONCILE_PLAYER_RADIUS * MISSING_RECONCILE_PLAYER_RADIUS;
+        for (Vector3d playerPos : playerPositions) {
+            if (playerPos.distanceSquared(anchor) <= radiusSquared) {
+                return true;
+            }
         }
         return false;
     }
@@ -97,16 +109,22 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
             return;
         }
 
+        EntityStore external = store.getExternalData();
+        World tickWorld = external != null ? external.getWorld() : null;
+        if (tickWorld == null || !tickWorld.isAlive()) {
+            return;
+        }
+
         long now = System.currentTimeMillis();
         if (now < nextRunAtMs) {
             return;
         }
         nextRunAtMs = now + UPDATE_INTERVAL_MS;
 
-        reconcileMissingTrackedEntities();
+        reconcileMissingTrackedEntities(tickWorld);
 
         for (BossTrackingSystem.ActiveEventStatus event : trackingSystem.snapshotActiveEvents()) {
-            if (event == null) {
+            if (event == null || event.world != tickWorld) {
                 continue;
             }
             double notificationRadius = -1.0d;
@@ -138,12 +156,17 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
         }
     }
 
-    private void reconcileMissingTrackedEntities() {
+    private void reconcileMissingTrackedEntities(World tickWorld) {
         long now = System.currentTimeMillis();
-        Map<UUID, BossTrackingSystem.BossData> trackedBosses = trackingSystem.snapshotTrackedBosses();
-        Map<UUID, UUID> trackedAdds = trackingSystem.snapshotTrackedAdds();
-        missingBossSince.keySet().retainAll(trackedBosses.keySet());
-        missingAddSince.keySet().retainAll(trackedAdds.keySet());
+        // retainAll against the global tracked sets (cheap UUID-set ops) so state for other worlds'
+        // entities isn't purged just because this world happens to tick; the expensive per-entity
+        // distance scan below is still scoped to tickWorld only.
+        missingBossSince.keySet().retainAll(trackingSystem.snapshotTrackedBosses().keySet());
+        missingAddSince.keySet().retainAll(trackingSystem.snapshotTrackedAdds().keySet());
+
+        Map<UUID, BossTrackingSystem.BossData> trackedBosses = trackingSystem.snapshotTrackedBosses(tickWorld);
+        Map<UUID, UUID> trackedAdds = trackingSystem.snapshotTrackedAdds(tickWorld);
+        java.util.List<Vector3d> nearbyPlayerPositions = collectPlayerPositions(tickWorld);
 
         for (Map.Entry<UUID, BossTrackingSystem.BossData> entry : trackedBosses.entrySet()) {
             UUID bossUuid = entry.getKey();
@@ -151,7 +174,7 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
             if (bossUuid == null || bossData == null) {
                 continue;
             }
-            if (!isMissingReconcileEligible(bossData.world, bossData.spawnLocation)) {
+            if (!isMissingReconcileEligible(nearbyPlayerPositions, bossData.spawnLocation)) {
                 missingBossSince.remove(bossUuid);
                 continue;
             }
@@ -224,7 +247,7 @@ public final class BossEventNotificationSystem extends TickingSystem<EntityStore
             BossTrackingSystem.BossEventContext eventContext = trackingSystem.getEventContext(bossUuid);
             World world = bossData != null ? bossData.world : (eventContext != null ? eventContext.world : null);
             Vector3d anchor = bossData != null ? bossData.spawnLocation : (eventContext != null ? eventContext.spawnLocation : null);
-            if (!isMissingReconcileEligible(world, anchor)) {
+            if (!isMissingReconcileEligible(nearbyPlayerPositions, anchor)) {
                 missingAddSince.remove(addUuid);
                 continue;
             }

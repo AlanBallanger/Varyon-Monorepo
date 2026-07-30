@@ -389,9 +389,9 @@ public final class BossWaveNotificationService {
                 ? notificationRadiusBlocks
                 : resolveNotificationRadius();
         long now = System.currentTimeMillis();
-        final String titleTextForLog = title != null ? title.toString() : "null";
         LOGGER.info(() -> "showToNearbyPlayers: world=" + world.getName() + " center=" + center
-                + " radius=" + radius + " duration=" + durationSeconds + " title=" + titleTextForLog);
+                + " radius=" + radius + " duration=" + durationSeconds
+                + " title=" + (title != null ? title.toString() : "null"));
         int shown = 0;
         int outOfRange = 0;
         int failures = 0;
@@ -597,9 +597,9 @@ public final class BossWaveNotificationService {
                                           Message subtitle,
                                           float durationSeconds) {
         double radiusSq = radiusBlocks * radiusBlocks;
-        final String titleTextForLog = title != null ? title.toString() : "null";
         LOGGER.info(() -> "showTitleInRadius: world=" + world.getName() + " center=" + center
-                + " radiusBlocks=" + radiusBlocks + " duration=" + durationSeconds + " title=" + titleTextForLog);
+                + " radiusBlocks=" + radiusBlocks + " duration=" + durationSeconds
+                + " title=" + (title != null ? title.toString() : "null"));
         int shown = 0;
         int outOfRange = 0;
         int failures = 0;

@@ -112,15 +112,21 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     /** Weighted boss-pool editor for a planification rule row. */
     private BossPoolEditorState bossPoolEditorState;
 
-    private static final long BOSS_EDITOR_AUTOSAVE_DEBOUNCE_MS = 1500L;
-    private static final java.util.concurrent.ScheduledExecutorService BOSS_EDITOR_AUTOSAVE_EXECUTOR =
+    private static final long CONFIG_AUTOSAVE_DEBOUNCE_MS = 1500L;
+    private static final java.util.concurrent.ScheduledExecutorService CONFIG_AUTOSAVE_EXECUTOR =
             java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
-                Thread t = new Thread(r, "BossArena-BossEditorAutoSave");
+                Thread t = new Thread(r, "BossArena-ConfigAutoSave");
                 t.setDaemon(true);
                 return t;
             });
     /** Pending debounced auto-save for the currently open boss editor draft, if any. */
     private java.util.concurrent.ScheduledFuture<?> pendingBossEditorAutoSave;
+    /** Pending debounced auto-save for the Planification tab's raw text/number fields, if any. */
+    private java.util.concurrent.ScheduledFuture<?> pendingTimedAutoSave;
+    /** Pending debounced auto-save for the Marchands (shop) editor, if any. */
+    private java.util.concurrent.ScheduledFuture<?> pendingShopEditorAutoSave;
+    /** Pending debounced auto-saves for Arènes rows, keyed by row index. */
+    private final Map<Integer, java.util.concurrent.ScheduledFuture<?>> pendingArenaAutoSaveByRow = new java.util.concurrent.ConcurrentHashMap<>();
 
     private BossArenaConfigPage(PlayerRef playerRef, BossArenaPlugin plugin, String tab) {
         super(playerRef, CustomPageLifetime.CanDismiss, ConfigEventData.CODEC);
@@ -1328,8 +1334,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
 
         if (TAB_PLANIFICATION.equals(selectedTab)) {
-            if ("boss_timed_save".equals(action)) {
-                handleBossTimedSave(data);
+            if ("timed_autosave".equals(action)) {
+                scheduleTimedAutoSave(data);
             } else if ("timed_add".equals(action)) {
                 handleTimedAdd();
             } else if (action.startsWith("timed_delete_")) {
@@ -1572,12 +1578,13 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
-        if ("shop_edit_save".equals(action)) {
-            handleShopEditSave(data);
+        if ("shop_edit_autosave".equals(action)) {
+            scheduleShopEditorAutoSave(data);
             return;
         }
 
         if ("shop_edit_close".equals(action)) {
+            flushPendingShopEditorAutoSave(data);
             shopLocationEditorState = null;
             shopCurrencyPicksOpen = false;
             rebuild();
@@ -1694,6 +1701,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         shopCurrencyPicksOpen = !query.isEmpty() && !BossArenaConfigUiControls.isExactItemId(query);
         shopStatusText = "";
         softUpdateShopCurrencyPicks(false);
+        scheduleShopEditorAutoSave(data);
     }
 
     private void handleShopCurrencyPick(String pickToken, ConfigEventData data) {
@@ -1851,24 +1859,73 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         return event;
     }
 
-    private void handleShopEditSave(ConfigEventData data) {
-        if (shopLocationEditorState == null) {
+    /**
+     * Debounces a background persist of the Marchand editor's current draft (vendor name, currency
+     * item, contracts) so admins don't have to click "Enregistrer". Silent — validation errors
+     * (e.g. an unknown/partial currency item while typing) are swallowed and retried on the next edit.
+     */
+    private void scheduleShopEditorAutoSave(ConfigEventData data) {
+        if (data == null || shopLocationEditorState == null) {
             return;
+        }
+        if (pendingShopEditorAutoSave != null) {
+            pendingShopEditorAutoSave.cancel(false);
+        }
+        pendingShopEditorAutoSave = CONFIG_AUTOSAVE_EXECUTOR.schedule(
+                () -> autoSaveShopEditor(data),
+                CONFIG_AUTOSAVE_DEBOUNCE_MS,
+                java.util.concurrent.TimeUnit.MILLISECONDS
+        );
+    }
+
+    private void cancelPendingShopEditorAutoSave() {
+        if (pendingShopEditorAutoSave != null) {
+            pendingShopEditorAutoSave.cancel(false);
+            pendingShopEditorAutoSave = null;
+        }
+    }
+
+    private void flushPendingShopEditorAutoSave(ConfigEventData data) {
+        if (pendingShopEditorAutoSave == null) {
+            return;
+        }
+        pendingShopEditorAutoSave.cancel(false);
+        pendingShopEditorAutoSave = null;
+        autoSaveShopEditor(data);
+    }
+
+    private void autoSaveShopEditor(ConfigEventData data) {
+        try {
+            persistShopEditorDraft(data);
+        } catch (Exception ex) {
+            plugin.getLogger().atFine().withCause(ex).log("Marchand auto-save skipped (form likely incomplete)");
+        }
+    }
+
+    /**
+     * Validates and writes the shop editor's current draft to {@link BossShopConfig} + disk.
+     * Does NOT touch {@code shopLocationEditorState}/{@code rebuild()} — callers decide whether to
+     * close the editor (explicit save) or leave it open (auto-save).
+     *
+     * @return a human-readable summary suitable for {@code shopStatusText}
+     * @throws IllegalArgumentException if the draft is currently invalid (e.g. blank/unknown currency item,
+     *                                  incomplete or duplicate contract) — callers should treat this as
+     *                                  "not ready to save yet" rather than a hard failure.
+     */
+    private String persistShopEditorDraft(ConfigEventData data) {
+        if (shopLocationEditorState == null) {
+            throw new IllegalArgumentException("Aucun marchand en cours d'édition.");
         }
 
         BossShopConfig shopConfig = plugin.getShopConfig();
         if (shopConfig == null) {
-            shopStatusText = "Config marchands indisponible.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Config marchands indisponible.");
         }
 
         ShopLocationRef shopLocation = shopLocationEditorState.shopLocation;
         BossShopConfig.ShopLocation location = shopConfig.getShopLocation(shopLocation.worldName, shopLocation.x, shopLocation.y, shopLocation.z);
         if (location == null) {
-            shopStatusText = "Le marchand sélectionné n'existe plus dans la config.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Le marchand sélectionné n'existe plus dans la config.");
         }
 
         syncShopContractDraftsFromData(data);
@@ -1882,14 +1939,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 shopLocationEditorState.currencyItemId
         ).trim();
         if (currencyItemId.isEmpty()) {
-            shopStatusText = "Indiquez un item monnaie (ex: Ingredient_Bar_Iron).";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Indiquez un item monnaie (ex: Ingredient_Bar_Iron).");
         }
         if (!BossArenaConfigUiControls.isExactItemId(currencyItemId)) {
-            shopStatusText = "Item monnaie inconnu: " + currencyItemId;
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Item monnaie inconnu: " + currencyItemId);
         }
         shopLocationEditorState.currencyItemId = currencyItemId;
 
@@ -1902,15 +1955,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             String bossId = optionalText(draft.bossId);
             String arenaId = optionalText(draft.arenaId);
             if (bossId.isEmpty() || arenaId.isEmpty()) {
-                shopStatusText = "Chaque contrat doit préciser un boss et une arène.";
-                rebuild();
-                return;
+                throw new IllegalArgumentException("Chaque contrat doit préciser un boss et une arène.");
             }
             String pairKey = bossId.toLowerCase(Locale.ROOT) + "\0" + arenaId.toLowerCase(Locale.ROOT);
             if (!seenPairs.add(pairKey)) {
-                shopStatusText = "Contrat en double (même boss et même arène).";
-                rebuild();
-                return;
+                throw new IllegalArgumentException("Contrat en double (même boss et même arène).");
             }
             BossShopConfig.ShopContract contract = new BossShopConfig.ShopContract();
             contract.bossId = bossId;
@@ -1933,11 +1982,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         plugin.saveShopConfig();
         plugin.refreshShopNpcInteractionHint(location);
-        shopStatusText = "Marchand enregistré (" + shopLocation.x + ", " + shopLocation.y + ", " + shopLocation.z
+        return "Marchand enregistré (" + shopLocation.x + ", " + shopLocation.y + ", " + shopLocation.z
                 + ") avec " + saved.size() + " contrat(s). Monnaie: " + currencyItemId + ".";
-        shopLocationEditorState = null;
-        shopCurrencyPicksOpen = false;
-        rebuild();
     }
 
     private void buildShopLocationEditorOverlay(UICommandBuilder cmd, UIEventBuilder events) {
@@ -1964,6 +2010,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 CustomUIEventBindingType.ValueChanged,
                 "#ShopEditorCurrencyItem",
                 buildShopEditSnapshotEvent("shop_currency_filter"),
+                false
+        );
+        events.addEventBinding(
+                CustomUIEventBindingType.ValueChanged,
+                "#ShopEditorVendorName",
+                buildShopEditSnapshotEvent("shop_edit_autosave"),
                 false
         );
 
@@ -2006,17 +2058,23 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     "#ShopEditRemove" + suffix,
                     buildShopEditSnapshotEvent("shop_edit_remove_" + row)
             );
+            for (String fieldId : new String[]{
+                    "#ShopEditBoss" + suffix, "#ShopEditArena" + suffix,
+                    "#ShopEditBossPrice" + suffix, "#ShopEditSilentPrice" + suffix
+            }) {
+                events.addEventBinding(
+                        CustomUIEventBindingType.ValueChanged,
+                        fieldId,
+                        buildShopEditSnapshotEvent("shop_edit_autosave"),
+                        false
+                );
+            }
         }
 
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#ShopEditorAddContract",
                 buildShopEditSnapshotEvent("shop_edit_add")
-        );
-        events.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#ShopEditorSaveButton",
-                buildShopEditSnapshotEvent("shop_edit_save")
         );
         events.addEventBinding(CustomUIEventBindingType.Activating, "#ShopEditorCloseButton", EventData.of("Action", "shop_edit_close"));
     }
@@ -2045,8 +2103,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
-        if (action.startsWith("arena_save_")) {
-            handleArenaSave(action.substring("arena_save_".length()), data, null);
+        if (action.startsWith("arena_autosave_")) {
+            scheduleArenaAutoSave(action.substring("arena_autosave_".length()), data);
             return;
         }
 
@@ -2092,11 +2150,17 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaDelete" + suffix, EventData.of("Action", "arena_delete_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaHere" + suffix, EventData.of("Action", "arena_here_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#ArenaTp" + suffix, EventData.of("Action", "arena_tp_" + row));
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    "#ArenaSave" + suffix,
-                    buildArenaRowSnapshotEvent("arena_save_" + row, row)
-            );
+            for (String fieldId : new String[]{
+                    "#ArenaName" + suffix, "#ArenaWorld" + suffix,
+                    "#ArenaX" + suffix, "#ArenaY" + suffix, "#ArenaZ" + suffix, "#ArenaRadius" + suffix
+            }) {
+                events.addEventBinding(
+                        CustomUIEventBindingType.ValueChanged,
+                        fieldId,
+                        buildArenaRowSnapshotEvent("arena_autosave_" + row, row),
+                        false
+                );
+            }
         }
     }
 
@@ -2251,41 +2315,66 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         rebuild();
     }
 
-    private void handleArenaSave(String rowToken, ConfigEventData data, Boolean proximityEnabledOverride) {
+    /**
+     * Debounces a background persist of one arena row so admins don't have to click a Save button.
+     * Silent — validation errors (blank name while clearing the field, unknown world while typing,
+     * name collision) are swallowed and simply retried on the next edit.
+     */
+    private void scheduleArenaAutoSave(String rowToken, ConfigEventData data) {
         int row = parseRow(rowToken);
-        if (row < 1 || row > arenaRows.size()) {
-            arenaStatusText = "Sélection de ligne arène invalide.";
-            rebuild();
+        if (row < 1 || data == null) {
             return;
+        }
+        java.util.concurrent.ScheduledFuture<?> previous = pendingArenaAutoSaveByRow.remove(row);
+        if (previous != null) {
+            previous.cancel(false);
+        }
+        java.util.concurrent.ScheduledFuture<?> future = CONFIG_AUTOSAVE_EXECUTOR.schedule(
+                () -> autoSaveArenaRow(row, data),
+                CONFIG_AUTOSAVE_DEBOUNCE_MS,
+                java.util.concurrent.TimeUnit.MILLISECONDS
+        );
+        pendingArenaAutoSaveByRow.put(row, future);
+    }
+
+    private void autoSaveArenaRow(int row, ConfigEventData data) {
+        try {
+            persistArenaRow(row, data);
+        } catch (Exception ex) {
+            plugin.getLogger().atFine().withCause(ex).log("Arena auto-save skipped for row " + row + " (form likely incomplete)");
+        }
+    }
+
+    /**
+     * Validates and writes one arena row's current form fields to {@link ArenaRegistry} + disk.
+     *
+     * @throws IllegalArgumentException if the row/form is currently invalid — callers should treat
+     *                                   this as "not ready to save yet" rather than a hard failure.
+     */
+    private void persistArenaRow(int row, ConfigEventData data) {
+        if (row < 1 || row > arenaRows.size()) {
+            throw new IllegalArgumentException("Sélection de ligne arène invalide.");
         }
 
         Arena arena = ArenaRegistry.get(arenaRows.get(row - 1));
         if (arena == null) {
-            arenaStatusText = "L'arène sélectionnée n'existe plus.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("L'arène sélectionnée n'existe plus.");
         }
 
         String requestedId = normalizeArenaId(data.arenaName);
         if (requestedId.isEmpty()) {
-            arenaStatusText = "Le nom d'arène ne peut pas être vide.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Le nom d'arène ne peut pas être vide.");
         }
 
         if (!ARENA_ID_PATTERN.matcher(requestedId).matches()) {
-            arenaStatusText = "Le nom d'arène ne peut utiliser que lettres, chiffres, '_' ou '-'.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Le nom d'arène ne peut utiliser que lettres, chiffres, '_' ou '-'.");
         }
 
         Double x = parseCoordinate(data.arenaX);
         Double y = parseCoordinate(data.arenaY);
         Double z = parseCoordinate(data.arenaZ);
         if (x == null || y == null || z == null) {
-            arenaStatusText = "Les coordonnées doivent être des nombres valides.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Les coordonnées doivent être des nombres valides.");
         }
 
         String worldName = optionalText(data.arenaWorld);
@@ -2296,14 +2385,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             worldName = optionalText(arena.worldName);
         }
         if (worldName.isEmpty()) {
-            arenaStatusText = "Le monde de l'arène ne peut pas être vide.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Le monde de l'arène ne peut pas être vide.");
         }
         if (Universe.get().getWorld(worldName) == null) {
-            arenaStatusText = "Monde introuvable : '" + worldName + "'.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("Monde introuvable : '" + worldName + "'.");
         }
 
         String radiusRaw = optionalText(data.getArenaRadius(row));
@@ -2318,9 +2403,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         String oldArenaId = arena.arenaId;
         boolean nameChanged = oldArenaId == null || !oldArenaId.equalsIgnoreCase(requestedId);
         if (nameChanged && ArenaRegistry.exists(requestedId)) {
-            arenaStatusText = "L'arène '" + requestedId + "' existe déjà.";
-            rebuild();
-            return;
+            throw new IllegalArgumentException("L'arène '" + requestedId + "' existe déjà.");
         }
 
         if (nameChanged && oldArenaId != null && !oldArenaId.isBlank()) {
@@ -2338,8 +2421,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         ArenaRegistry.register(arena);
 
         plugin.saveArenas();
-        arenaStatusText = "Arène '" + arena.arenaId + "' enregistrée (" + arena.worldName + ").";
-        rebuild();
     }
 
     private void handleBossesAction(String action,
@@ -2389,6 +2470,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
 
+        if ("boss_wave_field_changed".equals(action)) {
+            handleBossWaveFieldChanged(data);
+            return;
+        }
+
         if ("boss_wave_add_page".equals(action)) {
             handleBossWaveAddPage(data);
             return;
@@ -2415,11 +2501,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         if (action.startsWith("boss_wave_delete_")) {
             handleBossWaveDelete(action.substring("boss_wave_delete_".length()), data);
-            return;
-        }
-
-        if ("boss_waves_save".equals(action)) {
-            handleBossWavesSave(data);
             return;
         }
 
@@ -2526,11 +2607,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
         if (action.startsWith("boss_delete_")) {
             handleBossDelete(action.substring("boss_delete_".length()));
-            return;
-        }
-
-        if ("boss_editor_save".equals(action)) {
-            handleBossEditorSave(data);
         }
     }
 
@@ -2913,12 +2989,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     buildBossEditorSnapshotEvent("boss_loot_scroll_down"));
         }
 
-        events.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#BossEditorSaveButton",
-                buildBossEditorSnapshotEvent("boss_editor_save")
-        );
-
         cmd.set("#BossWavesOverlay.Visible", bossWavesOverlayOpen);
         if (bossWavesOverlayOpen) {
             BossDefinition.ExtraMobs extra = boss.extraMobs != null ? boss.extraMobs : new BossDefinition.ExtraMobs();
@@ -2988,6 +3058,17 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                         buildBossWavesSnapshotEvent("boss_wave_npc_filter_" + row),
                         false
                 );
+                for (String fieldId : new String[]{
+                        "#BossWaveAmountMin" + suffix, "#BossWaveAmountMax" + suffix,
+                        "#BossWaveHp" + suffix, "#BossWaveDamage" + suffix, "#BossWaveSize" + suffix
+                }) {
+                    events.addEventBinding(
+                            CustomUIEventBindingType.ValueChanged,
+                            fieldId,
+                            buildBossWavesSnapshotEvent("boss_wave_field_changed"),
+                            false
+                    );
+                }
 
                 boolean populated = row <= adds.size();
                 cmd.set("#BossWaveAction" + suffix + ".Text", populated ? "-" : "+");
@@ -3005,11 +3086,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     CustomUIEventBindingType.Activating,
                     "#BossWavesEnabledToggle",
                     buildBossWavesSnapshotEvent("boss_waves_enabled_toggle")
-            );
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    "#BossWavesSaveButton",
-                    buildBossWavesSnapshotEvent("boss_waves_save")
             );
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
@@ -3032,6 +3108,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     buildBossWavesSnapshotEvent("boss_wave_trigger_changed"),
                     false
             );
+            for (String fieldId : new String[]{"#BossWaveTriggerValueField", "#BossWaveRepeatCountField"}) {
+                events.addEventBinding(
+                        CustomUIEventBindingType.ValueChanged,
+                        fieldId,
+                        buildBossWavesSnapshotEvent("boss_wave_field_changed"),
+                        false
+                );
+            }
             applyWaveNpcPicks(cmd, events, true);
         }
 
@@ -3186,13 +3270,36 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     EventData.of("Action", "timed_pop_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedDelete" + suffix,
                     EventData.of("Action", "timed_delete_" + row));
+
+            for (String fieldId : new String[]{
+                    "#TimedBossId" + suffix, "#TimedArenaId" + suffix, "#TimedMinPlayers" + suffix,
+                    "#TimedGraceSeconds" + suffix,
+                    "#TimedEveryHours" + suffix, "#TimedEveryMinutes" + suffix, "#TimedEverySeconds" + suffix,
+                    "#TimedIntervalHours" + suffix, "#TimedIntervalDays" + suffix, "#TimedIntervalSeconds" + suffix,
+                    "#TimedArrivalHours" + suffix, "#TimedArrivalMinutes" + suffix, "#TimedArrivalSeconds" + suffix,
+                    "#TimedDespawnHours" + suffix, "#TimedDespawnMinutes" + suffix
+            }) {
+                events.addEventBinding(
+                        CustomUIEventBindingType.ValueChanged,
+                        fieldId,
+                        buildBossTimedSnapshotEvent("timed_autosave"),
+                        false
+                );
+            }
+        }
+
+        for (String fieldId : new String[]{"#TimedAnnounceText", "#TimedReminderText", "#TimedGraceText"}) {
+            events.addEventBinding(
+                    CustomUIEventBindingType.ValueChanged,
+                    fieldId,
+                    buildBossTimedSnapshotEvent("timed_autosave"),
+                    false
+            );
         }
 
         cmd.set("#TimedAnnounceText.Value", announceText);
         cmd.set("#TimedReminderText.Value", reminderText);
         cmd.set("#TimedGraceText.Value", graceText);
-        events.addEventBinding(CustomUIEventBindingType.Activating, "#BossTimedSaveButton",
-                buildBossTimedSnapshotEvent("boss_timed_save"));
         buildBossPoolOverlay(cmd, events);
     }
 
@@ -3695,15 +3802,49 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
     }
 
-    private void handleBossTimedSave(ConfigEventData data) {
+    /**
+     * Debounces a background persist of the Planification tab's raw form fields (bossId, arenaId,
+     * hours/minutes/seconds, min players, announce/reminder/grace text) so admins don't have to
+     * click "Enregistrer" to keep typed edits. Toggles already persist immediately elsewhere;
+     * this only covers the free-text/number fields. Silent — errors are swallowed since the form
+     * may be transiently incomplete while typing.
+     */
+    private void scheduleTimedAutoSave(ConfigEventData data) {
+        if (data == null) {
+            return;
+        }
+        if (pendingTimedAutoSave != null) {
+            pendingTimedAutoSave.cancel(false);
+        }
+        pendingTimedAutoSave = CONFIG_AUTOSAVE_EXECUTOR.schedule(
+                () -> autoSaveTimedRows(data),
+                CONFIG_AUTOSAVE_DEBOUNCE_MS,
+                java.util.concurrent.TimeUnit.MILLISECONDS
+        );
+    }
+
+    private void cancelPendingTimedAutoSave() {
+        if (pendingTimedAutoSave != null) {
+            pendingTimedAutoSave.cancel(false);
+            pendingTimedAutoSave = null;
+        }
+    }
+
+    private void flushPendingTimedAutoSave(ConfigEventData data) {
+        if (pendingTimedAutoSave == null) {
+            return;
+        }
+        pendingTimedAutoSave.cancel(false);
+        pendingTimedAutoSave = null;
+        autoSaveTimedRows(data);
+    }
+
+    private void autoSaveTimedRows(ConfigEventData data) {
         try {
-            List<BossArenaConfig.TimedBossSpawn> out = parseTimedRowsFromEvent(data, true);
-            persistTimedRows(out, data, true);
-            bossStatusText = "Règles de planification enregistrées (" + out.size() + ").";
-            rebuild();
-        } catch (IllegalArgumentException ex) {
-            bossStatusText = ex.getMessage();
-            rebuild();
+            List<BossArenaConfig.TimedBossSpawn> parsed = parseTimedRowsFromEvent(data, false);
+            persistTimedRows(parsed, data, false);
+        } catch (Exception ex) {
+            plugin.getLogger().atFine().withCause(ex).log("Planification auto-save skipped (form likely incomplete)");
         }
     }
 
@@ -4374,178 +4515,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         return result;
     }
 
-    private void handleBossEditorSave(ConfigEventData data) {
-        if (bossEditorState == null) {
-            return;
-        }
-        cancelPendingBossEditorAutoSave();
-
-        try {
-            BossDefinition outBoss = cloneBoss(bossEditorState.boss);
-
-            String bossNameText = resolvedOrFallback(data.bossEditName, outBoss.bossName);
-            String npcIdText = resolvedOrFallback(data.bossEditNpcId, outBoss.npcId);
-            outBoss.bossName = requireNonBlank(bossNameText, "BossID ne peut pas être vide.");
-            outBoss.npcId = requireNonBlank(npcIdText, "ID PNJ ne peut pas être vide.");
-            outBoss.tier = normalizeTier(resolvedOrFallback(data.bossEditTier, outBoss.tier));
-
-            outBoss.amount = parseRequiredInt(
-                    resolvedOrFallback(data.bossEditAmount, Integer.toString(Math.max(1, outBoss.amount))),
-                    "La quantité doit être un entier > 0.",
-                    1,
-                    Integer.MAX_VALUE
-            );
-            outBoss.levelOverride = parseBossLevelOverride(
-                    resolvedOrFallback(data.bossEditLevelOverride, Integer.toString(Math.max(0, outBoss.levelOverride))),
-                    "Surcharge niveau doit être vide/0 pour défaut, ou un entier >= 1."
-            );
-            outBoss.modifiers.hp = requireSliderFloat(
-                    data.bossEditHp,
-                    outBoss.modifiers.hp,
-                    MULT_HP_DMG_MIN,
-                    MULT_HP_DMG_MAX,
-                    "Mult PV doit être entre 0.50 et 50.00."
-            );
-            outBoss.modifiers.damage = requireSliderFloat(
-                    data.bossEditDamage,
-                    outBoss.modifiers.damage,
-                    MULT_HP_DMG_MIN,
-                    MULT_HP_DMG_MAX,
-                    "Mult Dégâts doit être entre 0.50 et 50.00."
-            );
-            outBoss.modifiers.movementSpeed = requireSliderFloat(
-                    data.bossEditSpeed,
-                    outBoss.modifiers.movementSpeed,
-                    MULT_SCALE_MIN,
-                    MULT_SCALE_MAX,
-                    "Mult vitesse déplacement doit être entre 0.10 et 10.00."
-            );
-            outBoss.modifiers.size = requireSliderFloat(
-                    data.bossEditSize,
-                    outBoss.modifiers.size,
-                    MULT_SIZE_MIN,
-                    MULT_SIZE_MAX,
-                    "Mult Taille doit être entre 0.10 et 10.00."
-            );
-            outBoss.modifiers.attackRate = requireSliderFloat(
-                    data.bossEditAttackRate,
-                    outBoss.modifiers.attackRate,
-                    MULT_SCALE_MIN,
-                    MULT_SCALE_MAX,
-                    "Mult cadence d'attaque doit être entre 0.10 et 10.00."
-            );
-            // Recharge / Rotation UI removed — keep existing stored values.
-            outBoss.modifiers.knockbackGiven = requireSliderFloat(
-                    data.bossEditKnockbackGiven,
-                    outBoss.modifiers.knockbackGiven,
-                    MULT_SCALE_MIN,
-                    MULT_SCALE_MAX,
-                    "Mult knockback donné doit être entre 0.10 et 10.00."
-            );
-            outBoss.modifiers.knockbackTaken = requireSliderFloat(
-                    data.bossEditKnockbackTaken,
-                    outBoss.modifiers.knockbackTaken,
-                    MULT_SCALE_MIN,
-                    MULT_SCALE_MAX,
-                    "Mult knockback reçu doit être entre 0.10 et 10.00."
-            );
-            outBoss.modifiers.regen = BossRegen.normalizeHpPerSecond(requireSliderFloat(
-                    data.bossEditRegen,
-                    outBoss.modifiers.regen,
-                    REGEN_MIN,
-                    REGEN_MAX,
-                    "Régén PV/s doit être entre 0 et 1000."
-            ));
-            outBoss.perPlayerIncrease.hp = requirePerPlayerSlider(
-                    data.bossEditPpHp, outBoss.perPlayerIncrease.hp, "PV/joueurs");
-            outBoss.perPlayerIncrease.damage = requirePerPlayerSlider(
-                    data.bossEditPpDamage, outBoss.perPlayerIncrease.damage, "Dégâts/joueurs");
-            outBoss.perPlayerIncrease.movementSpeed = requirePerPlayerSlider(
-                    data.bossEditPpSpeed, outBoss.perPlayerIncrease.movementSpeed, "Vitesse/joueurs");
-            outBoss.perPlayerIncrease.size = requirePerPlayerSlider(
-                    data.bossEditPpSize, outBoss.perPlayerIncrease.size, "Taille/joueurs");
-            outBoss.perPlayerIncrease.attackRate = requirePerPlayerSlider(
-                    data.bossEditPpAttackRate, outBoss.perPlayerIncrease.attackRate, "Attaque/joueurs");
-            outBoss.perPlayerIncrease.knockbackGiven = requirePerPlayerSlider(
-                    data.bossEditPpKnockbackGiven, outBoss.perPlayerIncrease.knockbackGiven, "Recul+/joueurs");
-            outBoss.perPlayerIncrease.knockbackTaken = requirePerPlayerSlider(
-                    data.bossEditPpKnockbackTaken, outBoss.perPlayerIncrease.knockbackTaken, "Recul-/joueurs");
-            outBoss.perPlayerIncrease.regen = requirePerPlayerSlider(
-                    data.bossEditPpRegen, outBoss.perPlayerIncrease.regen, "Régén/joueurs");
-            if (outBoss.extraMobs == null) {
-                outBoss.extraMobs = new BossDefinition.ExtraMobs();
-            }
-            applyBossSpawnSpreadFromData(outBoss, data);
-            applyWaveSpawnSettingsFromData(outBoss.extraMobs, data);
-            outBoss.extraMobs.waves = parseRequiredInt(
-                    resolvedOrFallback(data.bossEditWaves, Integer.toString(Math.max(-1, outBoss.extraMobs.waves))),
-                    "Vagues doit être -1 (infini) ou un entier >= 0.",
-                    -1,
-                    Integer.MAX_VALUE
-            );
-            outBoss.extraMobs.sanitize();
-
-            String musicText = optionalText(data.bossEditMusic);
-            if (!looksLikeUiBindingExpression(musicText)) {
-                outBoss.musicFileName = musicText;
-            }
-            String musicRadiusText = resolvedOrFallback(
-                    data.bossEditMusicRadius,
-                    formatWaveNumber(outBoss.getMusicRadius())
-            );
-            if (!musicRadiusText.isEmpty()) {
-                outBoss.musicRadius = parseRequiredDouble(
-                        musicRadiusText,
-                        "Le rayon musique doit être un nombre > 0.",
-                        0.1d,
-                        Double.MAX_VALUE
-                );
-            }
-
-            LootTable outLoot = new LootTable();
-            outLoot.bossName = outBoss.bossName;
-            outLoot.lootRadius = 50.0d; // Only used for JSON; effective radius is arena Loot Radius or 50 when spawn "here"
-            outLoot.items = new ArrayList<>();
-
-            List<LootItem> mergedLoot = mergeLootWindow(data);
-            bossEditorState.loot.items = mergedLoot;
-            for (LootItem item : mergedLoot) {
-                if (item == null) {
-                    continue;
-                }
-                outLoot.items.add(new LootItem(item.itemId, item.dropChance, item.minAmount, item.maxAmount));
-            }
-
-            String oldName = bossEditorState.originalBossName;
-            boolean nameChanged = oldName != null && !oldName.equalsIgnoreCase(outBoss.bossName);
-
-            if ((oldName == null || nameChanged) && BossRegistry.exists(outBoss.bossName)) {
-                bossStatusText = "Le boss '" + outBoss.bossName + "' existe déjà.";
-                rebuild();
-                return;
-            }
-
-            if (nameChanged) {
-                BossRegistry.remove(oldName);
-                LootRegistry.remove(oldName);
-            }
-
-            BossRegistry.register(outBoss);
-            LootRegistry.register(outLoot);
-
-            plugin.saveBossDefinitions();
-            plugin.saveLootTables();
-
-            bossEditorState = new BossEditorState(outBoss.bossName, cloneBoss(outBoss), cloneLoot(outLoot, outBoss.bossName));
-            bossWavesOverlayOpen = false;
-            bossStatusText = "Boss '" + outBoss.bossName + "' enregistré.";
-            rebuild();
-        } catch (IllegalArgumentException ex) {
-            bossStatusText = ex.getMessage();
-            rebuild();
-        }
-    }
-
     private void applyBossEditorDraft(ConfigEventData data) {
         if (data == null || bossEditorState == null) {
             return;
@@ -4672,7 +4641,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     /**
      * Debounces a background persist of the current boss editor draft so admins no longer have to
      * click "Enregistrer" for every slider/toggle change to survive a crash/restart. Runs
-     * {@link #BOSS_EDITOR_AUTOSAVE_DEBOUNCE_MS} after the last edit; a new edit before that fires
+     * {@link #CONFIG_AUTOSAVE_DEBOUNCE_MS} after the last edit; a new edit before that fires
      * cancels and reschedules. Intentionally silent (no rebuild/status message) and skips renames —
      * only the explicit Save button handles renaming/validation errors.
      */
@@ -4684,9 +4653,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             pendingBossEditorAutoSave.cancel(false);
         }
         String originalBossName = bossEditorState.originalBossName;
-        pendingBossEditorAutoSave = BOSS_EDITOR_AUTOSAVE_EXECUTOR.schedule(
+        pendingBossEditorAutoSave = CONFIG_AUTOSAVE_EXECUTOR.schedule(
                 () -> autoSaveBossEditorDraft(originalBossName),
-                BOSS_EDITOR_AUTOSAVE_DEBOUNCE_MS,
+                CONFIG_AUTOSAVE_DEBOUNCE_MS,
                 java.util.concurrent.TimeUnit.MILLISECONDS
         );
     }
@@ -4719,31 +4688,48 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
      */
     private void autoSaveBossEditorDraft(String originalBossName) {
         try {
-            if (originalBossName == null || originalBossName.isBlank()) {
-                return;
-            }
             BossEditorState state = bossEditorState;
             if (state == null || state.boss == null) {
                 return;
             }
             String currentName = optionalText(state.boss.bossName);
-            if (currentName.isEmpty() || !currentName.equalsIgnoreCase(originalBossName)) {
-                // Name changed mid-edit or blank: leave it for the explicit Save to resolve safely.
+            if (currentName.isEmpty()) {
+                // Blank mid-edit: nothing coherent to save yet.
                 return;
             }
-            if (BossRegistry.get(originalBossName) == null) {
-                // Boss was deleted or never saved yet — nothing to auto-save onto.
+
+            boolean isNewBoss = originalBossName == null || originalBossName.isBlank();
+            boolean nameChanged = !isNewBoss && !currentName.equalsIgnoreCase(originalBossName);
+
+            if (isNewBoss || nameChanged) {
+                if (BossRegistry.exists(currentName)) {
+                    // Renamed/created onto a name that's already taken: leave it for the admin
+                    // to resolve by changing the BossID again — don't silently overwrite another boss.
+                    return;
+                }
+            } else if (BossRegistry.get(originalBossName) == null) {
+                // Boss was deleted mid-edit — nothing to auto-save onto.
                 return;
             }
 
             BossDefinition draftCopy = cloneBoss(state.boss);
+            LootTable lootCopy = state.loot != null ? cloneLoot(state.loot, draftCopy.bossName) : null;
+
+            if (nameChanged) {
+                BossRegistry.remove(originalBossName);
+                LootRegistry.remove(originalBossName);
+            }
             BossRegistry.register(draftCopy);
-            if (state.loot != null) {
-                LootTable lootCopy = cloneLoot(state.loot, draftCopy.bossName);
+            if (lootCopy != null) {
                 LootRegistry.register(lootCopy);
             }
             plugin.saveBossDefinitions();
             plugin.saveLootTables();
+
+            if (isNewBoss || nameChanged) {
+                bossEditorState = new BossEditorState(draftCopy.bossName, cloneBoss(draftCopy),
+                        cloneLoot(lootCopy, draftCopy.bossName));
+            }
         } catch (Exception ex) {
             plugin.getLogger().atWarning().withCause(ex).log(
                     "Boss editor auto-save failed for '" + originalBossName + "'");
@@ -4835,6 +4821,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             waveNpcSearchQuery = query;
             waveNpcPicksOpen = !query.isEmpty() && !BossArenaConfigUiControls.isExactNpcId(query);
             softUpdateWaveNpcPicks(false);
+            scheduleBossEditorAutoSave();
         } catch (IllegalArgumentException ex) {
             bossStatusText = ex.getMessage();
             rebuild();
@@ -5371,6 +5358,26 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         UICommandBuilder cmd = new UICommandBuilder();
         cmd.set("#BossWaveTriggerValueFieldLabel.Text", waveTriggerValueUnitLabel(trigger));
         sendUpdate(cmd, false);
+        handleBossWaveFieldChanged(data);
+    }
+
+    /** Auto-save hook for wave overlay fields with no dedicated live handler (min/max, hp/dmg/size, trigger value, repeat count). */
+    private void handleBossWaveFieldChanged(ConfigEventData data) {
+        if (bossEditorState == null || !bossWavesOverlayOpen) {
+            return;
+        }
+        try {
+            applyBossEditorDraft(data);
+            if (bossEditorState.boss.extraMobs == null) {
+                bossEditorState.boss.extraMobs = new BossDefinition.ExtraMobs();
+            }
+            BossDefinition.ExtraMobs extra = bossEditorState.boss.extraMobs;
+            applyWaveSpawnSettingsFromData(extra, data);
+            applyCurrentWavePage(extra, data);
+            scheduleBossEditorAutoSave();
+        } catch (IllegalArgumentException ignored) {
+            // Silent: the wave form may be transiently incomplete while typing.
+        }
     }
 
     private void handleBossWaveAddPage(ConfigEventData data) {
@@ -5421,71 +5428,6 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             rebuild();
         }
     }
-
-    private void handleBossWavesSave(ConfigEventData data) {
-        if (bossEditorState == null) {
-            return;
-        }
-
-        try {
-            applyBossEditorDraft(data);
-
-            if (bossEditorState.boss.extraMobs == null) {
-                bossEditorState.boss.extraMobs = new BossDefinition.ExtraMobs();
-            }
-            BossDefinition.ExtraMobs extra = bossEditorState.boss.extraMobs;
-            applyWaveSpawnSettingsFromData(extra, data);
-            applyCurrentWavePage(extra, data);
-            extra.sanitize();
-            persistBossEditorDraftToDisk();
-            bossStatusText = "Boss '" + bossEditorState.boss.bossName + "' enregistré (vagues).";
-            rebuild();
-        } catch (IllegalArgumentException ex) {
-            bossStatusText = ex.getMessage();
-            rebuild();
-        }
-    }
-
-    /** Writes the in-memory boss editor draft (definition + loot) to registries and disk. */
-    private void persistBossEditorDraftToDisk() {
-        if (bossEditorState == null || bossEditorState.boss == null) {
-            throw new IllegalArgumentException("Aucun boss en cours d'édition.");
-        }
-        cancelPendingBossEditorAutoSave();
-
-        BossDefinition outBoss = cloneBoss(bossEditorState.boss);
-        if (outBoss.bossName == null || outBoss.bossName.isBlank()) {
-            throw new IllegalArgumentException("BossID ne peut pas être vide.");
-        }
-        if (outBoss.npcId == null || outBoss.npcId.isBlank()) {
-            throw new IllegalArgumentException("ID PNJ ne peut pas être vide.");
-        }
-        if (outBoss.extraMobs != null) {
-            outBoss.extraMobs.sanitize();
-        }
-
-        LootTable outLoot = cloneLoot(bossEditorState.loot, outBoss.bossName);
-        if (outLoot.items == null) {
-            outLoot.items = new ArrayList<>();
-        }
-
-        String oldName = bossEditorState.originalBossName;
-        boolean nameChanged = oldName != null && !oldName.equalsIgnoreCase(outBoss.bossName);
-        if ((oldName == null || nameChanged) && BossRegistry.exists(outBoss.bossName)) {
-            throw new IllegalArgumentException("Le boss '" + outBoss.bossName + "' existe déjà.");
-        }
-        if (nameChanged) {
-            BossRegistry.remove(oldName);
-            LootRegistry.remove(oldName);
-        }
-
-        BossRegistry.register(outBoss);
-        LootRegistry.register(outLoot);
-        plugin.saveBossDefinitions();
-        plugin.saveLootTables();
-        bossEditorState = new BossEditorState(outBoss.bossName, cloneBoss(outBoss), cloneLoot(outLoot, outBoss.bossName));
-    }
-
 
     private void handleBossWaveAddRow(String rowToken, ConfigEventData data) {
         if (bossEditorState == null) {

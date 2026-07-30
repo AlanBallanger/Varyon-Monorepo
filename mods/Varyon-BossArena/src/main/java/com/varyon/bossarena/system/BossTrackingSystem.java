@@ -58,6 +58,7 @@ public class BossTrackingSystem {
     private final Object persistenceLock = new Object();
     private volatile Path persistencePath;
     private volatile boolean persistenceDirty;
+    private volatile boolean persistenceFailureWarned;
     private volatile PersistedState pendingRestoreState;
     private volatile MissingEntityHandler missingEntityHandler;
     private ScheduledExecutorService persistenceExecutor;
@@ -412,7 +413,11 @@ public class BossTrackingSystem {
             }
             persistState();
         } catch (Exception e) {
-            LOGGER.warning("Failed to autosave boss tracking state: " + e.getMessage());
+            if (!persistenceFailureWarned) {
+                persistenceFailureWarned = true;
+                LOGGER.warning("Failed to autosave boss tracking state: " + e.getMessage()
+                        + " (further failures will be suppressed until a save succeeds)");
+            }
         }
     }
 
@@ -442,8 +447,13 @@ public class BossTrackingSystem {
                     Files.move(temp, path, StandardCopyOption.REPLACE_EXISTING);
                 }
                 persistenceDirty = false;
+                persistenceFailureWarned = false;
             } catch (IOException e) {
-                LOGGER.warning("Failed to persist boss tracking state: " + e.getMessage());
+                if (!persistenceFailureWarned) {
+                    persistenceFailureWarned = true;
+                    LOGGER.warning("Failed to persist boss tracking state: " + e.getMessage()
+                            + " (further failures will be suppressed until a save succeeds)");
+                }
             }
         }
     }
@@ -1444,13 +1454,67 @@ public class BossTrackingSystem {
         return new HashMap<>(trackedBosses);
     }
 
+    /** Tracked bosses whose {@link BossData#world} is {@code world}, skipping other worlds' entries. */
+    public Map<UUID, BossData> snapshotTrackedBosses(World world) {
+        if (world == null) {
+            return Map.of();
+        }
+        Map<UUID, BossData> out = new HashMap<>();
+        for (Map.Entry<UUID, BossData> entry : trackedBosses.entrySet()) {
+            if (entry.getValue() != null && entry.getValue().world == world) {
+                out.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return out;
+    }
+
     public Map<UUID, UUID> snapshotTrackedAdds() {
         return new HashMap<>(addToBoss);
+    }
+
+    /** Tracked adds (addUuid → bossUuid) whose owning boss/event resolves to {@code world}. */
+    public Map<UUID, UUID> snapshotTrackedAdds(World world) {
+        if (world == null) {
+            return Map.of();
+        }
+        Map<UUID, UUID> out = new HashMap<>();
+        for (Map.Entry<UUID, UUID> entry : addToBoss.entrySet()) {
+            UUID bossUuid = entry.getValue();
+            World ownerWorld = resolveAddOwnerWorld(bossUuid);
+            if (ownerWorld == world) {
+                out.put(entry.getKey(), bossUuid);
+            }
+        }
+        return out;
+    }
+
+    private World resolveAddOwnerWorld(UUID bossUuid) {
+        BossData owner = trackedBosses.get(bossUuid);
+        if (owner != null && owner.world != null) {
+            return owner.world;
+        }
+        BossEventContext ctx = getEventContext(bossUuid);
+        return ctx != null ? ctx.world : null;
     }
 
     /** Pending pre-boss wave adds: addUuid → eventId. */
     public Map<UUID, UUID> snapshotPendingPreBossAdds() {
         return new HashMap<>(pendingPreBossAddToEventId);
+    }
+
+    /** Pending pre-boss wave adds whose event resolves to {@code world}. */
+    public Map<UUID, UUID> snapshotPendingPreBossAdds(World world) {
+        if (world == null) {
+            return Map.of();
+        }
+        Map<UUID, UUID> out = new HashMap<>();
+        for (Map.Entry<UUID, UUID> entry : pendingPreBossAddToEventId.entrySet()) {
+            EventData event = eventsById.get(entry.getValue());
+            if (event != null && resolveEventWorld(event) == world) {
+                out.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return out;
     }
 
     /**
@@ -1497,6 +1561,32 @@ public class BossTrackingSystem {
                 event.currentWaveNumber,
                 event.totalWaveCount
         );
+    }
+
+    /**
+     * Returns one currently-tracked boss UUID belonging to this event (the "primary" boss shown
+     * on the HUD/notifications), or null if the event is unknown or has no tracked boss right now.
+     * Direct event → boss lookup, avoiding a scan of every tracked boss on every world.
+     */
+    public UUID getPrimaryBossUuid(UUID eventId) {
+        if (eventId == null) {
+            return null;
+        }
+        EventData event = eventsById.get(eventId);
+        if (event == null) {
+            return null;
+        }
+        for (UUID bossUuid : event.aliveBosses) {
+            if (bossUuid != null && trackedBosses.containsKey(bossUuid)) {
+                return bossUuid;
+            }
+        }
+        for (UUID bossUuid : event.bossUuids) {
+            if (bossUuid != null && trackedBosses.containsKey(bossUuid)) {
+                return bossUuid;
+            }
+        }
+        return null;
     }
 
     public Set<UUID> snapshotAddsForBoss(UUID bossUuid) {

@@ -69,9 +69,9 @@ public final class BossSpawnService {
     private static final long HP_TRIGGER_POLL_INTERVAL_MS = 250L;
     private static final double HP_TRIGGER_EPSILON = 0.01d;
     /**
-     * Grace delay before the FIRST boss-HP-percent poll after spawn. HP scaling (BossHealthScale.apply,
-     * RPGLevelingBossScaleCompatSystem's 250ms resync) needs a moment to settle current HP at the newly
-     * scaled max; polling immediately can read a stale low percentage and fire "below X%" waves at spawn.
+     * Grace delay before the FIRST boss-HP-percent poll after spawn. HP scaling (BossHealthScale.apply)
+     * needs a moment to settle current HP at the newly scaled max; polling immediately can read a
+     * stale low percentage and fire "below X%" waves at spawn.
      */
     private static final long HP_TRIGGER_INITIAL_GRACE_MS = 600L;
     private static final ScheduledExecutorService EXTRA_WAVE_SCHEDULER =

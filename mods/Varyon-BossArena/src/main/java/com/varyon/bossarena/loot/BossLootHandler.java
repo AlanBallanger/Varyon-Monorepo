@@ -125,8 +125,6 @@ public class BossLootHandler {
     }
 
     public static void handleBossDeath(World world, Vector3d chestLocation, String bossName, UUID eventId, Store<EntityStore> store) {
-        LOGGER.info("=== BOSS LOOT DEBUG ===");
-        LOGGER.info("Boss: " + bossName + " died at: " + chestLocation);
         if (world == null) {
             LOGGER.warning("Cannot handle boss loot for '" + bossName + "': world is null.");
             return;
