@@ -195,6 +195,23 @@ $Sounds = "Sounds.ui";
                         Label #ParametresQuestMenuOpenLabel { Text: "Ouvrir"; Anchor: (Full: 0); Style: (FontSize: 13, TextColor: @SettingMuted, HorizontalAlignment: Center, VerticalAlignment: Center); }
                       }
                     }
+
+                    Group { Anchor: (Height: 1, Bottom: 12, Top: 12); Background: (Color: #FFFFFF(0.08)); }
+
+                    Group #ParametresDmgNumRow {
+                      LayoutMode: Left;
+                      Label { FlexWeight: 1; Text: "Degats personnalises"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
+                      Button #ParametresDmgNumOn {
+                        Anchor: (Width: 52, Height: 28, Right: 4);
+                        Style: @SwitchBtnStyle;
+                        Label #ParametresDmgNumOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                      Button #ParametresDmgNumOff {
+                        Anchor: (Width: 52, Height: 28);
+                        Style: @SwitchBtnStyle;
+                        Label #ParametresDmgNumOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                      }
+                    }
                   }
                 }
               }
@@ -217,23 +234,6 @@ $Sounds = "Sounds.ui";
                     LayoutMode: Top;
                     FlexWeight: 1;
                     Anchor: (Left: 0, Right: 0);
-
-                    Group #ParametresDmgNumRow {
-                      LayoutMode: Left;
-                      Label { FlexWeight: 1; Text: "Degats personnalises"; Style: (FontSize: 15, TextColor: @SettingInk, RenderBold: true, VerticalAlignment: Center); }
-                      Button #ParametresDmgNumOn {
-                        Anchor: (Width: 52, Height: 28, Right: 4);
-                        Style: @SwitchBtnStyle;
-                        Label #ParametresDmgNumOnLabel { Text: "ON"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
-                      }
-                      Button #ParametresDmgNumOff {
-                        Anchor: (Width: 52, Height: 28);
-                        Style: @SwitchBtnStyle;
-                        Label #ParametresDmgNumOffLabel { Text: "OFF"; Anchor: (Full: 0); Style: (FontSize: 12, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
-                      }
-                    }
-
-                    Group { Anchor: (Height: 1, Bottom: 12, Top: 12); Background: (Color: #FFFFFF(0.08)); }
 
                     Group #ParametresRpgSettingsRow {
                       LayoutMode: Left;

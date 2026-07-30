@@ -121,6 +121,7 @@ public class VaryonUIPlugin extends JavaPlugin {
         if (accueilAltKeyFilter != null && uuid != null) {
             accueilAltKeyFilter.clearPlayer(uuid);
         }
+        SimpleUIPage.clearPerPlayerTogglePreferences(uuid);
     }
 
     private void onPlayerReady(PlayerReadyEvent event) {

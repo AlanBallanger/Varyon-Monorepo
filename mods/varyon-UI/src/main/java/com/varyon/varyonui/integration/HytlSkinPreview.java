@@ -39,6 +39,17 @@ public final class HytlSkinPreview {
             .connectTimeout(Duration.ofSeconds(15))
             .build();
 
+    /**
+     * Short-TTL in-memory cache for fetched portrait PNGs, keyed by (uuid, kind). Without this,
+     * every menu re-open triggered a fresh outbound HTTP call + PNG decode/resize for the same
+     * player's avatar/headshot, even if they'd just opened the menu moments before.
+     */
+    private static final long PORTRAIT_CACHE_TTL_MS = 5 * 60 * 1000L;
+    private static final java.util.concurrent.ConcurrentHashMap<String, CachedPng> PORTRAIT_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private record CachedPng(byte[] bytes, long fetchedAtMs) {}
+
     private HytlSkinPreview() {}
 
     public static void preparePortraitPackAtStartup(JavaPlugin plugin) {
@@ -54,6 +65,37 @@ public final class HytlSkinPreview {
 
     @Nullable
     public static byte[] fetchHeadshotPng(@Nonnull UUID uuid) {
+        byte[] cached = cachedPortrait("headshot", uuid);
+        if (cached != null) {
+            return cached;
+        }
+        byte[] fetched = fetchHeadshotPngUncached(uuid);
+        if (fetched != null) {
+            PORTRAIT_CACHE.put("headshot:" + uuid, new CachedPng(fetched, System.currentTimeMillis()));
+        }
+        return fetched;
+    }
+
+    /** True if a still-fresh cached portrait exists for this player (either kind). */
+    public static boolean hasFreshCachedPortrait(@Nonnull UUID uuid) {
+        return cachedPortrait("headshot", uuid) != null || cachedPortrait("avatar", uuid) != null;
+    }
+
+    @Nullable
+    private static byte[] cachedPortrait(String kind, UUID uuid) {
+        CachedPng entry = PORTRAIT_CACHE.get(kind + ":" + uuid);
+        if (entry == null) {
+            return null;
+        }
+        if (System.currentTimeMillis() - entry.fetchedAtMs() > PORTRAIT_CACHE_TTL_MS) {
+            PORTRAIT_CACHE.remove(kind + ":" + uuid);
+            return null;
+        }
+        return entry.bytes();
+    }
+
+    @Nullable
+    private static byte[] fetchHeadshotPngUncached(@Nonnull UUID uuid) {
         String qs = "user=" + uuid + "&trim=true&size=" + PHOTO_QUERY_SIZE;
         URI uri = URI.create(HYTALE_PHOTO_SKIN_FRONT + "?" + qs);
         try {
@@ -83,6 +125,19 @@ public final class HytlSkinPreview {
 
     @Nullable
     public static byte[] fetchAvatarPng(@Nonnull UUID uuid) {
+        byte[] cached = cachedPortrait("avatar", uuid);
+        if (cached != null) {
+            return cached;
+        }
+        byte[] fetched = fetchAvatarPngUncached(uuid);
+        if (fetched != null) {
+            PORTRAIT_CACHE.put("avatar:" + uuid, new CachedPng(fetched, System.currentTimeMillis()));
+        }
+        return fetched;
+    }
+
+    @Nullable
+    private static byte[] fetchAvatarPngUncached(@Nonnull UUID uuid) {
         String qs = "user=" + uuid + "&trim=true&size=" + PHOTO_QUERY_SIZE;
         URI uri = URI.create(HYTALE_PHOTO_SKIN_AVATAR + "?" + qs);
         try {

@@ -12,7 +12,9 @@ import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +24,15 @@ final class SkinPortraitRuntime {
 
     private static volatile String portraitPackId;
     private static volatile boolean portraitPackReady;
+
+    /**
+     * Hash of the last PNG bytes published per key. publishPngWithKey always wrote to disk and
+     * called sendAsset() (a client-visible asset push forcing a texture reload) unconditionally,
+     * even when the bytes hadn't changed since the last publish — this made the sidebar avatar
+     * visibly flicker/reload on every menu open, independent of the HTTP-fetch cache. Skip the
+     * disk write + client push when the same bytes were already published for this key.
+     */
+    private static final ConcurrentHashMap<String, Integer> LAST_PUBLISHED_HASH = new ConcurrentHashMap<>();
 
     private SkinPortraitRuntime() {}
 
@@ -94,6 +105,14 @@ final class SkinPortraitRuntime {
             LOG.log(Level.WARNING, "[PortraitPack] pack not ready key=" + key);
             return null;
         }
+
+        int contentHash = Arrays.hashCode(pngBytes);
+        if (!forceClientRebuild && Integer.valueOf(contentHash).equals(LAST_PUBLISHED_HASH.get(key))) {
+            // Same bytes already published for this key — skip the disk write and the client
+            // asset push (sendAsset forces a visible texture reload) entirely.
+            return "Portraits/" + key + ".png";
+        }
+
         try {
             String fileName = key + ".png";
             Path cacheDir = plugin.getDataDirectory().resolve("skin_portraits_cache");
@@ -108,6 +127,7 @@ final class SkinPortraitRuntime {
             if (module != null) {
                 module.sendAsset(asset, forceClientRebuild);
             }
+            LAST_PUBLISHED_HASH.put(key, contentHash);
             return "Portraits/" + key + ".png";
         } catch (Exception e) {
             LOG.log(Level.WARNING, "[PortraitPack] publish failed key=" + key, e);

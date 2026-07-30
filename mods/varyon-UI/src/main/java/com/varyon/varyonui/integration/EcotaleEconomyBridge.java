@@ -23,15 +23,18 @@ public final class EcotaleEconomyBridge {
             java.util.regex.Pattern.compile("[.,]00$");
 
     private static Boolean available = null;
+    private static Class<?> economyBridgeClass = null;
+    private static Method getBalanceMethod = null;
 
     private EcotaleEconomyBridge() {}
 
     public static boolean isAvailable() {
         if (available == null) {
             try {
-                Class.forName(ECONOMY_BRIDGE);
+                economyBridgeClass = Class.forName(ECONOMY_BRIDGE);
+                getBalanceMethod = economyBridgeClass.getMethod("getBalance", UUID.class);
                 available = true;
-            } catch (ClassNotFoundException e) {
+            } catch (Throwable t) {
                 available = false;
             }
         }
@@ -51,10 +54,8 @@ public final class EcotaleEconomyBridge {
             return;
         }
         try {
-            Class<?> c = Class.forName(ECONOMY_BRIDGE);
-            Method getBalance = c.getMethod("getBalance", UUID.class);
-            double bal = ((Number) getBalance.invoke(null, uuid)).doubleValue();
-            String text = TRAILING_ZERO_DECIMALS.matcher(formatAmountOnlyReflect(c, bal)).replaceAll("");
+            double bal = ((Number) getBalanceMethod.invoke(null, uuid)).doubleValue();
+            String text = TRAILING_ZERO_DECIMALS.matcher(formatAmountOnlyReflect(economyBridgeClass, bal)).replaceAll("");
             ui.set("#SidebarStatBalanceValueMain.TextSpans", Message.raw(text));
         } catch (Throwable t) {
             LOG.log(Level.WARNING, "[EcotaleSidebar] apply failed uuid=" + uuid, t);
@@ -90,16 +91,25 @@ public final class EcotaleEconomyBridge {
         return null;
     }
 
+    private static volatile Method formatAmountOnlyMethod;
+    private static volatile Method formatLegacyMethod;
+    private static volatile boolean formatMethodResolved;
+
     @Nonnull
     private static String formatAmountOnlyReflect(@Nonnull Class<?> economyBridge, double bal) throws Exception {
-        try {
-            Method m = economyBridge.getMethod("formatAmountOnly", double.class);
-            return (String) m.invoke(null, bal);
-        } catch (NoSuchMethodException e) {
-            Method legacy = economyBridge.getMethod("format", double.class);
-            String withSymbol = (String) legacy.invoke(null, bal);
-            return stripLeadingCurrencyNoise(withSymbol);
+        if (!formatMethodResolved) {
+            try {
+                formatAmountOnlyMethod = economyBridge.getMethod("formatAmountOnly", double.class);
+            } catch (NoSuchMethodException e) {
+                formatLegacyMethod = economyBridge.getMethod("format", double.class);
+            }
+            formatMethodResolved = true;
         }
+        if (formatAmountOnlyMethod != null) {
+            return (String) formatAmountOnlyMethod.invoke(null, bal);
+        }
+        String withSymbol = (String) formatLegacyMethod.invoke(null, bal);
+        return stripLeadingCurrencyNoise(withSymbol);
     }
 
     @Nonnull

@@ -8,13 +8,55 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class MenuRpgBridge {
 
     private static final Logger LOG = Logger.getLogger("VaryonUI");
+
+    /** Cached Class/Method reflective lookups — this bridge runs on every menu build/tab switch,
+     * so re-resolving Class.forName/getMethod fresh on every call was real avoidable per-interaction
+     * CPU cost (a dozen+ classes and methods resolved from scratch on every rebuild). */
+    private static final Map<String, java.util.Optional<Class<?>>> CLASS_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, java.util.Optional<Method>> METHOD_CACHE = new ConcurrentHashMap<>();
+
+    private static Class<?> classOf(String name, ClassLoader ldr) throws ClassNotFoundException {
+        java.util.Optional<Class<?>> cached = CLASS_CACHE.computeIfAbsent(name, n -> {
+            try {
+                return java.util.Optional.of(Class.forName(n, true, ldr));
+            } catch (Throwable t) {
+                return java.util.Optional.empty();
+            }
+        });
+        if (cached.isEmpty()) {
+            throw new ClassNotFoundException(name);
+        }
+        return cached.get();
+    }
+
+    private static Method methodOf(Class<?> owner, String name, Class<?>... paramTypes) throws NoSuchMethodException {
+        StringBuilder key = new StringBuilder(owner.getName()).append('#').append(name);
+        for (Class<?> pt : paramTypes) {
+            key.append(',').append(pt.getName());
+        }
+        java.util.Optional<Method> cached = METHOD_CACHE.computeIfAbsent(key.toString(), k -> {
+            try {
+                Method m = owner.getMethod(name, paramTypes);
+                m.setAccessible(true);
+                return java.util.Optional.of(m);
+            } catch (Throwable t) {
+                return java.util.Optional.empty();
+            }
+        });
+        if (cached.isEmpty()) {
+            throw new NoSuchMethodException(owner.getName() + "#" + name);
+        }
+        return cached.get();
+    }
 
     private static final String PLUGIN_CLASS      = "fr.varyon.vrpg.VaryonRpgPlugin";
     private static final String CLASS_MANAGER     = "fr.varyon.vrpg.classes.ClassManager";
@@ -50,14 +92,14 @@ public final class MenuRpgBridge {
     public static void applyMenuXp(@Nonnull UUID playerId, @Nonnull UICommandBuilder ui) {
         final Class<?> pluginClass;
         try {
-            pluginClass = Class.forName(PLUGIN_CLASS);
+            pluginClass = classOf(PLUGIN_CLASS, MenuRpgBridge.class.getClassLoader());
         } catch (ClassNotFoundException e) {
             applyFallback(ui);
             return;
         }
         ClassLoader ldr = pluginClass.getClassLoader();
         try {
-            Object plugin = access(pluginClass.getMethod("getInstance")).invoke(null);
+            Object plugin = methodOf(pluginClass, "getInstance").invoke(null);
             if (plugin == null) { applyFallback(ui); return; }
 
             applyClassSection(ui, plugin, pluginClass, ldr, playerId);
@@ -71,34 +113,34 @@ public final class MenuRpgBridge {
 
     private static void applyClassSection(UICommandBuilder ui, Object plugin, Class<?> pluginClass,
                                           ClassLoader ldr, UUID uuid) throws ReflectiveOperationException {
-        Object classManager = access(pluginClass.getMethod("getClassManager")).invoke(plugin);
+        Object classManager = methodOf(pluginClass, "getClassManager").invoke(plugin);
         if (classManager == null) { emptyClassSlot(ui); return; }
 
-        Class<?> cmClass = Class.forName(CLASS_MANAGER, true, ldr);
-        Class<?> accClass = Class.forName(CLASS_ACCOUNT, true, ldr);
-        Class<?> progClass = Class.forName(CLASS_PROGRESS, true, ldr);
+        Class<?> cmClass = classOf(CLASS_MANAGER, ldr);
+        Class<?> accClass = classOf(CLASS_ACCOUNT, ldr);
+        Class<?> progClass = classOf(CLASS_PROGRESS, ldr);
 
-        Object acc = access(cmClass.getMethod("getOrLoad", UUID.class)).invoke(classManager, uuid);
+        Object acc = methodOf(cmClass, "getOrLoad", UUID.class).invoke(classManager, uuid);
         if (acc == null) { emptyClassSlot(ui); return; }
 
-        Object activeClass = access(accClass.getMethod("getActiveClass")).invoke(acc);
+        Object activeClass = methodOf(accClass, "getActiveClass").invoke(acc);
         if (activeClass == null) { emptyClassSlot(ui); return; }
 
-        Class<?> pcClass = Class.forName(PLAYER_CLASS, true, ldr);
-        Class<?> psClass = Class.forName(PLAYER_SPEC, true, ldr);
+        Class<?> pcClass = classOf(PLAYER_CLASS, ldr);
+        Class<?> psClass = classOf(PLAYER_SPEC, ldr);
 
-        Object prog = access(accClass.getMethod("getProgress", pcClass)).invoke(acc, activeClass);
-        int level = ((Number) access(progClass.getMethod("getLevel")).invoke(prog)).intValue();
-        long xpIn = ((Number) access(progClass.getMethod("getXpInLevel")).invoke(prog)).longValue();
-        long xpTo = ((Number) access(progClass.getMethod("getXpToNextLevel")).invoke(prog)).longValue();
-        boolean maxLvl = (boolean) access(progClass.getMethod("isMaxLevel")).invoke(prog);
-        Object activeSpec = access(progClass.getMethod("getActiveSpec")).invoke(prog);
+        Object prog = methodOf(accClass, "getProgress", pcClass).invoke(acc, activeClass);
+        int level = ((Number) methodOf(progClass, "getLevel").invoke(prog)).intValue();
+        long xpIn = ((Number) methodOf(progClass, "getXpInLevel").invoke(prog)).longValue();
+        long xpTo = ((Number) methodOf(progClass, "getXpToNextLevel").invoke(prog)).longValue();
+        boolean maxLvl = (boolean) methodOf(progClass, "isMaxLevel").invoke(prog);
+        Object activeSpec = methodOf(progClass, "getActiveSpec").invoke(prog);
 
         String displayName = activeSpec != null
-                ? (String) access(psClass.getMethod("getDisplayName")).invoke(activeSpec)
-                : (String) access(pcClass.getMethod("getDisplayName")).invoke(activeClass);
+                ? (String) methodOf(psClass, "getDisplayName").invoke(activeSpec)
+                : (String) methodOf(pcClass, "getDisplayName").invoke(activeClass);
 
-        int talentPts = ((Number) access(accClass.getMethod("availableTalentPoints", pcClass))
+        int talentPts = ((Number) methodOf(accClass, "availableTalentPoints", pcClass)
                 .invoke(acc, activeClass)).intValue();
         String levelTxt = "Nv." + level + (talentPts > 0 ? " *" : "");
         String xpTxt = maxLvl ? "MAX" : (xpIn + "/" + xpTo);
@@ -115,19 +157,19 @@ public final class MenuRpgBridge {
 
     private static void applyJobSection(UICommandBuilder ui, Object plugin, Class<?> pluginClass,
                                         ClassLoader ldr, UUID uuid) throws ReflectiveOperationException {
-        Object profManager = access(pluginClass.getMethod("getProfessionManager")).invoke(plugin);
+        Object profManager = methodOf(pluginClass, "getProfessionManager").invoke(plugin);
         if (profManager == null) { emptyJobSlot(ui, 1); emptyJobSlot(ui, 2); return; }
 
-        Class<?> pmClass = Class.forName(PROF_MANAGER, true, ldr);
-        Class<?> paClass = Class.forName(PLAYER_ACCOUNT, true, ldr);
-        Class<?> profClass = Class.forName(PROFESSION, true, ldr);
-        Class<?> ppClass = Class.forName(PROF_PROGRESS, true, ldr);
+        Class<?> pmClass = classOf(PROF_MANAGER, ldr);
+        Class<?> paClass = classOf(PLAYER_ACCOUNT, ldr);
+        Class<?> profClass = classOf(PROFESSION, ldr);
+        Class<?> ppClass = classOf(PROF_PROGRESS, ldr);
 
-        Object acc = access(pmClass.getMethod("getOrLoad", UUID.class)).invoke(profManager, uuid);
+        Object acc = methodOf(pmClass, "getOrLoad", UUID.class).invoke(profManager, uuid);
         if (acc == null) { emptyJobSlot(ui, 1); emptyJobSlot(ui, 2); return; }
 
-        Object slot0 = access(paClass.getMethod("getActiveSlot0")).invoke(acc);
-        Object slot1 = access(paClass.getMethod("getActiveSlot1")).invoke(acc);
+        Object slot0 = methodOf(paClass, "getActiveSlot0").invoke(acc);
+        Object slot1 = methodOf(paClass, "getActiveSlot1").invoke(acc);
 
         applyJobSlot(ui, 1, slot0, acc, paClass, profClass, ppClass);
         applyJobSlot(ui, 2, slot1, acc, paClass, profClass, ppClass);
@@ -138,12 +180,12 @@ public final class MenuRpgBridge {
             throws ReflectiveOperationException {
         if (prof == null) { emptyJobSlot(ui, slot); return; }
 
-        Object prog = access(paClass.getMethod("getProgress", profClass)).invoke(acc, prof);
-        String displayName = (String) access(profClass.getMethod("getDisplayName")).invoke(prof);
-        int level = ((Number) access(ppClass.getMethod("getLevel")).invoke(prog)).intValue();
-        long xpIn = ((Number) access(ppClass.getMethod("getXpInLevel")).invoke(prog)).longValue();
-        long xpTo = ((Number) access(ppClass.getMethod("getXpToNextLevel")).invoke(prog)).longValue();
-        boolean maxLvl = (boolean) access(ppClass.getMethod("isMaxLevel")).invoke(prog);
+        Object prog = methodOf(paClass, "getProgress", profClass).invoke(acc, prof);
+        String displayName = (String) methodOf(profClass, "getDisplayName").invoke(prof);
+        int level = ((Number) methodOf(ppClass, "getLevel").invoke(prog)).intValue();
+        long xpIn = ((Number) methodOf(ppClass, "getXpInLevel").invoke(prog)).longValue();
+        long xpTo = ((Number) methodOf(ppClass, "getXpToNextLevel").invoke(prog)).longValue();
+        boolean maxLvl = (boolean) methodOf(ppClass, "isMaxLevel").invoke(prog);
 
         String levelTxt = "Nv." + level;
         String xpTxt = maxLvl ? "MAX" : (xpIn + "/" + xpTo);
@@ -182,25 +224,25 @@ public final class MenuRpgBridge {
 
     private static void applyStatsSection(UICommandBuilder ui, Object plugin, Class<?> pluginClass,
                                            ClassLoader ldr, UUID uuid) throws ReflectiveOperationException {
-        Object classManager = access(pluginClass.getMethod("getClassManager")).invoke(plugin);
+        Object classManager = methodOf(pluginClass, "getClassManager").invoke(plugin);
         if (classManager == null) { emptyStats(ui); return; }
 
-        Class<?> cmClass = Class.forName(CLASS_MANAGER, true, ldr);
-        Class<?> statEngineClass = Class.forName(CLASS_STAT_ENGINE, true, ldr);
-        Class<?> statsClass = Class.forName(CLASS_PLAYER_STATS, true, ldr);
+        Class<?> cmClass = classOf(CLASS_MANAGER, ldr);
+        Class<?> statEngineClass = classOf(CLASS_STAT_ENGINE, ldr);
+        Class<?> statsClass = classOf(CLASS_PLAYER_STATS, ldr);
 
-        Object statEngine = access(cmClass.getMethod("getStatEngine")).invoke(classManager);
+        Object statEngine = methodOf(cmClass, "getStatEngine").invoke(classManager);
         if (statEngine == null) { emptyStats(ui); return; }
 
-        Object stats = access(statEngineClass.getMethod("getStats", UUID.class)).invoke(statEngine, uuid);
+        Object stats = methodOf(statEngineClass, "getStats", UUID.class).invoke(statEngine, uuid);
         if (stats == null) { emptyStats(ui); return; }
 
-        int maxHp        = ((Number) access(statsClass.getMethod("maxHp")).invoke(stats)).intValue();
-        int atk          = ((Number) access(statsClass.getMethod("atk")).invoke(stats)).intValue();
-        int armorPct     = ((Number) access(statsClass.getMethod("armorPct")).invoke(stats)).intValue();
-        int maxStamina   = ((Number) access(statsClass.getMethod("maxStamina")).invoke(stats)).intValue();
-        int critChancePct = ((Number) access(statsClass.getMethod("critChancePct")).invoke(stats)).intValue();
-        int critDamagePct = ((Number) access(statsClass.getMethod("critDamagePct")).invoke(stats)).intValue();
+        int maxHp        = ((Number) methodOf(statsClass, "maxHp").invoke(stats)).intValue();
+        int atk          = ((Number) methodOf(statsClass, "atk").invoke(stats)).intValue();
+        int armorPct     = ((Number) methodOf(statsClass, "armorPct").invoke(stats)).intValue();
+        int maxStamina   = ((Number) methodOf(statsClass, "maxStamina").invoke(stats)).intValue();
+        int critChancePct = ((Number) methodOf(statsClass, "critChancePct").invoke(stats)).intValue();
+        int critDamagePct = ((Number) methodOf(statsClass, "critDamagePct").invoke(stats)).intValue();
 
         ui.setObject("#SidebarStatHPIcon.Background",         ICON_HP);
         ui.setObject("#SidebarStatArmorIcon.Background",      ICON_ARM);
@@ -236,11 +278,6 @@ public final class MenuRpgBridge {
         emptyJobSlot(ui, 1);
         emptyJobSlot(ui, 2);
         emptyStats(ui);
-    }
-
-    private static Method access(Method m) {
-        m.setAccessible(true);
-        return m;
     }
 
     private static Throwable unwrap(Throwable e) {

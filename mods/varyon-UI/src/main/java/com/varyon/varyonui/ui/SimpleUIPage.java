@@ -102,6 +102,21 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
 
     private static final long COMMAND_EXECUTE_DELAY_MS = 100L;
     private static final ConcurrentHashMap<UUID, Boolean> ACTIVITY_BUBBLE_ON = new ConcurrentHashMap<>();
+    /**
+     * Local cache mirroring the sibling Varyon-Damage_Number mod's per-player toggle state.
+     * CommandManager.handleCommand() runs the "/dmgnum" command asynchronously (ForkJoinPool),
+     * so re-reading DamageNumberBridge.isEnabled(uuid) immediately after firing the command could
+     * race and read the pre-toggle value, making the switch render inverted for one frame/click.
+     * Writing the intended state here immediately (same pattern as ACTIVITY_BUBBLE_ON) avoids that.
+     */
+    private static final ConcurrentHashMap<UUID, Boolean> DMG_NUM_ON = new ConcurrentHashMap<>();
+
+    public static void clearPerPlayerTogglePreferences(UUID uuid) {
+        if (uuid != null) {
+            ACTIVITY_BUBBLE_ON.remove(uuid);
+            DMG_NUM_ON.remove(uuid);
+        }
+    }
 
     private static final String SWITCH_ON_ACTIVE_BG = "#27AE60";
     private static final String SWITCH_ON_INACTIVE_BG = "#27AE6047";
@@ -196,7 +211,14 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         patchTabBarAppearance(commandBuilder);
         appendTabBarEvents(commandBuilder, eventBuilder);
         if (scheduleSkinFetch) {
-            HytlSkinPreview.applyPlaceholder(commandBuilder);
+            UUID uuid = playerRef.getUuid();
+            // Skip the placeholder flash on menu open when we already have a fresh cached
+            // portrait — the async refresh below will simply reapply the same (unchanged) image
+            // via SkinPortraitRuntime's dedup, so clearing to a gray placeholder first only
+            // produced a visible flicker with nothing gained.
+            if (uuid == null || !HytlSkinPreview.hasFreshCachedPortrait(uuid)) {
+                HytlSkinPreview.applyPlaceholder(commandBuilder);
+            }
             scheduleAsyncSidebarPortraitRefresh(skinContextRef);
         }
     }
@@ -669,7 +691,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         applyDualSwitch(commandBuilder,
             "ParametresDmgNumOn", "ParametresDmgNumOnLabel",
             "ParametresDmgNumOff", "ParametresDmgNumOffLabel",
-            DamageNumberBridge.isEnabled(uuid));
+            DMG_NUM_ON.computeIfAbsent(uuid, DamageNumberBridge::isEnabled));
     }
 
     private static void applyDualSwitch(
@@ -1151,6 +1173,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         cb.set("#PtClaimAllBtn.TextSpans", canClaimAll
             ? Message.raw("Récupérer tout")
             : Message.raw("Récupérer tout").color("#8899aa"));
+        cb.set("#PtClaimAllBtn.Disabled", !canClaimAll);
 
         buildPlaytimeProgressBar(cb, daily, rdata);
         buildPlaytimeChests(cb, daily, rdata);
@@ -1468,8 +1491,10 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
             PlayerRef playerRefComp = store.getComponent(ref, PlayerRef.getComponentType());
             if (playerRefComp != null && playerRefComp.getUuid() != null && DamageNumberBridge.isAvailable()) {
                 boolean wantOn = "on".equals(data.dmgNumToggle);
-                if (DamageNumberBridge.isEnabled(playerRefComp.getUuid()) != wantOn) {
+                UUID uuid = playerRefComp.getUuid();
+                if (DMG_NUM_ON.computeIfAbsent(uuid, DamageNumberBridge::isEnabled) != wantOn) {
                     CommandManager.get().handleCommand(playerRefComp, "dmgnum");
+                    DMG_NUM_ON.put(uuid, wantOn);
                 }
                 UICommandBuilder commandBuilder = new UICommandBuilder();
                 UIEventBuilder eventBuilder = new UIEventBuilder();
