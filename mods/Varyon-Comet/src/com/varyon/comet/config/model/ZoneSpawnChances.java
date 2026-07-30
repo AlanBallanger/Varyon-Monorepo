@@ -85,7 +85,12 @@ public class ZoneSpawnChances {
      * @return Selected tier (1-5)
      */
     public int selectTier(Random random) {
-        double roll = random.nextDouble();
+        double total = getTotalProbability();
+        if (total <= 0.0) {
+            return 0;
+        }
+
+        double roll = random.nextDouble() * total;
         double cumulative = 0.0;
 
         cumulative += tier1;
@@ -100,8 +105,15 @@ public class ZoneSpawnChances {
         cumulative += tier4;
         if (roll < cumulative) return 4;
 
-        // Default to tier 5 if nothing else matched
-        return 5;
+        if (tier5 > 0.0) {
+            return 5;
+        }
+        for (int tier = 4; tier >= 1; tier--) {
+            if (getProbability(tier) > 0.0) {
+                return tier;
+            }
+        }
+        return 0;
     }
 
     /**

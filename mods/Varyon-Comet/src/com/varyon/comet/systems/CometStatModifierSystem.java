@@ -62,10 +62,12 @@ public class CometStatModifierSystem extends HolderSystem<EntityStore> {
             float scaleMultiplier, float speedMultiplier) {
         pendingModifiers.put(npcUUID,
                 new StatModifiers(hpMultiplier, damageMultiplier, scaleMultiplier, speedMultiplier));
-        LOGGER.info("[CometStatModifier] Registered pending modifier for UUID " + npcUUID +
-                " - HP: " + hpMultiplier + "x, Damage: " + damageMultiplier + "x, Scale: " + scaleMultiplier
-                + "x, Speed: "
-                + speedMultiplier + "x");
+        if (CometConfig.DEBUG) {
+            LOGGER.info("[CometStatModifier] Registered pending modifier for UUID " + npcUUID +
+                    " - HP: " + hpMultiplier + "x, Damage: " + damageMultiplier + "x, Scale: " + scaleMultiplier
+                    + "x, Speed: "
+                    + speedMultiplier + "x");
+        }
     }
 
     /**
@@ -147,8 +149,10 @@ public class CometStatModifierSystem extends HolderSystem<EntityStore> {
     public void applyModifiers(Holder<EntityStore> holder, float hpMult, float damageMult, float scaleMult,
             float speedMult) {
         try {
-            LOGGER.info("[CometStatModifier] Applying modifiers to entity - HP: " + hpMult + "x, Scale: " + scaleMult
-                    + "x, Speed: " + speedMult + "x");
+            if (CometConfig.DEBUG) {
+                LOGGER.info("[CometStatModifier] Applying modifiers to entity - HP: " + hpMult + "x, Scale: " + scaleMult
+                        + "x, Speed: " + speedMult + "x");
+            }
 
             // Apply HP multiplier
             if (hpMult != 1.0f) {
@@ -195,8 +199,10 @@ public class CometStatModifierSystem extends HolderSystem<EntityStore> {
             }
 
             if (npcUUID != null) {
-                LOGGER.info("[CometStatModifier] Applying modifiers to UUID " + npcUUID + " - HP: " + hpMult
-                        + "x, Scale: " + scaleMult + "x, Speed: " + speedMult + "x");
+                if (CometConfig.DEBUG) {
+                    LOGGER.info("[CometStatModifier] Applying modifiers to UUID " + npcUUID + " - HP: " + hpMult
+                            + "x, Scale: " + scaleMult + "x, Speed: " + speedMult + "x");
+                }
                 pendingModifiers.put(npcUUID, new StatModifiers(hpMult, damageMult, scaleMult, speedMult));
                 modifiedNPCs.put(npcUUID, true);
             }
@@ -241,7 +247,9 @@ public class CometStatModifierSystem extends HolderSystem<EntityStore> {
             // Get the entity's CURRENT max health (not the asset default)
             float currentMax = statMap.get(statIndex).getMax();
 
-            LOGGER.info("[CometStatModifier] Applying HP modifier: currentMax=" + currentMax + ", multiplier=" + multiplier);
+            if (CometConfig.DEBUG) {
+                LOGGER.info("[CometStatModifier] Applying HP modifier: currentMax=" + currentMax + ", multiplier=" + multiplier);
+            }
 
             // Use MULTIPLICATIVE modifier to properly scale HP
             StaticModifier modifier = new StaticModifier(
@@ -251,15 +259,15 @@ public class CometStatModifierSystem extends HolderSystem<EntityStore> {
 
             statMap.putModifier(EntityStatMap.Predictable.ALL, statIndex, HP_MODIFIER_KEY, (Modifier) modifier);
 
-            // Log the result after applying modifier
-            float newMax = statMap.get(statIndex).getMax();
-            float newCurrent = statMap.get(statIndex).get();
-            LOGGER.info("[CometStatModifier] After putModifier - newMax=" + newMax + ", newCurrent=" + newCurrent);
-
             statMap.maximizeStatValue(EntityStatMap.Predictable.ALL, statIndex);
 
-            float finalCurrent = statMap.get(statIndex).get();
-            LOGGER.info("[CometStatModifier] After maximizeStatValue - finalCurrent=" + finalCurrent);
+            if (CometConfig.DEBUG) {
+                float newMax = statMap.get(statIndex).getMax();
+                float newCurrent = statMap.get(statIndex).get();
+                LOGGER.info("[CometStatModifier] After putModifier - newMax=" + newMax + ", newCurrent=" + newCurrent);
+                float finalCurrent = statMap.get(statIndex).get();
+                LOGGER.info("[CometStatModifier] After maximizeStatValue - finalCurrent=" + finalCurrent);
+            }
         } catch (Exception e) {
             LOGGER.warning("[CometStatModifier] Error applying health to map: " + e.getMessage());
             e.printStackTrace();
@@ -278,7 +286,9 @@ public class CometStatModifierSystem extends HolderSystem<EntityStore> {
             float currentMax = statMap.get(statIndex).getMax();
             float currentValue = statMap.get(statIndex).get();
 
-            LOGGER.info("[CometStatModifier] Applying Speed modifier: currentMax=" + currentMax + ", currentValue=" + currentValue + ", multiplier=" + multiplier);
+            if (CometConfig.DEBUG) {
+                LOGGER.info("[CometStatModifier] Applying Speed modifier: currentMax=" + currentMax + ", currentValue=" + currentValue + ", multiplier=" + multiplier);
+            }
 
             // Use MULTIPLICATIVE modifier to properly scale Speed
             StaticModifier modifier = new StaticModifier(
@@ -288,16 +298,16 @@ public class CometStatModifierSystem extends HolderSystem<EntityStore> {
 
             statMap.putModifier(EntityStatMap.Predictable.ALL, statIndex, SPEED_MODIFIER_KEY, (Modifier) modifier);
 
-            // Log the result after applying modifier
-            float newMax = statMap.get(statIndex).getMax();
-            float newCurrent = statMap.get(statIndex).get();
-            LOGGER.info("[CometStatModifier] After putModifier - newMax=" + newMax + ", newCurrent=" + newCurrent);
-
             // Maximize the speed value to match the new max
             statMap.maximizeStatValue(EntityStatMap.Predictable.ALL, statIndex);
 
-            float finalCurrent = statMap.get(statIndex).get();
-            LOGGER.info("[CometStatModifier] After maximizeStatValue - finalCurrent=" + finalCurrent);
+            if (CometConfig.DEBUG) {
+                float newMax = statMap.get(statIndex).getMax();
+                float newCurrent = statMap.get(statIndex).get();
+                LOGGER.info("[CometStatModifier] After putModifier - newMax=" + newMax + ", newCurrent=" + newCurrent);
+                float finalCurrent = statMap.get(statIndex).get();
+                LOGGER.info("[CometStatModifier] After maximizeStatValue - finalCurrent=" + finalCurrent);
+            }
         } catch (Exception e) {
             LOGGER.warning("[CometStatModifier] Error applying speed to map: " + e.getMessage());
             e.printStackTrace();

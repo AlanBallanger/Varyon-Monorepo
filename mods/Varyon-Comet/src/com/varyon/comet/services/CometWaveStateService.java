@@ -47,6 +47,23 @@ public class CometWaveStateService {
         return new HashMap<>(cometOwners);
     }
 
+    /**
+     * Read-only views backed directly by the live ConcurrentHashMaps — no per-call copy.
+     * Safe for read-only iteration (e.g. map marker refresh) since the backing maps are
+     * already thread-safe; callers must not mutate the returned map.
+     */
+    public Map<Vector3i, CometWaveManager.CometState> getActiveCometsView() {
+        return java.util.Collections.unmodifiableMap(activeComets);
+    }
+
+    public Map<Vector3i, CometTier> getCometTiersView() {
+        return java.util.Collections.unmodifiableMap(cometTiers);
+    }
+
+    public Map<Vector3i, UUID> getCometOwnersView() {
+        return java.util.Collections.unmodifiableMap(cometOwners);
+    }
+
     public boolean hasActiveCometNear(int x, int y, int z, int distance) {
         for (Vector3i pos : activeComets.keySet()) {
             if (distance(pos, x, y, z) <= distance) {

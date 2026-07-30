@@ -44,13 +44,13 @@ public class CometMarkerProvider implements WorldMapManager.MarkerProvider {
         try {
             java.util.UUID viewingPlayerUUID = viewingPlayer.getUuid();
 
-            // Get active comets from wave manager
-            java.util.Map<Vector3i, CometWaveManager.CometState> activeComets = 
-                waveManager.getActiveComets();
-            java.util.Map<Vector3i, CometTier> cometTiers = 
-                waveManager.getCometTiers();
-            java.util.Map<Vector3i, java.util.UUID> cometOwners = 
-                waveManager.getCometOwners();
+            // Get active comets from wave manager (read-only views, no per-call copy)
+            java.util.Map<Vector3i, CometWaveManager.CometState> activeComets =
+                waveManager.getActiveCometsView();
+            java.util.Map<Vector3i, CometTier> cometTiers =
+                waveManager.getCometTiersView();
+            java.util.Map<Vector3i, java.util.UUID> cometOwners =
+                waveManager.getCometOwnersView();
             
             if (activeComets == null || activeComets.isEmpty()) {
                 return;  // No logging - this is called constantly

@@ -106,9 +106,6 @@ public class CometDamageModifierSystem extends DamageEventSystem {
 
             damage.setAmount(newDamage);
 
-            LOGGER.info("[CometDamageModifier] Modified damage from NPC " + npc.getRoleName() +
-                    ": " + originalDamage + " -> " + newDamage + " (" + damageMultiplier + "x)");
-
         } catch (Exception e) {
             LOGGER.warning("[CometDamageModifier] Error in handle: " + e.getMessage());
             e.printStackTrace();

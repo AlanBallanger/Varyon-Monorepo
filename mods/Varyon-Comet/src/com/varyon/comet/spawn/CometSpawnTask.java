@@ -97,6 +97,10 @@ public class CometSpawnTask {
         }
     }
 
+    public World getWorld() {
+        return world;
+    }
+
     public void setDelayRangeSeconds(int min, int max) {
         this.minDelaySeconds = min;
         this.maxDelaySeconds = max;

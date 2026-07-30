@@ -48,6 +48,10 @@ public class CometFallingSystem {
     // Key: projectile UUID, Value: target block position
     private final Map<UUID, Vector3i> trackedProjectiles = new HashMap<>();
 
+    private static final long FALLBACK_ERROR_LOG_BACKOFF_MS = 10_000;
+    private volatile long lastEntityErrorLoggedAt = 0;
+    private volatile long lastFallbackErrorLoggedAt = 0;
+
     // Map to track spawn Y positions for fallback position checking
     // Key: projectile UUID, Value: spawn Y position
     private final Map<UUID, Double> projectileSpawnY = new HashMap<>();
@@ -138,127 +142,123 @@ public class CometFallingSystem {
         }
 
         try {
-            // Iterate through all chunks and check entities
-            store.forEachChunk(Query.any(), (archetypeChunk, commandBuffer) -> {
+            // Resolve each tracked projectile directly by UUID instead of scanning every loaded
+            // chunk in the world — tracked-projectile count is tiny (usually 0-1) regardless of
+            // world size, so a direct lookup avoids an O(all chunks) scan every second.
+            for (UUID entityUUID : new java.util.ArrayList<>(trackedProjectiles.keySet())) {
                 try {
-                    // Check if this chunk has Projectile and UUIDComponent
-                    if (!archetypeChunk.getArchetype().contains(Projectile.getComponentType()) ||
-                            !archetypeChunk.getArchetype().contains(UUIDComponent.getComponentType())) {
-                        return; // Skip chunks that don't have both components
+                    Vector3i targetPos = trackedProjectiles.get(entityUUID);
+                    if (targetPos == null) {
+                        continue;
                     }
 
-                    // Iterate through entities in this chunk
-                    int size = archetypeChunk.size();
-                    for (int i = 0; i < size; i++) {
-                        try {
-                            Ref<EntityStore> ref = archetypeChunk.getReferenceTo(i);
-                            if (ref == null || !ref.isValid()) {
-                                continue;
-                            }
+                    Ref<EntityStore> ref = world.getEntityRef(entityUUID);
+                    if (ref == null || !ref.isValid()) {
+                        continue; // Not resolvable this cycle; orphan cleanup handles timeouts below.
+                    }
 
-                            UUIDComponent uuidComponent = store.getComponent(ref, UUIDComponent.getComponentType());
-                            if (uuidComponent == null) {
-                                continue;
-                            }
+                    // Get position
+                    TransformComponent transform = store.getComponent(ref,
+                            TransformComponent.getComponentType());
+                    if (transform == null) {
+                        continue;
+                    }
 
-                            UUID entityUUID = uuidComponent.getUuid();
-                            Vector3i targetPos = trackedProjectiles.get(entityUUID);
+                    Vector3d position = VecUtil.toJoml(transform.getPosition());
+                    Double spawnY = projectileSpawnY.get(entityUUID);
+                    Long spawnTime = projectileSpawnTime.get(entityUUID);
 
-                            if (targetPos == null) {
-                                continue; // Not our tracked projectile
-                            }
+                    // Check for timeout (projectile stuck on entity)
+                    boolean timedOut = false;
+                    if (spawnTime != null) {
+                        long elapsedSeconds = (System.currentTimeMillis() - spawnTime) / 1000;
+                        if (elapsedSeconds >= PROJECTILE_TIMEOUT_SECONDS) {
+                            timedOut = true;
+                            LOGGER.info("Projectile " + entityUUID + " timed out after " + elapsedSeconds + "s, force-spawning comet at target");
+                        }
+                    }
 
-                            // Get position
-                            TransformComponent transform = store.getComponent(ref,
-                                    TransformComponent.getComponentType());
-                            if (transform == null) {
-                                continue;
-                            }
+                    if (spawnY != null) {
+                        // Calculate target Y (ground level - spawnY was 100 blocks above target)
+                        double targetY = spawnY - 100.0;
 
-                            Vector3d position = VecUtil.toJoml(transform.getPosition());
-                            Double spawnY = projectileSpawnY.get(entityUUID);
-                            Long spawnTime = projectileSpawnTime.get(entityUUID);
+                        // Check if projectile has hit or passed the target Y level OR timed out
+                        if (position.y <= targetY + 1.0 || timedOut) {
+                            LOGGER.fine("Fallback: Projectile " + entityUUID + " hit ground" + (timedOut ? " (timed out)" : ""));
 
-                            // Check for timeout (projectile stuck on entity)
-                            boolean timedOut = false;
-                            if (spawnTime != null) {
-                                long elapsedSeconds = (System.currentTimeMillis() - spawnTime) / 1000;
-                                if (elapsedSeconds >= PROJECTILE_TIMEOUT_SECONDS) {
-                                    timedOut = true;
-                                    LOGGER.info("Projectile " + entityUUID + " timed out after " + elapsedSeconds + "s, force-spawning comet at target");
+                            org.joml.Vector3i actualBlockPos;
+
+                            if (timedOut) {
+                                // Use original target position when timed out (projectile stuck)
+                                actualBlockPos = targetPos;
+                            } else {
+                                // Use actual landing position - round to nearest block for X/Z
+                                int blockX = (int) Math.round(position.x);
+                                int blockZ = (int) Math.round(position.z);
+                                int landingBlockY = (int) Math.floor(position.y);
+
+                                // Find the actual solid ground below the landing position
+                                // The projectile might land on grass/plants, so we need to find the solid block
+                                int solidGroundY = findGroundLevelAtPosition(world, blockX, blockZ, landingBlockY);
+
+                                int blockY;
+                                if (solidGroundY != -1) {
+                                    // Found solid ground, place comet one block above it
+                                    blockY = solidGroundY + 1;
+                                } else {
+                                    // Fallback: place one block above landing Y
+                                    blockY = landingBlockY + 1;
                                 }
+
+                                actualBlockPos = new org.joml.Vector3i(
+                                        blockX, blockY, blockZ);
                             }
 
-                            if (spawnY != null) {
-                                // Calculate target Y (ground level - spawnY was 100 blocks above target)
-                                double targetY = spawnY - 100.0;
+                            CometTier tier = getProjectileTier(entityUUID);
+                            String themeId = getProjectileThemeId(entityUUID);
+                            UUID ownerUUID = getProjectileOwner(entityUUID);
+                            int zoneId = getProjectileZone(entityUUID);
+                            spawnCometBlock(world, actualBlockPos, store, tier, themeId, ownerUUID, zoneId);
+                            removeTrackedProjectile(entityUUID);
 
-                                // Check if projectile has hit or passed the target Y level OR timed out
-                                if (position.y <= targetY + 1.0 || timedOut) {
-                                    LOGGER.fine("Fallback: Projectile " + entityUUID + " hit ground" + (timedOut ? " (timed out)" : ""));
-
-                                    org.joml.Vector3i actualBlockPos;
-
-                                    if (timedOut) {
-                                        // Use original target position when timed out (projectile stuck)
-                                        actualBlockPos = targetPos;
-                                    } else {
-                                        // Use actual landing position - round to nearest block for X/Z
-                                        int blockX = (int) Math.round(position.x);
-                                        int blockZ = (int) Math.round(position.z);
-                                        int landingBlockY = (int) Math.floor(position.y);
-
-                                        // Find the actual solid ground below the landing position
-                                        // The projectile might land on grass/plants, so we need to find the solid block
-                                        int solidGroundY = findGroundLevelAtPosition(world, blockX, blockZ, landingBlockY);
-
-                                        int blockY;
-                                        if (solidGroundY != -1) {
-                                            // Found solid ground, place comet one block above it
-                                            blockY = solidGroundY + 1;
-                                        } else {
-                                            // Fallback: place one block above landing Y
-                                            blockY = landingBlockY + 1;
-                                        }
-
-                                        actualBlockPos = new org.joml.Vector3i(
-                                                blockX, blockY, blockZ);
-                                    }
-
-                                    CometTier tier = getProjectileTier(entityUUID);
-                                    String themeId = getProjectileThemeId(entityUUID);
-                                    UUID ownerUUID = getProjectileOwner(entityUUID);
-                                    int zoneId = getProjectileZone(entityUUID);
-                                    spawnCometBlock(world, actualBlockPos, store, tier, themeId, ownerUUID, zoneId);
-                                    removeTrackedProjectile(entityUUID);
-
-                                    // Remove the projectile entity
+                            // Remove the projectile entity
+                            try {
+                                com.hypixel.hytale.component.CommandBuffer<EntityStore> commandBuffer =
+                                        com.varyon.comet.util.CommandBufferUtil.take(store);
+                                if (commandBuffer != null) {
                                     try {
                                         commandBuffer.removeEntity(ref,
                                                 com.hypixel.hytale.component.RemoveReason.REMOVE);
-                                    } catch (Exception e) {
-                                        LOGGER.warning(
-                                                "[CometFallingSystem] Could not remove projectile: " + e.getMessage());
+                                    } finally {
+                                        com.varyon.comet.util.CommandBufferUtil.consume(commandBuffer);
                                     }
                                 }
+                            } catch (Exception e) {
+                                LOGGER.warning(
+                                        "[CometFallingSystem] Could not remove projectile: " + e.getMessage());
                             }
-                        } catch (Exception e) {
-                            LOGGER.warning("[CometFallingSystem] Error checking entity in chunk: " + e.getMessage());
-                            e.printStackTrace();
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.warning("[CometFallingSystem] Error in chunk iteration: " + e.getMessage());
-                    e.printStackTrace();
+                    long now = System.currentTimeMillis();
+                    if (now - lastEntityErrorLoggedAt >= FALLBACK_ERROR_LOG_BACKOFF_MS) {
+                        lastEntityErrorLoggedAt = now;
+                        LOGGER.warning("[CometFallingSystem] Error checking tracked projectile: " + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
-            });
+            }
 
             // Cleanup pass: handle orphaned projectiles that timed out but entity is gone
             cleanupOrphanedProjectiles(world, store);
 
         } catch (Exception e) {
-            LOGGER.warning("[CometFallingSystem] Error in fallback projectile check: " + e.getMessage());
-            e.printStackTrace();
+            long now = System.currentTimeMillis();
+            if (now - lastFallbackErrorLoggedAt >= FALLBACK_ERROR_LOG_BACKOFF_MS) {
+                lastFallbackErrorLoggedAt = now;
+                LOGGER.warning("[CometFallingSystem] Error in fallback projectile check: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 

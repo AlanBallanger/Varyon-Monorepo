@@ -160,6 +160,32 @@ public class CometModPlugin extends JavaPlugin {
                     }
                 });
 
+        getEventRegistry().registerGlobal(
+                com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent.class,
+                event -> {
+                    try {
+                        com.hypixel.hytale.server.core.universe.PlayerRef playerRef = event.getPlayerRef();
+                        if (playerRef != null && spawnTask != null) {
+                            com.hypixel.hytale.server.core.universe.world.World world = spawnTask.getWorld();
+                            if (world != null) {
+                                world.execute(() -> {
+                                    try {
+                                        com.hypixel.hytale.server.core.entity.entities.Player player = playerRef.getComponent(
+                                                com.hypixel.hytale.server.core.entity.entities.Player.getComponentType());
+                                        if (player != null) {
+                                            spawnTask.removePlayer(player);
+                                        }
+                                    } catch (Exception e) {
+                                        // Ignore
+                                    }
+                                });
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                });
+
     }
 
     @Override

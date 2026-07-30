@@ -101,6 +101,19 @@ public class CometWaveManager {
         return waveState.getCometOwnersSnapshot();
     }
 
+    /** Read-only, non-copying views for high-frequency read-only callers (e.g. map marker refresh). */
+    public Map<Vector3i, CometState> getActiveCometsView() {
+        return waveState.getActiveCometsView();
+    }
+
+    public Map<Vector3i, CometTier> getCometTiersView() {
+        return waveState.getCometTiersView();
+    }
+
+    public Map<Vector3i, java.util.UUID> getCometOwnersView() {
+        return waveState.getCometOwnersView();
+    }
+
     /**
      * Check if there's an active comet near the given position
      *
@@ -229,6 +242,10 @@ public class CometWaveManager {
      * NOTE: This runs on the scheduler thread, so we need to execute world
      * operations on WorldThread
      */
+    private static final long TIMEOUT_CLEANUP_ERROR_LOG_BACKOFF_MS = 10_000;
+    private volatile long lastTimeoutCleanupErrorLoggedAt = 0;
+    private volatile long lastOrphanedWaveWarnLoggedAt = 0;
+
     public void checkTimeouts() {
         // Check all active waves for timeout
         long currentTime = System.currentTimeMillis();
@@ -289,14 +306,22 @@ public class CometWaveManager {
                         destroyCometOnTimeout(finalStore, finalWaveData);
                     });
                 } catch (Exception e) {
-                    LOGGER.warning("Error executing cleanup for timed out wave at " + blockPos + ": " + e.getMessage());
+                    long now = System.currentTimeMillis();
+                    if (now - lastTimeoutCleanupErrorLoggedAt >= TIMEOUT_CLEANUP_ERROR_LOG_BACKOFF_MS) {
+                        lastTimeoutCleanupErrorLoggedAt = now;
+                        LOGGER.warning("Error executing cleanup for timed out wave at " + blockPos + ": " + e.getMessage());
+                    }
                 }
             } else {
                 // Critical failure: No valid store found to clean up wave.
                 // Just remove it from active waves to prevent infinite loops,
                 // though the block and mobs might linger.
                 activeWaves.remove(blockPos);
-                LOGGER.warning("Could not find valid store to clean up orphaned wave at " + blockPos);
+                long now = System.currentTimeMillis();
+                if (now - lastOrphanedWaveWarnLoggedAt >= TIMEOUT_CLEANUP_ERROR_LOG_BACKOFF_MS) {
+                    lastOrphanedWaveWarnLoggedAt = now;
+                    LOGGER.warning("Could not find valid store to clean up orphaned wave at " + blockPos);
+                }
             }
         }
     }
@@ -1877,15 +1902,15 @@ public class CometWaveManager {
 
     public void handleMobDeath(
             com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> mobRef) {
-        LOGGER.info("[CometWaveManager] handleMobDeath called! Checking " + activeWaves.size() + " active waves...");
+        if (activeWaves.isEmpty()) {
+            return;
+        }
         Store<EntityStore> eventStore = (mobRef != null && mobRef.isValid()) ? mobRef.getStore() : null;
         java.util.UUID deadMobUuid = getEntityUuid(eventStore, mobRef);
 
         // Check all active waves to see if this mob belongs to any of them
         for (Map.Entry<org.joml.Vector3i, WaveData> entry : activeWaves.entrySet()) {
             WaveData waveData = entry.getValue();
-            LOGGER.info("[CometWaveManager] Checking wave at " + entry.getKey() + " with " + waveData.spawnedMobs.size()
-                    + " mobs in list");
 
             // Check if this mob is in the list (by reference or by checking if ref matches)
             boolean found = false;
@@ -1907,8 +1932,6 @@ public class CometWaveManager {
                 if (sameRef || sameUuid) {
                     found = true;
                     waveData.spawnedMobs.remove(i);
-                    LOGGER.info("[CometWaveManager] Mob died for wave at " + entry.getKey() + " (removed from list, " +
-                            waveData.spawnedMobs.size() + " remaining)");
                     break;
                 }
             }
@@ -1929,8 +1952,6 @@ public class CometWaveManager {
                 return; // Found and handled, exit
             }
         }
-
-        LOGGER.info("[CometWaveManager] Mob death not found in any active wave");
     }
 
     public void cleanup() {

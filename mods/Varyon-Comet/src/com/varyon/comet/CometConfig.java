@@ -77,7 +77,7 @@ public class CometConfig {
     public static final int COMET_ASSET_BOX_RADIUS = 2;
 
     /** Set to true to log [CometDebug] messages to console (activation, waves, placement). Remember to set false before release. */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     // Singleton instance for global access
     private static CometConfig instance;
