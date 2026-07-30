@@ -40,9 +40,18 @@ public class InventoryManager {
     private static final int INVENTORY_READY_MAX_ATTEMPTS = 200;
     private static final long INVENTORY_READY_RETRY_MS = 100L;
 
+    /**
+     * Minimum delay between two cache refreshes triggered by inventory-change events for the
+     * same player. The cache is only a crash-safety fallback (see {@link #onDisconnectUnsafe}
+     * and {@link #saveAll()}, which both re-read the live holder anyway) — so it does not need
+     * to be updated on every single slot transaction. Throttling avoids a full inventory scan
+     * on every click during rapid inventory manipulation (sorting, crafting bursts).
+     */
+    private static final long INVENTORY_CHANGE_CACHE_REFRESH_MS = 3000L;
+
     private final Path dataDirectory;
     private final WorldGroupConfig groupConfig;
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final Gson gson = new GsonBuilder().create();
 
     /**
      * In-memory cache: playerUUID → (storage key → inventory data)
@@ -66,6 +75,9 @@ public class InventoryManager {
      * inventory at any point (auto-save, disconnect) without going through PlayerRef.
      */
     private final Map<UUID, Holder<EntityStore>> playerHolders = new ConcurrentHashMap<>();
+
+    /** Last time the cache was refreshed from a live inventory-change event, per player. */
+    private final Map<UUID, Long> lastInventoryChangeRefresh = new ConcurrentHashMap<>();
 
     public InventoryManager(Path dataDirectory, WorldGroupConfig groupConfig) {
         this.dataDirectory = dataDirectory;
@@ -176,6 +188,14 @@ public class InventoryManager {
         if (holder == null || worldName == null || isInstance(worldName)) {
             return;
         }
+
+        long now = System.currentTimeMillis();
+        Long last = lastInventoryChangeRefresh.get(playerId);
+        if (last != null && now - last < INVENTORY_CHANGE_CACHE_REFRESH_MS) {
+            return;
+        }
+        lastInventoryChangeRefresh.put(playerId, now);
+
         String key = groupConfig.getStorageKey(worldName);
         PlayerInventoryData data = PlayerInventoryData.fromHolder(holder);
         cache.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(key, data);
@@ -189,6 +209,7 @@ public class InventoryManager {
         String lastWorld = currentWorld.remove(playerId);
         Holder<EntityStore> holder = playerHolders.remove(playerId);
         Map<String, PlayerInventoryData> playerMap = cache.remove(playerId);
+        lastInventoryChangeRefresh.remove(playerId);
 
         if (lastWorld == null || isInstance(lastWorld)) {
             return;
@@ -211,9 +232,11 @@ public class InventoryManager {
 
         if (data != null) {
             writeToFile(playerId, key, data);
-            int n = data.getItems() != null ? data.getItems().size() : 0;
-            LOGGER.at(Level.INFO).log("SAVED on disconnect: %s | world=%s | key=%s | items=%d",
-                    playerId, lastWorld, key, n);
+            if (groupConfig.isDebug()) {
+                int n = data.getItems() != null ? data.getItems().size() : 0;
+                LOGGER.at(Level.INFO).log("SAVED on disconnect: %s | world=%s | key=%s | items=%d",
+                        playerId, lastWorld, key, n);
+            }
             if (!groupConfig.isWorldListedInGroups(lastWorld)) {
                 LOGGER.at(Level.WARNING).log(
                         "PWI: world '%s' is not listed in groups.yml — saved as %s.json. Add this world name under the correct group.",
@@ -232,9 +255,11 @@ public class InventoryManager {
             PlayerInventoryData data = PlayerInventoryData.fromHolder(holder);
             cache.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(key, data);
             writeToFile(playerId, key, data);
-            int sz = data.getItems() != null ? data.getItems().size() : 0;
-            LOGGER.at(Level.INFO).log("SAVED %s | world=%s | key=%s | items=%d",
-                    playerId, worldName, key, sz);
+            if (groupConfig.isDebug()) {
+                int sz = data.getItems() != null ? data.getItems().size() : 0;
+                LOGGER.at(Level.INFO).log("SAVED %s | world=%s | key=%s | items=%d",
+                        playerId, worldName, key, sz);
+            }
         } catch (Throwable t) {
             logFailure("PWI save", t);
         }
@@ -286,16 +311,20 @@ public class InventoryManager {
                         data.applyToInventory(holder, world.getEntityStore().getStore());
                         PlayerInventoryData synced = PlayerInventoryData.fromHolder(holder);
                         playerMap.put(key, synced);
-                        int sz = synced.getItems() != null ? synced.getItems().size() : 0;
-                        LOGGER.at(Level.INFO).log("LOADED %s | world=%s | key=%s | items=%d",
-                                playerId, worldName, key, sz);
+                        if (groupConfig.isDebug()) {
+                            int sz = synced.getItems() != null ? synced.getItems().size() : 0;
+                            LOGGER.at(Level.INFO).log("LOADED %s | world=%s | key=%s | items=%d",
+                                    playerId, worldName, key, sz);
+                        }
                     } else {
                         PlayerInventoryData.clearInventory(holder);
                         PlayerInventoryData empty = PlayerInventoryData.fromHolder(holder);
                         playerMap.put(key, empty);
                         writeToFile(playerId, key, empty);
-                        LOGGER.at(Level.INFO).log("NEW cleared | player=%s | world=%s | key=%s",
-                                playerId, worldName, key);
+                        if (groupConfig.isDebug()) {
+                            LOGGER.at(Level.INFO).log("NEW cleared | player=%s | world=%s | key=%s",
+                                    playerId, worldName, key);
+                        }
                     }
                 } catch (Throwable t) {
                     logFailure("PWI scheduleLoad", t);
@@ -384,6 +413,7 @@ public class InventoryManager {
 
         private final Map<String, String> worldToGroupKey = new HashMap<>();
         private int groupCount = 0;
+        private volatile boolean debug = false;
 
         private static String normalizeWorldName(String world) {
             if (world == null) return null;
@@ -423,11 +453,17 @@ public class InventoryManager {
         public void reload() {
             worldToGroupKey.clear();
             groupCount = 0;
+            debug = false;
 
             try (BufferedReader reader = Files.newBufferedReader(configFile)) {
                 Yaml yaml = new Yaml();
                 Map<String, Object> root = yaml.load(reader);
                 if (root == null) return;
+
+                Object rawDebug = root.get("debug");
+                if (rawDebug instanceof Boolean b) {
+                    debug = b;
+                }
 
                 @SuppressWarnings("unchecked")
                 Map<String, Object> groups = (Map<String, Object>) root.get("groups");
@@ -491,6 +527,10 @@ public class InventoryManager {
 
         public int getGroupCount() {
             return groupCount;
+        }
+
+        public boolean isDebug() {
+            return debug;
         }
     }
 }
