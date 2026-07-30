@@ -1,0 +1,490 @@
+$C = "../Common.ui";
+
+@CrRowBg = #172639;
+@CrPanelBg = #0a0f17;
+@CrCardBg = #101a28;
+
+@CrButtonRedStyle = TextButtonStyle(
+  Default: (Background: (Color: #7a2b2b), LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: (Color: #933737), LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: (Color: #5e2020), LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+@CrButtonGreenStyle = TextButtonStyle(
+  Default: (Background: (Color: #185a28), LabelStyle: (FontSize: 12, TextColor: #aaffaa, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: (Color: #286a38), LabelStyle: (FontSize: 12, TextColor: #aaffaa, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: (Color: #0f4018), LabelStyle: (FontSize: 12, TextColor: #aaffaa, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+@CrButtonNeutralStyle = TextButtonStyle(
+  Default: (Background: (Color: #2b3f66), LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: (Color: #35507f), LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: (Color: #233553), LabelStyle: (FontSize: 12, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+Group #Root {
+  Anchor: (Left: 0, Top: 0, Right: 0, Bottom: 0);
+  LayoutMode: Full;
+
+  Group #CardWrap {
+    Anchor: (Full: 0);
+    LayoutMode: Center;
+
+  Group #Card {
+    Anchor: (Width: 900, Height: 620);
+    Background: (Color: #0d1420ee);
+    OutlineColor: #2a3a52;
+    OutlineSize: 1;
+    LayoutMode: Top;
+
+    // === Header ===
+    Group #Header {
+      LayoutMode: Left;
+      Background: (Color: #0a0f17);
+      Padding: (Left: 16, Right: 16, Top: 10, Bottom: 10);
+      Anchor: (Height: 44);
+
+      Label #Title {
+        Text: "CRAFTRESTRICT";
+        Style: (FontSize: 16, RenderBold: true, TextColor: #ffffff);
+        FlexWeight: 1;
+        Anchor: (Vertical: 0);
+      }
+
+      TextButton #CloseButton {
+        Text: "X";
+        Style: @CrButtonRedStyle;
+        Anchor: (Width: 26, Height: 26, Vertical: 0);
+      }
+    }
+
+    // === Body: two columns ===
+    Group #Body {
+      LayoutMode: Left;
+      Padding: (Top: 10, Bottom: 10, Left: 10, Right: 10);
+      FlexWeight: 1;
+
+      // ===== LEFT COLUMN: AVAILABLE ITEMS =====
+      Group #LeftColumn {
+        FlexWeight: 1;
+        LayoutMode: Top;
+        Anchor: (Right: 6);
+
+        Label {
+          Text: "OBJETS DISPONIBLES";
+          Style: (FontSize: 12, RenderBold: true, TextColor: #96a9be);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #AvailableSearchBg {
+          Background: (Color: @CrPanelBg);
+          OutlineColor: #223247;
+          OutlineSize: 1;
+          Padding: (Left: 8, Right: 8);
+          Anchor: (Height: 28, Bottom: 8);
+
+          TextField #AvailableSearchInput {
+            Style: (FontSize: 12, TextColor: #ffffff);
+            FlexWeight: 1;
+          }
+        }
+
+        Group #AvailableScroll {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Background: (Color: @CrPanelBg);
+          Padding: (Full: 4);
+
+          Group #AvailableList {
+            LayoutMode: Top;
+
+            Group #AvailableRow1 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel1 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd1 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow2 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel2 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd2 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow3 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel3 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd3 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow4 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel4 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd4 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow5 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel5 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd5 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow6 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel6 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd6 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow7 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel7 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd7 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow8 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel8 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd8 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow9 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel9 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd9 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow10 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel10 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd10 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow11 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel11 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd11 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow12 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel12 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd12 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow13 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel13 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd13 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+            Group #AvailableRow14 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Label #AvailableLabel14 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+              TextButton #AvailableAdd14 { Text: "ADD"; Style: @CrButtonGreenStyle; Anchor: (Width: 64, Height: 26, Vertical: 0); }
+            }
+          }
+        }
+      }
+
+      // ===== RIGHT COLUMN: RESTRICTED ITEMS =====
+      Group #RightColumn {
+        FlexWeight: 1;
+        LayoutMode: Top;
+        Anchor: (Left: 6);
+
+        Label {
+          Text: "OBJETS RESTREINTS (clic sur la ligne pour modifier)";
+          Style: (FontSize: 12, RenderBold: true, TextColor: #96a9be);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #RestrictedSearchBg {
+          Background: (Color: @CrPanelBg);
+          OutlineColor: #223247;
+          OutlineSize: 1;
+          Padding: (Left: 8, Right: 8);
+          Anchor: (Height: 28, Bottom: 8);
+
+          TextField #RestrictedSearchInput {
+            Style: (FontSize: 12, TextColor: #ffffff);
+            FlexWeight: 1;
+          }
+        }
+
+        Label #RestrictedEmptyLabel {
+          Text: "Aucun objet configure.";
+          Style: (FontSize: 13, TextColor: #96a9be, HorizontalAlignment: Center);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #RestrictedScroll {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Background: (Color: @CrPanelBg);
+          Padding: (Full: 4);
+
+          Group #RestrictedList {
+            LayoutMode: Top;
+
+            Group #RestrictedRow1 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen1 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel1 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove1 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow2 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen2 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel2 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove2 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow3 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen3 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel3 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove3 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow4 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen4 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel4 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove4 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow5 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen5 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel5 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove5 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow6 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen6 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel6 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove6 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow7 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen7 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel7 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove7 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow8 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen8 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel8 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove8 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow9 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen9 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel9 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove9 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow10 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen10 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel10 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove10 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow11 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen11 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel11 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove11 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow12 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen12 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel12 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove12 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow13 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen13 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel13 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove13 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #RestrictedRow14 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #RestrictedOpen14 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2)))); Padding: (Left: 4);
+                Label #RestrictedLabel14 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #RestrictedRemove14 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  }
+
+  // ===== EDIT POPUP (scope / permission for one restricted rule) =====
+  Group #EditPopup {
+    Anchor: (Full: 0);
+    LayoutMode: Center;
+    Background: (Color: #000000(0.55));
+    Visible: false;
+
+    Group #EditPopupCard {
+      Anchor: (Width: 440, Height: 460);
+      Background: (Color: #101a28);
+      OutlineColor: #2a3a52;
+      OutlineSize: 1;
+      LayoutMode: Top;
+      Padding: (Full: 16);
+
+      Label #EditPopupTitle {
+        Text: "";
+        Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff);
+        Anchor: (Bottom: 12);
+      }
+
+      Label {
+        Text: "Portee (aucune case = tous les mondes)";
+        Style: (FontSize: 11, TextColor: #96a9be);
+        Anchor: (Bottom: 4);
+      }
+
+      Label #EditWorldsEmptyLabel {
+        Text: "Aucun monde charge.";
+        Style: (FontSize: 11, TextColor: #96a9be);
+        Anchor: (Bottom: 4);
+      }
+
+      Group #EditWorldsScroll {
+        Anchor: (Height: 180, Bottom: 12);
+        LayoutMode: TopScrolling;
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        Background: (Color: @CrPanelBg);
+        Padding: (Full: 4);
+
+        Group #EditWorldsList {
+          LayoutMode: Top;
+
+            Button #EditWorldRow1 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName1 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn1 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff1 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow2 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName2 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn2 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff2 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow3 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName3 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn3 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff3 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow4 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName4 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn4 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff4 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow5 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName5 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn5 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff5 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow6 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName6 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn6 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff6 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow7 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName7 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn7 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff7 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow8 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName8 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn8 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff8 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow9 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName9 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn9 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff9 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+            Button #EditWorldRow10 { FlexWeight: 0; Anchor: (Height: 30, Bottom: 3, Left: 0, Right: 0); Style: ButtonStyle(Default: (Background: (Color: #172639)), Hovered: (Background: (Color: #223247))); Padding: (Left: 8, Right: 8);
+              Group { LayoutMode: Left;
+                Label #EditWorldName10 { FlexWeight: 1; Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center); }
+                Group #EditWorldBadgeOn10 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #185a28); OutlineColor: #2fae52; OutlineSize: 1; LayoutMode: Middle; Visible: false;
+                  Label { Text: "ON"; Style: (TextColor: #aaffaa, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+                Group #EditWorldBadgeOff10 { Anchor: (Width: 46, Height: 22, Vertical: 0); Background: (Color: #2a3243); OutlineColor: #3a4456; OutlineSize: 1; LayoutMode: Middle;
+                  Label { Text: "OFF"; Style: (TextColor: #8a97a8, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); }
+                }
+              }
+            }
+        }
+      }
+
+      Label {
+        Text: "Permission requise (optionnel)";
+        Style: (FontSize: 11, TextColor: #96a9be);
+        Anchor: (Bottom: 4);
+      }
+
+      Group #EditPermissionBg {
+        Background: (Color: @CrPanelBg);
+        OutlineColor: #223247;
+        OutlineSize: 1;
+        Padding: (Left: 8, Right: 8);
+        Anchor: (Height: 28, Bottom: 16);
+
+        TextField #EditPermissionInput {
+          Style: (FontSize: 12, TextColor: #ffffff);
+          FlexWeight: 1;
+        }
+      }
+
+      Group #EditPopupFooter {
+        LayoutMode: Left;
+        Anchor: (Height: 32);
+
+        TextButton #EditCloseButton {
+          Text: "ANNULER";
+          Style: @CrButtonNeutralStyle;
+          Anchor: (Width: 110, Height: 32, Right: 8);
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #EditSaveButton {
+          Text: "ENREGISTRER";
+          Style: @CrButtonGreenStyle;
+          Anchor: (Width: 130, Height: 32);
+        }
+      }
+    }
+  }
+}
