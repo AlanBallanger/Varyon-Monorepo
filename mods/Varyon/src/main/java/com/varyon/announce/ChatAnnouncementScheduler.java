@@ -113,11 +113,14 @@ public final class ChatAnnouncementScheduler {
     private void broadcast(@Nonnull String text) {
         Message msg = Message.raw(text).color(new Color(255, 215, 0));
         for (PlayerRef playerRef : Universe.get().getPlayers()) {
-            if (playerRef == null || !playerRef.getReference().isValid()) {
+            if (playerRef == null) {
                 continue;
             }
             try {
                 Ref ref = playerRef.getReference();
+                if (ref == null || !ref.isValid()) {
+                    continue;
+                }
                 Store store = ref.getStore();
                 Player player = (Player) store.getComponent(ref, Player.getComponentType());
                 if (player == null) {

@@ -9,6 +9,7 @@ import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.ui.Anchor;
@@ -20,17 +21,30 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.VaryonPlugin;
+import com.varyon.config.DifficultyZone;
+import com.varyon.config.RtpvConfig;
+import com.varyon.config.ZoneConfig;
 import com.varyon.config.ZonePermissionsConfig;
 import com.varyon.teleport.FirstSpawnStyleParticleFx;
+
+import net.cfh.vault.VaultUnlockedServicesManager;
+import net.milkbowl.vault2.economy.Economy;
+import net.milkbowl.vault2.economy.EconomyResponse;
 
 import org.joml.Vector3d;
 
 import com.hypixel.hytale.server.core.entity.entities.Player;
 
+import java.awt.Color;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.logging.Level;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPage.EventDataClass> {
+    private static final com.hypixel.hytale.logger.HytaleLogger LOGGER = com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
 
     private static final int WINDOW_WIDTH = 852;
     private static final int WINDOW_HEIGHT = 595;
@@ -70,9 +84,17 @@ public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPa
         commandBuilder.set("#MenuTitle.Text", "Téléportation arènes Varyon");
 
         ZonePermissionsConfig zonePermissionsConfig = null;
+        RtpvConfig rtpvConfig = null;
+        List<DifficultyZone> zones = null;
+        boolean economyEnabled = false;
+        double safeMultiplier = 2.0;
         try {
             if (VaryonPlugin.getStaticConfigManager() != null) {
                 zonePermissionsConfig = VaryonPlugin.getStaticConfigManager().getZonePermissionsConfig();
+                rtpvConfig = VaryonPlugin.getStaticConfigManager().getRtpvConfig();
+                zones = VaryonPlugin.getStaticConfigManager().getZoneConfig().getZones();
+                economyEnabled = rtpvConfig.isEconomyEnabled();
+                safeMultiplier = rtpvConfig.getSafeCostMultiplier();
             }
         } catch (Exception ignored) {}
 
@@ -88,11 +110,27 @@ public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPa
                 commandBuilder.set("#ZoneMain" + i + ".Disabled", true);
                 commandBuilder.set("#ZoneRadius" + i + ".Visible", true);
                 commandBuilder.set("#ZoneMainLead" + i + ".Text", "");
+                commandBuilder.set("#ZoneMainCoinSlot" + i + ".Visible", false);
+                commandBuilder.set("#ZoneMainAmount" + i + ".Text", "");
+                commandBuilder.setNull("#ZoneMainCoin" + i + ".ItemId");
                 continue;
             }
 
             commandBuilder.set("#ZoneRadius" + i + ".Visible", true);
-            commandBuilder.set("#ZoneMainLead" + i + ".Text", TELEPORT_LABEL);
+
+            int arenaCost = arenaTeleportCost(zones, i, safeMultiplier);
+
+            if (economyEnabled) {
+                commandBuilder.set("#ZoneMainLead" + i + ".Text", TELEPORT_LABEL + " ");
+                commandBuilder.set("#ZoneMainAmount" + i + ".Text", String.valueOf(arenaCost));
+                commandBuilder.set("#ZoneMainCoinSlot" + i + ".Visible", true);
+                EconomyCoinItemHelper.applyCoinItem(commandBuilder, "ZoneMainCoin" + i);
+            } else {
+                commandBuilder.set("#ZoneMainLead" + i + ".Text", TELEPORT_LABEL);
+                commandBuilder.set("#ZoneMainAmount" + i + ".Text", "");
+                commandBuilder.set("#ZoneMainCoinSlot" + i + ".Visible", false);
+                commandBuilder.setNull("#ZoneMainCoin" + i + ".ItemId");
+            }
 
             int zoneId = i;
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ZoneMain" + i,
@@ -145,6 +183,33 @@ public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPa
                 return;
             }
 
+            RtpvConfig rtpvConfig = VaryonPlugin.getStaticConfigManager() != null
+                ? VaryonPlugin.getStaticConfigManager().getRtpvConfig() : null;
+            List<DifficultyZone> zones = VaryonPlugin.getStaticConfigManager() != null
+                ? VaryonPlugin.getStaticConfigManager().getZoneConfig().getZones() : null;
+
+            if (rtpvConfig != null && rtpvConfig.isEconomyEnabled()) {
+                int cost = arenaTeleportCost(zones, requestedZone, rtpvConfig.getSafeCostMultiplier());
+                BigDecimal costBD = BigDecimal.valueOf(cost);
+                try {
+                    if (!hasEnoughBalance(playerRefComp, costBD)) {
+                        BigDecimal balance = getBalance(playerRefComp);
+                        playerRefComp.sendMessage(Message.raw(
+                            "Coins insuffisants. Coût : " + cost + " | Solde : " + balance.intValue()
+                        ).color(Color.RED));
+                        return;
+                    }
+                } catch (NoClassDefFoundError e) {
+                    LOGGER.at(Level.WARNING).log("Vault non disponible, vérification économie ignorée");
+                }
+
+                try {
+                    withdrawBalance(playerRefComp, costBD, cost);
+                } catch (NoClassDefFoundError e) {
+                    LOGGER.at(Level.WARNING).log("Vault non disponible, déduction ignorée");
+                }
+            }
+
             player.getPageManager().setPage(ref, store, Page.None);
 
             double[] coords = ARENA_COORDS[requestedZone - 1];
@@ -152,6 +217,35 @@ public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPa
             Teleport teleport = Teleport.createForPlayer(world, position, Rotation3f.ZERO);
             store.addComponent(ref, Teleport.getComponentType(), teleport);
             FirstSpawnStyleParticleFx.playAt(world, position, ref, store, 0);
+        }
+    }
+
+    private static int arenaTeleportCost(@Nullable List<DifficultyZone> zones, int arenaIndexOneBased, double safeMultiplier) {
+        if (zones == null || arenaIndexOneBased < 1 || arenaIndexOneBased > zones.size()) {
+            return 0;
+        }
+        int baseCost = zones.get(arenaIndexOneBased - 1).getTeleportCost();
+        return (int) Math.ceil(baseCost * safeMultiplier);
+    }
+
+    private static boolean hasEnoughBalance(PlayerRef playerRef, BigDecimal cost) {
+        Economy economy = VaultUnlockedServicesManager.get().economyObj();
+        if (economy == null || !economy.isEnabled()) return true;
+        return economy.has("Varyon", playerRef.getUuid(), cost);
+    }
+
+    private static BigDecimal getBalance(PlayerRef playerRef) {
+        Economy economy = VaultUnlockedServicesManager.get().economyObj();
+        if (economy == null || !economy.isEnabled()) return BigDecimal.ZERO;
+        return economy.getBalance("Varyon", playerRef.getUuid());
+    }
+
+    private static void withdrawBalance(PlayerRef playerRef, BigDecimal cost, int finalCost) {
+        Economy economy = VaultUnlockedServicesManager.get().economyObj();
+        if (economy == null || !economy.isEnabled()) return;
+        EconomyResponse response = economy.withdraw("Varyon", playerRef.getUuid(), cost);
+        if (!response.transactionSuccess()) {
+            LOGGER.at(Level.WARNING).log("Failed to deduct " + finalCost + " coins from " + playerRef.getUuid() + ": " + response.errorMessage);
         }
     }
 

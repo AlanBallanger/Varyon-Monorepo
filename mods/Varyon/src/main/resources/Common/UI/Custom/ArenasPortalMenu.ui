@@ -103,6 +103,16 @@ $C.@PageOverlay {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
+                Group #ZoneMainCoinSlot1 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin1 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount1 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
               }
             }
           }
@@ -166,6 +176,16 @@ $C.@PageOverlay {
                 Label #ZoneMainLead2 {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot2 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin2 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount2 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -231,6 +251,16 @@ $C.@PageOverlay {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
+                Group #ZoneMainCoinSlot3 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin3 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount3 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
               }
             }
           }
@@ -295,6 +325,16 @@ $C.@PageOverlay {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
+                Group #ZoneMainCoinSlot4 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin4 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount4 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
               }
             }
           }
@@ -358,6 +398,16 @@ $C.@PageOverlay {
                 Label #ZoneMainLead5 {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot5 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin5 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount5 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -429,6 +479,16 @@ $C.@PageOverlay {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
+                Group #ZoneMainCoinSlot6 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin6 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount6 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
               }
             }
           }
@@ -492,6 +552,16 @@ $C.@PageOverlay {
                 Label #ZoneMainLead7 {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot7 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin7 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount7 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -557,6 +627,16 @@ $C.@PageOverlay {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
+                Group #ZoneMainCoinSlot8 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin8 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount8 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
               }
             }
           }
@@ -620,6 +700,16 @@ $C.@PageOverlay {
                 Label #ZoneMainLead9 {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+                Group #ZoneMainCoinSlot9 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin9 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount9 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
               }
             }
@@ -685,6 +775,16 @@ $C.@PageOverlay {
                   Text: "";
                   Style: (FontSize: 13, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
                 }
+                Group #ZoneMainCoinSlot10 {
+                  Anchor: (Width: 22, Height: 22);
+                  Padding: (Left: 3, Right: 3);
+                  LayoutMode: Middle;
+                  ItemIcon #ZoneMainCoin10 { Anchor: (Width: 22, Height: 22); }
+                }
+                Label #ZoneMainAmount10 {
+                  Text: "";
+                  Style: (FontSize: 12, RenderBold: true, TextColor: #c8c2e0, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
               }
             }
           }
@@ -716,7 +816,7 @@ $C.@PageOverlay {
             }
           }
           Label #HowItWorksBody {
-            Text: "Choisis l'arène à laquelle tu veux te téléporter pour affronter le worldboss qui va apparaître. Aucun coût.";
+            Text: "Choisis l'arène à laquelle tu veux te téléporter pour affronter le worldboss qui va apparaître. Coût identique à une téléportation Hors PvP vers la zone correspondante.";
             Style: (FontSize: 12, TextColor: #9eb8d0, HorizontalAlignment: Start, Wrap: true);
           }
         }

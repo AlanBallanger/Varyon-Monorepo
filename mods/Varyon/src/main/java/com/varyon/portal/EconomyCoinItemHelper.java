@@ -5,6 +5,7 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +15,8 @@ public final class EconomyCoinItemHelper {
 
     private static final String COIN_TYPE_CLASS = "fr.varyon.ecotale.coins.currency.CoinType";
     private static final String ITEM_COIN_LEGACY = "Coin_Copper";
+
+    private static final AtomicReference<String> LAST_LOGGED_ITEM_ID = new AtomicReference<>();
 
     private EconomyCoinItemHelper() {}
 
@@ -48,7 +51,11 @@ public final class EconomyCoinItemHelper {
     public static void applyCoinItem(@Nonnull UICommandBuilder ui, @Nonnull String elementIdSansHash) {
         String slot = "#" + elementIdSansHash;
         String itemId = resolveCoinItemId();
-        LOG.log(Level.WARNING, "applyCoinItem slot=" + slot + " resolvedItemId=" + itemId);
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE, "applyCoinItem slot=" + slot + " resolvedItemId=" + itemId);
+        } else if (!itemId.equals(LAST_LOGGED_ITEM_ID.getAndSet(itemId))) {
+            LOG.log(Level.INFO, "Coin item id resolved to " + itemId);
+        }
         ui.setNull(slot + ".Background");
         ui.set(slot + ".ItemId", itemId);
     }

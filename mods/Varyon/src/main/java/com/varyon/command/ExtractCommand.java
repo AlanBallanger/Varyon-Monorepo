@@ -12,11 +12,14 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.protocol.BlockMaterial;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.spawn.ISpawnProvider;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.VaryonPlugin;
+import com.varyon.arena.ArenaManager;
 import com.varyon.config.DifficultyZone;
 import com.varyon.config.ExtractionConfig;
 import com.varyon.config.MessagesConfig;
@@ -80,6 +83,19 @@ public class ExtractCommand extends AbstractPlayerCommand {
 
         boolean bypass = playerRef.hasPermission(PERM_BYPASS);
 
+        Transform playerTransform = playerRef.getTransform();
+        double playerX = playerTransform.getPosition().x;
+        double playerZ = playerTransform.getPosition().z;
+
+        ArenaManager arenaManager = VaryonPlugin.getStaticArenaManager();
+        if (arenaManager != null && arenaManager.findArenaAt(world.getName(), playerX, playerZ) != null) {
+            if (manager.hasActivePortal(playerId)) {
+                manager.removePlayerPortal(playerId);
+            }
+            teleportToSpawnInstantly(context, store, ref, playerRef, world, msg);
+            return;
+        }
+
         if (manager.hasActivePortal(playerId)) {
             manager.removePlayerPortal(playerId);
         }
@@ -90,10 +106,6 @@ public class ExtractCommand extends AbstractPlayerCommand {
             context.sendMessage(Message.raw(cooldownMsg).color(Color.RED));
             return;
         }
-
-        Transform playerTransform = playerRef.getTransform();
-        double playerX = playerTransform.getPosition().x;
-        double playerZ = playerTransform.getPosition().z;
 
         ZoneConfig zoneConfig = VaryonPlugin.getStaticConfigManager().getZoneConfig();
         DifficultyZone zone = ZoneCalculator.getZoneAtPosition(playerX, playerZ, world.getName(), zoneConfig);
@@ -141,6 +153,23 @@ public class ExtractCommand extends AbstractPlayerCommand {
                 LOGGER.at(Level.SEVERE).log("Error spawning extraction portal: " + e.getMessage(), e);
                 context.sendMessage(Message.raw(msg.error).color(Color.RED));
             }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void teleportToSpawnInstantly(@Nonnull CommandContext context, @Nonnull Store store,
+                                                 @Nonnull Ref ref, @Nonnull PlayerRef playerRef,
+                                                 @Nonnull World world, @Nonnull MessagesConfig.ExtractionMessages msg) {
+        world.execute(() -> {
+            ISpawnProvider spawnProvider = world.getWorldConfig().getSpawnProvider();
+            if (spawnProvider == null) {
+                return;
+            }
+            Transform spawnPoint = spawnProvider.getSpawnPoint(world, playerRef.getUuid());
+            Teleport teleport = Teleport.createForPlayer(world, spawnPoint.getPosition(), com.hypixel.hytale.math.vector.Rotation3f.ZERO);
+            store.addComponent(ref, Teleport.getComponentType(), teleport);
+            context.sendMessage(Message.raw(msg.teleporting).color(Color.GREEN));
+            LOGGER.at(Level.INFO).log("Player " + playerRef.getUuid() + " extracted instantly from arena (no portal)");
         });
     }
 
