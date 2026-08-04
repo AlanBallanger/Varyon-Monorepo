@@ -39,7 +39,7 @@ tasks.named<ProcessResources>("processResources") {
 val modJar = tasks.register<Zip>("modJar") {
     group = "build"
     description = "Assemble le JAR du mod"
-    archiveBaseName.set("Varyon-Damage_Number")
+    archiveBaseName.set("Varyon-Damage-Number")
     archiveVersion.set(version.toString())
     archiveExtension.set("jar")
     destinationDirectory.set(layout.buildDirectory.dir("libs"))
