@@ -25,5 +25,5 @@ tasks.named<ProcessResources>("processResources") {
 
 tasks.named<Jar>("jar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    archiveBaseName.set("Varyon_Logs")
+    archiveBaseName.set("Varyon-Logs")
 }

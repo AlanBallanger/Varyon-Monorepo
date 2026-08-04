@@ -1,4 +1,4 @@
-package com.varyon.logs;
+package com.varyon.logs.early;
 
 import java.util.regex.Pattern;
 
