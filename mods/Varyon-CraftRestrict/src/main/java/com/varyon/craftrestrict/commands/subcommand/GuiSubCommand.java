@@ -1,6 +1,6 @@
-package com.faiizer.craftrestrict.commands.subcommand;
+package com.varyon.craftrestrict.commands.subcommand;
 
-import com.faiizer.craftrestrict.ui.CraftRestrictConfigPage;
+import com.varyon.craftrestrict.ui.CraftRestrictConfigPage;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.command.system.CommandContext;

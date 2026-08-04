@@ -1,22 +1,25 @@
-package com.faiizer.craftrestrict;
+package com.varyon.craftrestrict;
 
-import com.faiizer.craftrestrict.commands.CraftRestrictCommand;
-import com.faiizer.craftrestrict.config.CraftRestrictConfig;
-import com.faiizer.craftrestrict.events.EventPlayerInteractBlock;
-import com.faiizer.craftrestrict.packets.PacketCraftInterceptor;
-import com.faiizer.craftrestrict.packets.PacketOpenWindowInterceptor;
-import com.faiizer.craftrestrict.packets.PacketUpdateWindowInterceptor;
-import com.faiizer.craftrestrict.recipes.RecipesManager;
+import com.varyon.craftrestrict.commands.CraftRestrictCommand;
+import com.varyon.craftrestrict.config.CraftRestrictConfig;
+import com.varyon.craftrestrict.events.EventContainerBlockOpen;
+import com.varyon.craftrestrict.events.EventInventoryActiveSlotRequest;
+import com.varyon.craftrestrict.events.EventPlayerInteractBlock;
+import com.varyon.craftrestrict.events.EventPlayerJoinWorld;
+import com.varyon.craftrestrict.inventory.PossessionInventoryListenerRegistry;
+import com.varyon.craftrestrict.packets.PacketCraftInterceptor;
+import com.varyon.craftrestrict.packets.PacketOpenWindowInterceptor;
+import com.varyon.craftrestrict.packets.PacketUpdateWindowInterceptor;
+import com.varyon.craftrestrict.recipes.RecipesManager;
 import com.hypixel.hytale.component.system.ISystem;
-import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.event.events.BootEvent;
+import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 
@@ -46,6 +49,7 @@ public class Main extends JavaPlugin {
         this.registeringCommands();
         this.enablingPackets();
         this.loadingEvents();
+        this.loadingPlayerJoinListener();
         this.getEventRegistry().registerGlobal(BootEvent.class, event -> this.loadingManagers());
     }
 
@@ -115,6 +119,31 @@ public class Main extends JavaPlugin {
         } catch (Exception e) {
             this.getLogger().at(Level.SEVERE).log("[Setup] -> EventPlayerInteractBlock cannot be loaded.");
         }
+        this.getLogger().at(Level.INFO).log("[Setup] -> Loading EventInventoryActiveSlotRequest...");
+        try {
+            this.getEntityStoreRegistry().registerSystem((ISystem) new EventInventoryActiveSlotRequest());
+            this.getLogger().at(Level.INFO).log("[Setup] -> EventInventoryActiveSlotRequest loaded.");
+        } catch (Exception e) {
+            this.getLogger().at(Level.SEVERE).log("[Setup] -> EventInventoryActiveSlotRequest cannot be loaded.");
+        }
+        this.getLogger().at(Level.INFO).log("[Setup] -> Loading EventContainerBlockOpen...");
+        try {
+            this.getEntityStoreRegistry().registerSystem((ISystem) new EventContainerBlockOpen());
+            this.getLogger().at(Level.INFO).log("[Setup] -> EventContainerBlockOpen loaded.");
+        } catch (Exception e) {
+            this.getLogger().at(Level.SEVERE).log("[Setup] -> EventContainerBlockOpen cannot be loaded.");
+        }
+    }
+
+    private void loadingPlayerJoinListener() {
+        this.getLogger().at(Level.INFO).log("[Setup] -> Loading player join listener...");
+        try {
+            this.getEventRegistry().registerGlobal(AddPlayerToWorldEvent.class, EventPlayerJoinWorld::handle);
+            this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, EventPlayerJoinWorld::handleDisconnect);
+            this.getLogger().at(Level.INFO).log("[Setup] -> Player join listener registered.");
+        } catch (Exception e) {
+            this.getLogger().at(Level.SEVERE).log("[Setup] -> ERROR: Could not register player join listener: " + e.getMessage());
+        }
     }
 
     private void loadingManagers() {
@@ -124,14 +153,6 @@ public class Main extends JavaPlugin {
             this.getLogger().at(Level.INFO).log("[Setup] -> Recipes manager loaded successfully.");
             this.getLogger().at(Level.INFO).log("[Setup] -> Starting initial pre-loading...");
             RecipesManager.preWarmCache();
-            this.getLogger().at(Level.INFO).log("[Setup] -> Scheduling secondary sync in 10s...");
-            ScheduledFuture<Void> scheduledTask = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-                this.getLogger().at(Level.INFO).log("[Setup] -> Running secondary recipe discovery...");
-                RecipesManager.preWarmCache();
-                this.getLogger().at(Level.INFO).log("[Setup] -> Secondary synchronization complete.");
-                return null;
-            }, 10L, TimeUnit.SECONDS);
-            this.getTaskRegistry().registerTask(scheduledTask);
         } catch (Exception e) {
             this.getLogger().at(Level.SEVERE).log("[Setup] -> ERROR: Could not load recipes manager: " + e.getMessage());
         }
@@ -154,6 +175,7 @@ public class Main extends JavaPlugin {
             CONFIG.load().thenAccept(newConfig -> {
                 PacketCraftInterceptor.reloadConfig(CONFIG.get());
                 PacketOpenWindowInterceptor.reloadConfig(CONFIG.get());
+                PossessionInventoryListenerRegistry.enforceForAllOnlinePlayers();
                 this.getLogger().at(Level.INFO).log("[Config] Reloaded successfully.");
             }).join();
             return true;

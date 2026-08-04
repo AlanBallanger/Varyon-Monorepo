@@ -1,4 +1,4 @@
-package com.faiizer.craftrestrict.recipes;
+package com.varyon.craftrestrict.recipes;
 
 import com.hypixel.hytale.server.core.asset.type.item.config.CraftingRecipe;
 import java.util.ArrayList;

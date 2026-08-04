@@ -1,4 +1,4 @@
-package com.faiizer.craftrestrict.recipes;
+package com.varyon.craftrestrict.recipes;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

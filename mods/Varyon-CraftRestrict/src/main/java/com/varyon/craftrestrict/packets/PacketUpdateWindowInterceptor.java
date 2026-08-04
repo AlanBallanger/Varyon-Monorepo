@@ -1,6 +1,7 @@
-package com.faiizer.craftrestrict.packets;
+package com.varyon.craftrestrict.packets;
 
-import com.faiizer.craftrestrict.utils.PermissionsUtils;
+import com.varyon.craftrestrict.recipes.RecipesCache;
+import com.varyon.craftrestrict.utils.PermissionsUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -46,6 +47,10 @@ public class PacketUpdateWindowInterceptor extends CraftRestrictPacketIntercepto
                                 this.logger.at(Level.INFO).log("========================================");
                             }
                             if (shouldRestrict) {
+                                String restrictedId = RecipesCache.getRestrictedId(recipeId);
+                                if (config.isLockedItemsAppearsInCraftingList() && restrictedId != null) {
+                                    filteredRecipes.add(restrictedId);
+                                }
                                 continue;
                             }
                             filteredRecipes.add(recipeId);

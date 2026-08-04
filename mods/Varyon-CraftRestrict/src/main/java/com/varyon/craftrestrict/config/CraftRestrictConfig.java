@@ -1,4 +1,4 @@
-package com.faiizer.craftrestrict.config;
+package com.varyon.craftrestrict.config;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -46,6 +46,21 @@ public class CraftRestrictConfig {
             .append(new KeyedCodec<>("RestrictionRules", new MapCodec<>(RestrictionRule.CODEC, LinkedHashMap::new)),
                     (config, value, extraInfo) -> config.RestrictionRules = value,
                     (config, extraInfo) -> config.RestrictionRules).add()
+            .append(new KeyedCodec<>("SendPossessionDenyMessage", Codec.BOOLEAN),
+                    (config, value, extraInfo) -> config.SendPossessionDenyMessage = value,
+                    (config, extraInfo) -> config.SendPossessionDenyMessage).add()
+            .append(new KeyedCodec<>("SendPossessionDenySound", Codec.BOOLEAN),
+                    (config, value, extraInfo) -> config.SendPossessionDenySound = value,
+                    (config, extraInfo) -> config.SendPossessionDenySound).add()
+            .append(new KeyedCodec<>("PossessionDenyMessage", Codec.STRING),
+                    (config, value, extraInfo) -> config.PossessionDenyMessage = value,
+                    (config, extraInfo) -> config.PossessionDenyMessage).add()
+            .append(new KeyedCodec<>("PossessionDenySound", Codec.STRING),
+                    (config, value, extraInfo) -> config.PossessionDenySound = value,
+                    (config, extraInfo) -> config.PossessionDenySound).add()
+            .append(new KeyedCodec<>("PossessionRestrictionRules", new MapCodec<>(RestrictionRule.CODEC, LinkedHashMap::new)),
+                    (config, value, extraInfo) -> config.PossessionRestrictionRules = value,
+                    (config, extraInfo) -> config.PossessionRestrictionRules).add()
             .build();
 
     private String RestrictionMode = "DENY";
@@ -60,6 +75,11 @@ public class CraftRestrictConfig {
     private String BenchDenyMessage = "Tu ne peux pas utiliser cet établi !";
     private String BenchDenySound = "SFX_Antelope_Alerted";
     private Map<String, RestrictionRule> RestrictionRules = new LinkedHashMap<>();
+    private boolean SendPossessionDenyMessage = true;
+    private boolean SendPossessionDenySound = true;
+    private String PossessionDenyMessage = "Tu ne peux pas posséder cet objet !";
+    private String PossessionDenySound = "SFX_Antelope_Alerted";
+    private Map<String, RestrictionRule> PossessionRestrictionRules = new LinkedHashMap<>();
 
     public String getRestrictionMode() {
         return this.RestrictionMode;
@@ -111,5 +131,29 @@ public class CraftRestrictConfig {
 
     public void setRestrictionRules(Map<String, RestrictionRule> rules) {
         this.RestrictionRules = rules;
+    }
+
+    public boolean isSendPossessionDenyMessage() {
+        return this.SendPossessionDenyMessage;
+    }
+
+    public boolean isSendPossessionDenySound() {
+        return this.SendPossessionDenySound;
+    }
+
+    public String getPossessionDenyMessage() {
+        return this.PossessionDenyMessage;
+    }
+
+    public String getPossessionDenySound() {
+        return this.PossessionDenySound;
+    }
+
+    public Map<String, RestrictionRule> getPossessionRestrictionRules() {
+        return this.PossessionRestrictionRules;
+    }
+
+    public void setPossessionRestrictionRules(Map<String, RestrictionRule> rules) {
+        this.PossessionRestrictionRules = rules;
     }
 }

@@ -1,7 +1,7 @@
-package com.faiizer.craftrestrict.packets;
+package com.varyon.craftrestrict.packets;
 
-import com.faiizer.craftrestrict.recipes.RecipesCache;
-import com.faiizer.craftrestrict.utils.PermissionsUtils;
+import com.varyon.craftrestrict.recipes.RecipesCache;
+import com.varyon.craftrestrict.utils.PermissionsUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

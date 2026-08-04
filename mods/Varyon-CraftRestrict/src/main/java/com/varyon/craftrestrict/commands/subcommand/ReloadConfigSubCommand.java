@@ -1,6 +1,6 @@
-package com.faiizer.craftrestrict.commands.subcommand;
+package com.varyon.craftrestrict.commands.subcommand;
 
-import com.faiizer.craftrestrict.Main;
+import com.varyon.craftrestrict.Main;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;

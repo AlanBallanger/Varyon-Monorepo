@@ -1,6 +1,6 @@
-package com.faiizer.craftrestrict.packets;
+package com.varyon.craftrestrict.packets;
 
-import com.faiizer.craftrestrict.utils.PermissionsUtils;
+import com.varyon.craftrestrict.utils.PermissionsUtils;
 import com.hypixel.hytale.protocol.packets.window.CraftRecipeAction;
 import com.hypixel.hytale.protocol.packets.window.SendWindowAction;
 import com.hypixel.hytale.protocol.packets.window.WindowAction;

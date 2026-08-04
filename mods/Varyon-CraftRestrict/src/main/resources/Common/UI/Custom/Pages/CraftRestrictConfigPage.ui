@@ -168,6 +168,27 @@ Group #Root {
         LayoutMode: Top;
         Anchor: (Left: 6);
 
+        Group #TabBar {
+          LayoutMode: Left;
+          Anchor: (Height: 30, Bottom: 8);
+
+          TextButton #TabCraftButton {
+            Text: "CRAFT / ETABLI";
+            Style: @CrButtonNeutralStyle;
+            FlexWeight: 1;
+            Anchor: (Height: 28, Right: 3);
+          }
+          TextButton #TabPossessionButton {
+            Text: "POSSESSION";
+            Style: @CrButtonNeutralStyle;
+            FlexWeight: 1;
+            Anchor: (Height: 28, Left: 3);
+          }
+        }
+
+        Group #CraftTab {
+        LayoutMode: Top;
+
         Label {
           Text: "OBJETS RESTREINTS (clic sur la ligne pour modifier)";
           Style: (FontSize: 12, RenderBold: true, TextColor: #96a9be);
@@ -288,6 +309,148 @@ Group #Root {
               TextButton #RestrictedRemove14 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
             }
           }
+        }
+        }
+
+        Group #PossessionTab {
+        LayoutMode: Top;
+        Visible: false;
+
+        Label {
+          Text: "OBJETS EN POSSESSION INTERDITE (clic sur la ligne pour modifier, MODE bascule DENY/DELETE)";
+          Style: (FontSize: 12, RenderBold: true, TextColor: #96a9be);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #PossessionSearchBg {
+          Background: (Color: @CrPanelBg);
+          OutlineColor: #223247;
+          OutlineSize: 1;
+          Padding: (Left: 8, Right: 8);
+          Anchor: (Height: 28, Bottom: 8);
+
+          TextField #PossessionSearchInput {
+            Style: (FontSize: 12, TextColor: #ffffff);
+            FlexWeight: 1;
+          }
+        }
+
+        Label #PossessionEmptyLabel {
+          Text: "Aucun objet configure.";
+          Style: (FontSize: 13, TextColor: #96a9be, HorizontalAlignment: Center);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #PossessionScroll {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Background: (Color: @CrPanelBg);
+          Padding: (Full: 4);
+
+          Group #PossessionList {
+            LayoutMode: Top;
+
+            Group #PossessionRow1 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen1 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel1 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode1 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove1 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow2 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen2 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel2 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode2 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove2 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow3 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen3 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel3 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode3 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove3 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow4 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen4 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel4 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode4 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove4 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow5 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen5 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel5 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode5 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove5 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow6 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen6 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel6 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode6 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove6 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow7 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen7 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel7 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode7 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove7 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow8 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen8 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel8 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode8 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove8 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow9 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen9 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel9 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode9 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove9 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow10 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen10 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel10 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode10 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove10 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow11 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen11 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel11 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode11 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove11 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow12 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen12 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel12 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode12 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove12 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow13 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen13 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel13 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode13 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove13 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+            Group #PossessionRow14 { LayoutMode: Left; Anchor: (Height: 34, Bottom: 2); Background: (Color: @CrRowBg); Padding: (Left: 8, Right: 4, Top: 2, Bottom: 2);
+              Button #PossessionOpen14 { FlexWeight: 1; Style: ButtonStyle(Default: (Background: (Color: #000000(0))), Hovered: (Background: (Color: #000000(0.2))), Sounds: $C.@ButtonSounds); Padding: (Left: 4);
+                Label #PossessionLabel14 { Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start); }
+              }
+              TextButton #PossessionMode14 { Text: "MODE"; Style: @CrButtonNeutralStyle; Anchor: (Width: 64, Height: 26, Vertical: 0, Right: 4); }
+              TextButton #PossessionRemove14 { Text: "REMOVE"; Style: @CrButtonRedStyle; Anchor: (Width: 74, Height: 26, Vertical: 0); }
+            }
+          }
+        }
         }
       }
     }

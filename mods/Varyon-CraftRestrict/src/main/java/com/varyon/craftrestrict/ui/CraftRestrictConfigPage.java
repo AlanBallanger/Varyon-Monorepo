@@ -1,9 +1,9 @@
-package com.faiizer.craftrestrict.ui;
+package com.varyon.craftrestrict.ui;
 
-import com.faiizer.craftrestrict.Main;
-import com.faiizer.craftrestrict.config.RestrictionRule;
-import com.faiizer.craftrestrict.config.RestrictionRulesManager;
-import com.faiizer.craftrestrict.recipes.CraftableItemsIndex;
+import com.varyon.craftrestrict.Main;
+import com.varyon.craftrestrict.config.RestrictionRule;
+import com.varyon.craftrestrict.config.RestrictionRulesManager;
+import com.varyon.craftrestrict.recipes.CraftableItemsIndex;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
@@ -30,13 +30,17 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
     private static final String LAYOUT = "Pages/CraftRestrictConfigPage.ui";
     private static final int MAX_AVAILABLE_ROWS = 14;
     private static final int MAX_RESTRICTED_ROWS = 14;
+    private static final int MAX_POSSESSION_ROWS = 14;
     private static final int MAX_WORLD_ROWS = 10;
 
     private String availableSearchQuery = "";
     private String restrictedSearchQuery = "";
+    private String possessionSearchQuery = "";
+    private boolean possessionTabActive = false;
 
     @Nullable
     private String editingRuleId;
+    private boolean editingPossession = false;
     /** Worlds toggled OFF (excluded) for the rule currently being edited. */
     private final Set<String> editingExcludedWorlds = new LinkedHashSet<>();
 
@@ -59,8 +63,11 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
         cmd.append(LAYOUT);
         cmd.set("#AvailableSearchInput.Value", availableSearchQuery);
         cmd.set("#RestrictedSearchInput.Value", restrictedSearchQuery);
+        cmd.set("#PossessionSearchInput.Value", possessionSearchQuery);
         buildAvailableList(cmd, evt);
+        buildTabs(cmd);
         buildRestrictedList(cmd, evt);
+        buildPossessionList(cmd, evt);
         buildEditPopup(cmd, evt);
         bindStaticEvents(evt);
     }
@@ -82,9 +89,25 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
                 restrictedSearchQuery = data.getSearchQuery() == null ? "" : data.getSearchQuery();
                 refreshUI();
             }
+            case "search_possession" -> {
+                possessionSearchQuery = data.getSearchQuery() == null ? "" : data.getSearchQuery();
+                refreshUI();
+            }
+            case "show_craft_tab" -> {
+                possessionTabActive = false;
+                refreshUI();
+            }
+            case "show_possession_tab" -> {
+                possessionTabActive = true;
+                refreshUI();
+            }
             case "add_item" -> {
                 String itemId = data.getItemId();
-                RestrictionRulesManager.addRule(itemId, "", "");
+                if (possessionTabActive) {
+                    RestrictionRulesManager.addPossessionRule(itemId);
+                } else {
+                    RestrictionRulesManager.addRule(itemId, "", "");
+                }
                 refreshUI();
             }
             case "remove_rule" -> {
@@ -94,8 +117,23 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
                 }
                 refreshUI();
             }
+            case "remove_possession_rule" -> {
+                RestrictionRulesManager.removePossessionRule(data.getRuleId());
+                if (data.getRuleId() != null && data.getRuleId().equals(editingRuleId)) {
+                    editingRuleId = null;
+                }
+                refreshUI();
+            }
+            case "toggle_possession_mode" -> {
+                RestrictionRulesManager.togglePossessionRuleMode(data.getRuleId());
+                refreshUI();
+            }
             case "edit_rule" -> {
-                openEditPopup(data.getRuleId());
+                openEditPopup(data.getRuleId(), false);
+                refreshUI();
+            }
+            case "edit_possession_rule" -> {
+                openEditPopup(data.getRuleId(), true);
                 refreshUI();
             }
             case "edit_toggle_world" -> {
@@ -120,15 +158,19 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
     public void onDismiss(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
     }
 
-    private void openEditPopup(@Nullable String ruleId) {
+    private void openEditPopup(@Nullable String ruleId, boolean possession) {
         if (ruleId == null) {
             return;
         }
-        RestrictionRule rule = Main.getConfig().getRestrictionRules().get(ruleId);
+        Map<String, RestrictionRule> rules = possession
+                ? Main.getConfig().getPossessionRestrictionRules()
+                : Main.getConfig().getRestrictionRules();
+        RestrictionRule rule = rules.get(ruleId);
         if (rule == null) {
             return;
         }
         editingRuleId = ruleId;
+        editingPossession = possession;
         editingExcludedWorlds.clear();
         editingExcludedWorlds.addAll(rule.getExcludedWorldsList());
     }
@@ -146,13 +188,17 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
         if (editingRuleId == null) {
             return;
         }
-        RestrictionRule existing = Main.getConfig().getRestrictionRules().get(editingRuleId);
+        Map<String, RestrictionRule> rules = editingPossession
+                ? Main.getConfig().getPossessionRestrictionRules()
+                : Main.getConfig().getRestrictionRules();
+        RestrictionRule existing = rules.get(editingRuleId);
         if (existing == null) {
             editingRuleId = null;
             return;
         }
         String excluded = RestrictionRule.joinWorlds(List.copyOf(editingExcludedWorlds));
-        RestrictionRulesManager.updateRule(editingRuleId, excluded, permission == null ? "" : permission.trim());
+        RestrictionRulesManager.updateRule(editingPossession, editingRuleId, excluded,
+                permission == null ? "" : permission.trim(), null);
         editingRuleId = null;
     }
 
@@ -162,6 +208,15 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
                 new EventData().append("Action", "search_available").append("@SearchQuery", "#AvailableSearchInput.Value"), false);
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#RestrictedSearchInput",
                 new EventData().append("Action", "search_restricted").append("@SearchQuery", "#RestrictedSearchInput.Value"), false);
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#PossessionSearchInput",
+                new EventData().append("Action", "search_possession").append("@SearchQuery", "#PossessionSearchInput.Value"), false);
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#TabCraftButton", EventData.of("Action", "show_craft_tab"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#TabPossessionButton", EventData.of("Action", "show_possession_tab"));
+    }
+
+    private void buildTabs(@Nonnull UICommandBuilder cmd) {
+        cmd.set("#CraftTab.Visible", !possessionTabActive);
+        cmd.set("#PossessionTab.Visible", possessionTabActive);
     }
 
     private void buildAvailableList(@Nonnull UICommandBuilder cmd, @Nonnull UIEventBuilder evt) {
@@ -208,13 +263,49 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
         }
     }
 
+    private void buildPossessionList(@Nonnull UICommandBuilder cmd, @Nonnull UIEventBuilder evt) {
+        List<Map.Entry<String, RestrictionRule>> rules = RestrictionRulesManager.listPossessionRuleEntries();
+        String needle = possessionSearchQuery == null ? "" : possessionSearchQuery.trim().toLowerCase(Locale.ROOT);
+        if (!needle.isEmpty()) {
+            rules = rules.stream()
+                    .filter(entry -> entry.getValue().getPattern().toLowerCase(Locale.ROOT).contains(needle))
+                    .toList();
+        }
+        cmd.set("#PossessionEmptyLabel.Visible", rules.isEmpty());
+        for (int row = 1; row <= MAX_POSSESSION_ROWS; row++) {
+            String suffix = Integer.toString(row);
+            boolean visible = row <= rules.size();
+            cmd.set("#PossessionRow" + suffix + ".Visible", visible);
+            if (!visible) {
+                continue;
+            }
+            Map.Entry<String, RestrictionRule> entry = rules.get(row - 1);
+            RestrictionRule rule = entry.getValue();
+            String scopeLabel = rule.isGlobal() ? "GLOBAL" : "SAUF " + String.join(", ", rule.getExcludedWorldsList());
+            String permLabel = rule.hasPermission() ? (" [" + rule.getPermission() + "]") : "";
+            String modeLabel = rule.isDeleteMode() ? "DELETE" : "DENY";
+            cmd.set("#PossessionLabel" + suffix + ".Text",
+                    escape(rule.getPattern() + "  (" + scopeLabel + ")" + permLabel + "  <" + modeLabel + ">"));
+            cmd.set("#PossessionMode" + suffix + ".Text", modeLabel);
+            evt.addEventBinding(CustomUIEventBindingType.Activating, "#PossessionOpen" + suffix,
+                    EventData.of("Action", "edit_possession_rule").append("RuleId", entry.getKey()), false);
+            evt.addEventBinding(CustomUIEventBindingType.Activating, "#PossessionMode" + suffix,
+                    EventData.of("Action", "toggle_possession_mode").append("RuleId", entry.getKey()), false);
+            evt.addEventBinding(CustomUIEventBindingType.Activating, "#PossessionRemove" + suffix,
+                    EventData.of("Action", "remove_possession_rule").append("RuleId", entry.getKey()), false);
+        }
+    }
+
     private void buildEditPopup(@Nonnull UICommandBuilder cmd, @Nonnull UIEventBuilder evt) {
         boolean open = editingRuleId != null;
         cmd.set("#EditPopup.Visible", open);
         if (!open) {
             return;
         }
-        RestrictionRule rule = Main.getConfig().getRestrictionRules().get(editingRuleId);
+        Map<String, RestrictionRule> rules = editingPossession
+                ? Main.getConfig().getPossessionRestrictionRules()
+                : Main.getConfig().getRestrictionRules();
+        RestrictionRule rule = rules.get(editingRuleId);
         if (rule == null) {
             cmd.set("#EditPopup.Visible", false);
             return;
@@ -250,7 +341,9 @@ public final class CraftRestrictConfigPage extends InteractiveCustomUIPage<Craft
         UICommandBuilder cmd = new UICommandBuilder();
         UIEventBuilder evt = new UIEventBuilder();
         buildAvailableList(cmd, evt);
+        buildTabs(cmd);
         buildRestrictedList(cmd, evt);
+        buildPossessionList(cmd, evt);
         buildEditPopup(cmd, evt);
         bindStaticEvents(evt);
         sendUpdate(cmd, evt, false);

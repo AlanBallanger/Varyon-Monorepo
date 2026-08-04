@@ -1,34 +1,40 @@
-package com.faiizer.craftrestrict.commands.subcommand;
+package com.varyon.craftrestrict.commands;
 
-import com.faiizer.craftrestrict.Main;
+import com.varyon.craftrestrict.Main;
+import com.varyon.craftrestrict.commands.subcommand.GuiSubCommand;
+import com.varyon.craftrestrict.commands.subcommand.HelpSubCommand;
+import com.varyon.craftrestrict.commands.subcommand.ReloadConfigSubCommand;
 import com.hypixel.hytale.common.plugin.AuthorInfo;
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class HelpSubCommand extends AbstractAsyncCommand {
+public class CraftRestrictCommand extends AbstractCommand {
 
-    public HelpSubCommand() {
-        super("help", "Shows all available commands");
+    public CraftRestrictCommand() {
+        super("craftrestrict", "Manage the CraftRecipe mod");
+        this.addSubCommand(new HelpSubCommand());
+        this.addSubCommand(new ReloadConfigSubCommand());
+        this.addSubCommand(new GuiSubCommand());
     }
 
     @Nullable
     @Override
     protected String generatePermissionNode() {
-        return "craftrestrict.commands.craftrestrict.help.use";
+        return "craftrestrict.commands.craftrestrict.command.use";
     }
 
-    @Nonnull
+    @Nullable
     @Override
-    protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext commandContext) {
+    protected CompletableFuture<Void> execute(@Nonnull CommandContext commandContext) {
         CommandSender sender = commandContext.sender();
         Main plugin = Main.getPluginInstance();
         PluginManifest manifest = plugin.getManifest();
@@ -36,11 +42,10 @@ public class HelpSubCommand extends AbstractAsyncCommand {
         String message = """
 
                 ====================
-                HELP - CraftRestrict
-                ====================
-                /craftrestrict help -> Show this message.
-                /craftrestrict reloadconfig/reload/rl -> Reload the mod config.
-                /craftrestrict gui -> Open the restriction management UI.
+                %s v%s
+                - Author: %s
+                - Description: %s
+                Command list: /craftrestrict help
                 ====================
                 """.stripTrailing().formatted(
                 manifest.getName(),

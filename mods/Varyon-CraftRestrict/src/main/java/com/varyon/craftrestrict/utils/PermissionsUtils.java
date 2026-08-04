@@ -1,8 +1,8 @@
-package com.faiizer.craftrestrict.utils;
+package com.varyon.craftrestrict.utils;
 
-import com.faiizer.craftrestrict.Main;
-import com.faiizer.craftrestrict.config.CraftRestrictConfig;
-import com.faiizer.craftrestrict.config.RestrictionRule;
+import com.varyon.craftrestrict.Main;
+import com.varyon.craftrestrict.config.CraftRestrictConfig;
+import com.varyon.craftrestrict.config.RestrictionRule;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
+import java.util.Map;
 import java.util.UUID;
 
 public class PermissionsUtils {
@@ -25,7 +26,7 @@ public class PermissionsUtils {
         }
 
         String worldName = resolveWorldName(playerRef);
-        for (RestrictionRule rule : Main.getConfig().getRestrictionRules().values()) {
+        for (RestrictionRule rule : getRulesForType(type).values()) {
             if (!rule.matchesId(id) || !rule.matchesWorld(worldName)) {
                 continue;
             }
@@ -43,6 +44,26 @@ public class PermissionsUtils {
         return isAllowMode != hasSpecificPerm;
     }
 
+    private static Map<String, RestrictionRule> getRulesForType(String type) {
+        if ("possession".equalsIgnoreCase(type)) {
+            return Main.getConfig().getPossessionRestrictionRules();
+        }
+        return Main.getConfig().getRestrictionRules();
+    }
+
+    public static String resolveRestrictionMode(PlayerRef playerRef, String id) {
+        return resolvePossessionModeById(id, resolveWorldName(playerRef));
+    }
+
+    public static String resolvePossessionModeById(String id, String worldName) {
+        for (RestrictionRule rule : Main.getConfig().getPossessionRestrictionRules().values()) {
+            if (rule.matchesId(id) && rule.matchesWorld(worldName) && rule.isDeleteMode()) {
+                return "DELETE";
+            }
+        }
+        return "DENY";
+    }
+
     private static String resolveWorldName(PlayerRef playerRef) {
         try {
             UUID worldUuid = playerRef.getWorldUuid();
@@ -58,14 +79,19 @@ public class PermissionsUtils {
 
     public static void sendRestrictionNotifications(PlayerRef playerRef, String type) {
         boolean isBench = type.equalsIgnoreCase("bench");
+        boolean isPossession = type.equalsIgnoreCase("possession");
         CraftRestrictConfig config = Main.getConfig();
-        boolean shouldSendMessage = isBench ? config.isSendBenchDenyMessage() : config.isSendRecipeDenyMessage();
-        String messageContent = isBench ? config.getBenchDenyMessage() : config.getRecipeDenyMessage();
+        boolean shouldSendMessage = isPossession ? config.isSendPossessionDenyMessage()
+                : isBench ? config.isSendBenchDenyMessage() : config.isSendRecipeDenyMessage();
+        String messageContent = isPossession ? config.getPossessionDenyMessage()
+                : isBench ? config.getBenchDenyMessage() : config.getRecipeDenyMessage();
         if (shouldSendMessage && messageContent != null) {
             playerRef.sendMessage(Message.raw(messageContent));
         }
-        boolean shouldPlaySound = isBench ? config.isSendBenchDenySound() : config.isSendRecipeDenySound();
-        String soundId = isBench ? config.getBenchDenySound() : config.getRecipeDenySound();
+        boolean shouldPlaySound = isPossession ? config.isSendPossessionDenySound()
+                : isBench ? config.isSendBenchDenySound() : config.isSendRecipeDenySound();
+        String soundId = isPossession ? config.getPossessionDenySound()
+                : isBench ? config.getBenchDenySound() : config.getRecipeDenySound();
         if (shouldPlaySound) {
             int soundIndex;
             try {

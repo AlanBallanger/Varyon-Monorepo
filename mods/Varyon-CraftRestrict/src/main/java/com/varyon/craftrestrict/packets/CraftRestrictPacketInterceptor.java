@@ -1,7 +1,7 @@
-package com.faiizer.craftrestrict.packets;
+package com.varyon.craftrestrict.packets;
 
-import com.faiizer.craftrestrict.Main;
-import com.faiizer.craftrestrict.config.CraftRestrictConfig;
+import com.varyon.craftrestrict.Main;
+import com.varyon.craftrestrict.config.CraftRestrictConfig;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
 import com.hypixel.hytale.server.core.io.adapter.PacketFilter;

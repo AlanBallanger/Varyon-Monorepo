@@ -1,4 +1,4 @@
-package com.faiizer.craftrestrict.ui;
+package com.varyon.craftrestrict.ui;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -18,6 +18,8 @@ public class CraftRestrictEventData {
                             (d, v) -> d.searchQuery = v, d -> d.searchQuery)
                     .addField(new KeyedCodec<>("@EditPermission", Codec.STRING),
                             (d, v) -> d.editPermission = v, d -> d.editPermission)
+                    .addField(new KeyedCodec<>("Possession", Codec.BOOLEAN),
+                            (d, v) -> d.possession = v, d -> d.possession)
                     .build();
 
     String action;
@@ -25,6 +27,7 @@ public class CraftRestrictEventData {
     String ruleId;
     String searchQuery;
     String editPermission;
+    boolean possession;
 
     public String getAction() {
         return action;
@@ -44,5 +47,9 @@ public class CraftRestrictEventData {
 
     public String getEditPermission() {
         return editPermission;
+    }
+
+    public boolean isPossession() {
+        return possession;
     }
 }

@@ -1,4 +1,4 @@
-package com.faiizer.craftrestrict.config;
+package com.varyon.craftrestrict.config;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -27,20 +27,30 @@ public class RestrictionRule {
             .append(new KeyedCodec<>("Permission", Codec.STRING),
                     (rule, value, extraInfo) -> rule.permission = value,
                     (rule, extraInfo) -> rule.permission).add()
+            .append(new KeyedCodec<>("Mode", Codec.STRING),
+                    (rule, value, extraInfo) -> rule.mode = value,
+                    (rule, extraInfo) -> rule.mode).add()
             .build();
 
     private String pattern = "";
     /** Comma-separated list of world names EXCLUDED from this rule, or blank if it applies everywhere. */
     private String excludedWorlds = "";
     private String permission = "";
+    /** DENY or DELETE. Only meaningful for possession rules; ignored by recipe/bench rules. */
+    private String mode = "DENY";
 
     public RestrictionRule() {
     }
 
     public RestrictionRule(String pattern, String excludedWorlds, String permission) {
+        this(pattern, excludedWorlds, permission, "DENY");
+    }
+
+    public RestrictionRule(String pattern, String excludedWorlds, String permission, String mode) {
         this.pattern = pattern == null ? "" : pattern;
         this.excludedWorlds = excludedWorlds == null ? "" : excludedWorlds;
         this.permission = permission == null ? "" : permission;
+        this.mode = mode == null ? "DENY" : mode;
     }
 
     public static String joinWorlds(List<String> worlds) {
@@ -82,6 +92,14 @@ public class RestrictionRule {
 
     public boolean hasPermission() {
         return permission != null && !permission.isBlank();
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public boolean isDeleteMode() {
+        return "DELETE".equalsIgnoreCase(mode);
     }
 
     public boolean matchesWorld(String worldName) {
