@@ -1,0 +1,18 @@
+{
+  "Group": "com.woxtz.weaponinfo",
+  "Name": "WeaponStatsViewer",
+  "Version": "1.7.0",
+  "Description": "Browse all weapons with damage stats, organized by type and rarity. Supports English and Spanish.",
+  "Authors": [
+    {
+      "Name": "Woxtz"
+    }
+  ],
+  "Website": "",
+  "ServerVersion": "*",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": true,
+  "Main": "com.woxtz.weaponinfo.WeaponInfoPlugin"
+}
