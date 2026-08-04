@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.bundling.Zip
+
 plugins {
     java
 }
@@ -39,6 +41,36 @@ tasks.named<ProcessResources>("processResources") {
 }
 
 tasks.named<Jar>("jar") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    enabled = false
+}
+
+// Standard Jar task was found to intermittently/consistently fail to write its output file in
+// this environment (Java 25 + Gradle 9.2.1) despite reporting success. Zip is a reliable
+// substitute already used successfully by sibling modules (Varyon-Comet, Varyon-Damage_Number).
+val modJar = tasks.register<Zip>("modJar") {
+    group = "build"
+    description = "Assemble le JAR du mod"
     archiveBaseName.set("Varyon-TpToWorld")
+    archiveVersion.set(version.toString())
+    archiveExtension.set("jar")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.get().output)
+}
+
+tasks.named("assemble") {
+    dependsOn(modJar)
+}
+
+val exportModJar = tasks.register<Copy>("exportModJar") {
+    group = "build"
+    description = "Copie le JAR vers Varyon-Monorepo/build/output"
+    dependsOn(modJar)
+    from(modJar)
+    into(rootProject.layout.buildDirectory.dir("output"))
+}
+
+tasks.named("build") {
+    dependsOn(modJar)
+    finalizedBy(exportModJar)
 }

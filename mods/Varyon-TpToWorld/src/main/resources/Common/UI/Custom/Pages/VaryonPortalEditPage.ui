@@ -1,0 +1,58 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+  LayoutMode: Middle;
+}
+
+$C.@Container {
+  Anchor: (Width: 560, Height: 220);
+
+  #Title {
+    $C.@Title {
+      @Text = "CONFIGURATION DU PORTAIL";
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Padding: (Full: 16);
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 8);
+
+      Label {
+        Text: "Commande :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      $C.@TextField #CommandInput {
+        @Anchor = (Height: 32);
+        FlexWeight: 1;
+      }
+    }
+
+    Label {
+      Text: "Executee sur le joueur qui traverse le portail (ex: tp @p 50 50 50). Laisser vide pour revenir au comportement par defaut (retour au spawn).";
+      Style: (TextColor: #6f7f92, FontSize: 11, Wrap: true);
+      Anchor: (Left: 0, Right: 0, Height: 48, Bottom: 12);
+    }
+
+    Group #ButtonSection {
+      LayoutMode: Left;
+
+      $C.@TextButton #SaveButton {
+        @Text = "ENREGISTRER";
+        @Anchor = (Width: 140, Height: 36);
+      }
+
+      $C.@SecondaryTextButton #CancelButton {
+        @Text = "ANNULER";
+        @Anchor = (Left: 8, Width: 100, Height: 36);
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

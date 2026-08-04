@@ -1,0 +1,57 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Varyon_MagicPortal_Spawn"
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_Flash"
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_CenterCircle"
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_Waves",
+      "StartDelay": 0,
+      "PositionOffset": {
+        "Y": 0.2
+      }
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_SmokeAlpha",
+      "StartDelay": 0,
+      "PositionOffset": {
+        "Y": 0.2
+      }
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_Sparks",
+      "StartDelay": 0
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_SparksRunes"
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_Center",
+      "StartDelay": 0.5
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_CenterGlow",
+      "StartDelay": 0.5
+    },
+    {
+      "SpawnerId": "Varyon_MagicPortal_SmokeMiddle",
+      "RotationOffset": {
+        "Pitch": 90.0
+      }
+    },
+    {
+      "SpawnerId": "Varyon_CreativeWorld_Flat",
+      "PositionOffset": {
+        "X": 0,
+        "Z": 0.3
+      }
+    }
+  ],
+  "CullDistance": 50.0,
+  "IsImportant": false
+}

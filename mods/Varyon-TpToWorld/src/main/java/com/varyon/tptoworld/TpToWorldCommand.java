@@ -3,96 +3,69 @@ package com.varyon.tptoworld;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Rotation3f;
+import com.hypixel.hytale.math.vector.Transform;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractTargetPlayerCommand;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.universe.world.spawn.ISpawnProvider;
-import com.hypixel.hytale.math.vector.Transform;
 import java.awt.Color;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+import javax.annotation.Nullable;
 
-public final class TpToWorldCommand extends AbstractAsyncCommand {
+public final class TpToWorldCommand extends AbstractTargetPlayerCommand {
 
-    private final RequiredArg<PlayerRef> playerArg;
     private final RequiredArg<String> worldArg;
+    private final OptionalArg<Double> xArg;
+    private final OptionalArg<Double> yArg;
+    private final OptionalArg<Double> zArg;
 
     public TpToWorldCommand() {
-        super("tptoworld", "Téléporter un joueur vers un autre monde (au spawn de ce monde)");
+        super("tptoworld", "Téléporter un joueur vers un autre monde (au spawn de ce monde, ou à une position donnée)");
         this.requirePermission("varyon.admin");
-        this.playerArg = this.withRequiredArg("joueur", "Nom du joueur", ArgTypes.PLAYER_REF);
-        this.worldArg = this.withRequiredArg("monde", "Nom du monde de destination", ArgTypes.GREEDY_STRING);
+        this.worldArg = this.withRequiredArg("monde", "Nom du monde de destination", ArgTypes.STRING);
+        this.xArg = this.withOptionalArg("x", "Position X de destination (optionnel)", ArgTypes.DOUBLE);
+        this.yArg = this.withOptionalArg("y", "Position Y de destination (optionnel)", ArgTypes.DOUBLE);
+        this.zArg = this.withOptionalArg("z", "Position Z de destination (optionnel)", ArgTypes.DOUBLE);
     }
 
-    @NonNullDecl
     @Override
-    protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext context) {
-        PlayerRef targetRef = context.get(playerArg);
-        if (targetRef == null || !targetRef.isValid()) {
-            context.sendMessage(Message.raw("Joueur introuvable ou hors ligne.").color(Color.RED));
-            return CompletableFuture.completedFuture(null);
-        }
-
+    protected void execute(@Nonnull CommandContext context, @Nullable Ref<EntityStore> sourceRef,
+                           @Nonnull Ref<EntityStore> targetRef, @Nonnull PlayerRef playerRef,
+                           @Nonnull World world, @Nonnull Store<EntityStore> store) {
         String worldName = context.get(worldArg);
-        Universe universe = Universe.get();
-        if (universe == null) {
-            context.sendMessage(Message.raw("Univers indisponible.").color(Color.RED));
-            return CompletableFuture.completedFuture(null);
-        }
-
-        Map<String, World> worlds = universe.getWorlds();
-        World targetWorld = worlds != null ? worlds.get(worldName) : null;
+        World targetWorld = Universe.get().getWorld(worldName);
         if (targetWorld == null) {
             context.sendMessage(Message.raw("Monde introuvable : " + worldName).color(Color.RED));
-            return CompletableFuture.completedFuture(null);
+            return;
         }
 
-        Ref<EntityStore> targetEntityRef = targetRef.getReference();
-        if (targetEntityRef == null || !targetEntityRef.isValid()) {
-            context.sendMessage(Message.raw("Le joueur n'est pas dans un monde.").color(Color.RED));
-            return CompletableFuture.completedFuture(null);
-        }
+        Double x = context.get(xArg);
+        Double y = context.get(yArg);
+        Double z = context.get(zArg);
 
-        Store<EntityStore> targetStore = targetEntityRef.getStore();
-        Object targetExt = targetStore.getExternalData();
-        if (!(targetExt instanceof EntityStore targetEntityStore) || targetEntityStore.getWorld() == null) {
-            context.sendMessage(Message.raw("Impossible de localiser le monde actuel du joueur.").color(Color.RED));
-            return CompletableFuture.completedFuture(null);
-        }
-
-        World currentWorld = targetEntityStore.getWorld();
-
-        ISpawnProvider spawnProvider = targetWorld.getWorldConfig().getSpawnProvider();
-        if (spawnProvider == null) {
-            context.sendMessage(Message.raw("Le monde de destination n'a pas de point de spawn.").color(Color.RED));
-            return CompletableFuture.completedFuture(null);
-        }
-
-        Transform spawnPoint = spawnProvider.getSpawnPoint(targetWorld, targetRef.getUuid());
-        org.joml.Vector3d spawnPos = spawnPoint.getPosition();
-
-        String targetName = targetRef.getUsername() != null ? targetRef.getUsername() : "";
-        currentWorld.execute(() -> {
-            Ref<EntityStore> liveRef = targetRef.getReference();
-            if (liveRef == null || !liveRef.isValid()) {
+        Teleport teleportComponent;
+        if (x != null && y != null && z != null) {
+            teleportComponent = Teleport.createForPlayer(targetWorld, new org.joml.Vector3d(x, y, z), Rotation3f.ZERO);
+        } else {
+            Transform spawnPoint = targetWorld.getWorldConfig().getSpawnProvider().getSpawnPoint(targetRef, store);
+            if (spawnPoint == null) {
+                context.sendMessage(Message.raw("Le monde de destination n'a pas de point de spawn.").color(Color.RED));
                 return;
             }
-            Store<EntityStore> liveStore = liveRef.getStore();
-            Teleport teleport = Teleport.createForPlayer(targetWorld, spawnPos, Rotation3f.ZERO);
-            liveStore.addComponent(liveRef, Teleport.getComponentType(), teleport);
-        });
+            teleportComponent = Teleport.createForPlayer(targetWorld, spawnPoint);
+        }
 
+        store.addComponent(targetRef, Teleport.getComponentType(), teleportComponent);
+
+        String targetName = playerRef.getUsername() != null ? playerRef.getUsername() : "";
         context.sendMessage(Message.raw(targetName + " téléporté vers le monde " + targetWorld.getName() + ".").color(Color.GREEN));
-        targetRef.sendMessage(Message.raw("Tu as été téléporté vers le monde " + targetWorld.getName() + ".").color(Color.GREEN));
-        return CompletableFuture.completedFuture(null);
+        playerRef.sendMessage(Message.raw("Tu as été téléporté vers le monde " + targetWorld.getName() + ".").color(Color.GREEN));
     }
 }
