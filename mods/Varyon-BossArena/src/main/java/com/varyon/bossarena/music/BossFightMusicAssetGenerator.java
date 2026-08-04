@@ -32,7 +32,9 @@ final class BossFightMusicAssetGenerator {
 
     static synchronized void rebuildPack(Path musicSrc) throws IOException {
         if (packRoot == null || !Files.isDirectory(packRoot)) {
-            packRoot = Files.createTempDirectory("VaryonBossArenaMusic");
+            packRoot = Path.of(System.getProperty("java.io.tmpdir"), "VaryonBossArenaMusic-pack");
+            deleteTreeQuietly(packRoot);
+            Files.createDirectories(packRoot);
             packRoot.toFile().deleteOnExit();
             LOGGER.info("[BossArena] music pack dir=" + packRoot);
         }

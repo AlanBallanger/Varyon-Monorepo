@@ -104,6 +104,8 @@ public final class BossArenaPlugin extends JavaPlugin {
             });
     private static BossArenaPlugin INSTANCE;
     private final java.util.concurrent.atomic.AtomicBoolean cleanedUp = new java.util.concurrent.atomic.AtomicBoolean(false);
+    private final java.util.Set<String> respawnedShopKeys =
+            java.util.concurrent.ConcurrentHashMap.newKeySet();
     private BossTrackingSystem trackingSystem;
     private BossDamageChartTracker damageChartTracker;
     private BossArenaConfig config = new BossArenaConfig();
@@ -191,6 +193,19 @@ public final class BossArenaPlugin extends JavaPlugin {
                 || normalizedNpcTypeId.endsWith("/" + normalizedConfiguredId);
     }
 
+    private static boolean isRecordedShopNpc(com.hypixel.hytale.component.ArchetypeChunk<EntityStore> chunk,
+                                             int index,
+                                             BossShopConfig.ShopLocation location) {
+        if (location == null || location.uuid == null || location.uuid.isBlank()) {
+            return false;
+        }
+        UUIDComponent uuidComponent = chunk.getComponent(index, UUIDComponent.getComponentType());
+        if (uuidComponent == null || uuidComponent.getUuid() == null) {
+            return false;
+        }
+        return uuidComponent.getUuid().toString().equalsIgnoreCase(location.uuid.trim());
+    }
+
     private static NPCEntity resolveTargetNpc(Entity targetEntity, Ref<EntityStore> targetRef, Store<EntityStore> store) {
         if (targetRef != null) {
             Object npcObj = store.getComponent(targetRef, NPCEntity.getComponentType());
@@ -276,7 +291,6 @@ public final class BossArenaPlugin extends JavaPlugin {
     @Override
     public void setup() {
         INSTANCE = this;
-        getLogger().atInfo().log("BossArena setup() called");
 
         registerCustomCodecs();
         registerCustomInteractions();
@@ -311,34 +325,27 @@ public final class BossArenaPlugin extends JavaPlugin {
         this.fightMusicManager = new BossFightMusicManager(getModRootDirectory().resolve("music"));
         this.getEntityStoreRegistry().registerSystem(new BossFightMusicApplySystem(fightMusicManager));
         this.getEntityStoreRegistry().registerSystem(new BossLootChestUseSystem());
-        getLogger().atInfo().log("Successfully registered boss systems");
 
         // Fallback chest open (UseBlockEvent.Pre is the primary path via BossLootChestUseSystem)
         this.getEventRegistry().registerGlobal(
                 LivingEntityUseBlockEvent.class,
                 this::onBlockInteract
         );
-        getLogger().atInfo().log("Registered chest interaction listener");
         this.getEventRegistry().registerGlobal(
                 PlayerInteractEvent.class,
                 this::onPlayerInteract
         );
-        getLogger().atInfo().log("Registered player interaction listener");
         this.getEventRegistry().registerGlobal(
                 AddPlayerToWorldEvent.class,
                 this::onAddPlayerToWorld
         );
-        getLogger().atInfo().log("Registered world player add listener");
         this.getEventRegistry().registerGlobal(
                 PlayerDisconnectEvent.class,
                 this::onPlayerDisconnect
         );
-        getLogger().atInfo().log("Registered player disconnect listener");
         this.getEventRegistry().registerGlobal(EventPriority.FIRST, ShutdownEvent.class, event -> {
-            getLogger().atInfo().log("ShutdownEvent received (priority FIRST)");
             handleShutdown();
         });
-        getLogger().atInfo().log("Registered shutdown listener (priority FIRST)");
 
         config.load();
         if (config.timedMapMarker != null) {
@@ -401,8 +408,7 @@ public final class BossArenaPlugin extends JavaPlugin {
 
     private void registerCustomBlocks() {
         try {
-            getLogger().atInfo().log("Registering Boss Arena custom blocks...");
-
+            // no custom blocks currently registered here
         } catch (Exception e) {
             getLogger().atSevere().withCause(e).log("Failed to register custom blocks");
         }
@@ -410,31 +416,23 @@ public final class BossArenaPlugin extends JavaPlugin {
 
     private void registerCustomInteractions() {
         try {
-            getLogger().atInfo().log("Registering Boss Arena custom interactions...");
-
             RootInteraction rootInteraction = new RootInteraction("BossArena_OpenChest", "BossArena_OpenChest");
             RootInteraction.getAssetStore().loadAssets(ASSET_PACK_ID, List.of(rootInteraction));
-            getLogger().atInfo().log("Registered RootInteraction: BossArena_OpenChest");
-
 
             RootInteraction shopOpenInteraction = new RootInteraction(
                     SHOP_OPEN_INTERACTION_ID,
                     SHOP_OPEN_INTERACTION_ID
             );
             RootInteraction.getAssetStore().loadAssets(ASSET_PACK_ID, List.of(shopOpenInteraction));
-            getLogger().atInfo().log("Registered RootInteraction: " + SHOP_OPEN_INTERACTION_ID);
 
             RootInteraction noDeathDrops = new RootInteraction(NO_DEATH_DROPS_INTERACTION_ID, NO_DEATH_DROPS_INTERACTION_ID);
             RootInteraction.getAssetStore().loadAssets(ASSET_PACK_ID, List.of(noDeathDrops));
-            getLogger().atInfo().log("Registered RootInteraction: " + NO_DEATH_DROPS_INTERACTION_ID);
 
             Interaction.getAssetStore().loadAssets(ASSET_PACK_ID, List.of(
                     new OpenBossChestInteraction(),
                     new OpenBossShopNpcInteraction(),
                     new SimpleInteraction(NO_DEATH_DROPS_INTERACTION_ID)
             ));
-            getLogger().atInfo().log("Registered interaction assets for BossArena_OpenChest and "
-                    + SHOP_OPEN_INTERACTION_ID);
 
         } catch (Exception e) {
             getLogger().atSevere().withCause(e).log("Failed to register custom interactions");
@@ -443,8 +441,6 @@ public final class BossArenaPlugin extends JavaPlugin {
 
     private void registerCustomCodecs() {
         try {
-            getLogger().atInfo().log("Registering Boss Arena chunk components and interactions...");
-
             ComponentType<ChunkStore, BossLootChestBlock> bossLootChestType =
                     getChunkStoreRegistry().registerComponent(
                             BossLootChestBlock.class,
@@ -453,7 +449,6 @@ public final class BossArenaPlugin extends JavaPlugin {
                     );
             BossLootChestBlock.setComponentType(bossLootChestType);
             getChunkStoreRegistry().registerSystem(new OrphanItemContainerBlockCleanupSystem());
-            getLogger().atInfo().log("Registered orphan ItemContainerBlock cleanup system");
 
             // Register OpenBossChestInteraction codec with Interaction system
             // The string must match the interaction ID in the JSON
@@ -472,8 +467,6 @@ public final class BossArenaPlugin extends JavaPlugin {
                     SimpleInteraction.class,
                     SimpleInteraction.CODEC
             );
-
-            getLogger().atInfo().log("✅ Successfully registered custom codecs");
 
         } catch (Exception e) {
             getLogger().atSevere().withCause(e).log("❌ Failed to register custom codecs");
@@ -1122,8 +1115,18 @@ public final class BossArenaPlugin extends JavaPlugin {
         }
     }
 
+    private static String shopRespawnKey(World world, BossShopConfig.ShopLocation location) {
+        return world.getName() + "@" + location.x + "," + location.y + "," + location.z;
+    }
+
     private void respawnShopNpc(World world, BossShopConfig.ShopLocation location) {
         if (world == null || location == null) return;
+
+        // Guard against repeated respawns: scheduleShopRebind runs on every player join and
+        // retries several times, so without this a fresh guard would be spawned each pass.
+        if (!respawnedShopKeys.add(shopRespawnKey(world, location))) {
+            return;
+        }
 
         String shopNpcId = resolveShopNpcId();
         int baseX = location.x;
@@ -1162,7 +1165,14 @@ public final class BossArenaPlugin extends JavaPlugin {
                         (chunk, ignored) -> {
                             for (int i = 0; i < chunk.size(); i++) {
                                 NPCEntity npc = chunk.getComponent(i, NPCEntity.getComponentType());
-                                if (npc == null || !isShopNpcTypeId(npc.getNPCTypeId(), shopNpcId)) {
+                                if (npc == null) {
+                                    continue;
+                                }
+                                // When the shop role asset failed to load, getNPCTypeId() no longer
+                                // matches, so also treat the previously recorded guard UUID as a match.
+                                // Otherwise stale guards are never removed and pile up at the shop.
+                                if (!isShopNpcTypeId(npc.getNPCTypeId(), shopNpcId)
+                                        && !isRecordedShopNpc(chunk, i, location)) {
                                     continue;
                                 }
                                 TransformComponent transform = chunk.getComponent(i, TransformComponent.getComponentType());
@@ -1406,7 +1416,6 @@ public final class BossArenaPlugin extends JavaPlugin {
                 if (bosses != null) {
                     for (BossDefinition def : bosses) {
                         BossRegistry.register(def);
-                        getLogger().atInfo().log("Registered boss: " + def.bossName);
                     }
                 }
 
@@ -1440,7 +1449,6 @@ public final class BossArenaPlugin extends JavaPlugin {
                 if (arenas != null) {
                     for (Arena arena : arenas) {
                         ArenaRegistry.register(arena);
-                        getLogger().atInfo().log("Registered arena: " + arena.arenaId);
                     }
                 }
 

@@ -41,7 +41,9 @@ public final class BossArenaAssetSetup {
      */
     public static void register(BossArenaPlugin plugin) {
         try {
-            Path assetsRoot = Files.createTempDirectory("VaryonBossArenaAssets");
+            Path assetsRoot = Path.of(System.getProperty("java.io.tmpdir"), "VaryonBossArenaAssets-pack");
+            deleteTreeQuietly(assetsRoot);
+            Files.createDirectories(assetsRoot);
             assetsRoot.toFile().deleteOnExit();
             extractAssets(plugin, assetsRoot);
             registeredAssetsRoot = assetsRoot;
@@ -123,6 +125,21 @@ public final class BossArenaAssetSetup {
         Files.deleteIfExists(modelDir.resolve("Boss_Shop.blockymodel"));
         Files.deleteIfExists(modelDir.resolve("boss_arena_shop_texture.png"));
         purgeLegacyShopArtifacts(assetsRoot);
+    }
+
+    private static void deleteTreeQuietly(Path root) {
+        if (!Files.exists(root)) {
+            return;
+        }
+        try (java.util.stream.Stream<Path> walk = Files.walk(root)) {
+            walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> {
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException ignored) {
+                }
+            });
+        } catch (IOException ignored) {
+        }
     }
 
     private static boolean isLegacyShopArtifact(String fileName) {

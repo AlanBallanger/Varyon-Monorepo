@@ -41,7 +41,6 @@ public class LootRegistry {
 
         String key = table.bossName.toLowerCase();
         LOOT_TABLES.put(key, table);
-        LOGGER.info("Registered loot table for: " + table.bossName + " with " + table.items.size() + " items");
     }
 
     /**
