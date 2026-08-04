@@ -1,0 +1,355 @@
+# ============================================================
+# ExtendedTeleporters - German (DE) Translation File
+# Language: de-DE
+# Keys format: {category}.{key} - filename provides the extendedteleporters prefix
+# ============================================================
+
+# ============================================================
+# GUI - Teleporter Settings
+# ============================================================
+gui.title = Teleporter-Einstellungen
+gui.selectTeleporter = Teleporter auswählen
+gui.noTeleporters = Du hast keine Teleporter
+gui.warpName = Warp-Name
+gui.warpNamePlaceholder = Warp-Namen eingeben
+gui.warpDestination = Warp-Ziel
+gui.destinationNone = -- Kein --
+gui.showOnlyMyWarps = Nur meine Warps anzeigen
+gui.configureBlock = Teleporter konfigurieren
+
+# Visibility Settings
+gui.visibility = Sichtbarkeit
+gui.visibility.public = Öffentlich (für alle sichtbar)
+gui.visibility.private = Privat (nur für dich sichtbar)
+
+# Access Settings
+gui.settings = Teleporter-Einstellungen
+gui.allowPublicDestinationChange = Oeffentliche Zielaenderung erlauben (jeder kann das Ziel dieses Teleporters aendern)
+gui.partyOnly = Nur Party (nur du und vertraute Spieler können ihn nutzen)
+gui.restricted = Beschränkt (nur du kannst ihn nutzen, überschreibt Nur-Party Einstellung)
+gui.lockInteraction = Einstellungen sperren (nur du und Vertraute können das GUI öffnen)
+gui.lockBreaking = Abbauen sperren (nur du und Vertraute können den Teleporter abbauen)
+gui.displayWorld = Welt anzeigen (Welt in Warp-Liste anzeigen)
+gui.displayCoordinates = Koordinaten anzeigen (Position in Warp-Liste anzeigen)
+gui.hideMapWaypoint = Auf Karte ausblenden (keine Markierung auf der Karte setzen)
+gui.selfDestruct = Selbstzerstörung (öffentlich, unzerstörbar, zerstört sich nach 5 Min selber.)
+gui.selfDestructTimer = Selbstzerstörung in: {minutes}:{seconds}
+gui.selfDestructImminent = Selbstzerstörung steht kurz bevor!
+gui.singleUse = Einmalig (Teleporter wird nach Benutzung gelöscht)
+
+# Info Labels
+gui.location = Position: {dimension} ({x}, {y}, {z})
+gui.locationNotSelected = Position: Kein Teleporter ausgewählt
+gui.ownerYou = Besitzer: Du
+gui.ownerOther = Besitzer: Ein anderer Spieler
+gui.ownerUntracked = Besitzer: Unbekannt
+
+# Buttons
+gui.saveChanges = Änderungen speichern
+gui.manageTrust = Unterbesitzer verwalten
+gui.close = Schließen
+gui.title.configureTeleporter = Teleporter konfigurieren
+
+# ============================================================
+# Messages - Permissions & Limits
+# ============================================================
+msg.noPermission.private = Du hast keine Berechtigung, Teleporter privat zu machen.
+msg.noPermission.partyOnly = Du hast keine Berechtigung, Nur-Party zu aktivieren.
+msg.noPermission.restricted = Du hast keine Berechtigung, Teleporter zu beschränken.
+msg.noPermission.lockInteraction = Du hast keine Berechtigung, Interaktionen zu sperren.
+msg.noPermission.lockBreak = Du hast keine Berechtigung, das Abbauen zu sperren.
+msg.noPermission.hideWorld = Du hast keine Berechtigung, Weltnamen auszublenden.
+msg.noPermission.hideCoords = Du hast keine Berechtigung, Koordinaten auszublenden.
+msg.noPermission.selfDestruct = Du hast keine Berechtigung, den Selbstzerstörungsmodus zu aktivieren.
+msg.noPermission.hideMapWaypoint = Du hast keine Berechtigung, Teleporter auf der Karte auszublenden.
+
+msg.limit.total = Du hast dein Teleporter-Limit erreicht ({current}/{max}).
+msg.limit.private = Du hast dein Limit für private Teleporter erreicht ({current}/{max}).
+msg.limit.public = Du hast dein Limit für öffentliche Teleporter erreicht ({current}/{max}).
+msg.limit.restricted = Du hast dein Limit für beschränkte/Party-Teleporter erreicht ({current}/{max}).
+
+# ============================================================
+# Messages - Warp Names
+# ============================================================
+msg.warpName.invalid = Ungültiger Warp-Name: {error}
+msg.warpName.reason = Grund: {reason}
+msg.warpName.updated = Warp-Name geändert zu: {name}
+msg.warpName.updateFailed = Warp-Name konnte nicht geändert werden. Ist der Chunk geladen?
+msg.warpName.duplicate = Name „{name}“ existiert bereits. Verwende stattdessen „{uniqueName}“.
+msg.warpName.set = Warp-Name gesetzt auf: {name}
+msg.warpName.whitespaceOnly = Warp-Name darf nicht nur aus Leerzeichen bestehen.
+msg.warpName.tooLong = Warp-Name ist zu lang (max. {max} Zeichen).
+msg.warpName.invalidChar = Warp-Name darf {char} nicht enthalten, da dies Speicherdateien beschädigen kann.
+msg.warpName.controlChars = Warp-Name enthält unsichtbare Steuerzeichen, die Speicherdateien beschädigen können.
+
+# ============================================================
+# Messages - Destination
+# ============================================================
+msg.destination.set = Ziel gesetzt auf: {destination}
+msg.destination.cleared = Ziel entfernt.
+
+# ============================================================
+# Messages - Privacy
+# ============================================================
+msg.privacy.nowPrivate = Teleporter ist jetzt privat.
+msg.privacy.nowPublic = Teleporter ist jetzt öffentlich.
+msg.privacy.noWarpName = Kann nicht privat gemacht werden, kein Warp-Name gesetzt.
+
+# ============================================================
+# Messages - Restriction
+# ============================================================
+msg.restriction.nowRestricted = Teleporter ist jetzt beschränkt (nur Besitzer).
+msg.restriction.nowUnrestricted = Teleporter ist nicht mehr beschränkt.
+
+# ============================================================
+# Messages - Self-Destruct
+# ============================================================
+msg.selfDestruct.noDestination = Selbstzerstörung ohne gesetztes Ziel nicht möglich.
+msg.selfDestruct.singleUseConflict = Einmal-Teleporter können keine Selbstzerstörung haben.
+msg.selfDestruct.selfDestructConflict = Selbstzerstörungs-Teleporter können nicht einmalig sein.
+msg.selfDestruct.activated = SELBSTZERSTÖRUNG AKTIVIERT! Teleporter zerstört sich in 5 Minuten.
+msg.selfDestruct.activatedInfo = Teleporter ist jetzt öffentlich und kann nicht verändert oder abgebaut werden.
+
+# ============================================================
+# Messages - Save
+# ============================================================
+msg.save.success = Einstellungen gespeichert!
+msg.save.teleporterSaved = Teleporter-Einstellungen gespeichert!
+
+# ============================================================
+# Messages - Config Disabled
+# ============================================================
+msg.config.privateDisabled = Private Teleporter sind auf diesem Server deaktiviert.
+msg.config.partyDisabled = Nur-Party-Teleporter sind auf diesem Server deaktiviert.
+msg.config.restrictedDisabled = Beschränkte Teleporter sind auf diesem Server deaktiviert.
+msg.config.interactionLockDisabled = Interaktionsgesperrte Teleporter sind auf diesem Server deaktiviert.
+msg.config.breakLockDisabled = Abbaugesperrte Teleporter sind auf diesem Server deaktiviert.
+
+# ============================================================
+# Commands - General
+# ============================================================
+cmd.playerOnly = Dieser Befehl kann nur von Spielern verwendet werden.
+cmd.notInWorld = Du musst dich in einer Welt befinden, um diesen Befehl zu nutzen.
+
+# ============================================================
+# Commands - Trust
+# ============================================================
+cmd.trust.description = Vertraue einem Spieler auf deinem Teleporter (Benutzung: trust <spieler> "{teleporter}")
+cmd.trust.teleporterNotFound = Teleporter nicht gefunden: {name}
+cmd.trust.useQuotes = Bitte Anführungszeichen um den Teleporter-Namen verwenden.
+cmd.trust.example = Beispiel: /teleporter trust SpielerName "Mein Teleporter"
+cmd.trust.notOwner = Du kannst nur auf deinen eigenen Teleportern Spieler hinzufügen.
+cmd.trust.playerNotFound = Spieler nicht gefunden oder nicht online: {name}
+cmd.trust.playerMustBeOnline = Der Spieler muss online sein, um hinzugefügt zu werden.
+cmd.trust.cannotTrustSelf = Du kannst dir nicht selbst vertrauen – du bist bereits der Besitzer!
+cmd.trust.alreadyTrusted = {name} ist bereits als vertraut eingetragen.
+cmd.trust.success = {name} wurde als vertraut für „{teleporter}“ hinzugefügt
+cmd.trust.successInfo = Die Person kann diesen Teleporter nun auch bei Party-/Beschränkungsmodus nutzen.
+
+# ============================================================
+# Commands - Untrust
+# ============================================================
+cmd.untrust.description = Vertrauen eines Spielers entfernen (Benutzung: /teleporter untrust SpielerName "Mein Teleporter")
+cmd.untrust.notOwner = Du kannst nur auf deinen eigenen Teleportern Vertrauen entfernen.
+cmd.untrust.playerNotFound = Spieler nicht gefunden: {name}
+cmd.untrust.useTrustlist = Verwende /teleporter trustlist "Mein Teleporter", um vertraute Spieler zu sehen.
+cmd.untrust.notTrusted = {name} ist kein vertrauter Spieler dieses Teleporters.
+cmd.untrust.success = {name} wurde aus der Vertrauensliste von „{teleporter}“ entfernt
+
+# ============================================================
+# Commands - Trust List
+# ============================================================
+cmd.trustlist.description = Zeigt vertraute Spieler eines Teleporters an (Benutzung: trustlist "{teleporter}")
+cmd.trustlist.notOwnerOrTrusted = Du kannst die Vertrauensliste nur für eigene Teleporter einsehen.
+cmd.trustlist.empty = Keine vertrauten Spieler auf „{teleporter}“
+cmd.trustlist.addHint = Verwende /teleporter trust SpielerName "Mein Teleporter", um jemanden hinzuzufügen.
+cmd.trustlist.header = === Vertraute Spieler auf „{teleporter}“ ===
+cmd.trustlist.total = Gesamt: {count} vertraute Spieler
+
+# ============================================================
+# Commands - List
+# ============================================================
+cmd.list.description = Listet deine Teleporter auf
+cmd.list.header = === Deine Teleporter ===
+cmd.list.header.all = Alle Teleporter
+cmd.list.header.yours = Deine Teleporter
+cmd.list.header.format = === {title} ({total} gesamt) ===
+cmd.list.pagination = Seite {current}/{total} – Verwende /teleporter list <seite> zum Navigieren
+cmd.list.entry = {name} in {dimension} ({x}, {y}, {z})
+cmd.list.entryPrivate = [Privat]
+cmd.list.entryRestricted = [Beschränkt]
+cmd.list.entryParty = [Party]
+cmd.list.empty = Du hast keine Teleporter.
+cmd.list.pageInfo = Seite {current}/{total}
+cmd.list.unnamed = (unbenannt)
+cmd.list.noDestination = (kein Ziel)
+cmd.list.locationHidden = (Position verborgen)
+cmd.list.flag.private = [Privat]
+cmd.list.flag.restricted = [Beschränkt]
+cmd.list.flag.settingsLocked = [EinstellungenGesperrt]
+cmd.list.flag.breakLocked = [AbbauGesperrt]
+cmd.list.flag.hiddenWorld = [WeltVerborgen]
+cmd.list.flag.hiddenCoords = [KoordinatenVerborgen]
+cmd.list.flag.server = [Server]
+cmd.list.flag.singleUse = [Einmalig]
+cmd.list.flag.selfDestruct.time = {minutes}:{seconds}
+cmd.list.flag.selfDestruct.expired = ABGELAUFEN
+cmd.list.flag.selfDestruct.format = [Selbstzerstörung:{time}]
+
+# ============================================================
+# Commands - Bypass
+# ============================================================
+cmd.bypass.description = Umschalten des Bypass-Modus für Teleporter-Beschränkungen
+cmd.bypass.enabled = Bypass-Modus aktiviert. Du kannst jetzt auf alle Teleporter zugreifen.
+cmd.bypass.disabled = Bypass-Modus deaktiviert.
+
+# ============================================================
+# Commands - Go
+# ============================================================
+cmd.go.description = Zu einem Warp teleportieren
+cmd.go.warpNotFound = Warp nicht gefunden: {name}
+cmd.go.teleporting = Teleportiere zu {name}...
+cmd.go.cannotUse = Du kannst diesen Teleporter nicht benutzen.
+cmd.go.bypassRequired = Du musst zuerst den Bypass-Modus aktivieren: /teleporter bypass
+cmd.go.notFound = Teleporter nicht gefunden: {name}
+cmd.go.useListHint = Verwende /teleporter list, um verfügbare Teleporter zu sehen.
+cmd.go.worldNotLoaded = Welt nicht geladen: {world}
+cmd.go.success = Teleportiert zu: {name}
+cmd.go.successCrossWorld = Teleportiert zu: {name} in {world}
+cmd.go.failed = Teleport fehlgeschlagen, Spielerreferenz ungültig.
+
+# ============================================================
+# Commands - Destination
+# ============================================================
+cmd.destination.description = Benutzerdefinierte Ziele verwalten
+cmd.destination.header = === Befehle für benutzerdefinierte Ziele ===
+cmd.destination.help.create = /teleporter destination <name> <x> <y> <z> – Benutzerdefiniertes Ziel erstellen
+cmd.destination.help.list = /teleporter destination list – Alle benutzerdefinierten Ziele auflisten
+cmd.destination.help.remove = /teleporter destination remove <name> – Benutzerdefiniertes Ziel entfernen
+cmd.destination.help.set = /teleporter destination set <teleporter> <ziel> – Teleporter mit Ziel verknüpfen
+cmd.destination.create.nameEmpty = Zielname darf nicht leer sein.
+cmd.destination.create.alreadyExists = Ein benutzerdefiniertes Ziel mit diesem Namen existiert bereits: {name}
+cmd.destination.create.removeHint = Verwende /teleporter destination remove <name>, um es zuerst zu entfernen.
+cmd.destination.create.warpExists = Ein Warp mit diesem Namen existiert bereits: {name}
+cmd.destination.create.success = Benutzerdefiniertes Ziel erstellt: {name}
+cmd.destination.create.location = Position: {dimension} ({x}, {y}, {z})
+cmd.destination.create.linkHint = Verwende /teleporter destination set <teleporter> {name}, um einen Teleporter zu verknüpfen.
+cmd.destination.create.failed = Benutzerdefiniertes Ziel konnte nicht erstellt werden.
+cmd.destination.set.description = Benutzerdefiniertes Ziel setzen
+cmd.destination.set.success = Ziel des Teleporters „{teleporter}“ auf „{destination}“ gesetzt
+cmd.destination.set.location = Position: {dimension} ({x}, {y}, {z})
+cmd.destination.set.failed = Ziel des Teleporters konnte nicht gesetzt werden.
+cmd.destination.set.teleporterNotFound = Teleporter nicht gefunden: {name}
+cmd.destination.set.teleporterListHint = Verwende /teleporter list, um verfügbare Teleporter zu sehen.
+cmd.destination.set.destinationNotFound = Benutzerdefiniertes Ziel nicht gefunden: {name}
+cmd.destination.set.destinationListHint = Verwende /teleporter destination list, um verfügbare Ziele zu sehen.
+cmd.destination.remove.description = Benutzerdefiniertes Ziel entfernen
+cmd.destination.remove.success = Benutzerdefiniertes Ziel entfernt: {name}
+cmd.destination.remove.warning = Teleporter, die mit diesem Ziel verknüpft sind, funktionieren nicht mehr.
+cmd.destination.remove.notFound = Benutzerdefiniertes Ziel nicht gefunden: {name}
+cmd.destination.remove.listHint = Verwende /teleporter destination list, um verfügbare Ziele zu sehen.
+cmd.destination.remove.failed = Benutzerdefiniertes Ziel konnte nicht entfernt werden.
+cmd.destination.list.description = Alle benutzerdefinierten Ziele auflisten
+cmd.destination.list.header = === Benutzerdefinierte Ziele ({count}) ===
+cmd.destination.list.entry = {name}: {dimension} ({x}, {y}, {z})
+cmd.destination.list.empty = Keine benutzerdefinierten Ziele gefunden.
+cmd.destination.list.createHint = Verwende /teleporter destination <name> <x> <y> <z>, um eines zu erstellen.
+
+# ============================================================
+# Commands - Server
+# ============================================================
+cmd.server.description = Server-Teleporter verwalten
+cmd.server.set.description = Teleporter als servereigen markieren
+cmd.server.set.notFound = Kein Teleporter an deiner Position gefunden.
+cmd.server.set.success = Teleporter als servereigen markiert.
+cmd.server.unset.description = Server-Teleporter-Status entfernen
+cmd.server.unset.success = Teleporter ist kein Server-Teleporter mehr.
+cmd.server.notFound = Teleporter nicht gefunden: {name}
+cmd.server.listHint = Verwende /teleporter list, um verfügbare Teleporter zu sehen.
+cmd.server.enabled = Teleporter „{name}“ ist jetzt ein SERVER-Teleporter.
+cmd.server.enabled.info1 = Einstellungen sind gesperrt, das Ziel kann jedoch geändert werden.
+cmd.server.enabled.info2 = Benutzer im Bypass-Modus können normal interagieren.
+cmd.server.disabled = Teleporter „{name}“ ist kein Server-Teleporter mehr.
+cmd.server.disabled.info = Normaler Zugriff auf Einstellungen wiederhergestellt.
+
+# ============================================================
+# Commands - Reload
+# ============================================================
+cmd.reload.description = Teleporter-Daten von der Festplatte neu laden
+cmd.reload.success = Teleporter-Daten erfolgreich neu geladen.
+cmd.reload.error = Fehler beim Neuladen der Teleporter-Daten: {error}
+
+# ============================================================
+# Interaction Messages
+# ============================================================
+msg.interaction.cannotInteract = Du kannst mit diesem Teleporter nicht interagieren.
+msg.interaction.cannotBreak = Du kannst diesen Teleporter nicht abbauen.
+msg.interaction.cannotUse = Du kannst diesen Teleporter nicht benutzen.
+msg.interaction.selfDestructActive = Dieser Teleporter befindet sich im Selbstzerstörungsmodus.
+
+# ============================================================
+# Placement Messages
+# ============================================================
+msg.placement.limitReached = Du hast dein Teleporter-Limit erreicht ({current}/{max}).
+msg.placement.success = Teleporter erfolgreich platziert.
+
+# ============================================================
+# Error Messages
+# ============================================================
+error.teleporterNotFound = Teleporter nicht gefunden.
+error.notOwner = Du bist nicht der Besitzer dieses Teleporters.
+error.generic = Ein Fehler ist aufgetreten. Bitte versuche es erneut.
+msg.error.teleporterNotFound = Fehler: Teleporter nicht gefunden
+msg.error.worldBlocked = Dieser Teleporter kann in dieser Welt nicht benutzt werden.
+
+# ============================================================
+# GUI - Subowner Management
+# ============================================================
+gui.manageSubowners = Miteigentuemer verwalten
+
+# Subowner Management GUI
+subowner.title = Miteigentuemer verwalten
+subowner.location = {dimension} ({x}, {y}, {z})
+subowner.addPlayer = Miteigentuemer hinzufuegen
+subowner.currentSubowners = Aktuelle Miteigentuemer
+subowner.noSubowners = Noch keine Miteigentuemer. Waehle oben einen Spieler aus.
+subowner.noOnlinePlayers = Keine Online-Spieler verfuegbar.
+subowner.save = Speichern
+subowner.cancel = Abbrechen
+
+# Subowner Permissions
+subowner.perm.rename = Umbenennen
+subowner.perm.destination = Ziel setzen
+subowner.perm.settings = Einstellungen
+subowner.perm.break = Abbauen
+
+# Subowner Messages
+subowner.saved = Miteigentuemer-Einstellungen gespeichert!
+subowner.add.success = {name} als Miteigentuemer hinzugefuegt.
+subowner.add.cannotAddOwner = Du kannst dich nicht selbst hinzufuegen - du bist bereits der Besitzer!
+subowner.add.alreadySubowner = Dieser Spieler ist bereits Miteigentuemer.
+subowner.add.invalidPlayer = Ungueltiger Spieler ausgewaehlt.
+
+# Teleporter Selection GUI
+select.title = Teleporter auswaehlen
+select.chooseTeleporter = Waehle einen Teleporter
+select.noTeleporters = Du hast keine Teleporter.
+select.manage = Miteigentuemer verwalten
+select.cancel = Abbrechen
+
+# Legacy Trust GUI Command
+cmd.trustgui.description = Miteigentuemer-Verwaltung oeffnen
+cmd.trustgui.noTeleporters = Du hast keine Teleporter. Platziere zuerst einen!
+
+# Subowner Messages (additional)
+subowner.teleporterNotFound = Teleporter nicht gefunden.
+subowner.noPermission = Du hast keine Berechtigung, Miteigentuemer fuer diesen Teleporter zu verwalten.
+
+# ============================================================
+# Common
+# ============================================================
+common.player.unknown = Unbekannt
+common.player.uuidShort = {uuid}...
+common.player.offline = Offline ({uuid}...)
+common.trustedCountFormat = ({count} trusted)
+common.restricted = EINGESCHRÄNKT

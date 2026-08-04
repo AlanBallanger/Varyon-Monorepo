@@ -1,0 +1,365 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 600, Height: 580);
+
+    #Title {
+      Group {
+        $C.@Title {
+          @Text = %extendedteleporters.subowner.title;
+        }
+      }
+    }
+
+    #Content {
+      LayoutMode: Top;
+      Padding: (Full: 16);
+
+      // === TELEPORTER INFO HEADER ===
+      Group #TeleporterInfo {
+        LayoutMode: Top;
+        Anchor: (Bottom: 14);
+
+        Label #TeleporterName {
+          Text: "";
+          Style: (RenderUppercase: true, RenderBold: true, FontSize: 16, TextColor: #d4c896);
+          Anchor: (Bottom: 4);
+        }
+
+        Label #TeleporterLocation {
+          Text: "";
+          Style: (FontSize: 12, TextColor: #7a8a9a);
+        }
+      }
+
+      $C.@ContentSeparator { Anchor: (Bottom: 14); }
+
+      // === ADD SUBOWNER SECTION ===
+      Group #AddSection {
+        LayoutMode: Top;
+        Anchor: (Bottom: 14);
+
+        Label #AddLabel {
+          Text: %extendedteleporters.subowner.addPlayer;
+          Style: (RenderUppercase: true, RenderBold: true, FontSize: 13, TextColor: #96a9be);
+          Anchor: (Bottom: 8);
+        }
+
+        Group #AddRow {
+          LayoutMode: Left;
+          Anchor: (Height: 40);
+
+          $C.@DropdownBox #OnlinePlayersDropdown {
+            FlexWeight: 1;
+            Anchor: (Height: 38, Right: 10);
+            Style: (...@DefaultDropdownBoxStyle, PanelAlign: Bottom, PanelOffset: 5);
+          }
+
+          $C.@TextButton #AddButton {
+            Text: "+";
+            Anchor: (Width: 50, Height: 38);
+            Padding: (Horizontal: 0);
+          }
+        }
+
+        Label #NoPlayersLabel {
+          Text: %extendedteleporters.subowner.noOnlinePlayers;
+          Style: (FontSize: 12, TextColor: #666666);
+          Visible: false;
+          Anchor: (Top: 6);
+        }
+      }
+
+      $C.@ContentSeparator { Anchor: (Bottom: 14); }
+
+      // === SUBOWNERS LIST SECTION ===
+      Group #SubownersSection {
+        LayoutMode: Top;
+        Anchor: (Height: 250, Bottom: 8);
+
+        Label #SubownersLabel {
+          Text: %extendedteleporters.subowner.currentSubowners;
+          Style: (RenderUppercase: true, RenderBold: true, FontSize: 13, TextColor: #96a9be);
+          Anchor: (Bottom: 10);
+        }
+
+        Group #SubownersList {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Padding: (Right: 8);
+          HitTestVisible: true;
+
+          // Entry 0
+          Group #Entry0 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header0 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name0 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove0 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms0 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm0Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm0Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm0Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm0Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 1
+          Group #Entry1 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header1 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name1 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove1 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms1 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm1Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm1Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm1Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm1Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 2
+          Group #Entry2 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header2 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name2 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove2 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms2 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm2Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm2Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm2Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm2Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 3
+          Group #Entry3 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header3 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name3 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove3 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms3 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm3Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm3Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm3Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm3Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 4
+          Group #Entry4 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header4 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name4 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove4 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms4 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm4Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm4Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm4Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm4Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 5
+          Group #Entry5 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header5 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name5 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove5 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms5 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm5Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm5Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm5Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm5Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 6
+          Group #Entry6 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header6 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name6 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove6 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms6 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm6Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm6Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm6Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm6Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 7
+          Group #Entry7 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header7 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name7 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove7 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms7 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm7Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm7Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm7Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm7Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 8
+          Group #Entry8 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header8 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name8 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove8 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms8 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm8Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm8Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm8Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm8Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+
+          // Entry 9
+          Group #Entry9 {
+            LayoutMode: Top;
+            Anchor: (Bottom: 10);
+            Background: (Color: #1a2535);
+            Padding: (Full: 12);
+            Visible: false;
+
+            Group #Header9 {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Label #Name9 { FlexWeight: 1; Style: (FontSize: 15, RenderBold: true, TextColor: #c9d4e0, VerticalAlignment: Center); }
+              $C.@CancelTextButton #Remove9 { Text: "X"; Anchor: (Width: 30, Height: 28); Padding: (Horizontal: 0); }
+            }
+            Group #Perms9 {
+              LayoutMode: Left;
+              Anchor: (Height: 28);
+              $C.@CheckBoxWithLabel #Perm9Rename { @Text = %extendedteleporters.subowner.perm.rename; }
+              $C.@CheckBoxWithLabel #Perm9Dest { @Text = %extendedteleporters.subowner.perm.destination; }
+              $C.@CheckBoxWithLabel #Perm9Set { @Text = %extendedteleporters.subowner.perm.settings; }
+              $C.@CheckBoxWithLabel #Perm9Brk { @Text = %extendedteleporters.subowner.perm.break; }
+            }
+          }
+        }
+
+        Label #EmptyListLabel {
+          Text: %extendedteleporters.subowner.noSubowners;
+          Style: (FontSize: 14, TextColor: #555555, HorizontalAlignment: Center);
+          Visible: false;
+        }
+      }
+
+      Label { FlexWeight: 1; }
+
+      // === ACTION BUTTONS ===
+      Group #ButtonSection {
+        LayoutMode: Right;
+        Anchor: (Height: 44);
+
+        $C.@TextButton #SaveButton {
+          Text: %extendedteleporters.subowner.save;
+          Padding: (Left: 16, Right: 16);
+          Anchor: (Right: 8);
+        }
+
+        $C.@CancelTextButton #CancelButton {
+          Text: %extendedteleporters.subowner.cancel;
+          Padding: (Left: 16, Right: 16);
+        }
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

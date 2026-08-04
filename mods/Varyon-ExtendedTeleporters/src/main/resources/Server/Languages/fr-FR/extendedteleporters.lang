@@ -1,0 +1,355 @@
+# ============================================================
+# ExtendedTeleporters - French (France) Translation File
+# Language: fr-FR
+# Keys format: {category}.{key} - filename provides the extendedteleporters prefix
+# ============================================================
+
+# ============================================================
+# GUI - Teleporter Settings
+# ============================================================
+gui.title = Paramètres du Téléporteur
+gui.selectTeleporter = Sélectionner un Téléporteur
+gui.noTeleporters = Vous n'avez aucun téléporteur
+gui.warpName = Nom du Warp
+gui.warpNamePlaceholder = Entrez un nom de warp
+gui.warpDestination = Destination du Warp
+gui.destinationNone = -- Aucune --
+gui.showOnlyMyWarps = Afficher uniquement mes warps
+gui.configureBlock = Configurer le Téléporteur
+
+# Visibility Settings
+gui.visibility = Visibilité
+gui.visibility.public = Public (visible par tout le monde)
+gui.visibility.private = Privé (visible uniquement par vous)
+
+# Access Settings
+gui.settings = Paramètres du Téléporteur
+gui.allowPublicDestinationChange = Autoriser le Changement Public de Destination (n'importe qui peut définir la destination de ce téléporteur)
+gui.partyOnly = Mode Groupe (seuls vous et les joueurs de confiance peuvent l'utiliser)
+gui.restricted = Restreint (seul vous pouvez l'utiliser - prévaut sur le mode groupe)
+gui.lockInteraction = Verrouiller les Paramètres (seuls vous et les joueurs de confiance peuvent ouvrir l'interface)
+gui.lockBreaking = Verrouiller la Destruction (seuls vous et les joueurs de confiance peuvent le détruire)
+gui.displayWorld = Afficher le Monde (afficher la dimension dans les listes de warp)
+gui.displayCoordinates = Afficher les Coordonnées (afficher la position dans les listes de warp)
+gui.hideMapWaypoint = Masquer de la Carte (ne pas afficher le marqueur sur la carte)
+gui.selfDestruct = Auto-Destruction (public, indestructible, se détruit dans 5 min)
+gui.selfDestructTimer = Auto-destruction dans : {minutes}:{seconds}
+gui.selfDestructImminent = Auto-destruction imminente !
+gui.singleUse = Usage Unique (la destination s'efface après qu'un joueur se téléporte)
+
+# Info Labels
+gui.location = Emplacement : {dimension} ({x}, {y}, {z})
+gui.locationNotSelected = Emplacement : Aucun téléporteur sélectionné
+gui.ownerYou = Propriétaire : Vous
+gui.ownerOther = Propriétaire : Un autre joueur
+gui.ownerUntracked = Propriétaire : Non suivi
+
+# Buttons
+gui.saveChanges = Enregistrer les Modifications
+gui.manageTrust = Gérer les Sous-propriétaires
+gui.close = Fermer
+gui.title.configureTeleporter = Configurer le Téléporteur
+
+# ============================================================
+# Messages - Permissions & Limits
+# ============================================================
+msg.noPermission.private = Vous n'avez pas la permission de rendre les téléporteurs privés.
+msg.noPermission.partyOnly = Vous n'avez pas la permission d'activer le mode groupe.
+msg.noPermission.restricted = Vous n'avez pas la permission de rendre les téléporteurs restreints.
+msg.noPermission.lockInteraction = Vous n'avez pas la permission de verrouiller les interactions du téléporteur.
+msg.noPermission.lockBreak = Vous n'avez pas la permission de verrouiller la destruction du téléporteur.
+msg.noPermission.hideWorld = Vous n'avez pas la permission de masquer les noms de monde.
+msg.noPermission.hideCoords = Vous n'avez pas la permission de masquer les coordonnées.
+msg.noPermission.selfDestruct = Vous n'avez pas la permission d'activer le mode auto-destruction.
+msg.noPermission.hideMapWaypoint = Vous n'avez pas la permission de masquer les téléporteurs de la carte.
+
+msg.limit.total = Vous avez atteint votre limite de téléporteurs ({current}/{max}).
+msg.limit.private = Vous avez atteint votre limite de téléporteurs privés ({current}/{max}).
+msg.limit.public = Vous avez atteint votre limite de téléporteurs publics ({current}/{max}).
+msg.limit.restricted = Vous avez atteint votre limite de téléporteurs restreints/groupe ({current}/{max}).
+
+# ============================================================
+# Messages - Warp Names
+# ============================================================
+msg.warpName.invalid = Nom de warp invalide : {error}
+msg.warpName.reason = Raison : {reason}
+msg.warpName.updated = Nom du warp mis à jour en : {name}
+msg.warpName.updateFailed = Impossible de mettre à jour le nom du warp. Le chunk est-il chargé ?
+msg.warpName.duplicate = Le nom '{name}' existe déjà. Utilisation de '{uniqueName}' à la place.
+msg.warpName.set = Nom du warp défini sur : {name}
+msg.warpName.whitespaceOnly = Le nom du warp ne peut pas contenir uniquement des espaces.
+msg.warpName.tooLong = Le nom du warp est trop long (max {max} caractères).
+msg.warpName.invalidChar = Le nom du warp ne peut pas contenir {char} car cela peut corrompre les fichiers de sauvegarde.
+msg.warpName.controlChars = Le nom du warp contient des caractères de contrôle invisibles qui peuvent corrompre les fichiers de sauvegarde.
+
+# ============================================================
+# Messages - Destination
+# ============================================================
+msg.destination.set = Destination définie sur : {destination}
+msg.destination.cleared = Destination effacée.
+
+# ============================================================
+# Messages - Privacy
+# ============================================================
+msg.privacy.nowPrivate = Le téléporteur est maintenant privé.
+msg.privacy.nowPublic = Le téléporteur est maintenant public.
+msg.privacy.noWarpName = Impossible de rendre privé - aucun nom de warp défini.
+
+# ============================================================
+# Messages - Restriction
+# ============================================================
+msg.restriction.nowRestricted = Le téléporteur est maintenant restreint (propriétaire uniquement).
+msg.restriction.nowUnrestricted = Le téléporteur n'est plus restreint.
+
+# ============================================================
+# Messages - Self-Destruct
+# ============================================================
+msg.selfDestruct.noDestination = Impossible d'activer l'auto-destruction sans destination définie.
+msg.selfDestruct.singleUseConflict = Les téléporteurs à usage unique ne peuvent pas avoir l'auto-destruction activée.
+msg.selfDestruct.selfDestructConflict = Les téléporteurs en auto-destruction ne peuvent pas être définis en usage unique.
+msg.selfDestruct.activated = AUTO-DESTRUCTION ACTIVÉE ! Le téléporteur s'auto-détruira dans 5 minutes.
+msg.selfDestruct.activatedInfo = Le téléporteur est maintenant public et personne ne peut le détruire ou le modifier.
+
+# ============================================================
+# Messages - Save
+# ============================================================
+msg.save.success = Paramètres enregistrés !
+msg.save.teleporterSaved = Paramètres du téléporteur enregistrés !
+
+# ============================================================
+# Messages - Config Disabled
+# ============================================================
+msg.config.privateDisabled = Les téléporteurs privés sont désactivés sur ce serveur.
+msg.config.partyDisabled = Les téléporteurs en mode groupe sont désactivés sur ce serveur.
+msg.config.restrictedDisabled = Les téléporteurs restreints sont désactivés sur ce serveur.
+msg.config.interactionLockDisabled = Les téléporteurs à interaction verrouillée sont désactivés sur ce serveur.
+msg.config.breakLockDisabled = Les téléporteurs à destruction verrouillée sont désactivés sur ce serveur.
+
+# ============================================================
+# Commands - General
+# ============================================================
+cmd.playerOnly = Cette commande ne peut être utilisée que par des joueurs.
+cmd.notInWorld = Vous devez être dans un monde pour utiliser cette commande.
+
+# ============================================================
+# Commands - Trust
+# ============================================================
+cmd.trust.description = Faire confiance à un joueur sur votre téléporteur (usage : trust <joueur> "{teleporter}")
+cmd.trust.teleporterNotFound = Téléporteur introuvable : {name}
+cmd.trust.useQuotes = Assurez-vous d'utiliser des guillemets autour du nom du téléporteur.
+cmd.trust.example = Exemple : /teleporter trust NomJoueur "Mon Téléporteur"
+cmd.trust.notOwner = Vous ne pouvez faire confiance à des joueurs que sur vos propres téléporteurs.
+cmd.trust.playerNotFound = Joueur introuvable ou hors ligne : {name}
+cmd.trust.playerMustBeOnline = Le joueur doit être en ligne pour recevoir votre confiance.
+cmd.trust.cannotTrustSelf = Vous ne pouvez pas vous faire confiance à vous-même - vous êtes déjà le propriétaire !
+cmd.trust.alreadyTrusted = {name} est déjà de confiance sur ce téléporteur.
+cmd.trust.success = {name} ajouté comme personne de confiance sur "{teleporter}"
+cmd.trust.successInfo = Cette personne peut désormais utiliser ce téléporteur même avec les paramètres groupe/restreint et le modifier.
+
+# ============================================================
+# Commands - Untrust
+# ============================================================
+cmd.untrust.description = Retirer la confiance d'un joueur sur votre téléporteur (usage : untrust <joueur> "{teleporter}")
+cmd.untrust.notOwner = Vous ne pouvez retirer la confiance que sur vos propres téléporteurs.
+cmd.untrust.playerNotFound = Joueur introuvable : {name}
+cmd.untrust.useTrustlist = Utilisez /teleporter trustlist "{teleporter}" pour voir les joueurs de confiance.
+cmd.untrust.notTrusted = {name} n'est pas de confiance sur ce téléporteur.
+cmd.untrust.success = {name} retiré de la liste de confiance sur "{teleporter}"
+
+# ============================================================
+# Commands - Trust List
+# ============================================================
+cmd.trustlist.description = Lister les joueurs de confiance sur votre téléporteur (usage : trustlist "{teleporter}")
+cmd.trustlist.notOwnerOrTrusted = Vous ne pouvez voir la liste de confiance que de vos propres téléporteurs.
+cmd.trustlist.empty = Aucun joueur de confiance sur "{teleporter}"
+cmd.trustlist.addHint = Utilisez /teleporter trust <joueur> "{teleporter}" pour en ajouter un.
+cmd.trustlist.header = === Joueurs de Confiance sur "{teleporter}" ===
+cmd.trustlist.total = Total : {count} joueur(s) de confiance
+
+# ============================================================
+# Commands - List
+# ============================================================
+cmd.list.description = Lister vos téléporteurs
+cmd.list.header = === Vos Téléporteurs ===
+cmd.list.header.all = Tous les Téléporteurs
+cmd.list.header.yours = Vos Téléporteurs
+cmd.list.header.format = === {title} ({total} au total) ===
+cmd.list.pagination = Page {current}/{total} - Utilisez /teleporter list <page> pour naviguer
+cmd.list.entry = {name} à {dimension} ({x}, {y}, {z})
+cmd.list.entryPrivate = [Privé]
+cmd.list.entryRestricted = [Restreint]
+cmd.list.entryParty = [Groupe]
+cmd.list.empty = Vous n'avez aucun téléporteur.
+cmd.list.pageInfo = Page {current}/{total}
+cmd.list.unnamed = (sans nom)
+cmd.list.noDestination = (aucune destination)
+cmd.list.locationHidden = (emplacement masqué)
+cmd.list.flag.private = [Privé]
+cmd.list.flag.restricted = [Restreint]
+cmd.list.flag.settingsLocked = [ParamètresVerrouillés]
+cmd.list.flag.breakLocked = [DestructionVerrouillée]
+cmd.list.flag.hiddenWorld = [MondeMasqué]
+cmd.list.flag.hiddenCoords = [CoordsMasquées]
+cmd.list.flag.server = [Serveur]
+cmd.list.flag.singleUse = [UsageUnique]
+cmd.list.flag.selfDestruct.time = {minutes}:{seconds}
+cmd.list.flag.selfDestruct.expired = EXPIRÉ
+cmd.list.flag.selfDestruct.format = [AutoDestruction:{time}]
+
+# ============================================================
+# Commands - Bypass
+# ============================================================
+cmd.bypass.description = Basculer le mode contournement pour les restrictions du téléporteur
+cmd.bypass.enabled = Mode contournement activé. Vous pouvez maintenant accéder à tous les téléporteurs.
+cmd.bypass.disabled = Mode contournement désactivé.
+
+# ============================================================
+# Commands - Go
+# ============================================================
+cmd.go.description = Se téléporter vers un warp
+cmd.go.warpNotFound = Warp introuvable : {name}
+cmd.go.teleporting = Téléportation vers {name}...
+cmd.go.cannotUse = Vous ne pouvez pas utiliser ce téléporteur.
+cmd.go.bypassRequired = Vous devez d'abord activer le mode contournement : /teleporter bypass
+cmd.go.notFound = Téléporteur introuvable : {name}
+cmd.go.useListHint = Utilisez /teleporter list pour voir les téléporteurs disponibles.
+cmd.go.worldNotLoaded = Monde non chargé : {world}
+cmd.go.success = Téléporté vers : {name}
+cmd.go.successCrossWorld = Téléporté vers : {name} dans {world}
+cmd.go.failed = Échec de la téléportation - référence du joueur invalide.
+
+# ============================================================
+# Commands - Destination
+# ============================================================
+cmd.destination.description = Gérer les destinations personnalisées
+cmd.destination.header = === Commandes de Destination Personnalisée ===
+cmd.destination.help.create = /teleporter destination <nom> <x> <y> <z> - Créer une destination personnalisée
+cmd.destination.help.list = /teleporter destination list - Lister toutes les destinations personnalisées
+cmd.destination.help.remove = /teleporter destination remove <nom> - Supprimer une destination personnalisée
+cmd.destination.help.set = /teleporter destination set <téléporteur> <destination> - Lier un téléporteur à une destination
+cmd.destination.create.nameEmpty = Le nom de la destination ne peut pas être vide.
+cmd.destination.create.alreadyExists = Une destination personnalisée avec ce nom existe déjà : {name}
+cmd.destination.create.removeHint = Utilisez /teleporter destination remove <nom> pour la supprimer d'abord.
+cmd.destination.create.warpExists = Un warp avec ce nom existe déjà : {name}
+cmd.destination.create.success = Destination personnalisée créée : {name}
+cmd.destination.create.location = Emplacement : {dimension} ({x}, {y}, {z})
+cmd.destination.create.linkHint = Utilisez /teleporter destination set <téléporteur> {name} pour lier un téléporteur.
+cmd.destination.create.failed = Échec de la création de la destination personnalisée.
+cmd.destination.set.description = Définir une destination personnalisée
+cmd.destination.set.success = Destination du téléporteur '{teleporter}' définie sur '{destination}'
+cmd.destination.set.location = Emplacement : {dimension} ({x}, {y}, {z})
+cmd.destination.set.failed = Échec de la définition de la destination du téléporteur.
+cmd.destination.set.teleporterNotFound = Téléporteur introuvable : {name}
+cmd.destination.set.teleporterListHint = Utilisez /teleporter list pour voir les téléporteurs disponibles.
+cmd.destination.set.destinationNotFound = Destination personnalisée introuvable : {name}
+cmd.destination.set.destinationListHint = Utilisez /teleporter destination list pour voir les destinations disponibles.
+cmd.destination.remove.description = Supprimer une destination personnalisée
+cmd.destination.remove.success = Destination personnalisée supprimée : {name}
+cmd.destination.remove.warning = Les téléporteurs liés à cette destination ne fonctionneront plus.
+cmd.destination.remove.notFound = Destination personnalisée introuvable : {name}
+cmd.destination.remove.listHint = Utilisez /teleporter destination list pour voir les destinations disponibles.
+cmd.destination.remove.failed = Échec de la suppression de la destination personnalisée.
+cmd.destination.list.description = Lister toutes les destinations personnalisées
+cmd.destination.list.header = === Destinations Personnalisées ({count}) ===
+cmd.destination.list.entry = {name} : {dimension} ({x}, {y}, {z})
+cmd.destination.list.empty = Aucune destination personnalisée trouvée.
+cmd.destination.list.createHint = Utilisez /teleporter destination <nom> <x> <y> <z> pour en créer une.
+
+# ============================================================
+# Commands - Server
+# ============================================================
+cmd.server.description = Gérer les téléporteurs du serveur
+cmd.server.set.description = Marquer un téléporteur comme appartenant au serveur
+cmd.server.set.notFound = Aucun téléporteur trouvé à votre emplacement.
+cmd.server.set.success = Téléporteur marqué comme appartenant au serveur.
+cmd.server.unset.description = Retirer le statut de téléporteur du serveur
+cmd.server.unset.success = Le téléporteur n'appartient plus au serveur.
+cmd.server.notFound = Téléporteur introuvable : {name}
+cmd.server.listHint = Utilisez /teleporter list pour voir les téléporteurs disponibles.
+cmd.server.enabled = Le téléporteur '{name}' est maintenant un téléporteur SERVEUR.
+cmd.server.enabled.info1 = Les paramètres sont verrouillés, mais la destination peut toujours être modifiée.
+cmd.server.enabled.info2 = Les utilisateurs en mode contournement peuvent interagir normalement.
+cmd.server.disabled = Le téléporteur '{name}' n'est plus un téléporteur serveur.
+cmd.server.disabled.info = Accès normal aux paramètres restauré.
+
+# ============================================================
+# Commands - Reload
+# ============================================================
+cmd.reload.description = Recharger les données des téléporteurs depuis le disque
+cmd.reload.success = Données des téléporteurs rechargées avec succès.
+cmd.reload.error = Erreur lors du rechargement des données des téléporteurs : {error}
+
+# ============================================================
+# Interaction Messages
+# ============================================================
+msg.interaction.cannotInteract = Vous ne pouvez pas interagir avec ce téléporteur.
+msg.interaction.cannotBreak = Vous ne pouvez pas détruire ce téléporteur.
+msg.interaction.cannotUse = Vous ne pouvez pas utiliser ce téléporteur.
+msg.interaction.selfDestructActive = Ce téléporteur est en mode auto-destruction.
+
+# ============================================================
+# Placement Messages
+# ============================================================
+msg.placement.limitReached = Vous avez atteint votre limite de téléporteurs ({current}/{max}).
+msg.placement.success = Téléporteur placé avec succès.
+
+# ============================================================
+# Error Messages
+# ============================================================
+error.teleporterNotFound = Téléporteur introuvable.
+error.notOwner = Vous n'êtes pas le propriétaire de ce téléporteur.
+error.generic = Une erreur est survenue. Veuillez réessayer.
+msg.error.teleporterNotFound = Erreur : Téléporteur introuvable
+msg.error.worldBlocked = Ce téléporteur ne peut pas être utilisé dans ce monde.
+
+# ============================================================
+# GUI - Subowner Management
+# ============================================================
+gui.manageSubowners = Gérer les Sous-propriétaires
+
+# Subowner Management GUI
+subowner.title = Gérer les Sous-propriétaires
+subowner.location = {dimension} ({x}, {y}, {z})
+subowner.addPlayer = Ajouter un Sous-propriétaire
+subowner.currentSubowners = Sous-propriétaires Actuels
+subowner.noSubowners = Aucun sous-propriétaire pour le moment. Sélectionnez un joueur ci-dessus.
+subowner.noOnlinePlayers = Aucun joueur en ligne disponible.
+subowner.save = Enregistrer
+subowner.cancel = Annuler
+
+# Subowner Permissions
+subowner.perm.rename = Renommer
+subowner.perm.destination = Destination
+subowner.perm.settings = Paramètres
+subowner.perm.break = Détruire
+
+# Subowner Messages
+subowner.saved = Paramètres des sous-propriétaires enregistrés !
+subowner.add.success = {name} ajouté comme sous-propriétaire.
+subowner.add.cannotAddOwner = Vous ne pouvez pas vous ajouter vous-même - vous êtes déjà le propriétaire !
+subowner.add.alreadySubowner = Ce joueur est déjà sous-propriétaire.
+subowner.add.invalidPlayer = Joueur sélectionné invalide.
+
+# Teleporter Selection GUI
+select.title = Sélectionner un Téléporteur
+select.chooseTeleporter = Choisissez un Téléporteur
+select.noTeleporters = Vous n'avez aucun téléporteur.
+select.manage = Gérer les Sous-propriétaires
+select.cancel = Annuler
+
+# Legacy Trust GUI Command
+cmd.trustgui.description = Ouvrir l'interface de Gestion des Sous-propriétaires
+cmd.trustgui.noTeleporters = Vous n'avez aucun téléporteur. Placez-en un d'abord !
+
+# Subowner Messages (additional)
+subowner.teleporterNotFound = Téléporteur introuvable.
+subowner.noPermission = Vous n'avez pas la permission de gérer les sous-propriétaires de ce téléporteur.
+
+# ============================================================
+# Common
+# ============================================================
+common.player.unknown = Inconnu
+common.player.uuidShort = {uuid}...
+common.player.offline = Hors ligne ({uuid}...)
+common.trustedCountFormat = ({count} de confiance)
+common.restricted = RESTREINT
