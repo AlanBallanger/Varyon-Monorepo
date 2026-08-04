@@ -75,7 +75,9 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
         }
         repository.load();
         try {
-            packRoot = Files.createTempDirectory("VaryonMusicZones");
+            packRoot = Path.of(System.getProperty("java.io.tmpdir"), "VaryonMusicZones-pack");
+            deleteTreeQuietly(packRoot);
+            Files.createDirectories(packRoot);
             packRoot.toFile().deleteOnExit();
             LOGGER.atInfo().log("[MusicZones] pack dir=" + packRoot);
         } catch (Exception e) {
@@ -91,6 +93,21 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
     @Override
     protected void shutdown() {
         instance = null;
+    }
+
+    private void deleteTreeQuietly(Path root) {
+        if (!Files.exists(root, LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        try (Stream<Path> walk = Files.walk(root)) {
+            walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> {
+                try {
+                    Files.deleteIfExists(p);
+                } catch (Exception ignored) {
+                }
+            });
+        } catch (Exception ignored) {
+        }
     }
 
     public void rebuildAssetPack() throws Exception {

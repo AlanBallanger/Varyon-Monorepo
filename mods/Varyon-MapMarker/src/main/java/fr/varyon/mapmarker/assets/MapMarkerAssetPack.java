@@ -5,9 +5,11 @@ import com.hypixel.hytale.common.plugin.AuthorInfo;
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.common.semver.Semver;
 import com.hypixel.hytale.common.semver.SemverRange;
+import com.hypixel.hytale.protocol.packets.setup.RequestCommonAssetsRebuild;
 import com.hypixel.hytale.server.core.asset.AssetModule;
 import com.hypixel.hytale.server.core.asset.common.CommonAsset;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetModule;
+import com.hypixel.hytale.server.core.universe.Universe;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -100,8 +102,13 @@ public final class MapMarkerAssetPack {
             }
 
             CommonAsset asset = new MapMarkerRuntimePngAsset(assetName, pngBytes);
-            cam.addCommonAsset(PACK_NAME, asset, false);
+            cam.addCommonAsset(assetName, asset, true);
             publishedPackFiles.put(assetName, filePath);
+
+            Universe universe = Universe.get();
+            if (universe != null && universe.getPlayerCount() > 0) {
+                universe.broadcastPacketNoCache(new RequestCommonAssetsRebuild());
+            }
         } catch (Exception ignored) {
         }
     }
