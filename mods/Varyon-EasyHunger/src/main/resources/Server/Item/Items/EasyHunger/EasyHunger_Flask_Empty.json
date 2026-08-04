@@ -1,0 +1,81 @@
+{
+    "Parent": "Potion_Empty",
+    "TranslationProperties": {
+        "Name": "server.items.EasyHunger_Flask_Empty.name",
+        "Description": "server.items.EasyHunger_Flask_Empty.description"
+    },
+    "HeldScale": 0.35,
+    "MaxStack": 16,
+    "Categories": [
+        "Items.Survival"
+    ],
+    "Interactions": {
+        "Primary": "Block_Primary",
+        "Secondary": {
+            "Interactions": [
+                {
+                    "Type": "RefillContainer",
+                    "Effects": {
+                        "ClearSoundEventOnFinish": true,
+                        "LocalSoundEventId": "SFX_Water_MoveIn"
+                    },
+                    "States": {
+                        "Filled_Water": {
+                            "AllowedFluids": [
+                                "Water_Source",
+                                "Water"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "State": {
+        "Filled_Water": {
+            "Variant": true,
+            "TranslationProperties": {
+                "Name": "server.items.EasyHunger_Flask_Filled.name",
+                "Description": "server.items.EasyHunger_Flask_Filled.description"
+            },
+            "Icon": "Icons/ItemsGenerated/Potion_Mana.png",
+            "Consumable": true,
+            "MaxDurability": 10,
+            "MaxStack": 1,
+            "Interactions": {
+                "Secondary": {
+                    "Interactions": [
+                        {
+                            "Type": "Charging",
+                            "FailOnDamage": true,
+                            "Effects": {
+                                "ItemAnimationId": "Consume",
+                                "ClearAnimationOnFinish": true,
+                                "LocalSoundEventId": "SFX_Health_Potion_High_Drink"
+                            },
+                            "HorizontalSpeedMultiplier": 0.5,
+                            "Next": {
+                                "1.5": {
+                                    "Type": "Serial",
+                                    "Interactions": [
+                                        {
+                                            "Type": "ModifyInventory",
+                                            "AdjustHeldItemQuantity": -1
+                                        },
+                                        {
+                                            "Type": "EasyHunger_DrinkWater",
+                                            "ThirstRestoreAmount": 10.0
+                                        }
+                                    ]
+                                }
+                            },
+                            "Failed": {
+                                "Type": "Simple"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

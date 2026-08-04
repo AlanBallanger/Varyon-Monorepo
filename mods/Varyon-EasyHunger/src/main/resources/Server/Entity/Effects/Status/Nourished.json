@@ -1,0 +1,9 @@
+{
+    "StatModifiers": {
+        "Health": 0.5
+    },
+    "OverlapBehavior": "Overwrite",
+    "Infinite": true,
+    "DamageCalculatorCooldown": 1,
+    "StatusEffectIcon": "UI/Custom/HUD/Hunger/HungerEffect.png"
+}

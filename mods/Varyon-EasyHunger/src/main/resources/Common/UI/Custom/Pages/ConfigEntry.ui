@@ -1,0 +1,32 @@
+$C = "../Common.ui";
+
+// Config entry row template
+Group {
+  Anchor: (Height: 34, Bottom: 4);
+  LayoutMode: Left;
+  Background: (Color: #1a2233);
+  OutlineColor: #2b3d52;
+  OutlineSize: 1;
+  Padding: (Horizontal: 12, Vertical: 4);
+  TooltipText: "";
+
+  // Config label
+  Label #ConfigLabel {
+    Text: "Setting Name";
+    Style: (FontSize: 12, TextColor: #b8c5d4, VerticalAlignment: Center);
+    Anchor: (Width: 280);
+  }
+
+  Label { FlexWeight: 1; }
+
+  // Config value input
+  TextField #ConfigValue {
+    Value: "0";
+    Anchor: (Width: 120, Height: 26, Vertical: 0);
+    Background: (Color: #0d1520);
+    OutlineColor: #3a5a7a;
+    OutlineSize: 1;
+    Padding: (Left: 8);
+    Style: $C.@DefaultInputFieldStyle;
+  }
+}

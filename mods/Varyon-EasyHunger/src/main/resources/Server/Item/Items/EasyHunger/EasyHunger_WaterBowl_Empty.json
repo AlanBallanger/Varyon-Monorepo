@@ -1,0 +1,176 @@
+{
+    "Parent": "Potion_Empty",
+    "TranslationProperties": {
+        "Name": "server.items.EasyHunger_WaterBowl_Empty.name",
+        "Description": "server.items.EasyHunger_WaterBowl_Empty.description"
+    },
+    "BlockType": {
+        "Material": "Empty",
+        "DrawType": "Model",
+        "CustomModel": "Items/EasyHunger_WaterBowl.blockymodel",
+        "CustomModelScale": 0.5,
+        "CustomModelTexture": [
+            {
+                "Texture": "Items/Pouch.png",
+                "Weight": 1
+            }
+        ]
+    },
+    "Icon": "Icons/ItemsGenerated/EasyHunger_WaterBowl_Empty.png",
+    "IconProperties": {
+        "Scale": 1,
+        "Rotation": [
+            -135,
+            25,
+            180
+        ],
+        "Translation": [
+            0,
+            -2
+        ]
+    },
+    "HeldScale": 1.0,
+    "MaxStack": 8,
+    "Categories": [
+        "Items.Survival"
+    ],
+    "Recipe": {
+        "TimeSeconds": 1.0,
+        "Input": [
+            {
+                "ItemId": "Ingredient_Stick",
+                "Quantity": 5
+            },
+            {
+                "ItemId": "Ingredient_Fibre",
+                "Quantity": 5
+            }
+        ],
+        "BenchRequirement": [
+            {
+                "Type": "Crafting",
+                "Categories": [
+                    "Workbench_Survival"
+                ],
+                "Id": "Workbench"
+            },
+            {
+                "Type": "Crafting",
+                "Categories": [
+                    "Jax_Workbench_Survival"
+                ],
+                "Id": "Jax_Workbench"
+            }
+        ],
+        "OutputQuantity": 1
+    },
+    "Interactions": {
+        "Primary": "Block_Primary",
+        "Secondary": {
+            "Interactions": [
+                {
+                    "Type": "RefillContainer",
+                    "Effects": {
+                        "ClearSoundEventOnFinish": true,
+                        "LocalSoundEventId": "SFX_Water_MoveIn"
+                    },
+                    "States": {
+                        "Filled_Water": {
+                            "AllowedFluids": [
+                                "Water_Source",
+                                "Water"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "State": {
+        "Filled_Water": {
+            "Variant": true,
+            "TranslationProperties": {
+                "Name": "server.items.EasyHunger_WaterBowl_Filled.name",
+                "Description": "server.items.EasyHunger_WaterBowl_Filled.description"
+            },
+            "BlockType": {
+                "Material": "Empty",
+                "DrawType": "Model",
+                "CustomModel": "Items/EasyHunger_WaterBowl_Full.blockymodel",
+                "CustomModelScale": 0.5,
+                "CustomModelTexture": [
+                    {
+                        "Texture": "Items/Pouch.png",
+                        "Weight": 1
+                    }
+                ]
+            },
+            "Icon": "Icons/ItemsGenerated/EasyHunger_WaterBowl_Full.png",
+            "Consumable": true,
+            "MaxDurability": 2,
+            "MaxStack": 1,
+            "Scale": 2,
+            "PlayerAnimationsId": {
+                "Parent": "Item",
+                "Animations": {
+                    "Consume": {
+                        "FirstPerson": "Characters/Animations/Items/Main_Handed/Item/Attacks/Drink/Drink_FPS.blockyanim",
+                        "ThirdPerson": "Characters/Animations/Items/Main_Handed/Item/Attacks/Drink/Drink.blockyanim",
+                        "Speed": 1,
+                        "Looping": true
+                    }
+                }
+            },
+            "Interactions": {
+                "Primary": "Block_Primary",
+                "Secondary": {
+                    "Interactions": [
+                        {
+                            "Type": "EasyHunger_RefillWaterskin",
+                            "AllowedFluids": [
+                                "Water_Source",
+                                "Water"
+                            ]
+                        },
+                        {
+                            "Type": "EasyHunger_StartDrinking"
+                        },
+                        {
+                            "Type": "Charging",
+                            "FailOnDamage": true,
+                            "Effects": {
+                                "ItemAnimationId": "Consume",
+                                "ClearAnimationOnFinish": true,
+                                "LocalSoundEventId": "SFX_Health_Potion_Low_Drink",
+                                "ClearSoundEventOnFinish": true
+                            },
+                            "HorizontalSpeedMultiplier": 0.5,
+                            "Next": {
+                                "0.0": {
+                                    "Type": "EasyHunger_FailedDrinking"
+                                },
+                                "1.5": {
+                                    "Type": "Serial",
+                                    "Interactions": [
+                                        {
+                                            "Type": "ModifyInventory",
+                                            "AdjustHeldItemDurability": -1,
+                                            "BrokenItem": "EasyHunger_WaterBowl_Empty"
+                                        },
+                                        {
+                                            "Type": "EasyHunger_DrinkWater",
+                                            "ThirstRestoreAmount": 5.0
+                                        }
+                                    ]
+                                }
+                            },
+                            "Failed": {
+                                "Type": "EasyHunger_FailedDrinking"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

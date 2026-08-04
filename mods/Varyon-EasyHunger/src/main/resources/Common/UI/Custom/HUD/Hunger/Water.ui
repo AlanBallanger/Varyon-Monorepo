@@ -1,0 +1,42 @@
+@EasyWaterAdventureBarFill = "WaterBarFill.png";
+@EasyWaterCreativeBarFill = "WaterCreativeBarFill.png";
+@EasyWaterPreviewBarFill = "WaterBarFillPreview.png";
+
+Group {
+    LayoutMode: Bottom;
+
+    Group #EasyWaterContainer {
+        LayoutMode: Left;
+        
+        Group #EasyWaterIcon {
+            Anchor: (Left: 0, Width: 24, Height: 24, Right: 4, Top: -8);
+            Background: "WaterIcon.png";
+        }
+
+        Group {
+            Anchor: (Left: 0, Width: 318, Height: 12);
+            Background: "WaterBackground.png";
+
+            ProgressBar #EasyWaterPreviewBar {
+                Anchor: (Width: 318, Height: 12);
+                BarTexturePath: @EasyWaterPreviewBarFill;
+                Value: 0;
+                Visible: true;
+            }
+            ProgressBar #EasyWaterThirstBar {
+                Anchor: (Width: 318, Height: 12);
+                BarTexturePath: @EasyWaterAdventureBarFill;
+                Visible: true;
+            }
+            ProgressBar #EasyWaterCreativeThirstBar {
+                Anchor: (Width: 318, Height: 12);
+                BarTexturePath: @EasyWaterCreativeBarFill;
+                Visible: false;
+            }
+            ProgressBar #EasyWaterProgressBarEffect {
+                Anchor: (Width: 318, Height: 12);
+                BarTexturePath: "WaterBarEffect.png";
+            }
+        }
+    }
+}

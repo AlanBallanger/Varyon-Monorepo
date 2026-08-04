@@ -1,0 +1,20 @@
+general.damageCauses.starvation = Starvation
+general.damageCauses.thirst = Dehydration
+
+items.EasyHunger_WaterBowl_Empty.name = Empty Water Bowl
+items.EasyHunger_WaterBowl_Empty.description = A simple bowl that can be filled with water
+items.EasyHunger_WaterBowl_Filled.name = Water Bowl
+items.EasyHunger_WaterBowl_Filled.description = A bowl filled with water. Drink to restore thirst.
+
+items.EasyHunger_Odre_Empty.name = Empty Waterskin
+items.EasyHunger_Odre_Empty.description = A leather waterskin that can be filled with water
+items.EasyHunger_Odre_Filled.name = Waterskin
+items.EasyHunger_Odre_Filled.description = A waterskin filled with fresh water. Drink to restore thirst.
+
+items.EasyHunger_Flask_Empty.name = Empty Flask
+items.EasyHunger_Flask_Empty.description = An empty flask that can be filled with water
+items.EasyHunger_Flask_Filled.name = Water Flask
+items.EasyHunger_Flask_Filled.description = A flask filled with fresh water. Drink to restore hunger.
+
+server.items.EasyHunger_Template_Waterskin.name = Waterskin
+server.items.EasyHunger_Template_Waterskin.description = Carry water with you

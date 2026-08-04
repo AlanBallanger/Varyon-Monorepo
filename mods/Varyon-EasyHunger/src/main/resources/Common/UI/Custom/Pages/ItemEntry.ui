@@ -1,0 +1,39 @@
+$C = "../Common.ui";
+
+// Individual item entry row with icon, name, and value
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 40, Bottom: 4);
+  Background: (Color: #1a2530);
+  Padding: (Top: 4, Bottom: 4, Left: 8, Right: 8);
+
+  // Item icon
+  ItemIcon #ItemIcon {
+    Anchor: (Width: 32, Height: 32, Vertical: 0);
+    Visible: true;
+  }
+
+  // Spacer
+  Group { Anchor: (Width: 8); }
+
+  // Item name label
+  Label #ItemName {
+    Text: "unknown_item";
+    Style: (FontSize: 12, TextColor: #d4d4d4, VerticalAlignment: Center);
+    Anchor: (Width: 280, Vertical: 0);
+  }
+
+  // Spacer
+  Label { FlexWeight: 1; }
+
+  // Editable value field
+  TextField #ValueInput {
+    Value: "0";
+    Anchor: (Width: 55, Height: 26, Vertical: 0);
+    Background: (Color: #0d1520);
+    OutlineColor: #3a4a5a;
+    OutlineSize: 1;
+    Padding: (Left: 16);
+    Style: $C.@DefaultInputFieldStyle;
+  }
+}

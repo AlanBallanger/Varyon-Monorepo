@@ -1,0 +1,8 @@
+{
+    "Interactions": [
+        {
+            "Type": "EasyHunger_StartDrinking"
+        },
+        "Condition_Consume_Drink"
+    ]
+}

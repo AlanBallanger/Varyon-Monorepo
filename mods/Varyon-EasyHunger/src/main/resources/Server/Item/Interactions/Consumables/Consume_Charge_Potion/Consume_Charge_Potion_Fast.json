@@ -1,0 +1,69 @@
+{
+    "Type": "Serial",
+    "Interactions": [
+        {
+            "Type": "Replace",
+            "Var": "ConsumeSFX",
+            "DefaultValue": {
+                "Interactions": [
+                    "Consume_SFX"
+                ]
+            }
+        },
+        {
+            "Type": "Charging",
+            "FailOnDamage": true,
+            "Effects": {
+                "ItemAnimationId": "Consume",
+                "ClearAnimationOnFinish": true,
+                "ClearSoundEventOnFinish": true
+            },
+            "HorizontalSpeedMultiplier": 0.4,
+            "Next": {
+                "0.0": {
+                    "Type": "EasyHunger_FailedDrinking"
+                },
+                "1.5": {
+                    "Type": "ModifyInventory",
+                    "AdjustHeldItemQuantity": -1,
+                    "Next": {
+                        "Type": "Serial",
+                        "Interactions": [
+                            {
+                                "Type": "Replace",
+                                "Var": "ConsumedSFX",
+                                "DefaultOk": true,
+                                "DefaultValue": {
+                                    "Interactions": [
+                                        "Consumed_SFX"
+                                    ]
+                                }
+                            },
+                            {
+                                "Type": "Replace",
+                                "DefaultValue": {
+                                    "Interactions": [
+                                        "Effect"
+                                    ]
+                                },
+                                "Var": "Effect"
+                            },
+                            {
+                                "Type": "EasyHunger_DrinkWater",
+                                "$Comment": "Reads ThirstRestoreAmount from DrinksConfig - no JSON fallback to avoid engine duplication"
+                            },
+                            {
+                                "Type": "Simple",
+                                "RunTime": 0.2,
+                                "$Comment": "Delay before next consume cycle can start to prevent sound overlap"
+                            }
+                        ]
+                    }
+                }
+            },
+            "Failed": {
+                "Type": "EasyHunger_FailedDrinking"
+            }
+        }
+    ]
+}

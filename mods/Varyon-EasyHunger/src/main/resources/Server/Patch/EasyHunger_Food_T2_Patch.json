@@ -1,0 +1,22 @@
+{
+    "_BaseAssetPath": "Server/Item/Interactions/Consumables/Consume_Charge_Food/Consume_Charge_Food_T2_Inner.json",
+    "Next": {
+        "0.0": {
+            "Type": "EasyHunger_FailedFeeding"
+        },
+        "2.5": {
+            "Next": {
+                "Interactions": [
+                    {
+                        "_op": "add",
+                        "Type": "EasyHunger_ConsumeFood",
+                        "HungerRestoreAmount": 10.0
+                    }
+                ]
+            }
+        }
+    },
+    "Failed": {
+        "Type": "EasyHunger_FailedFeeding"
+    }
+}

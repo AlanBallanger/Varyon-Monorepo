@@ -1,0 +1,174 @@
+package com.varyon.easyhunger;
+
+import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect;
+import com.hypixel.hytale.server.core.entity.effect.ActiveEntityEffect;
+import com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent;
+import com.hypixel.hytale.server.core.modules.entity.damage.DamageCause;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.varyon.easyhunger.components.HungerComponent;
+import com.varyon.easyhunger.config.EasyHungerConfig;
+import com.varyon.easyhunger.systems.StarveSystem;
+import com.varyon.easyhunger.ui.EasyHungerHud;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+
+public class EasyHungerUtils {
+    private static EntityEffect starvingEntityEffect;
+    private static EntityEffect hungryEntityEffect;
+    private static EntityEffect dehydratedEntityEffect;
+    private static DamageCause starvationDamageCause;
+
+    public static final String starvingEntityEffectId = "Starving";
+    public static final String hungryEntityEffectId = "Hungry";
+    public static final String dehydratedEntityEffectId = "Dehydrated";
+
+
+    @NonNullDecl
+    public static EntityEffect getStarvingEntityEffect() {
+        if (starvingEntityEffect == null) {
+            starvingEntityEffect = EntityEffect.getAssetMap().getAsset(starvingEntityEffectId);
+            assert starvingEntityEffect != null;
+            EasyHungerConfig conf = EasyHunger.get().getConfig();
+            try {
+                // patch damageCalculator cooldown so that audio syncs properly with starvation tick rate (user configured)
+                Field f = EntityEffect.class.getDeclaredField("damageCalculatorCooldown");
+                f.setAccessible(true);
+                // this only affect sfx. Users with low hunger tick rates may notice bugged sfx timings otherwise.
+                float cooldown = Math.max(conf.getStarvationTickRate(), 1.0f);
+                f.setFloat(starvingEntityEffect, cooldown);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return starvingEntityEffect;
+    }
+
+    @NonNullDecl
+    public static EntityEffect getHungryEntityEffect() {
+        if (hungryEntityEffect == null) {
+            hungryEntityEffect = EntityEffect.getAssetMap().getAsset(hungryEntityEffectId);
+            assert hungryEntityEffect != null;
+        }
+        return hungryEntityEffect;
+    }
+
+    public static boolean activeEntityEffectIs(ActiveEntityEffect effect, String entityEffectId) {
+        try {
+            Field f = ActiveEntityEffect.class.getDeclaredField("entityEffectId");
+            f.setAccessible(true);
+            String id = (String) f.get(effect);
+            return id.equals(entityEffectId);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean activeEntityEffectIsStarving(ActiveEntityEffect effect) {
+        return activeEntityEffectIs(effect, starvingEntityEffectId);
+    }
+
+    public static boolean activeEntityEffectIsHungry(ActiveEntityEffect effect) {
+        return activeEntityEffectIs(effect, hungryEntityEffectId);
+    }
+
+    public static boolean activeEntityEffectIsHungerRelated(ActiveEntityEffect effect) {
+        return activeEntityEffectIsStarving(effect) || activeEntityEffectIsHungry(effect);
+    }
+
+    @NonNullDecl
+    public static EntityEffect getDehydratedEntityEffect() {
+        if (dehydratedEntityEffect == null) {
+            dehydratedEntityEffect = EntityEffect.getAssetMap().getAsset(dehydratedEntityEffectId);
+            assert dehydratedEntityEffect != null;
+        }
+        return dehydratedEntityEffect;
+    }
+
+    public static boolean activeEntityEffectIsDehydrated(ActiveEntityEffect effect) {
+        return activeEntityEffectIs(effect, dehydratedEntityEffectId);
+    }
+
+    public static boolean activeEntityEffectIsDehydrated(EffectControllerComponent effectController) {
+        ActiveEntityEffect[] effects = effectController.getAllActiveEntityEffects();
+        if (effects != null) {
+            for (ActiveEntityEffect effect : effects) {
+                if (activeEntityEffectIsDehydrated(effect)) return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean activeEntityEffectIsThirstRelated(ActiveEntityEffect effect) {
+        return activeEntityEffectIsDehydrated(effect);
+    }
+
+    public static void removeThirstRelatedEffectsFromEntity(
+            Ref<EntityStore> ref,
+            ComponentAccessor<EntityStore> componentAccessor,
+            @NonNullDecl EffectControllerComponent effectController
+    ) {
+        final ActiveEntityEffect[] activeEffects = effectController.getAllActiveEntityEffects();
+        if (activeEffects != null && activeEffects.length > 0) {
+            Arrays.stream(activeEffects).filter(EasyHungerUtils::activeEntityEffectIsThirstRelated).forEach(effect -> {
+                effectController.removeEffect(ref, effect.getEntityEffectIndex(), componentAccessor);
+            });
+        }
+    }
+
+    public static void removeHungerRelatedEffectsFromEntity(
+            Ref<EntityStore> ref,
+            ComponentAccessor<EntityStore> componentAccessor,
+            @NonNullDecl EffectControllerComponent effectController
+    ) {
+        final ActiveEntityEffect[] activeEffects = effectController.getAllActiveEntityEffects();
+        if (activeEffects != null && activeEffects.length > 0) {
+            Arrays.stream(activeEffects).filter(StarveSystem::shouldRemoveEffectOnStarvation).forEach(effect -> {
+                effectController.removeEffect(ref, effect.getEntityEffectIndex(), componentAccessor);
+            });
+        }
+    }
+
+    public static void removeHungerRelatedEffectsFromEntity(
+            Ref<EntityStore> ref,
+            ComponentAccessor<EntityStore> componentAccessor
+    ) {
+        final EffectControllerComponent effectController = componentAccessor.getComponent(ref, EffectControllerComponent.getComponentType());
+        if (effectController == null) return;
+        removeHungerRelatedEffectsFromEntity(ref, componentAccessor, effectController);
+    }
+
+    public static void setPlayerHungerLevel(
+            @NonNullDecl Ref<EntityStore> ref,
+            @NonNullDecl ComponentAccessor<EntityStore> componentAccessor,
+            float hungerLevel
+    ) {
+        HungerComponent hungerComponent = componentAccessor.getComponent(ref, HungerComponent.getComponentType());
+        PlayerRef playerRef = componentAccessor.getComponent(ref, PlayerRef.getComponentType());
+        if (hungerComponent == null || playerRef == null) return;
+
+        hungerComponent.setHungerLevel(hungerLevel);
+        EasyHungerHud.updatePlayerHungerLevel(playerRef, hungerLevel);
+    }
+
+    @NonNullDecl
+    public static DamageCause getStarvationDamageCause() {
+        // We recreate this every time to ensure config changes (like death message) are applied instantly
+        // Hytale's DamageCause is likely lightweight enough.
+        String message = "Starvation";
+        return new DamageCause("Starvation", message, false, true, true);
+    }
+
+    @NonNullDecl
+    public static DamageCause getThirstDamageCause() {
+        String message = "Thirst";
+        return new DamageCause("Thirst", message, false, true, true);
+    }
+}
+
+
+

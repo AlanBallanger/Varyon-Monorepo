@@ -1,0 +1,20 @@
+general.damageCauses.starvation = Fome
+general.damageCauses.thirst = Desidratação
+
+items.EasyHunger_WaterBowl_Empty.name = Tigela de Água Vazia
+items.EasyHunger_WaterBowl_Empty.description = Uma tigela simples que pode ser enchida com água
+items.EasyHunger_WaterBowl_Filled.name = Tigela com Água
+items.EasyHunger_WaterBowl_Filled.description = Uma tigela cheia de água. Beba para saciar a sede.
+
+items.EasyHunger_Odre_Empty.name = Odre Vazio
+items.EasyHunger_Odre_Empty.description = Um odre de couro que pode ser enchido com água
+items.EasyHunger_Odre_Filled.name = Odre
+items.EasyHunger_Odre_Filled.description = Um odre cheio de água fresca. Beba para saciar a sede.
+
+items.EasyHunger_Flask_Empty.name = Frasco Vazio
+items.EasyHunger_Flask_Empty.description = Um frasco vazio que pode ser enchido com água
+items.EasyHunger_Flask_Filled.name = Frasco com Água
+items.EasyHunger_Flask_Filled.description = Um frasco cheio de água fresca. Beba para saciar a sede.
+
+server.items.EasyHunger_Template_Waterskin.name = Odre Template
+server.items.EasyHunger_Template_Waterskin.description = Carregue água com você

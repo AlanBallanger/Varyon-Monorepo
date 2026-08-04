@@ -1,0 +1,9 @@
+{
+    "StatModifiers": {
+        "Stamina": 0.2
+    },
+    "OverlapBehavior": "Overwrite",
+    "Infinite": true,
+    "DamageCalculatorCooldown": 1,
+    "StatusEffectIcon": "UI/Custom/HUD/Hunger/WaterEffect.png"
+}

@@ -1,0 +1,30 @@
+Group {
+  Anchor: (Width: 44, Height: 44, Right: 2, Bottom: 2);
+
+  Button #SlotButton {
+    Anchor: (Full: 0);
+    Style: (
+      Default: (Background: "../Common/BlockSelectorSlotBackground.png"),
+      Hovered: (Background: #4a5a7a),
+      Pressed: (Background: #3a4a6a)
+    );
+    LayoutMode: CenterMiddle;
+
+    ItemIcon #ItemIcon {
+      Anchor: (Width: 32, Height: 32);
+    }
+  }
+
+  Label #Quantity {
+    Visible: false;
+    Anchor: (Right: 4, Bottom: 2);
+    Style: (
+      FontSize: 12,
+      TextColor: #ffffff,
+      OutlineColor: #000000,
+      HorizontalAlignment: End,
+      VerticalAlignment: End,
+      RenderBold: true
+    );
+  }
+}

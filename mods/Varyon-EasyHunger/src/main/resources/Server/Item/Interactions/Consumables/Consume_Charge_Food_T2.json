@@ -1,0 +1,36 @@
+{
+    "Type": "Serial",
+    "Interactions": [
+        {
+            "Type": "Replace",
+            "Var": "ConsumeSFX",
+            "DefaultValue": {
+                "Interactions": [
+                    "Consume_SFX"
+                ]
+            }
+        },
+        {
+            "Type": "Replace",
+            "DefaultOk": true,
+            "DefaultValue": {
+                "Interactions": [
+                    {
+                        "Type": "EasyHunger_StartFeeding"
+                    }
+                ]
+            },
+            "Var": "EasyHunger_Start_Feeding"
+        },
+        {
+            "Type": "Replace",
+            "Var": "Consume_Charge",
+            "DefaultOk": true,
+            "DefaultValue": {
+                "Interactions": [
+                    "Consume_Charge_Food_T2_Inner"
+                ]
+            }
+        }
+    ]
+}

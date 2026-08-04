@@ -1,0 +1,22 @@
+{
+  "ApplicationEffects": {
+    "EntityBottomTint": "#121212",
+    "EntityTopTint": "#121212",
+    "EntityAnimationId": "Hurt",
+    "HorizontalSpeedMultiplier": 0.7,
+    "MovementEffects": {
+      "DisableSprint": true
+    }
+  },
+  "DamageCalculatorCooldown": 2,
+  "DamageCalculator": {
+    "BaseDamage": {
+      "Starvation": 0
+    }
+  },
+  "OverlapBehavior": "Overwrite",
+  "Debuff": true,
+  "StatusEffectIcon": "UI/Custom/HUD/Hunger/HungerIcon.png",
+  "Infinite": false,
+  "Duration": 300
+}

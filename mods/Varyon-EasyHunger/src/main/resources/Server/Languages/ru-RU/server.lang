@@ -1,0 +1,20 @@
+general.damageCauses.starvation = Голод
+general.damageCauses.thirst = Обезвоживание
+
+items.EasyHunger_WaterBowl_Empty.name = Пустая Миска
+items.EasyHunger_WaterBowl_Empty.description = Простая миска, которую можно наполнить водой
+items.EasyHunger_WaterBowl_Filled.name = Миска с Водой
+items.EasyHunger_WaterBowl_Filled.description = Миска, полная воды. Выпейте, чтобы утолить жажду.
+
+items.EasyHunger_Odre_Empty.name = Пустой Бурдюк
+items.EasyHunger_Odre_Empty.description = Кожаный бурдюк, который можно наполнить водой
+items.EasyHunger_Odre_Filled.name = Бурдюк
+items.EasyHunger_Odre_Filled.description = Бурдюк, полный свежей воды. Выпейте, чтобы утолить жажду.
+
+items.EasyHunger_Flask_Empty.name = Пустая Фляга
+items.EasyHunger_Flask_Empty.description = Пустая фляга, которую можно наполнить водой
+items.EasyHunger_Flask_Filled.name = Фляга с Водой
+items.EasyHunger_Flask_Filled.description = Фляга, полная свежей воды. Выпейте, чтобы утолить жажду.
+
+server.items.EasyHunger_Template_Waterskin.name = Шаблон Бурдюка
+server.items.EasyHunger_Template_Waterskin.description = Берите воду с собой

@@ -1,0 +1,30 @@
+{
+    "_BaseAssetPath": "Server/Item/Interactions/Consumables/Consume_Charge_Potion_Fast.json",
+    "Interactions": [
+        {
+            "_find": {
+                "Type": "Charging"
+            },
+            "_op": "merge",
+            "Next": {
+                "0.0": {
+                    "Type": "EasyHunger_FailedDrinking"
+                },
+                "1.5": {
+                    "Next": {
+                        "Interactions": [
+                            {
+                                "_op": "add",
+                                "Type": "EasyHunger_DrinkWater",
+                                "$Comment": "Reads ThirstRestoreAmount from DrinksConfig"
+                            }
+                        ]
+                    }
+                }
+            },
+            "Failed": {
+                "Type": "EasyHunger_FailedDrinking"
+            }
+        }
+    ]
+}

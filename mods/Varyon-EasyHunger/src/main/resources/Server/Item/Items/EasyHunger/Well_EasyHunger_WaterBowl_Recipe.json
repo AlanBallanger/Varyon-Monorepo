@@ -1,0 +1,31 @@
+{
+    "Recipe": {
+        "PrimaryOutput": {
+            "ItemId": "*EasyHunger_WaterBowl_Empty_State_Filled_Water"
+        },
+        "BenchRequirement": [
+            {
+                "Type": "Processing",
+                "Id": "Well"
+            },
+            {
+                "Type": "Processing",
+                "Id": "Bench_Water"
+            },
+            {
+                "Type": "Processing",
+                "Id": "Bench_Sink"
+            },
+            {
+                "Type": "Processing",
+                "Id": "Well_Process"
+            }
+        ],
+        "Input": [
+            {
+                "ItemId": "EasyHunger_WaterBowl_Empty"
+            }
+        ],
+        "TimeSeconds": 1.5
+    }
+}
