@@ -26,6 +26,21 @@ public final class Standard12NodeLayout implements TalentTreeLayout {
         {298, 475},
     };
 
+    private static final int[][] PARENT_GROUPS = {
+        {},        // 0
+        {},        // 1
+        {0, 1},    // 2
+        {2},       // 3
+        {2},       // 4
+        {2},       // 5
+        {3},       // 6
+        {4},       // 7
+        {5},       // 8
+        {6, 7, 8}, // 9
+        {9},       // 10
+        {9},       // 11
+    };
+
     public static final Standard12NodeLayout INSTANCE = new Standard12NodeLayout();
 
     private Standard12NodeLayout() {}
@@ -33,6 +48,11 @@ public final class Standard12NodeLayout implements TalentTreeLayout {
     @Override
     public int[][] slotPositions() {
         return SLOT_LT;
+    }
+
+    @Override
+    public int[][] parentGroups() {
+        return PARENT_GROUPS;
     }
 
     @Override

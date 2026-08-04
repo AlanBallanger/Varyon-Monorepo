@@ -13,6 +13,8 @@ import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.ecs.PlaceBlockEvent;
 import com.hypixel.hytale.server.core.inventory.InventoryComponent;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.farming.FarmingData;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -65,6 +67,7 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
 
         PlayerRef playerRef = archetypeChunk.getComponent(index, playerRefType);
         if (playerRef == null) return;
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
         UUID uuid = playerRef.getUuid();
 
         boolean dbg = VrpgConfig.isDebugTalents();
@@ -124,10 +127,10 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
             int ex = bx + dx * i;
             int ez = bz + dz * i;
             try {
-                String belowId = String.valueOf(world.getBlockType(ex, by - 1, ez).getId()).toLowerCase();
+                var belowType = world.getBlockType(ex, by - 1, ez);
                 String atId   = String.valueOf(world.getBlockType(ex, by,     ez).getId()).toLowerCase();
 
-                boolean validSoil = belowId.startsWith("soil_dirt_tilled") || belowId.contains("planter");
+                boolean validSoil = isPlantableSoil(belowType);
                 boolean isEmpty   = "empty".equals(atId);
                 if (!validSoil || !isEmpty) continue;
 
@@ -155,6 +158,16 @@ public final class FarmerPlaceCropSystem extends EntityEventSystem<EntityStore, 
                 LOGGER.atWarning().withCause(e).log("[BrasLong] erreur consommation graines");
             }
         }
+    }
+
+    private static boolean isPlantableSoil(@Nullable BlockType type) {
+        if (type == null) return false;
+        try {
+            FarmingData farming = type.getFarming();
+            if (farming != null && farming.getSoilConfig() != null) return true;
+        } catch (Exception ignored) {}
+        String id = String.valueOf(type.getId()).toLowerCase();
+        return id.startsWith("soil_dirt_tilled") || id.contains("planter");
     }
 
     private static String deriveCropBlockId(String seedId) {

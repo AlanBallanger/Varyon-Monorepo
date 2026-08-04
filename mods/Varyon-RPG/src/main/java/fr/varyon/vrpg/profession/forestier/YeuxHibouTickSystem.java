@@ -58,11 +58,9 @@ public final class YeuxHibouTickSystem extends EntityTickingSystem<EntityStore> 
 
         PlayerRef playerRef = chunk.getComponent(index, playerRefType);
         if (playerRef == null) return;
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
 
         UUID uuid = playerRef.getUuid();
-
-        int tc = tickCounters.merge(uuid, 1, Integer::sum);
-        if (tc % CHECK_INTERVAL != 0) return;
 
         try {
             EntityTrackerSystems.EntityViewer viewer = chunk.getComponent(index, viewerType);
@@ -71,27 +69,30 @@ public final class YeuxHibouTickSystem extends EntityTickingSystem<EntityStore> 
                 return;
             }
 
-            PlayerAccount acc = professionManager.getAccount(uuid);
-            if (acc == null || !acc.isActive(Profession.FORESTIER)) {
-                clearLight(uuid, chunk, index, viewer);
-                return;
-            }
-
-            int rank = acc.getTalentRank(Profession.FORESTIER, NODE_ID);
+            int tc = tickCounters.merge(uuid, 1, Integer::sum);
+            boolean refresh = tc % CHECK_INTERVAL == 0;
             Integer lastApplied = appliedRanks.get(uuid);
 
-            if (rank == 0) {
-                if (lastApplied != null) clearLight(uuid, chunk, index, viewer);
-                return;
+            if (refresh || lastApplied == null) {
+                PlayerAccount acc = professionManager.getAccount(uuid);
+                int rank = (acc != null && acc.isActive(Profession.FORESTIER))
+                    ? acc.getTalentRank(Profession.FORESTIER, NODE_ID) : 0;
+
+                if (rank == 0) {
+                    if (lastApplied != null) clearLight(uuid, chunk, index, viewer);
+                    return;
+                }
+                lastApplied = rank;
+                appliedRanks.put(uuid, rank);
             }
 
-            if (lastApplied != null && lastApplied == rank) return;
-
-            applyLight(uuid, rank, chunk, index, viewer);
+            // SendPackets vide viewer.updates a chaque tick : la lumiere doit etre
+            // re-queue en permanence, sinon elle ne dure qu'une frame.
+            applyLight(lastApplied, chunk, index, viewer);
         } catch (Exception ignored) {}
     }
 
-    private void applyLight(UUID uuid, int rank,
+    private void applyLight(int rank,
                              ArchetypeChunk<EntityStore> chunk, int index,
                              EntityTrackerSystems.EntityViewer viewer) {
         try {
@@ -99,7 +100,6 @@ public final class YeuxHibouTickSystem extends EntityTickingSystem<EntityStore> 
             byte radius = RADIUS_PER_RANK[rank];
             DynamicLightUpdate update = new DynamicLightUpdate(new ColorLight(radius, (byte) 1, (byte) 1, (byte) 1));
             viewer.queueUpdate(ref, update);
-            appliedRanks.put(uuid, rank);
         } catch (Exception ignored) {}
     }
 

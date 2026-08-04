@@ -105,6 +105,11 @@ public final class ProfessionXpPotionInteraction extends SimpleInstantInteractio
             return;
         }
 
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) {
+            interactionContext.getState().state = InteractionState.Failed;
+            return;
+        }
+
         manager.ensureAccount(playerRef.getUuid(), playerRef.getUsername());
         manager.addXp(playerRef.getUuid(), reward.profession(), reward.xp(), playerRef);
         interactionContext.getState().state = InteractionState.Finished;

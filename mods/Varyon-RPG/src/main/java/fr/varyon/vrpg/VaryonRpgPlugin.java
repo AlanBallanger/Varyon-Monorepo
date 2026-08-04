@@ -95,7 +95,6 @@ import fr.varyon.vrpg.profession.forestier.MaitriseForestierStaminaSystem;
 import fr.varyon.vrpg.profession.forestier.MaitriseForestierTracker;
 import fr.varyon.vrpg.profession.mineur.MaitriseMineurDamageSystem;
 import fr.varyon.vrpg.profession.mineur.MaitriseMineurSpeedSystem;
-import fr.varyon.vrpg.profession.mineur.BagCraftRestrictionSystem;
 import fr.varyon.vrpg.profession.mineur.ExplosionTalentSystem;
 import fr.varyon.vrpg.profession.mineur.MinerComboTracker;
 import fr.varyon.vrpg.profession.mineur.VeinCooldownTracker;
@@ -166,7 +165,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.rodeur.RodeurSpeedSystem rodeurSpeedSystem;
     private fr.varyon.vrpg.classes.rodeur.RodeurOutgoingDamageSystem rodeurOutgoingDamageSystem;
     private fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem rodeurArrowGroundSystem;
-    private fr.varyon.vrpg.classes.rodeur.RodeurIncomingDamageSystem rodeurIncomingDamageSystem;
+    private fr.varyon.vrpg.classes.rodeur.RodeurPluieGroundSystem rodeurPluieGroundSystem;
+    private fr.varyon.vrpg.classes.rodeur.RodeurTrapRootSystem rodeurTrapRootSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
     private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierBleedSystem arbaBleedSystem;
@@ -351,7 +351,6 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             this.rodeurState = new fr.varyon.vrpg.classes.rodeur.RodeurState();
             this.rodeurPoisonSystem = new fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem();
             this.rodeurSpeedSystem = new fr.varyon.vrpg.classes.rodeur.RodeurSpeedSystem(classManager, rodeurState);
-            this.rodeurIncomingDamageSystem = new fr.varyon.vrpg.classes.rodeur.RodeurIncomingDamageSystem(classManager);
             this.arbaState = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState();
             this.arbaBleedSystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierBleedSystem();
             this.arbaImmobilitySystem = new fr.varyon.vrpg.classes.arbaletrier.ArbaietrierImmobilityTickSystem(classManager, arbaState);
@@ -485,42 +484,6 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 });
             });
             getEventRegistry().registerGlobal(PlayerInteractEvent.class, event -> {
-                ItemStack held = event.getItemInHand();
-                if (held == null) return;
-                String itemId = held.getItemId();
-                if (itemId == null) return;
-                boolean isOreBag = BagCraftRestrictionSystem.ORE_BAG_IDS.contains(itemId);
-                boolean isCropBag = BagCraftRestrictionSystem.CROP_BAG_IDS.contains(itemId);
-                boolean isWoodBag = BagCraftRestrictionSystem.WOOD_BAG_IDS.contains(itemId);
-                if (!isOreBag && !isCropBag && !isWoodBag) return;
-                Player player = event.getPlayer();
-                if (player == null) return;
-                Ref<EntityStore> playerEntityRef = event.getPlayerRef();
-                PlayerRef ref = playerEntityRef != null ? playerEntityRef.getStore().getComponent(playerEntityRef, PlayerRef.getComponentType()) : null;
-                if (ref == null || professionManager == null) { event.setCancelled(true); return; }
-                PlayerAccount acc = professionManager.getAccount(ref.getUuid());
-                boolean ok;
-                String msg;
-                if (isOreBag) {
-                    ok = acc != null && acc.isActive(fr.varyon.vrpg.rpg.Profession.MINEUR)
-                        && acc.getTalentRank(fr.varyon.vrpg.rpg.Profession.MINEUR, "13") > 0;
-                    msg = "Besace du Foreur — talent Mineur (nœud 13) requis.";
-                } else if (isWoodBag) {
-                    ok = acc != null && acc.isActive(fr.varyon.vrpg.rpg.Profession.FORESTIER)
-                        && acc.getTalentRank(fr.varyon.vrpg.rpg.Profession.FORESTIER, "13") > 0;
-                    msg = "Besace du Forestier — talent Forestier (nœud 13) requis.";
-                } else {
-                    ok = acc != null && acc.isActive(fr.varyon.vrpg.rpg.Profession.FERMIER)
-                        && acc.getTalentRank(fr.varyon.vrpg.rpg.Profession.FERMIER, "16") > 0;
-                    msg = "Besace du Paysan — talent Fermier (nœud 16) requis.";
-                }
-                if (!ok) {
-                    event.setCancelled(true);
-                    ref.sendMessage(com.hypixel.hytale.server.core.Message.raw(msg)
-                        .color(new java.awt.Color(200, 50, 50)));
-                }
-            });
-            getEventRegistry().registerGlobal(PlayerInteractEvent.class, event -> {
                 ItemStack heldRestrict = event.getItemInHand();
                 if (heldRestrict != null) {
                     String restrictId = heldRestrict.getItemId();
@@ -531,7 +494,7 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                             PlayerRef restrictRef = restrictEntityRef != null ? restrictEntityRef.getStore().getComponent(restrictEntityRef, PlayerRef.getComponentType()) : null;
                             PlayerAccount restrictAcc = restrictRef != null && professionManager != null
                                 ? professionManager.getAccount(restrictRef.getUuid()) : null;
-                            if (!TalentItemRestrictionSystem.isAllowed(restrictId, restrictAcc)) {
+                            if (!TalentItemRestrictionSystem.isAllowed(restrictId, restrictAcc, restrictRef)) {
                                 event.setCancelled(true);
                                 restrictRef.sendMessage(com.hypixel.hytale.server.core.Message.raw(
                                     TalentItemRestrictionSystem.getMessage(restrictId))
@@ -778,11 +741,6 @@ public final class VaryonRpgPlugin extends JavaPlugin {
             LOGGER.atWarning().withCause(e).log("[VaryonRPG] register FarmerPlaceCropSystem");
         }
 
-        try {
-            getEntityStoreRegistry().registerSystem(new BagCraftRestrictionSystem(professionManager));
-        } catch (Exception e) {
-            LOGGER.atWarning().withCause(e).log("[VaryonRPG] register BagCraftRestrictionSystem");
-        }
 
         try {
             getEntityStoreRegistry().registerSystem(new TalentItemRestrictionSystem(professionManager));
@@ -1149,16 +1107,24 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurOutgoingDamageSystem");
             }
             try {
-                getEntityStoreRegistry().registerSystem(rodeurIncomingDamageSystem);
-            } catch (Exception e) {
-                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurIncomingDamageSystem");
-            }
-            try {
                 this.rodeurArrowGroundSystem = new fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem(rodeurState);
                 getEntityStoreRegistry().registerSystem(rodeurArrowGroundSystem);
                 if (classSkillService != null) classSkillService.setRodeurArrowGroundSystem(rodeurArrowGroundSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurArrowGroundSystem");
+            }
+            try {
+                this.rodeurPluieGroundSystem = new fr.varyon.vrpg.classes.rodeur.RodeurPluieGroundSystem();
+                getEntityStoreRegistry().registerSystem(rodeurPluieGroundSystem);
+                if (classSkillService != null) classSkillService.setRodeurPluieGroundSystem(rodeurPluieGroundSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurPluieGroundSystem");
+            }
+            try {
+                this.rodeurTrapRootSystem = new fr.varyon.vrpg.classes.rodeur.RodeurTrapRootSystem();
+                getEntityStoreRegistry().registerSystem(rodeurTrapRootSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register RodeurTrapRootSystem");
             }
         }
 

@@ -34,6 +34,7 @@ public final class RodeurDunesFallSystem extends DamageEventSystem {
 
             PlayerRef playerRef = chunk.getComponent(index, playerRefType);
             if (playerRef == null) return;
+            if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
 
             int rank = tickSystem.getActiveRank(playerRef.getUuid());
             if (rank == 0) return;

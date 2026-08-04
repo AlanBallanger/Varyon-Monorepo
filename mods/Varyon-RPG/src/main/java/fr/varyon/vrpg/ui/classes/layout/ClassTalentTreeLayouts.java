@@ -59,6 +59,11 @@ public final class ClassTalentTreeLayouts {
         return ClassTalentTree.getTree(activeClass);
     }
 
+    @Nonnull
+    public static int[][] parentGroupsForAccount(@Nullable ClassAccount acc) {
+        return forAccount(acc).parentGroups();
+    }
+
     public static int buildEdges(@Nullable ClassAccount acc,
                                  @Nonnull com.hypixel.hytale.server.core.ui.builder.UICommandBuilder ui,
                                  int seg) {

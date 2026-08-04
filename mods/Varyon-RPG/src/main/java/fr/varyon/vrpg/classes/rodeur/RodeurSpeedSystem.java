@@ -74,11 +74,19 @@ public final class RodeurSpeedSystem extends EntityTickingSystem<EntityStore> {
         try {
             Ref<EntityStore> ref = chunk.getReferenceTo(index);
             MovementManager mm = store.getComponent(ref, MovementManager.getComponentType());
-            if (mm == null) return;
+            boolean debug = fr.varyon.vrpg.config.VrpgConfig.isDebugCombat();
+            if (mm == null) {
+                if (debug) com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass()
+                    .atInfo().log("[RodeurSpeed] MovementManager null, skip");
+                return;
+            }
             float target = mm.getDefaultSettings().baseSpeed * (1f + boost);
             if (Math.abs(mm.getSettings().baseSpeed - target) > 0.01f) {
                 mm.getSettings().baseSpeed = target;
                 mm.update(playerRef.getPacketHandler());
+                if (debug) com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass()
+                    .atInfo().log(String.format("[RodeurSpeed] applied boost=%.2f base=%.2f target=%.2f",
+                        boost, mm.getDefaultSettings().baseSpeed, target));
             }
         } catch (Exception ignored) {}
     }

@@ -60,7 +60,7 @@ public final class TalentItemPlaceRestrictionSystem extends EntityEventSystem<En
 
         String playerName = playerRef.getUsername() != null ? playerRef.getUsername() : playerRef.getUuid().toString().substring(0, 8);
         PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
-        boolean allowed = TalentItemRestrictionSystem.isAllowed(itemId, acc);
+        boolean allowed = TalentItemRestrictionSystem.isAllowed(itemId, acc, playerRef);
 
         if (fr.varyon.vrpg.config.VrpgConfig.isDebugTalents()) {
             LOGGER.atInfo().log("[PlaceRestrict] place player=" + playerName

@@ -94,6 +94,7 @@ public final class ClassSkillService {
     private fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem rodeurPoisonSystem;
     @Nullable private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
     @Nullable private fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem rodeurArrowGroundSystem;
+    @Nullable private fr.varyon.vrpg.classes.rodeur.RodeurPluieGroundSystem rodeurPluieGroundSystem;
     private final fr.varyon.vrpg.classes.lancier.LancierState lancierState;
     private final fr.varyon.vrpg.classes.lancier.LancierBleedSystem lancierBleedSystem;
     @Nullable private fr.varyon.vrpg.classes.lancier.FormationDePiquesZoneSystem formationZoneSystem;
@@ -145,6 +146,10 @@ public final class ClassSkillService {
 
     public void setRodeurArrowGroundSystem(@Nonnull fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem sys) {
         this.rodeurArrowGroundSystem = sys;
+    }
+
+    public void setRodeurPluieGroundSystem(@Nonnull fr.varyon.vrpg.classes.rodeur.RodeurPluieGroundSystem sys) {
+        this.rodeurPluieGroundSystem = sys;
     }
 
     public void setFormationDePiquesZoneSystem(@Nonnull fr.varyon.vrpg.classes.lancier.FormationDePiquesZoneSystem sys) {
@@ -716,10 +721,13 @@ public final class ClassSkillService {
                 java.util.concurrent.ScheduledExecutorService delugeExec =
                     SKILL_SCHEDULER;
                 int[] strikesDone = {0};
-                delugeExec.scheduleAtFixedRate(() -> {
+                final java.util.concurrent.atomic.AtomicReference<java.util.concurrent.ScheduledFuture<?>> delugeTaskRef =
+                    new java.util.concurrent.atomic.AtomicReference<>();
+                delugeTaskRef.set(delugeExec.scheduleAtFixedRate(() -> {
                     try {
                         if (strikesDone[0] >= strikes) {
-                            delugeExec.shutdown();
+                            java.util.concurrent.ScheduledFuture<?> t = delugeTaskRef.get();
+                            if (t != null) t.cancel(false);
                             return;
                         }
                         strikesDone[0]++;
@@ -756,7 +764,7 @@ public final class ClassSkillService {
                             } catch (Exception ignored) {}
                         });
                     } catch (Exception ignored) {}
-                }, 0, DelugeDeGamesSkill.intervalMs(), java.util.concurrent.TimeUnit.MILLISECONDS);
+                }, 0, DelugeDeGamesSkill.intervalMs(), java.util.concurrent.TimeUnit.MILLISECONDS));
             }
         } catch (Exception ignored) {}
 
@@ -2445,9 +2453,15 @@ public final class ClassSkillService {
                                         java.util.concurrent.ScheduledExecutorService exec =
                                             SKILL_SCHEDULER;
                                         java.util.concurrent.atomic.AtomicInteger step = new java.util.concurrent.atomic.AtomicInteger(0);
-                                        exec.scheduleAtFixedRate(() -> fw.execute(() -> {
+                                        final java.util.concurrent.atomic.AtomicReference<java.util.concurrent.ScheduledFuture<?>> pullTaskRef =
+                                            new java.util.concurrent.atomic.AtomicReference<>();
+                                        pullTaskRef.set(exec.scheduleAtFixedRate(() -> fw.execute(() -> {
                                             int s = step.incrementAndGet();
-                                            if (s > STEPS) { exec.shutdown(); return; }
+                                            if (s > STEPS) {
+                                                java.util.concurrent.ScheduledFuture<?> t2 = pullTaskRef.get();
+                                                if (t2 != null) t2.cancel(false);
+                                                return;
+                                            }
                                             double t = (double) s / STEPS;
                                             try {
                                                 TransformComponent tc2 = fStore.getComponent(fRef, TransformComponent.getComponentType());
@@ -2457,8 +2471,11 @@ public final class ClassSkillService {
                                                         startPos.y + (endPos.y - startPos.y) * t,
                                                         startPos.z + (endPos.z - startPos.z) * t);
                                                 }
-                                            } catch (Exception ignored5) { exec.shutdown(); }
-                                        }), 0, STEP_MS, java.util.concurrent.TimeUnit.MILLISECONDS);
+                                            } catch (Exception ignored5) {
+                                                java.util.concurrent.ScheduledFuture<?> t3 = pullTaskRef.get();
+                                                if (t3 != null) t3.cancel(false);
+                                            }
+                                        }), 0, STEP_MS, java.util.concurrent.TimeUnit.MILLISECONDS));
                                     }
                                 }
 
@@ -2697,9 +2714,15 @@ public final class ClassSkillService {
                     SKILL_SCHEDULER;
                 java.util.concurrent.atomic.AtomicInteger hitNum = new java.util.concurrent.atomic.AtomicInteger(1);
                 String[] anims = {"SwingRight", "SwingLeft", "SwingRight", "SwingLeft", "SwingRight", "SwingLeft"};
-                exec.scheduleAtFixedRate(() -> fw.execute(() -> {
+                final java.util.concurrent.atomic.AtomicReference<java.util.concurrent.ScheduledFuture<?>> delugeCoupsTaskRef =
+                    new java.util.concurrent.atomic.AtomicReference<>();
+                delugeCoupsTaskRef.set(exec.scheduleAtFixedRate(() -> fw.execute(() -> {
                     int h = hitNum.incrementAndGet();
-                    if (h > fTotalHits) { exec.shutdown(); return; }
+                    if (h > fTotalHits) {
+                        java.util.concurrent.ScheduledFuture<?> t = delugeCoupsTaskRef.get();
+                        if (t != null) t.cancel(false);
+                        return;
+                    }
                     try {
                         com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(
                             fTargeted, fStore,
@@ -2710,10 +2733,13 @@ public final class ClassSkillService {
                             anims[(h - 2) % anims.length], true, fStore);
                         TransformComponent tc2 = fStore.getComponent(fEntityRef, TransformComponent.getComponentType());
                         if (tc2 != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", fPlayerRef, tc2.getPosition(), null);
-                    } catch (Exception ignored3) { exec.shutdown(); }
+                    } catch (Exception ignored3) {
+                        java.util.concurrent.ScheduledFuture<?> t = delugeCoupsTaskRef.get();
+                        if (t != null) t.cancel(false);
+                    }
                 }), fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.HIT_DELAY_MS,
                    fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.HIT_DELAY_MS,
-                   java.util.concurrent.TimeUnit.MILLISECONDS);
+                   java.util.concurrent.TimeUnit.MILLISECONDS));
             }
         } catch (Exception ignored) {}
 
@@ -3369,10 +3395,12 @@ public final class ClassSkillService {
     }
 
     private void spawnPluieArrowFalling(@Nonnull Ref<EntityStore> casterRef,
+                                        @Nonnull UUID casterUuid,
                                         @Nonnull Store<EntityStore> store,
                                         @Nonnull org.joml.Vector3d spawnPos,
                                         @Nonnull org.joml.Vector3d landPos,
-                                        @Nonnull java.util.concurrent.atomic.AtomicReference<java.util.UUID> outProjectileId) {
+                                        float dmg,
+                                        @Nonnull java.util.concurrent.atomic.AtomicReference<Ref<EntityStore>> outProjectileRef) {
         try {
             com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
                 com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap()
@@ -3385,12 +3413,14 @@ public final class ClassSkillService {
             if (len < 1e-6) return;
             org.joml.Vector3d dir = new org.joml.Vector3d(dx / len, dy / len, dz / len);
             final org.joml.Vector3d fPos = new org.joml.Vector3d(spawnPos);
+            final fr.varyon.vrpg.classes.rodeur.RodeurPluieGroundSystem fGround = rodeurPluieGroundSystem;
             EntityStoreCommandBuffers.runWithResult(store, cb -> {
                 java.util.UUID projectileId = java.util.UUID.randomUUID();
                 Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
                     .spawnProjectile(projectileId, casterRef, cb, cfg, fPos, dir);
                 if (projectileRef != null) {
-                    outProjectileId.set(projectileId);
+                    outProjectileRef.set(projectileRef);
+                    if (fGround != null) fGround.trackArrow(projectileRef, casterUuid, dmg);
                 }
                 return null;
             });
@@ -3468,6 +3498,20 @@ public final class ClassSkillService {
                 }, ref -> store.getComponent(ref, com.hypixel.hytale.server.core.modules.projectile.component.Projectile.getComponentType()) != null);
         } catch (Exception ignored) {}
         return found[0];
+    }
+
+    private void removeTrackedProjectile(@Nonnull Store<EntityStore> store,
+                                         @Nullable Ref<EntityStore> projectileRef) {
+        if (projectileRef == null || !projectileRef.isValid()) return;
+        if (EntityStoreCommandBuffers.run(store, cb -> {
+                cb.removeEntity(projectileRef, com.hypixel.hytale.component.RemoveReason.REMOVE);
+                return Boolean.TRUE;
+            })) {
+            return;
+        }
+        try {
+            store.removeEntity(projectileRef, com.hypixel.hytale.component.RemoveReason.REMOVE);
+        } catch (Exception ignored) {}
     }
 
     private void removeMeteorProjectile(@Nonnull Store<EntityStore> store,
@@ -4537,66 +4581,71 @@ public final class ClassSkillService {
                     center = aimGroundPointFromLook(pluieBase, dirPluie, pluieRange);
                 }
 
-                com.hypixel.hytale.server.core.universe.world.World world = null;
-                try {
-                    java.util.UUID wUuid = playerRef.getWorldUuid();
-                    if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
-                } catch (Exception ignored2) {}
                 ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, tc.getPosition(), null);
-                if (world != null) {
-                    final com.hypixel.hytale.server.core.universe.world.World fw = world;
-                    final UUID fUuid = uuid;
-                    final float fDmg = dmgPerArrow;
-                    final int fArrows = arrows;
-                    final double fRadius = radius;
-                    final org.joml.Vector3d fCenter = center;
-                    final long fFallMs = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.arrowFallMs();
-                    long tickInterval = durationMs / Math.max(1, fArrows - 1);
-                    java.util.concurrent.ScheduledExecutorService exec =
-                        SKILL_SCHEDULER;
-                    int[] ticks = {0};
-                    exec.scheduleAtFixedRate(() -> {
+                spawnProjectileToward(fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.PROJECTILE_ID,
+                    tc.getPosition(), center, entityRef, playerRef, null);
+
+                final double fRootRadius = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.rootRadius();
+                final long fRootMsCast = fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.rootMs();
+                final UUID fUuid = uuid;
+                final float fDmg = dmgPerArrow;
+                final int fArrows = arrows;
+                final double fRadius = radius;
+                final long tickInterval = durationMs / Math.max(1, fArrows - 1);
+                final org.joml.Vector3d fCenter = new org.joml.Vector3d(center);
+
+                // Délai estimé du temps de vol de la flèche initiale (distance / vitesse approx. selon LaunchForce)
+                // pour que la volée n'apparaisse qu'une fois la première flèche arrivée.
+                double flightDist = pluieBase.distance(center);
+                long fInitialDelay = (long) Math.min(1200.0, Math.max(150.0, flightDist / 22.0 * 1000.0));
+
+                com.hypixel.hytale.server.core.universe.world.World fw0 = null;
+                try {
+                    java.util.UUID wUuid3 = playerRef.getWorldUuid();
+                    if (wUuid3 != null) fw0 = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid3);
+                } catch (Exception ignored5) {}
+                if (fw0 != null) {
+                    final com.hypixel.hytale.server.core.universe.world.World fWorld = fw0;
+                    SKILL_SCHEDULER.schedule(() -> fWorld.execute(() -> {
                         try {
-                            if (ticks[0] >= fArrows) { exec.shutdown(); return; }
-                            ticks[0]++;
-                            double rndX = fCenter.x + (Math.random() * 2 - 1) * fRadius;
-                            double rndZ = fCenter.z + (Math.random() * 2 - 1) * fRadius;
-                            final org.joml.Vector3d spawnAbove = new org.joml.Vector3d(
-                                rndX,
-                                fCenter.y + fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.fallHeight(),
-                                rndZ);
-                            final org.joml.Vector3d landPos = new org.joml.Vector3d(rndX, fCenter.y, rndZ);
-                            final java.util.concurrent.atomic.AtomicReference<java.util.UUID> arrowId =
-                                new java.util.concurrent.atomic.AtomicReference<>();
-                            fw.execute(() -> {
-                                try {
-                                    com.hypixel.hytale.server.core.universe.PlayerRef wr =
-                                        com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(fUuid);
-                                    if (wr == null) return;
-                                    Ref<EntityStore> wRef = wr.getReference();
-                                    if (wRef == null || !wRef.isValid()) return;
-                                    Store<EntityStore> liveStore = wRef.getStore();
-                                    if (liveStore == null) return;
-                                    spawnPluieArrowFalling(wRef, liveStore, spawnAbove, landPos, arrowId);
-                                } catch (Exception ignored3) {}
-                            });
-                            exec.schedule(() -> fw.execute(() -> {
-                                try {
-                                    com.hypixel.hytale.server.core.universe.PlayerRef wr =
-                                        com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(fUuid);
-                                    if (wr == null) return;
-                                    Ref<EntityStore> wRef = wr.getReference();
-                                    if (wRef == null || !wRef.isValid()) return;
-                                    Store<EntityStore> liveStore = wRef.getStore();
-                                    if (liveStore == null) return;
-                                    removeMeteorProjectile(liveStore, arrowId.get(), landPos);
-                                    damageNearby(landPos, 1.5f, wRef, liveStore, fDmg,
-                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL);
-                                    ClassSkillSounds.playSkillSound("SFX_Arrow_Fire_Miss", wr, landPos, null);
-                                } catch (Exception ignored3) {}
-                            }), fFallMs, java.util.concurrent.TimeUnit.MILLISECONDS);
-                        } catch (Exception ignored4) { exec.shutdown(); }
-                    }, 0L, tickInterval, java.util.concurrent.TimeUnit.MILLISECONDS);
+                            com.hypixel.hytale.server.core.universe.PlayerRef wrRoot =
+                                com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(fUuid);
+                            if (wrRoot == null) return;
+                            Ref<EntityStore> wRefRoot = wrRoot.getReference();
+                            if (wRefRoot == null || !wRefRoot.isValid()) return;
+                            Store<EntityStore> liveStoreRoot = wRefRoot.getStore();
+                            if (liveStoreRoot == null) return;
+                            rootNearby(fCenter, fRootRadius, wRefRoot, liveStoreRoot, fRootMsCast);
+                        } catch (Exception ignored6) {}
+                    }), fInitialDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
+                    for (int i = 0; i < fArrows; i++) {
+                        final long fSpawnDelay = fInitialDelay + tickInterval * i;
+                        SKILL_SCHEDULER.schedule(() -> {
+                            try {
+                                double rndX = fCenter.x + (Math.random() * 2 - 1) * fRadius;
+                                double rndZ = fCenter.z + (Math.random() * 2 - 1) * fRadius;
+                                final org.joml.Vector3d spawnAbove = new org.joml.Vector3d(
+                                    rndX,
+                                    fCenter.y + fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.fallHeight(),
+                                    rndZ);
+                                final org.joml.Vector3d landPos = new org.joml.Vector3d(rndX, fCenter.y, rndZ);
+                                final java.util.concurrent.atomic.AtomicReference<Ref<EntityStore>> arrowRef =
+                                    new java.util.concurrent.atomic.AtomicReference<>();
+                                fWorld.execute(() -> {
+                                    try {
+                                        com.hypixel.hytale.server.core.universe.PlayerRef wr =
+                                            com.hypixel.hytale.server.core.universe.Universe.get().getPlayer(fUuid);
+                                        if (wr == null) return;
+                                        Ref<EntityStore> wRef = wr.getReference();
+                                        if (wRef == null || !wRef.isValid()) return;
+                                        Store<EntityStore> liveStore = wRef.getStore();
+                                        if (liveStore == null) return;
+                                        spawnPluieArrowFalling(wRef, fUuid, liveStore, spawnAbove, landPos, fDmg, arrowRef);
+                                    } catch (Exception ignored3) {}
+                                });
+                            } catch (Exception ignored4) {}
+                        }, fSpawnDelay, java.util.concurrent.TimeUnit.MILLISECONDS);
+                    }
                 }
             }
         } catch (Exception ignored) {}
@@ -4702,25 +4751,27 @@ public final class ClassSkillService {
         if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
         try {
-            float weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-            float dmg = weaponDmg * fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.damagePctForRank(rank);
-            if (dmg < 1f) dmg = 1f;
-            long rootMs = fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.rootMsForRank(rank);
+            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
+            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
+                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
+            if (tc != null) {
+                org.joml.Vector3d dir = hr != null ? new org.joml.Vector3d(hr.getDirection()) : new org.joml.Vector3d(0, 0, 1);
+                org.joml.Vector3d landing = aimGroundPointFromLook(tc.getPosition(), dir, 12.0);
+                long rootMs = fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.rootMsForRank(rank);
+                long trapDurationMs = fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.trapDurationMs();
 
-            com.hypixel.hytale.server.core.universe.world.World world = store.getExternalData().getWorld();
-            if (world == null) return false;
+                com.hypixel.hytale.server.core.universe.world.World world = store.getExternalData().getWorld();
+                if (world == null) return false;
 
-            final float fDmg = dmg;
-            final long fRootMs = rootMs;
-            world.execute(() -> spawnRodeurSkillArrowLive(uuid,
-                fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_ENTRAVANTE,
-                fDmg, 0.0, fRootMs, fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.PROJECTILE_ID,
-                fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.pendingTimeoutMs()));
+                fr.varyon.vrpg.classes.rodeur.RodeurTrapHelper.activateTrap(
+                    world, landing, trapDurationMs, rootMs);
+                ClassSkillSounds.playSkillSound("SFX_Bow_T2_Shoot", playerRef, landing, null);
+            }
         } catch (Exception ignored) {}
 
         ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID);
-        notifySkill(uuid, "Flèche Entravante");
+        notifySkill(uuid, "Piège Entravant");
         return true;
     }
 
@@ -4759,15 +4810,24 @@ public final class ClassSkillService {
             java.util.concurrent.ScheduledExecutorService rafaleExec =
                 SKILL_SCHEDULER;
             int[] shots = {0};
-            rafaleExec.scheduleAtFixedRate(() -> {
+            final java.util.concurrent.atomic.AtomicReference<java.util.concurrent.ScheduledFuture<?>> rafaleTaskRef =
+                new java.util.concurrent.atomic.AtomicReference<>();
+            rafaleTaskRef.set(rafaleExec.scheduleAtFixedRate(() -> {
                 try {
-                    if (shots[0] >= fCount) { rafaleExec.shutdown(); return; }
+                    if (shots[0] >= fCount) {
+                        java.util.concurrent.ScheduledFuture<?> t = rafaleTaskRef.get();
+                        if (t != null) t.cancel(false);
+                        return;
+                    }
                     shots[0]++;
                     fw.execute(() -> spawnRodeurSkillArrowLive(fUuid,
                         fr.varyon.vrpg.classes.rodeur.RodeurState.ARROW_TYPE_RAFALE,
                         fDmg, 0.0, 0L, fProjectile, fTimeout));
-                } catch (Exception ignored4) { rafaleExec.shutdown(); }
-            }, 0L, fDelayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+                } catch (Exception ignored4) {
+                    java.util.concurrent.ScheduledFuture<?> t = rafaleTaskRef.get();
+                    if (t != null) t.cancel(false);
+                }
+            }, 0L, fDelayMs, java.util.concurrent.TimeUnit.MILLISECONDS));
         } catch (Exception ignored) {}
 
         ClassSkillStamina.consume(playerRef, staminaCost);
@@ -5445,6 +5505,34 @@ public final class ClassSkillService {
         return true;
     }
 
+    private void rootNearby(@Nonnull org.joml.Vector3d center, double radius,
+                            @Nonnull Ref<EntityStore> casterRef, @Nonnull Store<EntityStore> store,
+                            long durationMs) {
+        try {
+            float durationSec = durationMs / 1000f;
+            int idx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap()
+                .getIndex("Vrpg_Ombre_Root");
+            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect effect = idx >= 0
+                ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
+                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(idx)
+                : null;
+            if (effect == null) return;
+            long ci = casterRef.getIndex();
+            com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                .selectNearbyEntities(store, center, radius, t -> {
+                    try {
+                        if (t.getIndex() == ci) return;
+                        com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
+                            store.getComponent(t, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
+                        if (ec != null) {
+                            ec.addEffect(t, effect, durationSec,
+                                com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
+                        }
+                    } catch (Exception ignored2) {}
+                }, t -> t.getIndex() != ci);
+        } catch (Exception ignored) {}
+    }
+
     private void damageNearby(@Nonnull org.joml.Vector3d center, float radius,
                                @Nonnull Ref<EntityStore> casterRef, @Nonnull Store<EntityStore> store,
                                float dmg, @Nonnull com.hypixel.hytale.server.core.modules.entity.damage.DamageCause cause) {
@@ -5547,14 +5635,14 @@ public final class ClassSkillService {
                 com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap().getAsset(configId);
             if (cfg == null) return;
             double dx = toPos.x - fromPos.x;
-            double dy = (toPos.y + 0.5) - (fromPos.y + 1.5);
+            double dy = (toPos.y + 0.5) - (fromPos.y + 2.0);
             double dz = toPos.z - fromPos.z;
             double len = Math.sqrt(dx*dx + dy*dy + dz*dz);
             if (len < 1e-6) return;
             org.joml.Vector3d dir = new org.joml.Vector3d(dx/len, dy/len, dz/len);
             org.joml.Vector3d spawnPos = new org.joml.Vector3d(
                 fromPos.x + dir.x * 0.5,
-                fromPos.y + 1.5,
+                fromPos.y + 2.0,
                 fromPos.z + dir.z * 0.5);
             java.util.UUID wUuid = playerRef.getWorldUuid();
             if (wUuid == null) return;
@@ -5582,6 +5670,17 @@ public final class ClassSkillService {
             @Nonnull Ref<EntityStore> casterRef,
             @Nonnull PlayerRef playerRef,
             @Nonnull UUID creatorUuid) {
+        spawnRodeurProjectileTowardTracked(configId, fromPos, toPos, casterRef, playerRef, creatorUuid, null);
+    }
+
+    private void spawnRodeurProjectileTowardTracked(
+            @Nonnull String configId,
+            @Nonnull org.joml.Vector3d fromPos,
+            @Nonnull org.joml.Vector3d toPos,
+            @Nonnull Ref<EntityStore> casterRef,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull UUID creatorUuid,
+            @Nullable fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem.OnImpact onImpact) {
         if (rodeurArrowGroundSystem == null) {
             spawnProjectileToward(configId, fromPos, toPos, casterRef, playerRef, null);
             return;
@@ -5615,7 +5714,7 @@ public final class ClassSkillService {
                 Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
                     .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
                 if (projRef != null) {
-                    fGround.trackProjectile(projRef, creatorUuid);
+                    fGround.trackProjectile(projRef, creatorUuid, onImpact);
                 }
                 return null;
             }));

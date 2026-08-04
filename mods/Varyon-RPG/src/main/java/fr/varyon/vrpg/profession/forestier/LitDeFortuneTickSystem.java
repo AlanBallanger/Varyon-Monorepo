@@ -48,6 +48,7 @@ public final class LitDeFortuneTickSystem extends EntityTickingSystem<EntityStor
 
         PlayerRef playerRef = chunk.getComponent(index, playerRefType);
         if (playerRef == null) return;
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
 
         UUID uuid = playerRef.getUuid();
 

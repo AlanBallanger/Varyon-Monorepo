@@ -218,9 +218,9 @@ public final class ClassSkillStatResolver {
             case RodeurPassifs.OEIL_CHASSEUR_NODE -> xpOnlyStats(
                 Math.round(RodeurPassifs.oeilXpBonusForRank(rank) * 100));
             case RodeurPassifs.FLECHES_TOXIQUES_NODE -> rodeurFlechesToxiquesStats(rank);
-            case RodeurPassifs.INSTINCT_SURVIE_NODE -> rodeurInstinctSurvieStats(rank);
+            case RodeurPassifs.RICOCHET_NODE -> rodeurRicochetStats(rank);
             case RodeurPassifs.PRECISION_MORTELLE_NODE -> rodeurPrecisionMortelleStats(rank);
-            case RodeurPassifs.TRAQUE_MOBILE_NODE -> rodeurTraqueMobileStats(rank);
+            case RodeurPassifs.FOULEE_RODEUR_NODE -> rodeurFouleeStats(rank);
             case RodeurPassifs.TRAQUE_SANS_FIN_NODE -> rodeurTraqueSansFinStats(rank);
             case ReculStrategiqueSkill.SKILL_ID -> reculStrategiqueStats(rank);
             case PluieDesFlechesSkill.SKILL_ID -> pluieDesFlechesStats(rank);
@@ -1107,9 +1107,9 @@ public final class ClassSkillStatResolver {
         );
     }
 
-    private static List<SkillStatEntry> rodeurInstinctSurvieStats(int rank) {
-        int pct = Math.round(RodeurPassifs.dodgeChanceForRank(rank) * 100);
-        return List.of(new SkillStatEntry(SkillStatKind.DODGE, "+" + pct + "%"));
+    private static List<SkillStatEntry> rodeurRicochetStats(int rank) {
+        int pct = Math.round(RodeurPassifs.ricochetPctForRank(rank) * 100);
+        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, pct + "%"));
     }
 
     private static List<SkillStatEntry> rodeurPrecisionMortelleStats(int rank) {
@@ -1117,9 +1117,12 @@ public final class ClassSkillStatResolver {
         return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"));
     }
 
-    private static List<SkillStatEntry> rodeurTraqueMobileStats(int rank) {
-        int pct = Math.round(RodeurPassifs.traqueBonusForRank(rank) * 100);
-        return List.of(new SkillStatEntry(SkillStatKind.DAMAGE_BONUS, "+" + pct + "%"));
+    private static List<SkillStatEntry> rodeurFouleeStats(int rank) {
+        int pct = Math.round(RodeurPassifs.fouleeSpeedBonusForRank(rank) * 100);
+        return List.of(
+            new SkillStatEntry(SkillStatKind.MOVE_SPEED, "+" + pct + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION, formatDurationMs(RodeurPassifs.FOULEE_DURATION_MS))
+        );
     }
 
     private static List<SkillStatEntry> rodeurTraqueSansFinStats(int rank) {
@@ -1184,10 +1187,10 @@ public final class ClassSkillStatResolver {
     }
 
     private static List<SkillStatEntry> flecheEntravanteStats(int rank) {
-        int dmg = Math.round(FlecheEntravantSkill.damagePctForRank(rank) * 100);
         int stamina = Math.round(FlecheEntravantSkill.staminaCostForRank(rank));
         return List.of(
-            new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, dmg + "%"),
+            new SkillStatEntry(SkillStatKind.DURATION,
+                formatDurationMs(FlecheEntravantSkill.trapDurationMs()), "Piège"),
             new SkillStatEntry(SkillStatKind.DURATION,
                 formatDurationMs(FlecheEntravantSkill.rootMsForRank(rank)), "Immob."),
             new SkillStatEntry(SkillStatKind.COOLDOWN,

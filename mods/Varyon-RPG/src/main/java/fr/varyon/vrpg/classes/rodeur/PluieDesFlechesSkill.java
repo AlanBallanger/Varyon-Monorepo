@@ -11,8 +11,10 @@ public final class PluieDesFlechesSkill {
     private static final double  SPREAD_RADIUS = 1.0;
     private static final double  AIM_RANGE     = 20.0;
     private static final double  FALL_HEIGHT  = 10.0;
-    private static final long    ARROW_FALL_MS = 700L;
-    public static final String   PROJECTILE_ID = "Vrpg_Fleche_Pluie";
+    private static final long    ARROW_FALL_MS = 500L;
+    private static final long    ROOT_MS       = 1000L;
+    private static final double  ROOT_RADIUS   = 3.0;
+    public static final String   PROJECTILE_ID = "Vrpg_Fleche_Pluie2";
     private static final long[]  COOLDOWN_MS  = {30000, 28000, 26000, 24000, 22000};
     private static final float[] STAMINA_COST = {11f, 11f, 12f, 12f, 13f};
 
@@ -31,11 +33,14 @@ public final class PluieDesFlechesSkill {
     public static long   arrowFallMs()              { return ARROW_FALL_MS; }
     public static long   cooldownMsForRank(int rank) { return COOLDOWN_MS[idx(rank)]; }
     public static float  staminaCostForRank(int rank){ return STAMINA_COST[idx(rank)]; }
+    public static long   rootMs()                   { return ROOT_MS; }
+    public static double rootRadius()               { return ROOT_RADIUS; }
 
     public static String statLineForRank(int rank) {
         int dmg = Math.round(damagePctForRank(rank) * 100);
         int arrows = arrowCountForRank(rank);
         int cd = (int)(cooldownMsForRank(rank) / 1000);
-        return arrows + " flèches, " + dmg + "% dégâts/flèche, " + (DURATION_MS / 1000f) + "s, Délai " + cd + "s";
+        return "Entrave en zone " + (ROOT_MS / 1000f) + "s, " + arrows + " flèches, "
+            + dmg + "% dégâts/flèche, " + (DURATION_MS / 1000f) + "s, Délai " + cd + "s";
     }
 }

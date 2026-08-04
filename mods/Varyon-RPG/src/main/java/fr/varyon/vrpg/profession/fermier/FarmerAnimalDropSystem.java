@@ -80,6 +80,7 @@ public final class FarmerAnimalDropSystem {
             PlayerRef playerRef = store.getComponent(attackerRef, PlayerRef.getComponentType());
             if (playerRef == null) playerRef = commandBuffer.getComponent(attackerRef, PlayerRef.getComponentType());
             if (playerRef == null) return;
+            if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(player)) return;
             PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
             if (acc == null || !acc.isActive(Profession.FERMIER)) return;
 
@@ -198,6 +199,7 @@ public final class FarmerAnimalDropSystem {
 
     public void onMilkInteract(@Nonnull PlayerRef playerRef, @Nonnull String roleLower) {
         UUID uuid = playerRef.getUuid();
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
         if (!FarmerAnimalTable.isMilkableAnimal(roleLower)) return;
         long now = System.currentTimeMillis();
         Long last = lastMilkTime.get(uuid);

@@ -3,6 +3,7 @@ package fr.varyon.vrpg.ui.classes;
 import fr.varyon.vrpg.classes.ClassAccount;
 import fr.varyon.vrpg.classes.ClassTalentTree;
 import fr.varyon.vrpg.classes.PlayerClass;
+import fr.varyon.vrpg.ui.classes.layout.ClassTalentTreeLayouts;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,9 +45,23 @@ public final class ClassTalentTreeLogic {
         if (!state.classEditMode || state.pendingClassRanks == null) return false;
         if (nodeIdx < 0 || nodeIdx >= nodes.length) return false;
         if (state.pendingClassRanks[nodeIdx] >= nodes[nodeIdx].maxRank()) return false;
+        if (!parentsAllow(state, acc, nodeIdx)) return false;
         if (pendingRemainingPoints(state, acc, activeClass) <= 0) return false;
         state.pendingClassRanks[nodeIdx]++;
         return true;
+    }
+
+    private static boolean parentsAllow(@Nonnull RpgClassUiState state,
+                                        @Nonnull ClassAccount acc,
+                                        int nodeIdx) {
+        int[][] parentGroups = ClassTalentTreeLayouts.parentGroupsForAccount(acc);
+        if (nodeIdx >= parentGroups.length) return true;
+        int[] parents = parentGroups[nodeIdx];
+        if (parents.length == 0) return true;
+        for (int p : parents) {
+            if (p < state.pendingClassRanks.length && state.pendingClassRanks[p] >= 1) return true;
+        }
+        return false;
     }
 
     public static boolean tryPendingRemove(@Nonnull RpgClassUiState state, int nodeIdx) {

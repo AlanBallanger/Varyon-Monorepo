@@ -112,6 +112,7 @@ public final class MinerBlockBreakSystem extends EntityEventSystem<EntityStore, 
 
         PlayerRef playerRef = archetypeChunk.getComponent(index, playerRefType);
         if (playerRef == null) return;
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
         UUID playerUuid = playerRef.getUuid();
 
         PlayerAccount acc = professionManager.getAccount(playerUuid);

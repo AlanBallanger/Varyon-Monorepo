@@ -38,6 +38,7 @@ public final class MaitriseForestierDamageSystem extends DamageEventSystem {
         try {
             PlayerRef playerRef = chunk.getComponent(index, playerRefType);
             if (playerRef == null) return;
+            if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
 
             PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
             if (acc == null || !acc.isActive(Profession.FORESTIER)) return;

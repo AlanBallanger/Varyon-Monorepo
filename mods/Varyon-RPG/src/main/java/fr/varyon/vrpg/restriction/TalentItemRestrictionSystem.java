@@ -28,7 +28,15 @@ public final class TalentItemRestrictionSystem extends EntityEventSystem<EntityS
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-    private record Rule(Profession profession, String nodeId, String talentName, int minRank) {}
+    private record Rule(Profession profession, String nodeId, String talentName, int minRank, boolean locked) {
+        Rule(Profession profession, String nodeId, String talentName, int minRank) {
+            this(profession, nodeId, talentName, minRank, false);
+        }
+
+        static Rule locked(Profession profession, String talentName) {
+            return new Rule(profession, null, talentName, Integer.MAX_VALUE, true);
+        }
+    }
 
     private static final Map<String, Rule> RESTRICTIONS = Map.ofEntries(
         Map.entry("Varyon_Miners_Helmet",            new Rule(Profession.MINEUR,    "12", "Œil de Taupe",       1)),
@@ -45,6 +53,15 @@ public final class TalentItemRestrictionSystem extends EntityEventSystem<EntityS
         Map.entry("Bag_Ore_Lesser",                       new Rule(Profession.MINEUR,    "13", "Besace du Foreur",          1)),
         Map.entry("Bag_Potion_Lesser",                    new Rule(Profession.CHASSEUR,  "13", "Bourse du Traqueur",        1)),
         Map.entry("Bag_Wood_Lesser",                      new Rule(Profession.FORESTIER, "13", "Besace du Forestier",       1)),
+        // Classic/Greater bags: pas encore implémentés côté jeu, verrouillés pour tout le monde
+        Map.entry("Bag_Crop",                             Rule.locked(Profession.FERMIER,   "Besace du Paysan")),
+        Map.entry("Bag_Crop_Greater",                     Rule.locked(Profession.FERMIER,   "Besace du Paysan")),
+        Map.entry("Bag_Ore",                               Rule.locked(Profession.MINEUR,    "Besace du Foreur")),
+        Map.entry("Bag_Ore_Greater",                       Rule.locked(Profession.MINEUR,    "Besace du Foreur")),
+        Map.entry("Bag_Potion",                           Rule.locked(Profession.CHASSEUR,  "Bourse du Traqueur")),
+        Map.entry("Bag_Potion_Greater",                    Rule.locked(Profession.CHASSEUR,  "Bourse du Traqueur")),
+        Map.entry("Bag_Wood",                             Rule.locked(Profession.FORESTIER, "Besace du Forestier")),
+        Map.entry("Bag_Wood_Greater",                      Rule.locked(Profession.FORESTIER, "Besace du Forestier")),
         Map.entry("SanAndreaP_Sprinkler_Funnel",          new Rule(Profession.FERMIER,   "10", "Crop Circles",              1)),
         Map.entry("Miner_Drill_Kart",                     new Rule(Profession.MINEUR,    "11", "Wagon Express",             1)),
         Map.entry("Grappling_Hook_Iron",                  new Rule(Profession.FORESTIER, "9",  "Équipement Tridimensionnel", 1)),
@@ -67,9 +84,24 @@ public final class TalentItemRestrictionSystem extends EntityEventSystem<EntityS
         this.professionManager = professionManager;
     }
 
+    public static boolean isOperator(@Nullable PlayerRef playerRef) {
+        if (playerRef == null) return false;
+        try {
+            return playerRef.hasPermission("*") || playerRef.hasPermission("vrpg.restriction.bypass");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isAllowed(@Nonnull String itemId, @Nullable PlayerAccount acc, @Nullable PlayerRef playerRef) {
+        if (isOperator(playerRef)) return true;
+        return isAllowed(itemId, acc);
+    }
+
     public static boolean isAllowed(@Nonnull String itemId, @Nullable PlayerAccount acc) {
         Rule rule = RESTRICTIONS.get(itemId);
         if (rule == null) return true;
+        if (rule.locked()) return false;
         if (acc == null || !acc.isActive(rule.profession())) return false;
         return acc.getTalentRank(rule.profession(), rule.nodeId()) >= rule.minRank();
     }
@@ -82,6 +114,9 @@ public final class TalentItemRestrictionSystem extends EntityEventSystem<EntityS
     public static String getMessage(@Nonnull String itemId, @Nonnull String action) {
         Rule rule = RESTRICTIONS.get(itemId);
         if (rule == null) return null;
+        if (rule.locked()) {
+            return "Impossible de " + action + " cet objet : «" + rule.talentName() + "» n'est pas encore disponible.";
+        }
         return "Impossible de " + action + " cet objet : le talent de "
             + rule.profession().getDisplayName()
             + " «" + rule.talentName() + "»"
@@ -123,10 +158,10 @@ public final class TalentItemRestrictionSystem extends EntityEventSystem<EntityS
         }
 
         String playerName = playerRef.getUsername() != null ? playerRef.getUsername() : playerRef.getUuid().toString().substring(0, 8);
-        boolean hasPermStar = playerRef.hasPermission("*");
+        boolean hasPermStar = isOperator(playerRef);
 
         PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
-        boolean allowed = isAllowed(outputId, acc);
+        boolean allowed = isAllowed(outputId, acc, playerRef);
 
         if (fr.varyon.vrpg.config.VrpgConfig.isDebugTalents()) {
             LOGGER.atInfo().log("[TalentRestrict] craft player=" + playerName

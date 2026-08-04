@@ -127,8 +127,10 @@ public final class ClassSkillInteractionInjector {
                         "[VaryonRPG] Ability inject item=%s: %s", item.getId(), e.getMessage());
                 }
             }
-            HytaleLogger.getLogger().at(Level.INFO).log(
-                "[VaryonRPG] Ability interactions injected on %d items", injected);
+            if (injected > 0) {
+                HytaleLogger.getLogger().at(Level.INFO).log(
+                    "[VaryonRPG] Ability interactions injected on %d items", injected);
+            }
         } catch (NoSuchFieldException e) {
             HytaleLogger.getLogger().at(Level.SEVERE).log(
                 "[VaryonRPG] Ability inject — Item field mismatch: %s", e.getMessage());

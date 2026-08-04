@@ -76,6 +76,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
 
     public int addXp(@Nonnull UUID uuid, @Nonnull PlayerClass playerClass, double amount,
                      @Nonnull PlayerRef playerRef) {
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return 0;
         int levelsGained = addXpInternal(uuid, playerClass, amount);
         if (amount > 0) {
             scheduleXpNotif(uuid, playerRef, playerClass, amount, XP_NOTIF_DEBOUNCE_MS);

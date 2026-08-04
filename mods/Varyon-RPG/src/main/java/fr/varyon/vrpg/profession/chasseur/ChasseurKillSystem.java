@@ -94,6 +94,7 @@ public final class ChasseurKillSystem {
             PlayerRef playerRef = store.getComponent(attackerRef, PlayerRef.getComponentType());
             if (playerRef == null) playerRef = commandBuffer.getComponent(attackerRef, PlayerRef.getComponentType());
             if (playerRef == null) return;
+            if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(player)) return;
             UUID uuid = playerRef.getUuid();
 
             PlayerAccount acc = professionManager.getAccount(uuid);

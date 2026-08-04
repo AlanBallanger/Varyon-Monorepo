@@ -81,6 +81,7 @@ public final class ProfessionManager extends AbstractPlayerManager<PlayerAccount
     }
 
     public int addXp(@Nonnull UUID uuid, @Nonnull Profession profession, double amount, @Nonnull PlayerRef playerRef) {
+        if (CreativeGate.isCreative(playerRef)) return 0;
         double multiplier = slotMultiplier(uuid, profession);
         double effective = amount * multiplier;
         int levelsGained = addXpInternal(uuid, profession, effective);

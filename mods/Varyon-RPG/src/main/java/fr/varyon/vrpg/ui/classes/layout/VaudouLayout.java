@@ -26,6 +26,21 @@ public final class VaudouLayout implements TalentTreeLayout {
         {430, 508},
     };
 
+    private static final int[][] PARENT_GROUPS = {
+        {},        // 0
+        {},        // 1
+        {0, 1},    // 2
+        {0, 1},    // 3
+        {0, 1},    // 4
+        {2},       // 5
+        {3},       // 6
+        {4},       // 7
+        {5, 6},    // 8
+        {6, 7},    // 9
+        {8},       // 10
+        {9},       // 11
+    };
+
     public static final VaudouLayout INSTANCE = new VaudouLayout();
 
     private VaudouLayout() {}
@@ -33,6 +48,11 @@ public final class VaudouLayout implements TalentTreeLayout {
     @Override
     public int[][] slotPositions() {
         return SLOT_LT;
+    }
+
+    @Override
+    public int[][] parentGroups() {
+        return PARENT_GROUPS;
     }
 
     @Override

@@ -31,6 +31,8 @@ public final class MiningHelmet {
 
     public int scanForOres(Player player, PlayerRef playerRef, UUID uuid,
                             Store<EntityStore> store, Ref<EntityStore> ref) {
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(player)) return 0;
+
         Long lastScan = lastScanTimes.get(uuid);
         long now = System.currentTimeMillis();
         if (lastScan != null && (now - lastScan) < SCAN_COOLDOWN_MS) return 0;

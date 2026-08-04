@@ -14,8 +14,8 @@ public final class RodeurState {
     private final ConcurrentHashMap<UUID, Integer> marqueConsumes   = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long>    miseEnJouExpiry  = new ConcurrentHashMap<>();
 
-    // --- Flèches en vol (Recul, Entravante, Rafale) ---
-    // Type: 0=none, 1=recul, 2=entravante, 3=rafale, 4=marquage
+    // --- Flèches en vol (Recul, Rafale) ---
+    // Type: 0=none, 1=recul, 3=rafale, 4=marquage
     private final ConcurrentHashMap<UUID, Float>   pendingArrowDmg       = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Integer> pendingArrowType      = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Double>  pendingArrowKb        = new ConcurrentHashMap<>();
@@ -84,9 +84,9 @@ public final class RodeurState {
     }
 
     public static final int ARROW_TYPE_RECUL      = 1;
-    public static final int ARROW_TYPE_ENTRAVANTE = 2;
     public static final int ARROW_TYPE_RAFALE     = 3;
     public static final int ARROW_TYPE_MARQUAGE   = 4;
+    public static final int ARROW_TYPE_PLUIE      = 5;
 
     public void setPendingArrow(@Nonnull UUID uuid, int type, float dmg, double kb, long rootMs) {
         pendingArrowDmg.put(uuid, dmg);

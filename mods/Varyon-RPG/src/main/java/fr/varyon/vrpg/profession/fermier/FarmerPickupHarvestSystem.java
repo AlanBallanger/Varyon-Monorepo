@@ -85,6 +85,7 @@ public final class FarmerPickupHarvestSystem extends EntityEventSystem<EntitySto
         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
         PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
         if (playerRef == null) return;
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
         UUID uuid = playerRef.getUuid();
 
         PlayerAccount acc = professionManager.getAccount(uuid);

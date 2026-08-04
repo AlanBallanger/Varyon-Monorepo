@@ -48,6 +48,7 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
     private final RodeurPoisonSystem poisonSystem;
     private final ClassSkillCooldowns cooldowns;
     private Integer healthIdx = null;
+    private static final ThreadLocal<Boolean> IN_RICOCHET = ThreadLocal.withInitial(() -> false);
 
     public RodeurOutgoingDamageSystem(@Nonnull ClassManager classManager,
                                       @Nonnull RodeurState rodeurState,
@@ -80,6 +81,7 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                        @Nonnull Store<EntityStore> store,
                        @Nonnull CommandBuffer<EntityStore> commandBuffer,
                        @Nonnull Damage damage) {
+        if (IN_RICOCHET.get()) return;
         try {
             if (damage.isCancelled()) return;
 
@@ -112,6 +114,12 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
 
             // Flèches rodeur à l'impact (Recul, Entravante, Rafale) — remplace les 1 dégâts symboliques du JSON
             int arrowType = rodeurState.getPendingArrowType(uuid);
+            if (arrowType == RodeurState.ARROW_TYPE_PLUIE) {
+                // Flèche initiale de Pluie de Flèches : logique entièrement gérée côté Java, on neutralise juste le dégât symbolique vanilla.
+                rodeurState.clearPendingArrow(uuid);
+                damage.setAmount(0f);
+                return;
+            }
             if (arrowType > 0) {
                 float arrowDmg = rodeurState.consumePendingArrowDmg(uuid);
                 if (arrowType == RodeurState.ARROW_TYPE_MARQUAGE || arrowDmg > 0f) {
@@ -165,21 +173,6 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                                 com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
                         }
                         return;
-                    } else if (arrowType == RodeurState.ARROW_TYPE_ENTRAVANTE) {
-                        long rootMs = rodeurState.getPendingArrowRoot(uuid);
-                        if (rootMs > 0) {
-                            int rootIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex("Vrpg_Ombre_Root");
-                            com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect rootEffect =
-                                rootIdx >= 0 ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
-                                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(rootIdx) : null;
-                            if (rootEffect != null) {
-                                com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
-                                    store.getComponent(victimRef, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
-                                if (ec != null) ec.addEffect(victimRef, rootEffect, rootMs / 1000f,
-                                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
-                            }
-                        }
-                        rodeurState.clearPendingArrow(uuid);
                     } else if (arrowType == RodeurState.ARROW_TYPE_RAFALE) {
                         rodeurState.clearPendingArrow(uuid);
                     }
@@ -206,14 +199,6 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                 }
             }
 
-            // Traque mobile — bonus si le joueur se déplace
-            int traqueMobileRank = acc.getTalentRank(PlayerClass.TIREUR, RodeurPassifs.TRAQUE_MOBILE_NODE);
-            if (traqueMobileRank > 0 && isMoving(attackerRef, store)) {
-                float bonus = RodeurPassifs.traqueBonusForRank(traqueMobileRank);
-                amount *= (1f + bonus);
-                if (debug) log.append(String.format(" TraqueMobile=+%.0f%%", bonus * 100));
-            }
-
             if (amount != base) damage.setAmount(amount);
             if (debug) { log.append(String.format(" → final=%.1f", amount)); LOG.atInfo().log(log.toString()); }
 
@@ -223,6 +208,76 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
                 poisonSystem.applyPoison(victimRef, amount, store);
             }
 
+            // Ricochet — la flèche ricoche sur une cible proche
+            int ricochetRank = acc.getTalentRank(PlayerClass.TIREUR, RodeurPassifs.RICOCHET_NODE);
+            if (ricochetRank > 0) {
+                applyRicochet(attackerRef, victimRef, amount, ricochetRank, store);
+            }
+
+            // Foulée du Rodeur — bonus de vitesse au tir d'une flèche normale
+            int fouleeRank = acc.getTalentRank(PlayerClass.TIREUR, RodeurPassifs.FOULEE_RODEUR_NODE);
+            if (fouleeRank > 0) {
+                float bonus = RodeurPassifs.fouleeSpeedBonusForRank(fouleeRank);
+                rodeurState.startSpeedBoost(uuid, bonus, RodeurPassifs.FOULEE_DURATION_MS);
+                if (debug) LOG.atInfo().log(String.format("[Foulee] rank=%d bonus=%.2f durMs=%d applied",
+                    fouleeRank, bonus, RodeurPassifs.FOULEE_DURATION_MS));
+            } else if (debug) {
+                LOG.atInfo().log("[Foulee] rank=0, skip");
+            }
+
+        } catch (Exception ignored) {}
+    }
+
+    private void applyRicochet(@Nonnull Ref<EntityStore> attackerRef,
+                               @Nonnull Ref<EntityStore> victimRef,
+                               float amount,
+                               int rank,
+                               @Nonnull Store<EntityStore> store) {
+        try {
+            float ricochetDmg = amount * RodeurPassifs.ricochetPctForRank(rank);
+            if (ricochetDmg < 1f) return;
+
+            int attackerIdx = attackerRef.getIndex();
+            java.util.HashSet<Integer> excluded = new java.util.HashSet<>();
+            excluded.add(victimRef.getIndex());
+            Ref<EntityStore> currentRef = victimRef;
+            int bounces = RodeurPassifs.ricochetBouncesForRank(rank);
+
+            for (int i = 0; i < bounces; i++) {
+                TransformComponent tcCurrent = store.getComponent(currentRef, TransformComponent.getComponentType());
+                if (tcCurrent == null) return;
+                org.joml.Vector3d origin = tcCurrent.getPosition();
+
+                final Ref<EntityStore>[] closest = new Ref[1];
+                final double[] closestDist = {Double.MAX_VALUE};
+                com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
+                    .selectNearbyEntities(store, origin, (float) RodeurPassifs.RICOCHET_RANGE, t -> {
+                        try {
+                            if (t.getIndex() == attackerIdx || excluded.contains(t.getIndex())) return;
+                            if (store.getComponent(t, NPCEntity.getComponentType()) == null) return;
+                            TransformComponent ttc = store.getComponent(t, TransformComponent.getComponentType());
+                            if (ttc == null) return;
+                            double d = ttc.getPosition().distance(origin);
+                            if (d < closestDist[0]) {
+                                closestDist[0] = d;
+                                closest[0] = t;
+                            }
+                        } catch (Exception ignored2) {}
+                    }, t -> true);
+
+                if (closest[0] == null) return;
+
+                IN_RICOCHET.set(true);
+                try {
+                    DamageSystems.executeDamage(closest[0], store,
+                        new Damage(new Damage.EntitySource(attackerRef), com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, ricochetDmg));
+                } finally {
+                    IN_RICOCHET.set(false);
+                }
+
+                excluded.add(closest[0].getIndex());
+                currentRef = closest[0];
+            }
         } catch (Exception ignored) {}
     }
 
@@ -236,20 +291,6 @@ public final class RodeurOutgoingDamageSystem extends DamageEventSystem {
         var hp = stats.get(healthIdx);
         if (hp == null) return false;
         return damage >= hp.get();
-    }
-
-    private boolean isMoving(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
-        try {
-            com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
-                store.getComponent(ref, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
-            if (vel == null) return false;
-            org.joml.Vector3d v = vel.getVelocity();
-            if (v == null) return false;
-            double hSpeed = v.x * v.x + v.z * v.z;
-            return hSpeed > 0.01;
-        } catch (Exception ignored) {
-            return false;
-        }
     }
 
     private float applyCritToArrowDamage(@Nonnull UUID uuid,

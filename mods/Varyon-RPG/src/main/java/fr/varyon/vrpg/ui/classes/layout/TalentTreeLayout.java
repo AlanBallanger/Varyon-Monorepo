@@ -8,6 +8,12 @@ public interface TalentTreeLayout {
 
     int[][] slotPositions();
 
+    /**
+     * Groupes de parents (OR) requis pour débloquer chaque nœud par index.
+     * Un tableau vide signifie qu'aucun prérequis n'est nécessaire (nœud racine).
+     */
+    int[][] parentGroups();
+
     default boolean skipCentering() {
         return false;
     }

@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.rodeur;
 public final class FlecheDeReculsSkill {
 
     public static final String SKILL_ID       = "fleche_de_recul";
-    public static final String TALENT_NODE_ID = "rodeur_4";
+    public static final String TALENT_NODE_ID = "rodeur_7";
 
     private static final float[] DAMAGE_PCT    = {2.00f, 2.25f, 2.50f, 2.75f, 3.00f};
     private static final double[] KNOCKBACK    = {5.0, 6.0, 7.0, 8.0, 10.0};

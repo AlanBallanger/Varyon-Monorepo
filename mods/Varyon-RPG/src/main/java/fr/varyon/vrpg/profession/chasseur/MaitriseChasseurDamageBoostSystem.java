@@ -60,6 +60,7 @@ public final class MaitriseChasseurDamageBoostSystem extends DamageEventSystem {
             PlayerRef playerRef = store.getComponent(attackerRef, PlayerRef.getComponentType());
             if (playerRef == null) playerRef = commandBuffer.getComponent(attackerRef, PlayerRef.getComponentType());
             if (playerRef == null) return;
+            if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(player)) return;
 
             PlayerAccount acc = professionManager.getAccount(playerRef.getUuid());
             if (acc == null || !acc.isActive(Profession.CHASSEUR)) return;

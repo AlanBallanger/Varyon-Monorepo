@@ -47,6 +47,7 @@ public final class ExplosionTalentSystem extends EntityTickingSystem<EntityStore
 
         PlayerRef playerRef = chunk.getComponent(index, playerRefType);
         if (playerRef == null) return;
+        if (fr.varyon.vrpg.rpg.CreativeGate.isCreative(playerRef)) return;
 
         UUID uuid = playerRef.getUuid();
         Vector3d pos = pendingExplosions.remove(uuid);

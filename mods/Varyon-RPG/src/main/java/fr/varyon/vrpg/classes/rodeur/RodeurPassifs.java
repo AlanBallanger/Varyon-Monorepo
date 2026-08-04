@@ -32,20 +32,27 @@ public final class RodeurPassifs {
             + Math.round(POISON_WEAPON_PCT * 100) + "% dégâts arme/s pendant 5s";
     }
 
-    // --- Instinct de survie (node 7) — esquive passive ---
-    public static final String INSTINCT_SURVIE_NODE  = "rodeur_7";
-    private static final float[] DODGE_CHANCE        = {0.04f, 0.07f, 0.10f, 0.13f, 0.16f};
+    // --- Ricochet (node 4) — les flèches normales ricochent sur une cible proche ---
+    public static final String RICOCHET_NODE   = "rodeur_4";
+    private static final float[] RICOCHET_PCT  = {0.50f, 0.60f, 0.70f, 0.80f, 1.00f};
+    public static final double   RICOCHET_RANGE = 5.0;
 
-    public static float dodgeChanceForRank(int rank) {
-        return DODGE_CHANCE[idx(rank, DODGE_CHANCE.length)];
+    public static float ricochetPctForRank(int rank) {
+        return RICOCHET_PCT[idx(rank, RICOCHET_PCT.length)];
     }
 
-    public static String instinctStatLine(int rank) {
-        return "+" + Math.round(dodgeChanceForRank(rank) * 100) + "% chance d'esquive";
+    public static int ricochetBouncesForRank(int rank) {
+        return rank >= RICOCHET_PCT.length ? 2 : 1;
     }
 
-    // --- Précision mortelle (node 8) — bonus dégâts < 50% HP ---
-    public static final String PRECISION_MORTELLE_NODE = "rodeur_8";
+    public static String ricochetStatLine(int rank) {
+        int bounces = ricochetBouncesForRank(rank);
+        String bounceText = bounces > 1 ? "Ricoche sur " + bounces + " cibles proches" : "Ricoche sur une cible proche";
+        return bounceText + " : " + Math.round(ricochetPctForRank(rank) * 100) + "% des dégâts";
+    }
+
+    // --- Précision mortelle (node 5) — bonus dégâts < 50% HP ---
+    public static final String PRECISION_MORTELLE_NODE = "rodeur_5";
     private static final float[] PRECISION_BONUS      = {0.08f, 0.12f, 0.16f, 0.20f, 0.25f};
     public static final float    PRECISION_HP_THRESH  = 0.50f;
 
@@ -57,16 +64,17 @@ public final class RodeurPassifs {
         return "+" + Math.round(precisionBonusForRank(rank) * 100) + "% dégâts si cible < 50% PV";
     }
 
-    // --- Traque mobile (node 9) — bonus dégâts en déplacement ---
-    public static final String TRAQUE_MOBILE_NODE    = "rodeur_9";
-    private static final float[] TRAQUE_BONUS        = {0.05f, 0.08f, 0.11f, 0.14f, 0.18f};
+    // --- Foulée du Rodeur (node 9) — bonus de vitesse au tir d'une flèche normale ---
+    public static final String FOULEE_RODEUR_NODE    = "rodeur_9";
+    private static final float[] FOULEE_SPEED_BONUS  = {0.30f, 0.35f, 0.40f, 0.45f, 0.50f};
+    public static final long     FOULEE_DURATION_MS  = 2_000L;
 
-    public static float traqueBonusForRank(int rank) {
-        return TRAQUE_BONUS[idx(rank, TRAQUE_BONUS.length)];
+    public static float fouleeSpeedBonusForRank(int rank) {
+        return FOULEE_SPEED_BONUS[idx(rank, FOULEE_SPEED_BONUS.length)];
     }
 
-    public static String traqueMobileStatLine(int rank) {
-        return "+" + Math.round(traqueBonusForRank(rank) * 100) + "% dégâts en déplacement";
+    public static String fouleeStatLine(int rank) {
+        return "+" + Math.round(fouleeSpeedBonusForRank(rank) * 100) + "% vitesse pendant 2s au tir d'une flèche";
     }
 
     // --- Traque sans fin (node 10) — réduit Délai marque après kill ---

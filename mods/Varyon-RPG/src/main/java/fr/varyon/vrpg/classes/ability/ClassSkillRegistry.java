@@ -185,12 +185,12 @@ public final class ClassSkillRegistry {
                 case 1  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.OEIL_CHASSEUR_NODE;
                 case 2  -> fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.SKILL_ID;
                 case 3  -> fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.SKILL_ID;
-                case 4  -> fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.SKILL_ID;
-                case 5  -> fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.RICOCHET_NODE;
+                case 5  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.PRECISION_MORTELLE_NODE;
                 case 6  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.FLECHES_TOXIQUES_NODE;
-                case 7  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.INSTINCT_SURVIE_NODE;
-                case 8  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.PRECISION_MORTELLE_NODE;
-                case 9  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.TRAQUE_MOBILE_NODE;
+                case 7  -> fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.SKILL_ID;
+                case 8  -> fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.SKILL_ID;
+                case 9  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.FOULEE_RODEUR_NODE;
                 case 10 -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.TRAQUE_SANS_FIN_NODE;
                 case 11 -> fr.varyon.vrpg.classes.rodeur.RafaleSkill.SKILL_ID;
                 default -> null;

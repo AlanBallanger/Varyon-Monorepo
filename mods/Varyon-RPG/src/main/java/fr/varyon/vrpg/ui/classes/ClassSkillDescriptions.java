@@ -172,9 +172,9 @@ public final class ClassSkillDescriptions {
             case fr.varyon.vrpg.classes.rodeur.RafaleSkill.SKILL_ID              -> fr.varyon.vrpg.classes.rodeur.RafaleSkill.statLineForRank(rank);
             case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.OEIL_CHASSEUR_NODE  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.oeilStatLine(rank);
             case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.FLECHES_TOXIQUES_NODE -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.poisonStatLine(rank);
-            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.INSTINCT_SURVIE_NODE  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.instinctStatLine(rank);
+            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.RICOCHET_NODE  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.ricochetStatLine(rank);
             case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.PRECISION_MORTELLE_NODE -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.precisionStatLine(rank);
-            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.TRAQUE_MOBILE_NODE    -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.traqueMobileStatLine(rank);
+            case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.FOULEE_RODEUR_NODE    -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.fouleeStatLine(rank);
             case fr.varyon.vrpg.classes.rodeur.RodeurPassifs.TRAQUE_SANS_FIN_NODE  -> fr.varyon.vrpg.classes.rodeur.RodeurPassifs.traqueSansFinStatLine(rank);
             // Arbalétrier
             case fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.SKILL_ID      -> fr.varyon.vrpg.classes.arbaletrier.ReculTactiqueSkill.statLineForRank(rank);
