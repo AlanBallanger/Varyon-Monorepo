@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.asset.AssetModule;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
+import com.varyon.bossarena.util.InstanceTempDir;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -41,7 +42,8 @@ public final class BossArenaAssetSetup {
      */
     public static void register(BossArenaPlugin plugin) {
         try {
-            Path assetsRoot = Path.of(System.getProperty("java.io.tmpdir"), "VaryonBossArenaAssets-pack");
+            Path assetsRoot = InstanceTempDir.resolve("VaryonBossArenaAssets-pack");
+            plugin.getLogger().atInfo().log("[BossArena] assets pack dir=" + assetsRoot);
             deleteTreeQuietly(assetsRoot);
             Files.createDirectories(assetsRoot);
             assetsRoot.toFile().deleteOnExit();

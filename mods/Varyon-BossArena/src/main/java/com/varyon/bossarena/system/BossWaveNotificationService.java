@@ -576,18 +576,19 @@ public final class BossWaveNotificationService {
         showTitleInRadius(world, arenaCenter, radiusBlocks, title, subtitle, TIMED_ARENA_TITLE_DURATION_SECONDS);
     }
 
-    /** Fixed waiting title when Planifié needs more players in the Rayon Décl. */
+    /** Waiting title when a rule needs more players in the Rayon Décl, with the current count. */
     public static void notifyTimedWaitingPlayersTitle(World world,
                                                       Vector3d arenaCenter,
                                                       double radiusBlocks,
-                                                      int requiredPlayers) {
+                                                      int requiredPlayers,
+                                                      int currentPlayers) {
         if (world == null || arenaCenter == null || radiusBlocks <= 0.0d || requiredPlayers <= 0) {
             return;
         }
-        String titleText = "Vous devez être " + requiredPlayers
-                + " joueurs minimum pour que le combat se lance";
-        Message title = toPlainMessage(titleText);
-        showTitleInRadius(world, arenaCenter, radiusBlocks, title, null, TIMED_ARENA_TITLE_DURATION_SECONDS);
+        Message title = toPlainMessage("Combat de boss");
+        Message subtitle = toPlainMessage("En attente de joueurs ... "
+                + Math.max(0, currentPlayers) + "/" + requiredPlayers);
+        showTitleInRadius(world, arenaCenter, radiusBlocks, title, subtitle, TIMED_ARENA_TITLE_DURATION_SECONDS);
     }
 
     private static void showTitleInRadius(World world,
@@ -597,9 +598,11 @@ public final class BossWaveNotificationService {
                                           Message subtitle,
                                           float durationSeconds) {
         double radiusSq = radiusBlocks * radiusBlocks;
-        LOGGER.info(() -> "showTitleInRadius: world=" + world.getName() + " center=" + center
-                + " radiusBlocks=" + radiusBlocks + " duration=" + durationSeconds
-                + " title=" + (title != null ? title.toString() : "null"));
+        boolean debug = BossArenaConfig.debugLogsEnabled();
+        if (debug) {
+            LOGGER.info(() -> "showTitleInRadius: world=" + world.getName() + " center=" + formatPos(center)
+                    + " radiusBlocks=" + formatNum(radiusBlocks) + " duration=" + formatNum(durationSeconds));
+        }
         int shown = 0;
         int outOfRange = 0;
         int failures = 0;
@@ -643,8 +646,10 @@ public final class BossWaveNotificationService {
         final int shownFinal = shown;
         final int outOfRangeFinal = outOfRange;
         final int failuresFinal = failures;
-        LOGGER.info(() -> "showTitleInRadius done: shown=" + shownFinal
-                + " outOfRange=" + outOfRangeFinal + " failures=" + failuresFinal);
+        if (debug || failuresFinal > 0) {
+            LOGGER.info(() -> "showTitleInRadius done: shown=" + shownFinal
+                    + " outOfRange=" + outOfRangeFinal + " failures=" + failuresFinal);
+        }
     }
 
     private static String applyTimedAnnouncementPlaceholders(String template,
@@ -761,6 +766,22 @@ public final class BossWaveNotificationService {
             return text;
         }
         return COLOR_CODE_PATTERN.matcher(text).replaceAll("");
+    }
+
+    /** Compact number for logs: trims the trailing ".0" and avoids scientific notation. */
+    private static String formatNum(double value) {
+        if (value == Math.rint(value) && !Double.isInfinite(value)) {
+            return Long.toString((long) value);
+        }
+        return String.format(Locale.ROOT, "%.2f", value);
+    }
+
+    /** Readable "x, y, z" instead of JOML's scientific-notation toString. */
+    private static String formatPos(Vector3d pos) {
+        if (pos == null) {
+            return "null";
+        }
+        return formatNum(pos.x) + ", " + formatNum(pos.y) + ", " + formatNum(pos.z);
     }
 
     private static Message toPlainMessage(String text) {

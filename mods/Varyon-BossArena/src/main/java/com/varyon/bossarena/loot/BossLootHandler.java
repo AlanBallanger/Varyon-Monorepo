@@ -1,6 +1,7 @@
 package com.varyon.bossarena.loot;
 
 import com.varyon.bossarena.BossArenaPlugin;
+import com.varyon.bossarena.config.BossArenaConfig;
 import com.varyon.bossarena.util.EntityComponents;
 import com.varyon.bossarena.damagechart.BossDamageChartTracker;
 import com.varyon.bossarena.damagechart.DamageChartOpener;
@@ -167,7 +168,10 @@ public class BossLootHandler {
 
         List<PlayerRef> eligiblePlayers = new ArrayList<>();
         var playerRefs = world.getPlayerRefs();
-        LOGGER.info("Total players in world: " + playerRefs.size());
+        boolean debug = BossArenaConfig.debugLogsEnabled();
+        if (debug) {
+            LOGGER.info("Total players in world: " + playerRefs.size());
+        }
 
         for (PlayerRef ref : playerRefs) {
             UUID playerUuid = EntityComponents.uuid(ref);
@@ -182,12 +186,16 @@ public class BossLootHandler {
             Vector3d playerPos = new Vector3d(rawPlayerPos.x, rawPlayerPos.y, rawPlayerPos.z);
             double distance = calculateDistance(playerPos, chestLocation);
 
-            LOGGER.info("Player " + playerUuid + " at " + playerPos + ", distance: " + distance);
+            if (debug) {
+                LOGGER.info("Player " + playerUuid + " at " + playerPos + ", distance: " + distance);
+            }
 
             if (distance <= effectiveRadius) {
                 eligiblePlayers.add(ref);
-                LOGGER.info("  -> Player IS eligible!");
-            } else {
+                if (debug) {
+                    LOGGER.info("  -> Player IS eligible!");
+                }
+            } else if (debug) {
                 LOGGER.info("  -> Player too far (radius: " + effectiveRadius + ")");
             }
         }

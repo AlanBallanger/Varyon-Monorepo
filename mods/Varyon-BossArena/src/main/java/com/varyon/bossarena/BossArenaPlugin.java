@@ -22,6 +22,7 @@ import com.varyon.bossarena.system.BossDamageScalingSystem;
 import com.varyon.bossarena.system.BossEventNotificationSystem;
 import com.varyon.bossarena.system.BossEntityRemovedSystem;
 import com.varyon.bossarena.system.BossLeashSystem;
+import com.varyon.bossarena.system.BossForcedAggroSystem;
 import com.varyon.bossarena.system.BossSpeedScalingSystem;
 import com.varyon.bossarena.system.LootSpawnSystem;
 import com.varyon.bossarena.loot.LootRegistry;
@@ -317,6 +318,7 @@ public final class BossArenaPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new BossDamageChartRecordingSystem(trackingSystem, damageChartTracker));
         this.getEntityStoreRegistry().registerSystem(new BossSpeedScalingSystem(trackingSystem));
         this.getEntityStoreRegistry().registerSystem(new BossLeashSystem(trackingSystem));
+        this.getEntityStoreRegistry().registerSystem(new BossForcedAggroSystem(trackingSystem, config));
         this.getEntityStoreRegistry().registerSystem(new BossDeathSystem(trackingSystem, this));
         this.getEntityStoreRegistry().registerSystem(new BossEventNotificationSystem(trackingSystem, this));
         this.dpsHudSystem = new BossDpsHudSystem(trackingSystem, damageChartTracker, this);
@@ -1448,6 +1450,7 @@ public final class BossArenaPlugin extends JavaPlugin {
 
                 if (arenas != null) {
                     for (Arena arena : arenas) {
+                        backfillProximityRadius(arena);
                         ArenaRegistry.register(arena);
                     }
                 }
@@ -1459,6 +1462,19 @@ public final class BossArenaPlugin extends JavaPlugin {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    /**
+     * Arenas saved before the radius column drove proximity have no {@code proximityRadius},
+     * which Gson leaves at 0 and the spawn gate reads as "proximity disabled". Align it with
+     * the radius shown in the config UI so those arenas keep triggering.
+     */
+    private static void backfillProximityRadius(Arena arena) {
+        if (arena == null || arena.proximityRadius > 0.0d) {
+            return;
+        }
+        double lootRadius = arena.getLootRadius();
+        arena.proximityRadius = lootRadius > 0.0d ? lootRadius : 30.0d;
     }
 
     public CompletableFuture<Void> saveArenas() {

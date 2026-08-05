@@ -4,6 +4,7 @@ import com.hypixel.hytale.assetstore.AssetPack;
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.server.core.asset.AssetModule;
 import com.varyon.bossarena.BossArenaPlugin;
+import com.varyon.bossarena.util.InstanceTempDir;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +33,7 @@ final class BossFightMusicAssetGenerator {
 
     static synchronized void rebuildPack(Path musicSrc) throws IOException {
         if (packRoot == null || !Files.isDirectory(packRoot)) {
-            packRoot = Path.of(System.getProperty("java.io.tmpdir"), "VaryonBossArenaMusic-pack");
+            packRoot = InstanceTempDir.resolve("VaryonBossArenaMusic-pack");
             deleteTreeQuietly(packRoot);
             Files.createDirectories(packRoot);
             packRoot.toFile().deleteOnExit();

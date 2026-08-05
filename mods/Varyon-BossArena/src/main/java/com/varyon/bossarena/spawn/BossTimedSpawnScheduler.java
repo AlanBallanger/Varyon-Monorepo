@@ -56,7 +56,8 @@ public final class BossTimedSpawnScheduler {
     private static final long WAIT_FOR_DEATH_EPOCH_MS = Long.MAX_VALUE / 4L;
     /** Chat reminder lead time before scheduled spawn. */
     private static final long REMINDER_LEAD_MS = TimeUnit.MINUTES.toMillis(5L);
-    private static final long WAITING_PLAYERS_TITLE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(30L);
+    /** Refresh cadence of the "En attente de joueurs" title while players wait in the arena. */
+    private static final long WAITING_PLAYERS_TITLE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(5L);
     private static final long GRACE_TITLE_REFRESH_MS = TimeUnit.SECONDS.toMillis(5L);
     private final Random bossPoolRandom = new Random();
     private final BossSpawnService bossSpawnService;
@@ -219,16 +220,13 @@ public final class BossTimedSpawnScheduler {
         return Math.max(1000L, seconds * 1000L);
     }
 
-    private static long resolveDespawnMinutes(BossArenaConfig.TimedBossSpawn rule) {
-        // Only Planifié (interval) uses forced despawn. Temps réapparition has no lifetime limit from this field.
-        if (rule == null || rule.isAfterDeathMode()) {
+    /** Boss lifetime in seconds. Explicit contract: 0h 0m 0s means infinite (no forced despawn). */
+    private static long resolveDespawnSeconds(BossArenaConfig.TimedBossSpawn rule) {
+        if (rule == null) {
             return 0L;
         }
-        // Explicit contract: 0h 0m means infinite lifetime (no forced despawn).
-        if (rule.despawnAfterHours <= 0L && rule.despawnAfterMinutes <= 0L) {
-            return 0L;
-        }
-        return Math.max(0L, BossArenaConfig.resolveMinutes(rule.despawnAfterHours, rule.despawnAfterMinutes));
+        return Math.max(0L, BossArenaConfig.resolveSeconds(
+                rule.despawnAfterHours, rule.despawnAfterMinutes, rule.despawnAfterSeconds));
     }
 
     private static long minutesToMillis(long minutes) {
@@ -284,6 +282,7 @@ public final class BossTimedSpawnScheduler {
         out.preventDuplicateWhileAlive = source.preventDuplicateWhileAlive;
         out.despawnAfterHours = source.despawnAfterHours;
         out.despawnAfterMinutes = source.despawnAfterMinutes;
+        out.despawnAfterSeconds = source.despawnAfterSeconds;
         out.announceWorldWide = source.announceWorldWide;
         out.announceCurrentWorld = source.announceCurrentWorld;
         out.worldAnnouncementText = source.worldAnnouncementText;
@@ -697,7 +696,9 @@ public final class BossTimedSpawnScheduler {
 
         final boolean announce = true;
         world.execute(() -> {
-            long timedDespawnMinutes = resolveDespawnMinutes(rule);
+            // Countdown display works in minutes: round up so sub-minute lifetimes still show 1.
+            long despawnSeconds = resolveDespawnSeconds(rule);
+            long timedDespawnMinutes = despawnSeconds > 0L ? ((despawnSeconds + 59L) / 60L) : 0L;
             UUID result = bossSpawnService.spawnBossFromJson(
                     null,
                     configuredBossId,
@@ -851,15 +852,26 @@ public final class BossTimedSpawnScheduler {
 
         if (!thresholdMet) {
             clearGraceState(state);
-            if (rule.isIntervalMode() && required > 0 && nearbyCount > 0) {
-                maybeNotifyWaitingPlayers(state, world, center, proximityRadius, required, someoneEntered, now);
+            if (!rule.isManualMode() && required > 0 && nearbyCount > 0) {
+                maybeNotifyWaitingPlayers(state, world, center, proximityRadius, required,
+                        nearbyCount, someoneEntered, now);
             }
             state.nextSpawnEpochMs = now + (rule.isIntervalMode() ? retryMs : TimeUnit.SECONDS.toMillis(NO_PLAYER_RETRY_SECONDS));
+            if (required > 0) {
+                // Waiting in range: refresh at the title cadence. Nobody in range: still poll often
+                // enough that walking back into the arena is picked up quickly.
+                long recheckMs = nearbyCount > 0
+                        ? WAITING_PLAYERS_TITLE_INTERVAL_MS
+                        : TimeUnit.SECONDS.toMillis(PROXIMITY_RETRY_SECONDS);
+                state.nextSpawnEpochMs = Math.min(state.nextSpawnEpochMs, now + recheckMs);
+            }
             if (rule.isIntervalMode() && state.arrivalDeadlineMs > 0L) {
                 state.nextSpawnEpochMs = Math.min(state.nextSpawnEpochMs, state.arrivalDeadlineMs);
             }
-            LOGGER.info("Timed spawn '" + state.label + "' waiting nearby players: "
-                    + nearbyCount + "/" + Math.max(1, required) + " in Rayon Décl.");
+            if (BossArenaConfig.debugLogsEnabled()) {
+                LOGGER.info("Timed spawn '" + state.label + "' waiting nearby players: "
+                        + nearbyCount + "/" + Math.max(1, required) + " in Rayon Décl.");
+            }
             return false;
         }
 
@@ -897,6 +909,7 @@ public final class BossTimedSpawnScheduler {
                                            Vector3d center,
                                            double radius,
                                            int required,
+                                           int nearbyCount,
                                            boolean someoneEntered,
                                            long now) {
         if (!someoneEntered && state.lastWaitingPlayersTitleMs > 0L
@@ -904,7 +917,7 @@ public final class BossTimedSpawnScheduler {
             return;
         }
         state.lastWaitingPlayersTitleMs = now;
-        BossWaveNotificationService.notifyTimedWaitingPlayersTitle(world, center, radius, required);
+        BossWaveNotificationService.notifyTimedWaitingPlayersTitle(world, center, radius, required, nearbyCount);
     }
 
     private void maybeNotifyGraceTitle(TimedSpawnState state,
@@ -1051,11 +1064,11 @@ public final class BossTimedSpawnScheduler {
 
     private void enforceTimedDespawn(TimedSpawnState state, long now) {
         BossArenaConfig.TimedBossSpawn rule = state.rule;
-        long despawnMinutes = resolveDespawnMinutes(rule);
-        if (despawnMinutes <= 0L) {
+        long despawnSeconds = resolveDespawnSeconds(rule);
+        if (despawnSeconds <= 0L) {
             return;
         }
-        long maxAgeMs = minutesToMillis(despawnMinutes);
+        long maxAgeMs = TimeUnit.SECONDS.toMillis(despawnSeconds);
 
         for (Map.Entry<UUID, BossTrackingSystem.BossData> entry : trackingSystem.snapshotTrackedBosses().entrySet()) {
             UUID bossUuid = entry.getKey();

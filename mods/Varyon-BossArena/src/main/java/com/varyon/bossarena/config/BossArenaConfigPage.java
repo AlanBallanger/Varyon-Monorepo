@@ -2198,6 +2198,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         String arenaId = nextArenaId();
         Arena arena = new Arena(arenaId, world.getName(), position);
         arena.lootRadius = 30.0d;
+        arena.proximityRadius = 30.0d;
         ArenaRegistry.register(arena);
         plugin.saveArenas();
 
@@ -3204,17 +3205,22 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             cmd.set("#TimedRequirePlayer" + suffix + ".Value", "false");
             cmd.set("#TimedRequirePlayerToggle" + suffix + ".Visible", false);
             cmd.set("#TimedPreventDup" + suffix + ".Value", "true");
-            cmd.set("#TimedDespawnHours" + suffix + ".Value", "0");
-            long despawnMinutesTotal = entry != null
-                    ? BossArenaConfig.resolveMinutes(entry.despawnAfterHours, entry.despawnAfterMinutes)
-                    : 5L;
-            if (despawnMinutesTotal <= 0L && interval) {
-                despawnMinutesTotal = 5L;
+            // Despawn lifetime is split across a minutes and a seconds field.
+            long despawnTotalSeconds = entry != null
+                    ? BossArenaConfig.resolveSeconds(
+                            entry.despawnAfterHours, entry.despawnAfterMinutes, entry.despawnAfterSeconds)
+                    : 300L;
+            if (despawnTotalSeconds <= 0L && interval) {
+                despawnTotalSeconds = 300L;
             }
-            cmd.set("#TimedDespawnMinutes" + suffix + ".Value", Long.toString(Math.max(0L, despawnMinutesTotal)));
-            cmd.set("#TimedDespawnMinutes" + suffix + ".Visible", interval);
-            cmd.set("#TimedDespawnLabel" + suffix + ".Visible", interval);
-            cmd.set("#TimedDespawnMinutesUnit" + suffix + ".Visible", interval);
+            boolean despawnVisible = !manual;
+            cmd.set("#TimedDespawnMinutes" + suffix + ".Value", Long.toString(Math.max(0L, despawnTotalSeconds / 60L)));
+            cmd.set("#TimedDespawnSeconds" + suffix + ".Value", Long.toString(Math.max(0L, despawnTotalSeconds % 60L)));
+            cmd.set("#TimedDespawnMinutes" + suffix + ".Visible", despawnVisible);
+            cmd.set("#TimedDespawnSeconds" + suffix + ".Visible", despawnVisible);
+            cmd.set("#TimedDespawnLabel" + suffix + ".Visible", despawnVisible);
+            cmd.set("#TimedDespawnMinutesUnit" + suffix + ".Visible", despawnVisible);
+            cmd.set("#TimedDespawnSecondsUnit" + suffix + ".Visible", despawnVisible);
 
             cmd.set("#TimedAnnounceGlobal" + suffix + ".Value", announceGlobal ? "true" : "false");
             BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedAnnounceGlobalToggle" + suffix, announceGlobal);
@@ -3277,7 +3283,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     "#TimedEveryHours" + suffix, "#TimedEveryMinutes" + suffix, "#TimedEverySeconds" + suffix,
                     "#TimedIntervalHours" + suffix, "#TimedIntervalDays" + suffix, "#TimedIntervalSeconds" + suffix,
                     "#TimedArrivalHours" + suffix, "#TimedArrivalMinutes" + suffix, "#TimedArrivalSeconds" + suffix,
-                    "#TimedDespawnHours" + suffix, "#TimedDespawnMinutes" + suffix
+                    "#TimedDespawnMinutes" + suffix, "#TimedDespawnSeconds" + suffix
             }) {
                 events.addEventBinding(
                         CustomUIEventBindingType.ValueChanged,
@@ -3346,7 +3352,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     .append("@TimedArrivalSeconds" + suffix, "#TimedArrivalSeconds" + suffix + ".Value")
                     .append("@TimedRequirePlayer" + suffix, "#TimedRequirePlayer" + suffix + ".Value")
                     .append("@BossWaveHp" + suffix, "#TimedPreventDup" + suffix + ".Value")
-                    .append("@BossWaveDamage" + suffix, "#TimedDespawnHours" + suffix + ".Value")
+                    .append("@BossWaveDamage" + suffix, "#TimedDespawnSeconds" + suffix + ".Value")
                     .append("@BossWaveSize" + suffix, "#TimedDespawnMinutes" + suffix + ".Value")
                     .append("@TimedAnnounceGlobal" + suffix, "#TimedAnnounceGlobal" + suffix + ".Value")
                     .append("@TimedAnnounceWorld" + suffix, "#TimedAnnounceWorld" + suffix + ".Value")
@@ -3391,6 +3397,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         entry.preventDuplicateWhileAlive = true;
         entry.despawnAfterHours = 0L;
         entry.despawnAfterMinutes = 5L;
+        entry.despawnAfterSeconds = 0L;
         entry.oneShot = false;
         entry.announceWorldWide = false;
         entry.announceCurrentWorld = false;
@@ -3936,7 +3943,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             String arrivalMinutesText = optionalText(data.getTimedArrivalMinutes(row));
             String arrivalSecondsText = optionalText(data.getTimedArrivalSeconds(row));
             String requireText = optionalText(data.getTimedRequirePlayer(row));
-            String despawnHoursText = optionalText(data.getBossWaveDamage(row));
+            String despawnSecondsText = optionalText(data.getBossWaveDamage(row));
             String despawnMinutesText = optionalText(data.getBossWaveSize(row));
             String announceGlobalText = optionalText(data.getTimedAnnounceGlobal(row));
             String announceWorldText = optionalText(data.getTimedAnnounceWorld(row));
@@ -3958,7 +3965,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     || looksLikeUiBindingExpression(arrivalMinutesText)
                     || looksLikeUiBindingExpression(arrivalSecondsText)
                     || looksLikeUiBindingExpression(requireText)
-                    || looksLikeUiBindingExpression(despawnHoursText)
+                    || looksLikeUiBindingExpression(despawnSecondsText)
                     || looksLikeUiBindingExpression(despawnMinutesText)
                     || looksLikeUiBindingExpression(announceGlobalText)
                     || looksLikeUiBindingExpression(announceWorldText)
@@ -4126,20 +4133,29 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             }
 
             long despawnMinutes;
-            if (intervalMode) {
+            long despawnSeconds;
+            if (!manualMode) {
                 despawnMinutes = parseRequiredLong(
-                        despawnMinutesText.isEmpty() ? "5" : despawnMinutesText,
+                        despawnMinutesText.isEmpty() ? (intervalMode ? "5" : "0") : despawnMinutesText,
                         "Ligne " + row + " : Temps avant disparition (minutes) invalide.",
                         0L,
                         Long.MAX_VALUE
+                );
+                despawnSeconds = parseRequiredLong(
+                        despawnSecondsText.isEmpty() ? "0" : despawnSecondsText,
+                        "Ligne " + row + " : Temps avant disparition (secondes) invalide.",
+                        0L,
+                        59L
                 );
             } else if (existingRow != null) {
                 despawnMinutes = BossArenaConfig.resolveMinutes(
                         existingRow.despawnAfterHours,
                         existingRow.despawnAfterMinutes
                 );
+                despawnSeconds = Math.max(0L, existingRow.despawnAfterSeconds);
             } else {
                 despawnMinutes = 0L;
+                despawnSeconds = 0L;
             }
 
             BossArenaConfig.TimedBossSpawn entry = new BossArenaConfig.TimedBossSpawn();
@@ -4165,6 +4181,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             entry.preventDuplicateWhileAlive = true;
             entry.despawnAfterHours = 0L;
             entry.despawnAfterMinutes = despawnMinutes;
+            entry.despawnAfterSeconds = despawnSeconds;
             entry.announceWorldWide = announceGlobal;
             entry.announceCurrentWorld = announceWorld;
             entry.worldAnnouncementText = resolvedAnnounceText;

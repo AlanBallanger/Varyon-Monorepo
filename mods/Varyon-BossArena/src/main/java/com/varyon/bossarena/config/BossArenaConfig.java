@@ -47,14 +47,27 @@ public final class BossArenaConfig {
     private static final String DEFAULT_CURRENCY_ITEM_ID = "Coin";
     private static final String DEFAULT_FALLBACK_CURRENCY_ITEM_ID = "Ingredient_Bar_Iron";
     private static final int MIN_COUNTDOWN_MINUTES = 1;
+    private static final double DEFAULT_FORCED_AGGRO_INTERVAL_SECONDS = 3.0d;
+    private static final double MIN_FORCED_AGGRO_INTERVAL_SECONDS = 0.5d;
+    private static final double MAX_FORCED_AGGRO_INTERVAL_SECONDS = 60.0d;
     private static final Path CONFIG_PATH = Path.of("mods", "Varyon-BossArena", "config.json");
     private static final Path LEGACY_CONFIG_PATH = Path.of("mods", "BossArena", "config.json");
 
+    /**
+     * When false (default), routine INFO diagnostics are suppressed and only warnings/errors
+     * plus startup lines are logged. Warnings and errors are never suppressed.
+     */
+    public boolean debugLogs = false;
     /** Distance (blocks) within which players see boss event title/subtitle. */
     public double notificationRadius = NotificationRadiusConstants.DEFAULT;
     public String currencyItemId = DEFAULT_CURRENCY_ITEM_ID;
     public String fallbackCurrencyItemId = DEFAULT_FALLBACK_CURRENCY_ITEM_ID;
     public Map<String, Integer> bossTierCountdownMinutes = createDefaultBossTierCountdownMinutes();
+    /**
+     * How often (seconds) idle event mobs are forced onto a nearby player. 0 disables forcing.
+     * Only mobs with no valid target are affected, so taunts are never overridden.
+     */
+    public double forcedAggroIntervalSeconds = DEFAULT_FORCED_AGGRO_INTERVAL_SECONDS;
     public EventBannerTemplates eventBanner = createDefaultEventBannerTemplates();
     public TimedMapMarkerSettings timedMapMarker = createDefaultTimedMapMarkerSettings();
     public List<TimedBossSpawn> timedBossSpawns = new ArrayList<>();
@@ -379,6 +392,7 @@ public final class BossArenaConfig {
             clean.preventDuplicateWhileAlive = true;
             clean.despawnAfterHours = Math.max(0L, raw.despawnAfterHours);
             clean.despawnAfterMinutes = Math.max(0L, raw.despawnAfterMinutes);
+            clean.despawnAfterSeconds = Math.max(0L, raw.despawnAfterSeconds);
             clean.announceWorldWide = raw.announceWorldWide;
             clean.announceCurrentWorld = raw.announceCurrentWorld;
             if (clean.announceWorldWide) {
@@ -626,6 +640,8 @@ public final class BossArenaConfig {
     }
 
     private void applyLoadedConfig(BossArenaConfig loaded) {
+        this.debugLogs = loaded.debugLogs;
+        DEBUG_LOGS_ENABLED = loaded.debugLogs;
         this.notificationRadius = NotificationRadiusConstants.clamp(loaded.notificationRadius);
         this.currencyItemId = sanitizeItemId(loaded.currencyItemId, DEFAULT_CURRENCY_ITEM_ID);
         this.fallbackCurrencyItemId = sanitizeItemId(
@@ -633,10 +649,22 @@ public final class BossArenaConfig {
                 DEFAULT_FALLBACK_CURRENCY_ITEM_ID
         );
         this.bossTierCountdownMinutes = sanitizeBossTierCountdownMinutes(loaded.bossTierCountdownMinutes);
+        this.forcedAggroIntervalSeconds = sanitizeForcedAggroInterval(loaded.forcedAggroIntervalSeconds);
         this.eventBanner = sanitizeEventBannerTemplates(loaded.eventBanner);
         this.timedMapMarker = sanitizeTimedMapMarkerSettings(loaded.timedMapMarker);
         this.timedBossSpawns = sanitizeTimedBossSpawns(loaded.timedBossSpawns);
         this._comment_placeholders = sanitizePlaceholderDocs(loaded._comment_placeholders);
+    }
+
+    /**
+     * Mirrors {@link #debugLogs} so logging sites can check it without holding a config reference.
+     * Defaults to false until the config is loaded.
+     */
+    private static volatile boolean DEBUG_LOGS_ENABLED = false;
+
+    /** True when routine INFO diagnostics should be emitted. */
+    public static boolean debugLogsEnabled() {
+        return DEBUG_LOGS_ENABLED;
     }
 
     /** Returns the configured notification radius (blocks), clamped to valid range. */
@@ -644,11 +672,26 @@ public final class BossArenaConfig {
         return NotificationRadiusConstants.clamp(notificationRadius);
     }
 
+    /** Returns the forced-aggro interval in seconds, or 0 when the feature is disabled. */
+    public double getForcedAggroIntervalSeconds() {
+        return sanitizeForcedAggroInterval(forcedAggroIntervalSeconds);
+    }
+
+    private static double sanitizeForcedAggroInterval(double raw) {
+        if (!Double.isFinite(raw) || raw <= 0.0d) {
+            return 0.0d;
+        }
+        return Math.min(MAX_FORCED_AGGRO_INTERVAL_SECONDS, Math.max(MIN_FORCED_AGGRO_INTERVAL_SECONDS, raw));
+    }
+
     private void applyDefaultConfig() {
+        this.debugLogs = false;
+        DEBUG_LOGS_ENABLED = false;
         this.notificationRadius = NotificationRadiusConstants.DEFAULT;
         this.currencyItemId = DEFAULT_CURRENCY_ITEM_ID;
         this.fallbackCurrencyItemId = DEFAULT_FALLBACK_CURRENCY_ITEM_ID;
         this.bossTierCountdownMinutes = createDefaultBossTierCountdownMinutes();
+        this.forcedAggroIntervalSeconds = DEFAULT_FORCED_AGGRO_INTERVAL_SECONDS;
         this.eventBanner = createDefaultEventBannerTemplates();
         this.timedMapMarker = createDefaultTimedMapMarkerSettings();
         this.timedBossSpawns = new ArrayList<>();
@@ -744,6 +787,7 @@ public final class BossArenaConfig {
         public boolean preventDuplicateWhileAlive = true;
         public long despawnAfterHours = 0L;
         public long despawnAfterMinutes = 5L;
+        public long despawnAfterSeconds = 0L;
         // Legacy key: server-wide announcement across all worlds.
         public boolean announceWorldWide = false;
         // Optional world-only announcement for players in the spawned world.

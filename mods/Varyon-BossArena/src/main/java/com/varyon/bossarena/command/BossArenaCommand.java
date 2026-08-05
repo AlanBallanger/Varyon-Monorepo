@@ -345,6 +345,7 @@ public final class BossArenaCommand extends AbstractCommand {
 
                 Arena arena = new Arena(arenaId, worldName, position);
                 arena.lootRadius = 30.0d;
+                arena.proximityRadius = 30.0d;
                 ArenaRegistry.register(arena);
 
                 plugin.saveArenas().thenRun(() -> {
