@@ -9,12 +9,14 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.arguments.types.RelativeDoublePosition;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractTargetPlayerCommand;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.joml.Vector3d;
 import java.awt.Color;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,17 +24,13 @@ import javax.annotation.Nullable;
 public final class TpToWorldCommand extends AbstractTargetPlayerCommand {
 
     private final RequiredArg<String> worldArg;
-    private final OptionalArg<Double> xArg;
-    private final OptionalArg<Double> yArg;
-    private final OptionalArg<Double> zArg;
+    private final OptionalArg<RelativeDoublePosition> positionArg;
 
     public TpToWorldCommand() {
         super("tptoworld", "Téléporter un joueur vers un autre monde (au spawn de ce monde, ou à une position donnée)");
         this.requirePermission("varyon.admin");
         this.worldArg = this.withRequiredArg("monde", "Nom du monde de destination", ArgTypes.STRING);
-        this.xArg = this.withOptionalArg("x", "Position X de destination (optionnel)", ArgTypes.DOUBLE);
-        this.yArg = this.withOptionalArg("y", "Position Y de destination (optionnel)", ArgTypes.DOUBLE);
-        this.zArg = this.withOptionalArg("z", "Position Z de destination (optionnel)", ArgTypes.DOUBLE);
+        this.positionArg = this.withOptionalArg("position", "Position X Y Z de destination (optionnel)", ArgTypes.RELATIVE_POSITION);
     }
 
     @Override
@@ -46,13 +44,12 @@ public final class TpToWorldCommand extends AbstractTargetPlayerCommand {
             return;
         }
 
-        Double x = context.get(xArg);
-        Double y = context.get(yArg);
-        Double z = context.get(zArg);
+        RelativeDoublePosition position = context.get(positionArg);
 
         Teleport teleportComponent;
-        if (x != null && y != null && z != null) {
-            teleportComponent = Teleport.createForPlayer(targetWorld, new org.joml.Vector3d(x, y, z), Rotation3f.ZERO);
+        if (position != null) {
+            Vector3d destination = position.getRelativePosition(new Vector3d(0, 0, 0), targetWorld);
+            teleportComponent = Teleport.createForPlayer(targetWorld, destination, Rotation3f.ZERO);
         } else {
             Transform spawnPoint = targetWorld.getWorldConfig().getSpawnProvider().getSpawnPoint(targetRef, store);
             if (spawnPoint == null) {

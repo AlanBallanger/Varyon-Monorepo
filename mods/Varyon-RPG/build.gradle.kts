@@ -124,17 +124,13 @@ val verifyModJar = tasks.register("verifyModJar") {
     }
 }
 
-val exportModJar = tasks.register<Copy>("exportModJar") {
-    group = "build"
-    description = "Copie le JAR vers Varyon-Monorepo/build/output"
-    dependsOn(fatJar, verifyModJar)
-    from(fatJar)
-    into(rootProject.layout.buildDirectory.dir("output"))
-}
-
+// Pas de tache d'export ici : l'init script ~/.gradle/init.d/deploy-output.gradle force
+// deja destinationDirectory de "fatJar" vers build/output et copie vers les mods du
+// serveur. L'ancien exportModJar copiait build/output vers build/output, ce qui ecrasait
+// le JAR par lui-meme et le laissait a 0 octet.
 tasks.named("build") {
     dependsOn(fatJar)
-    finalizedBy(verifyModJar, exportModJar)
+    finalizedBy(verifyModJar)
 }
 
 tasks.named<Jar>("jar") {
