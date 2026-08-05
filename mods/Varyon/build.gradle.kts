@@ -59,12 +59,21 @@ val fatJar = tasks.register<Zip>("fatJar") {
     })
 }
 
-val exportModJar = tasks.register<Copy>("exportModJar") {
+// Le plugin hytale-mod force destinationDirectory des taches d'archive vers build/output a la
+// racine : fatJar ecrit donc deja directement a destination. L'ancienne tache Copy recopiait le
+// fichier sur lui-meme, ce qui le tronquait a 0 octet. On se contente de verifier le resultat.
+val exportModJar = tasks.register("exportModJar") {
     group = "build"
-    description = "Copie le JAR vers Varyon-Monorepo/build/output"
+    description = "Verifie le JAR exporte vers Varyon-Monorepo/build/output"
     dependsOn(fatJar)
-    from(fatJar)
-    into(rootProject.layout.buildDirectory.dir("output"))
+    val archive = fatJar.flatMap { it.archiveFile }
+    doLast {
+        val jar = archive.get().asFile
+        if (!jar.isFile || jar.length() == 0L) {
+            throw GradleException("Export du mod echoue : ${jar.path} est absent ou vide")
+        }
+        logger.lifecycle("Mod exporte : ${jar.path} (${jar.length()} octets)")
+    }
 }
 
 tasks.named("build") {

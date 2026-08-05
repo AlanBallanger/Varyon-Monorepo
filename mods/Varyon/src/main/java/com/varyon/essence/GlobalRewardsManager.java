@@ -6,7 +6,9 @@ import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.transaction.ItemStackTransaction;
@@ -15,6 +17,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.config.FactionRewardsConfig;
@@ -166,6 +169,21 @@ public class GlobalRewardsManager {
         return "Tu reçois : " + quantity + " " + noun + " de clé de palier " + keyTier + " (" + pctLabel + ")";
     }
 
+    private static final String REWARD_SOUND_ID = "SFX_Vrpg_MineraiFantomatique";
+
+    private static void playRewardSound(@Nonnull PlayerRef playerRef) {
+        try {
+            int soundIndex = SoundEvent.getAssetMap().getIndex(REWARD_SOUND_ID);
+            if (soundIndex == 0) {
+                LOGGER.at(Level.WARNING).log("Reward sound not found: " + REWARD_SOUND_ID);
+                return;
+            }
+            SoundUtil.playSoundEvent2dToPlayer(playerRef, soundIndex, SoundCategory.UI, 1.0f, 1.0f);
+        } catch (Exception e) {
+            LOGGER.at(Level.WARNING).log("Failed to play reward sound for " + playerRef.getUsername() + ": " + e.getMessage());
+        }
+    }
+
     private static int remainderQuantity(@Nullable ItemStack remainder) {
         return ItemStack.isEmpty(remainder) ? 0 : remainder.getQuantity();
     }
@@ -265,6 +283,7 @@ public class GlobalRewardsManager {
 
             String factionColor = faction == FactionManager.Faction.NOYAU ? "#5555FF" : "#FF8800";
             playerRef.sendMessage(Message.raw("[Palier " + tierNumber + "] " + faction.getDisplayName() + " a atteint un seuil !").color(Color.decode(factionColor)));
+            playRewardSound(playerRef);
 
             String pct = participated ? "100%" : ((int)(config.getPassiveRewardRate() * 100)) + "%";
             if (remainderQty == 0) {
@@ -317,6 +336,8 @@ public class GlobalRewardsManager {
             ItemStack remainder = tx.getRemainder();
             int remainderQty = remainderQuantity(remainder);
             int acceptedQty = fragments - remainderQty;
+
+            playRewardSound(playerRef);
 
             if (remainderQty == 0) {
                 playerRef.sendMessage(Message.raw("[Récompense en attente] " + fragmentGainChatLine(fragments, maxZone, "100%")).color(Color.GREEN));
