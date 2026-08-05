@@ -226,6 +226,7 @@ public class CometSpawnTask {
         try {
             final int varyonRing = VaryonZoneResolver.resolveVaryonRing(player);
             final int hytaleZone = VaryonZoneResolver.resolveHytaleZone(player);
+            LOGGER.info("Natural spawn: resolved varyonRing=" + varyonRing + " hytaleZone=" + hytaleZone);
 
             CometTier tier = selectTierForHytaleZone(hytaleZone);
             if (tier == null) {
@@ -328,10 +329,17 @@ public class CometSpawnTask {
 
             if (targetBlockPos == null) return SpawnResult.NO_SAFE_LOCATION;
 
-            // Register zone for this comet at its landing position
+            // Ring comes from the landing position, not the player, so rewards match where the comet actually fell
+            int landingRing = VaryonZoneResolver.resolveVaryonRingForComet(
+                    targetBlockPos.x, targetBlockPos.z, currentWorld.getName(), player);
+            int ringForWave = landingRing > 0 ? landingRing : 1;
+            if (landingRing != varyonRing) {
+                LOGGER.info("Natural spawn: ring at landing position = " + landingRing
+                        + " (player ring was " + varyonRing + ")");
+            }
+
             CometWaveManager waveManager = CometModPlugin.getWaveManager();
             if (waveManager != null) {
-                int ringForWave = varyonRing > 0 ? varyonRing : 1;
                 waveManager.registerCometZone(targetBlockPos, ringForWave);
             }
             
@@ -347,8 +355,7 @@ public class CometSpawnTask {
             com.hypixel.hytale.server.core.universe.PlayerRef playerRefComponent =
                     currentStore.getComponent(playerRef, com.hypixel.hytale.server.core.universe.PlayerRef.getComponentType());
             java.util.UUID ownerUUID = playerRefComponent != null ? playerRefComponent.getUuid() : null;
-            int ringForProjectile = varyonRing > 0 ? varyonRing : 1;
-            fallingSystem.spawnFallingComet(playerRef, targetBlockPos, tier, null, currentStore, currentWorld, ownerUUID, ringForProjectile);
+            fallingSystem.spawnFallingComet(playerRef, targetBlockPos, tier, null, currentStore, currentWorld, ownerUUID, ringForWave);
 
             com.varyon.comet.util.CommandBufferUtil.consume(commandBuffer);
             

@@ -58,13 +58,13 @@ Recommended admin setup in LuckPerms:
 gradlew build
 ```
 
-→ **`build/libs/Varyon_Comet-4.0.0.jar`**
+→ **`build/libs/Varyon-Comet-4.0.0.jar`**
 
 Config minimale : `settings.gradle.kts` (nom du projet), `build.gradle.kts` (Java + dépendances + chemins sources). Le **Gradle wrapper** (`gradlew`, `gradlew.bat`, `gradle/wrapper/`) sert seulement à lancer Gradle sans l’installer.
 
 ### Deploy
 
-Copie `Varyon_Comet-4.0.0.jar` depuis `build/libs/` vers les mods du serveur.
+Copie `Varyon-Comet-4.0.0.jar` depuis `build/libs/` vers les mods du serveur.
 
 ## Comet Ownership
 
@@ -187,7 +187,7 @@ Message keys: `msgCometFallingTitle`, `msgCometFallingSubtitle`, `msgCometFallin
 
 ## Packaging As One JAR
 
-Gradle produit un seul JAR : `build/libs/Varyon_Comet-4.0.0.jar` (`gradlew clean build`).
+Gradle produit un seul JAR : `build/libs/Varyon-Comet-4.0.0.jar` (`gradlew clean build`).
 
 Le JAR contient notamment `Common/`, `Server/`, `manifest.json`.
 

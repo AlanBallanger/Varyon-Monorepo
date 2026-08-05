@@ -165,20 +165,27 @@ public class CometModPlugin extends JavaPlugin {
                 event -> {
                     try {
                         com.hypixel.hytale.server.core.universe.PlayerRef playerRef = event.getPlayerRef();
-                        if (playerRef != null && spawnTask != null) {
-                            com.hypixel.hytale.server.core.universe.world.World world = spawnTask.getWorld();
-                            if (world != null) {
-                                world.execute(() -> {
-                                    try {
-                                        com.hypixel.hytale.server.core.entity.entities.Player player = playerRef.getComponent(
-                                                com.hypixel.hytale.server.core.entity.entities.Player.getComponentType());
-                                        if (player != null) {
-                                            spawnTask.removePlayer(player);
-                                        }
-                                    } catch (Exception e) {
-                                        // Ignore
+                        if (playerRef != null && spawnTask != null && playerRef.isValid()) {
+                            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> ref = playerRef.getReference();
+                            com.hypixel.hytale.component.Store<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> store = ref != null ? ref.getStore() : null;
+                            if (store != null) {
+                                Object externalData = store.getExternalData();
+                                if (externalData instanceof com.hypixel.hytale.server.core.universe.world.storage.EntityStore) {
+                                    com.hypixel.hytale.server.core.universe.world.World world = ((com.hypixel.hytale.server.core.universe.world.storage.EntityStore) externalData).getWorld();
+                                    if (world != null) {
+                                        world.execute(() -> {
+                                            try {
+                                                com.hypixel.hytale.server.core.entity.entities.Player player = playerRef.getComponent(
+                                                        com.hypixel.hytale.server.core.entity.entities.Player.getComponentType());
+                                                if (player != null) {
+                                                    spawnTask.removePlayer(player);
+                                                }
+                                            } catch (Exception e) {
+                                                // Ignore
+                                            }
+                                        });
                                     }
-                                });
+                                }
                             }
                         }
                     } catch (Exception e) {

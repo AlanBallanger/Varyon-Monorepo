@@ -639,7 +639,7 @@ public class CometWaveManager {
         waveData.themeName = WaveThemeProvider.getThemeName(themeId);
         LOGGER.info("Selected theme: " + waveData.themeName + " (ID: " + themeId + ") for tier " + tier.getName());
 
-        int zoneLevel = Math.max(1, cometZones.getOrDefault(blockPos, 1));
+        int zoneLevel = Math.max(1, waveState.getZoneOrDefault(blockPos, 1));
 
         if (mobList == null || mobList.length == 0) {
             LOGGER.warning("No mobs available for tier " + tier.getName() + " theme " + themeId);
@@ -821,7 +821,9 @@ public class CometWaveManager {
         int beforeCleanup = waveData.spawnedMobs.size();
         waveData.spawnedMobs.removeIf(ref -> isTrackedMobDead(store, ref));
         int afterCleanup = waveData.spawnedMobs.size();
-        if (beforeCleanup != afterCleanup) {
+        boolean verboseWaveLogging = CometConfig.getInstance() != null && CometConfig.getInstance().verboseWaveLogging;
+
+        if (beforeCleanup != afterCleanup && verboseWaveLogging) {
             LOGGER.info("Cleaned up " + (beforeCleanup - afterCleanup) + " dead/invalid mob refs");
         }
 
@@ -833,8 +835,10 @@ public class CometWaveManager {
             }
         }
 
-        LOGGER.info("Wave at " + waveData.blockPos + ": " + remaining + " mobs remaining (out of "
-                + waveData.spawnedMobs.size() + " in list)");
+        if (verboseWaveLogging) {
+            LOGGER.info("Wave at " + waveData.blockPos + ": " + remaining + " mobs remaining (out of "
+                    + waveData.spawnedMobs.size() + " in list)");
+        }
 
         // Check if mob count changed (real-time detection)
         boolean mobCountChanged = (remaining != waveData.previousRemainingCount);
@@ -935,9 +939,11 @@ public class CometWaveManager {
                     secondaryTitle = Message.raw(secondaryText);
                 }
 
-                LOGGER.info("Updating title: Wave=" + waveData.currentWave + "/" + waveData.totalWaveCount +
-                        " (boss=" + isBossWave + ") | Mobs=" + killedMobs + "/" + totalMobs +
-                        " | Time: " + timeText + (mobCountChanged ? " (mob died - real-time)" : " (periodic)"));
+                if (verboseWaveLogging) {
+                    LOGGER.info("Updating title: Wave=" + waveData.currentWave + "/" + waveData.totalWaveCount +
+                            " (boss=" + isBossWave + ") | Mobs=" + killedMobs + "/" + totalMobs +
+                            " | Time: " + timeText + (mobCountChanged ? " (mob died - real-time)" : " (periodic)"));
+                }
 
                 EventTitleUtil.hideEventTitleFromPlayer(playerRefComponent, 0.0F);
                 EventTitleUtil.showEventTitleToPlayer(
@@ -1279,7 +1285,7 @@ public class CometWaveManager {
             LOGGER.severe("Normal wave missing theme at " + blockPos + "; using skeleton as last resort");
             themeId = "skeleton";
         }
-        int zoneLevel = Math.max(1, cometZones.getOrDefault(blockPos, 1));
+        int zoneLevel = Math.max(1, waveState.getZoneOrDefault(blockPos, 1));
 
         // Get mob list for this wave
         String[] mobList = WaveThemeProvider.getMobListForWave(tier, themeId, waveIndex);
@@ -1429,7 +1435,7 @@ public class CometWaveManager {
             LOGGER.severe("Boss wave missing theme at " + blockPos + "; using skeleton as last resort");
             themeId = "skeleton";
         }
-        int zoneLevel = Math.max(1, cometZones.getOrDefault(blockPos, 1));
+        int zoneLevel = Math.max(1, waveState.getZoneOrDefault(blockPos, 1));
 
         // Get bosses for this specific wave
         java.util.List<String> bosses = WaveThemeProvider.getBossesForWave(tier, themeId, waveIndex);
@@ -1684,10 +1690,8 @@ public class CometWaveManager {
             // Get theme ID for potential reward override
             String themeId = waveData.themeId != null ? waveData.themeId : cometThemes.get(blockPos);
 
-            Integer zoneId = cometZones.get(blockPos);
-            if (zoneId == null) {
-                zoneId = 1;
-            }
+            int zoneId = Math.max(1, waveState.getZoneOrDefault(blockPos, 1));
+            LOGGER.info("[CometWaveManager] Reward zone resolved to Varyon ring " + zoneId + " for comet at " + blockPos);
 
             generateTierRewards(tier, themeId, zoneId, allItems, droppedItemIds);
 

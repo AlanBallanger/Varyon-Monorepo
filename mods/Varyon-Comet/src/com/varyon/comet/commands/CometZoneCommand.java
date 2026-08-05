@@ -57,14 +57,15 @@ public class CometZoneCommand extends AbstractWorldCommand {
             
             // Force update zone info by getting player position and triggering zone check
             // The WorldMapTracker updates zone info periodically, but we can check it directly
-            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> playerRef = 
+            com.hypixel.hytale.component.Ref<com.hypixel.hytale.server.core.universe.world.storage.EntityStore> playerRef =
                 player.getReference();
+            org.joml.Vector3d playerPos = null;
             if (playerRef != null && playerRef.isValid()) {
-                com.hypixel.hytale.server.core.modules.entity.component.TransformComponent transform = 
+                com.hypixel.hytale.server.core.modules.entity.component.TransformComponent transform =
                     store.getComponent(playerRef, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
                 if (transform != null) {
-                    org.joml.Vector3d pos = transform.getPosition();
-                    LOGGER.info("Player position: " + pos + " - checking zone info");
+                    playerPos = transform.getPosition();
+                    LOGGER.info("Player position: " + playerPos + " - checking zone info");
                 }
             }
             
@@ -80,7 +81,12 @@ public class CometZoneCommand extends AbstractWorldCommand {
             String zoneName = zoneInfo.zoneName();
             String regionName = zoneInfo.regionName();
 
-            int varyonRing = VaryonZoneResolver.resolveVaryonRing(player);
+            // Same resolution comets use, so this command reports the ring rewards will actually be based on
+            int varyonRing = playerPos != null
+                    ? VaryonZoneResolver.resolveVaryonRingForComet(
+                            playerPos.x, playerPos.z,
+                            player.getWorld() != null ? player.getWorld().getName() : null, player)
+                    : VaryonZoneResolver.resolveVaryonRing(player);
             int hytaleZone = VaryonZoneResolver.resolveHytaleZone(player);
             int worldMapRaw = VaryonZoneResolver.resolveWorldMapZoneIndexRaw(player);
             CometConfig cfgZones = CometConfig.getInstance();

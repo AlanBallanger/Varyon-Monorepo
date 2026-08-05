@@ -152,8 +152,6 @@ public class CometSpawnCommand extends AbstractWorldCommand {
             }
             Vector3d playerPos = VecUtil.toJoml(transform.getPosition());
             Player targetPlayer = store.getComponent(playerRef, Player.getComponentType());
-            int varyonRing = VaryonZoneResolver.resolveVaryonRing(targetPlayer);
-            int ringForWave = varyonRing > 0 ? varyonRing : 1;
 
             // Check if --onme flag is provided (spawn directly above player)
             boolean spawnOnPlayer = onMeArg.provided(context);
@@ -209,6 +207,10 @@ public class CometSpawnCommand extends AbstractWorldCommand {
             final Vector3i targetBlockPos = new Vector3i(spawnX, spawnY + 1, spawnZ);
             PlayerRef playerRefComp = store.getComponent(playerRef, PlayerRef.getComponentType());
             final java.util.UUID ownerUUID = playerRefComp != null ? playerRefComp.getUuid() : null;
+
+            int landingRing = VaryonZoneResolver.resolveVaryonRingForComet(
+                    targetBlockPos.x, targetBlockPos.z, world.getName(), targetPlayer);
+            final int ringForWave = landingRing > 0 ? landingRing : 1;
 
             if (themeId != null) {
                 CometWaveManager waveManager = CometModPlugin.getWaveManager();

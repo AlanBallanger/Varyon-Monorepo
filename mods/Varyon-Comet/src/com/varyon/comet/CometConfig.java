@@ -114,6 +114,9 @@ public class CometConfig {
     /** If true, mobs spawned in comet waves do not drop loot from their loot tables (rewards come only from the comet chest). If false, wave mobs use their normal droplist on death. */
     public boolean disableWaveMobLoot = true;
 
+    /** If true, log per-tick wave progress (mob counts, title updates) at INFO level. If false (default), these are logged at FINE and hidden from normal console output. */
+    public boolean verboseWaveLogging = false;
+
     public int waveTimeoutSeconds = 120;
     public double waveSpawnMinRadius = 2.0;
     public double waveSpawnMaxRadius = 8.0;
@@ -695,6 +698,9 @@ public class CometConfig {
             Boolean disableWaveMobLoot = extractBooleanValue(parseFrom, "disableWaveMobLoot");
             if (disableWaveMobLoot != null) config.disableWaveMobLoot = disableWaveMobLoot;
 
+            Boolean verboseWaveLogging = extractBooleanValue(parseFrom, "verboseWaveLogging");
+            if (verboseWaveLogging != null) config.verboseWaveLogging = verboseWaveLogging;
+
             Integer waveTimeoutSeconds = extractIntValue(parseFrom, "waveTimeoutSeconds");
             if (waveTimeoutSeconds != null) config.waveTimeoutSeconds = waveTimeoutSeconds;
 
@@ -1022,7 +1028,7 @@ public class CometConfig {
         return ThemeConfigWriter.generateFullConfig(
                 minDelaySeconds, maxDelaySeconds, spawnChance,
                 despawnTimeMinutes, minSpawnDistance, maxSpawnDistance,
-                naturalSpawnsEnabled, globalComets, injectUseForCleanSlateBlocks, disableWaveMobLoot, getEnabledWorlds(),
+                naturalSpawnsEnabled, globalComets, injectUseForCleanSlateBlocks, disableWaveMobLoot, verboseWaveLogging, getEnabledWorlds(),
                 waveTimeoutSeconds, waveSpawnMinRadius, waveSpawnMaxRadius, combatMusicAmbienceId,
                 cometLandSoundEventId, cometDestroySoundEventId, cometFallingNotifySoundEventId,
                 waveSpeedRewardEnabled, waveSpeedRewardMaxPercent, waveSpeedRewardMinPercent,

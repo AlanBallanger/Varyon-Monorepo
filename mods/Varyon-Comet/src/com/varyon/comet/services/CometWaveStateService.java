@@ -139,10 +139,21 @@ public class CometWaveStateService {
 
     public void registerCometZone(Vector3i blockPos, int zoneId) {
         cometZones.put(blockPos, zoneId);
+        Logger.getLogger(CometWaveStateService.class.getName())
+                .info("Registered Varyon ring " + zoneId + " for comet at " + blockPos);
     }
 
     public Integer getZone(Vector3i blockPos) {
         return cometZones.get(blockPos);
+    }
+
+    /** Zone for a comet, falling back to the canonical position so multi-block assets and adjusted landing positions resolve. */
+    public int getZoneOrDefault(Vector3i blockPos, int fallback) {
+        if (blockPos == null) return fallback;
+        Integer z = cometZones.get(blockPos);
+        if (z != null) return z;
+        Vector3i canonical = findRegisteredPosition(blockPos.x, blockPos.y, blockPos.z);
+        return canonical != null ? cometZones.getOrDefault(canonical, fallback) : fallback;
     }
 
     public void setTheme(Vector3i blockPos, String themeId) {

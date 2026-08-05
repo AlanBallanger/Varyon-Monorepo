@@ -45,7 +45,7 @@ tasks.named<Jar>("jar") {
 val modJar = tasks.register<Zip>("modJar") {
     group = "build"
     description = "Assemble le JAR du mod"
-    archiveBaseName.set("Varyon_Comet")
+    archiveBaseName.set("Varyon-Comet")
     archiveVersion.set(version.toString())
     archiveExtension.set("jar")
     destinationDirectory.set(layout.buildDirectory.dir("libs"))
