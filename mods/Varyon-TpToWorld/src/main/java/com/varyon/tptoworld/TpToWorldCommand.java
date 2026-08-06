@@ -3,6 +3,7 @@ package com.varyon.tptoworld;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Rotation3f;
+import com.hypixel.hytale.math.vector.Rotation3fc;
 import com.hypixel.hytale.math.vector.Transform;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
@@ -25,12 +26,14 @@ public final class TpToWorldCommand extends AbstractTargetPlayerCommand {
 
     private final RequiredArg<String> worldArg;
     private final OptionalArg<RelativeDoublePosition> positionArg;
+    private final OptionalArg<Rotation3fc> rotationArg;
 
     public TpToWorldCommand() {
-        super("tptoworld", "Téléporter un joueur vers un autre monde (au spawn de ce monde, ou à une position donnée)");
+        super("tptoworld", "Téléporter un joueur vers un autre monde (au spawn de ce monde, ou à une position/rotation données)");
         this.requirePermission("varyon.admin");
         this.worldArg = this.withRequiredArg("monde", "Nom du monde de destination", ArgTypes.STRING);
         this.positionArg = this.withOptionalArg("position", "Position X Y Z de destination (optionnel)", ArgTypes.RELATIVE_POSITION);
+        this.rotationArg = this.withOptionalArg("rotation", "Rotation pitch yaw roll en degrés (optionnel, nécessite position)", ArgTypes.ROTATION);
     }
 
     @Override
@@ -45,11 +48,18 @@ public final class TpToWorldCommand extends AbstractTargetPlayerCommand {
         }
 
         RelativeDoublePosition position = context.get(positionArg);
+        Rotation3fc rotationDegrees = context.get(rotationArg);
 
         Teleport teleportComponent;
         if (position != null) {
             Vector3d destination = position.getRelativePosition(new Vector3d(0, 0, 0), targetWorld);
-            teleportComponent = Teleport.createForPlayer(targetWorld, destination, Rotation3f.ZERO);
+            Rotation3fc rotation = rotationDegrees != null
+                    ? new Rotation3f(
+                            (float) Math.toRadians(rotationDegrees.pitch()),
+                            (float) Math.toRadians(rotationDegrees.yaw()),
+                            (float) Math.toRadians(rotationDegrees.roll()))
+                    : new Rotation3f(0f, 0f, 0f);
+            teleportComponent = Teleport.createForPlayer(targetWorld, destination, rotation);
         } else {
             Transform spawnPoint = targetWorld.getWorldConfig().getSpawnProvider().getSpawnPoint(targetRef, store);
             if (spawnPoint == null) {

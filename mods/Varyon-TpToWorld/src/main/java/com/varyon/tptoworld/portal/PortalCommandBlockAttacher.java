@@ -37,6 +37,7 @@ public final class PortalCommandBlockAttacher {
                 if (chunkStore != null) {
                     chunkStore.putComponent(entityRef, VaryonPortalCommandBlock.getComponentType(), custom);
                     if (VaryonPortalCommandBlock.getAt(world, x, y, z) != null) {
+                        chunk.markNeedsSaving();
                         return true;
                     }
                 }
@@ -56,7 +57,11 @@ public final class PortalCommandBlockAttacher {
                 int rotation = chunk.getRotationIndex(localX, y, localZ);
                 chunk.setState(localX, y, localZ, blockType, rotation, holder);
             }
-            return VaryonPortalCommandBlock.getAt(world, x, y, z) != null;
+            boolean ok = VaryonPortalCommandBlock.getAt(world, x, y, z) != null;
+            if (ok) {
+                chunk.markNeedsSaving();
+            }
+            return ok;
         } catch (Exception ignored) {
             return false;
         }
