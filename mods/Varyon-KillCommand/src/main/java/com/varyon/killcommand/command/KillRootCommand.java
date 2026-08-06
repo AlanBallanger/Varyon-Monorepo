@@ -15,6 +15,7 @@ public final class KillRootCommand extends CommandBase {
         this.requirePermission("varyon.admin");
         this.addSubCommand(new KillMobsCommand());
         this.addSubCommand(new KillMobCommand());
+        this.addSubCommand(new KillEntitiesCommand());
         this.addSubCommand(new KillPlayerCommand());
         this.addUsageVariant(new KillDirectPlayerVariant());
     }
@@ -22,6 +23,7 @@ public final class KillRootCommand extends CommandBase {
     @Override
     protected void executeSync(@Nonnull CommandContext context) {
         context.sendMessage(Message.raw("Usage : /kill mobs <rayon>"));
+        context.sendMessage(Message.raw("Objets et projectiles au sol : /kill entities <rayon>"));
         context.sendMessage(Message.raw("Mob précis : /kill mob <mob> (rayon fixe de 20 blocs)"));
         context.sendMessage(Message.raw("Mob précis (personnalisé) : /kill mob <mob> <quantité> <rayon>"));
         context.sendMessage(Message.raw("Joueur direct : /kill <joueur>"));
