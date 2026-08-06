@@ -657,7 +657,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
     private static List<DropdownEntryInfo> arenaDropdownEntries() {
         List<Arena> arenas = new ArrayList<>(ArenaRegistry.getAll());
-        arenas.sort(Comparator.comparing(a -> a.arenaId == null ? "" : a.arenaId, String.CASE_INSENSITIVE_ORDER));
+        arenas.sort((a, b) -> compareNatural(
+                a == null ? "" : a.arenaId,
+                b == null ? "" : b.arenaId));
         List<DropdownEntryInfo> entries = new ArrayList<>();
         entries.add(new DropdownEntryInfo(LocalizableString.fromString("(arène)"), ""));
         for (Arena arena : arenas) {
@@ -673,10 +675,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     @Nonnull
     private static List<DropdownEntryInfo> bossDropdownEntries() {
         List<BossDefinition> bosses = new ArrayList<>(BossRegistry.getAll().values());
-        bosses.sort(Comparator.comparing(
-                b -> b == null || b.bossName == null ? "" : b.bossName,
-                String.CASE_INSENSITIVE_ORDER
-        ));
+        bosses.sort((a, b) -> compareNatural(
+                a == null ? "" : a.bossName,
+                b == null ? "" : b.bossName));
         List<DropdownEntryInfo> entries = new ArrayList<>();
         entries.add(new DropdownEntryInfo(LocalizableString.fromString("(boss)"), ""));
         for (BossDefinition boss : bosses) {
@@ -949,7 +950,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
     private static List<Arena> snapshotArenas() {
         List<Arena> arenas = new ArrayList<>(ArenaRegistry.getAll());
-        arenas.sort(Comparator.comparing(a -> a.arenaId == null ? "" : a.arenaId, String.CASE_INSENSITIVE_ORDER));
+        arenas.sort((a, b) -> compareNatural(
+                a == null ? "" : a.arenaId,
+                b == null ? "" : b.arenaId));
         return arenas;
     }
 
@@ -962,7 +965,51 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 names.add(boss.bossName);
             }
         }
+        names.sort(BossArenaConfigPage::compareNatural);
         return names;
+    }
+
+    /**
+     * Alphabetical, but digit runs compare as numbers so "tier2" sorts before "tier10".
+     * Case-insensitive, with a case-sensitive tiebreak for stability.
+     */
+    static int compareNatural(String left, String right) {
+        String a = left == null ? "" : left;
+        String b = right == null ? "" : right;
+        int i = 0;
+        int j = 0;
+        while (i < a.length() && j < b.length()) {
+            char ca = a.charAt(i);
+            char cb = b.charAt(j);
+            if (Character.isDigit(ca) && Character.isDigit(cb)) {
+                int startA = i;
+                int startB = j;
+                while (i < a.length() && Character.isDigit(a.charAt(i))) {
+                    i++;
+                }
+                while (j < b.length() && Character.isDigit(b.charAt(j))) {
+                    j++;
+                }
+                String numA = a.substring(startA, i).replaceFirst("^0+(?=.)", "");
+                String numB = b.substring(startB, j).replaceFirst("^0+(?=.)", "");
+                if (numA.length() != numB.length()) {
+                    return numA.length() - numB.length();
+                }
+                int cmp = numA.compareTo(numB);
+                if (cmp != 0) {
+                    return cmp;
+                }
+                continue;
+            }
+            int cmp = Character.compare(Character.toLowerCase(ca), Character.toLowerCase(cb));
+            if (cmp != 0) {
+                return cmp;
+            }
+            i++;
+            j++;
+        }
+        int remaining = (a.length() - i) - (b.length() - j);
+        return remaining != 0 ? remaining : a.compareTo(b);
     }
 
     private static String nextArenaId() {
@@ -1340,6 +1387,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 handleTimedAdd();
             } else if (action.startsWith("timed_delete_")) {
                 handleTimedDelete(action.substring("timed_delete_".length()));
+            } else if (action.startsWith("timed_move_up_")) {
+                handleTimedMove(action.substring("timed_move_up_".length()), data, -1);
+            } else if (action.startsWith("timed_move_down_")) {
+                handleTimedMove(action.substring("timed_move_down_".length()), data, 1);
             } else if (action.startsWith("timed_toggle_enabled_")) {
                 handleTimedFieldToggle(action.substring("timed_toggle_enabled_".length()), data, "enabled");
             } else if (action.startsWith("timed_toggle_mode_")) {
@@ -3172,6 +3223,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 continue;
             }
 
+            // Reorder arrows: hidden at the ends, where there is nothing to swap with.
+            cmd.set("#TimedMoveUp" + suffix + ".Visible", row > 1);
+            cmd.set("#TimedMoveDown" + suffix + ".Visible", row < rows.size());
+
             BossArenaConfig.TimedBossSpawn entry = rows.get(row - 1);
             boolean interval = entry != null && entry.isIntervalMode();
             boolean manual = entry != null && entry.isManualMode();
@@ -3276,6 +3331,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     EventData.of("Action", "timed_pop_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedDelete" + suffix,
                     EventData.of("Action", "timed_delete_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedMoveUp" + suffix,
+                    buildBossTimedSnapshotEvent("timed_move_up_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedMoveDown" + suffix,
+                    buildBossTimedSnapshotEvent("timed_move_down_" + row));
 
             for (String fieldId : new String[]{
                     "#TimedBossId" + suffix, "#TimedArenaId" + suffix, "#TimedMinPlayers" + suffix,
@@ -3434,6 +3493,40 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         cfg.save();
         plugin.refreshTimedBossSpawns();
         bossStatusText = "Règle supprimée.";
+        rebuild();
+    }
+
+    /**
+     * Moves a planification rule one slot up ({@code direction < 0}) or down, and persists the new
+     * order. Pending edits are flushed first so reordering never discards what is on screen.
+     */
+    private void handleTimedMove(String rowToken, ConfigEventData data, int direction) {
+        int row;
+        try {
+            row = Integer.parseInt(rowToken);
+        } catch (NumberFormatException ex) {
+            return;
+        }
+        if (data != null) {
+            flushPendingTimedAutoSave(data);
+        }
+        BossArenaConfig cfg = plugin.getConfig();
+        if (cfg == null) {
+            return;
+        }
+        List<BossArenaConfig.TimedBossSpawn> rows = cfg.getTimedBossSpawns();
+        int index = row - 1;
+        int target = index + direction;
+        if (index < 0 || index >= rows.size() || target < 0 || target >= rows.size()) {
+            return;
+        }
+        BossArenaConfig.TimedBossSpawn moved = rows.get(index);
+        rows.set(index, rows.get(target));
+        rows.set(target, moved);
+        cfg.timedBossSpawns = rows;
+        cfg.save();
+        plugin.refreshTimedBossSpawns();
+        bossStatusText = "Ordre des règles mis à jour.";
         rebuild();
     }
 

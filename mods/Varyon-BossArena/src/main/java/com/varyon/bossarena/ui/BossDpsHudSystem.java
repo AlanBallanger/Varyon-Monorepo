@@ -208,13 +208,17 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
         for (var entry : lastFightSnapshotByPlayer.entrySet()) {
             UUID playerUuid = entry.getKey();
             FightSnapshot snapshot = entry.getValue();
-            if (!event.eventId.equals(snapshot.eventId())) {
+            if (!event.eventId.equals(snapshot.eventId())
+                    || playersUpdatedThisTick.contains(playerUuid)) {
                 continue;
             }
             BossDpsHud hud = BossDpsHud.get(playerUuid);
             if (hud != null) {
+                // The fight is still running: replay the HP gauge, never the post-kill "X monstres"
+                // view. Passing personalKills here made the HUD flip between HP and kills whenever a
+                // single tick failed to read the boss.
                 hud.updateFight(snapshot.bossName(), snapshot.bossHpCurrent(), snapshot.bossHpMax(),
-                        snapshot.rows(), snapshot.personalKills());
+                        snapshot.rows());
             }
             playersUpdatedThisTick.add(playerUuid);
             playersWithHudShown.add(playerUuid);

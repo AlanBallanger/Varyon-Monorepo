@@ -4,7 +4,6 @@ import com.varyon.bossarena.BossArenaPlugin;
 import com.varyon.bossarena.config.BossArenaConfigPage;
 import com.varyon.bossarena.util.BossArenaCleanup;
 import com.varyon.bossarena.util.VecUtil;
-import com.varyon.bossarena.data.Arena;
 import com.varyon.bossarena.data.ArenaRegistry;
 import com.varyon.bossarena.data.BossDefinition;
 import com.varyon.bossarena.data.BossRegistry;
@@ -67,10 +66,8 @@ public final class BossArenaCommand extends AbstractCommand {
         this.plugin = plugin;
         requireAdminPermission(this);
 
-        addSubCommand(new ArenaRoot(plugin));
         addSubCommand(new SpawnBoss(plugin));
         addSubCommand(new Reload(plugin));
-        addSubCommand(new Config(plugin));
         addSubCommand(new ShopRoot(plugin));
         addSubCommand(new Cleanup(plugin));
     }
@@ -268,155 +265,35 @@ public final class BossArenaCommand extends AbstractCommand {
         return nearest;
     }
 
+    /** Bare /bossarena opens the config GUI; arenas are managed from there, not from subcommands. */
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-        ctx.sendMessage(Message.raw(
-                "Use: /bossarena arena <create|delete|list> OR /bossarena spawn <bossId> <arenaId|here> OR /bossarena reload OR /bossarena config OR /bossarena shop [place|remove <id>] OR /bossarena cleanup"
-        ));
-        return CompletableFuture.completedFuture(null);
+        return openConfigGui(ctx, plugin);
     }
 
-    // ============================================================
-    // /bossarena arena ...
-    // ============================================================
-    static final class ArenaRoot extends AbstractCommand {
-
-        ArenaRoot(BossArenaPlugin plugin) {
-            super("arena", "Arena management");
-            requireAdminPermission(this);
-            addSubCommand(new ArenaCreate(plugin));
-            addSubCommand(new ArenaDelete(plugin));
-            addSubCommand(new ArenaList(plugin));
-        }
-
-        @Override
-        protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-            ctx.sendMessage(Message.raw("Use: /bossarena arena <create|delete|list>"));
+    static CompletableFuture<Void> openConfigGui(@Nonnull CommandContext ctx, BossArenaPlugin plugin) {
+        if (!ctx.isPlayer()) {
+            ctx.sendMessage(Message.raw("Player-only command"));
             return CompletableFuture.completedFuture(null);
         }
-    }
 
-    private static final class ArenaCreate extends AbstractCommand {
-        private final BossArenaPlugin plugin;
-        private final RequiredArg<String> idArg;
-
-        ArenaCreate(BossArenaPlugin plugin) {
-            super("create", "Create arena at your location: /bossarena arena create <arenaId>");
-            this.plugin = plugin;
-            requireAdminPermission(this);
-            this.idArg = withRequiredArg("arenaId", "Unique arena identifier", ArgTypes.STRING);
-        }
-
-        @Override
-        protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-            if (!ctx.isPlayer()) {
-                ctx.sendMessage(Message.raw("Only players can create arenas"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            Ref<EntityStore> createRef = ctx.senderAsPlayerRef();
-            if (createRef == null || !createRef.isValid()) {
-                ctx.sendMessage(Message.raw("Could not resolve player"));
-                return CompletableFuture.completedFuture(null);
-            }
-            String arenaId = ctx.get(idArg);
-
-            if (arenaId == null || arenaId.isBlank()) {
-                ctx.sendMessage(Message.raw("Arena ID cannot be empty"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            if (ArenaRegistry.exists(arenaId)) {
-                ctx.sendMessage(Message.raw("Arena '" + arenaId + "' already exists!"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            World world = resolveWorldFromPlayerRef(createRef);
-            if (world == null) {
-                ctx.sendMessage(Message.raw("Could not resolve player world"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            return CompletableFuture.runAsync(() -> {
-                Store<EntityStore> store = createRef.getStore();
-                Player player = store.getComponent(createRef, Player.getComponentType());
-                Vector3d position = BossArenaCommand.getPlayerPosition(player);
-                String worldName = world.getName();
-
-                Arena arena = new Arena(arenaId, worldName, position);
-                arena.lootRadius = 30.0d;
-                arena.proximityRadius = 30.0d;
-                ArenaRegistry.register(arena);
-
-                plugin.saveArenas().thenRun(() -> {
-                    ctx.sendMessage(Message.raw("✓ Created arena '" + arenaId + "' at your location"));
-                    ctx.sendMessage(Message.raw(String.format("  Position: %.1f, %.1f, %.1f in %s",
-                            position.x, position.y, position.z, worldName)));
-                });
-            }, world);
-        }
-    }
-
-    private static final class ArenaDelete extends AbstractCommand {
-        private final BossArenaPlugin plugin;
-        private final RequiredArg<String> idArg;
-
-        ArenaDelete(BossArenaPlugin plugin) {
-            super("delete", "Delete an arena: /bossarena arena delete <arenaId>");
-            this.plugin = plugin;
-            requireAdminPermission(this);
-            this.idArg = withRequiredArg("arenaId", "Arena to delete", ArgTypes.STRING);
-        }
-
-        @Override
-        protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-            String arenaId = ctx.get(idArg);
-
-            if (arenaId == null || arenaId.isBlank()) {
-                ctx.sendMessage(Message.raw("Usage: /bossarena arena delete <arenaId>"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            if (!ArenaRegistry.exists(arenaId)) {
-                ctx.sendMessage(Message.raw("Arena '" + arenaId + "' does not exist!"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            Arena removed = ArenaRegistry.remove(arenaId);
-
-            plugin.saveArenas().thenRun(() -> {
-                ctx.sendMessage(Message.raw("✓ Deleted arena '" + arenaId + "'"));
-                if (removed != null) {
-                    ctx.sendMessage(Message.raw("  Was at: " + removed.toString()));
-                }
-            });
-
+        Ref<EntityStore> configRef = ctx.senderAsPlayerRef();
+        if (configRef == null || !configRef.isValid()) {
+            ctx.sendMessage(Message.raw("Could not resolve player"));
             return CompletableFuture.completedFuture(null);
         }
-    }
 
-    private static final class ArenaList extends AbstractCommand {
-        ArenaList(BossArenaPlugin plugin) {
-            super("list", "List all arenas: /bossarena arena list");
-            requireAdminPermission(this);
-        }
-
-        @Override
-        protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-            Collection<Arena> arenas = ArenaRegistry.getAll();
-
-            if (arenas.isEmpty()) {
-                ctx.sendMessage(Message.raw("No arenas registered"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            ctx.sendMessage(Message.raw("=== Registered Arenas (" + arenas.size() + ") ==="));
-            for (Arena arena : arenas) {
-                ctx.sendMessage(Message.raw("  • " + arena.toString()));
-            }
-
+        Store<EntityStore> store = configRef.getStore();
+        World world = resolveWorldFromPlayerRef(configRef);
+        if (world == null) {
+            ctx.sendMessage(Message.raw("Could not resolve player world"));
             return CompletableFuture.completedFuture(null);
         }
+
+        return CompletableFuture.runAsync(() -> {
+            Player player = store.getComponent(configRef, Player.getComponentType());
+            BossArenaConfigPage.open(configRef, store, player, plugin);
+        }, world);
     }
 
     // ============================================================
@@ -571,45 +448,6 @@ public final class BossArenaCommand extends AbstractCommand {
             });
 
             return CompletableFuture.completedFuture(null);
-        }
-    }
-
-    // ============================================================
-    // /bossarena config
-    // ============================================================
-    static final class Config extends AbstractCommand {
-        private final BossArenaPlugin plugin;
-
-        Config(BossArenaPlugin plugin) {
-            super("config", "Open the BossArena config GUI");
-            this.plugin = plugin;
-            requireAdminPermission(this);
-        }
-
-        @Override
-        protected CompletableFuture<Void> execute(@Nonnull CommandContext ctx) {
-            if (!ctx.isPlayer()) {
-                ctx.sendMessage(Message.raw("Player-only command"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            Ref<EntityStore> configRef = ctx.senderAsPlayerRef();
-            if (configRef == null || !configRef.isValid()) {
-                ctx.sendMessage(Message.raw("Could not resolve player"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            Store<EntityStore> store = configRef.getStore();
-            World world = resolveWorldFromPlayerRef(configRef);
-            if (world == null) {
-                ctx.sendMessage(Message.raw("Could not resolve player world"));
-                return CompletableFuture.completedFuture(null);
-            }
-
-            return CompletableFuture.runAsync(() -> {
-                Player player = store.getComponent(configRef, Player.getComponentType());
-                BossArenaConfigPage.open(configRef, store, player, plugin);
-            }, world);
         }
     }
 

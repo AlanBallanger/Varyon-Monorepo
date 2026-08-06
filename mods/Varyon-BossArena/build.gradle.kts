@@ -35,6 +35,7 @@ dependencies {
     compileOnly("org.jspecify:jspecify:1.0.0")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("com.google.code.gson:gson:2.11.0")
+    compileOnly("net.luckperms:api:5.4")
     compileOnly(files(resolvedHytaleServerJar))
     if (findProject(":mods:Varyon") != null) {
         compileOnly(project(":mods:Varyon"))

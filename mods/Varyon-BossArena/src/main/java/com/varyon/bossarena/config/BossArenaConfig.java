@@ -1,5 +1,6 @@
 package com.varyon.bossarena.config;
 
+import com.varyon.bossarena.BossArenaPlugin;
 import com.varyon.bossarena.util.NotificationRadiusConstants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -47,17 +48,33 @@ public final class BossArenaConfig {
     private static final String DEFAULT_CURRENCY_ITEM_ID = "Coin";
     private static final String DEFAULT_FALLBACK_CURRENCY_ITEM_ID = "Ingredient_Bar_Iron";
     private static final int MIN_COUNTDOWN_MINUTES = 1;
+    private static final double DEFAULT_OVERLEVEL_DAMAGE_PENALTY_PERCENT = 15.0d;
     private static final double DEFAULT_FORCED_AGGRO_INTERVAL_SECONDS = 3.0d;
     private static final double MIN_FORCED_AGGRO_INTERVAL_SECONDS = 0.5d;
     private static final double MAX_FORCED_AGGRO_INTERVAL_SECONDS = 60.0d;
-    private static final Path CONFIG_PATH = Path.of("mods", "Varyon-BossArena", "config.json");
     private static final Path LEGACY_CONFIG_PATH = Path.of("mods", "BossArena", "config.json");
+    private static final Path LEGACY_HYPHEN_CONFIG_PATH =
+            Path.of("mods", "Varyon-BossArena", "config.json");
+
+    private static Path configPath() {
+        BossArenaPlugin plugin = BossArenaPlugin.getInstance();
+        Path modRoot = plugin != null
+                ? plugin.getModRootDirectory()
+                : Path.of("mods", "Varyon-BossArena");
+        return modRoot.resolve("config.json");
+    }
 
     /**
      * When false (default), routine INFO diagnostics are suppressed and only warnings/errors
      * plus startup lines are logged. Warnings and errors are never suppressed.
      */
     public boolean debugLogs = false;
+    /**
+     * Damage penalty per tier of overlevel, as a percentage. A player whose unlocked Varyon tier is
+     * above the boss zone's tier deals {@code (1 - pct/100)^diff} damage, so the default 15 gives
+     * ×0.85 per tier: 3 tiers above is ×0.85³ ≈ 61.4%. 0 disables the penalty.
+     */
+    public double overlevelDamagePenaltyPercent = DEFAULT_OVERLEVEL_DAMAGE_PENALTY_PERCENT;
     /** Distance (blocks) within which players see boss event title/subtitle. */
     public double notificationRadius = NotificationRadiusConstants.DEFAULT;
     public String currencyItemId = DEFAULT_CURRENCY_ITEM_ID;
@@ -571,9 +588,10 @@ public final class BossArenaConfig {
 
     public void save() {
         try {
-            Files.createDirectories(CONFIG_PATH.getParent());
+            Path configPath = configPath();
+            Files.createDirectories(configPath.getParent());
             String json = new GsonBuilder().setPrettyPrinting().create().toJson(this);
-            Files.writeString(CONFIG_PATH, json);
+            Files.writeString(configPath, json);
             LOGGER.info("Successfully saved BossArena config");
         } catch (IOException e) {
             LOGGER.severe("Failed to save BossArena config: " + e.getMessage());
@@ -583,8 +601,9 @@ public final class BossArenaConfig {
     public void load() {
         try {
             migrateLegacyConfigIfNeeded();
-            if (Files.exists(CONFIG_PATH)) {
-                String content = Files.readString(CONFIG_PATH);
+            Path configPath = configPath();
+            if (Files.exists(configPath)) {
+                String content = Files.readString(configPath);
                 BossArenaConfig loaded = new GsonBuilder().create().fromJson(content, BossArenaConfig.class);
                 if (loaded != null) {
                     applyLoadedConfig(loaded);
@@ -609,12 +628,24 @@ public final class BossArenaConfig {
 
     private void migrateLegacyConfigIfNeeded() {
         try {
-            if (Files.exists(CONFIG_PATH) || !Files.isRegularFile(LEGACY_CONFIG_PATH)) {
+            Path configPath = configPath();
+            if (Files.exists(configPath)) {
                 return;
             }
-            Files.createDirectories(CONFIG_PATH.getParent());
-            Files.copy(LEGACY_CONFIG_PATH, CONFIG_PATH);
-            LOGGER.info("Migrated config from " + LEGACY_CONFIG_PATH + " to " + CONFIG_PATH);
+            Path source = null;
+            if (Files.isRegularFile(LEGACY_HYPHEN_CONFIG_PATH)
+                    && !LEGACY_HYPHEN_CONFIG_PATH.toAbsolutePath().normalize()
+                            .equals(configPath.toAbsolutePath().normalize())) {
+                source = LEGACY_HYPHEN_CONFIG_PATH;
+            } else if (Files.isRegularFile(LEGACY_CONFIG_PATH)) {
+                source = LEGACY_CONFIG_PATH;
+            }
+            if (source == null) {
+                return;
+            }
+            Files.createDirectories(configPath.getParent());
+            Files.copy(source, configPath);
+            LOGGER.info("Migrated config from " + source + " to " + configPath);
         } catch (IOException e) {
             LOGGER.warning("Failed to migrate legacy BossArena config: " + e.getMessage());
         }
@@ -642,6 +673,9 @@ public final class BossArenaConfig {
     private void applyLoadedConfig(BossArenaConfig loaded) {
         this.debugLogs = loaded.debugLogs;
         DEBUG_LOGS_ENABLED = loaded.debugLogs;
+        this.overlevelDamagePenaltyPercent =
+                sanitizeOverlevelPenaltyPercent(loaded.overlevelDamagePenaltyPercent);
+        OVERLEVEL_PENALTY_PERCENT = this.overlevelDamagePenaltyPercent;
         this.notificationRadius = NotificationRadiusConstants.clamp(loaded.notificationRadius);
         this.currencyItemId = sanitizeItemId(loaded.currencyItemId, DEFAULT_CURRENCY_ITEM_ID);
         this.fallbackCurrencyItemId = sanitizeItemId(
@@ -667,6 +701,35 @@ public final class BossArenaConfig {
         return DEBUG_LOGS_ENABLED;
     }
 
+    /** Mirrors {@link #overlevelDamagePenaltyPercent} for damage-path access without a config reference. */
+    private static volatile double OVERLEVEL_PENALTY_PERCENT = DEFAULT_OVERLEVEL_DAMAGE_PENALTY_PERCENT;
+
+    private static double sanitizeOverlevelPenaltyPercent(double raw) {
+        if (!Double.isFinite(raw) || raw <= 0.0d) {
+            return 0.0d;
+        }
+        return Math.min(100.0d, raw);
+    }
+
+    /**
+     * Damage multiplier for a player {@code tierDifference} tiers above the boss zone.
+     * Returns 1 when the player is at or below the boss tier, or when the penalty is disabled.
+     */
+    public static float overlevelDamageMultiplier(int tierDifference) {
+        if (tierDifference <= 0) {
+            return 1.0f;
+        }
+        double percent = OVERLEVEL_PENALTY_PERCENT;
+        if (percent <= 0.0d) {
+            return 1.0f;
+        }
+        double perTier = 1.0d - (percent / 100.0d);
+        if (perTier <= 0.0d) {
+            return 0.0f;
+        }
+        return (float) Math.pow(perTier, tierDifference);
+    }
+
     /** Returns the configured notification radius (blocks), clamped to valid range. */
     public double getNotificationRadius() {
         return NotificationRadiusConstants.clamp(notificationRadius);
@@ -687,6 +750,8 @@ public final class BossArenaConfig {
     private void applyDefaultConfig() {
         this.debugLogs = false;
         DEBUG_LOGS_ENABLED = false;
+        this.overlevelDamagePenaltyPercent = DEFAULT_OVERLEVEL_DAMAGE_PENALTY_PERCENT;
+        OVERLEVEL_PENALTY_PERCENT = DEFAULT_OVERLEVEL_DAMAGE_PENALTY_PERCENT;
         this.notificationRadius = NotificationRadiusConstants.DEFAULT;
         this.currencyItemId = DEFAULT_CURRENCY_ITEM_ID;
         this.fallbackCurrencyItemId = DEFAULT_FALLBACK_CURRENCY_ITEM_ID;

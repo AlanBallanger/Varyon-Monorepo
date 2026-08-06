@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.component.system.tick.TickingSystem;
 import com.hypixel.hytale.server.core.entity.InteractionManager;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
+import com.varyon.bossarena.util.BossHealthScale;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
@@ -186,9 +187,42 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
         if (applyPeriodicScalers) {
             applyTurnRateMultiplier(entityUuid, world, modifiers);
             applyInteractionCooldownScaling(entityUuid, world, modifiers);
+            resyncHealthModifier(entityUuid, store, external, modifiers);
         }
         if (applyRegenTick) {
             applyFlatRegeneration(entityUuid, store, external, modifiers);
+        }
+    }
+
+    /**
+     * Re-asserts the BossArena MAX-HP modifier, because Varyon's MobScalingRefSystem re-adds its own
+     * {@code Varyon_Health} modifier whenever the entity is re-added to the store (chunk reload,
+     * archetype change). That raises MAX without raising current HP, so the entity looks like it
+     * spawned below full and then regenerates. Uses applyModifierOnly so player damage is preserved.
+     */
+    private void resyncHealthModifier(UUID entityUuid,
+                                      Store<EntityStore> store,
+                                      EntityStore external,
+                                      BossModifiers modifiers) {
+        float hpMultiplier = modifiers.hpMultiplier();
+        if (!Float.isFinite(hpMultiplier) || hpMultiplier <= 0.0f) {
+            return;
+        }
+        float worldFactor = trackingSystem.getWorldHealthFactor(entityUuid);
+        if (worldFactor <= 0.01f) {
+            return;
+        }
+        try {
+            Ref<EntityStore> entityRef = external != null ? external.getRefFromUUID(entityUuid) : null;
+            if (entityRef == null || !entityRef.isValid()) {
+                return;
+            }
+            Object statMapObj = store.getComponent(entityRef, EntityStatMap.getComponentType());
+            if (statMapObj instanceof EntityStatMap statMap) {
+                BossHealthScale.applyModifierOnly(statMap, hpMultiplier, worldFactor);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Failed to resync health modifier for entity " + entityUuid, e);
         }
     }
 

@@ -207,20 +207,9 @@ public class BossLootHandler {
             return;
         }
 
-        // Damage chart: take snapshot for this event and show to eligible players
-        if (eventId != null && damageChartTracker != null && damageChartOpener != null && store != null) {
-            var snapshot = damageChartTracker.takeSnapshotAndRemove(eventId);
-            if (!snapshot.isEmpty()) {
-                List<DamageChartOpener.DisplayRow> rows = new ArrayList<>();
-                for (BossDamageChartTracker.DamageEntry e : snapshot) {
-                    // Resolve against every player currently in the world, not just those eligible
-                    // for loot — a player who dealt damage then moved away (or is out of the loot
-                    // radius) is still online and must show their username, not their raw UUID.
-                    String name = resolveDisplayName(e.playerUuid(), playerRefs);
-                    rows.add(new DamageChartOpener.DisplayRow(name, e.damage()));
-                }
-                damageChartOpener.openChart(world, eligiblePlayers, rows, bossName, store);
-            }
+        // The per-event damage snapshot is dropped here: the chat summary it fed has been removed.
+        if (eventId != null && damageChartTracker != null) {
+            damageChartTracker.takeSnapshotAndRemove(eventId);
         }
 
         // Execute commands if any
@@ -272,19 +261,6 @@ public class BossLootHandler {
         spawnLootChest(world, chestCopy);
         // Hard timeout while untouched: chest is removed if nobody opens it within 60s.
         scheduleUntouchedChestExpiry(world, chestCopy);
-    }
-
-    private static String resolveDisplayName(UUID playerUuid, Iterable<PlayerRef> worldPlayers) {
-        if (playerUuid == null) {
-            return "Unknown";
-        }
-        for (PlayerRef ref : worldPlayers) {
-            if (ref != null && playerUuid.equals(EntityComponents.uuid(ref))) {
-                String name = ref.getUsername();
-                return (name != null && !name.isBlank()) ? name : playerUuid.toString();
-            }
-        }
-        return playerUuid.toString();
     }
 
     private static void executeConsoleCommand(PlayerRef player, String cmd, String bossName) {

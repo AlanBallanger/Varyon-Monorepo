@@ -96,7 +96,7 @@ public final class BossArenaPlugin extends JavaPlugin {
     public static final String SHOP_OPEN_INTERACTION_ID = "BossArena_OpenShopNpc";
     public static final String SHOP_NPC_TYPE_ID = "bossarena_shop_guard";
     public static final PluginIdentifier RPG_LEVELING_PLUGIN_ID = new PluginIdentifier("Zuxaw", "RPGLeveling");
-    private static final Path MOD_ROOT = Path.of("mods", "Varyon-BossArena");
+    private static final Path LEGACY_HYPHEN_MOD_ROOT = Path.of("mods", "Varyon-BossArena");
     private static final ScheduledExecutorService SHOP_REBIND_EXECUTOR =
             Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "BossArena-ShopRebind");
@@ -486,8 +486,9 @@ public final class BossArenaPlugin extends JavaPlugin {
         }
     }
 
-    private Path getModRootDirectory() {
-        return MOD_ROOT;
+    public Path getModRootDirectory() {
+        Path dataDirectory = getDataDirectory();
+        return dataDirectory != null ? dataDirectory : LEGACY_HYPHEN_MOD_ROOT;
     }
 
     /** Copies a single resource to a path; used only for legacy data migration. */
@@ -512,10 +513,7 @@ public final class BossArenaPlugin extends JavaPlugin {
                     getLogger().atInfo().log("Migrated BossArena data from mods/BossArena to " + canonicalRoot);
                 }
             }
-            Path legacyRoot = getDataDirectory();
-            if (legacyRoot == null) {
-                return;
-            }
+            Path legacyRoot = LEGACY_HYPHEN_MOD_ROOT;
 
             Path canonical = canonicalRoot.toAbsolutePath().normalize();
             Path legacy = legacyRoot.toAbsolutePath().normalize();
@@ -1158,6 +1156,14 @@ public final class BossArenaPlugin extends JavaPlugin {
             // Best-effort cleanup: remove any existing shop NPCs of this type very close to the saved location
             // so we never stack multiple guards at the same shop.
             Store<EntityStore> store = world.getEntityStore() != null ? world.getEntityStore().getStore() : null;
+            // The pre-spawn scan only sees NPCs in loaded chunks. If a guard is already there but its
+            // chunk was not loaded when we decided to respawn, spawning again would stack a duplicate
+            // that survives every restart. Re-check now that we are on the world thread.
+            if (store != null && findShopNpcRefNearLocation(store, location, shopNpcId) != null) {
+                getLogger().atInfo().log("Shop NPC already present at " + location.x + ", " + location.y
+                        + ", " + location.z + "; skipping respawn.");
+                return;
+            }
             if (store != null) {
                 store.forEachChunk(
                         com.hypixel.hytale.component.query.Query.and(

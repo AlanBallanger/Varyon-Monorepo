@@ -1942,6 +1942,8 @@ public class BossTrackingSystem {
         public long spawnedAtEpochMs;
         /** Zone/world HP bake factor; {@code <= 0} = unknown. */
         public float worldHealthFactor;
+        /** Varyon difficulty zone id at the spawn point; 0 = unknown (no overlevel penalty). */
+        public int varyonZoneId;
 
         public BossData(String bossName,
                         BossModifiers modifiers,
@@ -1962,6 +1964,16 @@ public class BossTrackingSystem {
             this.eventId = eventId;
             this.spawnedAtEpochMs = spawnedAtEpochMs;
             this.worldHealthFactor = 0.0f;
+            this.varyonZoneId = resolveVaryonZoneId(world, spawnLocation);
+        }
+
+        /** Resolved once at spawn: the arena is fixed, and the damage path must stay allocation-free. */
+        private static int resolveVaryonZoneId(World world, Vector3d spawnLocation) {
+            if (world == null || spawnLocation == null) {
+                return 0;
+            }
+            return com.varyon.bossarena.compat.VaryonZoneLookup.zoneIdAt(
+                    spawnLocation.x, spawnLocation.z, world.getName());
         }
     }
 

@@ -12,6 +12,9 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
+import com.hypixel.hytale.server.core.universe.world.SoundUtil;
+import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
+import com.hypixel.hytale.protocol.SoundCategory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class BossWaveNotificationService {
@@ -34,6 +38,13 @@ public final class BossWaveNotificationService {
     private static final long WORLD_ALERT_DURATION_MILLIS = (long) (WORLD_ALERT_DURATION_SECONDS * 1000f);
     /** Slightly above the 5s scheduler tick so grace / waiting titles stay visible between refreshes. */
     private static final float TIMED_ARENA_TITLE_DURATION_SECONDS = 6.0f;
+    /** Slightly over 1s so each countdown tick stays up until the next one replaces it. */
+    private static final float WAVE_COUNTDOWN_TITLE_DURATION_SECONDS = 1.2f;
+    /** "Survivez à cette vague" fade-out once the wave spawns. */
+    private static final float WAVE_START_TITLE_DURATION_SECONDS = 2.0f;
+    /** Ticks alongside each wave countdown title, like {@code /sound 2d SFX_Incorrect_Tool}. */
+    private static final String WAVE_COUNTDOWN_SOUND_EVENT = "SFX_Incorrect_Tool";
+    private static final Map<String, Integer> SOUND_EVENT_INDEX_CACHE = new ConcurrentHashMap<>();
     private static final Map<UUID, Long> TIMED_ALERT_SUPPRESS_UNTIL = new ConcurrentHashMap<>();
     private static final Pattern PLACEHOLDER_PATTERN =
             Pattern.compile("\\$([A-Za-z][A-Za-z0-9_]*)|\\{([A-Za-z][A-Za-z0-9_]*)\\}");
@@ -589,6 +600,88 @@ public final class BossWaveNotificationService {
         Message subtitle = toPlainMessage("En attente de joueurs ... "
                 + Math.max(0, currentPlayers) + "/" + requiredPlayers);
         showTitleInRadius(world, arenaCenter, radiusBlocks, title, subtitle, TIMED_ARENA_TITLE_DURATION_SECONDS);
+    }
+
+    /**
+     * Plays a 2D sound to every player inside the radius, mirroring {@code /sound 2d <name>}.
+     * Resolves the sound event index by name once and caches it.
+     */
+    private static void playSound2dInRadius(World world, Vector3d center, double radiusBlocks, String soundEventName) {
+        int soundIndex = resolveSoundEventIndex(soundEventName);
+        if (soundIndex <= 0) {
+            return;
+        }
+        double radiusSq = radiusBlocks * radiusBlocks;
+        for (PlayerRef playerRef : world.getPlayerRefs()) {
+            if (playerRef == null || !playerRef.isValid()) {
+                continue;
+            }
+            Transform transform = playerRef.getTransform();
+            org.joml.Vector3d pos = transform != null ? transform.getPosition() : null;
+            if (pos == null) {
+                continue;
+            }
+            double dx = pos.x - center.x;
+            double dy = pos.y - center.y;
+            double dz = pos.z - center.z;
+            if ((dx * dx) + (dy * dy) + (dz * dz) > radiusSq) {
+                continue;
+            }
+            try {
+                SoundUtil.playSoundEvent2dToPlayer(playerRef, soundIndex, SoundCategory.SFX);
+            } catch (Exception e) {
+                LOGGER.log(Level.FINE, "Failed to play wave countdown sound", e);
+            }
+        }
+    }
+
+    private static int resolveSoundEventIndex(String soundEventName) {
+        Integer cached = SOUND_EVENT_INDEX_CACHE.get(soundEventName);
+        if (cached != null) {
+            return cached;
+        }
+        int index = 0;
+        try {
+            var assetMap = SoundEvent.getAssetMap();
+            if (assetMap != null) {
+                index = assetMap.getIndex(soundEventName);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Failed to resolve sound event '" + soundEventName + "'", e);
+        }
+        if (index <= 0) {
+            LOGGER.warning("Sound event not found: " + soundEventName);
+        }
+        SOUND_EVENT_INDEX_CACHE.put(soundEventName, index);
+        return index;
+    }
+
+    /** Countdown shown every second before a wave spawns: "Vague X" over "N secondes". */
+    public static void notifyWaveCountdownTitle(World world,
+                                                Vector3d arenaCenter,
+                                                double radiusBlocks,
+                                                int waveNumber,
+                                                long secondsRemaining) {
+        if (world == null || arenaCenter == null || radiusBlocks <= 0.0d || secondsRemaining <= 0L) {
+            return;
+        }
+        Message title = toPlainMessage("Vague " + waveNumber);
+        Message subtitle = toPlainMessage(secondsRemaining + (secondsRemaining > 1L ? " secondes" : " seconde"));
+        showTitleInRadius(world, arenaCenter, radiusBlocks, title, subtitle, WAVE_COUNTDOWN_TITLE_DURATION_SECONDS);
+        playSound2dInRadius(world, arenaCenter, radiusBlocks, WAVE_COUNTDOWN_SOUND_EVENT);
+    }
+
+    /** Shown when the wave actually spawns; fades out over {@link #WAVE_START_TITLE_DURATION_SECONDS}. */
+    public static void notifyWaveStartedTitle(World world,
+                                              Vector3d arenaCenter,
+                                              double radiusBlocks,
+                                              int waveNumber) {
+        if (world == null || arenaCenter == null || radiusBlocks <= 0.0d) {
+            return;
+        }
+        Message title = toPlainMessage("Vague " + waveNumber);
+        Message subtitle = toPlainMessage("Survivez à cette vague");
+        showTitleInRadius(world, arenaCenter, radiusBlocks, title, subtitle, WAVE_START_TITLE_DURATION_SECONDS);
     }
 
     private static void showTitleInRadius(World world,

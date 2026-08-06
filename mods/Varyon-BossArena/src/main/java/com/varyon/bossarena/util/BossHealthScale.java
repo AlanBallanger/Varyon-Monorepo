@@ -55,6 +55,12 @@ public final class BossHealthScale {
             return 1.0f;
         }
 
+        // Captured before anything strips modifiers: stripping drops MAX back to the asset value and
+        // the engine clamps current HP to it. Re-adding the modifier restores MAX but not the lost
+        // HP, so a repeated resync would shave the entity down every pass.
+        EntityStatValue before = statMap.get(healthIndex);
+        float currentBefore = before != null ? before.get() : -1f;
+
         float bossMult = sanitizeBossMult(bossHpMult);
         float worldFactor = knownWorldFactor > MIN_FACTOR
                 ? clampFactor(knownWorldFactor)
@@ -74,12 +80,36 @@ public final class BossHealthScale {
                 BossSpawnService.HEALTH_MODIFIER_KEY,
                 healthMod
         );
+
+        restoreCurrentHealth(statMap, healthIndex, currentBefore);
         return worldFactor;
     }
 
     /** Re-assert baked modifier using a previously captured world factor. */
     public static void enforce(EntityStatMap statMap, float bossHpMult, float worldFactor) {
         apply(statMap, bossHpMult, worldFactor > MIN_FACTOR ? worldFactor : 0.0f);
+    }
+
+    /**
+     * Puts current HP back to what it was before the modifier was stripped, capped at the new MAX.
+     * Only ever restores HP the clamp took away — it never heals beyond the captured value.
+     */
+    private static void restoreCurrentHealth(EntityStatMap statMap, int healthIndex, float currentBefore) {
+        if (currentBefore < 0f || !Float.isFinite(currentBefore)) {
+            return;
+        }
+        EntityStatValue health = statMap.get(healthIndex);
+        if (health == null) {
+            return;
+        }
+        float max = health.getMax();
+        if (!Float.isFinite(max) || max <= 0f) {
+            return;
+        }
+        float target = Math.min(currentBefore, max);
+        if (health.get() + 0.01f < target) {
+            statMap.setStatValue(EntityStatMap.Predictable.ALL, healthIndex, target);
+        }
     }
 
     private static float captureWorldFactor(EntityStatMap statMap, int healthIndex) {

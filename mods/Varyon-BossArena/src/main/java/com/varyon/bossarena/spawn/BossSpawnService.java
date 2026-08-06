@@ -74,6 +74,8 @@ public final class BossSpawnService {
      * stale low percentage and fire "below X%" waves at spawn.
      */
     private static final long HP_TRIGGER_INITIAL_GRACE_MS = 600L;
+    /** A wave's mobs are spread evenly across this window instead of all appearing at once. */
+    private static final long WAVE_SPAWN_SPREAD_MS = 3000L;
     private static final ScheduledExecutorService EXTRA_WAVE_SCHEDULER =
             Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "BossArena-ExtraWaves");
@@ -559,6 +561,7 @@ public final class BossSpawnService {
                         continue;
                     }
                     applyModifiers(store, npcRef, combinedMods, uuid);
+                    fillHealthToMax(store, npcRef);
                     disableDefaultEntityLoot(store, npcRef, def.bossName + "#" + (i + 1));
 
                     // Diagnostic logging for NPC behavior
@@ -920,6 +923,7 @@ public final class BossSpawnService {
         }
         LOGGER.info("Scheduled pre-boss wave execution " + (index + 1) + "/" + executions.size()
                 + " in " + delayMs + "ms.");
+        scheduleWaveCountdownTitles(world, spawnPos, nextWaveNumber.get(), delayMs);
         EXTRA_WAVE_SCHEDULER.schedule(run, delayMs, TimeUnit.MILLISECONDS);
     }
 
@@ -1253,6 +1257,8 @@ public final class BossSpawnService {
         LOGGER.info("Scheduled wave trigger '" + triggerLabel + "' execution " + executionNumber
                 + " in " + safeDelayMs + "ms for boss " + bossUuid + ".");
 
+        scheduleWaveCountdownTitles(world, spawnPos, nextWaveNumber.get(), safeDelayMs);
+
         EXTRA_WAVE_SCHEDULER.schedule(() -> world.execute(() -> {
             if (!isBossAlive(world, bossUuid, triggerLabel + "#" + executionNumber)) {
                 return;
@@ -1278,6 +1284,59 @@ public final class BossSpawnService {
             }
         }), safeDelayMs, TimeUnit.MILLISECONDS);
     }
+
+    /**
+     * Schedules one countdown title per remaining second before a wave spawns, for players inside
+     * the arena. Runs for the whole configured delay, however long it is.
+     */
+    private void scheduleWaveCountdownTitles(World world, Vector3d spawnPos, int waveNumber, long delayMs) {
+        long totalSeconds = delayMs / 1000L;
+        if (totalSeconds <= 0L) {
+            return;
+        }
+        // Resolved from the spawn point, not from a boss: pre-boss waves run before any boss exists.
+        ArenaView arena = resolveArenaViewAt(world, spawnPos);
+        if (arena == null) {
+            return;
+        }
+        for (long secondsLeft = totalSeconds; secondsLeft >= 1L; secondsLeft--) {
+            long fireAtMs = delayMs - (secondsLeft * 1000L);
+            if (fireAtMs < 0L) {
+                continue;
+            }
+            final long remaining = secondsLeft;
+            EXTRA_WAVE_SCHEDULER.schedule(() -> world.execute(() ->
+                    BossWaveNotificationService.notifyWaveCountdownTitle(
+                            world, arena.center(), arena.radius(), waveNumber, remaining)
+            ), fireAtMs, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    /** Arena containing this position (center/radius), or null when none matches. */
+    private ArenaView resolveArenaViewAt(World world, Vector3d position) {
+        if (world == null || position == null) {
+            return null;
+        }
+        String worldName = world.getName();
+        for (Arena arena : ArenaRegistry.getAll()) {
+            if (arena == null || arena.worldName == null || !arena.worldName.equals(worldName)) {
+                continue;
+            }
+            double radius = arena.getBannerRadius();
+            if (radius <= 0.0d) {
+                continue;
+            }
+            Vector3d center = arena.getPosition();
+            double dx = position.x - center.x;
+            double dz = position.z - center.z;
+            if ((dx * dx) + (dz * dz) <= radius * radius) {
+                return new ArenaView(center, radius);
+            }
+        }
+        return null;
+    }
+
+    private record ArenaView(Vector3d center, double radius) {}
 
     private void scheduleHpThresholdWave(World world,
                                          BossDefinition def,
@@ -1538,6 +1597,12 @@ public final class BossSpawnService {
 
         LOGGER.info("Executing wave " + waveNumber + " for '" + def.bossName + "' via trigger '" + triggerLabel + "'.");
 
+        ArenaView waveArena = resolveArenaViewAt(world, spawnPos);
+        if (waveArena != null) {
+            BossWaveNotificationService.notifyWaveStartedTitle(
+                    world, waveArena.center(), waveArena.radius(), waveNumber);
+        }
+
         int nearbyCount = PlayerFinder.countPlayersInRadius(world, spawnPos, 40);
         int worldCount = world.getPlayerCount();
         int playerCount = Math.max(nearbyCount, worldCount);
@@ -1560,69 +1625,34 @@ public final class BossSpawnService {
 
         int trackedAddsSpawned = 0;
         List<UUID> spawnedAddUuids = new ArrayList<>();
+        // HP-% waves lock boss damage until their adds die, and pre-boss waves are linked from the
+        // returned list, so those must exist synchronously. Everything else is staggered so a wave
+        // materialises over WAVE_SPAWN_SPREAD_MS instead of popping all at once.
+        boolean stagger = bossUuid != null
+                && (triggerLabel == null || !triggerLabel.startsWith("boss_hp_percent"));
+        int totalWaveMobs = countWaveMobs(adds, mobsPerPlayerMult, playerCount);
+        int spawnOrdinal = 0;
         for (BossDefinition.ExtraMobs.WaveAdd add : adds) {
             if (add == null || add.npcId == null || add.npcId.isBlank()) {
                 continue;
             }
             int mobCount = BossDefinition.ExtraMobs.rollMobCount(add, mobsPerPlayerMult, playerCount);
             for (int i = 0; i < mobCount; i++) {
-                Vector3d mobPos = computeWaveSpawnPosition(world, spawnPos, def.extraMobs);
-
-                var result = NPCPlugin.get().spawnNPC(
-                        world.getEntityStore().getStore(),
-                        add.npcId,
-                        null,
-                        VecUtil.toHytale(mobPos),
-                        com.hypixel.hytale.math.vector.Rotation3f.ZERO
-                );
-                if (result == null) {
-                    LOGGER.warning("Failed to spawn add '" + add.npcId + "' for wave " + waveNumber + ".");
-                    continue;
-                }
-
-                Ref<EntityStore> addRef = result.first();
-                if (addRef == null || !addRef.isValid()) {
-                    LOGGER.warning("Spawned add '" + add.npcId + "' has invalid entity reference; skipping.");
-                    continue;
-                }
-                BossModifiers addMods = new BossModifiers(
-                        Math.max(0.01f, add.hp),
-                        Math.max(0.01f, add.damage),
-                        1.0f,
-                        Math.max(0.01f, add.size),
-                        1.0f,
-                        1.0f,
-                        1.0f,
-                        1.0f,
-                        1.0f,
-                        1.0f
-                );
-                var addStore = world.getEntityStore().getStore();
-                Object addUuidObj = addStore.getComponent(addRef, UUIDComponent.getComponentType());
-                UUID addUuid = addUuidObj instanceof UUIDComponent addUuidComp ? addUuidComp.getUuid() : null;
-                BossModifiers combinedAddMods = VaryonMobScale.absorbInto(addStore, addRef, addMods);
-                applyModifiers(addStore, addRef, combinedAddMods, addUuid);
-                disableDefaultEntityLoot(addStore, addRef, add.npcId);
-                if (!addRef.isValid()) {
-                    LOGGER.warning("Spawned add '" + add.npcId + "' became invalid during setup; skipping tracking.");
-                    continue;
-                }
-
-                if (addUuid != null) {
-                    spawnedAddUuids.add(addUuid);
-                    if (bossUuid != null) {
-                        tracking.trackAdd(bossUuid, addUuid, combinedAddMods);
+                final BossDefinition.ExtraMobs.WaveAdd waveAdd = add;
+                final int ordinal = spawnOrdinal++;
+                long spreadDelayMs = stagger ? waveSpawnOffsetMs(ordinal, totalWaveMobs) : 0L;
+                if (spreadDelayMs <= 0L) {
+                    UUID spawned = spawnWaveMob(world, def, spawnPos, waveNumber, bossUuid, waveAdd, ordinal);
+                    if (spawned != null) {
+                        spawnedAddUuids.add(spawned);
                         trackedAddsSpawned++;
-                    } else {
-                        pendingDetachedAddModifiers.put(addUuid, combinedAddMods);
                     }
+                } else {
+                    trackedAddsSpawned++;
+                    EXTRA_WAVE_SCHEDULER.schedule(() -> world.execute(() ->
+                            spawnWaveMob(world, def, spawnPos, waveNumber, bossUuid, waveAdd, ordinal)
+                    ), spreadDelayMs, TimeUnit.MILLISECONDS);
                 }
-
-                LOGGER.info("Spawned add '" + add.npcId + "' " + (i + 1) + "/" + mobCount
-                        + " (wave " + waveNumber
-                        + ", hp=" + addMods.hpMultiplier()
-                        + ", dmg=" + addMods.damageMultiplier()
-                        + ", size=" + addMods.scaleMultiplier() + ")");
             }
         }
 
@@ -1660,6 +1690,125 @@ public final class BossSpawnService {
         }
 
         return spawnedAddUuids;
+    }
+
+    /** Sets current HP to MAX. Called once at spawn, never afterwards, so it cannot heal away damage. */
+    private static void fillHealthToMax(Store<EntityStore> store, Ref<EntityStore> entityRef) {
+        if (store == null || entityRef == null || !entityRef.isValid()) {
+            return;
+        }
+        try {
+            Object statMapObj = store.getComponent(entityRef, EntityStatMap.getComponentType());
+            if (!(statMapObj instanceof EntityStatMap statMap)) {
+                return;
+            }
+            int healthIndex = DefaultEntityStatTypes.getHealth();
+            if (healthIndex < 0) {
+                return;
+            }
+            statMap.maximizeStatValue(EntityStatMap.Predictable.ALL, healthIndex);
+            var health = statMap.get(healthIndex);
+            if (health == null) {
+                return;
+            }
+            float max = health.getMax();
+            if (max > 0f && health.get() + 0.5f < max) {
+                statMap.setStatValue(EntityStatMap.Predictable.ALL, healthIndex, max);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Failed to fill spawned entity to max HP", e);
+        }
+    }
+
+    /** Total mobs a wave will roll, used to spread spawns evenly over {@link #WAVE_SPAWN_SPREAD_MS}. */
+    private static int countWaveMobs(List<BossDefinition.ExtraMobs.WaveAdd> adds,
+                                     float mobsPerPlayerMult,
+                                     int playerCount) {
+        int total = 0;
+        for (BossDefinition.ExtraMobs.WaveAdd add : adds) {
+            if (add != null && add.npcId != null && !add.npcId.isBlank()) {
+                total += BossDefinition.ExtraMobs.rollMobCount(add, mobsPerPlayerMult, playerCount);
+            }
+        }
+        return total;
+    }
+
+    /** Even offset for the nth mob of a wave, spanning 0..WAVE_SPAWN_SPREAD_MS. */
+    private static long waveSpawnOffsetMs(int ordinal, int totalMobs) {
+        if (totalMobs <= 1 || ordinal <= 0) {
+            return 0L;
+        }
+        return (WAVE_SPAWN_SPREAD_MS * ordinal) / (totalMobs - 1L);
+    }
+
+    /** Spawns and configures a single wave mob. Returns its UUID, or null when the spawn failed. */
+    private UUID spawnWaveMob(World world,
+                              BossDefinition def,
+                              Vector3d spawnPos,
+                              int waveNumber,
+                              UUID bossUuid,
+                              BossDefinition.ExtraMobs.WaveAdd add,
+                              int ordinal) {
+        Vector3d mobPos = computeWaveSpawnPosition(world, spawnPos, def.extraMobs);
+
+        var result = NPCPlugin.get().spawnNPC(
+                world.getEntityStore().getStore(),
+                add.npcId,
+                null,
+                VecUtil.toHytale(mobPos),
+                com.hypixel.hytale.math.vector.Rotation3f.ZERO
+        );
+        if (result == null) {
+            LOGGER.warning("Failed to spawn add '" + add.npcId + "' for wave " + waveNumber + ".");
+            return null;
+        }
+
+        Ref<EntityStore> addRef = result.first();
+        if (addRef == null || !addRef.isValid()) {
+            LOGGER.warning("Spawned add '" + add.npcId + "' has invalid entity reference; skipping.");
+            return null;
+        }
+        BossModifiers addMods = new BossModifiers(
+                Math.max(0.01f, add.hp),
+                Math.max(0.01f, add.damage),
+                1.0f,
+                Math.max(0.01f, add.size),
+                1.0f,
+                1.0f,
+                1.0f,
+                1.0f,
+                1.0f,
+                1.0f
+        );
+        var addStore = world.getEntityStore().getStore();
+        Object addUuidObj = addStore.getComponent(addRef, UUIDComponent.getComponentType());
+        UUID addUuid = addUuidObj instanceof UUIDComponent addUuidComp ? addUuidComp.getUuid() : null;
+        BossModifiers combinedAddMods = VaryonMobScale.absorbInto(addStore, addRef, addMods);
+        applyModifiers(addStore, addRef, combinedAddMods, addUuid);
+        disableDefaultEntityLoot(addStore, addRef, add.npcId);
+        if (!addRef.isValid()) {
+            LOGGER.warning("Spawned add '" + add.npcId + "' became invalid during setup; skipping tracking.");
+            return null;
+        }
+
+        if (addUuid != null) {
+            if (bossUuid != null) {
+                tracking.trackAdd(bossUuid, addUuid, combinedAddMods);
+            } else {
+                pendingDetachedAddModifiers.put(addUuid, combinedAddMods);
+            }
+        }
+
+        // Fill after every modifier is in place: applyModifiers raises MAX, so filling inside it can
+        // still land on a stale MAX and leave the mob visibly below full.
+        fillHealthToMax(addStore, addRef);
+
+        LOGGER.info("Spawned add '" + add.npcId + "' #" + (ordinal + 1)
+                + " (wave " + waveNumber
+                + ", hp=" + addMods.hpMultiplier()
+                + ", dmg=" + addMods.damageMultiplier()
+                + ", size=" + addMods.scaleMultiplier() + ")");
+        return addUuid;
     }
 
     private void disableDefaultEntityLoot(Store<EntityStore> store, Ref<EntityStore> entityRef, String label) {
