@@ -25,7 +25,7 @@ import java.util.UUID;
 
 public final class ArcanistOutgoingDamageSystem extends DamageEventSystem {
 
-    private static final float STAFF_BASE_MULT = 5f;
+    private static final float STAFF_BASE_MULT = 3f;
 
     private static final com.hypixel.hytale.logger.HytaleLogger LOG =
         com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();

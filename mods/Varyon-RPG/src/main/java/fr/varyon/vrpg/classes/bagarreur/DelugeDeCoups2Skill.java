@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.bagarreur;
 public final class DelugeDeCoups2Skill {
 
     public static final String SKILL_ID       = "deluge_de_coups_bagarreur";
-    public static final String TALENT_NODE_ID = "bagarreur_9";
+    public static final String TALENT_NODE_ID = "bagarreur_5";
 
     private static final int[] HIT_COUNTS     = {3, 4, 5, 6, 7};
     public  static final long  HIT_DELAY_MS   = 125L;

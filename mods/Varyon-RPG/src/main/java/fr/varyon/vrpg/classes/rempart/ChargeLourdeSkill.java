@@ -6,7 +6,7 @@ public final class ChargeLourdeSkill {
     public static final String TALENT_NODE_ID = "rempart_0";
 
     private static final double[] DASH_DISTANCE = {4, 5, 6, 7, 8, 9};
-    private static final float[]  DAMAGE_PCT    = {0.8f, 1.0f, 1.2f, 1.4f, 1.6f, 2.0f};
+    private static final float[]  DAMAGE_PCT    = {1.2f, 1.5f, 1.8f, 2.1f, 2.4f, 3.0f};
     private static final long[]   COOLDOWN_MS   = {20000, 18000, 16000, 14000, 12000};
     private static final float[]  STAMINA_COST  = {6f, 7f, 8f, 9f, 10f, 10f};
 

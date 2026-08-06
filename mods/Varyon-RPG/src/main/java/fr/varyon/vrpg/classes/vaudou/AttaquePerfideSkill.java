@@ -8,8 +8,8 @@ public final class AttaquePerfideSkill {
     private static final float[] DAMAGE_PCT     = {1.20f, 1.50f, 1.80f, 2.20f, 2.60f};
     private static final float   BEHIND_BONUS   = 0.50f;
     private static final float[] HP_COST_PCT    = {0.03f, 0.03f, 0.04f, 0.04f, 0.05f};
-    private static final long[]  COOLDOWN_MS    = {24000, 22000, 20000, 18000, 16000};
-    private static final float[] MANA_COST      = {8f, 10f, 10f, 12f, 14f};
+    private static final long[]  COOLDOWN_MS    = {18000, 16000, 14000, 12000, 10000};
+    private static final float[] MANA_COST      = {6f, 7f, 8f, 9f, 10f};
 
     private AttaquePerfideSkill() {}
 

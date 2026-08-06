@@ -7,7 +7,7 @@ public final class TotemEntraveSkill {
     public static final String PROJECTILE_CONFIG = "Vrpg_Totem_Throw";
     public static final double THROW_SPEED      = 8.0;
 
-    public static final float SLOW_SPEED_REDUCTION = 0.30f;
+    public static final float SLOW_SPEED_REDUCTION = 0.40f;
 
     private static final long[]  BASE_DURATION_MS = {10000, 12000, 14000, 16000, 18000};
     private static final long[]  COOLDOWN_MS      = {25000, 23000, 21000, 19000, 17000};
@@ -29,6 +29,6 @@ public final class TotemEntraveSkill {
         int dur = (int) (baseDurationMsForRank(rank) / 1000);
         int cd  = (int) (cooldownMsForRank(rank) / 1000);
         int mn  = Math.round(manaCostForRank(rank));
-        return "Ralentit les ennemis " + dur + "s, " + mn + " mana, Délai " + cd + "s";
+        return "Ralentit les ennemis de " + slowReductionPct() + "% pendant " + dur + "s, " + mn + " mana, Délai " + cd + "s";
     }
 }

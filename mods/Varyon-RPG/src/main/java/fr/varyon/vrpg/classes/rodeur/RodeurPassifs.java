@@ -34,7 +34,7 @@ public final class RodeurPassifs {
 
     // --- Ricochet (node 4) — les flèches normales ricochent sur une cible proche ---
     public static final String RICOCHET_NODE   = "rodeur_4";
-    private static final float[] RICOCHET_PCT  = {0.50f, 0.60f, 0.70f, 0.80f, 1.00f};
+    private static final float[] RICOCHET_PCT  = {0.40f, 0.45f, 0.50f, 0.55f, 0.60f};
     public static final double   RICOCHET_RANGE = 5.0;
 
     public static float ricochetPctForRank(int rank) {
@@ -42,7 +42,7 @@ public final class RodeurPassifs {
     }
 
     public static int ricochetBouncesForRank(int rank) {
-        return rank >= RICOCHET_PCT.length ? 2 : 1;
+        return rank >= 4 ? 2 : 1;
     }
 
     public static String ricochetStatLine(int rank) {

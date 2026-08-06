@@ -23,7 +23,7 @@ public final class BagarreurPassifs {
     }
 
     // --- Adrénaline (node 5) — speed boost cumulable après dégâts reçus ---
-    public static final String ADRENALINE_NODE               = "bagarreur_5";
+    public static final String ADRENALINE_NODE               = "bagarreur_9";
     public  static final int   ADRENALINE_MAX_STACKS         = 3;
     private static final long[]   ADRENALINE_DURATION_MS     = {3000L, 4000L, 5000L, 6000L, 8000L};
     private static final float[]  ADRENALINE_SPEED_PER_STACK = {0.05f, 0.06f, 0.07f, 0.08f, 0.10f};
@@ -61,7 +61,7 @@ public final class BagarreurPassifs {
     }
 
     // --- Acharnement (node 6) — stacks dégâts sur même cible ---
-    public static final String ACHARNEMENT_NODE         = "bagarreur_6";
+    public static final String ACHARNEMENT_NODE         = "bagarreur_11";
     public  static final int   ACHARNEMENT_MAX_STACKS   = 5;
     private static final float[] ACHARNEMENT_PER_STACK  = {0.04f, 0.06f, 0.08f, 0.10f, 0.14f};
     public  static final long    ACHARNEMENT_WINDOW_MS  = 6000L;

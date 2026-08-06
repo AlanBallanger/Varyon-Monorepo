@@ -61,9 +61,9 @@ public final class GardienDeGaiaRegenTickSystem extends EntityTickingSystem<Enti
         if (acc.getActiveClass() != PlayerClass.MAGE) return;
         if (acc.getActiveSpec(PlayerClass.MAGE) != PlayerSpecialization.GARDIEN_DE_GAIA) return;
 
-        // --- Souffle de la Nature : regen HP + endurance aux alliés proches ---
+        // --- Souffle de la Nature : regen HP + endurance aux alliés proches (1x/seconde) ---
         int souffleRank = acc.getTalentRank(PlayerClass.MAGE, GardienDeGaiaPassifs.SOUFFLE_NODE);
-        if (souffleRank > 0) {
+        if (souffleRank > 0 && tc % HEAL_INTERVAL == 0) {
             int graceRankSouffle = acc.getTalentRank(PlayerClass.MAGE, GardienDeGaiaPassifs.GRACE_NODE);
             float hpRegen  = GardienDeGaiaPassifs.souffleHpRegenForRank(souffleRank);
             float staRegen = GardienDeGaiaPassifs.souffleStaRegenForRank(souffleRank);

@@ -5,7 +5,7 @@ public final class ExecutionSauvageSkill {
     public static final String SKILL_ID       = "execution_sauvage";
     public static final String TALENT_NODE_ID = "berserker_11";
 
-    private static final float[] BASE_DAMAGE_PCT   = {0.85f, 1.0f, 1.15f, 1.4f, 1.65f};
+    private static final float[] BASE_DAMAGE_PCT   = {0.72f, 0.85f, 0.98f, 1.19f, 1.4f};
     private static final float[] LOW_HP_BONUS_PCT  = {0.15f, 0.25f, 0.35f, 0.45f, 0.55f};
     private static final float   LOW_HP_THRESHOLD  = 0.50f;
     private static final long[]  COOLDOWN_MS       = {32000, 30000, 26000, 22000, 18000};

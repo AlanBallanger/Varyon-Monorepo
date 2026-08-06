@@ -1,6 +1,5 @@
 {
-  "Model": "Fireball",
-  "LaunchForce": 35,
+  "Model": "Vrpg_Fireball_NoLight",
   "Physics": {
     "Type": "Standard",
     "Gravity": 8,
@@ -10,50 +9,16 @@
     "Bounciness": 0.0,
     "SticksVertically": false
   },
+  "LaunchForce": 35,
   "SpawnOffset": {
     "X": 0.15,
     "Y": -0.25,
-    "Z": -0.5
+    "Z": 0
   },
   "Interactions": {
     "ProjectileHit": {
-      "Cooldown": {
-        "Cooldown": 0
-      },
+      "Cooldown": { "Cooldown": 0 },
       "Interactions": [
-        {
-          "Type": "Simple",
-          "RunTime": 0,
-          "Effects": {
-            "WorldSoundEventId": "SFX_Staff_Flame_Fireball_Launch"
-          }
-        },
-        {
-          "Parent": "DamageEntityParent",
-          "DamageCalculator": {
-            "BaseDamage": {
-              "Physical": 1
-            }
-          }
-        },
-        {
-          "Type": "RemoveEntity",
-          "Entity": "User"
-        }
-      ]
-    },
-    "ProjectileMiss": {
-      "Cooldown": {
-        "Cooldown": 0
-      },
-      "Interactions": [
-        {
-          "Type": "Simple",
-          "RunTime": 0,
-          "Effects": {
-            "WorldSoundEventId": "SFX_Staff_Flame_Fireball_Launch"
-          }
-        },
         {
           "Type": "RemoveEntity",
           "Entity": "User"

@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.arbaletrier;
 public final class CarreauTranspercantSkill {
 
     public static final String SKILL_ID       = "carreau_transpercant";
-    public static final String TALENT_NODE_ID = "arbaletrier_4";
+    public static final String TALENT_NODE_ID = "arbaletrier_6";
 
     private static final float[] DAMAGE_PCT    = {2.00f, 2.25f, 2.50f, 2.75f, 3.00f};
     private static final float[] SLOW_FACTOR   = {0.40f, 0.45f, 0.50f, 0.55f, 0.60f};

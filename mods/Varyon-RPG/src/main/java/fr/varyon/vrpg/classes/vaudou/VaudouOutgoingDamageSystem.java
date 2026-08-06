@@ -28,7 +28,7 @@ import java.util.UUID;
 
 public final class VaudouOutgoingDamageSystem extends DamageEventSystem {
 
-    public static final float STAFF_BASE_MULT = 5f;
+    public static final float STAFF_BASE_MULT = 3f;
 
     private static final com.hypixel.hytale.logger.HytaleLogger LOG =
         com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();

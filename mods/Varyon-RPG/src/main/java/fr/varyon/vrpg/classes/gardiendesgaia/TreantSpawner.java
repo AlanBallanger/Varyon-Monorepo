@@ -77,9 +77,31 @@ public final class TreantSpawner {
                 LOGGER.atWarning().log("[AppelDuTreant] EntityStatMap null sur le tréant");
             }
 
+            joinSummonerFlock(store, treantEntityRef, playerUuid);
+
             state.setTreant(playerUuid, treantEntityRef, dmgFactor);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[AppelDuTreant] spawnNPC ERREUR pos=" + pos);
+        }
+    }
+
+    /**
+     * Rattache le tréant au flock de son invocateur. Sans ça, le JoinFlock du template
+     * (ForceJoin sur le premier joueur à 20 blocs) peut désigner un allié comme leader,
+     * et le tréant réagit alors aux combats de cet allié au lieu de ceux de l'invocateur.
+     */
+    private static void joinSummonerFlock(@Nonnull Store<EntityStore> store,
+                                          @Nonnull Ref<EntityStore> treantRef,
+                                          @Nonnull UUID playerUuid) {
+        try {
+            Ref<EntityStore> summonerRef = store.getExternalData().getRefFromUUID(playerUuid);
+            if (summonerRef == null || !summonerRef.isValid()) {
+                LOGGER.atWarning().log("[AppelDuTreant] invocateur introuvable, flock non force");
+                return;
+            }
+            com.hypixel.hytale.server.flock.FlockMembershipSystems.join(treantRef, summonerRef, store);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[AppelDuTreant] join flock invocateur ERREUR");
         }
     }
 }

@@ -33,6 +33,18 @@ public enum WeaponCategory {
         return AUTRE;
     }
 
+    public static boolean isCrossbow(@Nullable String itemId) {
+        if (itemId == null) return false;
+        return matchesAny(itemId.toLowerCase(), "crossbow");
+    }
+
+    public static boolean isShortbow(@Nullable String itemId) {
+        if (itemId == null) return false;
+        String id = itemId.toLowerCase();
+        if (matchesAny(id, "crossbow")) return false;
+        return matchesAny(id, "shortbow", "bow");
+    }
+
     private static boolean matchesAny(String id, String... keywords) {
         for (String keyword : keywords) {
             if (matchesKeyword(id, keyword)) return true;

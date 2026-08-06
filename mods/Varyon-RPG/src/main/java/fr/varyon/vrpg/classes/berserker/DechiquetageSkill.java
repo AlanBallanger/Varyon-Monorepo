@@ -5,7 +5,7 @@ public final class DechiquetageSkill {
     public static final String SKILL_ID       = "dechiquetage";
     public static final String TALENT_NODE_ID = "berserker_9";
 
-    private static final float[] DAMAGE_PCT    = {1.0f, 1.15f, 1.3f, 1.5f, 1.75f};
+    private static final float[] DAMAGE_PCT    = {0.85f, 0.98f, 1.1f, 1.28f, 1.5f};
     private static final float[] LIFESTEAL_PCT = {0.15f, 0.20f, 0.25f, 0.30f, 0.40f};
     private static final long[]  COOLDOWN_MS   = {17000, 15500, 14000, 12500, 11000};
     private static final float[] STAMINA_COST  = {10f, 12f, 14f, 16f, 18f};

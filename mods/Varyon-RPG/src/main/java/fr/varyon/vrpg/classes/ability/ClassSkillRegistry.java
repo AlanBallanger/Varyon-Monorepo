@@ -135,13 +135,13 @@ public final class ClassSkillRegistry {
                 case 2  -> fr.varyon.vrpg.classes.bagarreur.DirectDuDroitSkill.SKILL_ID;
                 case 3  -> fr.varyon.vrpg.classes.bagarreur.MonteeAdreinalineSkill.SKILL_ID;
                 case 4  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.GARDE_BOXEUR_NODE;
-                case 5  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ADRENALINE_NODE;
-                case 6  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ACHARNEMENT_NODE;
+                case 5  -> fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID;
+                case 6  -> fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID;
                 case 7  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ESPRIT_COMBATIF_NODE;
                 case 8  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.POINGS_ACIER_NODE;
-                case 9  -> fr.varyon.vrpg.classes.bagarreur.DelugeDeCoups2Skill.SKILL_ID;
+                case 9  -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ADRENALINE_NODE;
                 case 10 -> fr.varyon.vrpg.classes.bagarreur.SecondSouffleSkill.SKILL_ID;
-                case 11 -> fr.varyon.vrpg.classes.bagarreur.UppercutSkill.SKILL_ID;
+                case 11 -> fr.varyon.vrpg.classes.bagarreur.BagarreurPassifs.ACHARNEMENT_NODE;
                 default -> null;
             };
         }
@@ -202,12 +202,12 @@ public final class ClassSkillRegistry {
                 case 1  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.TIREUR_ELITE_NODE;
                 case 2  -> fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.SKILL_ID;
                 case 3  -> fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.SKILL_ID;
-                case 4  -> fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.SKILL_ID;
+                case 4  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.CHASSEUR_COLOSSES_NODE;
                 case 5  -> fr.varyon.vrpg.classes.arbaletrier.CoupDeBotteSkill.SKILL_ID;
-                case 6  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.CHASSEUR_COLOSSES_NODE;
-                case 7  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.TIREUR_EMBUSQUE_NODE;
+                case 6  -> fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.SKILL_ID;
+                case 7  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.CARREAUX_LACERANTS_NODE;
                 case 8  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.VISEUR_NODE;
-                case 9  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.CARREAUX_LACERANTS_NODE;
+                case 9  -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.TIREUR_EMBUSQUE_NODE;
                 case 10 -> fr.varyon.vrpg.classes.arbaletrier.ArbaietrierPassifs.REFLEXES_AFFUTES_NODE;
                 case 11 -> fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.SKILL_ID;
                 default -> null;

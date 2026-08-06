@@ -169,6 +169,8 @@ public final class VaryonRpgPlugin extends JavaPlugin {
     private fr.varyon.vrpg.classes.rodeur.RodeurTrapRootSystem rodeurTrapRootSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
     private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
+    private fr.varyon.vrpg.classes.arcaniste.BouleDeFeuGroundSystem bouleDeFeuGroundSystem;
+    private fr.varyon.vrpg.classes.gardiendesgaia.EtreinteGroundSystem etreinteGroundSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierBleedSystem arbaBleedSystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierImmobilityTickSystem arbaImmobilitySystem;
     private fr.varyon.vrpg.classes.arbaletrier.ArbaietrierOutgoingDamageSystem arbaOutgoingDamageSystem;
@@ -1155,6 +1157,20 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 if (classSkillService != null) classSkillService.setCarreauExplosifGroundSystem(carreauExplosifGroundSystem);
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register CarreauExplosifGroundSystem");
+            }
+            try {
+                this.bouleDeFeuGroundSystem = new fr.varyon.vrpg.classes.arcaniste.BouleDeFeuGroundSystem(arcanistState);
+                getEntityStoreRegistry().registerSystem(bouleDeFeuGroundSystem);
+                if (classSkillService != null) classSkillService.setBouleDeFeuGroundSystem(bouleDeFeuGroundSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register BouleDeFeuGroundSystem");
+            }
+            try {
+                this.etreinteGroundSystem = new fr.varyon.vrpg.classes.gardiendesgaia.EtreinteGroundSystem();
+                getEntityStoreRegistry().registerSystem(etreinteGroundSystem);
+                if (classSkillService != null) classSkillService.setEtreinteGroundSystem(etreinteGroundSystem);
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register EtreinteGroundSystem");
             }
             try {
                 getEntityStoreRegistry().registerSystem(lancierBleedSystem);

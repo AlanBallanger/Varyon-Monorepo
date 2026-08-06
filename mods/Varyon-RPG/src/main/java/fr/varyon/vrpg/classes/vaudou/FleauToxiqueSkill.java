@@ -6,10 +6,10 @@ public final class FleauToxiqueSkill {
     public static final String TALENT_NODE_ID = "vaudou_2";
 
     public static final long   BASE_POISON_DURATION_MS = 5_000L;
-    private static final float[] POISON_WEAPON_PCT = {0.64f, 0.84f, 1.04f, 1.30f, 1.60f};
+    private static final float[] POISON_WEAPON_PCT = {0.50f, 0.60f, 0.70f, 0.80f, 1.00f};
     private static final float[] DAMAGE_REDUCE     = {0.06f, 0.08f, 0.10f, 0.12f, 0.15f};
-    private static final long[]  COOLDOWN_MS       = {18000, 17000, 16000, 15000, 14000};
-    private static final float[] MANA_COST         = {10f, 12f, 12f, 14f, 16f};
+    private static final long[]  COOLDOWN_MS       = {10000, 9000, 8000, 7000, 5000};
+    private static final float[] MANA_COST         = {5f, 6f, 6f, 7f, 8f};
 
     private FleauToxiqueSkill() {}
 

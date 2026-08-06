@@ -75,6 +75,7 @@ public final class CarreauExplosifGroundSystem extends EntityTickingSystem<Entit
             if (arbaState.getPendingCarreauType(creatorUuid) != ArbaietrierState.CARREAU_TYPE_EXPLOSIF) return;
 
             float dmg = arbaState.consumePendingCarreauDmg(creatorUuid);
+            int rank = arbaState.getPendingCarreauRank(creatorUuid);
             arbaState.clearPendingCarreau(creatorUuid);
             if (dmg <= 0f) dmg = 1f;
 
@@ -103,7 +104,7 @@ public final class CarreauExplosifGroundSystem extends EntityTickingSystem<Entit
 
             try {
                 com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
-                    .selectNearbyEntities(store, center, (float) CarreauExplosifSkill.radius(), t -> {
+                    .selectNearbyEntities(store, center, (float) CarreauExplosifSkill.radiusForRank(rank), t -> {
                         try {
                             if (t.getIndex() == fAttackerRef.getIndex()) return;
                             if (store.getComponent(t, NPCEntity.getComponentType()) == null) return;

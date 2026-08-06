@@ -30,8 +30,8 @@ public final class ArbaietrierPassifs {
         return "+" + Math.round(eliteXpBonusForRank(rank) * 100) + "% XP si cible à plus de 15m";
     }
 
-    // --- Chasseur de colosses (node 6) — bonus si cible a plus de HP que soi ---
-    public static final String CHASSEUR_COLOSSES_NODE = "arbaletrier_6";
+    // --- Chasseur de colosses (node 4) — bonus si cible a plus de HP que soi ---
+    public static final String CHASSEUR_COLOSSES_NODE = "arbaletrier_4";
     private static final float[] COLOSSES_BONUS       = {0.06f, 0.10f, 0.14f, 0.18f, 0.22f};
 
     public static float colossesBonusForRank(int rank) {
@@ -42,8 +42,8 @@ public final class ArbaietrierPassifs {
         return "+" + Math.round(colossesBonusForRank(rank) * 100) + "% dégâts si cible a plus de PV que soi";
     }
 
-    // --- Tireur embusqué (node 7) — bonus dégâts après immobilité ---
-    public static final String TIREUR_EMBUSQUE_NODE = "arbaletrier_7";
+    // --- Tireur embusqué (node 9) — bonus dégâts après immobilité ---
+    public static final String TIREUR_EMBUSQUE_NODE = "arbaletrier_9";
     private static final float[] EMBUSQUE_BONUS     = {0.08f, 0.12f, 0.16f, 0.20f, 0.25f};
     public static final long     EMBUSQUE_DELAY_MS  = 3_000L;
 
@@ -75,8 +75,8 @@ public final class ArbaietrierPassifs {
         return "+" + bonusPer5m + "% dégâts tous les 5m de distance (max " + (int)VISEUR_MAX_DIST + "m)";
     }
 
-    // --- Carreaux lacérants (node 9) — saignement passif ---
-    public static final String CARREAUX_LACERANTS_NODE = "arbaletrier_9";
+    // --- Carreaux lacérants (node 7) — saignement passif ---
+    public static final String CARREAUX_LACERANTS_NODE = "arbaletrier_7";
     private static final float[] BLEED_CHANCE          = {0.08f, 0.12f, 0.16f, 0.20f, 0.25f};
     public static final float    BLEED_WEAPON_PCT      = 0.75f;
     public static final long     BLEED_DURATION_MS     = 5_000L;

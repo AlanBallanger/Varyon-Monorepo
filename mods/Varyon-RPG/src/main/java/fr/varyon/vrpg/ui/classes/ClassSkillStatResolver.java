@@ -804,7 +804,7 @@ public final class ClassSkillStatResolver {
         return List.of(
             new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, pct + "%"),
             new SkillStatEntry(SkillStatKind.DURATION,
-                formatDurationMs(NovaDeGivreSkill.slowMsForRank(rank)), "Ralent."),
+                formatDurationMs(NovaDeGivreSkill.freezeMsForRank(rank)), "Gel"),
             new SkillStatEntry(SkillStatKind.MOVE_SPEED,
                 String.valueOf((int) NovaDeGivreSkill.radiusForRank(rank)), "Rayon"),
             new SkillStatEntry(SkillStatKind.MANA, String.valueOf(mana)),
@@ -895,7 +895,7 @@ public final class ClassSkillStatResolver {
         return List.of(
             new SkillStatEntry(SkillStatKind.WEAPON_DAMAGE, dmg + "%"),
             new SkillStatEntry(SkillStatKind.MOVE_SPEED,
-                String.valueOf((int) CarreauExplosifSkill.radius()), "Portée"),
+                String.valueOf((int) CarreauExplosifSkill.radiusForRank(rank)), "Portée"),
             new SkillStatEntry(SkillStatKind.COOLDOWN,
                 formatCooldown(CarreauExplosifSkill.cooldownMsForRank(rank))),
             new SkillStatEntry(SkillStatKind.STAMINA, String.valueOf(stamina))

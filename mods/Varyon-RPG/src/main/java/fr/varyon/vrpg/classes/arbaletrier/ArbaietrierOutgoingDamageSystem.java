@@ -184,7 +184,7 @@ public final class ArbaietrierOutgoingDamageSystem extends DamageEventSystem {
                 }
 
                 if (carreauType == ArbaietrierState.CARREAU_TYPE_EXPLOSIF) {
-                    double radius = CarreauExplosifSkill.radius();
+                    double radius = CarreauExplosifSkill.radiusForRank(carreauRankSaved);
                     TransformComponent tcVictim = store.getComponent(victimRef, TransformComponent.getComponentType());
                     if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat())
                         LOG.atInfo().log("[CarreauExplosif] hit NPC victimRef=" + victimRef.getIndex() + " tcVictim=" + (tcVictim != null) + " amount=" + amount + " radius=" + radius);

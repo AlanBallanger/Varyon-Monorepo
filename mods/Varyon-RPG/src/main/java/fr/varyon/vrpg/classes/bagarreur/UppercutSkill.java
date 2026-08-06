@@ -3,7 +3,7 @@ package fr.varyon.vrpg.classes.bagarreur;
 public final class UppercutSkill {
 
     public static final String SKILL_ID       = "uppercut";
-    public static final String TALENT_NODE_ID = "bagarreur_11";
+    public static final String TALENT_NODE_ID = "bagarreur_6";
 
     private static final float[] DAMAGE_PCT        = {3.15f, 4.05f, 4.95f, 6.3f, 8.1f};
     private static final float   LAUNCH_Y          = 40.0f;

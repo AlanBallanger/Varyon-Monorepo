@@ -93,6 +93,8 @@ public final class ClassSkillService {
     private final fr.varyon.vrpg.classes.arbaletrier.ArbaietrierState arbaState;
     private fr.varyon.vrpg.classes.rodeur.RodeurPoisonSystem rodeurPoisonSystem;
     @Nullable private fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem carreauExplosifGroundSystem;
+    @Nullable private fr.varyon.vrpg.classes.arcaniste.BouleDeFeuGroundSystem bouleDeFeuGroundSystem;
+    @Nullable private fr.varyon.vrpg.classes.gardiendesgaia.EtreinteGroundSystem etreinteGroundSystem;
     @Nullable private fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem rodeurArrowGroundSystem;
     @Nullable private fr.varyon.vrpg.classes.rodeur.RodeurPluieGroundSystem rodeurPluieGroundSystem;
     private final fr.varyon.vrpg.classes.lancier.LancierState lancierState;
@@ -142,6 +144,14 @@ public final class ClassSkillService {
 
     public void setCarreauExplosifGroundSystem(@Nonnull fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifGroundSystem sys) {
         this.carreauExplosifGroundSystem = sys;
+    }
+
+    public void setBouleDeFeuGroundSystem(@Nonnull fr.varyon.vrpg.classes.arcaniste.BouleDeFeuGroundSystem sys) {
+        this.bouleDeFeuGroundSystem = sys;
+    }
+
+    public void setEtreinteGroundSystem(@Nonnull fr.varyon.vrpg.classes.gardiendesgaia.EtreinteGroundSystem sys) {
+        this.etreinteGroundSystem = sys;
     }
 
     public void setRodeurArrowGroundSystem(@Nonnull fr.varyon.vrpg.classes.rodeur.RodeurArrowGroundSystem sys) {
@@ -1596,6 +1606,19 @@ public final class ClassSkillService {
             (acc, cls) -> fr.varyon.vrpg.classes.berserker.DixPourSangSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.DixPourSangSkill.TALENT_NODE_ID)));
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.SKILL_ID,
             (acc, cls) -> fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.berserker.CorDeGuerreSkill.TALENT_NODE_ID)));
+        // Ravageur
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.ravageur.PeauDeFerSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.ravageur.PeauDeFerSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.ravageur.PeauDeFerSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.ravageur.DechainementSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.ravageur.DechainementSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.ravageur.DechainementSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.ravageur.PremierAssautSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.ravageur.PremierAssautSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.ravageur.PremierAssautSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.ravageur.MarteauPilonSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.ravageur.MarteauPilonSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.ravageur.MarteauPilonSkill.TALENT_NODE_ID)));
+        COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.ravageur.RabattageSkill.SKILL_ID,
+            (acc, cls) -> fr.varyon.vrpg.classes.ravageur.RabattageSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.ravageur.RabattageSkill.TALENT_NODE_ID)));
         // Arcaniste
         COOLDOWN_RESOLVERS.put(fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.SKILL_ID,
             (acc, cls) -> echoTemporelCd(acc, cls, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.TALENT_NODE_ID, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.cooldownMsForRank(acc.getTalentRank(cls, fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.TALENT_NODE_ID))));
@@ -3009,9 +3032,11 @@ public final class ClassSkillService {
                 arcanistState.setPendingProjectileDmg(uuid, dmg, 1);
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingLeft", true, store);
                 ClassSkillSounds.playSkillSound("SFX_Staff_Flame_Fireball_Launch", playerRef, tc.getPosition(), null);
-                spawnMagicProjectile(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.PROJECTILE_CONFIG, spawnPos, hr.getDirection(), entityRef, playerRef, store, commandBuffer);
+                spawnBouleDeFeuTracked(spawnPos, hr.getDirection(), entityRef, playerRef, uuid, store, commandBuffer);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            LOG.atWarning().withCause(e).log("[BouleDeFeu] spawn projectile ERREUR");
+        }
         ClassSkillMana.consume(playerRef, manaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID);
         maybeEchoArcanique(uuid, acc, fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.SKILL_ID, bypass);
@@ -3108,12 +3133,12 @@ public final class ClassSkillService {
                 org.joml.Vector3d visualCenter = new org.joml.Vector3d(center.x, center.y + 0.05, center.z);
                 float dmg = getBaseDamage(playerRef) * fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.damagePctForRank(rank);
                 float radius = fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.radiusForRank(rank);
-                float slowSec = fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.slowMsForRank(rank) / 1000f;
-                int slowIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex(fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.SLOW_EFFECT);
-                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect slowEff = slowIdx >= 0
-                    ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect) com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(slowIdx) : null;
-                final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fSlowEff = slowEff;
-                final float fSlowSec = slowSec;
+                float freezeSec = fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.freezeMsForRank(rank) / 1000f;
+                int freezeIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getIndex(fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.FREEZE_EFFECT);
+                com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect freezeEff = freezeIdx >= 0
+                    ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect) com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(freezeIdx) : null;
+                final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fFreezeEff = freezeEff;
+                final float fFreezeSec = freezeSec;
                 arcanistState.setLastCastFire(uuid, false);
                 spawnSkillParticle(
                     fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.IMPACT_PARTICLE,
@@ -3121,7 +3146,7 @@ public final class ClassSkillService {
                     fr.varyon.vrpg.classes.arcaniste.NovaDeGivreSkill.particleScaleForRadius(radius),
                     entityRef);
                 damageNearby(center, radius, entityRef, store, dmg, resolveIceDamageCause());
-                // Slow séparé
+                // Gel séparé
                 long casterIdx = entityRef.getIndex();
                 com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
                     .selectNearbyEntities(store, center, radius, targetRef -> {
@@ -3129,7 +3154,7 @@ public final class ClassSkillService {
                             if (targetRef.getIndex() == casterIdx) return;
                             com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
                                 store.getComponent(targetRef, com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
-                            if (ec != null && fSlowEff != null) ec.addEffect(targetRef, fSlowEff, fSlowSec,
+                            if (ec != null && fFreezeEff != null) ec.addEffect(targetRef, fFreezeEff, fFreezeSec,
                                 com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, store);
                         } catch (Exception ignored2) {}
                     }, t -> t.getIndex() != casterIdx);
@@ -3863,51 +3888,12 @@ public final class ClassSkillService {
             org.joml.Vector3d eyePos = new org.joml.Vector3d(
                 tc.getPosition().x, tc.getPosition().y + 1.2, tc.getPosition().z);
             org.joml.Vector3d dir = new org.joml.Vector3d(hr.getDirection()).normalize();
-            org.joml.Vector3d impactPos = BlockRaystep.hitPosition(
-                world, eyePos, dir, fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.CAST_RANGE, 0.3);
 
-            double dist = impactPos.distance(eyePos);
-            long delayMs = (long) (dist / fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_SPEED * 1000.0);
-
-            spawnMagicProjectile(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_CONFIG,
-                eyePos, dir, entityRef, playerRef, store, commandBuffer);
+            // Les racines sont appliquees par EtreinteGroundSystem a l'impact reel du
+            // projectile. Un timer cale sur un raycast au lancement declenchait l'effet
+            // meme quand le projectile n'avait rien touche.
+            spawnEtreinteTracked(eyePos, dir, entityRef, playerRef, uuid, rank, store, commandBuffer);
             AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Staff", "SwingRight", true, store);
-
-            final int fRank = rank;
-            final org.joml.Vector3d fImpact = new org.joml.Vector3d(impactPos);
-            final Ref<EntityStore> fCasterRef = entityRef;
-            final com.hypixel.hytale.server.core.universe.world.World fw = world;
-
-            SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
-                try {
-                    if (!fCasterRef.isValid()) return;
-                    Store<EntityStore> ws = fw.getEntityStore().getStore();
-                    float rootRadius = (float) fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.rootRadius();
-                    float rootSec    = fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.rootDurationMs(fRank) / 1000f;
-                    int rootEffIdx = com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect
-                        .getAssetMap().getIndex("Vrpg_Etreinte_Root");
-                    com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect rootEff = rootEffIdx >= 0
-                        ? (com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect)
-                          com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect.getAssetMap().getAsset(rootEffIdx)
-                        : null;
-                    if (rootEff == null) return;
-                    spawnSkillParticle(fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.IMPACT_PARTICLE, fImpact, ws);
-                    long casterIdx = fCasterRef.getIndex();
-                    final com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect fRootEff = rootEff;
-                    com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
-                        .selectNearbyEntities(ws, fImpact, rootRadius, targetRef -> {
-                            try {
-                                if (targetRef.getIndex() == casterIdx) return;
-                                com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent ec =
-                                    ws.getComponent(targetRef,
-                                        com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent.getComponentType());
-                                if (ec != null)
-                                    ec.addEffect(targetRef, fRootEff, rootSec,
-                                        com.hypixel.hytale.server.core.asset.type.entityeffect.config.OverlapBehavior.OVERWRITE, ws);
-                            } catch (Exception ignored2) {}
-                        }, t -> t.getIndex() != casterIdx);
-                } catch (Exception ignored) {}
-            }), delayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
 
         } catch (Exception ignored) {}
 
@@ -4459,6 +4445,14 @@ public final class ClassSkillService {
             == fr.varyon.vrpg.classes.WeaponCategory.DISTANCE;
     }
 
+    private boolean isHoldingShortbow(@Nonnull PlayerRef playerRef) {
+        return fr.varyon.vrpg.classes.WeaponCategory.isShortbow(getHeldItemId(playerRef));
+    }
+
+    private boolean isHoldingCrossbow(@Nonnull PlayerRef playerRef) {
+        return fr.varyon.vrpg.classes.WeaponCategory.isCrossbow(getHeldItemId(playerRef));
+    }
+
     public boolean tryCastReculStrategique(@Nonnull UUID uuid,
                                            @Nonnull PlayerRef playerRef,
                                            @Nonnull Ref<EntityStore> entityRef,
@@ -4529,7 +4523,7 @@ public final class ClassSkillService {
                                           @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isRodeur(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingShortbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.PluieDesFlechesSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -4662,7 +4656,7 @@ public final class ClassSkillService {
                                            @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isRodeur(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingShortbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.MarqueDuChasseurSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -4702,7 +4696,7 @@ public final class ClassSkillService {
                                         @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isRodeur(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingShortbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.FlecheDeReculsSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -4740,7 +4734,7 @@ public final class ClassSkillService {
                                            @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isRodeur(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingShortbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.FlecheEntravantSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -4781,7 +4775,7 @@ public final class ClassSkillService {
                                  @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isRodeur(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingShortbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.rodeur.RafaleSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -4905,7 +4899,7 @@ public final class ClassSkillService {
                                        @Nonnull Ref<EntityStore> entityRef, @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArbaletrier(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingCrossbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.CarreauLourdSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -4934,7 +4928,7 @@ public final class ClassSkillService {
                                           @Nonnull Store<EntityStore> store) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArbaletrier(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingCrossbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.CarreauExplosifSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -4978,7 +4972,7 @@ public final class ClassSkillService {
                                               @Nullable CommandBuffer<EntityStore> commandBuffer) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArbaletrier(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingCrossbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.CarreauTranspercantSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -5090,7 +5084,7 @@ public final class ClassSkillService {
     public boolean tryCastMiseEnJou(@Nonnull UUID uuid, @Nonnull PlayerRef playerRef) {
         ClassAccount acc = classManager.getOrLoad(uuid);
         if (!isArbaletrier(acc)) return false;
-        if (!isHoldingDistance(playerRef)) { notifyNoWeapon(playerRef); return false; }
+        if (!isHoldingCrossbow(playerRef)) { notifyNoWeapon(playerRef); return false; }
         boolean bypass = RpgUiAdmin.isAdmin(playerRef) && RpgUiAdmin.isCreative(playerRef);
         int rank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.arbaletrier.MiseEnJouSkill.TALENT_NODE_ID);
         if (rank <= 0 && !bypass) return false;
@@ -5661,6 +5655,104 @@ public final class ClassSkillService {
                 return null;
             }));
         } catch (Exception ignored) {}
+    }
+
+    /**
+     * Spawn la boule de feu en la faisant suivre par le BouleDeFeuGroundSystem, qui applique
+     * les dégâts de zone a l'immobilisation. Le JSON du projectile reste purement visuel :
+     * passer par les interactions d'impact du staff vanilla bloque le personnage du lanceur.
+     */
+    private void spawnBouleDeFeuTracked(@Nonnull org.joml.Vector3d spawnPos,
+                                        @Nonnull org.joml.Vector3d dir,
+                                        @Nonnull Ref<EntityStore> casterRef,
+                                        @Nonnull PlayerRef playerRef,
+                                        @Nonnull UUID creatorUuid,
+                                        @Nonnull Store<EntityStore> store,
+                                        @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        try {
+            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap()
+                    .getAsset(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.PROJECTILE_CONFIG);
+            if (cfg == null) {
+                LOG.atWarning().log("[BouleDeFeu] config projectile introuvable");
+                return;
+            }
+            if (bouleDeFeuGroundSystem == null) {
+                LOG.atWarning().log("[BouleDeFeu] groundSystem NULL, fallback spawn non tracke");
+                spawnMagicProjectile(fr.varyon.vrpg.classes.arcaniste.BouleDeFeuSkill.PROJECTILE_CONFIG,
+                    spawnPos, dir, casterRef, playerRef, store, commandBuffer);
+                return;
+            }
+            final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
+            final org.joml.Vector3d fSpawnPos = new org.joml.Vector3d(spawnPos);
+            final org.joml.Vector3d fDir = new org.joml.Vector3d(dir);
+            final Ref<EntityStore> fRef = casterRef;
+            final fr.varyon.vrpg.classes.arcaniste.BouleDeFeuGroundSystem fSys = bouleDeFeuGroundSystem;
+
+            if (commandBuffer != null) {
+                Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(fRef, commandBuffer, fCfg, fSpawnPos, fDir);
+                fSys.trackProjectile(projRef, creatorUuid);
+                return;
+            }
+            EntityStoreCommandBuffers.runWithResult(store, cb -> {
+                Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
+                fSys.trackProjectile(projRef, creatorUuid);
+                return null;
+            });
+        } catch (Exception e) {
+            LOG.atWarning().withCause(e).log("[BouleDeFeu] spawn tracked ERREUR");
+        }
+    }
+
+    /**
+     * Spawn le projectile de l'Étreinte de Gaïa en le faisant suivre par EtreinteGroundSystem,
+     * qui le retire cote Java. Sans ce retrait, le RemoveEntity du JSON casse le personnage
+     * du lanceur a l'impact.
+     */
+    private void spawnEtreinteTracked(@Nonnull org.joml.Vector3d spawnPos,
+                                      @Nonnull org.joml.Vector3d dir,
+                                      @Nonnull Ref<EntityStore> casterRef,
+                                      @Nonnull PlayerRef playerRef,
+                                      @Nonnull UUID creatorUuid,
+                                      int rank,
+                                      @Nonnull Store<EntityStore> store,
+                                      @Nullable CommandBuffer<EntityStore> commandBuffer) {
+        final String configId = fr.varyon.vrpg.classes.gardiendesgaia.EtreinteDeGaiaSkill.PROJECTILE_CONFIG;
+        try {
+            if (etreinteGroundSystem == null) {
+                spawnMagicProjectile(configId, spawnPos, dir, casterRef, playerRef, store, commandBuffer);
+                return;
+            }
+            com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig cfg =
+                com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig.getAssetMap().getAsset(configId);
+            if (cfg == null) {
+                LOG.atWarning().log("[Etreinte] config projectile introuvable: " + configId);
+                return;
+            }
+            final com.hypixel.hytale.server.core.modules.projectile.config.ProjectileConfig fCfg = cfg;
+            final org.joml.Vector3d fSpawnPos = new org.joml.Vector3d(spawnPos);
+            final org.joml.Vector3d fDir = new org.joml.Vector3d(dir);
+            final Ref<EntityStore> fRef = casterRef;
+            final fr.varyon.vrpg.classes.gardiendesgaia.EtreinteGroundSystem fSys = etreinteGroundSystem;
+
+            final int fRank = rank;
+            if (commandBuffer != null) {
+                Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(fRef, commandBuffer, fCfg, fSpawnPos, fDir);
+                fSys.trackProjectile(projRef, creatorUuid, fRank);
+                return;
+            }
+            EntityStoreCommandBuffers.runWithResult(store, cb -> {
+                Ref<EntityStore> projRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
+                    .spawnProjectile(fRef, cb, fCfg, fSpawnPos, fDir);
+                fSys.trackProjectile(projRef, creatorUuid, fRank);
+                return null;
+            });
+        } catch (Exception e) {
+            LOG.atWarning().withCause(e).log("[Etreinte] spawn tracked ERREUR");
+        }
     }
 
     private void spawnRodeurProjectileTowardTracked(

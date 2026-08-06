@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 
 public final class VaudouTotemSlowSystem extends EntityTickingSystem<EntityStore> {
 
-    private static final String SLOW_EFFECT_ID = "Slowness_Totem_Slow";
+    private static final String SLOW_EFFECT_ID = "Vrpg_Totem_Entrave_Slow";
     private static final float  SLOW_REFRESH_SEC = 1.5f;
     private static final int    TICK_INTERVAL = 10;
 
