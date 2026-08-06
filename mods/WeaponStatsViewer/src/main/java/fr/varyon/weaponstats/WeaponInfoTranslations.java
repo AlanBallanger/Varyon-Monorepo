@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.152.
  */
-package com.woxtz.weaponinfo;
+package fr.varyon.weaponstats;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ public class WeaponInfoTranslations {
 
     static {
         HashMap<String, String> en = new HashMap<String, String>();
-        en.put("title", "Weapon Information");
+        en.put("title", "Informations sur les Armes");
         en.put("maxDamage", "Max Damage");
         en.put("avgDamage", "Avg Damage");
         en.put("level", "Level");
@@ -39,6 +39,14 @@ public class WeaponInfoTranslations {
         en.put("Dart", "Darts");
         en.put("Arrow", "Arrows");
         en.put("Other", "Other Weapons");
+        en.put("Firearms", "Firearms");
+        en.put("Bow", "Bows");
+        en.put("Bomb", "Bombs");
+        en.put("Sword_Shield", "Sword & Shield");
+        en.put("Dagger", "Daggers");
+        en.put("Spellbook", "Spellbooks");
+        en.put("Clubs", "Clubs");
+        en.put("Longswords", "Longswords");
         en.put("attack_Swing_Left", "Left Swing");
         en.put("attack_Swing_Right", "Right Swing");
         en.put("attack_Swing_Down", "Down Swing");
@@ -64,60 +72,6 @@ public class WeaponInfoTranslations {
         en.put("attack_Groundslam", "Ground Slam");
         translations.put("en-US", en);
         translations.put("en", en);
-        HashMap<String, String> es = new HashMap<String, String>();
-        es.put("title", "Informaci\u00f3n de Armas");
-        es.put("maxDamage", "Da\u00f1o M\u00e1ximo");
-        es.put("avgDamage", "Da\u00f1o Promedio");
-        es.put("level", "Nivel");
-        es.put("quality", "Calidad");
-        es.put("durability", "Durabilidad");
-        es.put("type", "Tipo");
-        es.put("id", "ID");
-        es.put("attackTypes", "Tipos de Ataque:");
-        es.put("Sword", "Espadas");
-        es.put("Longsword", "Espadas Largas");
-        es.put("Axe", "Hachas");
-        es.put("Battleaxe", "Hachas de Batalla");
-        es.put("Daggers", "Dagas");
-        es.put("Spear", "Lanzas");
-        es.put("Club", "Mazos");
-        es.put("Mace", "Mazas");
-        es.put("Staff", "B\u00e1culos");
-        es.put("Wand", "Varitas");
-        es.put("Shortbow", "Arcos Cortos");
-        es.put("Crossbow", "Ballestas");
-        es.put("Shield", "Escudos");
-        es.put("Claws", "Garras");
-        es.put("Blowgun", "Cerbatanas");
-        es.put("Gun", "Pistolas");
-        es.put("Dart", "Dardos");
-        es.put("Arrow", "Flechas");
-        es.put("Other", "Otras Armas");
-        es.put("attack_Swing_Left", "Corte Izquierdo");
-        es.put("attack_Swing_Right", "Corte Derecho");
-        es.put("attack_Swing_Down", "Corte Descendente");
-        es.put("attack_Swing_Down_Left", "Corte Diagonal Izquierdo");
-        es.put("attack_Swing_Down_Right", "Corte Diagonal Derecho");
-        es.put("attack_Swing_Up", "Corte Ascendente");
-        es.put("attack_Thrust", "Estocada");
-        es.put("attack_Vortexstrike_Spin", "Remolino (Especial)");
-        es.put("attack_Vortexstrike_Stab", "Estocada (Especial)");
-        es.put("attack_Downstrike", "Golpe Descendente");
-        es.put("attack_Spear_Stab", "Pu\u00f1alada (Lanza)");
-        es.put("attack_Longsword_Swing_Left", "Corte Izquierdo");
-        es.put("attack_Longsword_Swing_Right", "Corte Derecho");
-        es.put("attack_Longsword_Swing_Up_Left", "Corte Ascendente Izquierdo");
-        es.put("attack_Longsword_Stab_Charged", "Pu\u00f1alada Cargada");
-        es.put("attack_Axe_Swing_Up_Right", "Corte Ascendente Derecho");
-        es.put("attack_Axe_Swing_Down_Left", "Corte Descendente Izquierdo");
-        es.put("attack_Axe_Swing_Left_Charged", "Corte Izquierdo Cargado");
-        es.put("attack_Swing_Right_Charged", "Corte Derecho Cargado");
-        es.put("attack_Swing_Left_Charged", "Corte Izquierdo Cargado");
-        es.put("attack_Swing_Up_Left_Charged", "Corte Ascendente Izquierdo Cargado");
-        es.put("attack_Swing_Up_Left", "Corte Ascendente Izquierdo");
-        es.put("attack_Groundslam", "Golpe de Tierra");
-        translations.put("es-ES", es);
-        translations.put("es", es);
     }
 
     public static String get(String language, String key) {
@@ -135,4 +89,3 @@ public class WeaponInfoTranslations {
         return (translation = langMap.get(key)) != null ? translation : key;
     }
 }
-

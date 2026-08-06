@@ -24,6 +24,16 @@ $C.@PageOverlay {
         Padding: (Left: 10);
         ScrollbarStyle: $C.@DefaultScrollbarStyle;
 
+        Group #CategoryTabsSection {
+          Anchor: (Bottom: 10);
+          LayoutMode: Top;
+          Visible: false;
+
+          Group #CategoryTabs {
+            LayoutMode: Left;
+          }
+        }
+
         Group #SubcommandSection {
           Anchor: (Bottom: 10);
           LayoutMode: Top;

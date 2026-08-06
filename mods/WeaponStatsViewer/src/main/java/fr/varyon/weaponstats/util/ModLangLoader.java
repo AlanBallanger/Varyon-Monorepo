@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.152.
  */
-package com.woxtz.weaponinfo.util;
+package fr.varyon.weaponstats.util;
 
 import java.io.BufferedReader;
 import java.nio.file.Files;

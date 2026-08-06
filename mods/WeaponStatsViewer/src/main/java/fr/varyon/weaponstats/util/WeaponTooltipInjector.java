@@ -4,11 +4,11 @@
  * Could not load the following classes:
  *  com.hypixel.hytale.server.core.modules.i18n.I18nModule
  */
-package com.woxtz.weaponinfo.util;
+package fr.varyon.weaponstats.util;
 
 import com.hypixel.hytale.server.core.modules.i18n.I18nModule;
-import com.woxtz.weaponinfo.WeaponDamageCache;
-import com.woxtz.weaponinfo.util.ModLangLoader;
+import fr.varyon.weaponstats.WeaponDamageCache;
+import fr.varyon.weaponstats.util.ModLangLoader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,8 +62,7 @@ public class WeaponTooltipInjector {
                                     existingDesc = ModLangLoader.get((String)descKey);
                                 }
                                 if (existingDesc == null || existingDesc.isEmpty()) break block8;
-                                boolean isSpanish = lang.startsWith("es");
-                                String string = markerCheck = isSpanish ? "Da\u00f1o Prom" : "Avg Damage";
+                                String string = markerCheck = "Avg Damage";
                                 if (existingDesc.contains(markerCheck)) break block9;
                                 finalTooltip = existingDesc + statsText;
                                 break block10;
@@ -109,13 +108,13 @@ public class WeaponTooltipInjector {
         }
         sb.append("\n");
         if (hasShootStrength) {
-            String damageLabel = lang.startsWith("es") ? "Da\u00f1o" : "Damage";
-            String string = lang.startsWith("es") ? "Da\u00f1o Prom" : "Avg Damage";
+            String damageLabel = "Damage";
+            String string = "Avg Damage";
             String rangeStr = minShot == maxShot ? String.format("%d", (int)maxShot) : String.format("%d-%d", (int)minShot, (int)maxShot);
             sb.append(String.format("<color is=\"%s\">%s:</color> %s | <color is=\"%s\">%s:</color> %d", colorLabel, damageLabel, rangeStr, colorLabel, string, (int)damage.avgDamage));
         } else {
-            String maxLabel = lang.startsWith("es") ? "Da\u00f1o M\u00e1x" : "Max Damage";
-            String string = lang.startsWith("es") ? "Da\u00f1o Prom" : "Avg Damage";
+            String maxLabel = "Max Damage";
+            String string = "Avg Damage";
             sb.append(String.format("<color is=\"%s\">%s:</color> %d | <color is=\"%s\">%s:</color> %d", colorLabel, maxLabel, (int)damage.maxDamage, colorLabel, string, (int)damage.avgDamage));
         }
         if (!specificAttacks.isEmpty()) {
@@ -150,7 +149,7 @@ public class WeaponTooltipInjector {
             }
         }
         if (damage.signatureEnergy > 0.0) {
-            String sigLabel = lang.startsWith("es") ? "Energ\u00eda Firma" : "Signature Energy";
+            String sigLabel = "Signature Energy";
             sb.append("\n\n<color is=\"#a3906d\">" + sigLabel + ": +" + (int)damage.signatureEnergy + "</color>");
         }
         return sb.toString();

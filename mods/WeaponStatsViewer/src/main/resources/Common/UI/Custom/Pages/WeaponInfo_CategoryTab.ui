@@ -1,0 +1,32 @@
+$C = "../Common.ui";
+
+Button {
+  Anchor: (Width: 60, Bottom: 4, Right: 3);
+  Padding: (Full: 4);
+  Background: #2d2d2d;
+  LayoutMode: Top;
+  TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+  Style: (
+    Hovered: (
+      Background: #3a3a3a
+    ),
+    Pressed: (
+      Background: #454545
+    )
+  );
+
+  ItemIcon #CategoryIcon {
+    Anchor: (Width: 34, Height: 34, Bottom: 4);
+    Visible: true;
+  }
+
+  Label #CategoryName {
+    Style: (
+      FontSize: 9,
+      RenderBold: true,
+      TextColor: #e0e0e0,
+      HorizontalAlignment: Center
+    );
+    Anchor: (Bottom: 0);
+  }
+}

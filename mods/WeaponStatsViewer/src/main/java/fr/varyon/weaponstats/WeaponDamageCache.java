@@ -16,7 +16,7 @@
  *  javax.annotation.Nonnull
  *  javax.annotation.Nullable
  */
-package com.woxtz.weaponinfo;
+package fr.varyon.weaponstats;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -29,8 +29,8 @@ import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.PluginBase;
 import com.hypixel.hytale.server.core.plugin.PluginManager;
-import com.woxtz.weaponinfo.util.ModLangLoader;
-import com.woxtz.weaponinfo.util.WeaponTooltipInjector;
+import fr.varyon.weaponstats.util.ModLangLoader;
+import fr.varyon.weaponstats.util.WeaponTooltipInjector;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
@@ -79,7 +79,7 @@ public class WeaponDamageCache {
             }
         }
         int newWeaponsCount = 0;
-        Map<String, Item> items = ((DefaultAssetMap<String, Item>)event.getAssetMap()).getAssetMap();
+        Map<String, Item> items = ((DefaultAssetMap)event.getAssetMap()).getAssetMap();
         for (Map.Entry<String, Item> entry : items.entrySet()) {
             WeaponDamage damage;
             Item item = (Item)entry.getValue();
@@ -193,7 +193,7 @@ public class WeaponDamageCache {
         assetRoots.parallelStream().forEach(root -> {
             try (Stream<Path> stream = Files.walk(root, new FileVisitOption[0])) {
                 stream.filter(p -> p.toString().endsWith(".json")).forEach(p -> {
-                    Path path = jsonFileIndex.put(p.getFileName().toString(), (Path)p);
+                    jsonFileIndex.put(p.getFileName().toString(), p);
                 });
             }
             catch (Exception exception) {
@@ -211,7 +211,7 @@ public class WeaponDamageCache {
                     for (Path root2 : fs.getRootDirectories()) {
                         try (Stream<Path> stream = Files.walk(root2, new FileVisitOption[0])) {
                             stream.filter(p -> p.toString().endsWith(".json")).forEach(p -> {
-                                Path path = jsonFileIndex.put(p.getFileName().toString(), (Path)p);
+                                jsonFileIndex.put(p.getFileName().toString(), p);
                             });
                         }
                     }
@@ -258,4 +258,3 @@ public class WeaponDamageCache {
         }
     }
 }
-

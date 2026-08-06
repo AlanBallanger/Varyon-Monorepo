@@ -1,0 +1,21 @@
+{
+  "Group": "${plugin_group}",
+  "Name": "${plugin_name}",
+  "Version": "${plugin_version}",
+  "Description": "${plugin_description}",
+  "Main": "${plugin_main_entrypoint}",
+  "Authors": [
+    {
+      "Name": "${plugin_author}",
+      "Url": ""
+    }
+  ],
+  "Website": "${plugin_website}",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "LoadBefore": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": true,
+  "SubPlugins": [],
+  "ServerVersion": "${server_version}"
+}

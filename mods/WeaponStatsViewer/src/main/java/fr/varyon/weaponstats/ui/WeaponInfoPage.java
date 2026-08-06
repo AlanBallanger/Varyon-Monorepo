@@ -21,7 +21,7 @@
  *  com.hypixel.hytale.server.core.universe.world.storage.EntityStore
  *  javax.annotation.Nonnull
  */
-package com.woxtz.weaponinfo.ui;
+package fr.varyon.weaponstats.ui;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -39,9 +39,8 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.woxtz.weaponinfo.SpanishSearchTranslator;
-import com.woxtz.weaponinfo.WeaponDamageCache;
-import com.woxtz.weaponinfo.WeaponInfoTranslations;
+import fr.varyon.weaponstats.WeaponDamageCache;
+import fr.varyon.weaponstats.WeaponInfoTranslations;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -51,17 +50,49 @@ import javax.annotation.Nonnull;
 
 public class WeaponInfoPage
 extends InteractiveCustomUIPage<WeaponInfoPage.SearchData> {
+    private static final List<String> CATEGORY_ORDER = List.of(
+        "Dagger", "Sword", "Axe", "Bow", "Crossbow", "Staff", "Spellbook",
+        "Battleaxe", "Longswords", "Clubs", "Mace", "Spear", "Sword_Shield",
+        "Firearms", "Bomb", "Other"
+    );
+
     private String searchQuery;
+    private String selectedCategory;
     private final Map<String, List<Map.Entry<String, Item>>> weaponsByType;
     private final Map<String, Message> tooltipCache;
     private final Map<String, Message> nameCache;
 
     public WeaponInfoPage(@Nonnull PlayerRef playerRef, @Nonnull CustomPageLifetime lifetime, String defaultSearchQuery) {
-        super(playerRef, lifetime, SearchData.CODEC);
+        super(playerRef, lifetime, WeaponInfoPage.SearchData.CODEC);
         this.searchQuery = defaultSearchQuery;
+        this.selectedCategory = null;
         this.weaponsByType = new LinkedHashMap<String, List<Map.Entry<String, Item>>>();
         this.tooltipCache = new HashMap<String, Message>();
         this.nameCache = new HashMap<String, Message>();
+    }
+
+    private static String mapToCategory(String playerAnimationsId) {
+        if (playerAnimationsId == null || playerAnimationsId.isEmpty()) {
+            return "Other";
+        }
+        return switch (playerAnimationsId) {
+            case "Gun" -> "Firearms";
+            case "Shortbow" -> "Bow";
+            case "Crossbow" -> "Crossbow";
+            case "Spear" -> "Spear";
+            case "Bomb" -> "Bomb";
+            case "Staff", "Wand" -> "Staff";
+            case "Shield" -> "Sword_Shield";
+            case "Sword" -> "Sword";
+            case "Daggers", "Dagger" -> "Dagger";
+            case "Spellbook" -> "Spellbook";
+            case "Battleaxe" -> "Battleaxe";
+            case "Club" -> "Clubs";
+            case "Longsword" -> "Longswords";
+            case "Mace" -> "Mace";
+            case "Axe" -> "Axe";
+            default -> "Other";
+        };
     }
 
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder uiCommandBuilder, @Nonnull UIEventBuilder uiEventBuilder, @Nonnull Store<EntityStore> store) {
@@ -72,10 +103,18 @@ extends InteractiveCustomUIPage<WeaponInfoPage.SearchData> {
         this.buildWeaponList(ref, uiCommandBuilder, uiEventBuilder, store);
     }
 
-    public void handleDataEvent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, @Nonnull SearchData data) {
+    public void handleDataEvent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, @Nonnull WeaponInfoPage.SearchData data) {
         super.handleDataEvent(ref, store, data);
+        boolean changed = false;
         if (data.searchQuery != null) {
             this.searchQuery = data.searchQuery.trim().toLowerCase();
+            changed = true;
+        }
+        if (data.category != null) {
+            this.selectedCategory = data.category.equals("All") ? null : data.category;
+            changed = true;
+        }
+        if (changed) {
             UICommandBuilder commandBuilder = new UICommandBuilder();
             UIEventBuilder eventBuilder = new UIEventBuilder();
             this.buildWeaponList(ref, commandBuilder, eventBuilder, store);
@@ -94,56 +133,76 @@ extends InteractiveCustomUIPage<WeaponInfoPage.SearchData> {
             Item item = (Item)entry.getValue();
             String itemId = (String)entry.getKey();
             if (item.getWeapon() == null) continue;
-            boolean bl = includeItem = searchTerms.length == 0;
+            includeItem = searchTerms.length == 0;
             if (!includeItem) {
                 includeItem = true;
-                String[] stringArray = searchTerms;
-                int n = searchTerms.length;
-                int n2 = 0;
-                while (n2 < n) {
-                    String[] possibleTerms;
-                    String term = stringArray[n2];
-                    boolean termFound = false;
-                    String[] stringArray2 = possibleTerms = SpanishSearchTranslator.getAllPossibleTranslations(term);
-                    int n3 = possibleTerms.length;
-                    int n4 = 0;
-                    while (n4 < n3) {
-                        String englishName;
-                        String searchTerm = stringArray2[n4];
-                        if (itemId.toLowerCase().contains(searchTerm.toLowerCase())) {
-                            termFound = true;
-                            break;
-                        }
+                for (String term : searchTerms) {
+                    String searchTerm = term.toLowerCase();
+                    boolean termFound = itemId.toLowerCase().contains(searchTerm);
+                    if (!termFound) {
                         String translatedName = I18nModule.get().getMessage(language, item.getTranslationKey());
-                        if (translatedName != null && translatedName.toLowerCase().contains(searchTerm.toLowerCase())) {
-                            termFound = true;
-                            break;
-                        }
-                        if (!language.equals("en-US") && (englishName = I18nModule.get().getMessage("en-US", item.getTranslationKey())) != null && englishName.toLowerCase().contains(searchTerm.toLowerCase())) {
-                            termFound = true;
-                            break;
-                        }
-                        ++n4;
+                        termFound = translatedName != null && translatedName.toLowerCase().contains(searchTerm);
+                    }
+                    if (!termFound && !language.equals("en-US")) {
+                        String englishName = I18nModule.get().getMessage("en-US", item.getTranslationKey());
+                        termFound = englishName != null && englishName.toLowerCase().contains(searchTerm);
                     }
                     if (!termFound) {
                         includeItem = false;
                         break;
                     }
-                    ++n2;
                 }
             }
             if (!includeItem) continue;
-            if (itemId.contains("Arrow")) {
-                weaponType = "Arrow";
-            } else {
-                weaponType = item.getPlayerAnimationsId();
-                if (weaponType == null || weaponType.isEmpty()) {
-                    weaponType = "Other";
-                }
-            }
+            if (itemId.contains("Arrow")) continue;
+            weaponType = WeaponInfoPage.mapToCategory(item.getPlayerAnimationsId());
+            if (this.selectedCategory != null && !this.selectedCategory.equals(weaponType)) continue;
             this.weaponsByType.computeIfAbsent(weaponType, k -> new ArrayList()).add(entry);
         }
+        this.buildCategoryTabs(commandBuilder, eventBuilder);
         this.buildWeaponCards(commandBuilder, eventBuilder);
+    }
+
+    private void buildCategoryTabs(@Nonnull UICommandBuilder commandBuilder, @Nonnull UIEventBuilder eventBuilder) {
+        Map<String, Item> allItems = Item.getAssetMap().getAssetMap();
+        Map<String, Map.Entry<String, Item>> bestByCategory = new LinkedHashMap<String, Map.Entry<String, Item>>();
+        for (Map.Entry<String, Item> entry : allItems.entrySet()) {
+            Item item = entry.getValue();
+            String itemId = entry.getKey();
+            if (item.getWeapon() == null || itemId.contains("Arrow")) continue;
+            String category = WeaponInfoPage.mapToCategory(item.getPlayerAnimationsId());
+            WeaponDamageCache.WeaponDamage damage = WeaponDamageCache.getWeaponDamage(itemId);
+            double maxDamage = damage != null ? damage.maxDamage : 0.0;
+            Map.Entry<String, Item> current = bestByCategory.get(category);
+            if (current != null) {
+                WeaponDamageCache.WeaponDamage currentDamage = WeaponDamageCache.getWeaponDamage(current.getKey());
+                double currentMaxDamage = currentDamage != null ? currentDamage.maxDamage : 0.0;
+                if (maxDamage <= currentMaxDamage) continue;
+            }
+            bestByCategory.put(category, entry);
+        }
+        commandBuilder.clear("#CategoryTabs");
+        commandBuilder.set("#CategoryTabsSection.Visible", !bestByCategory.isEmpty());
+        String language = this.playerRef.getLanguage();
+        int tabIndex = 0;
+        for (String category : CATEGORY_ORDER) {
+            Map.Entry<String, Item> best = bestByCategory.get(category);
+            if (best == null) continue;
+            commandBuilder.append("#CategoryTabs", "Pages/WeaponInfo_CategoryTab.ui");
+            String itemId = best.getKey();
+            commandBuilder.set("#CategoryTabs[" + tabIndex + "] #CategoryIcon.ItemId", itemId);
+            String categoryLabel = WeaponInfoTranslations.get(language, category);
+            commandBuilder.set("#CategoryTabs[" + tabIndex + "] #CategoryName.TextSpans", Message.raw((String) categoryLabel));
+            boolean isSelected = category.equals(this.selectedCategory);
+            commandBuilder.set("#CategoryTabs[" + tabIndex + "].Background", isSelected ? "#4a5a9e" : "#2d2d2d");
+            eventBuilder.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#CategoryTabs[" + tabIndex + "]",
+                EventData.of((String) "Category", (String) (isSelected ? "All" : category)),
+                false
+            );
+            ++tabIndex;
+        }
     }
 
     private void buildWeaponCards(@Nonnull UICommandBuilder commandBuilder, @Nonnull UIEventBuilder eventBuilder) {
@@ -159,7 +218,12 @@ extends InteractiveCustomUIPage<WeaponInfoPage.SearchData> {
                 WeaponDamageCache.WeaponDamage d2 = WeaponDamageCache.getWeaponDamage((String)e2.getKey());
                 int priority1 = this.getQualityPriority(d1 != null ? d1.quality : "Common");
                 int priority2 = this.getQualityPriority(d2 != null ? d2.quality : "Common");
-                return Integer.compare(priority2, priority1);
+                if (priority1 != priority2) {
+                    return Integer.compare(priority2, priority1);
+                }
+                double maxDamage1 = d1 != null ? d1.maxDamage : 0.0;
+                double maxDamage2 = d2 != null ? d2.maxDamage : 0.0;
+                return Double.compare(maxDamage2, maxDamage1);
             });
             commandBuilder.append("#SubcommandCards", "Pages/WeaponInfo_SectionHeader.ui");
             String sectionTitle = WeaponInfoTranslations.get(language, weaponType);
@@ -190,7 +254,7 @@ extends InteractiveCustomUIPage<WeaponInfoPage.SearchData> {
                 commandBuilder.set("#SubcommandCards[" + rowIndex + "][" + cardsInCurrentRow + "].Style.Hovered.Background", hoverColor);
                 if (damage != null) {
                     String damageText;
-                    String damageHeader = language.equals("es") ? "Da\u00f1o:" : "Damage:";
+                    String damageHeader = "Damage:";
                     commandBuilder.set("#SubcommandCards[" + rowIndex + "][" + cardsInCurrentRow + "] #DamageHeader.TextSpans", Message.raw((String)damageHeader));
                     if (damage.hasRandomDamage && damage.randomModifier > 0.0) {
                         int minDamage = (int)Math.round(damage.maxDamage * (1.0 - damage.randomModifier));
@@ -403,6 +467,19 @@ extends InteractiveCustomUIPage<WeaponInfoPage.SearchData> {
         }
     }
 
+    private static String translateItemCategory(String category) {
+        return switch (category) {
+            case "Weapons" -> "Armes";
+            case "Utility" -> "Utilitaire";
+            case "Armor" -> "Armure";
+            case "Tools" -> "Outils";
+            case "Consumables" -> "Consommables";
+            case "Resources" -> "Ressources";
+            case "Decoration" -> "Décoration";
+            default -> category;
+        };
+    }
+
     private String getQualityHoverColor(String quality) {
         if (quality == null) {
             return "#3a3a3a";
@@ -432,23 +509,28 @@ extends InteractiveCustomUIPage<WeaponInfoPage.SearchData> {
         String translated;
         String cleanName = attackType.replace("_Damage", "");
         if (cleanName.contains("_Signature_")) {
-            cleanName = cleanName.replace("_Signature_", language.equals("es") ? "_Especial_" : "_Special_");
+            cleanName = cleanName.replace("_Signature_", "_Special_");
         }
         if ((translated = WeaponInfoTranslations.get(language, translationKey = "attack_" + cleanName)) != null && !translated.equals(translationKey)) {
             return translated;
         }
         if (cleanName.startsWith("Knife_")) {
             String suffix = cleanName.replace("Knife_", "").replace("_", " ");
-            return language.equals("es") ? "Cuchillo: " + suffix : "Knife: " + suffix;
+            return "Knife: " + suffix;
         }
         return cleanName.replace("_", " ");
     }
 
     public static class SearchData {
         private String searchQuery;
-        public static final BuilderCodec<SearchData> CODEC = ((BuilderCodec.Builder)BuilderCodec.builder(SearchData.class, SearchData::new).addField(new KeyedCodec("@SearchQuery", (Codec)Codec.STRING), (data, s) -> {
-            data.searchQuery = s;
-        }, data -> data.searchQuery)).build();
+        private String category;
+        public static final BuilderCodec<SearchData> CODEC = BuilderCodec.builder(SearchData.class, SearchData::new)
+            .addField(new KeyedCodec<String>("@SearchQuery", Codec.STRING), (SearchData data, String s) -> {
+                data.searchQuery = s;
+            }, (SearchData data) -> data.searchQuery)
+            .addField(new KeyedCodec<String>("Category", Codec.STRING), (SearchData data, String s) -> {
+                data.category = s;
+            }, (SearchData data) -> data.category)
+            .build();
     }
 }
-
