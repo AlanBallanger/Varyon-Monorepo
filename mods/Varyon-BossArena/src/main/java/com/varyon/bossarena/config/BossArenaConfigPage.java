@@ -60,10 +60,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private static final String TAB_PLANIFICATION = "planification";
     private static final String TAB_SHOP = "shop";
 
-    private static final int MAX_ARENA_ROWS = 8;
+    /** Arena rows declared in the layout. The list scrolls, so this is only an upper bound. */
+    private static final int MAX_ARENA_ROWS = 32;
     private static final int MAX_SHOP_ROWS = 8;
     private static final int MAX_SHOP_CONTRACT_ROWS = 8;
-    private static final int MAX_BOSS_ROWS = 8;
+    /** Boss rows declared in the layout. The list scrolls, so this is only an upper bound. */
+    private static final int MAX_BOSS_ROWS = 32;
     private static final int MAX_LOOT_ROWS = 8;
     private static final int MAX_LOOT_VISIBLE_ROWS = 8;
     private static final int MAX_WAVE_ADD_ROWS = 6;
@@ -78,8 +80,10 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private static final float MULT_SCALE_MAX = 10.00f;
     private static final float REGEN_MIN = BossRegen.MIN_HP_PER_SECOND;
     private static final float REGEN_MAX = BossRegen.MAX_HP_PER_SECOND;
-    private static final int MAX_TIMED_SPAWN_ROWS = 6;
-    private static final int MAX_BOSS_POOL_ROWS = 8;
+    /** Timed rules declared in the layout. The list scrolls, so this is only an upper bound. */
+    private static final int MAX_TIMED_SPAWN_ROWS = 32;
+    /** Pool rows declared in the layout. The list scrolls, so this is only an upper bound. */
+    private static final int MAX_BOSS_POOL_ROWS = 32;
     private static final int BOSS_SCROLL_THUMB_STEPS = 10;
     private static final Pattern ARENA_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
     private static final int MAX_SHOP_CURRENCY_PICKS = BossArenaConfigUiControls.MAX_ITEM_PICKS;
@@ -2224,7 +2228,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 .append("@ArenaX", "#ArenaX" + suffix + ".Value")
                 .append("@ArenaY", "#ArenaY" + suffix + ".Value")
                 .append("@ArenaZ", "#ArenaZ" + suffix + ".Value")
-                .append("@ArenaRadius" + suffix, "#ArenaRadius" + suffix + ".Value");
+                .append("@ArenaRadius", "#ArenaRadius" + suffix + ".Value");
     }
 
     private void addArenaAtPlayerPosition(Ref<EntityStore> ref, Store<EntityStore> store) {
@@ -2672,33 +2676,20 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         bossRows.clear();
 
         int totalBosses = bosses.size();
-        int maxOffset = Math.max(0, totalBosses - MAX_BOSS_ROWS);
-        bossListOffset = Math.max(0, Math.min(bossListOffset, maxOffset));
-        boolean scrollable = totalBosses > MAX_BOSS_ROWS;
-        boolean canScrollUp = scrollable && bossListOffset > 0;
-        boolean canScrollDown = scrollable && bossListOffset < maxOffset;
-
-        cmd.set("#BossScrollUp.Visible", canScrollUp);
-        cmd.set("#BossScrollDown.Visible", canScrollDown);
-        cmd.set("#BossScrollTrack.Visible", scrollable);
-        cmd.set("#BossScrollPageLabel.Visible", scrollable);
-
-        int scrollThumbStep = resolveBossScrollThumbStep(bossListOffset, maxOffset);
+        // The list now scrolls natively, so the old offset-based pager is disabled.
+        bossListOffset = 0;
+        cmd.set("#BossScrollUp.Visible", false);
+        cmd.set("#BossScrollDown.Visible", false);
+        cmd.set("#BossScrollTrack.Visible", false);
+        cmd.set("#BossScrollPageLabel.Visible", false);
         for (int step = 1; step <= BOSS_SCROLL_THUMB_STEPS; step++) {
-            cmd.set("#BossScrollThumb" + step + ".Visible", scrollable && step == scrollThumbStep);
+            cmd.set("#BossScrollThumb" + step + ".Visible", false);
         }
-
-        if (scrollable) {
-            int start = bossListOffset + 1;
-            int end = Math.min(totalBosses, bossListOffset + MAX_BOSS_ROWS);
-            cmd.set("#BossScrollPageLabel.Text", start + "-" + end + " / " + totalBosses);
-            cmd.set("#BossOverflowLabel.Visible", true);
-            cmd.set("#BossOverflowLabel.Text", "Utilisez le défilement pour voir tous les boss.");
-        } else {
-            cmd.set("#BossOverflowLabel.Visible", false);
-            cmd.set("#BossOverflowLabel.Text", "");
-            cmd.set("#BossScrollPageLabel.Text", "");
-        }
+        boolean bossOverflow = totalBosses > MAX_BOSS_ROWS;
+        cmd.set("#BossOverflowLabel.Visible", bossOverflow);
+        cmd.set("#BossOverflowLabel.Text", bossOverflow
+                ? ("+" + (totalBosses - MAX_BOSS_ROWS) + " boss non affichés sur cette page.")
+                : "");
 
         cmd.set("#BossEmptyLabel.Visible", bosses.isEmpty());
         if (bosses.isEmpty()) {
@@ -3726,11 +3717,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         cmd.set("#BossPoolStatusLabel.Text",
                 bossPoolEditorState.statusText == null ? "" : bossPoolEditorState.statusText);
         int total = bossPoolEditorState.bossIds.size();
-        int page = total == 0 ? 1 : (bossPoolEditorState.pageOffset / MAX_BOSS_POOL_ROWS) + 1;
-        int pages = Math.max(1, (total + MAX_BOSS_POOL_ROWS - 1) / MAX_BOSS_POOL_ROWS);
-        cmd.set("#BossPoolPageLabel.Text", "Page " + page + "/" + pages
-                + " | selection: " + bossPoolEditorState.selectedWeights.size()
-                + " / " + total);
+        // The list scrolls natively now, so the Prev/Next pager is hidden.
+        bossPoolEditorState.pageOffset = 0;
+        cmd.set("#BossPoolPrevButton.Visible", false);
+        cmd.set("#BossPoolNextButton.Visible", false);
+        cmd.set("#BossPoolPageLabel.Text", "selection: "
+                + bossPoolEditorState.selectedWeights.size() + " / " + total);
 
         List<DropdownEntryInfo> pickEntries = new ArrayList<>();
         pickEntries.add(new DropdownEntryInfo(LocalizableString.fromString("(choisir un boss)"), ""));
@@ -6005,296 +5997,917 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     }
 
     public static final class ConfigEventData {
-        public static final BuilderCodec<ConfigEventData> CODEC = BuilderCodec.builder(
-                        ConfigEventData.class,
-                        ConfigEventData::new
-                )
-                .append(new KeyedCodec<>("Action", Codec.STRING), (d, v) -> d.action = v, d -> d.action).add()
+        public static final BuilderCodec<ConfigEventData> CODEC = buildCodec();
 
-                .append(new KeyedCodec<>("@ArenaName", Codec.STRING), (d, v) -> d.arenaName = v, d -> d.arenaName).add()
-                .append(new KeyedCodec<>("@ArenaWorld", Codec.STRING), (d, v) -> d.arenaWorld = v, d -> d.arenaWorld).add()
-                .append(new KeyedCodec<>("@ArenaX", Codec.STRING), (d, v) -> d.arenaX = v, d -> d.arenaX).add()
-                .append(new KeyedCodec<>("@ArenaY", Codec.STRING), (d, v) -> d.arenaY = v, d -> d.arenaY).add()
-                .append(new KeyedCodec<>("@ArenaZ", Codec.STRING), (d, v) -> d.arenaZ = v, d -> d.arenaZ).add()
-                .append(new KeyedCodec<>("@ArenaRadius1", Codec.STRING), (d, v) -> d.arenaRadius1 = v, d -> d.arenaRadius1).add()
-                .append(new KeyedCodec<>("@ArenaRadius2", Codec.STRING), (d, v) -> d.arenaRadius2 = v, d -> d.arenaRadius2).add()
-                .append(new KeyedCodec<>("@ArenaRadius3", Codec.STRING), (d, v) -> d.arenaRadius3 = v, d -> d.arenaRadius3).add()
-                .append(new KeyedCodec<>("@ArenaRadius4", Codec.STRING), (d, v) -> d.arenaRadius4 = v, d -> d.arenaRadius4).add()
-                .append(new KeyedCodec<>("@ArenaRadius5", Codec.STRING), (d, v) -> d.arenaRadius5 = v, d -> d.arenaRadius5).add()
-                .append(new KeyedCodec<>("@ArenaRadius6", Codec.STRING), (d, v) -> d.arenaRadius6 = v, d -> d.arenaRadius6).add()
-                .append(new KeyedCodec<>("@ArenaRadius7", Codec.STRING), (d, v) -> d.arenaRadius7 = v, d -> d.arenaRadius7).add()
-                .append(new KeyedCodec<>("@ArenaRadius8", Codec.STRING), (d, v) -> d.arenaRadius8 = v, d -> d.arenaRadius8).add()
-                .append(new KeyedCodec<>("@ArenaProxEnabled", Codec.STRING), (d, v) -> d.arenaProxEnabled = v, d -> d.arenaProxEnabled).add()
-                .append(new KeyedCodec<>("@ArenaProxCooldown", Codec.STRING), (d, v) -> d.arenaProxCooldown = v, d -> d.arenaProxCooldown).add()
-                .append(new KeyedCodec<>("@ShopEditArenaId", Codec.STRING), (d, v) -> d.shopEditArenaId = v, d -> d.shopEditArenaId).add()
-                .append(new KeyedCodec<>("@ShopEditVendorName", Codec.STRING), (d, v) -> d.shopEditVendorName = v, d -> d.shopEditVendorName).add()
-                .append(new KeyedCodec<>("@ShopEditCurrencyItem", Codec.STRING), (d, v) -> d.shopEditCurrencyItem = v, d -> d.shopEditCurrencyItem).add()
-                .append(new KeyedCodec<>("@ShopEditBoss1", Codec.STRING), (d, v) -> d.shopEditBoss1 = v, d -> d.shopEditBoss1).add()
-                .append(new KeyedCodec<>("@ShopEditBoss2", Codec.STRING), (d, v) -> d.shopEditBoss2 = v, d -> d.shopEditBoss2).add()
-                .append(new KeyedCodec<>("@ShopEditBoss3", Codec.STRING), (d, v) -> d.shopEditBoss3 = v, d -> d.shopEditBoss3).add()
-                .append(new KeyedCodec<>("@ShopEditBoss4", Codec.STRING), (d, v) -> d.shopEditBoss4 = v, d -> d.shopEditBoss4).add()
-                .append(new KeyedCodec<>("@ShopEditBoss5", Codec.STRING), (d, v) -> d.shopEditBoss5 = v, d -> d.shopEditBoss5).add()
-                .append(new KeyedCodec<>("@ShopEditBoss6", Codec.STRING), (d, v) -> d.shopEditBoss6 = v, d -> d.shopEditBoss6).add()
-                .append(new KeyedCodec<>("@ShopEditBoss7", Codec.STRING), (d, v) -> d.shopEditBoss7 = v, d -> d.shopEditBoss7).add()
-                .append(new KeyedCodec<>("@ShopEditBoss8", Codec.STRING), (d, v) -> d.shopEditBoss8 = v, d -> d.shopEditBoss8).add()
-                .append(new KeyedCodec<>("@ShopEditArena1", Codec.STRING), (d, v) -> d.shopEditArena1 = v, d -> d.shopEditArena1).add()
-                .append(new KeyedCodec<>("@ShopEditArena2", Codec.STRING), (d, v) -> d.shopEditArena2 = v, d -> d.shopEditArena2).add()
-                .append(new KeyedCodec<>("@ShopEditArena3", Codec.STRING), (d, v) -> d.shopEditArena3 = v, d -> d.shopEditArena3).add()
-                .append(new KeyedCodec<>("@ShopEditArena4", Codec.STRING), (d, v) -> d.shopEditArena4 = v, d -> d.shopEditArena4).add()
-                .append(new KeyedCodec<>("@ShopEditArena5", Codec.STRING), (d, v) -> d.shopEditArena5 = v, d -> d.shopEditArena5).add()
-                .append(new KeyedCodec<>("@ShopEditArena6", Codec.STRING), (d, v) -> d.shopEditArena6 = v, d -> d.shopEditArena6).add()
-                .append(new KeyedCodec<>("@ShopEditArena7", Codec.STRING), (d, v) -> d.shopEditArena7 = v, d -> d.shopEditArena7).add()
-                .append(new KeyedCodec<>("@ShopEditArena8", Codec.STRING), (d, v) -> d.shopEditArena8 = v, d -> d.shopEditArena8).add()
-                .append(new KeyedCodec<>("@ShopEditBossPrice1", Codec.STRING), (d, v) -> d.shopEditBossPrice1 = v, d -> d.shopEditBossPrice1).add()
-                .append(new KeyedCodec<>("@ShopEditBossPrice2", Codec.STRING), (d, v) -> d.shopEditBossPrice2 = v, d -> d.shopEditBossPrice2).add()
-                .append(new KeyedCodec<>("@ShopEditBossPrice3", Codec.STRING), (d, v) -> d.shopEditBossPrice3 = v, d -> d.shopEditBossPrice3).add()
-                .append(new KeyedCodec<>("@ShopEditBossPrice4", Codec.STRING), (d, v) -> d.shopEditBossPrice4 = v, d -> d.shopEditBossPrice4).add()
-                .append(new KeyedCodec<>("@ShopEditBossPrice5", Codec.STRING), (d, v) -> d.shopEditBossPrice5 = v, d -> d.shopEditBossPrice5).add()
-                .append(new KeyedCodec<>("@ShopEditBossPrice6", Codec.STRING), (d, v) -> d.shopEditBossPrice6 = v, d -> d.shopEditBossPrice6).add()
-                .append(new KeyedCodec<>("@ShopEditBossPrice7", Codec.STRING), (d, v) -> d.shopEditBossPrice7 = v, d -> d.shopEditBossPrice7).add()
-                .append(new KeyedCodec<>("@ShopEditBossPrice8", Codec.STRING), (d, v) -> d.shopEditBossPrice8 = v, d -> d.shopEditBossPrice8).add()
-                .append(new KeyedCodec<>("@ShopEditSilentPrice1", Codec.STRING), (d, v) -> d.shopEditSilentPrice1 = v, d -> d.shopEditSilentPrice1).add()
-                .append(new KeyedCodec<>("@ShopEditSilentPrice2", Codec.STRING), (d, v) -> d.shopEditSilentPrice2 = v, d -> d.shopEditSilentPrice2).add()
-                .append(new KeyedCodec<>("@ShopEditSilentPrice3", Codec.STRING), (d, v) -> d.shopEditSilentPrice3 = v, d -> d.shopEditSilentPrice3).add()
-                .append(new KeyedCodec<>("@ShopEditSilentPrice4", Codec.STRING), (d, v) -> d.shopEditSilentPrice4 = v, d -> d.shopEditSilentPrice4).add()
-                .append(new KeyedCodec<>("@ShopEditSilentPrice5", Codec.STRING), (d, v) -> d.shopEditSilentPrice5 = v, d -> d.shopEditSilentPrice5).add()
-                .append(new KeyedCodec<>("@ShopEditSilentPrice6", Codec.STRING), (d, v) -> d.shopEditSilentPrice6 = v, d -> d.shopEditSilentPrice6).add()
-                .append(new KeyedCodec<>("@ShopEditSilentPrice7", Codec.STRING), (d, v) -> d.shopEditSilentPrice7 = v, d -> d.shopEditSilentPrice7).add()
-                .append(new KeyedCodec<>("@ShopEditSilentPrice8", Codec.STRING), (d, v) -> d.shopEditSilentPrice8 = v, d -> d.shopEditSilentPrice8).add()
-
-                .append(new KeyedCodec<>("@BossEditName", Codec.STRING), (d, v) -> d.bossEditName = v, d -> d.bossEditName).add()
-                .append(new KeyedCodec<>("@BossEditNpcId", Codec.STRING), (d, v) -> d.bossEditNpcId = v, d -> d.bossEditNpcId).add()
-                .append(new KeyedCodec<>("@BossEditTier", Codec.STRING), (d, v) -> d.bossEditTier = v, d -> d.bossEditTier).add()
-                .append(new KeyedCodec<>("@BossEditAmount", Codec.STRING), (d, v) -> d.bossEditAmount = v, d -> d.bossEditAmount).add()
-                .append(new KeyedCodec<>("@BossEditLevelOverride", Codec.STRING), (d, v) -> d.bossEditLevelOverride = v, d -> d.bossEditLevelOverride).add()
-                .append(new KeyedCodec<>("@BossEditHp", Codec.FLOAT), (d, v) -> d.bossEditHp = v, d -> d.bossEditHp).add()
-                .append(new KeyedCodec<>("@BossEditDamage", Codec.FLOAT), (d, v) -> d.bossEditDamage = v, d -> d.bossEditDamage).add()
-                .append(new KeyedCodec<>("@BossEditSpeed", Codec.FLOAT), (d, v) -> d.bossEditSpeed = v, d -> d.bossEditSpeed).add()
-                .append(new KeyedCodec<>("@BossEditSize", Codec.FLOAT), (d, v) -> d.bossEditSize = v, d -> d.bossEditSize).add()
-                .append(new KeyedCodec<>("@BossEditAttackRate", Codec.FLOAT), (d, v) -> d.bossEditAttackRate = v, d -> d.bossEditAttackRate).add()
-                .append(new KeyedCodec<>("@BossEditAbilityCooldown", Codec.FLOAT), (d, v) -> d.bossEditAbilityCooldown = v, d -> d.bossEditAbilityCooldown).add()
-                .append(new KeyedCodec<>("@BossEditKnockbackGiven", Codec.FLOAT), (d, v) -> d.bossEditKnockbackGiven = v, d -> d.bossEditKnockbackGiven).add()
-                .append(new KeyedCodec<>("@BossEditKnockbackTaken", Codec.FLOAT), (d, v) -> d.bossEditKnockbackTaken = v, d -> d.bossEditKnockbackTaken).add()
-                .append(new KeyedCodec<>("@BossEditTurnRate", Codec.FLOAT), (d, v) -> d.bossEditTurnRate = v, d -> d.bossEditTurnRate).add()
-                .append(new KeyedCodec<>("@BossEditRegen", Codec.FLOAT), (d, v) -> d.bossEditRegen = v, d -> d.bossEditRegen).add()
-                .append(new KeyedCodec<>("@BossEditPpHp", Codec.FLOAT), (d, v) -> d.bossEditPpHp = v, d -> d.bossEditPpHp).add()
-                .append(new KeyedCodec<>("@BossEditPpDamage", Codec.FLOAT), (d, v) -> d.bossEditPpDamage = v, d -> d.bossEditPpDamage).add()
-                .append(new KeyedCodec<>("@BossEditPpSpeed", Codec.FLOAT), (d, v) -> d.bossEditPpSpeed = v, d -> d.bossEditPpSpeed).add()
-                .append(new KeyedCodec<>("@BossEditPpSize", Codec.FLOAT), (d, v) -> d.bossEditPpSize = v, d -> d.bossEditPpSize).add()
-                .append(new KeyedCodec<>("@BossEditPpAttackRate", Codec.FLOAT), (d, v) -> d.bossEditPpAttackRate = v, d -> d.bossEditPpAttackRate).add()
-                .append(new KeyedCodec<>("@BossEditPpAbilityCooldown", Codec.FLOAT), (d, v) -> d.bossEditPpAbilityCooldown = v, d -> d.bossEditPpAbilityCooldown).add()
-                .append(new KeyedCodec<>("@BossEditPpKnockbackGiven", Codec.FLOAT), (d, v) -> d.bossEditPpKnockbackGiven = v, d -> d.bossEditPpKnockbackGiven).add()
-                .append(new KeyedCodec<>("@BossEditPpKnockbackTaken", Codec.FLOAT), (d, v) -> d.bossEditPpKnockbackTaken = v, d -> d.bossEditPpKnockbackTaken).add()
-                .append(new KeyedCodec<>("@BossEditPpTurnRate", Codec.FLOAT), (d, v) -> d.bossEditPpTurnRate = v, d -> d.bossEditPpTurnRate).add()
-                .append(new KeyedCodec<>("@BossEditPpRegen", Codec.FLOAT), (d, v) -> d.bossEditPpRegen = v, d -> d.bossEditPpRegen).add()
-                .append(new KeyedCodec<>("@BossEditWaves", Codec.STRING), (d, v) -> d.bossEditWaves = v, d -> d.bossEditWaves).add()
-                .append(new KeyedCodec<>("@BossEditExtraNpcId", Codec.STRING), (d, v) -> d.bossEditExtraNpcId = v, d -> d.bossEditExtraNpcId).add()
-                .append(new KeyedCodec<>("@BossEditExtraTimeLimit", Codec.STRING), (d, v) -> d.bossEditExtraTimeLimit = v, d -> d.bossEditExtraTimeLimit).add()
-                .append(new KeyedCodec<>("@BossEditExtraWaves", Codec.STRING), (d, v) -> d.bossEditExtraWaves = v, d -> d.bossEditExtraWaves).add()
-                .append(new KeyedCodec<>("@BossEditExtraMobsPerWave", Codec.STRING), (d, v) -> d.bossEditExtraMobsPerWave = v, d -> d.bossEditExtraMobsPerWave).add()
-
-                .append(new KeyedCodec<>("@BossSpawnTrigger", Codec.STRING), (d, v) -> d.bossSpawnTrigger = v, d -> d.bossSpawnTrigger).add()
-                .append(new KeyedCodec<>("@BossSpawnTriggerValue", Codec.STRING), (d, v) -> d.bossSpawnTriggerValue = v, d -> d.bossSpawnTriggerValue).add()
-                .append(new KeyedCodec<>("@BossSpawnSpreadRandom", Codec.STRING), (d, v) -> d.bossSpawnSpreadRandom = v, d -> d.bossSpawnSpreadRandom).add()
-                .append(new KeyedCodec<>("@BossSpawnSpreadRadius", Codec.STRING), (d, v) -> d.bossSpawnSpreadRadius = v, d -> d.bossSpawnSpreadRadius).add()
-                .append(new KeyedCodec<>("@BossWaveRandomLocations", Codec.STRING), (d, v) -> d.bossWaveRandomLocations = v, d -> d.bossWaveRandomLocations).add()
-                .append(new KeyedCodec<>("@BossWaveRandomRadius", Codec.STRING), (d, v) -> d.bossWaveRandomRadius = v, d -> d.bossWaveRandomRadius).add()
-                .append(new KeyedCodec<>("@BossWaveMobMult", Codec.FLOAT), (d, v) -> d.bossWaveMobMult = v, d -> d.bossWaveMobMult).add()
-                .append(new KeyedCodec<>("@BossWavesEnabled", Codec.STRING), (d, v) -> d.bossWavesEnabled = v, d -> d.bossWavesEnabled).add()
-                .append(new KeyedCodec<>("@BossEditMusic", Codec.STRING), (d, v) -> d.bossEditMusic = v, d -> d.bossEditMusic).add()
-                .append(new KeyedCodec<>("@BossEditMusicRadius", Codec.STRING), (d, v) -> d.bossEditMusicRadius = v, d -> d.bossEditMusicRadius).add()
-                .append(new KeyedCodec<>("@BossWaveTimeSec", Codec.STRING), (d, v) -> d.bossWaveTimeSec = v, d -> d.bossWaveTimeSec).add()
-                .append(new KeyedCodec<>("@BossWaveNpc1", Codec.STRING), (d, v) -> d.bossWaveNpc1 = v, d -> d.bossWaveNpc1).add()
-                .append(new KeyedCodec<>("@BossWaveAmount1", Codec.STRING), (d, v) -> d.bossWaveAmount1 = v, d -> d.bossWaveAmount1).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMin1", Codec.STRING), (d, v) -> d.bossWaveAmountMin1 = v, d -> d.bossWaveAmountMin1).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMax1", Codec.STRING), (d, v) -> d.bossWaveAmountMax1 = v, d -> d.bossWaveAmountMax1).add()
-                .append(new KeyedCodec<>("@BossWaveEvery1", Codec.STRING), (d, v) -> d.bossWaveEvery1 = v, d -> d.bossWaveEvery1).add()
-                .append(new KeyedCodec<>("@BossWaveHp1", Codec.STRING), (d, v) -> d.bossWaveHp1 = v, d -> d.bossWaveHp1).add()
-                .append(new KeyedCodec<>("@BossWaveDamage1", Codec.STRING), (d, v) -> d.bossWaveDamage1 = v, d -> d.bossWaveDamage1).add()
-                .append(new KeyedCodec<>("@BossWaveSize1", Codec.STRING), (d, v) -> d.bossWaveSize1 = v, d -> d.bossWaveSize1).add()
-                .append(new KeyedCodec<>("@BossWaveNpc2", Codec.STRING), (d, v) -> d.bossWaveNpc2 = v, d -> d.bossWaveNpc2).add()
-                .append(new KeyedCodec<>("@BossWaveAmount2", Codec.STRING), (d, v) -> d.bossWaveAmount2 = v, d -> d.bossWaveAmount2).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMin2", Codec.STRING), (d, v) -> d.bossWaveAmountMin2 = v, d -> d.bossWaveAmountMin2).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMax2", Codec.STRING), (d, v) -> d.bossWaveAmountMax2 = v, d -> d.bossWaveAmountMax2).add()
-                .append(new KeyedCodec<>("@BossWaveEvery2", Codec.STRING), (d, v) -> d.bossWaveEvery2 = v, d -> d.bossWaveEvery2).add()
-                .append(new KeyedCodec<>("@BossWaveHp2", Codec.STRING), (d, v) -> d.bossWaveHp2 = v, d -> d.bossWaveHp2).add()
-                .append(new KeyedCodec<>("@BossWaveDamage2", Codec.STRING), (d, v) -> d.bossWaveDamage2 = v, d -> d.bossWaveDamage2).add()
-                .append(new KeyedCodec<>("@BossWaveSize2", Codec.STRING), (d, v) -> d.bossWaveSize2 = v, d -> d.bossWaveSize2).add()
-                .append(new KeyedCodec<>("@BossWaveNpc3", Codec.STRING), (d, v) -> d.bossWaveNpc3 = v, d -> d.bossWaveNpc3).add()
-                .append(new KeyedCodec<>("@BossWaveAmount3", Codec.STRING), (d, v) -> d.bossWaveAmount3 = v, d -> d.bossWaveAmount3).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMin3", Codec.STRING), (d, v) -> d.bossWaveAmountMin3 = v, d -> d.bossWaveAmountMin3).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMax3", Codec.STRING), (d, v) -> d.bossWaveAmountMax3 = v, d -> d.bossWaveAmountMax3).add()
-                .append(new KeyedCodec<>("@BossWaveEvery3", Codec.STRING), (d, v) -> d.bossWaveEvery3 = v, d -> d.bossWaveEvery3).add()
-                .append(new KeyedCodec<>("@BossWaveHp3", Codec.STRING), (d, v) -> d.bossWaveHp3 = v, d -> d.bossWaveHp3).add()
-                .append(new KeyedCodec<>("@BossWaveDamage3", Codec.STRING), (d, v) -> d.bossWaveDamage3 = v, d -> d.bossWaveDamage3).add()
-                .append(new KeyedCodec<>("@BossWaveSize3", Codec.STRING), (d, v) -> d.bossWaveSize3 = v, d -> d.bossWaveSize3).add()
-                .append(new KeyedCodec<>("@BossWaveNpc4", Codec.STRING), (d, v) -> d.bossWaveNpc4 = v, d -> d.bossWaveNpc4).add()
-                .append(new KeyedCodec<>("@BossWaveAmount4", Codec.STRING), (d, v) -> d.bossWaveAmount4 = v, d -> d.bossWaveAmount4).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMin4", Codec.STRING), (d, v) -> d.bossWaveAmountMin4 = v, d -> d.bossWaveAmountMin4).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMax4", Codec.STRING), (d, v) -> d.bossWaveAmountMax4 = v, d -> d.bossWaveAmountMax4).add()
-                .append(new KeyedCodec<>("@BossWaveEvery4", Codec.STRING), (d, v) -> d.bossWaveEvery4 = v, d -> d.bossWaveEvery4).add()
-                .append(new KeyedCodec<>("@BossWaveHp4", Codec.STRING), (d, v) -> d.bossWaveHp4 = v, d -> d.bossWaveHp4).add()
-                .append(new KeyedCodec<>("@BossWaveDamage4", Codec.STRING), (d, v) -> d.bossWaveDamage4 = v, d -> d.bossWaveDamage4).add()
-                .append(new KeyedCodec<>("@BossWaveSize4", Codec.STRING), (d, v) -> d.bossWaveSize4 = v, d -> d.bossWaveSize4).add()
-                .append(new KeyedCodec<>("@BossWaveNpc5", Codec.STRING), (d, v) -> d.bossWaveNpc5 = v, d -> d.bossWaveNpc5).add()
-                .append(new KeyedCodec<>("@BossWaveAmount5", Codec.STRING), (d, v) -> d.bossWaveAmount5 = v, d -> d.bossWaveAmount5).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMin5", Codec.STRING), (d, v) -> d.bossWaveAmountMin5 = v, d -> d.bossWaveAmountMin5).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMax5", Codec.STRING), (d, v) -> d.bossWaveAmountMax5 = v, d -> d.bossWaveAmountMax5).add()
-                .append(new KeyedCodec<>("@BossWaveEvery5", Codec.STRING), (d, v) -> d.bossWaveEvery5 = v, d -> d.bossWaveEvery5).add()
-                .append(new KeyedCodec<>("@BossWaveHp5", Codec.STRING), (d, v) -> d.bossWaveHp5 = v, d -> d.bossWaveHp5).add()
-                .append(new KeyedCodec<>("@BossWaveDamage5", Codec.STRING), (d, v) -> d.bossWaveDamage5 = v, d -> d.bossWaveDamage5).add()
-                .append(new KeyedCodec<>("@BossWaveSize5", Codec.STRING), (d, v) -> d.bossWaveSize5 = v, d -> d.bossWaveSize5).add()
-                .append(new KeyedCodec<>("@BossWaveNpc6", Codec.STRING), (d, v) -> d.bossWaveNpc6 = v, d -> d.bossWaveNpc6).add()
-                .append(new KeyedCodec<>("@BossWaveAmount6", Codec.STRING), (d, v) -> d.bossWaveAmount6 = v, d -> d.bossWaveAmount6).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMin6", Codec.STRING), (d, v) -> d.bossWaveAmountMin6 = v, d -> d.bossWaveAmountMin6).add()
-                .append(new KeyedCodec<>("@BossWaveAmountMax6", Codec.STRING), (d, v) -> d.bossWaveAmountMax6 = v, d -> d.bossWaveAmountMax6).add()
-                .append(new KeyedCodec<>("@BossWaveEvery6", Codec.STRING), (d, v) -> d.bossWaveEvery6 = v, d -> d.bossWaveEvery6).add()
-                .append(new KeyedCodec<>("@BossWaveHp6", Codec.STRING), (d, v) -> d.bossWaveHp6 = v, d -> d.bossWaveHp6).add()
-                .append(new KeyedCodec<>("@BossWaveDamage6", Codec.STRING), (d, v) -> d.bossWaveDamage6 = v, d -> d.bossWaveDamage6).add()
-                .append(new KeyedCodec<>("@BossWaveSize6", Codec.STRING), (d, v) -> d.bossWaveSize6 = v, d -> d.bossWaveSize6).add()
-                .append(new KeyedCodec<>("@BossWaveValue1", Codec.STRING), (d, v) -> d.bossWaveValue1 = v, d -> d.bossWaveValue1).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatCount1", Codec.STRING), (d, v) -> d.bossWaveRepeatCount1 = v, d -> d.bossWaveRepeatCount1).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatSec1", Codec.STRING), (d, v) -> d.bossWaveRepeatSec1 = v, d -> d.bossWaveRepeatSec1).add()
-                .append(new KeyedCodec<>("@BossWaveValue2", Codec.STRING), (d, v) -> d.bossWaveValue2 = v, d -> d.bossWaveValue2).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatCount2", Codec.STRING), (d, v) -> d.bossWaveRepeatCount2 = v, d -> d.bossWaveRepeatCount2).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatSec2", Codec.STRING), (d, v) -> d.bossWaveRepeatSec2 = v, d -> d.bossWaveRepeatSec2).add()
-                .append(new KeyedCodec<>("@BossWaveValue3", Codec.STRING), (d, v) -> d.bossWaveValue3 = v, d -> d.bossWaveValue3).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatCount3", Codec.STRING), (d, v) -> d.bossWaveRepeatCount3 = v, d -> d.bossWaveRepeatCount3).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatSec3", Codec.STRING), (d, v) -> d.bossWaveRepeatSec3 = v, d -> d.bossWaveRepeatSec3).add()
-                .append(new KeyedCodec<>("@BossWaveValue4", Codec.STRING), (d, v) -> d.bossWaveValue4 = v, d -> d.bossWaveValue4).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatCount4", Codec.STRING), (d, v) -> d.bossWaveRepeatCount4 = v, d -> d.bossWaveRepeatCount4).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatSec4", Codec.STRING), (d, v) -> d.bossWaveRepeatSec4 = v, d -> d.bossWaveRepeatSec4).add()
-                .append(new KeyedCodec<>("@BossWaveValue5", Codec.STRING), (d, v) -> d.bossWaveValue5 = v, d -> d.bossWaveValue5).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatCount5", Codec.STRING), (d, v) -> d.bossWaveRepeatCount5 = v, d -> d.bossWaveRepeatCount5).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatSec5", Codec.STRING), (d, v) -> d.bossWaveRepeatSec5 = v, d -> d.bossWaveRepeatSec5).add()
-                .append(new KeyedCodec<>("@BossWaveValue6", Codec.STRING), (d, v) -> d.bossWaveValue6 = v, d -> d.bossWaveValue6).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatCount6", Codec.STRING), (d, v) -> d.bossWaveRepeatCount6 = v, d -> d.bossWaveRepeatCount6).add()
-                .append(new KeyedCodec<>("@BossWaveRepeatSec6", Codec.STRING), (d, v) -> d.bossWaveRepeatSec6 = v, d -> d.bossWaveRepeatSec6).add()
-                .append(new KeyedCodec<>("@TimedMinPlayers1", Codec.STRING), (d, v) -> d.timedMinPlayers1 = v, d -> d.timedMinPlayers1).add()
-                .append(new KeyedCodec<>("@TimedMinPlayers2", Codec.STRING), (d, v) -> d.timedMinPlayers2 = v, d -> d.timedMinPlayers2).add()
-                .append(new KeyedCodec<>("@TimedMinPlayers3", Codec.STRING), (d, v) -> d.timedMinPlayers3 = v, d -> d.timedMinPlayers3).add()
-                .append(new KeyedCodec<>("@TimedMinPlayers4", Codec.STRING), (d, v) -> d.timedMinPlayers4 = v, d -> d.timedMinPlayers4).add()
-                .append(new KeyedCodec<>("@TimedMinPlayers5", Codec.STRING), (d, v) -> d.timedMinPlayers5 = v, d -> d.timedMinPlayers5).add()
-                .append(new KeyedCodec<>("@TimedMinPlayers6", Codec.STRING), (d, v) -> d.timedMinPlayers6 = v, d -> d.timedMinPlayers6).add()
-                .append(new KeyedCodec<>("@TimedEverySeconds1", Codec.STRING), (d, v) -> d.timedEverySeconds1 = v, d -> d.timedEverySeconds1).add()
-                .append(new KeyedCodec<>("@TimedEverySeconds2", Codec.STRING), (d, v) -> d.timedEverySeconds2 = v, d -> d.timedEverySeconds2).add()
-                .append(new KeyedCodec<>("@TimedEverySeconds3", Codec.STRING), (d, v) -> d.timedEverySeconds3 = v, d -> d.timedEverySeconds3).add()
-                .append(new KeyedCodec<>("@TimedEverySeconds4", Codec.STRING), (d, v) -> d.timedEverySeconds4 = v, d -> d.timedEverySeconds4).add()
-                .append(new KeyedCodec<>("@TimedEverySeconds5", Codec.STRING), (d, v) -> d.timedEverySeconds5 = v, d -> d.timedEverySeconds5).add()
-                .append(new KeyedCodec<>("@TimedEverySeconds6", Codec.STRING), (d, v) -> d.timedEverySeconds6 = v, d -> d.timedEverySeconds6).add()
-                .append(new KeyedCodec<>("@TimedIntervalHours1", Codec.STRING), (d, v) -> d.timedIntervalHours1 = v, d -> d.timedIntervalHours1).add()
-                .append(new KeyedCodec<>("@TimedIntervalHours2", Codec.STRING), (d, v) -> d.timedIntervalHours2 = v, d -> d.timedIntervalHours2).add()
-                .append(new KeyedCodec<>("@TimedIntervalHours3", Codec.STRING), (d, v) -> d.timedIntervalHours3 = v, d -> d.timedIntervalHours3).add()
-                .append(new KeyedCodec<>("@TimedIntervalHours4", Codec.STRING), (d, v) -> d.timedIntervalHours4 = v, d -> d.timedIntervalHours4).add()
-                .append(new KeyedCodec<>("@TimedIntervalHours5", Codec.STRING), (d, v) -> d.timedIntervalHours5 = v, d -> d.timedIntervalHours5).add()
-                .append(new KeyedCodec<>("@TimedIntervalHours6", Codec.STRING), (d, v) -> d.timedIntervalHours6 = v, d -> d.timedIntervalHours6).add()
-                .append(new KeyedCodec<>("@TimedIntervalDays1", Codec.STRING), (d, v) -> d.timedIntervalDays1 = v, d -> d.timedIntervalDays1).add()
-                .append(new KeyedCodec<>("@TimedIntervalDays2", Codec.STRING), (d, v) -> d.timedIntervalDays2 = v, d -> d.timedIntervalDays2).add()
-                .append(new KeyedCodec<>("@TimedIntervalDays3", Codec.STRING), (d, v) -> d.timedIntervalDays3 = v, d -> d.timedIntervalDays3).add()
-                .append(new KeyedCodec<>("@TimedIntervalDays4", Codec.STRING), (d, v) -> d.timedIntervalDays4 = v, d -> d.timedIntervalDays4).add()
-                .append(new KeyedCodec<>("@TimedIntervalDays5", Codec.STRING), (d, v) -> d.timedIntervalDays5 = v, d -> d.timedIntervalDays5).add()
-                .append(new KeyedCodec<>("@TimedIntervalDays6", Codec.STRING), (d, v) -> d.timedIntervalDays6 = v, d -> d.timedIntervalDays6).add()
-                .append(new KeyedCodec<>("@TimedIntervalSeconds1", Codec.STRING), (d, v) -> d.timedIntervalSeconds1 = v, d -> d.timedIntervalSeconds1).add()
-                .append(new KeyedCodec<>("@TimedIntervalSeconds2", Codec.STRING), (d, v) -> d.timedIntervalSeconds2 = v, d -> d.timedIntervalSeconds2).add()
-                .append(new KeyedCodec<>("@TimedIntervalSeconds3", Codec.STRING), (d, v) -> d.timedIntervalSeconds3 = v, d -> d.timedIntervalSeconds3).add()
-                .append(new KeyedCodec<>("@TimedIntervalSeconds4", Codec.STRING), (d, v) -> d.timedIntervalSeconds4 = v, d -> d.timedIntervalSeconds4).add()
-                .append(new KeyedCodec<>("@TimedIntervalSeconds5", Codec.STRING), (d, v) -> d.timedIntervalSeconds5 = v, d -> d.timedIntervalSeconds5).add()
-                .append(new KeyedCodec<>("@TimedIntervalSeconds6", Codec.STRING), (d, v) -> d.timedIntervalSeconds6 = v, d -> d.timedIntervalSeconds6).add()
-                .append(new KeyedCodec<>("@TimedArrivalHours1", Codec.STRING), (d, v) -> d.timedArrivalHours1 = v, d -> d.timedArrivalHours1).add()
-                .append(new KeyedCodec<>("@TimedArrivalHours2", Codec.STRING), (d, v) -> d.timedArrivalHours2 = v, d -> d.timedArrivalHours2).add()
-                .append(new KeyedCodec<>("@TimedArrivalHours3", Codec.STRING), (d, v) -> d.timedArrivalHours3 = v, d -> d.timedArrivalHours3).add()
-                .append(new KeyedCodec<>("@TimedArrivalHours4", Codec.STRING), (d, v) -> d.timedArrivalHours4 = v, d -> d.timedArrivalHours4).add()
-                .append(new KeyedCodec<>("@TimedArrivalHours5", Codec.STRING), (d, v) -> d.timedArrivalHours5 = v, d -> d.timedArrivalHours5).add()
-                .append(new KeyedCodec<>("@TimedArrivalHours6", Codec.STRING), (d, v) -> d.timedArrivalHours6 = v, d -> d.timedArrivalHours6).add()
-                .append(new KeyedCodec<>("@TimedArrivalMinutes1", Codec.STRING), (d, v) -> d.timedArrivalMinutes1 = v, d -> d.timedArrivalMinutes1).add()
-                .append(new KeyedCodec<>("@TimedArrivalMinutes2", Codec.STRING), (d, v) -> d.timedArrivalMinutes2 = v, d -> d.timedArrivalMinutes2).add()
-                .append(new KeyedCodec<>("@TimedArrivalMinutes3", Codec.STRING), (d, v) -> d.timedArrivalMinutes3 = v, d -> d.timedArrivalMinutes3).add()
-                .append(new KeyedCodec<>("@TimedArrivalMinutes4", Codec.STRING), (d, v) -> d.timedArrivalMinutes4 = v, d -> d.timedArrivalMinutes4).add()
-                .append(new KeyedCodec<>("@TimedArrivalMinutes5", Codec.STRING), (d, v) -> d.timedArrivalMinutes5 = v, d -> d.timedArrivalMinutes5).add()
-                .append(new KeyedCodec<>("@TimedArrivalMinutes6", Codec.STRING), (d, v) -> d.timedArrivalMinutes6 = v, d -> d.timedArrivalMinutes6).add()
-                .append(new KeyedCodec<>("@TimedArrivalSeconds1", Codec.STRING), (d, v) -> d.timedArrivalSeconds1 = v, d -> d.timedArrivalSeconds1).add()
-                .append(new KeyedCodec<>("@TimedArrivalSeconds2", Codec.STRING), (d, v) -> d.timedArrivalSeconds2 = v, d -> d.timedArrivalSeconds2).add()
-                .append(new KeyedCodec<>("@TimedArrivalSeconds3", Codec.STRING), (d, v) -> d.timedArrivalSeconds3 = v, d -> d.timedArrivalSeconds3).add()
-                .append(new KeyedCodec<>("@TimedArrivalSeconds4", Codec.STRING), (d, v) -> d.timedArrivalSeconds4 = v, d -> d.timedArrivalSeconds4).add()
-                .append(new KeyedCodec<>("@TimedArrivalSeconds5", Codec.STRING), (d, v) -> d.timedArrivalSeconds5 = v, d -> d.timedArrivalSeconds5).add()
-                .append(new KeyedCodec<>("@TimedArrivalSeconds6", Codec.STRING), (d, v) -> d.timedArrivalSeconds6 = v, d -> d.timedArrivalSeconds6).add()
-                .append(new KeyedCodec<>("@TimedRequirePlayer1", Codec.STRING), (d, v) -> d.timedRequirePlayer1 = v, d -> d.timedRequirePlayer1).add()
-                .append(new KeyedCodec<>("@TimedRequirePlayer2", Codec.STRING), (d, v) -> d.timedRequirePlayer2 = v, d -> d.timedRequirePlayer2).add()
-                .append(new KeyedCodec<>("@TimedRequirePlayer3", Codec.STRING), (d, v) -> d.timedRequirePlayer3 = v, d -> d.timedRequirePlayer3).add()
-                .append(new KeyedCodec<>("@TimedRequirePlayer4", Codec.STRING), (d, v) -> d.timedRequirePlayer4 = v, d -> d.timedRequirePlayer4).add()
-                .append(new KeyedCodec<>("@TimedRequirePlayer5", Codec.STRING), (d, v) -> d.timedRequirePlayer5 = v, d -> d.timedRequirePlayer5).add()
-                .append(new KeyedCodec<>("@TimedRequirePlayer6", Codec.STRING), (d, v) -> d.timedRequirePlayer6 = v, d -> d.timedRequirePlayer6).add()
-                .append(new KeyedCodec<>("@TimedAnnounceGlobal1", Codec.STRING), (d, v) -> d.timedAnnounceGlobal1 = v, d -> d.timedAnnounceGlobal1).add()
-                .append(new KeyedCodec<>("@TimedAnnounceGlobal2", Codec.STRING), (d, v) -> d.timedAnnounceGlobal2 = v, d -> d.timedAnnounceGlobal2).add()
-                .append(new KeyedCodec<>("@TimedAnnounceGlobal3", Codec.STRING), (d, v) -> d.timedAnnounceGlobal3 = v, d -> d.timedAnnounceGlobal3).add()
-                .append(new KeyedCodec<>("@TimedAnnounceGlobal4", Codec.STRING), (d, v) -> d.timedAnnounceGlobal4 = v, d -> d.timedAnnounceGlobal4).add()
-                .append(new KeyedCodec<>("@TimedAnnounceGlobal5", Codec.STRING), (d, v) -> d.timedAnnounceGlobal5 = v, d -> d.timedAnnounceGlobal5).add()
-                .append(new KeyedCodec<>("@TimedAnnounceGlobal6", Codec.STRING), (d, v) -> d.timedAnnounceGlobal6 = v, d -> d.timedAnnounceGlobal6).add()
-                .append(new KeyedCodec<>("@TimedAnnounceWorld1", Codec.STRING), (d, v) -> d.timedAnnounceWorld1 = v, d -> d.timedAnnounceWorld1).add()
-                .append(new KeyedCodec<>("@TimedAnnounceWorld2", Codec.STRING), (d, v) -> d.timedAnnounceWorld2 = v, d -> d.timedAnnounceWorld2).add()
-                .append(new KeyedCodec<>("@TimedAnnounceWorld3", Codec.STRING), (d, v) -> d.timedAnnounceWorld3 = v, d -> d.timedAnnounceWorld3).add()
-                .append(new KeyedCodec<>("@TimedAnnounceWorld4", Codec.STRING), (d, v) -> d.timedAnnounceWorld4 = v, d -> d.timedAnnounceWorld4).add()
-                .append(new KeyedCodec<>("@TimedAnnounceWorld5", Codec.STRING), (d, v) -> d.timedAnnounceWorld5 = v, d -> d.timedAnnounceWorld5).add()
-                .append(new KeyedCodec<>("@TimedAnnounceWorld6", Codec.STRING), (d, v) -> d.timedAnnounceWorld6 = v, d -> d.timedAnnounceWorld6).add()
-                .append(new KeyedCodec<>("@TimedAnnounceText", Codec.STRING), (d, v) -> d.timedAnnounceText = v, d -> d.timedAnnounceText).add()
-                .append(new KeyedCodec<>("@TimedReminderText", Codec.STRING), (d, v) -> d.timedReminderText = v, d -> d.timedReminderText).add()
-                .append(new KeyedCodec<>("@TimedGraceText", Codec.STRING), (d, v) -> d.timedGraceText = v, d -> d.timedGraceText).add()
-                .append(new KeyedCodec<>("@BossPoolPick", Codec.STRING), (d, v) -> d.bossPoolPick = v, d -> d.bossPoolPick).add()
-                .append(new KeyedCodec<>("@TimedGraceEnabled1", Codec.STRING), (d, v) -> d.timedGraceEnabled1 = v, d -> d.timedGraceEnabled1).add()
-                .append(new KeyedCodec<>("@TimedGraceEnabled2", Codec.STRING), (d, v) -> d.timedGraceEnabled2 = v, d -> d.timedGraceEnabled2).add()
-                .append(new KeyedCodec<>("@TimedGraceEnabled3", Codec.STRING), (d, v) -> d.timedGraceEnabled3 = v, d -> d.timedGraceEnabled3).add()
-                .append(new KeyedCodec<>("@TimedGraceEnabled4", Codec.STRING), (d, v) -> d.timedGraceEnabled4 = v, d -> d.timedGraceEnabled4).add()
-                .append(new KeyedCodec<>("@TimedGraceEnabled5", Codec.STRING), (d, v) -> d.timedGraceEnabled5 = v, d -> d.timedGraceEnabled5).add()
-                .append(new KeyedCodec<>("@TimedGraceEnabled6", Codec.STRING), (d, v) -> d.timedGraceEnabled6 = v, d -> d.timedGraceEnabled6).add()
-                .append(new KeyedCodec<>("@TimedGraceSeconds1", Codec.STRING), (d, v) -> d.timedGraceSeconds1 = v, d -> d.timedGraceSeconds1).add()
-                .append(new KeyedCodec<>("@TimedGraceSeconds2", Codec.STRING), (d, v) -> d.timedGraceSeconds2 = v, d -> d.timedGraceSeconds2).add()
-                .append(new KeyedCodec<>("@TimedGraceSeconds3", Codec.STRING), (d, v) -> d.timedGraceSeconds3 = v, d -> d.timedGraceSeconds3).add()
-                .append(new KeyedCodec<>("@TimedGraceSeconds4", Codec.STRING), (d, v) -> d.timedGraceSeconds4 = v, d -> d.timedGraceSeconds4).add()
-                .append(new KeyedCodec<>("@TimedGraceSeconds5", Codec.STRING), (d, v) -> d.timedGraceSeconds5 = v, d -> d.timedGraceSeconds5).add()
-                .append(new KeyedCodec<>("@TimedGraceSeconds6", Codec.STRING), (d, v) -> d.timedGraceSeconds6 = v, d -> d.timedGraceSeconds6).add()
-
-                .append(new KeyedCodec<>("@BossLootName1", Codec.STRING), (d, v) -> d.bossLootName1 = v, d -> d.bossLootName1).add()
-                .append(new KeyedCodec<>("@BossLootMin1", Codec.STRING), (d, v) -> d.bossLootMin1 = v, d -> d.bossLootMin1).add()
-                .append(new KeyedCodec<>("@BossLootMax1", Codec.STRING), (d, v) -> d.bossLootMax1 = v, d -> d.bossLootMax1).add()
-                .append(new KeyedCodec<>("@BossLootChance1", Codec.STRING), (d, v) -> d.bossLootChance1 = v, d -> d.bossLootChance1).add()
-
-                .append(new KeyedCodec<>("@BossLootName2", Codec.STRING), (d, v) -> d.bossLootName2 = v, d -> d.bossLootName2).add()
-                .append(new KeyedCodec<>("@BossLootMin2", Codec.STRING), (d, v) -> d.bossLootMin2 = v, d -> d.bossLootMin2).add()
-                .append(new KeyedCodec<>("@BossLootMax2", Codec.STRING), (d, v) -> d.bossLootMax2 = v, d -> d.bossLootMax2).add()
-                .append(new KeyedCodec<>("@BossLootChance2", Codec.STRING), (d, v) -> d.bossLootChance2 = v, d -> d.bossLootChance2).add()
-
-                .append(new KeyedCodec<>("@BossLootName3", Codec.STRING), (d, v) -> d.bossLootName3 = v, d -> d.bossLootName3).add()
-                .append(new KeyedCodec<>("@BossLootMin3", Codec.STRING), (d, v) -> d.bossLootMin3 = v, d -> d.bossLootMin3).add()
-                .append(new KeyedCodec<>("@BossLootMax3", Codec.STRING), (d, v) -> d.bossLootMax3 = v, d -> d.bossLootMax3).add()
-                .append(new KeyedCodec<>("@BossLootChance3", Codec.STRING), (d, v) -> d.bossLootChance3 = v, d -> d.bossLootChance3).add()
-
-                .append(new KeyedCodec<>("@BossLootName4", Codec.STRING), (d, v) -> d.bossLootName4 = v, d -> d.bossLootName4).add()
-                .append(new KeyedCodec<>("@BossLootMin4", Codec.STRING), (d, v) -> d.bossLootMin4 = v, d -> d.bossLootMin4).add()
-                .append(new KeyedCodec<>("@BossLootMax4", Codec.STRING), (d, v) -> d.bossLootMax4 = v, d -> d.bossLootMax4).add()
-                .append(new KeyedCodec<>("@BossLootChance4", Codec.STRING), (d, v) -> d.bossLootChance4 = v, d -> d.bossLootChance4).add()
-
-                .append(new KeyedCodec<>("@BossLootName5", Codec.STRING), (d, v) -> d.bossLootName5 = v, d -> d.bossLootName5).add()
-                .append(new KeyedCodec<>("@BossLootMin5", Codec.STRING), (d, v) -> d.bossLootMin5 = v, d -> d.bossLootMin5).add()
-                .append(new KeyedCodec<>("@BossLootMax5", Codec.STRING), (d, v) -> d.bossLootMax5 = v, d -> d.bossLootMax5).add()
-                .append(new KeyedCodec<>("@BossLootChance5", Codec.STRING), (d, v) -> d.bossLootChance5 = v, d -> d.bossLootChance5).add()
-
-                .append(new KeyedCodec<>("@BossLootName6", Codec.STRING), (d, v) -> d.bossLootName6 = v, d -> d.bossLootName6).add()
-                .append(new KeyedCodec<>("@BossLootMin6", Codec.STRING), (d, v) -> d.bossLootMin6 = v, d -> d.bossLootMin6).add()
-                .append(new KeyedCodec<>("@BossLootMax6", Codec.STRING), (d, v) -> d.bossLootMax6 = v, d -> d.bossLootMax6).add()
-                .append(new KeyedCodec<>("@BossLootChance6", Codec.STRING), (d, v) -> d.bossLootChance6 = v, d -> d.bossLootChance6).add()
-
-                .append(new KeyedCodec<>("@BossLootName7", Codec.STRING), (d, v) -> d.bossLootName7 = v, d -> d.bossLootName7).add()
-                .append(new KeyedCodec<>("@BossLootMin7", Codec.STRING), (d, v) -> d.bossLootMin7 = v, d -> d.bossLootMin7).add()
-                .append(new KeyedCodec<>("@BossLootMax7", Codec.STRING), (d, v) -> d.bossLootMax7 = v, d -> d.bossLootMax7).add()
-                .append(new KeyedCodec<>("@BossLootChance7", Codec.STRING), (d, v) -> d.bossLootChance7 = v, d -> d.bossLootChance7).add()
-
-                .append(new KeyedCodec<>("@BossLootName8", Codec.STRING), (d, v) -> d.bossLootName8 = v, d -> d.bossLootName8).add()
-                .append(new KeyedCodec<>("@BossLootMin8", Codec.STRING), (d, v) -> d.bossLootMin8 = v, d -> d.bossLootMin8).add()
-                .append(new KeyedCodec<>("@BossLootMax8", Codec.STRING), (d, v) -> d.bossLootMax8 = v, d -> d.bossLootMax8).add()
-                .append(new KeyedCodec<>("@BossLootChance8", Codec.STRING), (d, v) -> d.bossLootChance8 = v, d -> d.bossLootChance8).add()
-                .build();
+        /**
+         * Built statement-by-statement rather than as one chained expression: the chain grew
+         * past what javac can analyse and blew the compiler stack.
+         */
+        private static BuilderCodec<ConfigEventData> buildCodec() {
+            var b = BuilderCodec.builder(ConfigEventData.class, ConfigEventData::new);
+            b.append(new KeyedCodec<>("Action", Codec.STRING), (d, v) -> d.action = v, d -> d.action).add();
+            b.append(new KeyedCodec<>("@ArenaName", Codec.STRING), (d, v) -> d.arenaName = v, d -> d.arenaName).add();
+            b.append(new KeyedCodec<>("@ArenaRadius", Codec.STRING), (d, v) -> d.arenaRadius = v, d -> d.arenaRadius).add();
+            b.append(new KeyedCodec<>("@ArenaWorld", Codec.STRING), (d, v) -> d.arenaWorld = v, d -> d.arenaWorld).add();
+            b.append(new KeyedCodec<>("@ArenaX", Codec.STRING), (d, v) -> d.arenaX = v, d -> d.arenaX).add();
+            b.append(new KeyedCodec<>("@ArenaY", Codec.STRING), (d, v) -> d.arenaY = v, d -> d.arenaY).add();
+            b.append(new KeyedCodec<>("@ArenaZ", Codec.STRING), (d, v) -> d.arenaZ = v, d -> d.arenaZ).add();
+            b.append(new KeyedCodec<>("@ArenaRadius1", Codec.STRING), (d, v) -> d.arenaRadius1 = v, d -> d.arenaRadius1).add();
+            b.append(new KeyedCodec<>("@ArenaRadius2", Codec.STRING), (d, v) -> d.arenaRadius2 = v, d -> d.arenaRadius2).add();
+            b.append(new KeyedCodec<>("@ArenaRadius3", Codec.STRING), (d, v) -> d.arenaRadius3 = v, d -> d.arenaRadius3).add();
+            b.append(new KeyedCodec<>("@ArenaRadius4", Codec.STRING), (d, v) -> d.arenaRadius4 = v, d -> d.arenaRadius4).add();
+            b.append(new KeyedCodec<>("@ArenaRadius5", Codec.STRING), (d, v) -> d.arenaRadius5 = v, d -> d.arenaRadius5).add();
+            b.append(new KeyedCodec<>("@ArenaRadius6", Codec.STRING), (d, v) -> d.arenaRadius6 = v, d -> d.arenaRadius6).add();
+            b.append(new KeyedCodec<>("@ArenaRadius7", Codec.STRING), (d, v) -> d.arenaRadius7 = v, d -> d.arenaRadius7).add();
+            b.append(new KeyedCodec<>("@ArenaRadius8", Codec.STRING), (d, v) -> d.arenaRadius8 = v, d -> d.arenaRadius8).add();
+            b.append(new KeyedCodec<>("@ArenaProxEnabled", Codec.STRING), (d, v) -> d.arenaProxEnabled = v, d -> d.arenaProxEnabled).add();
+            b.append(new KeyedCodec<>("@ArenaProxCooldown", Codec.STRING), (d, v) -> d.arenaProxCooldown = v, d -> d.arenaProxCooldown).add();
+            b.append(new KeyedCodec<>("@ShopEditArenaId", Codec.STRING), (d, v) -> d.shopEditArenaId = v, d -> d.shopEditArenaId).add();
+            b.append(new KeyedCodec<>("@ShopEditVendorName", Codec.STRING), (d, v) -> d.shopEditVendorName = v, d -> d.shopEditVendorName).add();
+            b.append(new KeyedCodec<>("@ShopEditCurrencyItem", Codec.STRING), (d, v) -> d.shopEditCurrencyItem = v, d -> d.shopEditCurrencyItem).add();
+            b.append(new KeyedCodec<>("@ShopEditBoss1", Codec.STRING), (d, v) -> d.shopEditBoss1 = v, d -> d.shopEditBoss1).add();
+            b.append(new KeyedCodec<>("@ShopEditBoss2", Codec.STRING), (d, v) -> d.shopEditBoss2 = v, d -> d.shopEditBoss2).add();
+            b.append(new KeyedCodec<>("@ShopEditBoss3", Codec.STRING), (d, v) -> d.shopEditBoss3 = v, d -> d.shopEditBoss3).add();
+            b.append(new KeyedCodec<>("@ShopEditBoss4", Codec.STRING), (d, v) -> d.shopEditBoss4 = v, d -> d.shopEditBoss4).add();
+            b.append(new KeyedCodec<>("@ShopEditBoss5", Codec.STRING), (d, v) -> d.shopEditBoss5 = v, d -> d.shopEditBoss5).add();
+            b.append(new KeyedCodec<>("@ShopEditBoss6", Codec.STRING), (d, v) -> d.shopEditBoss6 = v, d -> d.shopEditBoss6).add();
+            b.append(new KeyedCodec<>("@ShopEditBoss7", Codec.STRING), (d, v) -> d.shopEditBoss7 = v, d -> d.shopEditBoss7).add();
+            b.append(new KeyedCodec<>("@ShopEditBoss8", Codec.STRING), (d, v) -> d.shopEditBoss8 = v, d -> d.shopEditBoss8).add();
+            b.append(new KeyedCodec<>("@ShopEditArena1", Codec.STRING), (d, v) -> d.shopEditArena1 = v, d -> d.shopEditArena1).add();
+            b.append(new KeyedCodec<>("@ShopEditArena2", Codec.STRING), (d, v) -> d.shopEditArena2 = v, d -> d.shopEditArena2).add();
+            b.append(new KeyedCodec<>("@ShopEditArena3", Codec.STRING), (d, v) -> d.shopEditArena3 = v, d -> d.shopEditArena3).add();
+            b.append(new KeyedCodec<>("@ShopEditArena4", Codec.STRING), (d, v) -> d.shopEditArena4 = v, d -> d.shopEditArena4).add();
+            b.append(new KeyedCodec<>("@ShopEditArena5", Codec.STRING), (d, v) -> d.shopEditArena5 = v, d -> d.shopEditArena5).add();
+            b.append(new KeyedCodec<>("@ShopEditArena6", Codec.STRING), (d, v) -> d.shopEditArena6 = v, d -> d.shopEditArena6).add();
+            b.append(new KeyedCodec<>("@ShopEditArena7", Codec.STRING), (d, v) -> d.shopEditArena7 = v, d -> d.shopEditArena7).add();
+            b.append(new KeyedCodec<>("@ShopEditArena8", Codec.STRING), (d, v) -> d.shopEditArena8 = v, d -> d.shopEditArena8).add();
+            b.append(new KeyedCodec<>("@ShopEditBossPrice1", Codec.STRING), (d, v) -> d.shopEditBossPrice1 = v, d -> d.shopEditBossPrice1).add();
+            b.append(new KeyedCodec<>("@ShopEditBossPrice2", Codec.STRING), (d, v) -> d.shopEditBossPrice2 = v, d -> d.shopEditBossPrice2).add();
+            b.append(new KeyedCodec<>("@ShopEditBossPrice3", Codec.STRING), (d, v) -> d.shopEditBossPrice3 = v, d -> d.shopEditBossPrice3).add();
+            b.append(new KeyedCodec<>("@ShopEditBossPrice4", Codec.STRING), (d, v) -> d.shopEditBossPrice4 = v, d -> d.shopEditBossPrice4).add();
+            b.append(new KeyedCodec<>("@ShopEditBossPrice5", Codec.STRING), (d, v) -> d.shopEditBossPrice5 = v, d -> d.shopEditBossPrice5).add();
+            b.append(new KeyedCodec<>("@ShopEditBossPrice6", Codec.STRING), (d, v) -> d.shopEditBossPrice6 = v, d -> d.shopEditBossPrice6).add();
+            b.append(new KeyedCodec<>("@ShopEditBossPrice7", Codec.STRING), (d, v) -> d.shopEditBossPrice7 = v, d -> d.shopEditBossPrice7).add();
+            b.append(new KeyedCodec<>("@ShopEditBossPrice8", Codec.STRING), (d, v) -> d.shopEditBossPrice8 = v, d -> d.shopEditBossPrice8).add();
+            b.append(new KeyedCodec<>("@ShopEditSilentPrice1", Codec.STRING), (d, v) -> d.shopEditSilentPrice1 = v, d -> d.shopEditSilentPrice1).add();
+            b.append(new KeyedCodec<>("@ShopEditSilentPrice2", Codec.STRING), (d, v) -> d.shopEditSilentPrice2 = v, d -> d.shopEditSilentPrice2).add();
+            b.append(new KeyedCodec<>("@ShopEditSilentPrice3", Codec.STRING), (d, v) -> d.shopEditSilentPrice3 = v, d -> d.shopEditSilentPrice3).add();
+            b.append(new KeyedCodec<>("@ShopEditSilentPrice4", Codec.STRING), (d, v) -> d.shopEditSilentPrice4 = v, d -> d.shopEditSilentPrice4).add();
+            b.append(new KeyedCodec<>("@ShopEditSilentPrice5", Codec.STRING), (d, v) -> d.shopEditSilentPrice5 = v, d -> d.shopEditSilentPrice5).add();
+            b.append(new KeyedCodec<>("@ShopEditSilentPrice6", Codec.STRING), (d, v) -> d.shopEditSilentPrice6 = v, d -> d.shopEditSilentPrice6).add();
+            b.append(new KeyedCodec<>("@ShopEditSilentPrice7", Codec.STRING), (d, v) -> d.shopEditSilentPrice7 = v, d -> d.shopEditSilentPrice7).add();
+            b.append(new KeyedCodec<>("@ShopEditSilentPrice8", Codec.STRING), (d, v) -> d.shopEditSilentPrice8 = v, d -> d.shopEditSilentPrice8).add();
+            b.append(new KeyedCodec<>("@BossEditName", Codec.STRING), (d, v) -> d.bossEditName = v, d -> d.bossEditName).add();
+            b.append(new KeyedCodec<>("@BossEditNpcId", Codec.STRING), (d, v) -> d.bossEditNpcId = v, d -> d.bossEditNpcId).add();
+            b.append(new KeyedCodec<>("@BossEditTier", Codec.STRING), (d, v) -> d.bossEditTier = v, d -> d.bossEditTier).add();
+            b.append(new KeyedCodec<>("@BossEditAmount", Codec.STRING), (d, v) -> d.bossEditAmount = v, d -> d.bossEditAmount).add();
+            b.append(new KeyedCodec<>("@BossEditLevelOverride", Codec.STRING), (d, v) -> d.bossEditLevelOverride = v, d -> d.bossEditLevelOverride).add();
+            b.append(new KeyedCodec<>("@BossEditHp", Codec.FLOAT), (d, v) -> d.bossEditHp = v, d -> d.bossEditHp).add();
+            b.append(new KeyedCodec<>("@BossEditDamage", Codec.FLOAT), (d, v) -> d.bossEditDamage = v, d -> d.bossEditDamage).add();
+            b.append(new KeyedCodec<>("@BossEditSpeed", Codec.FLOAT), (d, v) -> d.bossEditSpeed = v, d -> d.bossEditSpeed).add();
+            b.append(new KeyedCodec<>("@BossEditSize", Codec.FLOAT), (d, v) -> d.bossEditSize = v, d -> d.bossEditSize).add();
+            b.append(new KeyedCodec<>("@BossEditAttackRate", Codec.FLOAT), (d, v) -> d.bossEditAttackRate = v, d -> d.bossEditAttackRate).add();
+            b.append(new KeyedCodec<>("@BossEditAbilityCooldown", Codec.FLOAT), (d, v) -> d.bossEditAbilityCooldown = v, d -> d.bossEditAbilityCooldown).add();
+            b.append(new KeyedCodec<>("@BossEditKnockbackGiven", Codec.FLOAT), (d, v) -> d.bossEditKnockbackGiven = v, d -> d.bossEditKnockbackGiven).add();
+            b.append(new KeyedCodec<>("@BossEditKnockbackTaken", Codec.FLOAT), (d, v) -> d.bossEditKnockbackTaken = v, d -> d.bossEditKnockbackTaken).add();
+            b.append(new KeyedCodec<>("@BossEditTurnRate", Codec.FLOAT), (d, v) -> d.bossEditTurnRate = v, d -> d.bossEditTurnRate).add();
+            b.append(new KeyedCodec<>("@BossEditRegen", Codec.FLOAT), (d, v) -> d.bossEditRegen = v, d -> d.bossEditRegen).add();
+            b.append(new KeyedCodec<>("@BossEditPpHp", Codec.FLOAT), (d, v) -> d.bossEditPpHp = v, d -> d.bossEditPpHp).add();
+            b.append(new KeyedCodec<>("@BossEditPpDamage", Codec.FLOAT), (d, v) -> d.bossEditPpDamage = v, d -> d.bossEditPpDamage).add();
+            b.append(new KeyedCodec<>("@BossEditPpSpeed", Codec.FLOAT), (d, v) -> d.bossEditPpSpeed = v, d -> d.bossEditPpSpeed).add();
+            b.append(new KeyedCodec<>("@BossEditPpSize", Codec.FLOAT), (d, v) -> d.bossEditPpSize = v, d -> d.bossEditPpSize).add();
+            b.append(new KeyedCodec<>("@BossEditPpAttackRate", Codec.FLOAT), (d, v) -> d.bossEditPpAttackRate = v, d -> d.bossEditPpAttackRate).add();
+            b.append(new KeyedCodec<>("@BossEditPpAbilityCooldown", Codec.FLOAT), (d, v) -> d.bossEditPpAbilityCooldown = v, d -> d.bossEditPpAbilityCooldown).add();
+            b.append(new KeyedCodec<>("@BossEditPpKnockbackGiven", Codec.FLOAT), (d, v) -> d.bossEditPpKnockbackGiven = v, d -> d.bossEditPpKnockbackGiven).add();
+            b.append(new KeyedCodec<>("@BossEditPpKnockbackTaken", Codec.FLOAT), (d, v) -> d.bossEditPpKnockbackTaken = v, d -> d.bossEditPpKnockbackTaken).add();
+            b.append(new KeyedCodec<>("@BossEditPpTurnRate", Codec.FLOAT), (d, v) -> d.bossEditPpTurnRate = v, d -> d.bossEditPpTurnRate).add();
+            b.append(new KeyedCodec<>("@BossEditPpRegen", Codec.FLOAT), (d, v) -> d.bossEditPpRegen = v, d -> d.bossEditPpRegen).add();
+            b.append(new KeyedCodec<>("@BossEditWaves", Codec.STRING), (d, v) -> d.bossEditWaves = v, d -> d.bossEditWaves).add();
+            b.append(new KeyedCodec<>("@BossEditExtraNpcId", Codec.STRING), (d, v) -> d.bossEditExtraNpcId = v, d -> d.bossEditExtraNpcId).add();
+            b.append(new KeyedCodec<>("@BossEditExtraTimeLimit", Codec.STRING), (d, v) -> d.bossEditExtraTimeLimit = v, d -> d.bossEditExtraTimeLimit).add();
+            b.append(new KeyedCodec<>("@BossEditExtraWaves", Codec.STRING), (d, v) -> d.bossEditExtraWaves = v, d -> d.bossEditExtraWaves).add();
+            b.append(new KeyedCodec<>("@BossEditExtraMobsPerWave", Codec.STRING), (d, v) -> d.bossEditExtraMobsPerWave = v, d -> d.bossEditExtraMobsPerWave).add();
+            b.append(new KeyedCodec<>("@BossSpawnTrigger", Codec.STRING), (d, v) -> d.bossSpawnTrigger = v, d -> d.bossSpawnTrigger).add();
+            b.append(new KeyedCodec<>("@BossSpawnTriggerValue", Codec.STRING), (d, v) -> d.bossSpawnTriggerValue = v, d -> d.bossSpawnTriggerValue).add();
+            b.append(new KeyedCodec<>("@BossSpawnSpreadRandom", Codec.STRING), (d, v) -> d.bossSpawnSpreadRandom = v, d -> d.bossSpawnSpreadRandom).add();
+            b.append(new KeyedCodec<>("@BossSpawnSpreadRadius", Codec.STRING), (d, v) -> d.bossSpawnSpreadRadius = v, d -> d.bossSpawnSpreadRadius).add();
+            b.append(new KeyedCodec<>("@BossWaveRandomLocations", Codec.STRING), (d, v) -> d.bossWaveRandomLocations = v, d -> d.bossWaveRandomLocations).add();
+            b.append(new KeyedCodec<>("@BossWaveRandomRadius", Codec.STRING), (d, v) -> d.bossWaveRandomRadius = v, d -> d.bossWaveRandomRadius).add();
+            b.append(new KeyedCodec<>("@BossWaveMobMult", Codec.FLOAT), (d, v) -> d.bossWaveMobMult = v, d -> d.bossWaveMobMult).add();
+            b.append(new KeyedCodec<>("@BossWavesEnabled", Codec.STRING), (d, v) -> d.bossWavesEnabled = v, d -> d.bossWavesEnabled).add();
+            b.append(new KeyedCodec<>("@BossEditMusic", Codec.STRING), (d, v) -> d.bossEditMusic = v, d -> d.bossEditMusic).add();
+            b.append(new KeyedCodec<>("@BossEditMusicRadius", Codec.STRING), (d, v) -> d.bossEditMusicRadius = v, d -> d.bossEditMusicRadius).add();
+            b.append(new KeyedCodec<>("@BossWaveTimeSec", Codec.STRING), (d, v) -> d.bossWaveTimeSec = v, d -> d.bossWaveTimeSec).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc1", Codec.STRING), (d, v) -> d.bossWaveNpc1 = v, d -> d.bossWaveNpc1).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount1", Codec.STRING), (d, v) -> d.bossWaveAmount1 = v, d -> d.bossWaveAmount1).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin1", Codec.STRING), (d, v) -> d.bossWaveAmountMin1 = v, d -> d.bossWaveAmountMin1).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax1", Codec.STRING), (d, v) -> d.bossWaveAmountMax1 = v, d -> d.bossWaveAmountMax1).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery1", Codec.STRING), (d, v) -> d.bossWaveEvery1 = v, d -> d.bossWaveEvery1).add();
+            b.append(new KeyedCodec<>("@BossWaveHp1", Codec.STRING), (d, v) -> d.bossWaveHp1 = v, d -> d.bossWaveHp1).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage1", Codec.STRING), (d, v) -> d.bossWaveDamage1 = v, d -> d.bossWaveDamage1).add();
+            b.append(new KeyedCodec<>("@BossWaveSize1", Codec.STRING), (d, v) -> d.bossWaveSize1 = v, d -> d.bossWaveSize1).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc2", Codec.STRING), (d, v) -> d.bossWaveNpc2 = v, d -> d.bossWaveNpc2).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount2", Codec.STRING), (d, v) -> d.bossWaveAmount2 = v, d -> d.bossWaveAmount2).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin2", Codec.STRING), (d, v) -> d.bossWaveAmountMin2 = v, d -> d.bossWaveAmountMin2).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax2", Codec.STRING), (d, v) -> d.bossWaveAmountMax2 = v, d -> d.bossWaveAmountMax2).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery2", Codec.STRING), (d, v) -> d.bossWaveEvery2 = v, d -> d.bossWaveEvery2).add();
+            b.append(new KeyedCodec<>("@BossWaveHp2", Codec.STRING), (d, v) -> d.bossWaveHp2 = v, d -> d.bossWaveHp2).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage2", Codec.STRING), (d, v) -> d.bossWaveDamage2 = v, d -> d.bossWaveDamage2).add();
+            b.append(new KeyedCodec<>("@BossWaveSize2", Codec.STRING), (d, v) -> d.bossWaveSize2 = v, d -> d.bossWaveSize2).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc3", Codec.STRING), (d, v) -> d.bossWaveNpc3 = v, d -> d.bossWaveNpc3).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount3", Codec.STRING), (d, v) -> d.bossWaveAmount3 = v, d -> d.bossWaveAmount3).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin3", Codec.STRING), (d, v) -> d.bossWaveAmountMin3 = v, d -> d.bossWaveAmountMin3).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax3", Codec.STRING), (d, v) -> d.bossWaveAmountMax3 = v, d -> d.bossWaveAmountMax3).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery3", Codec.STRING), (d, v) -> d.bossWaveEvery3 = v, d -> d.bossWaveEvery3).add();
+            b.append(new KeyedCodec<>("@BossWaveHp3", Codec.STRING), (d, v) -> d.bossWaveHp3 = v, d -> d.bossWaveHp3).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage3", Codec.STRING), (d, v) -> d.bossWaveDamage3 = v, d -> d.bossWaveDamage3).add();
+            b.append(new KeyedCodec<>("@BossWaveSize3", Codec.STRING), (d, v) -> d.bossWaveSize3 = v, d -> d.bossWaveSize3).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc4", Codec.STRING), (d, v) -> d.bossWaveNpc4 = v, d -> d.bossWaveNpc4).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount4", Codec.STRING), (d, v) -> d.bossWaveAmount4 = v, d -> d.bossWaveAmount4).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin4", Codec.STRING), (d, v) -> d.bossWaveAmountMin4 = v, d -> d.bossWaveAmountMin4).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax4", Codec.STRING), (d, v) -> d.bossWaveAmountMax4 = v, d -> d.bossWaveAmountMax4).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery4", Codec.STRING), (d, v) -> d.bossWaveEvery4 = v, d -> d.bossWaveEvery4).add();
+            b.append(new KeyedCodec<>("@BossWaveHp4", Codec.STRING), (d, v) -> d.bossWaveHp4 = v, d -> d.bossWaveHp4).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage4", Codec.STRING), (d, v) -> d.bossWaveDamage4 = v, d -> d.bossWaveDamage4).add();
+            b.append(new KeyedCodec<>("@BossWaveSize4", Codec.STRING), (d, v) -> d.bossWaveSize4 = v, d -> d.bossWaveSize4).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc5", Codec.STRING), (d, v) -> d.bossWaveNpc5 = v, d -> d.bossWaveNpc5).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount5", Codec.STRING), (d, v) -> d.bossWaveAmount5 = v, d -> d.bossWaveAmount5).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin5", Codec.STRING), (d, v) -> d.bossWaveAmountMin5 = v, d -> d.bossWaveAmountMin5).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax5", Codec.STRING), (d, v) -> d.bossWaveAmountMax5 = v, d -> d.bossWaveAmountMax5).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery5", Codec.STRING), (d, v) -> d.bossWaveEvery5 = v, d -> d.bossWaveEvery5).add();
+            b.append(new KeyedCodec<>("@BossWaveHp5", Codec.STRING), (d, v) -> d.bossWaveHp5 = v, d -> d.bossWaveHp5).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage5", Codec.STRING), (d, v) -> d.bossWaveDamage5 = v, d -> d.bossWaveDamage5).add();
+            b.append(new KeyedCodec<>("@BossWaveSize5", Codec.STRING), (d, v) -> d.bossWaveSize5 = v, d -> d.bossWaveSize5).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc6", Codec.STRING), (d, v) -> d.bossWaveNpc6 = v, d -> d.bossWaveNpc6).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc7", Codec.STRING), (d, v) -> d.bossWaveNpc7 = v, d -> d.bossWaveNpc7).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc8", Codec.STRING), (d, v) -> d.bossWaveNpc8 = v, d -> d.bossWaveNpc8).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc9", Codec.STRING), (d, v) -> d.bossWaveNpc9 = v, d -> d.bossWaveNpc9).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc10", Codec.STRING), (d, v) -> d.bossWaveNpc10 = v, d -> d.bossWaveNpc10).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc11", Codec.STRING), (d, v) -> d.bossWaveNpc11 = v, d -> d.bossWaveNpc11).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc12", Codec.STRING), (d, v) -> d.bossWaveNpc12 = v, d -> d.bossWaveNpc12).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc13", Codec.STRING), (d, v) -> d.bossWaveNpc13 = v, d -> d.bossWaveNpc13).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc14", Codec.STRING), (d, v) -> d.bossWaveNpc14 = v, d -> d.bossWaveNpc14).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc15", Codec.STRING), (d, v) -> d.bossWaveNpc15 = v, d -> d.bossWaveNpc15).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc16", Codec.STRING), (d, v) -> d.bossWaveNpc16 = v, d -> d.bossWaveNpc16).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc17", Codec.STRING), (d, v) -> d.bossWaveNpc17 = v, d -> d.bossWaveNpc17).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc18", Codec.STRING), (d, v) -> d.bossWaveNpc18 = v, d -> d.bossWaveNpc18).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc19", Codec.STRING), (d, v) -> d.bossWaveNpc19 = v, d -> d.bossWaveNpc19).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc20", Codec.STRING), (d, v) -> d.bossWaveNpc20 = v, d -> d.bossWaveNpc20).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc21", Codec.STRING), (d, v) -> d.bossWaveNpc21 = v, d -> d.bossWaveNpc21).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc22", Codec.STRING), (d, v) -> d.bossWaveNpc22 = v, d -> d.bossWaveNpc22).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc23", Codec.STRING), (d, v) -> d.bossWaveNpc23 = v, d -> d.bossWaveNpc23).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc24", Codec.STRING), (d, v) -> d.bossWaveNpc24 = v, d -> d.bossWaveNpc24).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc25", Codec.STRING), (d, v) -> d.bossWaveNpc25 = v, d -> d.bossWaveNpc25).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc26", Codec.STRING), (d, v) -> d.bossWaveNpc26 = v, d -> d.bossWaveNpc26).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc27", Codec.STRING), (d, v) -> d.bossWaveNpc27 = v, d -> d.bossWaveNpc27).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc28", Codec.STRING), (d, v) -> d.bossWaveNpc28 = v, d -> d.bossWaveNpc28).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc29", Codec.STRING), (d, v) -> d.bossWaveNpc29 = v, d -> d.bossWaveNpc29).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc30", Codec.STRING), (d, v) -> d.bossWaveNpc30 = v, d -> d.bossWaveNpc30).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc31", Codec.STRING), (d, v) -> d.bossWaveNpc31 = v, d -> d.bossWaveNpc31).add();
+            b.append(new KeyedCodec<>("@BossWaveNpc32", Codec.STRING), (d, v) -> d.bossWaveNpc32 = v, d -> d.bossWaveNpc32).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount6", Codec.STRING), (d, v) -> d.bossWaveAmount6 = v, d -> d.bossWaveAmount6).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount7", Codec.STRING), (d, v) -> d.bossWaveAmount7 = v, d -> d.bossWaveAmount7).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount8", Codec.STRING), (d, v) -> d.bossWaveAmount8 = v, d -> d.bossWaveAmount8).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount9", Codec.STRING), (d, v) -> d.bossWaveAmount9 = v, d -> d.bossWaveAmount9).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount10", Codec.STRING), (d, v) -> d.bossWaveAmount10 = v, d -> d.bossWaveAmount10).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount11", Codec.STRING), (d, v) -> d.bossWaveAmount11 = v, d -> d.bossWaveAmount11).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount12", Codec.STRING), (d, v) -> d.bossWaveAmount12 = v, d -> d.bossWaveAmount12).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount13", Codec.STRING), (d, v) -> d.bossWaveAmount13 = v, d -> d.bossWaveAmount13).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount14", Codec.STRING), (d, v) -> d.bossWaveAmount14 = v, d -> d.bossWaveAmount14).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount15", Codec.STRING), (d, v) -> d.bossWaveAmount15 = v, d -> d.bossWaveAmount15).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount16", Codec.STRING), (d, v) -> d.bossWaveAmount16 = v, d -> d.bossWaveAmount16).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount17", Codec.STRING), (d, v) -> d.bossWaveAmount17 = v, d -> d.bossWaveAmount17).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount18", Codec.STRING), (d, v) -> d.bossWaveAmount18 = v, d -> d.bossWaveAmount18).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount19", Codec.STRING), (d, v) -> d.bossWaveAmount19 = v, d -> d.bossWaveAmount19).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount20", Codec.STRING), (d, v) -> d.bossWaveAmount20 = v, d -> d.bossWaveAmount20).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount21", Codec.STRING), (d, v) -> d.bossWaveAmount21 = v, d -> d.bossWaveAmount21).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount22", Codec.STRING), (d, v) -> d.bossWaveAmount22 = v, d -> d.bossWaveAmount22).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount23", Codec.STRING), (d, v) -> d.bossWaveAmount23 = v, d -> d.bossWaveAmount23).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount24", Codec.STRING), (d, v) -> d.bossWaveAmount24 = v, d -> d.bossWaveAmount24).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount25", Codec.STRING), (d, v) -> d.bossWaveAmount25 = v, d -> d.bossWaveAmount25).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount26", Codec.STRING), (d, v) -> d.bossWaveAmount26 = v, d -> d.bossWaveAmount26).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount27", Codec.STRING), (d, v) -> d.bossWaveAmount27 = v, d -> d.bossWaveAmount27).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount28", Codec.STRING), (d, v) -> d.bossWaveAmount28 = v, d -> d.bossWaveAmount28).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount29", Codec.STRING), (d, v) -> d.bossWaveAmount29 = v, d -> d.bossWaveAmount29).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount30", Codec.STRING), (d, v) -> d.bossWaveAmount30 = v, d -> d.bossWaveAmount30).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount31", Codec.STRING), (d, v) -> d.bossWaveAmount31 = v, d -> d.bossWaveAmount31).add();
+            b.append(new KeyedCodec<>("@BossWaveAmount32", Codec.STRING), (d, v) -> d.bossWaveAmount32 = v, d -> d.bossWaveAmount32).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin6", Codec.STRING), (d, v) -> d.bossWaveAmountMin6 = v, d -> d.bossWaveAmountMin6).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin7", Codec.STRING), (d, v) -> d.bossWaveAmountMin7 = v, d -> d.bossWaveAmountMin7).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin8", Codec.STRING), (d, v) -> d.bossWaveAmountMin8 = v, d -> d.bossWaveAmountMin8).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin9", Codec.STRING), (d, v) -> d.bossWaveAmountMin9 = v, d -> d.bossWaveAmountMin9).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin10", Codec.STRING), (d, v) -> d.bossWaveAmountMin10 = v, d -> d.bossWaveAmountMin10).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin11", Codec.STRING), (d, v) -> d.bossWaveAmountMin11 = v, d -> d.bossWaveAmountMin11).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin12", Codec.STRING), (d, v) -> d.bossWaveAmountMin12 = v, d -> d.bossWaveAmountMin12).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin13", Codec.STRING), (d, v) -> d.bossWaveAmountMin13 = v, d -> d.bossWaveAmountMin13).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin14", Codec.STRING), (d, v) -> d.bossWaveAmountMin14 = v, d -> d.bossWaveAmountMin14).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin15", Codec.STRING), (d, v) -> d.bossWaveAmountMin15 = v, d -> d.bossWaveAmountMin15).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin16", Codec.STRING), (d, v) -> d.bossWaveAmountMin16 = v, d -> d.bossWaveAmountMin16).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin17", Codec.STRING), (d, v) -> d.bossWaveAmountMin17 = v, d -> d.bossWaveAmountMin17).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin18", Codec.STRING), (d, v) -> d.bossWaveAmountMin18 = v, d -> d.bossWaveAmountMin18).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin19", Codec.STRING), (d, v) -> d.bossWaveAmountMin19 = v, d -> d.bossWaveAmountMin19).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin20", Codec.STRING), (d, v) -> d.bossWaveAmountMin20 = v, d -> d.bossWaveAmountMin20).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin21", Codec.STRING), (d, v) -> d.bossWaveAmountMin21 = v, d -> d.bossWaveAmountMin21).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin22", Codec.STRING), (d, v) -> d.bossWaveAmountMin22 = v, d -> d.bossWaveAmountMin22).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin23", Codec.STRING), (d, v) -> d.bossWaveAmountMin23 = v, d -> d.bossWaveAmountMin23).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin24", Codec.STRING), (d, v) -> d.bossWaveAmountMin24 = v, d -> d.bossWaveAmountMin24).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin25", Codec.STRING), (d, v) -> d.bossWaveAmountMin25 = v, d -> d.bossWaveAmountMin25).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin26", Codec.STRING), (d, v) -> d.bossWaveAmountMin26 = v, d -> d.bossWaveAmountMin26).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin27", Codec.STRING), (d, v) -> d.bossWaveAmountMin27 = v, d -> d.bossWaveAmountMin27).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin28", Codec.STRING), (d, v) -> d.bossWaveAmountMin28 = v, d -> d.bossWaveAmountMin28).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin29", Codec.STRING), (d, v) -> d.bossWaveAmountMin29 = v, d -> d.bossWaveAmountMin29).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin30", Codec.STRING), (d, v) -> d.bossWaveAmountMin30 = v, d -> d.bossWaveAmountMin30).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin31", Codec.STRING), (d, v) -> d.bossWaveAmountMin31 = v, d -> d.bossWaveAmountMin31).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMin32", Codec.STRING), (d, v) -> d.bossWaveAmountMin32 = v, d -> d.bossWaveAmountMin32).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax6", Codec.STRING), (d, v) -> d.bossWaveAmountMax6 = v, d -> d.bossWaveAmountMax6).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax7", Codec.STRING), (d, v) -> d.bossWaveAmountMax7 = v, d -> d.bossWaveAmountMax7).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax8", Codec.STRING), (d, v) -> d.bossWaveAmountMax8 = v, d -> d.bossWaveAmountMax8).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax9", Codec.STRING), (d, v) -> d.bossWaveAmountMax9 = v, d -> d.bossWaveAmountMax9).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax10", Codec.STRING), (d, v) -> d.bossWaveAmountMax10 = v, d -> d.bossWaveAmountMax10).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax11", Codec.STRING), (d, v) -> d.bossWaveAmountMax11 = v, d -> d.bossWaveAmountMax11).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax12", Codec.STRING), (d, v) -> d.bossWaveAmountMax12 = v, d -> d.bossWaveAmountMax12).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax13", Codec.STRING), (d, v) -> d.bossWaveAmountMax13 = v, d -> d.bossWaveAmountMax13).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax14", Codec.STRING), (d, v) -> d.bossWaveAmountMax14 = v, d -> d.bossWaveAmountMax14).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax15", Codec.STRING), (d, v) -> d.bossWaveAmountMax15 = v, d -> d.bossWaveAmountMax15).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax16", Codec.STRING), (d, v) -> d.bossWaveAmountMax16 = v, d -> d.bossWaveAmountMax16).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax17", Codec.STRING), (d, v) -> d.bossWaveAmountMax17 = v, d -> d.bossWaveAmountMax17).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax18", Codec.STRING), (d, v) -> d.bossWaveAmountMax18 = v, d -> d.bossWaveAmountMax18).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax19", Codec.STRING), (d, v) -> d.bossWaveAmountMax19 = v, d -> d.bossWaveAmountMax19).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax20", Codec.STRING), (d, v) -> d.bossWaveAmountMax20 = v, d -> d.bossWaveAmountMax20).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax21", Codec.STRING), (d, v) -> d.bossWaveAmountMax21 = v, d -> d.bossWaveAmountMax21).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax22", Codec.STRING), (d, v) -> d.bossWaveAmountMax22 = v, d -> d.bossWaveAmountMax22).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax23", Codec.STRING), (d, v) -> d.bossWaveAmountMax23 = v, d -> d.bossWaveAmountMax23).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax24", Codec.STRING), (d, v) -> d.bossWaveAmountMax24 = v, d -> d.bossWaveAmountMax24).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax25", Codec.STRING), (d, v) -> d.bossWaveAmountMax25 = v, d -> d.bossWaveAmountMax25).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax26", Codec.STRING), (d, v) -> d.bossWaveAmountMax26 = v, d -> d.bossWaveAmountMax26).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax27", Codec.STRING), (d, v) -> d.bossWaveAmountMax27 = v, d -> d.bossWaveAmountMax27).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax28", Codec.STRING), (d, v) -> d.bossWaveAmountMax28 = v, d -> d.bossWaveAmountMax28).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax29", Codec.STRING), (d, v) -> d.bossWaveAmountMax29 = v, d -> d.bossWaveAmountMax29).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax30", Codec.STRING), (d, v) -> d.bossWaveAmountMax30 = v, d -> d.bossWaveAmountMax30).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax31", Codec.STRING), (d, v) -> d.bossWaveAmountMax31 = v, d -> d.bossWaveAmountMax31).add();
+            b.append(new KeyedCodec<>("@BossWaveAmountMax32", Codec.STRING), (d, v) -> d.bossWaveAmountMax32 = v, d -> d.bossWaveAmountMax32).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery6", Codec.STRING), (d, v) -> d.bossWaveEvery6 = v, d -> d.bossWaveEvery6).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery7", Codec.STRING), (d, v) -> d.bossWaveEvery7 = v, d -> d.bossWaveEvery7).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery8", Codec.STRING), (d, v) -> d.bossWaveEvery8 = v, d -> d.bossWaveEvery8).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery9", Codec.STRING), (d, v) -> d.bossWaveEvery9 = v, d -> d.bossWaveEvery9).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery10", Codec.STRING), (d, v) -> d.bossWaveEvery10 = v, d -> d.bossWaveEvery10).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery11", Codec.STRING), (d, v) -> d.bossWaveEvery11 = v, d -> d.bossWaveEvery11).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery12", Codec.STRING), (d, v) -> d.bossWaveEvery12 = v, d -> d.bossWaveEvery12).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery13", Codec.STRING), (d, v) -> d.bossWaveEvery13 = v, d -> d.bossWaveEvery13).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery14", Codec.STRING), (d, v) -> d.bossWaveEvery14 = v, d -> d.bossWaveEvery14).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery15", Codec.STRING), (d, v) -> d.bossWaveEvery15 = v, d -> d.bossWaveEvery15).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery16", Codec.STRING), (d, v) -> d.bossWaveEvery16 = v, d -> d.bossWaveEvery16).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery17", Codec.STRING), (d, v) -> d.bossWaveEvery17 = v, d -> d.bossWaveEvery17).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery18", Codec.STRING), (d, v) -> d.bossWaveEvery18 = v, d -> d.bossWaveEvery18).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery19", Codec.STRING), (d, v) -> d.bossWaveEvery19 = v, d -> d.bossWaveEvery19).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery20", Codec.STRING), (d, v) -> d.bossWaveEvery20 = v, d -> d.bossWaveEvery20).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery21", Codec.STRING), (d, v) -> d.bossWaveEvery21 = v, d -> d.bossWaveEvery21).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery22", Codec.STRING), (d, v) -> d.bossWaveEvery22 = v, d -> d.bossWaveEvery22).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery23", Codec.STRING), (d, v) -> d.bossWaveEvery23 = v, d -> d.bossWaveEvery23).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery24", Codec.STRING), (d, v) -> d.bossWaveEvery24 = v, d -> d.bossWaveEvery24).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery25", Codec.STRING), (d, v) -> d.bossWaveEvery25 = v, d -> d.bossWaveEvery25).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery26", Codec.STRING), (d, v) -> d.bossWaveEvery26 = v, d -> d.bossWaveEvery26).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery27", Codec.STRING), (d, v) -> d.bossWaveEvery27 = v, d -> d.bossWaveEvery27).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery28", Codec.STRING), (d, v) -> d.bossWaveEvery28 = v, d -> d.bossWaveEvery28).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery29", Codec.STRING), (d, v) -> d.bossWaveEvery29 = v, d -> d.bossWaveEvery29).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery30", Codec.STRING), (d, v) -> d.bossWaveEvery30 = v, d -> d.bossWaveEvery30).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery31", Codec.STRING), (d, v) -> d.bossWaveEvery31 = v, d -> d.bossWaveEvery31).add();
+            b.append(new KeyedCodec<>("@BossWaveEvery32", Codec.STRING), (d, v) -> d.bossWaveEvery32 = v, d -> d.bossWaveEvery32).add();
+            b.append(new KeyedCodec<>("@BossWaveHp6", Codec.STRING), (d, v) -> d.bossWaveHp6 = v, d -> d.bossWaveHp6).add();
+            b.append(new KeyedCodec<>("@BossWaveHp7", Codec.STRING), (d, v) -> d.bossWaveHp7 = v, d -> d.bossWaveHp7).add();
+            b.append(new KeyedCodec<>("@BossWaveHp8", Codec.STRING), (d, v) -> d.bossWaveHp8 = v, d -> d.bossWaveHp8).add();
+            b.append(new KeyedCodec<>("@BossWaveHp9", Codec.STRING), (d, v) -> d.bossWaveHp9 = v, d -> d.bossWaveHp9).add();
+            b.append(new KeyedCodec<>("@BossWaveHp10", Codec.STRING), (d, v) -> d.bossWaveHp10 = v, d -> d.bossWaveHp10).add();
+            b.append(new KeyedCodec<>("@BossWaveHp11", Codec.STRING), (d, v) -> d.bossWaveHp11 = v, d -> d.bossWaveHp11).add();
+            b.append(new KeyedCodec<>("@BossWaveHp12", Codec.STRING), (d, v) -> d.bossWaveHp12 = v, d -> d.bossWaveHp12).add();
+            b.append(new KeyedCodec<>("@BossWaveHp13", Codec.STRING), (d, v) -> d.bossWaveHp13 = v, d -> d.bossWaveHp13).add();
+            b.append(new KeyedCodec<>("@BossWaveHp14", Codec.STRING), (d, v) -> d.bossWaveHp14 = v, d -> d.bossWaveHp14).add();
+            b.append(new KeyedCodec<>("@BossWaveHp15", Codec.STRING), (d, v) -> d.bossWaveHp15 = v, d -> d.bossWaveHp15).add();
+            b.append(new KeyedCodec<>("@BossWaveHp16", Codec.STRING), (d, v) -> d.bossWaveHp16 = v, d -> d.bossWaveHp16).add();
+            b.append(new KeyedCodec<>("@BossWaveHp17", Codec.STRING), (d, v) -> d.bossWaveHp17 = v, d -> d.bossWaveHp17).add();
+            b.append(new KeyedCodec<>("@BossWaveHp18", Codec.STRING), (d, v) -> d.bossWaveHp18 = v, d -> d.bossWaveHp18).add();
+            b.append(new KeyedCodec<>("@BossWaveHp19", Codec.STRING), (d, v) -> d.bossWaveHp19 = v, d -> d.bossWaveHp19).add();
+            b.append(new KeyedCodec<>("@BossWaveHp20", Codec.STRING), (d, v) -> d.bossWaveHp20 = v, d -> d.bossWaveHp20).add();
+            b.append(new KeyedCodec<>("@BossWaveHp21", Codec.STRING), (d, v) -> d.bossWaveHp21 = v, d -> d.bossWaveHp21).add();
+            b.append(new KeyedCodec<>("@BossWaveHp22", Codec.STRING), (d, v) -> d.bossWaveHp22 = v, d -> d.bossWaveHp22).add();
+            b.append(new KeyedCodec<>("@BossWaveHp23", Codec.STRING), (d, v) -> d.bossWaveHp23 = v, d -> d.bossWaveHp23).add();
+            b.append(new KeyedCodec<>("@BossWaveHp24", Codec.STRING), (d, v) -> d.bossWaveHp24 = v, d -> d.bossWaveHp24).add();
+            b.append(new KeyedCodec<>("@BossWaveHp25", Codec.STRING), (d, v) -> d.bossWaveHp25 = v, d -> d.bossWaveHp25).add();
+            b.append(new KeyedCodec<>("@BossWaveHp26", Codec.STRING), (d, v) -> d.bossWaveHp26 = v, d -> d.bossWaveHp26).add();
+            b.append(new KeyedCodec<>("@BossWaveHp27", Codec.STRING), (d, v) -> d.bossWaveHp27 = v, d -> d.bossWaveHp27).add();
+            b.append(new KeyedCodec<>("@BossWaveHp28", Codec.STRING), (d, v) -> d.bossWaveHp28 = v, d -> d.bossWaveHp28).add();
+            b.append(new KeyedCodec<>("@BossWaveHp29", Codec.STRING), (d, v) -> d.bossWaveHp29 = v, d -> d.bossWaveHp29).add();
+            b.append(new KeyedCodec<>("@BossWaveHp30", Codec.STRING), (d, v) -> d.bossWaveHp30 = v, d -> d.bossWaveHp30).add();
+            b.append(new KeyedCodec<>("@BossWaveHp31", Codec.STRING), (d, v) -> d.bossWaveHp31 = v, d -> d.bossWaveHp31).add();
+            b.append(new KeyedCodec<>("@BossWaveHp32", Codec.STRING), (d, v) -> d.bossWaveHp32 = v, d -> d.bossWaveHp32).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage6", Codec.STRING), (d, v) -> d.bossWaveDamage6 = v, d -> d.bossWaveDamage6).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage7", Codec.STRING), (d, v) -> d.bossWaveDamage7 = v, d -> d.bossWaveDamage7).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage8", Codec.STRING), (d, v) -> d.bossWaveDamage8 = v, d -> d.bossWaveDamage8).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage9", Codec.STRING), (d, v) -> d.bossWaveDamage9 = v, d -> d.bossWaveDamage9).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage10", Codec.STRING), (d, v) -> d.bossWaveDamage10 = v, d -> d.bossWaveDamage10).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage11", Codec.STRING), (d, v) -> d.bossWaveDamage11 = v, d -> d.bossWaveDamage11).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage12", Codec.STRING), (d, v) -> d.bossWaveDamage12 = v, d -> d.bossWaveDamage12).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage13", Codec.STRING), (d, v) -> d.bossWaveDamage13 = v, d -> d.bossWaveDamage13).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage14", Codec.STRING), (d, v) -> d.bossWaveDamage14 = v, d -> d.bossWaveDamage14).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage15", Codec.STRING), (d, v) -> d.bossWaveDamage15 = v, d -> d.bossWaveDamage15).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage16", Codec.STRING), (d, v) -> d.bossWaveDamage16 = v, d -> d.bossWaveDamage16).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage17", Codec.STRING), (d, v) -> d.bossWaveDamage17 = v, d -> d.bossWaveDamage17).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage18", Codec.STRING), (d, v) -> d.bossWaveDamage18 = v, d -> d.bossWaveDamage18).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage19", Codec.STRING), (d, v) -> d.bossWaveDamage19 = v, d -> d.bossWaveDamage19).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage20", Codec.STRING), (d, v) -> d.bossWaveDamage20 = v, d -> d.bossWaveDamage20).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage21", Codec.STRING), (d, v) -> d.bossWaveDamage21 = v, d -> d.bossWaveDamage21).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage22", Codec.STRING), (d, v) -> d.bossWaveDamage22 = v, d -> d.bossWaveDamage22).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage23", Codec.STRING), (d, v) -> d.bossWaveDamage23 = v, d -> d.bossWaveDamage23).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage24", Codec.STRING), (d, v) -> d.bossWaveDamage24 = v, d -> d.bossWaveDamage24).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage25", Codec.STRING), (d, v) -> d.bossWaveDamage25 = v, d -> d.bossWaveDamage25).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage26", Codec.STRING), (d, v) -> d.bossWaveDamage26 = v, d -> d.bossWaveDamage26).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage27", Codec.STRING), (d, v) -> d.bossWaveDamage27 = v, d -> d.bossWaveDamage27).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage28", Codec.STRING), (d, v) -> d.bossWaveDamage28 = v, d -> d.bossWaveDamage28).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage29", Codec.STRING), (d, v) -> d.bossWaveDamage29 = v, d -> d.bossWaveDamage29).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage30", Codec.STRING), (d, v) -> d.bossWaveDamage30 = v, d -> d.bossWaveDamage30).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage31", Codec.STRING), (d, v) -> d.bossWaveDamage31 = v, d -> d.bossWaveDamage31).add();
+            b.append(new KeyedCodec<>("@BossWaveDamage32", Codec.STRING), (d, v) -> d.bossWaveDamage32 = v, d -> d.bossWaveDamage32).add();
+            b.append(new KeyedCodec<>("@BossWaveSize6", Codec.STRING), (d, v) -> d.bossWaveSize6 = v, d -> d.bossWaveSize6).add();
+            b.append(new KeyedCodec<>("@BossWaveSize7", Codec.STRING), (d, v) -> d.bossWaveSize7 = v, d -> d.bossWaveSize7).add();
+            b.append(new KeyedCodec<>("@BossWaveSize8", Codec.STRING), (d, v) -> d.bossWaveSize8 = v, d -> d.bossWaveSize8).add();
+            b.append(new KeyedCodec<>("@BossWaveSize9", Codec.STRING), (d, v) -> d.bossWaveSize9 = v, d -> d.bossWaveSize9).add();
+            b.append(new KeyedCodec<>("@BossWaveSize10", Codec.STRING), (d, v) -> d.bossWaveSize10 = v, d -> d.bossWaveSize10).add();
+            b.append(new KeyedCodec<>("@BossWaveSize11", Codec.STRING), (d, v) -> d.bossWaveSize11 = v, d -> d.bossWaveSize11).add();
+            b.append(new KeyedCodec<>("@BossWaveSize12", Codec.STRING), (d, v) -> d.bossWaveSize12 = v, d -> d.bossWaveSize12).add();
+            b.append(new KeyedCodec<>("@BossWaveSize13", Codec.STRING), (d, v) -> d.bossWaveSize13 = v, d -> d.bossWaveSize13).add();
+            b.append(new KeyedCodec<>("@BossWaveSize14", Codec.STRING), (d, v) -> d.bossWaveSize14 = v, d -> d.bossWaveSize14).add();
+            b.append(new KeyedCodec<>("@BossWaveSize15", Codec.STRING), (d, v) -> d.bossWaveSize15 = v, d -> d.bossWaveSize15).add();
+            b.append(new KeyedCodec<>("@BossWaveSize16", Codec.STRING), (d, v) -> d.bossWaveSize16 = v, d -> d.bossWaveSize16).add();
+            b.append(new KeyedCodec<>("@BossWaveSize17", Codec.STRING), (d, v) -> d.bossWaveSize17 = v, d -> d.bossWaveSize17).add();
+            b.append(new KeyedCodec<>("@BossWaveSize18", Codec.STRING), (d, v) -> d.bossWaveSize18 = v, d -> d.bossWaveSize18).add();
+            b.append(new KeyedCodec<>("@BossWaveSize19", Codec.STRING), (d, v) -> d.bossWaveSize19 = v, d -> d.bossWaveSize19).add();
+            b.append(new KeyedCodec<>("@BossWaveSize20", Codec.STRING), (d, v) -> d.bossWaveSize20 = v, d -> d.bossWaveSize20).add();
+            b.append(new KeyedCodec<>("@BossWaveSize21", Codec.STRING), (d, v) -> d.bossWaveSize21 = v, d -> d.bossWaveSize21).add();
+            b.append(new KeyedCodec<>("@BossWaveSize22", Codec.STRING), (d, v) -> d.bossWaveSize22 = v, d -> d.bossWaveSize22).add();
+            b.append(new KeyedCodec<>("@BossWaveSize23", Codec.STRING), (d, v) -> d.bossWaveSize23 = v, d -> d.bossWaveSize23).add();
+            b.append(new KeyedCodec<>("@BossWaveSize24", Codec.STRING), (d, v) -> d.bossWaveSize24 = v, d -> d.bossWaveSize24).add();
+            b.append(new KeyedCodec<>("@BossWaveSize25", Codec.STRING), (d, v) -> d.bossWaveSize25 = v, d -> d.bossWaveSize25).add();
+            b.append(new KeyedCodec<>("@BossWaveSize26", Codec.STRING), (d, v) -> d.bossWaveSize26 = v, d -> d.bossWaveSize26).add();
+            b.append(new KeyedCodec<>("@BossWaveSize27", Codec.STRING), (d, v) -> d.bossWaveSize27 = v, d -> d.bossWaveSize27).add();
+            b.append(new KeyedCodec<>("@BossWaveSize28", Codec.STRING), (d, v) -> d.bossWaveSize28 = v, d -> d.bossWaveSize28).add();
+            b.append(new KeyedCodec<>("@BossWaveSize29", Codec.STRING), (d, v) -> d.bossWaveSize29 = v, d -> d.bossWaveSize29).add();
+            b.append(new KeyedCodec<>("@BossWaveSize30", Codec.STRING), (d, v) -> d.bossWaveSize30 = v, d -> d.bossWaveSize30).add();
+            b.append(new KeyedCodec<>("@BossWaveSize31", Codec.STRING), (d, v) -> d.bossWaveSize31 = v, d -> d.bossWaveSize31).add();
+            b.append(new KeyedCodec<>("@BossWaveSize32", Codec.STRING), (d, v) -> d.bossWaveSize32 = v, d -> d.bossWaveSize32).add();
+            b.append(new KeyedCodec<>("@BossWaveValue1", Codec.STRING), (d, v) -> d.bossWaveValue1 = v, d -> d.bossWaveValue1).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount1", Codec.STRING), (d, v) -> d.bossWaveRepeatCount1 = v, d -> d.bossWaveRepeatCount1).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec1", Codec.STRING), (d, v) -> d.bossWaveRepeatSec1 = v, d -> d.bossWaveRepeatSec1).add();
+            b.append(new KeyedCodec<>("@BossWaveValue2", Codec.STRING), (d, v) -> d.bossWaveValue2 = v, d -> d.bossWaveValue2).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount2", Codec.STRING), (d, v) -> d.bossWaveRepeatCount2 = v, d -> d.bossWaveRepeatCount2).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec2", Codec.STRING), (d, v) -> d.bossWaveRepeatSec2 = v, d -> d.bossWaveRepeatSec2).add();
+            b.append(new KeyedCodec<>("@BossWaveValue3", Codec.STRING), (d, v) -> d.bossWaveValue3 = v, d -> d.bossWaveValue3).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount3", Codec.STRING), (d, v) -> d.bossWaveRepeatCount3 = v, d -> d.bossWaveRepeatCount3).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec3", Codec.STRING), (d, v) -> d.bossWaveRepeatSec3 = v, d -> d.bossWaveRepeatSec3).add();
+            b.append(new KeyedCodec<>("@BossWaveValue4", Codec.STRING), (d, v) -> d.bossWaveValue4 = v, d -> d.bossWaveValue4).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount4", Codec.STRING), (d, v) -> d.bossWaveRepeatCount4 = v, d -> d.bossWaveRepeatCount4).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec4", Codec.STRING), (d, v) -> d.bossWaveRepeatSec4 = v, d -> d.bossWaveRepeatSec4).add();
+            b.append(new KeyedCodec<>("@BossWaveValue5", Codec.STRING), (d, v) -> d.bossWaveValue5 = v, d -> d.bossWaveValue5).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount5", Codec.STRING), (d, v) -> d.bossWaveRepeatCount5 = v, d -> d.bossWaveRepeatCount5).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec5", Codec.STRING), (d, v) -> d.bossWaveRepeatSec5 = v, d -> d.bossWaveRepeatSec5).add();
+            b.append(new KeyedCodec<>("@BossWaveValue6", Codec.STRING), (d, v) -> d.bossWaveValue6 = v, d -> d.bossWaveValue6).add();
+            b.append(new KeyedCodec<>("@BossWaveValue7", Codec.STRING), (d, v) -> d.bossWaveValue7 = v, d -> d.bossWaveValue7).add();
+            b.append(new KeyedCodec<>("@BossWaveValue8", Codec.STRING), (d, v) -> d.bossWaveValue8 = v, d -> d.bossWaveValue8).add();
+            b.append(new KeyedCodec<>("@BossWaveValue9", Codec.STRING), (d, v) -> d.bossWaveValue9 = v, d -> d.bossWaveValue9).add();
+            b.append(new KeyedCodec<>("@BossWaveValue10", Codec.STRING), (d, v) -> d.bossWaveValue10 = v, d -> d.bossWaveValue10).add();
+            b.append(new KeyedCodec<>("@BossWaveValue11", Codec.STRING), (d, v) -> d.bossWaveValue11 = v, d -> d.bossWaveValue11).add();
+            b.append(new KeyedCodec<>("@BossWaveValue12", Codec.STRING), (d, v) -> d.bossWaveValue12 = v, d -> d.bossWaveValue12).add();
+            b.append(new KeyedCodec<>("@BossWaveValue13", Codec.STRING), (d, v) -> d.bossWaveValue13 = v, d -> d.bossWaveValue13).add();
+            b.append(new KeyedCodec<>("@BossWaveValue14", Codec.STRING), (d, v) -> d.bossWaveValue14 = v, d -> d.bossWaveValue14).add();
+            b.append(new KeyedCodec<>("@BossWaveValue15", Codec.STRING), (d, v) -> d.bossWaveValue15 = v, d -> d.bossWaveValue15).add();
+            b.append(new KeyedCodec<>("@BossWaveValue16", Codec.STRING), (d, v) -> d.bossWaveValue16 = v, d -> d.bossWaveValue16).add();
+            b.append(new KeyedCodec<>("@BossWaveValue17", Codec.STRING), (d, v) -> d.bossWaveValue17 = v, d -> d.bossWaveValue17).add();
+            b.append(new KeyedCodec<>("@BossWaveValue18", Codec.STRING), (d, v) -> d.bossWaveValue18 = v, d -> d.bossWaveValue18).add();
+            b.append(new KeyedCodec<>("@BossWaveValue19", Codec.STRING), (d, v) -> d.bossWaveValue19 = v, d -> d.bossWaveValue19).add();
+            b.append(new KeyedCodec<>("@BossWaveValue20", Codec.STRING), (d, v) -> d.bossWaveValue20 = v, d -> d.bossWaveValue20).add();
+            b.append(new KeyedCodec<>("@BossWaveValue21", Codec.STRING), (d, v) -> d.bossWaveValue21 = v, d -> d.bossWaveValue21).add();
+            b.append(new KeyedCodec<>("@BossWaveValue22", Codec.STRING), (d, v) -> d.bossWaveValue22 = v, d -> d.bossWaveValue22).add();
+            b.append(new KeyedCodec<>("@BossWaveValue23", Codec.STRING), (d, v) -> d.bossWaveValue23 = v, d -> d.bossWaveValue23).add();
+            b.append(new KeyedCodec<>("@BossWaveValue24", Codec.STRING), (d, v) -> d.bossWaveValue24 = v, d -> d.bossWaveValue24).add();
+            b.append(new KeyedCodec<>("@BossWaveValue25", Codec.STRING), (d, v) -> d.bossWaveValue25 = v, d -> d.bossWaveValue25).add();
+            b.append(new KeyedCodec<>("@BossWaveValue26", Codec.STRING), (d, v) -> d.bossWaveValue26 = v, d -> d.bossWaveValue26).add();
+            b.append(new KeyedCodec<>("@BossWaveValue27", Codec.STRING), (d, v) -> d.bossWaveValue27 = v, d -> d.bossWaveValue27).add();
+            b.append(new KeyedCodec<>("@BossWaveValue28", Codec.STRING), (d, v) -> d.bossWaveValue28 = v, d -> d.bossWaveValue28).add();
+            b.append(new KeyedCodec<>("@BossWaveValue29", Codec.STRING), (d, v) -> d.bossWaveValue29 = v, d -> d.bossWaveValue29).add();
+            b.append(new KeyedCodec<>("@BossWaveValue30", Codec.STRING), (d, v) -> d.bossWaveValue30 = v, d -> d.bossWaveValue30).add();
+            b.append(new KeyedCodec<>("@BossWaveValue31", Codec.STRING), (d, v) -> d.bossWaveValue31 = v, d -> d.bossWaveValue31).add();
+            b.append(new KeyedCodec<>("@BossWaveValue32", Codec.STRING), (d, v) -> d.bossWaveValue32 = v, d -> d.bossWaveValue32).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount6", Codec.STRING), (d, v) -> d.bossWaveRepeatCount6 = v, d -> d.bossWaveRepeatCount6).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount7", Codec.STRING), (d, v) -> d.bossWaveRepeatCount7 = v, d -> d.bossWaveRepeatCount7).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount8", Codec.STRING), (d, v) -> d.bossWaveRepeatCount8 = v, d -> d.bossWaveRepeatCount8).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount9", Codec.STRING), (d, v) -> d.bossWaveRepeatCount9 = v, d -> d.bossWaveRepeatCount9).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount10", Codec.STRING), (d, v) -> d.bossWaveRepeatCount10 = v, d -> d.bossWaveRepeatCount10).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount11", Codec.STRING), (d, v) -> d.bossWaveRepeatCount11 = v, d -> d.bossWaveRepeatCount11).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount12", Codec.STRING), (d, v) -> d.bossWaveRepeatCount12 = v, d -> d.bossWaveRepeatCount12).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount13", Codec.STRING), (d, v) -> d.bossWaveRepeatCount13 = v, d -> d.bossWaveRepeatCount13).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount14", Codec.STRING), (d, v) -> d.bossWaveRepeatCount14 = v, d -> d.bossWaveRepeatCount14).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount15", Codec.STRING), (d, v) -> d.bossWaveRepeatCount15 = v, d -> d.bossWaveRepeatCount15).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount16", Codec.STRING), (d, v) -> d.bossWaveRepeatCount16 = v, d -> d.bossWaveRepeatCount16).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount17", Codec.STRING), (d, v) -> d.bossWaveRepeatCount17 = v, d -> d.bossWaveRepeatCount17).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount18", Codec.STRING), (d, v) -> d.bossWaveRepeatCount18 = v, d -> d.bossWaveRepeatCount18).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount19", Codec.STRING), (d, v) -> d.bossWaveRepeatCount19 = v, d -> d.bossWaveRepeatCount19).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount20", Codec.STRING), (d, v) -> d.bossWaveRepeatCount20 = v, d -> d.bossWaveRepeatCount20).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount21", Codec.STRING), (d, v) -> d.bossWaveRepeatCount21 = v, d -> d.bossWaveRepeatCount21).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount22", Codec.STRING), (d, v) -> d.bossWaveRepeatCount22 = v, d -> d.bossWaveRepeatCount22).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount23", Codec.STRING), (d, v) -> d.bossWaveRepeatCount23 = v, d -> d.bossWaveRepeatCount23).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount24", Codec.STRING), (d, v) -> d.bossWaveRepeatCount24 = v, d -> d.bossWaveRepeatCount24).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount25", Codec.STRING), (d, v) -> d.bossWaveRepeatCount25 = v, d -> d.bossWaveRepeatCount25).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount26", Codec.STRING), (d, v) -> d.bossWaveRepeatCount26 = v, d -> d.bossWaveRepeatCount26).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount27", Codec.STRING), (d, v) -> d.bossWaveRepeatCount27 = v, d -> d.bossWaveRepeatCount27).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount28", Codec.STRING), (d, v) -> d.bossWaveRepeatCount28 = v, d -> d.bossWaveRepeatCount28).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount29", Codec.STRING), (d, v) -> d.bossWaveRepeatCount29 = v, d -> d.bossWaveRepeatCount29).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount30", Codec.STRING), (d, v) -> d.bossWaveRepeatCount30 = v, d -> d.bossWaveRepeatCount30).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount31", Codec.STRING), (d, v) -> d.bossWaveRepeatCount31 = v, d -> d.bossWaveRepeatCount31).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatCount32", Codec.STRING), (d, v) -> d.bossWaveRepeatCount32 = v, d -> d.bossWaveRepeatCount32).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec6", Codec.STRING), (d, v) -> d.bossWaveRepeatSec6 = v, d -> d.bossWaveRepeatSec6).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec7", Codec.STRING), (d, v) -> d.bossWaveRepeatSec7 = v, d -> d.bossWaveRepeatSec7).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec8", Codec.STRING), (d, v) -> d.bossWaveRepeatSec8 = v, d -> d.bossWaveRepeatSec8).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec9", Codec.STRING), (d, v) -> d.bossWaveRepeatSec9 = v, d -> d.bossWaveRepeatSec9).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec10", Codec.STRING), (d, v) -> d.bossWaveRepeatSec10 = v, d -> d.bossWaveRepeatSec10).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec11", Codec.STRING), (d, v) -> d.bossWaveRepeatSec11 = v, d -> d.bossWaveRepeatSec11).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec12", Codec.STRING), (d, v) -> d.bossWaveRepeatSec12 = v, d -> d.bossWaveRepeatSec12).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec13", Codec.STRING), (d, v) -> d.bossWaveRepeatSec13 = v, d -> d.bossWaveRepeatSec13).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec14", Codec.STRING), (d, v) -> d.bossWaveRepeatSec14 = v, d -> d.bossWaveRepeatSec14).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec15", Codec.STRING), (d, v) -> d.bossWaveRepeatSec15 = v, d -> d.bossWaveRepeatSec15).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec16", Codec.STRING), (d, v) -> d.bossWaveRepeatSec16 = v, d -> d.bossWaveRepeatSec16).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec17", Codec.STRING), (d, v) -> d.bossWaveRepeatSec17 = v, d -> d.bossWaveRepeatSec17).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec18", Codec.STRING), (d, v) -> d.bossWaveRepeatSec18 = v, d -> d.bossWaveRepeatSec18).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec19", Codec.STRING), (d, v) -> d.bossWaveRepeatSec19 = v, d -> d.bossWaveRepeatSec19).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec20", Codec.STRING), (d, v) -> d.bossWaveRepeatSec20 = v, d -> d.bossWaveRepeatSec20).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec21", Codec.STRING), (d, v) -> d.bossWaveRepeatSec21 = v, d -> d.bossWaveRepeatSec21).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec22", Codec.STRING), (d, v) -> d.bossWaveRepeatSec22 = v, d -> d.bossWaveRepeatSec22).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec23", Codec.STRING), (d, v) -> d.bossWaveRepeatSec23 = v, d -> d.bossWaveRepeatSec23).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec24", Codec.STRING), (d, v) -> d.bossWaveRepeatSec24 = v, d -> d.bossWaveRepeatSec24).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec25", Codec.STRING), (d, v) -> d.bossWaveRepeatSec25 = v, d -> d.bossWaveRepeatSec25).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec26", Codec.STRING), (d, v) -> d.bossWaveRepeatSec26 = v, d -> d.bossWaveRepeatSec26).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec27", Codec.STRING), (d, v) -> d.bossWaveRepeatSec27 = v, d -> d.bossWaveRepeatSec27).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec28", Codec.STRING), (d, v) -> d.bossWaveRepeatSec28 = v, d -> d.bossWaveRepeatSec28).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec29", Codec.STRING), (d, v) -> d.bossWaveRepeatSec29 = v, d -> d.bossWaveRepeatSec29).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec30", Codec.STRING), (d, v) -> d.bossWaveRepeatSec30 = v, d -> d.bossWaveRepeatSec30).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec31", Codec.STRING), (d, v) -> d.bossWaveRepeatSec31 = v, d -> d.bossWaveRepeatSec31).add();
+            b.append(new KeyedCodec<>("@BossWaveRepeatSec32", Codec.STRING), (d, v) -> d.bossWaveRepeatSec32 = v, d -> d.bossWaveRepeatSec32).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers1", Codec.STRING), (d, v) -> d.timedMinPlayers1 = v, d -> d.timedMinPlayers1).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers2", Codec.STRING), (d, v) -> d.timedMinPlayers2 = v, d -> d.timedMinPlayers2).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers3", Codec.STRING), (d, v) -> d.timedMinPlayers3 = v, d -> d.timedMinPlayers3).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers4", Codec.STRING), (d, v) -> d.timedMinPlayers4 = v, d -> d.timedMinPlayers4).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers5", Codec.STRING), (d, v) -> d.timedMinPlayers5 = v, d -> d.timedMinPlayers5).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers6", Codec.STRING), (d, v) -> d.timedMinPlayers6 = v, d -> d.timedMinPlayers6).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers7", Codec.STRING), (d, v) -> d.timedMinPlayers7 = v, d -> d.timedMinPlayers7).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers8", Codec.STRING), (d, v) -> d.timedMinPlayers8 = v, d -> d.timedMinPlayers8).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers9", Codec.STRING), (d, v) -> d.timedMinPlayers9 = v, d -> d.timedMinPlayers9).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers10", Codec.STRING), (d, v) -> d.timedMinPlayers10 = v, d -> d.timedMinPlayers10).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers11", Codec.STRING), (d, v) -> d.timedMinPlayers11 = v, d -> d.timedMinPlayers11).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers12", Codec.STRING), (d, v) -> d.timedMinPlayers12 = v, d -> d.timedMinPlayers12).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers13", Codec.STRING), (d, v) -> d.timedMinPlayers13 = v, d -> d.timedMinPlayers13).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers14", Codec.STRING), (d, v) -> d.timedMinPlayers14 = v, d -> d.timedMinPlayers14).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers15", Codec.STRING), (d, v) -> d.timedMinPlayers15 = v, d -> d.timedMinPlayers15).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers16", Codec.STRING), (d, v) -> d.timedMinPlayers16 = v, d -> d.timedMinPlayers16).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers17", Codec.STRING), (d, v) -> d.timedMinPlayers17 = v, d -> d.timedMinPlayers17).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers18", Codec.STRING), (d, v) -> d.timedMinPlayers18 = v, d -> d.timedMinPlayers18).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers19", Codec.STRING), (d, v) -> d.timedMinPlayers19 = v, d -> d.timedMinPlayers19).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers20", Codec.STRING), (d, v) -> d.timedMinPlayers20 = v, d -> d.timedMinPlayers20).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers21", Codec.STRING), (d, v) -> d.timedMinPlayers21 = v, d -> d.timedMinPlayers21).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers22", Codec.STRING), (d, v) -> d.timedMinPlayers22 = v, d -> d.timedMinPlayers22).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers23", Codec.STRING), (d, v) -> d.timedMinPlayers23 = v, d -> d.timedMinPlayers23).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers24", Codec.STRING), (d, v) -> d.timedMinPlayers24 = v, d -> d.timedMinPlayers24).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers25", Codec.STRING), (d, v) -> d.timedMinPlayers25 = v, d -> d.timedMinPlayers25).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers26", Codec.STRING), (d, v) -> d.timedMinPlayers26 = v, d -> d.timedMinPlayers26).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers27", Codec.STRING), (d, v) -> d.timedMinPlayers27 = v, d -> d.timedMinPlayers27).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers28", Codec.STRING), (d, v) -> d.timedMinPlayers28 = v, d -> d.timedMinPlayers28).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers29", Codec.STRING), (d, v) -> d.timedMinPlayers29 = v, d -> d.timedMinPlayers29).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers30", Codec.STRING), (d, v) -> d.timedMinPlayers30 = v, d -> d.timedMinPlayers30).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers31", Codec.STRING), (d, v) -> d.timedMinPlayers31 = v, d -> d.timedMinPlayers31).add();
+            b.append(new KeyedCodec<>("@TimedMinPlayers32", Codec.STRING), (d, v) -> d.timedMinPlayers32 = v, d -> d.timedMinPlayers32).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds1", Codec.STRING), (d, v) -> d.timedEverySeconds1 = v, d -> d.timedEverySeconds1).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds2", Codec.STRING), (d, v) -> d.timedEverySeconds2 = v, d -> d.timedEverySeconds2).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds3", Codec.STRING), (d, v) -> d.timedEverySeconds3 = v, d -> d.timedEverySeconds3).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds4", Codec.STRING), (d, v) -> d.timedEverySeconds4 = v, d -> d.timedEverySeconds4).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds5", Codec.STRING), (d, v) -> d.timedEverySeconds5 = v, d -> d.timedEverySeconds5).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds6", Codec.STRING), (d, v) -> d.timedEverySeconds6 = v, d -> d.timedEverySeconds6).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds7", Codec.STRING), (d, v) -> d.timedEverySeconds7 = v, d -> d.timedEverySeconds7).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds8", Codec.STRING), (d, v) -> d.timedEverySeconds8 = v, d -> d.timedEverySeconds8).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds9", Codec.STRING), (d, v) -> d.timedEverySeconds9 = v, d -> d.timedEverySeconds9).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds10", Codec.STRING), (d, v) -> d.timedEverySeconds10 = v, d -> d.timedEverySeconds10).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds11", Codec.STRING), (d, v) -> d.timedEverySeconds11 = v, d -> d.timedEverySeconds11).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds12", Codec.STRING), (d, v) -> d.timedEverySeconds12 = v, d -> d.timedEverySeconds12).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds13", Codec.STRING), (d, v) -> d.timedEverySeconds13 = v, d -> d.timedEverySeconds13).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds14", Codec.STRING), (d, v) -> d.timedEverySeconds14 = v, d -> d.timedEverySeconds14).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds15", Codec.STRING), (d, v) -> d.timedEverySeconds15 = v, d -> d.timedEverySeconds15).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds16", Codec.STRING), (d, v) -> d.timedEverySeconds16 = v, d -> d.timedEverySeconds16).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds17", Codec.STRING), (d, v) -> d.timedEverySeconds17 = v, d -> d.timedEverySeconds17).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds18", Codec.STRING), (d, v) -> d.timedEverySeconds18 = v, d -> d.timedEverySeconds18).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds19", Codec.STRING), (d, v) -> d.timedEverySeconds19 = v, d -> d.timedEverySeconds19).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds20", Codec.STRING), (d, v) -> d.timedEverySeconds20 = v, d -> d.timedEverySeconds20).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds21", Codec.STRING), (d, v) -> d.timedEverySeconds21 = v, d -> d.timedEverySeconds21).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds22", Codec.STRING), (d, v) -> d.timedEverySeconds22 = v, d -> d.timedEverySeconds22).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds23", Codec.STRING), (d, v) -> d.timedEverySeconds23 = v, d -> d.timedEverySeconds23).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds24", Codec.STRING), (d, v) -> d.timedEverySeconds24 = v, d -> d.timedEverySeconds24).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds25", Codec.STRING), (d, v) -> d.timedEverySeconds25 = v, d -> d.timedEverySeconds25).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds26", Codec.STRING), (d, v) -> d.timedEverySeconds26 = v, d -> d.timedEverySeconds26).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds27", Codec.STRING), (d, v) -> d.timedEverySeconds27 = v, d -> d.timedEverySeconds27).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds28", Codec.STRING), (d, v) -> d.timedEverySeconds28 = v, d -> d.timedEverySeconds28).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds29", Codec.STRING), (d, v) -> d.timedEverySeconds29 = v, d -> d.timedEverySeconds29).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds30", Codec.STRING), (d, v) -> d.timedEverySeconds30 = v, d -> d.timedEverySeconds30).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds31", Codec.STRING), (d, v) -> d.timedEverySeconds31 = v, d -> d.timedEverySeconds31).add();
+            b.append(new KeyedCodec<>("@TimedEverySeconds32", Codec.STRING), (d, v) -> d.timedEverySeconds32 = v, d -> d.timedEverySeconds32).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours1", Codec.STRING), (d, v) -> d.timedIntervalHours1 = v, d -> d.timedIntervalHours1).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours2", Codec.STRING), (d, v) -> d.timedIntervalHours2 = v, d -> d.timedIntervalHours2).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours3", Codec.STRING), (d, v) -> d.timedIntervalHours3 = v, d -> d.timedIntervalHours3).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours4", Codec.STRING), (d, v) -> d.timedIntervalHours4 = v, d -> d.timedIntervalHours4).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours5", Codec.STRING), (d, v) -> d.timedIntervalHours5 = v, d -> d.timedIntervalHours5).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours6", Codec.STRING), (d, v) -> d.timedIntervalHours6 = v, d -> d.timedIntervalHours6).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours7", Codec.STRING), (d, v) -> d.timedIntervalHours7 = v, d -> d.timedIntervalHours7).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours8", Codec.STRING), (d, v) -> d.timedIntervalHours8 = v, d -> d.timedIntervalHours8).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours9", Codec.STRING), (d, v) -> d.timedIntervalHours9 = v, d -> d.timedIntervalHours9).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours10", Codec.STRING), (d, v) -> d.timedIntervalHours10 = v, d -> d.timedIntervalHours10).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours11", Codec.STRING), (d, v) -> d.timedIntervalHours11 = v, d -> d.timedIntervalHours11).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours12", Codec.STRING), (d, v) -> d.timedIntervalHours12 = v, d -> d.timedIntervalHours12).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours13", Codec.STRING), (d, v) -> d.timedIntervalHours13 = v, d -> d.timedIntervalHours13).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours14", Codec.STRING), (d, v) -> d.timedIntervalHours14 = v, d -> d.timedIntervalHours14).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours15", Codec.STRING), (d, v) -> d.timedIntervalHours15 = v, d -> d.timedIntervalHours15).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours16", Codec.STRING), (d, v) -> d.timedIntervalHours16 = v, d -> d.timedIntervalHours16).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours17", Codec.STRING), (d, v) -> d.timedIntervalHours17 = v, d -> d.timedIntervalHours17).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours18", Codec.STRING), (d, v) -> d.timedIntervalHours18 = v, d -> d.timedIntervalHours18).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours19", Codec.STRING), (d, v) -> d.timedIntervalHours19 = v, d -> d.timedIntervalHours19).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours20", Codec.STRING), (d, v) -> d.timedIntervalHours20 = v, d -> d.timedIntervalHours20).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours21", Codec.STRING), (d, v) -> d.timedIntervalHours21 = v, d -> d.timedIntervalHours21).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours22", Codec.STRING), (d, v) -> d.timedIntervalHours22 = v, d -> d.timedIntervalHours22).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours23", Codec.STRING), (d, v) -> d.timedIntervalHours23 = v, d -> d.timedIntervalHours23).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours24", Codec.STRING), (d, v) -> d.timedIntervalHours24 = v, d -> d.timedIntervalHours24).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours25", Codec.STRING), (d, v) -> d.timedIntervalHours25 = v, d -> d.timedIntervalHours25).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours26", Codec.STRING), (d, v) -> d.timedIntervalHours26 = v, d -> d.timedIntervalHours26).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours27", Codec.STRING), (d, v) -> d.timedIntervalHours27 = v, d -> d.timedIntervalHours27).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours28", Codec.STRING), (d, v) -> d.timedIntervalHours28 = v, d -> d.timedIntervalHours28).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours29", Codec.STRING), (d, v) -> d.timedIntervalHours29 = v, d -> d.timedIntervalHours29).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours30", Codec.STRING), (d, v) -> d.timedIntervalHours30 = v, d -> d.timedIntervalHours30).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours31", Codec.STRING), (d, v) -> d.timedIntervalHours31 = v, d -> d.timedIntervalHours31).add();
+            b.append(new KeyedCodec<>("@TimedIntervalHours32", Codec.STRING), (d, v) -> d.timedIntervalHours32 = v, d -> d.timedIntervalHours32).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays1", Codec.STRING), (d, v) -> d.timedIntervalDays1 = v, d -> d.timedIntervalDays1).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays2", Codec.STRING), (d, v) -> d.timedIntervalDays2 = v, d -> d.timedIntervalDays2).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays3", Codec.STRING), (d, v) -> d.timedIntervalDays3 = v, d -> d.timedIntervalDays3).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays4", Codec.STRING), (d, v) -> d.timedIntervalDays4 = v, d -> d.timedIntervalDays4).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays5", Codec.STRING), (d, v) -> d.timedIntervalDays5 = v, d -> d.timedIntervalDays5).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays6", Codec.STRING), (d, v) -> d.timedIntervalDays6 = v, d -> d.timedIntervalDays6).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays7", Codec.STRING), (d, v) -> d.timedIntervalDays7 = v, d -> d.timedIntervalDays7).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays8", Codec.STRING), (d, v) -> d.timedIntervalDays8 = v, d -> d.timedIntervalDays8).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays9", Codec.STRING), (d, v) -> d.timedIntervalDays9 = v, d -> d.timedIntervalDays9).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays10", Codec.STRING), (d, v) -> d.timedIntervalDays10 = v, d -> d.timedIntervalDays10).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays11", Codec.STRING), (d, v) -> d.timedIntervalDays11 = v, d -> d.timedIntervalDays11).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays12", Codec.STRING), (d, v) -> d.timedIntervalDays12 = v, d -> d.timedIntervalDays12).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays13", Codec.STRING), (d, v) -> d.timedIntervalDays13 = v, d -> d.timedIntervalDays13).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays14", Codec.STRING), (d, v) -> d.timedIntervalDays14 = v, d -> d.timedIntervalDays14).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays15", Codec.STRING), (d, v) -> d.timedIntervalDays15 = v, d -> d.timedIntervalDays15).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays16", Codec.STRING), (d, v) -> d.timedIntervalDays16 = v, d -> d.timedIntervalDays16).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays17", Codec.STRING), (d, v) -> d.timedIntervalDays17 = v, d -> d.timedIntervalDays17).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays18", Codec.STRING), (d, v) -> d.timedIntervalDays18 = v, d -> d.timedIntervalDays18).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays19", Codec.STRING), (d, v) -> d.timedIntervalDays19 = v, d -> d.timedIntervalDays19).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays20", Codec.STRING), (d, v) -> d.timedIntervalDays20 = v, d -> d.timedIntervalDays20).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays21", Codec.STRING), (d, v) -> d.timedIntervalDays21 = v, d -> d.timedIntervalDays21).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays22", Codec.STRING), (d, v) -> d.timedIntervalDays22 = v, d -> d.timedIntervalDays22).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays23", Codec.STRING), (d, v) -> d.timedIntervalDays23 = v, d -> d.timedIntervalDays23).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays24", Codec.STRING), (d, v) -> d.timedIntervalDays24 = v, d -> d.timedIntervalDays24).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays25", Codec.STRING), (d, v) -> d.timedIntervalDays25 = v, d -> d.timedIntervalDays25).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays26", Codec.STRING), (d, v) -> d.timedIntervalDays26 = v, d -> d.timedIntervalDays26).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays27", Codec.STRING), (d, v) -> d.timedIntervalDays27 = v, d -> d.timedIntervalDays27).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays28", Codec.STRING), (d, v) -> d.timedIntervalDays28 = v, d -> d.timedIntervalDays28).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays29", Codec.STRING), (d, v) -> d.timedIntervalDays29 = v, d -> d.timedIntervalDays29).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays30", Codec.STRING), (d, v) -> d.timedIntervalDays30 = v, d -> d.timedIntervalDays30).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays31", Codec.STRING), (d, v) -> d.timedIntervalDays31 = v, d -> d.timedIntervalDays31).add();
+            b.append(new KeyedCodec<>("@TimedIntervalDays32", Codec.STRING), (d, v) -> d.timedIntervalDays32 = v, d -> d.timedIntervalDays32).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds1", Codec.STRING), (d, v) -> d.timedIntervalSeconds1 = v, d -> d.timedIntervalSeconds1).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds2", Codec.STRING), (d, v) -> d.timedIntervalSeconds2 = v, d -> d.timedIntervalSeconds2).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds3", Codec.STRING), (d, v) -> d.timedIntervalSeconds3 = v, d -> d.timedIntervalSeconds3).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds4", Codec.STRING), (d, v) -> d.timedIntervalSeconds4 = v, d -> d.timedIntervalSeconds4).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds5", Codec.STRING), (d, v) -> d.timedIntervalSeconds5 = v, d -> d.timedIntervalSeconds5).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds6", Codec.STRING), (d, v) -> d.timedIntervalSeconds6 = v, d -> d.timedIntervalSeconds6).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds7", Codec.STRING), (d, v) -> d.timedIntervalSeconds7 = v, d -> d.timedIntervalSeconds7).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds8", Codec.STRING), (d, v) -> d.timedIntervalSeconds8 = v, d -> d.timedIntervalSeconds8).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds9", Codec.STRING), (d, v) -> d.timedIntervalSeconds9 = v, d -> d.timedIntervalSeconds9).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds10", Codec.STRING), (d, v) -> d.timedIntervalSeconds10 = v, d -> d.timedIntervalSeconds10).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds11", Codec.STRING), (d, v) -> d.timedIntervalSeconds11 = v, d -> d.timedIntervalSeconds11).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds12", Codec.STRING), (d, v) -> d.timedIntervalSeconds12 = v, d -> d.timedIntervalSeconds12).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds13", Codec.STRING), (d, v) -> d.timedIntervalSeconds13 = v, d -> d.timedIntervalSeconds13).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds14", Codec.STRING), (d, v) -> d.timedIntervalSeconds14 = v, d -> d.timedIntervalSeconds14).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds15", Codec.STRING), (d, v) -> d.timedIntervalSeconds15 = v, d -> d.timedIntervalSeconds15).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds16", Codec.STRING), (d, v) -> d.timedIntervalSeconds16 = v, d -> d.timedIntervalSeconds16).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds17", Codec.STRING), (d, v) -> d.timedIntervalSeconds17 = v, d -> d.timedIntervalSeconds17).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds18", Codec.STRING), (d, v) -> d.timedIntervalSeconds18 = v, d -> d.timedIntervalSeconds18).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds19", Codec.STRING), (d, v) -> d.timedIntervalSeconds19 = v, d -> d.timedIntervalSeconds19).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds20", Codec.STRING), (d, v) -> d.timedIntervalSeconds20 = v, d -> d.timedIntervalSeconds20).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds21", Codec.STRING), (d, v) -> d.timedIntervalSeconds21 = v, d -> d.timedIntervalSeconds21).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds22", Codec.STRING), (d, v) -> d.timedIntervalSeconds22 = v, d -> d.timedIntervalSeconds22).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds23", Codec.STRING), (d, v) -> d.timedIntervalSeconds23 = v, d -> d.timedIntervalSeconds23).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds24", Codec.STRING), (d, v) -> d.timedIntervalSeconds24 = v, d -> d.timedIntervalSeconds24).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds25", Codec.STRING), (d, v) -> d.timedIntervalSeconds25 = v, d -> d.timedIntervalSeconds25).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds26", Codec.STRING), (d, v) -> d.timedIntervalSeconds26 = v, d -> d.timedIntervalSeconds26).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds27", Codec.STRING), (d, v) -> d.timedIntervalSeconds27 = v, d -> d.timedIntervalSeconds27).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds28", Codec.STRING), (d, v) -> d.timedIntervalSeconds28 = v, d -> d.timedIntervalSeconds28).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds29", Codec.STRING), (d, v) -> d.timedIntervalSeconds29 = v, d -> d.timedIntervalSeconds29).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds30", Codec.STRING), (d, v) -> d.timedIntervalSeconds30 = v, d -> d.timedIntervalSeconds30).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds31", Codec.STRING), (d, v) -> d.timedIntervalSeconds31 = v, d -> d.timedIntervalSeconds31).add();
+            b.append(new KeyedCodec<>("@TimedIntervalSeconds32", Codec.STRING), (d, v) -> d.timedIntervalSeconds32 = v, d -> d.timedIntervalSeconds32).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours1", Codec.STRING), (d, v) -> d.timedArrivalHours1 = v, d -> d.timedArrivalHours1).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours2", Codec.STRING), (d, v) -> d.timedArrivalHours2 = v, d -> d.timedArrivalHours2).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours3", Codec.STRING), (d, v) -> d.timedArrivalHours3 = v, d -> d.timedArrivalHours3).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours4", Codec.STRING), (d, v) -> d.timedArrivalHours4 = v, d -> d.timedArrivalHours4).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours5", Codec.STRING), (d, v) -> d.timedArrivalHours5 = v, d -> d.timedArrivalHours5).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours6", Codec.STRING), (d, v) -> d.timedArrivalHours6 = v, d -> d.timedArrivalHours6).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours7", Codec.STRING), (d, v) -> d.timedArrivalHours7 = v, d -> d.timedArrivalHours7).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours8", Codec.STRING), (d, v) -> d.timedArrivalHours8 = v, d -> d.timedArrivalHours8).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours9", Codec.STRING), (d, v) -> d.timedArrivalHours9 = v, d -> d.timedArrivalHours9).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours10", Codec.STRING), (d, v) -> d.timedArrivalHours10 = v, d -> d.timedArrivalHours10).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours11", Codec.STRING), (d, v) -> d.timedArrivalHours11 = v, d -> d.timedArrivalHours11).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours12", Codec.STRING), (d, v) -> d.timedArrivalHours12 = v, d -> d.timedArrivalHours12).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours13", Codec.STRING), (d, v) -> d.timedArrivalHours13 = v, d -> d.timedArrivalHours13).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours14", Codec.STRING), (d, v) -> d.timedArrivalHours14 = v, d -> d.timedArrivalHours14).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours15", Codec.STRING), (d, v) -> d.timedArrivalHours15 = v, d -> d.timedArrivalHours15).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours16", Codec.STRING), (d, v) -> d.timedArrivalHours16 = v, d -> d.timedArrivalHours16).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours17", Codec.STRING), (d, v) -> d.timedArrivalHours17 = v, d -> d.timedArrivalHours17).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours18", Codec.STRING), (d, v) -> d.timedArrivalHours18 = v, d -> d.timedArrivalHours18).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours19", Codec.STRING), (d, v) -> d.timedArrivalHours19 = v, d -> d.timedArrivalHours19).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours20", Codec.STRING), (d, v) -> d.timedArrivalHours20 = v, d -> d.timedArrivalHours20).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours21", Codec.STRING), (d, v) -> d.timedArrivalHours21 = v, d -> d.timedArrivalHours21).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours22", Codec.STRING), (d, v) -> d.timedArrivalHours22 = v, d -> d.timedArrivalHours22).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours23", Codec.STRING), (d, v) -> d.timedArrivalHours23 = v, d -> d.timedArrivalHours23).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours24", Codec.STRING), (d, v) -> d.timedArrivalHours24 = v, d -> d.timedArrivalHours24).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours25", Codec.STRING), (d, v) -> d.timedArrivalHours25 = v, d -> d.timedArrivalHours25).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours26", Codec.STRING), (d, v) -> d.timedArrivalHours26 = v, d -> d.timedArrivalHours26).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours27", Codec.STRING), (d, v) -> d.timedArrivalHours27 = v, d -> d.timedArrivalHours27).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours28", Codec.STRING), (d, v) -> d.timedArrivalHours28 = v, d -> d.timedArrivalHours28).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours29", Codec.STRING), (d, v) -> d.timedArrivalHours29 = v, d -> d.timedArrivalHours29).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours30", Codec.STRING), (d, v) -> d.timedArrivalHours30 = v, d -> d.timedArrivalHours30).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours31", Codec.STRING), (d, v) -> d.timedArrivalHours31 = v, d -> d.timedArrivalHours31).add();
+            b.append(new KeyedCodec<>("@TimedArrivalHours32", Codec.STRING), (d, v) -> d.timedArrivalHours32 = v, d -> d.timedArrivalHours32).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes1", Codec.STRING), (d, v) -> d.timedArrivalMinutes1 = v, d -> d.timedArrivalMinutes1).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes2", Codec.STRING), (d, v) -> d.timedArrivalMinutes2 = v, d -> d.timedArrivalMinutes2).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes3", Codec.STRING), (d, v) -> d.timedArrivalMinutes3 = v, d -> d.timedArrivalMinutes3).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes4", Codec.STRING), (d, v) -> d.timedArrivalMinutes4 = v, d -> d.timedArrivalMinutes4).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes5", Codec.STRING), (d, v) -> d.timedArrivalMinutes5 = v, d -> d.timedArrivalMinutes5).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes6", Codec.STRING), (d, v) -> d.timedArrivalMinutes6 = v, d -> d.timedArrivalMinutes6).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes7", Codec.STRING), (d, v) -> d.timedArrivalMinutes7 = v, d -> d.timedArrivalMinutes7).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes8", Codec.STRING), (d, v) -> d.timedArrivalMinutes8 = v, d -> d.timedArrivalMinutes8).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes9", Codec.STRING), (d, v) -> d.timedArrivalMinutes9 = v, d -> d.timedArrivalMinutes9).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes10", Codec.STRING), (d, v) -> d.timedArrivalMinutes10 = v, d -> d.timedArrivalMinutes10).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes11", Codec.STRING), (d, v) -> d.timedArrivalMinutes11 = v, d -> d.timedArrivalMinutes11).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes12", Codec.STRING), (d, v) -> d.timedArrivalMinutes12 = v, d -> d.timedArrivalMinutes12).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes13", Codec.STRING), (d, v) -> d.timedArrivalMinutes13 = v, d -> d.timedArrivalMinutes13).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes14", Codec.STRING), (d, v) -> d.timedArrivalMinutes14 = v, d -> d.timedArrivalMinutes14).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes15", Codec.STRING), (d, v) -> d.timedArrivalMinutes15 = v, d -> d.timedArrivalMinutes15).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes16", Codec.STRING), (d, v) -> d.timedArrivalMinutes16 = v, d -> d.timedArrivalMinutes16).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes17", Codec.STRING), (d, v) -> d.timedArrivalMinutes17 = v, d -> d.timedArrivalMinutes17).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes18", Codec.STRING), (d, v) -> d.timedArrivalMinutes18 = v, d -> d.timedArrivalMinutes18).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes19", Codec.STRING), (d, v) -> d.timedArrivalMinutes19 = v, d -> d.timedArrivalMinutes19).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes20", Codec.STRING), (d, v) -> d.timedArrivalMinutes20 = v, d -> d.timedArrivalMinutes20).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes21", Codec.STRING), (d, v) -> d.timedArrivalMinutes21 = v, d -> d.timedArrivalMinutes21).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes22", Codec.STRING), (d, v) -> d.timedArrivalMinutes22 = v, d -> d.timedArrivalMinutes22).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes23", Codec.STRING), (d, v) -> d.timedArrivalMinutes23 = v, d -> d.timedArrivalMinutes23).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes24", Codec.STRING), (d, v) -> d.timedArrivalMinutes24 = v, d -> d.timedArrivalMinutes24).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes25", Codec.STRING), (d, v) -> d.timedArrivalMinutes25 = v, d -> d.timedArrivalMinutes25).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes26", Codec.STRING), (d, v) -> d.timedArrivalMinutes26 = v, d -> d.timedArrivalMinutes26).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes27", Codec.STRING), (d, v) -> d.timedArrivalMinutes27 = v, d -> d.timedArrivalMinutes27).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes28", Codec.STRING), (d, v) -> d.timedArrivalMinutes28 = v, d -> d.timedArrivalMinutes28).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes29", Codec.STRING), (d, v) -> d.timedArrivalMinutes29 = v, d -> d.timedArrivalMinutes29).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes30", Codec.STRING), (d, v) -> d.timedArrivalMinutes30 = v, d -> d.timedArrivalMinutes30).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes31", Codec.STRING), (d, v) -> d.timedArrivalMinutes31 = v, d -> d.timedArrivalMinutes31).add();
+            b.append(new KeyedCodec<>("@TimedArrivalMinutes32", Codec.STRING), (d, v) -> d.timedArrivalMinutes32 = v, d -> d.timedArrivalMinutes32).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds1", Codec.STRING), (d, v) -> d.timedArrivalSeconds1 = v, d -> d.timedArrivalSeconds1).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds2", Codec.STRING), (d, v) -> d.timedArrivalSeconds2 = v, d -> d.timedArrivalSeconds2).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds3", Codec.STRING), (d, v) -> d.timedArrivalSeconds3 = v, d -> d.timedArrivalSeconds3).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds4", Codec.STRING), (d, v) -> d.timedArrivalSeconds4 = v, d -> d.timedArrivalSeconds4).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds5", Codec.STRING), (d, v) -> d.timedArrivalSeconds5 = v, d -> d.timedArrivalSeconds5).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds6", Codec.STRING), (d, v) -> d.timedArrivalSeconds6 = v, d -> d.timedArrivalSeconds6).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds7", Codec.STRING), (d, v) -> d.timedArrivalSeconds7 = v, d -> d.timedArrivalSeconds7).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds8", Codec.STRING), (d, v) -> d.timedArrivalSeconds8 = v, d -> d.timedArrivalSeconds8).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds9", Codec.STRING), (d, v) -> d.timedArrivalSeconds9 = v, d -> d.timedArrivalSeconds9).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds10", Codec.STRING), (d, v) -> d.timedArrivalSeconds10 = v, d -> d.timedArrivalSeconds10).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds11", Codec.STRING), (d, v) -> d.timedArrivalSeconds11 = v, d -> d.timedArrivalSeconds11).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds12", Codec.STRING), (d, v) -> d.timedArrivalSeconds12 = v, d -> d.timedArrivalSeconds12).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds13", Codec.STRING), (d, v) -> d.timedArrivalSeconds13 = v, d -> d.timedArrivalSeconds13).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds14", Codec.STRING), (d, v) -> d.timedArrivalSeconds14 = v, d -> d.timedArrivalSeconds14).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds15", Codec.STRING), (d, v) -> d.timedArrivalSeconds15 = v, d -> d.timedArrivalSeconds15).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds16", Codec.STRING), (d, v) -> d.timedArrivalSeconds16 = v, d -> d.timedArrivalSeconds16).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds17", Codec.STRING), (d, v) -> d.timedArrivalSeconds17 = v, d -> d.timedArrivalSeconds17).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds18", Codec.STRING), (d, v) -> d.timedArrivalSeconds18 = v, d -> d.timedArrivalSeconds18).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds19", Codec.STRING), (d, v) -> d.timedArrivalSeconds19 = v, d -> d.timedArrivalSeconds19).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds20", Codec.STRING), (d, v) -> d.timedArrivalSeconds20 = v, d -> d.timedArrivalSeconds20).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds21", Codec.STRING), (d, v) -> d.timedArrivalSeconds21 = v, d -> d.timedArrivalSeconds21).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds22", Codec.STRING), (d, v) -> d.timedArrivalSeconds22 = v, d -> d.timedArrivalSeconds22).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds23", Codec.STRING), (d, v) -> d.timedArrivalSeconds23 = v, d -> d.timedArrivalSeconds23).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds24", Codec.STRING), (d, v) -> d.timedArrivalSeconds24 = v, d -> d.timedArrivalSeconds24).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds25", Codec.STRING), (d, v) -> d.timedArrivalSeconds25 = v, d -> d.timedArrivalSeconds25).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds26", Codec.STRING), (d, v) -> d.timedArrivalSeconds26 = v, d -> d.timedArrivalSeconds26).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds27", Codec.STRING), (d, v) -> d.timedArrivalSeconds27 = v, d -> d.timedArrivalSeconds27).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds28", Codec.STRING), (d, v) -> d.timedArrivalSeconds28 = v, d -> d.timedArrivalSeconds28).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds29", Codec.STRING), (d, v) -> d.timedArrivalSeconds29 = v, d -> d.timedArrivalSeconds29).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds30", Codec.STRING), (d, v) -> d.timedArrivalSeconds30 = v, d -> d.timedArrivalSeconds30).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds31", Codec.STRING), (d, v) -> d.timedArrivalSeconds31 = v, d -> d.timedArrivalSeconds31).add();
+            b.append(new KeyedCodec<>("@TimedArrivalSeconds32", Codec.STRING), (d, v) -> d.timedArrivalSeconds32 = v, d -> d.timedArrivalSeconds32).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer1", Codec.STRING), (d, v) -> d.timedRequirePlayer1 = v, d -> d.timedRequirePlayer1).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer2", Codec.STRING), (d, v) -> d.timedRequirePlayer2 = v, d -> d.timedRequirePlayer2).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer3", Codec.STRING), (d, v) -> d.timedRequirePlayer3 = v, d -> d.timedRequirePlayer3).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer4", Codec.STRING), (d, v) -> d.timedRequirePlayer4 = v, d -> d.timedRequirePlayer4).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer5", Codec.STRING), (d, v) -> d.timedRequirePlayer5 = v, d -> d.timedRequirePlayer5).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer6", Codec.STRING), (d, v) -> d.timedRequirePlayer6 = v, d -> d.timedRequirePlayer6).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer7", Codec.STRING), (d, v) -> d.timedRequirePlayer7 = v, d -> d.timedRequirePlayer7).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer8", Codec.STRING), (d, v) -> d.timedRequirePlayer8 = v, d -> d.timedRequirePlayer8).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer9", Codec.STRING), (d, v) -> d.timedRequirePlayer9 = v, d -> d.timedRequirePlayer9).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer10", Codec.STRING), (d, v) -> d.timedRequirePlayer10 = v, d -> d.timedRequirePlayer10).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer11", Codec.STRING), (d, v) -> d.timedRequirePlayer11 = v, d -> d.timedRequirePlayer11).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer12", Codec.STRING), (d, v) -> d.timedRequirePlayer12 = v, d -> d.timedRequirePlayer12).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer13", Codec.STRING), (d, v) -> d.timedRequirePlayer13 = v, d -> d.timedRequirePlayer13).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer14", Codec.STRING), (d, v) -> d.timedRequirePlayer14 = v, d -> d.timedRequirePlayer14).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer15", Codec.STRING), (d, v) -> d.timedRequirePlayer15 = v, d -> d.timedRequirePlayer15).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer16", Codec.STRING), (d, v) -> d.timedRequirePlayer16 = v, d -> d.timedRequirePlayer16).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer17", Codec.STRING), (d, v) -> d.timedRequirePlayer17 = v, d -> d.timedRequirePlayer17).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer18", Codec.STRING), (d, v) -> d.timedRequirePlayer18 = v, d -> d.timedRequirePlayer18).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer19", Codec.STRING), (d, v) -> d.timedRequirePlayer19 = v, d -> d.timedRequirePlayer19).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer20", Codec.STRING), (d, v) -> d.timedRequirePlayer20 = v, d -> d.timedRequirePlayer20).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer21", Codec.STRING), (d, v) -> d.timedRequirePlayer21 = v, d -> d.timedRequirePlayer21).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer22", Codec.STRING), (d, v) -> d.timedRequirePlayer22 = v, d -> d.timedRequirePlayer22).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer23", Codec.STRING), (d, v) -> d.timedRequirePlayer23 = v, d -> d.timedRequirePlayer23).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer24", Codec.STRING), (d, v) -> d.timedRequirePlayer24 = v, d -> d.timedRequirePlayer24).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer25", Codec.STRING), (d, v) -> d.timedRequirePlayer25 = v, d -> d.timedRequirePlayer25).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer26", Codec.STRING), (d, v) -> d.timedRequirePlayer26 = v, d -> d.timedRequirePlayer26).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer27", Codec.STRING), (d, v) -> d.timedRequirePlayer27 = v, d -> d.timedRequirePlayer27).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer28", Codec.STRING), (d, v) -> d.timedRequirePlayer28 = v, d -> d.timedRequirePlayer28).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer29", Codec.STRING), (d, v) -> d.timedRequirePlayer29 = v, d -> d.timedRequirePlayer29).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer30", Codec.STRING), (d, v) -> d.timedRequirePlayer30 = v, d -> d.timedRequirePlayer30).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer31", Codec.STRING), (d, v) -> d.timedRequirePlayer31 = v, d -> d.timedRequirePlayer31).add();
+            b.append(new KeyedCodec<>("@TimedRequirePlayer32", Codec.STRING), (d, v) -> d.timedRequirePlayer32 = v, d -> d.timedRequirePlayer32).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal1", Codec.STRING), (d, v) -> d.timedAnnounceGlobal1 = v, d -> d.timedAnnounceGlobal1).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal2", Codec.STRING), (d, v) -> d.timedAnnounceGlobal2 = v, d -> d.timedAnnounceGlobal2).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal3", Codec.STRING), (d, v) -> d.timedAnnounceGlobal3 = v, d -> d.timedAnnounceGlobal3).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal4", Codec.STRING), (d, v) -> d.timedAnnounceGlobal4 = v, d -> d.timedAnnounceGlobal4).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal5", Codec.STRING), (d, v) -> d.timedAnnounceGlobal5 = v, d -> d.timedAnnounceGlobal5).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal6", Codec.STRING), (d, v) -> d.timedAnnounceGlobal6 = v, d -> d.timedAnnounceGlobal6).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal7", Codec.STRING), (d, v) -> d.timedAnnounceGlobal7 = v, d -> d.timedAnnounceGlobal7).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal8", Codec.STRING), (d, v) -> d.timedAnnounceGlobal8 = v, d -> d.timedAnnounceGlobal8).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal9", Codec.STRING), (d, v) -> d.timedAnnounceGlobal9 = v, d -> d.timedAnnounceGlobal9).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal10", Codec.STRING), (d, v) -> d.timedAnnounceGlobal10 = v, d -> d.timedAnnounceGlobal10).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal11", Codec.STRING), (d, v) -> d.timedAnnounceGlobal11 = v, d -> d.timedAnnounceGlobal11).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal12", Codec.STRING), (d, v) -> d.timedAnnounceGlobal12 = v, d -> d.timedAnnounceGlobal12).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal13", Codec.STRING), (d, v) -> d.timedAnnounceGlobal13 = v, d -> d.timedAnnounceGlobal13).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal14", Codec.STRING), (d, v) -> d.timedAnnounceGlobal14 = v, d -> d.timedAnnounceGlobal14).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal15", Codec.STRING), (d, v) -> d.timedAnnounceGlobal15 = v, d -> d.timedAnnounceGlobal15).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal16", Codec.STRING), (d, v) -> d.timedAnnounceGlobal16 = v, d -> d.timedAnnounceGlobal16).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal17", Codec.STRING), (d, v) -> d.timedAnnounceGlobal17 = v, d -> d.timedAnnounceGlobal17).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal18", Codec.STRING), (d, v) -> d.timedAnnounceGlobal18 = v, d -> d.timedAnnounceGlobal18).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal19", Codec.STRING), (d, v) -> d.timedAnnounceGlobal19 = v, d -> d.timedAnnounceGlobal19).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal20", Codec.STRING), (d, v) -> d.timedAnnounceGlobal20 = v, d -> d.timedAnnounceGlobal20).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal21", Codec.STRING), (d, v) -> d.timedAnnounceGlobal21 = v, d -> d.timedAnnounceGlobal21).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal22", Codec.STRING), (d, v) -> d.timedAnnounceGlobal22 = v, d -> d.timedAnnounceGlobal22).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal23", Codec.STRING), (d, v) -> d.timedAnnounceGlobal23 = v, d -> d.timedAnnounceGlobal23).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal24", Codec.STRING), (d, v) -> d.timedAnnounceGlobal24 = v, d -> d.timedAnnounceGlobal24).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal25", Codec.STRING), (d, v) -> d.timedAnnounceGlobal25 = v, d -> d.timedAnnounceGlobal25).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal26", Codec.STRING), (d, v) -> d.timedAnnounceGlobal26 = v, d -> d.timedAnnounceGlobal26).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal27", Codec.STRING), (d, v) -> d.timedAnnounceGlobal27 = v, d -> d.timedAnnounceGlobal27).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal28", Codec.STRING), (d, v) -> d.timedAnnounceGlobal28 = v, d -> d.timedAnnounceGlobal28).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal29", Codec.STRING), (d, v) -> d.timedAnnounceGlobal29 = v, d -> d.timedAnnounceGlobal29).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal30", Codec.STRING), (d, v) -> d.timedAnnounceGlobal30 = v, d -> d.timedAnnounceGlobal30).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal31", Codec.STRING), (d, v) -> d.timedAnnounceGlobal31 = v, d -> d.timedAnnounceGlobal31).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceGlobal32", Codec.STRING), (d, v) -> d.timedAnnounceGlobal32 = v, d -> d.timedAnnounceGlobal32).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld1", Codec.STRING), (d, v) -> d.timedAnnounceWorld1 = v, d -> d.timedAnnounceWorld1).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld2", Codec.STRING), (d, v) -> d.timedAnnounceWorld2 = v, d -> d.timedAnnounceWorld2).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld3", Codec.STRING), (d, v) -> d.timedAnnounceWorld3 = v, d -> d.timedAnnounceWorld3).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld4", Codec.STRING), (d, v) -> d.timedAnnounceWorld4 = v, d -> d.timedAnnounceWorld4).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld5", Codec.STRING), (d, v) -> d.timedAnnounceWorld5 = v, d -> d.timedAnnounceWorld5).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld6", Codec.STRING), (d, v) -> d.timedAnnounceWorld6 = v, d -> d.timedAnnounceWorld6).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld7", Codec.STRING), (d, v) -> d.timedAnnounceWorld7 = v, d -> d.timedAnnounceWorld7).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld8", Codec.STRING), (d, v) -> d.timedAnnounceWorld8 = v, d -> d.timedAnnounceWorld8).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld9", Codec.STRING), (d, v) -> d.timedAnnounceWorld9 = v, d -> d.timedAnnounceWorld9).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld10", Codec.STRING), (d, v) -> d.timedAnnounceWorld10 = v, d -> d.timedAnnounceWorld10).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld11", Codec.STRING), (d, v) -> d.timedAnnounceWorld11 = v, d -> d.timedAnnounceWorld11).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld12", Codec.STRING), (d, v) -> d.timedAnnounceWorld12 = v, d -> d.timedAnnounceWorld12).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld13", Codec.STRING), (d, v) -> d.timedAnnounceWorld13 = v, d -> d.timedAnnounceWorld13).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld14", Codec.STRING), (d, v) -> d.timedAnnounceWorld14 = v, d -> d.timedAnnounceWorld14).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld15", Codec.STRING), (d, v) -> d.timedAnnounceWorld15 = v, d -> d.timedAnnounceWorld15).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld16", Codec.STRING), (d, v) -> d.timedAnnounceWorld16 = v, d -> d.timedAnnounceWorld16).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld17", Codec.STRING), (d, v) -> d.timedAnnounceWorld17 = v, d -> d.timedAnnounceWorld17).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld18", Codec.STRING), (d, v) -> d.timedAnnounceWorld18 = v, d -> d.timedAnnounceWorld18).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld19", Codec.STRING), (d, v) -> d.timedAnnounceWorld19 = v, d -> d.timedAnnounceWorld19).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld20", Codec.STRING), (d, v) -> d.timedAnnounceWorld20 = v, d -> d.timedAnnounceWorld20).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld21", Codec.STRING), (d, v) -> d.timedAnnounceWorld21 = v, d -> d.timedAnnounceWorld21).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld22", Codec.STRING), (d, v) -> d.timedAnnounceWorld22 = v, d -> d.timedAnnounceWorld22).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld23", Codec.STRING), (d, v) -> d.timedAnnounceWorld23 = v, d -> d.timedAnnounceWorld23).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld24", Codec.STRING), (d, v) -> d.timedAnnounceWorld24 = v, d -> d.timedAnnounceWorld24).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld25", Codec.STRING), (d, v) -> d.timedAnnounceWorld25 = v, d -> d.timedAnnounceWorld25).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld26", Codec.STRING), (d, v) -> d.timedAnnounceWorld26 = v, d -> d.timedAnnounceWorld26).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld27", Codec.STRING), (d, v) -> d.timedAnnounceWorld27 = v, d -> d.timedAnnounceWorld27).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld28", Codec.STRING), (d, v) -> d.timedAnnounceWorld28 = v, d -> d.timedAnnounceWorld28).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld29", Codec.STRING), (d, v) -> d.timedAnnounceWorld29 = v, d -> d.timedAnnounceWorld29).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld30", Codec.STRING), (d, v) -> d.timedAnnounceWorld30 = v, d -> d.timedAnnounceWorld30).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld31", Codec.STRING), (d, v) -> d.timedAnnounceWorld31 = v, d -> d.timedAnnounceWorld31).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceWorld32", Codec.STRING), (d, v) -> d.timedAnnounceWorld32 = v, d -> d.timedAnnounceWorld32).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceText", Codec.STRING), (d, v) -> d.timedAnnounceText = v, d -> d.timedAnnounceText).add();
+            b.append(new KeyedCodec<>("@TimedReminderText", Codec.STRING), (d, v) -> d.timedReminderText = v, d -> d.timedReminderText).add();
+            b.append(new KeyedCodec<>("@TimedGraceText", Codec.STRING), (d, v) -> d.timedGraceText = v, d -> d.timedGraceText).add();
+            b.append(new KeyedCodec<>("@BossPoolPick", Codec.STRING), (d, v) -> d.bossPoolPick = v, d -> d.bossPoolPick).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled1", Codec.STRING), (d, v) -> d.timedGraceEnabled1 = v, d -> d.timedGraceEnabled1).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled2", Codec.STRING), (d, v) -> d.timedGraceEnabled2 = v, d -> d.timedGraceEnabled2).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled3", Codec.STRING), (d, v) -> d.timedGraceEnabled3 = v, d -> d.timedGraceEnabled3).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled4", Codec.STRING), (d, v) -> d.timedGraceEnabled4 = v, d -> d.timedGraceEnabled4).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled5", Codec.STRING), (d, v) -> d.timedGraceEnabled5 = v, d -> d.timedGraceEnabled5).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled6", Codec.STRING), (d, v) -> d.timedGraceEnabled6 = v, d -> d.timedGraceEnabled6).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled7", Codec.STRING), (d, v) -> d.timedGraceEnabled7 = v, d -> d.timedGraceEnabled7).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled8", Codec.STRING), (d, v) -> d.timedGraceEnabled8 = v, d -> d.timedGraceEnabled8).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled9", Codec.STRING), (d, v) -> d.timedGraceEnabled9 = v, d -> d.timedGraceEnabled9).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled10", Codec.STRING), (d, v) -> d.timedGraceEnabled10 = v, d -> d.timedGraceEnabled10).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled11", Codec.STRING), (d, v) -> d.timedGraceEnabled11 = v, d -> d.timedGraceEnabled11).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled12", Codec.STRING), (d, v) -> d.timedGraceEnabled12 = v, d -> d.timedGraceEnabled12).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled13", Codec.STRING), (d, v) -> d.timedGraceEnabled13 = v, d -> d.timedGraceEnabled13).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled14", Codec.STRING), (d, v) -> d.timedGraceEnabled14 = v, d -> d.timedGraceEnabled14).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled15", Codec.STRING), (d, v) -> d.timedGraceEnabled15 = v, d -> d.timedGraceEnabled15).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled16", Codec.STRING), (d, v) -> d.timedGraceEnabled16 = v, d -> d.timedGraceEnabled16).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled17", Codec.STRING), (d, v) -> d.timedGraceEnabled17 = v, d -> d.timedGraceEnabled17).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled18", Codec.STRING), (d, v) -> d.timedGraceEnabled18 = v, d -> d.timedGraceEnabled18).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled19", Codec.STRING), (d, v) -> d.timedGraceEnabled19 = v, d -> d.timedGraceEnabled19).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled20", Codec.STRING), (d, v) -> d.timedGraceEnabled20 = v, d -> d.timedGraceEnabled20).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled21", Codec.STRING), (d, v) -> d.timedGraceEnabled21 = v, d -> d.timedGraceEnabled21).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled22", Codec.STRING), (d, v) -> d.timedGraceEnabled22 = v, d -> d.timedGraceEnabled22).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled23", Codec.STRING), (d, v) -> d.timedGraceEnabled23 = v, d -> d.timedGraceEnabled23).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled24", Codec.STRING), (d, v) -> d.timedGraceEnabled24 = v, d -> d.timedGraceEnabled24).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled25", Codec.STRING), (d, v) -> d.timedGraceEnabled25 = v, d -> d.timedGraceEnabled25).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled26", Codec.STRING), (d, v) -> d.timedGraceEnabled26 = v, d -> d.timedGraceEnabled26).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled27", Codec.STRING), (d, v) -> d.timedGraceEnabled27 = v, d -> d.timedGraceEnabled27).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled28", Codec.STRING), (d, v) -> d.timedGraceEnabled28 = v, d -> d.timedGraceEnabled28).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled29", Codec.STRING), (d, v) -> d.timedGraceEnabled29 = v, d -> d.timedGraceEnabled29).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled30", Codec.STRING), (d, v) -> d.timedGraceEnabled30 = v, d -> d.timedGraceEnabled30).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled31", Codec.STRING), (d, v) -> d.timedGraceEnabled31 = v, d -> d.timedGraceEnabled31).add();
+            b.append(new KeyedCodec<>("@TimedGraceEnabled32", Codec.STRING), (d, v) -> d.timedGraceEnabled32 = v, d -> d.timedGraceEnabled32).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds1", Codec.STRING), (d, v) -> d.timedGraceSeconds1 = v, d -> d.timedGraceSeconds1).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds2", Codec.STRING), (d, v) -> d.timedGraceSeconds2 = v, d -> d.timedGraceSeconds2).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds3", Codec.STRING), (d, v) -> d.timedGraceSeconds3 = v, d -> d.timedGraceSeconds3).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds4", Codec.STRING), (d, v) -> d.timedGraceSeconds4 = v, d -> d.timedGraceSeconds4).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds5", Codec.STRING), (d, v) -> d.timedGraceSeconds5 = v, d -> d.timedGraceSeconds5).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds6", Codec.STRING), (d, v) -> d.timedGraceSeconds6 = v, d -> d.timedGraceSeconds6).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds7", Codec.STRING), (d, v) -> d.timedGraceSeconds7 = v, d -> d.timedGraceSeconds7).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds8", Codec.STRING), (d, v) -> d.timedGraceSeconds8 = v, d -> d.timedGraceSeconds8).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds9", Codec.STRING), (d, v) -> d.timedGraceSeconds9 = v, d -> d.timedGraceSeconds9).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds10", Codec.STRING), (d, v) -> d.timedGraceSeconds10 = v, d -> d.timedGraceSeconds10).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds11", Codec.STRING), (d, v) -> d.timedGraceSeconds11 = v, d -> d.timedGraceSeconds11).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds12", Codec.STRING), (d, v) -> d.timedGraceSeconds12 = v, d -> d.timedGraceSeconds12).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds13", Codec.STRING), (d, v) -> d.timedGraceSeconds13 = v, d -> d.timedGraceSeconds13).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds14", Codec.STRING), (d, v) -> d.timedGraceSeconds14 = v, d -> d.timedGraceSeconds14).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds15", Codec.STRING), (d, v) -> d.timedGraceSeconds15 = v, d -> d.timedGraceSeconds15).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds16", Codec.STRING), (d, v) -> d.timedGraceSeconds16 = v, d -> d.timedGraceSeconds16).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds17", Codec.STRING), (d, v) -> d.timedGraceSeconds17 = v, d -> d.timedGraceSeconds17).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds18", Codec.STRING), (d, v) -> d.timedGraceSeconds18 = v, d -> d.timedGraceSeconds18).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds19", Codec.STRING), (d, v) -> d.timedGraceSeconds19 = v, d -> d.timedGraceSeconds19).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds20", Codec.STRING), (d, v) -> d.timedGraceSeconds20 = v, d -> d.timedGraceSeconds20).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds21", Codec.STRING), (d, v) -> d.timedGraceSeconds21 = v, d -> d.timedGraceSeconds21).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds22", Codec.STRING), (d, v) -> d.timedGraceSeconds22 = v, d -> d.timedGraceSeconds22).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds23", Codec.STRING), (d, v) -> d.timedGraceSeconds23 = v, d -> d.timedGraceSeconds23).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds24", Codec.STRING), (d, v) -> d.timedGraceSeconds24 = v, d -> d.timedGraceSeconds24).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds25", Codec.STRING), (d, v) -> d.timedGraceSeconds25 = v, d -> d.timedGraceSeconds25).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds26", Codec.STRING), (d, v) -> d.timedGraceSeconds26 = v, d -> d.timedGraceSeconds26).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds27", Codec.STRING), (d, v) -> d.timedGraceSeconds27 = v, d -> d.timedGraceSeconds27).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds28", Codec.STRING), (d, v) -> d.timedGraceSeconds28 = v, d -> d.timedGraceSeconds28).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds29", Codec.STRING), (d, v) -> d.timedGraceSeconds29 = v, d -> d.timedGraceSeconds29).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds30", Codec.STRING), (d, v) -> d.timedGraceSeconds30 = v, d -> d.timedGraceSeconds30).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds31", Codec.STRING), (d, v) -> d.timedGraceSeconds31 = v, d -> d.timedGraceSeconds31).add();
+            b.append(new KeyedCodec<>("@TimedGraceSeconds32", Codec.STRING), (d, v) -> d.timedGraceSeconds32 = v, d -> d.timedGraceSeconds32).add();
+            b.append(new KeyedCodec<>("@BossLootName1", Codec.STRING), (d, v) -> d.bossLootName1 = v, d -> d.bossLootName1).add();
+            b.append(new KeyedCodec<>("@BossLootMin1", Codec.STRING), (d, v) -> d.bossLootMin1 = v, d -> d.bossLootMin1).add();
+            b.append(new KeyedCodec<>("@BossLootMax1", Codec.STRING), (d, v) -> d.bossLootMax1 = v, d -> d.bossLootMax1).add();
+            b.append(new KeyedCodec<>("@BossLootChance1", Codec.STRING), (d, v) -> d.bossLootChance1 = v, d -> d.bossLootChance1).add();
+            b.append(new KeyedCodec<>("@BossLootName2", Codec.STRING), (d, v) -> d.bossLootName2 = v, d -> d.bossLootName2).add();
+            b.append(new KeyedCodec<>("@BossLootMin2", Codec.STRING), (d, v) -> d.bossLootMin2 = v, d -> d.bossLootMin2).add();
+            b.append(new KeyedCodec<>("@BossLootMax2", Codec.STRING), (d, v) -> d.bossLootMax2 = v, d -> d.bossLootMax2).add();
+            b.append(new KeyedCodec<>("@BossLootChance2", Codec.STRING), (d, v) -> d.bossLootChance2 = v, d -> d.bossLootChance2).add();
+            b.append(new KeyedCodec<>("@BossLootName3", Codec.STRING), (d, v) -> d.bossLootName3 = v, d -> d.bossLootName3).add();
+            b.append(new KeyedCodec<>("@BossLootMin3", Codec.STRING), (d, v) -> d.bossLootMin3 = v, d -> d.bossLootMin3).add();
+            b.append(new KeyedCodec<>("@BossLootMax3", Codec.STRING), (d, v) -> d.bossLootMax3 = v, d -> d.bossLootMax3).add();
+            b.append(new KeyedCodec<>("@BossLootChance3", Codec.STRING), (d, v) -> d.bossLootChance3 = v, d -> d.bossLootChance3).add();
+            b.append(new KeyedCodec<>("@BossLootName4", Codec.STRING), (d, v) -> d.bossLootName4 = v, d -> d.bossLootName4).add();
+            b.append(new KeyedCodec<>("@BossLootMin4", Codec.STRING), (d, v) -> d.bossLootMin4 = v, d -> d.bossLootMin4).add();
+            b.append(new KeyedCodec<>("@BossLootMax4", Codec.STRING), (d, v) -> d.bossLootMax4 = v, d -> d.bossLootMax4).add();
+            b.append(new KeyedCodec<>("@BossLootChance4", Codec.STRING), (d, v) -> d.bossLootChance4 = v, d -> d.bossLootChance4).add();
+            b.append(new KeyedCodec<>("@BossLootName5", Codec.STRING), (d, v) -> d.bossLootName5 = v, d -> d.bossLootName5).add();
+            b.append(new KeyedCodec<>("@BossLootMin5", Codec.STRING), (d, v) -> d.bossLootMin5 = v, d -> d.bossLootMin5).add();
+            b.append(new KeyedCodec<>("@BossLootMax5", Codec.STRING), (d, v) -> d.bossLootMax5 = v, d -> d.bossLootMax5).add();
+            b.append(new KeyedCodec<>("@BossLootChance5", Codec.STRING), (d, v) -> d.bossLootChance5 = v, d -> d.bossLootChance5).add();
+            b.append(new KeyedCodec<>("@BossLootName6", Codec.STRING), (d, v) -> d.bossLootName6 = v, d -> d.bossLootName6).add();
+            b.append(new KeyedCodec<>("@BossLootMin6", Codec.STRING), (d, v) -> d.bossLootMin6 = v, d -> d.bossLootMin6).add();
+            b.append(new KeyedCodec<>("@BossLootMax6", Codec.STRING), (d, v) -> d.bossLootMax6 = v, d -> d.bossLootMax6).add();
+            b.append(new KeyedCodec<>("@BossLootChance6", Codec.STRING), (d, v) -> d.bossLootChance6 = v, d -> d.bossLootChance6).add();
+            b.append(new KeyedCodec<>("@BossLootName7", Codec.STRING), (d, v) -> d.bossLootName7 = v, d -> d.bossLootName7).add();
+            b.append(new KeyedCodec<>("@BossLootMin7", Codec.STRING), (d, v) -> d.bossLootMin7 = v, d -> d.bossLootMin7).add();
+            b.append(new KeyedCodec<>("@BossLootMax7", Codec.STRING), (d, v) -> d.bossLootMax7 = v, d -> d.bossLootMax7).add();
+            b.append(new KeyedCodec<>("@BossLootChance7", Codec.STRING), (d, v) -> d.bossLootChance7 = v, d -> d.bossLootChance7).add();
+            b.append(new KeyedCodec<>("@BossLootName8", Codec.STRING), (d, v) -> d.bossLootName8 = v, d -> d.bossLootName8).add();
+            b.append(new KeyedCodec<>("@BossLootMin8", Codec.STRING), (d, v) -> d.bossLootMin8 = v, d -> d.bossLootMin8).add();
+            b.append(new KeyedCodec<>("@BossLootMax8", Codec.STRING), (d, v) -> d.bossLootMax8 = v, d -> d.bossLootMax8).add();
+            b.append(new KeyedCodec<>("@BossLootChance8", Codec.STRING), (d, v) -> d.bossLootChance8 = v, d -> d.bossLootChance8).add();
+            return b.build();
+        }
         public String action;
         public String arenaName;
+        /** Radius of the edited arena row; the row index comes from the action token. */
+        public String arenaRadius;
         public String arenaWorld;
         public String arenaX;
         public String arenaY;
@@ -6426,13 +7039,221 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String bossWaveDamage5;
         public String bossWaveSize5;
         public String bossWaveNpc6;
+        public String bossWaveNpc7;
+        public String bossWaveNpc8;
+        public String bossWaveNpc9;
+        public String bossWaveNpc10;
+        public String bossWaveNpc11;
+        public String bossWaveNpc12;
+        public String bossWaveNpc13;
+        public String bossWaveNpc14;
+        public String bossWaveNpc15;
+        public String bossWaveNpc16;
+        public String bossWaveNpc17;
+        public String bossWaveNpc18;
+        public String bossWaveNpc19;
+        public String bossWaveNpc20;
+        public String bossWaveNpc21;
+        public String bossWaveNpc22;
+        public String bossWaveNpc23;
+        public String bossWaveNpc24;
+        public String bossWaveNpc25;
+        public String bossWaveNpc26;
+        public String bossWaveNpc27;
+        public String bossWaveNpc28;
+        public String bossWaveNpc29;
+        public String bossWaveNpc30;
+        public String bossWaveNpc31;
+        public String bossWaveNpc32;
         public String bossWaveAmount6;
+        public String bossWaveAmount7;
+        public String bossWaveAmount8;
+        public String bossWaveAmount9;
+        public String bossWaveAmount10;
+        public String bossWaveAmount11;
+        public String bossWaveAmount12;
+        public String bossWaveAmount13;
+        public String bossWaveAmount14;
+        public String bossWaveAmount15;
+        public String bossWaveAmount16;
+        public String bossWaveAmount17;
+        public String bossWaveAmount18;
+        public String bossWaveAmount19;
+        public String bossWaveAmount20;
+        public String bossWaveAmount21;
+        public String bossWaveAmount22;
+        public String bossWaveAmount23;
+        public String bossWaveAmount24;
+        public String bossWaveAmount25;
+        public String bossWaveAmount26;
+        public String bossWaveAmount27;
+        public String bossWaveAmount28;
+        public String bossWaveAmount29;
+        public String bossWaveAmount30;
+        public String bossWaveAmount31;
+        public String bossWaveAmount32;
         public String bossWaveAmountMin6;
+        public String bossWaveAmountMin7;
+        public String bossWaveAmountMin8;
+        public String bossWaveAmountMin9;
+        public String bossWaveAmountMin10;
+        public String bossWaveAmountMin11;
+        public String bossWaveAmountMin12;
+        public String bossWaveAmountMin13;
+        public String bossWaveAmountMin14;
+        public String bossWaveAmountMin15;
+        public String bossWaveAmountMin16;
+        public String bossWaveAmountMin17;
+        public String bossWaveAmountMin18;
+        public String bossWaveAmountMin19;
+        public String bossWaveAmountMin20;
+        public String bossWaveAmountMin21;
+        public String bossWaveAmountMin22;
+        public String bossWaveAmountMin23;
+        public String bossWaveAmountMin24;
+        public String bossWaveAmountMin25;
+        public String bossWaveAmountMin26;
+        public String bossWaveAmountMin27;
+        public String bossWaveAmountMin28;
+        public String bossWaveAmountMin29;
+        public String bossWaveAmountMin30;
+        public String bossWaveAmountMin31;
+        public String bossWaveAmountMin32;
         public String bossWaveAmountMax6;
+        public String bossWaveAmountMax7;
+        public String bossWaveAmountMax8;
+        public String bossWaveAmountMax9;
+        public String bossWaveAmountMax10;
+        public String bossWaveAmountMax11;
+        public String bossWaveAmountMax12;
+        public String bossWaveAmountMax13;
+        public String bossWaveAmountMax14;
+        public String bossWaveAmountMax15;
+        public String bossWaveAmountMax16;
+        public String bossWaveAmountMax17;
+        public String bossWaveAmountMax18;
+        public String bossWaveAmountMax19;
+        public String bossWaveAmountMax20;
+        public String bossWaveAmountMax21;
+        public String bossWaveAmountMax22;
+        public String bossWaveAmountMax23;
+        public String bossWaveAmountMax24;
+        public String bossWaveAmountMax25;
+        public String bossWaveAmountMax26;
+        public String bossWaveAmountMax27;
+        public String bossWaveAmountMax28;
+        public String bossWaveAmountMax29;
+        public String bossWaveAmountMax30;
+        public String bossWaveAmountMax31;
+        public String bossWaveAmountMax32;
         public String bossWaveEvery6;
+        public String bossWaveEvery7;
+        public String bossWaveEvery8;
+        public String bossWaveEvery9;
+        public String bossWaveEvery10;
+        public String bossWaveEvery11;
+        public String bossWaveEvery12;
+        public String bossWaveEvery13;
+        public String bossWaveEvery14;
+        public String bossWaveEvery15;
+        public String bossWaveEvery16;
+        public String bossWaveEvery17;
+        public String bossWaveEvery18;
+        public String bossWaveEvery19;
+        public String bossWaveEvery20;
+        public String bossWaveEvery21;
+        public String bossWaveEvery22;
+        public String bossWaveEvery23;
+        public String bossWaveEvery24;
+        public String bossWaveEvery25;
+        public String bossWaveEvery26;
+        public String bossWaveEvery27;
+        public String bossWaveEvery28;
+        public String bossWaveEvery29;
+        public String bossWaveEvery30;
+        public String bossWaveEvery31;
+        public String bossWaveEvery32;
         public String bossWaveHp6;
+        public String bossWaveHp7;
+        public String bossWaveHp8;
+        public String bossWaveHp9;
+        public String bossWaveHp10;
+        public String bossWaveHp11;
+        public String bossWaveHp12;
+        public String bossWaveHp13;
+        public String bossWaveHp14;
+        public String bossWaveHp15;
+        public String bossWaveHp16;
+        public String bossWaveHp17;
+        public String bossWaveHp18;
+        public String bossWaveHp19;
+        public String bossWaveHp20;
+        public String bossWaveHp21;
+        public String bossWaveHp22;
+        public String bossWaveHp23;
+        public String bossWaveHp24;
+        public String bossWaveHp25;
+        public String bossWaveHp26;
+        public String bossWaveHp27;
+        public String bossWaveHp28;
+        public String bossWaveHp29;
+        public String bossWaveHp30;
+        public String bossWaveHp31;
+        public String bossWaveHp32;
         public String bossWaveDamage6;
+        public String bossWaveDamage7;
+        public String bossWaveDamage8;
+        public String bossWaveDamage9;
+        public String bossWaveDamage10;
+        public String bossWaveDamage11;
+        public String bossWaveDamage12;
+        public String bossWaveDamage13;
+        public String bossWaveDamage14;
+        public String bossWaveDamage15;
+        public String bossWaveDamage16;
+        public String bossWaveDamage17;
+        public String bossWaveDamage18;
+        public String bossWaveDamage19;
+        public String bossWaveDamage20;
+        public String bossWaveDamage21;
+        public String bossWaveDamage22;
+        public String bossWaveDamage23;
+        public String bossWaveDamage24;
+        public String bossWaveDamage25;
+        public String bossWaveDamage26;
+        public String bossWaveDamage27;
+        public String bossWaveDamage28;
+        public String bossWaveDamage29;
+        public String bossWaveDamage30;
+        public String bossWaveDamage31;
+        public String bossWaveDamage32;
         public String bossWaveSize6;
+        public String bossWaveSize7;
+        public String bossWaveSize8;
+        public String bossWaveSize9;
+        public String bossWaveSize10;
+        public String bossWaveSize11;
+        public String bossWaveSize12;
+        public String bossWaveSize13;
+        public String bossWaveSize14;
+        public String bossWaveSize15;
+        public String bossWaveSize16;
+        public String bossWaveSize17;
+        public String bossWaveSize18;
+        public String bossWaveSize19;
+        public String bossWaveSize20;
+        public String bossWaveSize21;
+        public String bossWaveSize22;
+        public String bossWaveSize23;
+        public String bossWaveSize24;
+        public String bossWaveSize25;
+        public String bossWaveSize26;
+        public String bossWaveSize27;
+        public String bossWaveSize28;
+        public String bossWaveSize29;
+        public String bossWaveSize30;
+        public String bossWaveSize31;
+        public String bossWaveSize32;
         public String bossWaveValue1;
         public String bossWaveRepeatCount1;
         public String bossWaveRepeatSec1;
@@ -6449,8 +7270,86 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String bossWaveRepeatCount5;
         public String bossWaveRepeatSec5;
         public String bossWaveValue6;
+        public String bossWaveValue7;
+        public String bossWaveValue8;
+        public String bossWaveValue9;
+        public String bossWaveValue10;
+        public String bossWaveValue11;
+        public String bossWaveValue12;
+        public String bossWaveValue13;
+        public String bossWaveValue14;
+        public String bossWaveValue15;
+        public String bossWaveValue16;
+        public String bossWaveValue17;
+        public String bossWaveValue18;
+        public String bossWaveValue19;
+        public String bossWaveValue20;
+        public String bossWaveValue21;
+        public String bossWaveValue22;
+        public String bossWaveValue23;
+        public String bossWaveValue24;
+        public String bossWaveValue25;
+        public String bossWaveValue26;
+        public String bossWaveValue27;
+        public String bossWaveValue28;
+        public String bossWaveValue29;
+        public String bossWaveValue30;
+        public String bossWaveValue31;
+        public String bossWaveValue32;
         public String bossWaveRepeatCount6;
+        public String bossWaveRepeatCount7;
+        public String bossWaveRepeatCount8;
+        public String bossWaveRepeatCount9;
+        public String bossWaveRepeatCount10;
+        public String bossWaveRepeatCount11;
+        public String bossWaveRepeatCount12;
+        public String bossWaveRepeatCount13;
+        public String bossWaveRepeatCount14;
+        public String bossWaveRepeatCount15;
+        public String bossWaveRepeatCount16;
+        public String bossWaveRepeatCount17;
+        public String bossWaveRepeatCount18;
+        public String bossWaveRepeatCount19;
+        public String bossWaveRepeatCount20;
+        public String bossWaveRepeatCount21;
+        public String bossWaveRepeatCount22;
+        public String bossWaveRepeatCount23;
+        public String bossWaveRepeatCount24;
+        public String bossWaveRepeatCount25;
+        public String bossWaveRepeatCount26;
+        public String bossWaveRepeatCount27;
+        public String bossWaveRepeatCount28;
+        public String bossWaveRepeatCount29;
+        public String bossWaveRepeatCount30;
+        public String bossWaveRepeatCount31;
+        public String bossWaveRepeatCount32;
         public String bossWaveRepeatSec6;
+        public String bossWaveRepeatSec7;
+        public String bossWaveRepeatSec8;
+        public String bossWaveRepeatSec9;
+        public String bossWaveRepeatSec10;
+        public String bossWaveRepeatSec11;
+        public String bossWaveRepeatSec12;
+        public String bossWaveRepeatSec13;
+        public String bossWaveRepeatSec14;
+        public String bossWaveRepeatSec15;
+        public String bossWaveRepeatSec16;
+        public String bossWaveRepeatSec17;
+        public String bossWaveRepeatSec18;
+        public String bossWaveRepeatSec19;
+        public String bossWaveRepeatSec20;
+        public String bossWaveRepeatSec21;
+        public String bossWaveRepeatSec22;
+        public String bossWaveRepeatSec23;
+        public String bossWaveRepeatSec24;
+        public String bossWaveRepeatSec25;
+        public String bossWaveRepeatSec26;
+        public String bossWaveRepeatSec27;
+        public String bossWaveRepeatSec28;
+        public String bossWaveRepeatSec29;
+        public String bossWaveRepeatSec30;
+        public String bossWaveRepeatSec31;
+        public String bossWaveRepeatSec32;
         public String timedAnnounceText;
         public String timedReminderText;
         public String timedGraceText;
@@ -6461,78 +7360,416 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String timedGraceEnabled4;
         public String timedGraceEnabled5;
         public String timedGraceEnabled6;
+        public String timedGraceEnabled7;
+        public String timedGraceEnabled8;
+        public String timedGraceEnabled9;
+        public String timedGraceEnabled10;
+        public String timedGraceEnabled11;
+        public String timedGraceEnabled12;
+        public String timedGraceEnabled13;
+        public String timedGraceEnabled14;
+        public String timedGraceEnabled15;
+        public String timedGraceEnabled16;
+        public String timedGraceEnabled17;
+        public String timedGraceEnabled18;
+        public String timedGraceEnabled19;
+        public String timedGraceEnabled20;
+        public String timedGraceEnabled21;
+        public String timedGraceEnabled22;
+        public String timedGraceEnabled23;
+        public String timedGraceEnabled24;
+        public String timedGraceEnabled25;
+        public String timedGraceEnabled26;
+        public String timedGraceEnabled27;
+        public String timedGraceEnabled28;
+        public String timedGraceEnabled29;
+        public String timedGraceEnabled30;
+        public String timedGraceEnabled31;
+        public String timedGraceEnabled32;
         public String timedGraceSeconds1;
         public String timedGraceSeconds2;
         public String timedGraceSeconds3;
         public String timedGraceSeconds4;
         public String timedGraceSeconds5;
         public String timedGraceSeconds6;
+        public String timedGraceSeconds7;
+        public String timedGraceSeconds8;
+        public String timedGraceSeconds9;
+        public String timedGraceSeconds10;
+        public String timedGraceSeconds11;
+        public String timedGraceSeconds12;
+        public String timedGraceSeconds13;
+        public String timedGraceSeconds14;
+        public String timedGraceSeconds15;
+        public String timedGraceSeconds16;
+        public String timedGraceSeconds17;
+        public String timedGraceSeconds18;
+        public String timedGraceSeconds19;
+        public String timedGraceSeconds20;
+        public String timedGraceSeconds21;
+        public String timedGraceSeconds22;
+        public String timedGraceSeconds23;
+        public String timedGraceSeconds24;
+        public String timedGraceSeconds25;
+        public String timedGraceSeconds26;
+        public String timedGraceSeconds27;
+        public String timedGraceSeconds28;
+        public String timedGraceSeconds29;
+        public String timedGraceSeconds30;
+        public String timedGraceSeconds31;
+        public String timedGraceSeconds32;
         public String timedAnnounceGlobal1;
         public String timedAnnounceGlobal2;
         public String timedAnnounceGlobal3;
         public String timedAnnounceGlobal4;
         public String timedAnnounceGlobal5;
         public String timedAnnounceGlobal6;
+        public String timedAnnounceGlobal7;
+        public String timedAnnounceGlobal8;
+        public String timedAnnounceGlobal9;
+        public String timedAnnounceGlobal10;
+        public String timedAnnounceGlobal11;
+        public String timedAnnounceGlobal12;
+        public String timedAnnounceGlobal13;
+        public String timedAnnounceGlobal14;
+        public String timedAnnounceGlobal15;
+        public String timedAnnounceGlobal16;
+        public String timedAnnounceGlobal17;
+        public String timedAnnounceGlobal18;
+        public String timedAnnounceGlobal19;
+        public String timedAnnounceGlobal20;
+        public String timedAnnounceGlobal21;
+        public String timedAnnounceGlobal22;
+        public String timedAnnounceGlobal23;
+        public String timedAnnounceGlobal24;
+        public String timedAnnounceGlobal25;
+        public String timedAnnounceGlobal26;
+        public String timedAnnounceGlobal27;
+        public String timedAnnounceGlobal28;
+        public String timedAnnounceGlobal29;
+        public String timedAnnounceGlobal30;
+        public String timedAnnounceGlobal31;
+        public String timedAnnounceGlobal32;
         public String timedAnnounceWorld1;
         public String timedAnnounceWorld2;
         public String timedAnnounceWorld3;
         public String timedAnnounceWorld4;
         public String timedAnnounceWorld5;
         public String timedAnnounceWorld6;
+        public String timedAnnounceWorld7;
+        public String timedAnnounceWorld8;
+        public String timedAnnounceWorld9;
+        public String timedAnnounceWorld10;
+        public String timedAnnounceWorld11;
+        public String timedAnnounceWorld12;
+        public String timedAnnounceWorld13;
+        public String timedAnnounceWorld14;
+        public String timedAnnounceWorld15;
+        public String timedAnnounceWorld16;
+        public String timedAnnounceWorld17;
+        public String timedAnnounceWorld18;
+        public String timedAnnounceWorld19;
+        public String timedAnnounceWorld20;
+        public String timedAnnounceWorld21;
+        public String timedAnnounceWorld22;
+        public String timedAnnounceWorld23;
+        public String timedAnnounceWorld24;
+        public String timedAnnounceWorld25;
+        public String timedAnnounceWorld26;
+        public String timedAnnounceWorld27;
+        public String timedAnnounceWorld28;
+        public String timedAnnounceWorld29;
+        public String timedAnnounceWorld30;
+        public String timedAnnounceWorld31;
+        public String timedAnnounceWorld32;
         public String timedMinPlayers1;
         public String timedMinPlayers2;
         public String timedMinPlayers3;
         public String timedMinPlayers4;
         public String timedMinPlayers5;
         public String timedMinPlayers6;
+        public String timedMinPlayers7;
+        public String timedMinPlayers8;
+        public String timedMinPlayers9;
+        public String timedMinPlayers10;
+        public String timedMinPlayers11;
+        public String timedMinPlayers12;
+        public String timedMinPlayers13;
+        public String timedMinPlayers14;
+        public String timedMinPlayers15;
+        public String timedMinPlayers16;
+        public String timedMinPlayers17;
+        public String timedMinPlayers18;
+        public String timedMinPlayers19;
+        public String timedMinPlayers20;
+        public String timedMinPlayers21;
+        public String timedMinPlayers22;
+        public String timedMinPlayers23;
+        public String timedMinPlayers24;
+        public String timedMinPlayers25;
+        public String timedMinPlayers26;
+        public String timedMinPlayers27;
+        public String timedMinPlayers28;
+        public String timedMinPlayers29;
+        public String timedMinPlayers30;
+        public String timedMinPlayers31;
+        public String timedMinPlayers32;
         public String timedEverySeconds1;
         public String timedEverySeconds2;
         public String timedEverySeconds3;
         public String timedEverySeconds4;
         public String timedEverySeconds5;
         public String timedEverySeconds6;
+        public String timedEverySeconds7;
+        public String timedEverySeconds8;
+        public String timedEverySeconds9;
+        public String timedEverySeconds10;
+        public String timedEverySeconds11;
+        public String timedEverySeconds12;
+        public String timedEverySeconds13;
+        public String timedEverySeconds14;
+        public String timedEverySeconds15;
+        public String timedEverySeconds16;
+        public String timedEverySeconds17;
+        public String timedEverySeconds18;
+        public String timedEverySeconds19;
+        public String timedEverySeconds20;
+        public String timedEverySeconds21;
+        public String timedEverySeconds22;
+        public String timedEverySeconds23;
+        public String timedEverySeconds24;
+        public String timedEverySeconds25;
+        public String timedEverySeconds26;
+        public String timedEverySeconds27;
+        public String timedEverySeconds28;
+        public String timedEverySeconds29;
+        public String timedEverySeconds30;
+        public String timedEverySeconds31;
+        public String timedEverySeconds32;
         public String timedIntervalHours1;
         public String timedIntervalHours2;
         public String timedIntervalHours3;
         public String timedIntervalHours4;
         public String timedIntervalHours5;
         public String timedIntervalHours6;
+        public String timedIntervalHours7;
+        public String timedIntervalHours8;
+        public String timedIntervalHours9;
+        public String timedIntervalHours10;
+        public String timedIntervalHours11;
+        public String timedIntervalHours12;
+        public String timedIntervalHours13;
+        public String timedIntervalHours14;
+        public String timedIntervalHours15;
+        public String timedIntervalHours16;
+        public String timedIntervalHours17;
+        public String timedIntervalHours18;
+        public String timedIntervalHours19;
+        public String timedIntervalHours20;
+        public String timedIntervalHours21;
+        public String timedIntervalHours22;
+        public String timedIntervalHours23;
+        public String timedIntervalHours24;
+        public String timedIntervalHours25;
+        public String timedIntervalHours26;
+        public String timedIntervalHours27;
+        public String timedIntervalHours28;
+        public String timedIntervalHours29;
+        public String timedIntervalHours30;
+        public String timedIntervalHours31;
+        public String timedIntervalHours32;
         public String timedIntervalDays1;
         public String timedIntervalDays2;
         public String timedIntervalDays3;
         public String timedIntervalDays4;
         public String timedIntervalDays5;
         public String timedIntervalDays6;
+        public String timedIntervalDays7;
+        public String timedIntervalDays8;
+        public String timedIntervalDays9;
+        public String timedIntervalDays10;
+        public String timedIntervalDays11;
+        public String timedIntervalDays12;
+        public String timedIntervalDays13;
+        public String timedIntervalDays14;
+        public String timedIntervalDays15;
+        public String timedIntervalDays16;
+        public String timedIntervalDays17;
+        public String timedIntervalDays18;
+        public String timedIntervalDays19;
+        public String timedIntervalDays20;
+        public String timedIntervalDays21;
+        public String timedIntervalDays22;
+        public String timedIntervalDays23;
+        public String timedIntervalDays24;
+        public String timedIntervalDays25;
+        public String timedIntervalDays26;
+        public String timedIntervalDays27;
+        public String timedIntervalDays28;
+        public String timedIntervalDays29;
+        public String timedIntervalDays30;
+        public String timedIntervalDays31;
+        public String timedIntervalDays32;
         public String timedIntervalSeconds1;
         public String timedIntervalSeconds2;
         public String timedIntervalSeconds3;
         public String timedIntervalSeconds4;
         public String timedIntervalSeconds5;
         public String timedIntervalSeconds6;
+        public String timedIntervalSeconds7;
+        public String timedIntervalSeconds8;
+        public String timedIntervalSeconds9;
+        public String timedIntervalSeconds10;
+        public String timedIntervalSeconds11;
+        public String timedIntervalSeconds12;
+        public String timedIntervalSeconds13;
+        public String timedIntervalSeconds14;
+        public String timedIntervalSeconds15;
+        public String timedIntervalSeconds16;
+        public String timedIntervalSeconds17;
+        public String timedIntervalSeconds18;
+        public String timedIntervalSeconds19;
+        public String timedIntervalSeconds20;
+        public String timedIntervalSeconds21;
+        public String timedIntervalSeconds22;
+        public String timedIntervalSeconds23;
+        public String timedIntervalSeconds24;
+        public String timedIntervalSeconds25;
+        public String timedIntervalSeconds26;
+        public String timedIntervalSeconds27;
+        public String timedIntervalSeconds28;
+        public String timedIntervalSeconds29;
+        public String timedIntervalSeconds30;
+        public String timedIntervalSeconds31;
+        public String timedIntervalSeconds32;
         public String timedArrivalHours1;
         public String timedArrivalHours2;
         public String timedArrivalHours3;
         public String timedArrivalHours4;
         public String timedArrivalHours5;
         public String timedArrivalHours6;
+        public String timedArrivalHours7;
+        public String timedArrivalHours8;
+        public String timedArrivalHours9;
+        public String timedArrivalHours10;
+        public String timedArrivalHours11;
+        public String timedArrivalHours12;
+        public String timedArrivalHours13;
+        public String timedArrivalHours14;
+        public String timedArrivalHours15;
+        public String timedArrivalHours16;
+        public String timedArrivalHours17;
+        public String timedArrivalHours18;
+        public String timedArrivalHours19;
+        public String timedArrivalHours20;
+        public String timedArrivalHours21;
+        public String timedArrivalHours22;
+        public String timedArrivalHours23;
+        public String timedArrivalHours24;
+        public String timedArrivalHours25;
+        public String timedArrivalHours26;
+        public String timedArrivalHours27;
+        public String timedArrivalHours28;
+        public String timedArrivalHours29;
+        public String timedArrivalHours30;
+        public String timedArrivalHours31;
+        public String timedArrivalHours32;
         public String timedArrivalMinutes1;
         public String timedArrivalMinutes2;
         public String timedArrivalMinutes3;
         public String timedArrivalMinutes4;
         public String timedArrivalMinutes5;
         public String timedArrivalMinutes6;
+        public String timedArrivalMinutes7;
+        public String timedArrivalMinutes8;
+        public String timedArrivalMinutes9;
+        public String timedArrivalMinutes10;
+        public String timedArrivalMinutes11;
+        public String timedArrivalMinutes12;
+        public String timedArrivalMinutes13;
+        public String timedArrivalMinutes14;
+        public String timedArrivalMinutes15;
+        public String timedArrivalMinutes16;
+        public String timedArrivalMinutes17;
+        public String timedArrivalMinutes18;
+        public String timedArrivalMinutes19;
+        public String timedArrivalMinutes20;
+        public String timedArrivalMinutes21;
+        public String timedArrivalMinutes22;
+        public String timedArrivalMinutes23;
+        public String timedArrivalMinutes24;
+        public String timedArrivalMinutes25;
+        public String timedArrivalMinutes26;
+        public String timedArrivalMinutes27;
+        public String timedArrivalMinutes28;
+        public String timedArrivalMinutes29;
+        public String timedArrivalMinutes30;
+        public String timedArrivalMinutes31;
+        public String timedArrivalMinutes32;
         public String timedArrivalSeconds1;
         public String timedArrivalSeconds2;
         public String timedArrivalSeconds3;
         public String timedArrivalSeconds4;
         public String timedArrivalSeconds5;
         public String timedArrivalSeconds6;
+        public String timedArrivalSeconds7;
+        public String timedArrivalSeconds8;
+        public String timedArrivalSeconds9;
+        public String timedArrivalSeconds10;
+        public String timedArrivalSeconds11;
+        public String timedArrivalSeconds12;
+        public String timedArrivalSeconds13;
+        public String timedArrivalSeconds14;
+        public String timedArrivalSeconds15;
+        public String timedArrivalSeconds16;
+        public String timedArrivalSeconds17;
+        public String timedArrivalSeconds18;
+        public String timedArrivalSeconds19;
+        public String timedArrivalSeconds20;
+        public String timedArrivalSeconds21;
+        public String timedArrivalSeconds22;
+        public String timedArrivalSeconds23;
+        public String timedArrivalSeconds24;
+        public String timedArrivalSeconds25;
+        public String timedArrivalSeconds26;
+        public String timedArrivalSeconds27;
+        public String timedArrivalSeconds28;
+        public String timedArrivalSeconds29;
+        public String timedArrivalSeconds30;
+        public String timedArrivalSeconds31;
+        public String timedArrivalSeconds32;
         public String timedRequirePlayer1;
         public String timedRequirePlayer2;
         public String timedRequirePlayer3;
         public String timedRequirePlayer4;
         public String timedRequirePlayer5;
         public String timedRequirePlayer6;
+        public String timedRequirePlayer7;
+        public String timedRequirePlayer8;
+        public String timedRequirePlayer9;
+        public String timedRequirePlayer10;
+        public String timedRequirePlayer11;
+        public String timedRequirePlayer12;
+        public String timedRequirePlayer13;
+        public String timedRequirePlayer14;
+        public String timedRequirePlayer15;
+        public String timedRequirePlayer16;
+        public String timedRequirePlayer17;
+        public String timedRequirePlayer18;
+        public String timedRequirePlayer19;
+        public String timedRequirePlayer20;
+        public String timedRequirePlayer21;
+        public String timedRequirePlayer22;
+        public String timedRequirePlayer23;
+        public String timedRequirePlayer24;
+        public String timedRequirePlayer25;
+        public String timedRequirePlayer26;
+        public String timedRequirePlayer27;
+        public String timedRequirePlayer28;
+        public String timedRequirePlayer29;
+        public String timedRequirePlayer30;
+        public String timedRequirePlayer31;
+        public String timedRequirePlayer32;
         public String bossLootName1;
         public String bossLootMin1;
         public String bossLootMax1;
@@ -6686,6 +7923,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveNpc4;
                 case 5 -> bossWaveNpc5;
                 case 6 -> bossWaveNpc6;
+                case 7 -> bossWaveNpc7;
+                case 8 -> bossWaveNpc8;
+                case 9 -> bossWaveNpc9;
+                case 10 -> bossWaveNpc10;
+                case 11 -> bossWaveNpc11;
+                case 12 -> bossWaveNpc12;
+                case 13 -> bossWaveNpc13;
+                case 14 -> bossWaveNpc14;
+                case 15 -> bossWaveNpc15;
+                case 16 -> bossWaveNpc16;
+                case 17 -> bossWaveNpc17;
+                case 18 -> bossWaveNpc18;
+                case 19 -> bossWaveNpc19;
+                case 20 -> bossWaveNpc20;
+                case 21 -> bossWaveNpc21;
+                case 22 -> bossWaveNpc22;
+                case 23 -> bossWaveNpc23;
+                case 24 -> bossWaveNpc24;
+                case 25 -> bossWaveNpc25;
+                case 26 -> bossWaveNpc26;
+                case 27 -> bossWaveNpc27;
+                case 28 -> bossWaveNpc28;
+                case 29 -> bossWaveNpc29;
+                case 30 -> bossWaveNpc30;
+                case 31 -> bossWaveNpc31;
+                case 32 -> bossWaveNpc32;
                 default -> "";
             };
         }
@@ -6698,6 +7961,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveAmount4;
                 case 5 -> bossWaveAmount5;
                 case 6 -> bossWaveAmount6;
+                case 7 -> bossWaveAmount7;
+                case 8 -> bossWaveAmount8;
+                case 9 -> bossWaveAmount9;
+                case 10 -> bossWaveAmount10;
+                case 11 -> bossWaveAmount11;
+                case 12 -> bossWaveAmount12;
+                case 13 -> bossWaveAmount13;
+                case 14 -> bossWaveAmount14;
+                case 15 -> bossWaveAmount15;
+                case 16 -> bossWaveAmount16;
+                case 17 -> bossWaveAmount17;
+                case 18 -> bossWaveAmount18;
+                case 19 -> bossWaveAmount19;
+                case 20 -> bossWaveAmount20;
+                case 21 -> bossWaveAmount21;
+                case 22 -> bossWaveAmount22;
+                case 23 -> bossWaveAmount23;
+                case 24 -> bossWaveAmount24;
+                case 25 -> bossWaveAmount25;
+                case 26 -> bossWaveAmount26;
+                case 27 -> bossWaveAmount27;
+                case 28 -> bossWaveAmount28;
+                case 29 -> bossWaveAmount29;
+                case 30 -> bossWaveAmount30;
+                case 31 -> bossWaveAmount31;
+                case 32 -> bossWaveAmount32;
                 default -> "";
             };
         }
@@ -6710,6 +7999,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveAmountMin4;
                 case 5 -> bossWaveAmountMin5;
                 case 6 -> bossWaveAmountMin6;
+                case 7 -> bossWaveAmountMin7;
+                case 8 -> bossWaveAmountMin8;
+                case 9 -> bossWaveAmountMin9;
+                case 10 -> bossWaveAmountMin10;
+                case 11 -> bossWaveAmountMin11;
+                case 12 -> bossWaveAmountMin12;
+                case 13 -> bossWaveAmountMin13;
+                case 14 -> bossWaveAmountMin14;
+                case 15 -> bossWaveAmountMin15;
+                case 16 -> bossWaveAmountMin16;
+                case 17 -> bossWaveAmountMin17;
+                case 18 -> bossWaveAmountMin18;
+                case 19 -> bossWaveAmountMin19;
+                case 20 -> bossWaveAmountMin20;
+                case 21 -> bossWaveAmountMin21;
+                case 22 -> bossWaveAmountMin22;
+                case 23 -> bossWaveAmountMin23;
+                case 24 -> bossWaveAmountMin24;
+                case 25 -> bossWaveAmountMin25;
+                case 26 -> bossWaveAmountMin26;
+                case 27 -> bossWaveAmountMin27;
+                case 28 -> bossWaveAmountMin28;
+                case 29 -> bossWaveAmountMin29;
+                case 30 -> bossWaveAmountMin30;
+                case 31 -> bossWaveAmountMin31;
+                case 32 -> bossWaveAmountMin32;
                 default -> "";
             };
         }
@@ -6722,6 +8037,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveAmountMax4;
                 case 5 -> bossWaveAmountMax5;
                 case 6 -> bossWaveAmountMax6;
+                case 7 -> bossWaveAmountMax7;
+                case 8 -> bossWaveAmountMax8;
+                case 9 -> bossWaveAmountMax9;
+                case 10 -> bossWaveAmountMax10;
+                case 11 -> bossWaveAmountMax11;
+                case 12 -> bossWaveAmountMax12;
+                case 13 -> bossWaveAmountMax13;
+                case 14 -> bossWaveAmountMax14;
+                case 15 -> bossWaveAmountMax15;
+                case 16 -> bossWaveAmountMax16;
+                case 17 -> bossWaveAmountMax17;
+                case 18 -> bossWaveAmountMax18;
+                case 19 -> bossWaveAmountMax19;
+                case 20 -> bossWaveAmountMax20;
+                case 21 -> bossWaveAmountMax21;
+                case 22 -> bossWaveAmountMax22;
+                case 23 -> bossWaveAmountMax23;
+                case 24 -> bossWaveAmountMax24;
+                case 25 -> bossWaveAmountMax25;
+                case 26 -> bossWaveAmountMax26;
+                case 27 -> bossWaveAmountMax27;
+                case 28 -> bossWaveAmountMax28;
+                case 29 -> bossWaveAmountMax29;
+                case 30 -> bossWaveAmountMax30;
+                case 31 -> bossWaveAmountMax31;
+                case 32 -> bossWaveAmountMax32;
                 default -> "";
             };
         }
@@ -6891,6 +8232,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveEvery4;
                 case 5 -> bossWaveEvery5;
                 case 6 -> bossWaveEvery6;
+                case 7 -> bossWaveEvery7;
+                case 8 -> bossWaveEvery8;
+                case 9 -> bossWaveEvery9;
+                case 10 -> bossWaveEvery10;
+                case 11 -> bossWaveEvery11;
+                case 12 -> bossWaveEvery12;
+                case 13 -> bossWaveEvery13;
+                case 14 -> bossWaveEvery14;
+                case 15 -> bossWaveEvery15;
+                case 16 -> bossWaveEvery16;
+                case 17 -> bossWaveEvery17;
+                case 18 -> bossWaveEvery18;
+                case 19 -> bossWaveEvery19;
+                case 20 -> bossWaveEvery20;
+                case 21 -> bossWaveEvery21;
+                case 22 -> bossWaveEvery22;
+                case 23 -> bossWaveEvery23;
+                case 24 -> bossWaveEvery24;
+                case 25 -> bossWaveEvery25;
+                case 26 -> bossWaveEvery26;
+                case 27 -> bossWaveEvery27;
+                case 28 -> bossWaveEvery28;
+                case 29 -> bossWaveEvery29;
+                case 30 -> bossWaveEvery30;
+                case 31 -> bossWaveEvery31;
+                case 32 -> bossWaveEvery32;
                 default -> "";
             };
         }
@@ -6903,6 +8270,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveValue4;
                 case 5 -> bossWaveValue5;
                 case 6 -> bossWaveValue6;
+                case 7 -> bossWaveValue7;
+                case 8 -> bossWaveValue8;
+                case 9 -> bossWaveValue9;
+                case 10 -> bossWaveValue10;
+                case 11 -> bossWaveValue11;
+                case 12 -> bossWaveValue12;
+                case 13 -> bossWaveValue13;
+                case 14 -> bossWaveValue14;
+                case 15 -> bossWaveValue15;
+                case 16 -> bossWaveValue16;
+                case 17 -> bossWaveValue17;
+                case 18 -> bossWaveValue18;
+                case 19 -> bossWaveValue19;
+                case 20 -> bossWaveValue20;
+                case 21 -> bossWaveValue21;
+                case 22 -> bossWaveValue22;
+                case 23 -> bossWaveValue23;
+                case 24 -> bossWaveValue24;
+                case 25 -> bossWaveValue25;
+                case 26 -> bossWaveValue26;
+                case 27 -> bossWaveValue27;
+                case 28 -> bossWaveValue28;
+                case 29 -> bossWaveValue29;
+                case 30 -> bossWaveValue30;
+                case 31 -> bossWaveValue31;
+                case 32 -> bossWaveValue32;
                 default -> "";
             };
         }
@@ -6915,6 +8308,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveRepeatCount4;
                 case 5 -> bossWaveRepeatCount5;
                 case 6 -> bossWaveRepeatCount6;
+                case 7 -> bossWaveRepeatCount7;
+                case 8 -> bossWaveRepeatCount8;
+                case 9 -> bossWaveRepeatCount9;
+                case 10 -> bossWaveRepeatCount10;
+                case 11 -> bossWaveRepeatCount11;
+                case 12 -> bossWaveRepeatCount12;
+                case 13 -> bossWaveRepeatCount13;
+                case 14 -> bossWaveRepeatCount14;
+                case 15 -> bossWaveRepeatCount15;
+                case 16 -> bossWaveRepeatCount16;
+                case 17 -> bossWaveRepeatCount17;
+                case 18 -> bossWaveRepeatCount18;
+                case 19 -> bossWaveRepeatCount19;
+                case 20 -> bossWaveRepeatCount20;
+                case 21 -> bossWaveRepeatCount21;
+                case 22 -> bossWaveRepeatCount22;
+                case 23 -> bossWaveRepeatCount23;
+                case 24 -> bossWaveRepeatCount24;
+                case 25 -> bossWaveRepeatCount25;
+                case 26 -> bossWaveRepeatCount26;
+                case 27 -> bossWaveRepeatCount27;
+                case 28 -> bossWaveRepeatCount28;
+                case 29 -> bossWaveRepeatCount29;
+                case 30 -> bossWaveRepeatCount30;
+                case 31 -> bossWaveRepeatCount31;
+                case 32 -> bossWaveRepeatCount32;
                 default -> "";
             };
         }
@@ -6927,6 +8346,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveRepeatSec4;
                 case 5 -> bossWaveRepeatSec5;
                 case 6 -> bossWaveRepeatSec6;
+                case 7 -> bossWaveRepeatSec7;
+                case 8 -> bossWaveRepeatSec8;
+                case 9 -> bossWaveRepeatSec9;
+                case 10 -> bossWaveRepeatSec10;
+                case 11 -> bossWaveRepeatSec11;
+                case 12 -> bossWaveRepeatSec12;
+                case 13 -> bossWaveRepeatSec13;
+                case 14 -> bossWaveRepeatSec14;
+                case 15 -> bossWaveRepeatSec15;
+                case 16 -> bossWaveRepeatSec16;
+                case 17 -> bossWaveRepeatSec17;
+                case 18 -> bossWaveRepeatSec18;
+                case 19 -> bossWaveRepeatSec19;
+                case 20 -> bossWaveRepeatSec20;
+                case 21 -> bossWaveRepeatSec21;
+                case 22 -> bossWaveRepeatSec22;
+                case 23 -> bossWaveRepeatSec23;
+                case 24 -> bossWaveRepeatSec24;
+                case 25 -> bossWaveRepeatSec25;
+                case 26 -> bossWaveRepeatSec26;
+                case 27 -> bossWaveRepeatSec27;
+                case 28 -> bossWaveRepeatSec28;
+                case 29 -> bossWaveRepeatSec29;
+                case 30 -> bossWaveRepeatSec30;
+                case 31 -> bossWaveRepeatSec31;
+                case 32 -> bossWaveRepeatSec32;
                 default -> "";
             };
         }
@@ -6939,6 +8384,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveHp4;
                 case 5 -> bossWaveHp5;
                 case 6 -> bossWaveHp6;
+                case 7 -> bossWaveHp7;
+                case 8 -> bossWaveHp8;
+                case 9 -> bossWaveHp9;
+                case 10 -> bossWaveHp10;
+                case 11 -> bossWaveHp11;
+                case 12 -> bossWaveHp12;
+                case 13 -> bossWaveHp13;
+                case 14 -> bossWaveHp14;
+                case 15 -> bossWaveHp15;
+                case 16 -> bossWaveHp16;
+                case 17 -> bossWaveHp17;
+                case 18 -> bossWaveHp18;
+                case 19 -> bossWaveHp19;
+                case 20 -> bossWaveHp20;
+                case 21 -> bossWaveHp21;
+                case 22 -> bossWaveHp22;
+                case 23 -> bossWaveHp23;
+                case 24 -> bossWaveHp24;
+                case 25 -> bossWaveHp25;
+                case 26 -> bossWaveHp26;
+                case 27 -> bossWaveHp27;
+                case 28 -> bossWaveHp28;
+                case 29 -> bossWaveHp29;
+                case 30 -> bossWaveHp30;
+                case 31 -> bossWaveHp31;
+                case 32 -> bossWaveHp32;
                 default -> "";
             };
         }
@@ -6951,6 +8422,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveDamage4;
                 case 5 -> bossWaveDamage5;
                 case 6 -> bossWaveDamage6;
+                case 7 -> bossWaveDamage7;
+                case 8 -> bossWaveDamage8;
+                case 9 -> bossWaveDamage9;
+                case 10 -> bossWaveDamage10;
+                case 11 -> bossWaveDamage11;
+                case 12 -> bossWaveDamage12;
+                case 13 -> bossWaveDamage13;
+                case 14 -> bossWaveDamage14;
+                case 15 -> bossWaveDamage15;
+                case 16 -> bossWaveDamage16;
+                case 17 -> bossWaveDamage17;
+                case 18 -> bossWaveDamage18;
+                case 19 -> bossWaveDamage19;
+                case 20 -> bossWaveDamage20;
+                case 21 -> bossWaveDamage21;
+                case 22 -> bossWaveDamage22;
+                case 23 -> bossWaveDamage23;
+                case 24 -> bossWaveDamage24;
+                case 25 -> bossWaveDamage25;
+                case 26 -> bossWaveDamage26;
+                case 27 -> bossWaveDamage27;
+                case 28 -> bossWaveDamage28;
+                case 29 -> bossWaveDamage29;
+                case 30 -> bossWaveDamage30;
+                case 31 -> bossWaveDamage31;
+                case 32 -> bossWaveDamage32;
                 default -> "";
             };
         }
@@ -6963,22 +8460,39 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> bossWaveSize4;
                 case 5 -> bossWaveSize5;
                 case 6 -> bossWaveSize6;
+                case 7 -> bossWaveSize7;
+                case 8 -> bossWaveSize8;
+                case 9 -> bossWaveSize9;
+                case 10 -> bossWaveSize10;
+                case 11 -> bossWaveSize11;
+                case 12 -> bossWaveSize12;
+                case 13 -> bossWaveSize13;
+                case 14 -> bossWaveSize14;
+                case 15 -> bossWaveSize15;
+                case 16 -> bossWaveSize16;
+                case 17 -> bossWaveSize17;
+                case 18 -> bossWaveSize18;
+                case 19 -> bossWaveSize19;
+                case 20 -> bossWaveSize20;
+                case 21 -> bossWaveSize21;
+                case 22 -> bossWaveSize22;
+                case 23 -> bossWaveSize23;
+                case 24 -> bossWaveSize24;
+                case 25 -> bossWaveSize25;
+                case 26 -> bossWaveSize26;
+                case 27 -> bossWaveSize27;
+                case 28 -> bossWaveSize28;
+                case 29 -> bossWaveSize29;
+                case 30 -> bossWaveSize30;
+                case 31 -> bossWaveSize31;
+                case 32 -> bossWaveSize32;
                 default -> "";
             };
         }
 
+        /** Only one arena row is edited at a time, so the radius travels in a single field. */
         public String getArenaRadius(int row) {
-            return switch (row) {
-                case 1 -> arenaRadius1;
-                case 2 -> arenaRadius2;
-                case 3 -> arenaRadius3;
-                case 4 -> arenaRadius4;
-                case 5 -> arenaRadius5;
-                case 6 -> arenaRadius6;
-                case 7 -> arenaRadius7;
-                case 8 -> arenaRadius8;
-                default -> "";
-            };
+            return arenaRadius != null ? arenaRadius : "";
         }
     }
 }
