@@ -41,6 +41,10 @@ public final class KillPlayerCommand extends CommandBase {
         World world = store.getExternalData().getWorld();
         String targetName = targetPlayer.getUsername();
         world.execute(() -> {
+            if (store.getComponent(targetRef, DeathComponent.getComponentType()) != null) {
+                context.sendMessage(Message.raw("Joueur " + targetName + " déjà mort."));
+                return;
+            }
             DeathComponent.tryAddComponent(store, targetRef,
                     new Damage(new Damage.CommandSource(context.sender(), "kill"), DamageCause.COMMAND, Float.MAX_VALUE));
             context.sendMessage(Message.raw("Joueur " + targetName + " tué."));
