@@ -46,10 +46,6 @@ public final class DeathRecapCommand extends CommandBase {
             context.sendMessage(Message.raw("Vos recapitulatifs de mort sont desactives. Utilisez /mort logs pour les reactiver."));
             return;
         }
-        if (DeathRecapPage.hasOpenPage(uuid)) {
-            context.sendMessage(Message.raw("Le recapitulatif est deja ouvert."));
-            return;
-        }
         SuiviCombat.Snapshot snapshot = BanqueRecaps.get().peekLast(uuid);
         if (snapshot == null) {
             context.sendMessage(Message.raw("Aucun recapitulatif de mort recent."));
@@ -62,7 +58,9 @@ public final class DeathRecapCommand extends CommandBase {
             context.sendMessage(Message.raw("Impossible d'ouvrir le recapitulatif pour le moment."));
             return;
         }
-        world.execute(() -> DeathRecapPage.openFor(playerRef, snapshot));
+        // Si la page est deja ouverte mais repliee (bouton seul), /mort la deplie plutot que
+        // de se plaindre qu'elle est "deja ouverte" : c'est une demande explicite de la voir.
+        world.execute(() -> DeathRecapPage.openExpandedFor(playerRef, snapshot));
     }
 
     @Nullable

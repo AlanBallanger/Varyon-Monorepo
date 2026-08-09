@@ -82,11 +82,6 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
         openForInternal(playerRef, snapshot, true, OPEN_RETRY_TICKS_MAX);
     }
 
-    public static boolean hasOpenPage(@Nonnull UUID playerUuid) {
-        DeathRecapPage page = OPEN_PAGES.get(playerUuid);
-        return page != null && !page.resolved;
-    }
-
     private static void openForInternal(@Nonnull PlayerRef playerRef,
                                         @Nonnull SuiviCombat.Snapshot snapshot,
                                         boolean expanded,
@@ -374,6 +369,25 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
             // La fermeture a echoue : la page reste affichee et son interface verrouillee.
             releaseInterface();
         }
+    }
+
+    /** Bouton REPLIER : ne ferme pas la page, ne laisse visible que le bouton de reouverture. */
+    private void handleCollapse() {
+        expanded = false;
+        envoyerEtatDeplie();
+    }
+
+    /** Bouton "VOIR LE RECAPITULATIF" : reaffiche le contenu complet. */
+    private void handleReopen() {
+        expanded = true;
+        envoyerEtatDeplie();
+    }
+
+    private void envoyerEtatDeplie() {
+        UICommandBuilder ui = new UICommandBuilder();
+        ui.set("#RecapCollapsedRoot.Visible", !expanded);
+        ui.set("#RecapExpandedRoot.Visible", expanded);
+        envoyerMiseAJour(ui);
     }
 
     @Override
