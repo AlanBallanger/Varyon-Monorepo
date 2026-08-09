@@ -20,6 +20,7 @@ public class ThirstComponent implements Component<EntityStore> {
     private float thirstLevel;
     private float elapsedTime = 0.0f;
     private float lastSentThirst = -1.0f;
+    private float timeSinceHudResync = 0.0f;
     private float idleTime = 0.0f;
 
     public ThirstComponent() {
@@ -52,6 +53,10 @@ public class ThirstComponent implements Component<EntityStore> {
 
     public float getLastSentThirst() { return lastSentThirst; }
     public void setLastSentThirst(float v) { this.lastSentThirst = v; }
+
+    public float getTimeSinceHudResync() { return timeSinceHudResync; }
+    public void addTimeSinceHudResync(float dt) { timeSinceHudResync += dt; }
+    public void resetTimeSinceHudResync() { timeSinceHudResync = 0.0f; }
     
     @Nullable
     @Override

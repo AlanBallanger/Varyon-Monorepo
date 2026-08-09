@@ -32,6 +32,8 @@ import javax.annotation.Nullable;
 
 public class StarveSystem extends EntityTickingSystem<EntityStore> {
 
+    private static final float HUD_RESYNC_INTERVAL = 5.0f;
+
     private StarveSystem() {
         // Empty constructor - we read config dynamically each tick
     }
@@ -72,19 +74,33 @@ public class StarveSystem extends EntityTickingSystem<EntityStore> {
         EntityStatMap entityStatMap = archetypeChunk.getComponent(index, EntityStatMap.getComponentType());
         if (hunger == null || entityStatMap == null) return;
 
+        hunger.addTimeSinceHudResync(dt);
+        boolean forceHudResync = hunger.getTimeSinceHudResync() >= HUD_RESYNC_INTERVAL;
+        if (forceHudResync) hunger.resetTimeSinceHudResync();
+
         hunger.setStaminaSeen(getStaminaValue(entityStatMap));
         hunger.addElapsedTime(dt);
-        if (hunger.getElapsedTime() < EasyHunger.get().getConfig().getStarvationTickRate()) return;
+        if (hunger.getElapsedTime() < EasyHunger.get().getConfig().getStarvationTickRate()) {
+            if (forceHudResync) {
+                PlayerRef pr = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
+                if (pr != null) {
+                    float hungerLevel = hunger.getHungerLevel();
+                    hunger.setLastSentHunger(hungerLevel);
+                    EasyHungerHud.updatePlayerHungerLevel(pr, hungerLevel);
+                }
+            }
+            return;
+        }
         hunger.resetElapsedTime();
 
         float lowestStaminaSeen = hunger.getAndResetLowestStaminaSeen();
-        
+
         // Check if player is in a protected zone
         PlayerRef playerRef = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
         if (playerRef != null && HungerProtectionUtils.isSafe(playerRef)) {
             // Skip hunger drain in safe zones, but still update HUD
             float hungerLevel = hunger.getHungerLevel();
-            if (Math.abs(hungerLevel - hunger.getLastSentHunger()) >= 0.01f) {
+            if (forceHudResync || Math.abs(hungerLevel - hunger.getLastSentHunger()) >= 0.01f) {
                 hunger.setLastSentHunger(hungerLevel);
                 EasyHungerHud.updatePlayerHungerLevel(playerRef, hungerLevel);
             }
@@ -169,9 +185,9 @@ public class StarveSystem extends EntityTickingSystem<EntityStore> {
         }
 
         if (playerRef == null) return;
-        
+
         // Optimization: Only update HUD if value changed
-        if (Math.abs(hungerLevel - hunger.getLastSentHunger()) < 0.01f) return;
+        if (!forceHudResync && Math.abs(hungerLevel - hunger.getLastSentHunger()) < 0.01f) return;
         hunger.setLastSentHunger(hungerLevel);
         
         EasyHungerHud.updatePlayerHungerLevel(playerRef, hungerLevel);

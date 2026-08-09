@@ -12,11 +12,12 @@ import com.varyon.easyhunger.config.EasyHungerConfig;
 import com.varyon.easyhunger.config.HudPosition;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import java.util.WeakHashMap;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class EasyHungerHud extends CustomUIHud {
-    static private final WeakHashMap<PlayerRef, EasyHungerHud> hudMap = new WeakHashMap<>();
+    static private final ConcurrentHashMap<UUID, EasyHungerHud> hudMap = new ConcurrentHashMap<>();
     static public final String hudIdentifier = "com.varyon.easyhunger.hud.hunger";
     private GameMode gameMode;
     private float hungerLevel;
@@ -27,12 +28,12 @@ public class EasyHungerHud extends CustomUIHud {
         super(playerRef, hudIdentifier);
         this.gameMode = gameMode;
         this.hungerLevel = hungerLevel;
-        hudMap.put(playerRef, this);
+        hudMap.put(playerRef.getUuid(), this);
     }
 
     @Override
     protected void onRemove() {
-        hudMap.remove(getPlayerRef());
+        hudMap.remove(getPlayerRef().getUuid());
     }
 
     @Override
@@ -124,7 +125,7 @@ public class EasyHungerHud extends CustomUIHud {
     }
 
     static public void updatePlayerHungerLevel(@NonNullDecl PlayerRef playerRef, float hungerLevel) {
-        EasyHungerHud hud = hudMap.get(playerRef);
+        EasyHungerHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) {
             EasyCombinedHud.updatePlayerHungerLevel(playerRef, hungerLevel);
             return;
@@ -135,7 +136,7 @@ public class EasyHungerHud extends CustomUIHud {
     }
     
     static public void updatePlayerHungerPreview(@NonNullDecl PlayerRef playerRef, float hungerRestoration) {
-        EasyHungerHud hud = hudMap.get(playerRef);
+        EasyHungerHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) {
             EasyCombinedHud.updatePlayerHungerPreview(playerRef, hungerRestoration);
             return;
@@ -146,7 +147,7 @@ public class EasyHungerHud extends CustomUIHud {
     }
     
     static public void updatePlayerGameMode(@NonNullDecl PlayerRef playerRef, GameMode gameMode) {
-        EasyHungerHud hud = hudMap.get(playerRef);
+        EasyHungerHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) {
             EasyCombinedHud.updatePlayerGameMode(playerRef, gameMode);
             return;
@@ -157,7 +158,7 @@ public class EasyHungerHud extends CustomUIHud {
     }
 
     static public void updatePlayerHudVisibility(@NonNullDecl PlayerRef playerRef, boolean visible) {
-        EasyHungerHud hud = hudMap.get(playerRef);
+        EasyHungerHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) {
             EasyCombinedHud.updatePlayerHudVisibility(playerRef, visible);
             return;

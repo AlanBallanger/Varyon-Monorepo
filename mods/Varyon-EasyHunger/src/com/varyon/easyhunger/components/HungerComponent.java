@@ -22,7 +22,8 @@ public class HungerComponent implements Component<EntityStore> {
     private float hungerLevel;
     // Optimization: Track last sent level to avoid spamming HUD updates
     private float lastSentHunger = -1.0f;
-    
+    private float timeSinceHudResync = 0.0f;
+
     // Idle system tracking
     private float idleTime = 0.0f;
 
@@ -69,6 +70,10 @@ public class HungerComponent implements Component<EntityStore> {
 
     public float getLastSentHunger() { return lastSentHunger; }
     public void setLastSentHunger(float v) { this.lastSentHunger = v; }
+
+    public float getTimeSinceHudResync() { return timeSinceHudResync; }
+    public void addTimeSinceHudResync(float dt) { timeSinceHudResync += dt; }
+    public void resetTimeSinceHudResync() { timeSinceHudResync = 0.0f; }
 
     // WellFed system elapsed time tracking
     private float wellFedElapsedTime = 0.0f;

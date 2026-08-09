@@ -12,10 +12,11 @@ import com.varyon.easyhunger.config.EasyHungerConfig;
 import com.varyon.easyhunger.config.HudPosition;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import java.util.WeakHashMap;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EasyWaterHud extends CustomUIHud {
-    static private final WeakHashMap<PlayerRef, EasyWaterHud> hudMap = new WeakHashMap<>();
+    static private final ConcurrentHashMap<UUID, EasyWaterHud> hudMap = new ConcurrentHashMap<>();
     static public final String hudIdentifier = "com.varyon.easyhunger.hud.water";
     private GameMode gameMode;
     private float thirstLevel;
@@ -26,12 +27,12 @@ public class EasyWaterHud extends CustomUIHud {
         super(playerRef, hudIdentifier);
         this.gameMode = gameMode;
         this.thirstLevel = thirstLevel;
-        hudMap.put(playerRef, this);
+        hudMap.put(playerRef.getUuid(), this);
     }
 
     @Override
     protected void onRemove() {
-        hudMap.remove(getPlayerRef());
+        hudMap.remove(getPlayerRef().getUuid());
     }
 
     @Override
@@ -125,7 +126,7 @@ public class EasyWaterHud extends CustomUIHud {
     }
 
     static public void updatePlayerThirstLevel(@NonNullDecl PlayerRef playerRef, float thirstLevel) {
-        EasyWaterHud hud = hudMap.get(playerRef);
+        EasyWaterHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) {
             EasyCombinedHud.updatePlayerThirstLevel(playerRef, thirstLevel);
             return;
@@ -136,7 +137,7 @@ public class EasyWaterHud extends CustomUIHud {
     }
     
     static public void updatePlayerThirstPreview(@NonNullDecl PlayerRef playerRef, float thirstRestoration) {
-        EasyWaterHud hud = hudMap.get(playerRef);
+        EasyWaterHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) {
             EasyCombinedHud.updatePlayerThirstPreview(playerRef, thirstRestoration);
             return;
@@ -147,7 +148,7 @@ public class EasyWaterHud extends CustomUIHud {
     }
     
     static public void updatePlayerGameMode(@NonNullDecl PlayerRef playerRef, GameMode gameMode) {
-        EasyWaterHud hud = hudMap.get(playerRef);
+        EasyWaterHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) {
             // Combined HUD handles both game modes
             return;
@@ -158,7 +159,7 @@ public class EasyWaterHud extends CustomUIHud {
     }
 
     static public void updatePlayerHudVisibility(@NonNullDecl PlayerRef playerRef, boolean visible) {
-        EasyWaterHud hud = hudMap.get(playerRef);
+        EasyWaterHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) {
             // Combined HUD handles visibility for both
             return;

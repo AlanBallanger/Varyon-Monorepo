@@ -11,7 +11,8 @@ import com.varyon.easyhunger.config.EasyHungerConfig;
 import com.varyon.easyhunger.config.HudPosition;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import java.util.WeakHashMap;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Combined HUD for vanilla Hytale compatibility.
@@ -20,7 +21,7 @@ import java.util.WeakHashMap;
  */
 public class EasyCombinedHud extends CustomUIHud {
     static public final String hudIdentifier = "com.varyon.easyhunger.hud.combined";
-    static private final WeakHashMap<PlayerRef, EasyCombinedHud> hudMap = new WeakHashMap<>();
+    static private final ConcurrentHashMap<UUID, EasyCombinedHud> hudMap = new ConcurrentHashMap<>();
 
     private GameMode gameMode;
     private float hungerLevel;
@@ -37,12 +38,12 @@ public class EasyCombinedHud extends CustomUIHud {
         this.hungerLevel = hungerLevel;
         this.thirstLevel = thirstLevel;
         this.thirstEnabled = thirstEnabled;
-        hudMap.put(playerRef, this);
+        hudMap.put(playerRef.getUuid(), this);
     }
 
     @Override
     protected void onRemove() {
-        hudMap.remove(getPlayerRef());
+        hudMap.remove(getPlayerRef().getUuid());
     }
 
     @Override
@@ -217,7 +218,7 @@ public class EasyCombinedHud extends CustomUIHud {
     // === Static Update Methods (called externally) ===
 
     static public void updatePlayerHungerLevel(@NonNullDecl PlayerRef playerRef, float hungerLevel) {
-        EasyCombinedHud hud = hudMap.get(playerRef);
+        EasyCombinedHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) return;
         UICommandBuilder uiCommandBuilder = new UICommandBuilder();
         hud.updateHungerLevel(uiCommandBuilder, hungerLevel);
@@ -225,7 +226,7 @@ public class EasyCombinedHud extends CustomUIHud {
     }
 
     static public void updatePlayerHungerPreview(@NonNullDecl PlayerRef playerRef, float hungerRestoration) {
-        EasyCombinedHud hud = hudMap.get(playerRef);
+        EasyCombinedHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) return;
         UICommandBuilder uiCommandBuilder = new UICommandBuilder();
         hud.updateHungerPreview(uiCommandBuilder, hungerRestoration);
@@ -233,7 +234,7 @@ public class EasyCombinedHud extends CustomUIHud {
     }
 
     static public void updatePlayerThirstLevel(@NonNullDecl PlayerRef playerRef, float thirstLevel) {
-        EasyCombinedHud hud = hudMap.get(playerRef);
+        EasyCombinedHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) return;
         UICommandBuilder uiCommandBuilder = new UICommandBuilder();
         hud.updateThirstLevel(uiCommandBuilder, thirstLevel);
@@ -241,7 +242,7 @@ public class EasyCombinedHud extends CustomUIHud {
     }
 
     static public void updatePlayerThirstPreview(@NonNullDecl PlayerRef playerRef, float thirstRestoration) {
-        EasyCombinedHud hud = hudMap.get(playerRef);
+        EasyCombinedHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) return;
         UICommandBuilder uiCommandBuilder = new UICommandBuilder();
         hud.updateThirstPreview(uiCommandBuilder, thirstRestoration);
@@ -249,7 +250,7 @@ public class EasyCombinedHud extends CustomUIHud {
     }
 
     static public void updatePlayerGameMode(@NonNullDecl PlayerRef playerRef, GameMode gameMode) {
-        EasyCombinedHud hud = hudMap.get(playerRef);
+        EasyCombinedHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) return;
         UICommandBuilder uiCommandBuilder = new UICommandBuilder();
         hud.updateHungerGameMode(uiCommandBuilder, gameMode);
@@ -260,7 +261,7 @@ public class EasyCombinedHud extends CustomUIHud {
     }
 
     static public void updatePlayerHudVisibility(@NonNullDecl PlayerRef playerRef, boolean visible) {
-        EasyCombinedHud hud = hudMap.get(playerRef);
+        EasyCombinedHud hud = hudMap.get(playerRef.getUuid());
         if (hud == null) return;
         UICommandBuilder uiCommandBuilder = new UICommandBuilder();
         hud.updateVisibility(uiCommandBuilder, visible);

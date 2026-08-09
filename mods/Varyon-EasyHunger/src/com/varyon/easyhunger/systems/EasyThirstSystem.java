@@ -29,6 +29,8 @@ import javax.annotation.Nullable;
 
 public class EasyThirstSystem extends EntityTickingSystem<EntityStore> {
 
+    private static final float HUD_RESYNC_INTERVAL = 5.0f;
+
     private EasyThirstSystem() {
         // Empty constructor - we read config dynamically each tick
     }
@@ -70,11 +72,25 @@ public class EasyThirstSystem extends EntityTickingSystem<EntityStore> {
         ThirstComponent thirst = archetypeChunk.getComponent(index, ThirstComponent.getComponentType());
         if (thirst == null) return;
 
+        thirst.addTimeSinceHudResync(dt);
+        boolean forceHudResync = thirst.getTimeSinceHudResync() >= HUD_RESYNC_INTERVAL;
+        if (forceHudResync) thirst.resetTimeSinceHudResync();
+
         thirst.addElapsedTime(dt);
-        if (thirst.getElapsedTime() < EasyHunger.get().getConfig().getStarvationTickRate()) return;
+        if (thirst.getElapsedTime() < EasyHunger.get().getConfig().getStarvationTickRate()) {
+            if (forceHudResync) {
+                PlayerRef pr = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
+                if (pr != null) {
+                    float thirstLevel = thirst.getThirstLevel();
+                    thirst.setLastSentThirst(thirstLevel);
+                    EasyWaterHud.updatePlayerThirstLevel(pr, thirstLevel);
+                }
+            }
+            return;
+        }
         thirst.resetElapsedTime();
-        
-        
+
+
         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
 
         float finalDecay = EasyHunger.get().getConfig().getThirstDecayRate();
@@ -85,13 +101,13 @@ public class EasyThirstSystem extends EntityTickingSystem<EntityStore> {
                  finalDecay *= EasyHunger.get().getConfig().getSprintThirstMultiplier();
              }
         }
-        
+
         // Check if player is in a protected zone
         PlayerRef playerRef = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
         if (playerRef != null && HungerProtectionUtils.isSafe(playerRef)) {
             // Skip thirst drain in safe zones, but still update HUD
             float thirstLevel = thirst.getThirstLevel();
-            if (Math.abs(thirstLevel - thirst.getLastSentThirst()) >= 0.01f) {
+            if (forceHudResync || Math.abs(thirstLevel - thirst.getLastSentThirst()) >= 0.01f) {
                 thirst.setLastSentThirst(thirstLevel);
                 EasyWaterHud.updatePlayerThirstLevel(playerRef, thirstLevel);
             }
@@ -160,10 +176,9 @@ public class EasyThirstSystem extends EntityTickingSystem<EntityStore> {
         }
 
         if (playerRef == null) return;
-        
-        
+
         // Optimization: Only update HUD if value changed
-        if (Math.abs(thirstLevel - thirst.getLastSentThirst()) < 0.01f) return;
+        if (!forceHudResync && Math.abs(thirstLevel - thirst.getLastSentThirst()) < 0.01f) return;
         thirst.setLastSentThirst(thirstLevel);
 
         EasyWaterHud.updatePlayerThirstLevel(playerRef, thirstLevel);
