@@ -1,0 +1,486 @@
+// =============================================================================
+// Varyon-DeathRecap - page de recapitulatif de mort
+//
+// Volontairement autonome : aucune texture externe n'est referencee, uniquement
+// des aplats de couleur et des elements de base (Group / Label / Button /
+// CheckBox). La page reste ainsi valide meme si aucun autre pack d'assets
+// n'est charge sur le serveur.
+//
+// Les identifiants #RecapXxx sont pilotes depuis DeathRecapPage.java.
+// =============================================================================
+
+$C = "../../Common.ui";
+
+
+@PanelBg   = #0d1a29;
+@CardBg    = #0b141f;
+@Accent    = #ffe2a6;
+@NameColor = #f0c040;
+@MutedText = #9fb6d3;
+
+@RecapToggleStyle = CheckBoxStyle(
+    Unchecked: (
+        DefaultBackground: (Color: #0b1520),
+        HoveredBackground: (Color: #1a2a42),
+        PressedBackground: (Color: #243652)
+    ),
+    Checked: (
+        DefaultBackground: (Color: #f0c040),
+        HoveredBackground: (Color: #f6d98a),
+        PressedBackground: (Color: #dfbe69)
+    )
+);
+
+@RecapToggleBox = CheckBox {
+    Anchor: (Width: 22, Height: 22);
+    Background: (Color: #2a1f08);
+    Padding: (Full: 3);
+    Style: @RecapToggleStyle;
+};
+
+Group {
+    // ----- Etat replie : simple bouton pour rouvrir le recapitulatif -----
+    Group #RecapCollapsedRoot {
+        LayoutMode: Top;
+        Anchor: (Top: 232, Left: 0, Right: 0, Height: 40);
+
+        Group { LayoutMode: Middle;
+            TextButton #RecapReopenButton {
+                Text: "VOIR LE RECAPITULATIF";
+                Anchor: (Height: 36, Width: 260);
+                Padding: (Horizontal: 6);
+                Style: TextButtonStyle(
+                    Default: (Background: (Color: #2a1f08(0.85)), LabelStyle: (FontSize: 13, TextColor: #ffe2a6, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Hovered: (Background: (Color: #3d2e0c(0.9)), LabelStyle: (FontSize: 13, TextColor: #fff3d0, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Pressed: (Background: (Color: #1d1505(0.9)), LabelStyle: (FontSize: 13, TextColor: #d9c08a, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Sounds: $C.@ButtonSounds
+                );
+            }
+        }
+    }
+
+    // ----- Etat deplie : recapitulatif complet -----
+    $C.@PageOverlay #RecapExpandedRoot {
+    Group {
+        LayoutMode: Middle;
+
+        Group {
+            Anchor: (Width: 880, Height: 736);
+            LayoutMode: Top;
+
+            // =================================================================
+            // PANNEAU PRINCIPAL : totaux + classement des menaces
+            // =================================================================
+            Group {
+                Anchor: (Height: 488);
+                LayoutMode: Top;
+                Background: #8b95a8(0.7);
+                Padding: (Full: 2);
+
+                Group {
+                    FlexWeight: 1;
+                    LayoutMode: Top;
+                    Background: @PanelBg;
+
+                    // ----- Bandeau de titre -----
+                    Group {
+                        Anchor: (Height: 40);
+                        Background: #132437;
+                        LayoutMode: Left;
+                        Padding: (Horizontal: 12);
+
+                        Group { FlexWeight: 1; Anchor: (Top: 19, Bottom: 19); Background: @Accent; }
+                        Group { Anchor: (Width: 14); }
+                        Label #RecapTitle {
+                            Anchor: (Height: 24);
+                            Text: "VOUS ETES MORT";
+                            Style: (FontSize: 17, TextColor: #ffe2a6, RenderBold: true, LetterSpacing: 3, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+                        Group { Anchor: (Width: 14); }
+                        Group { FlexWeight: 1; Anchor: (Top: 19, Bottom: 19); Background: @Accent; }
+                    }
+
+                    Group {
+                        LayoutMode: Top;
+                        FlexWeight: 1;
+                        Padding: (Horizontal: 16, Vertical: 12);
+
+                        // ----- Trois totaux -----
+                        Group {
+                            LayoutMode: Left;
+                            Anchor: (Height: 48);
+
+                            Group {
+                                FlexWeight: 1;
+                                LayoutMode: Top;
+                                Background: #0b141f(0.75);
+                                Padding: (Horizontal: 10, Vertical: 6);
+                                Label #RecapDurationLabel { Text: "DUREE"; Style: (FontSize: 10, TextColor: #9fb6d3, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                Label #RecapCombatDuration { Text: "-"; Style: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); FlexWeight: 1; }
+                            }
+                            Group { Anchor: (Width: 8); }
+                            Group {
+                                FlexWeight: 1;
+                                LayoutMode: Top;
+                                Background: #0b141f(0.75);
+                                Padding: (Horizontal: 10, Vertical: 6);
+                                Label #RecapDamageTakenLabel { Text: "DEGATS SUBIS"; Style: (FontSize: 10, TextColor: #ff9a9a, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                Label #RecapDamageTaken { Text: "-"; Style: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); FlexWeight: 1; }
+                            }
+                            Group { Anchor: (Width: 8); }
+                            Group {
+                                FlexWeight: 1;
+                                LayoutMode: Top;
+                                Background: #0b141f(0.75);
+                                Padding: (Horizontal: 10, Vertical: 6);
+                                Label #RecapMitigatedLabel { Text: "DEGATS MITIGES"; Style: (FontSize: 10, TextColor: #9fd3ff, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                Label #RecapDamageMitigated { Text: "-"; Style: (FontSize: 15, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); FlexWeight: 1; }
+                            }
+                        }
+
+                        Group { Anchor: (Height: 12); }
+
+                        // ----- Rangee 1 : menaces #1 a #5 -----
+                        Group {
+                            LayoutMode: Left;
+                            Anchor: (Height: 150);
+
+                            Button #RecapCell0 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell0Rank { Text: "#1"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell0Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell0Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell0Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell0Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                            Group { Anchor: (Width: 6); }
+
+                            Button #RecapCell1 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell1Rank { Text: "#2"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell1Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell1Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell1Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell1Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                            Group { Anchor: (Width: 6); }
+
+                            Button #RecapCell2 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell2Rank { Text: "#3"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell2Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell2Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell2Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell2Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                            Group { Anchor: (Width: 6); }
+
+                            Button #RecapCell3 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell3Rank { Text: "#4"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell3Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell3Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell3Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell3Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                            Group { Anchor: (Width: 6); }
+
+                            Button #RecapCell4 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell4Rank { Text: "#5"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell4Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell4Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell4Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell4Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                        }
+
+                        Group { Anchor: (Height: 6); }
+
+                        // ----- Rangee 2 : menaces #6 a #10, masquee si inutile -----
+                        Group #RecapRow2 {
+                            LayoutMode: Left;
+                            Anchor: (Height: 150);
+                            Visible: false;
+
+                            Button #RecapCell5 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell5Rank { Text: "#6"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell5Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell5Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell5Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell5Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                            Group { Anchor: (Width: 6); }
+
+                            Button #RecapCell6 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell6Rank { Text: "#7"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell6Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell6Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell6Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell6Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                            Group { Anchor: (Width: 6); }
+
+                            Button #RecapCell7 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell7Rank { Text: "#8"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell7Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell7Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell7Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell7Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                            Group { Anchor: (Width: 6); }
+
+                            Button #RecapCell8 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell8Rank { Text: "#9"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell8Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell8Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell8Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell8Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                            Group { Anchor: (Width: 6); }
+
+                            Button #RecapCell9 {
+                                Anchor: (Width: 162, Height: 146); Padding: (Full: 4); Visible: false;
+                                Style: ButtonStyle(Default: (Background: (Color: #2b3a4d)), Hovered: (Background: (Color: #3d5068)), Pressed: (Background: (Color: #1e2a38)), Sounds: $C.@ButtonSounds);
+                                Group { Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); Background: #0b141f(0.94); LayoutMode: Top; Padding: (Horizontal: 6, Vertical: 8); HitTestVisible: false;
+                                    Label #RecapCell9Rank { Text: "#10"; Style: (FontSize: 20, TextColor: #c0cee5, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); Anchor: (Height: 24); }
+                                    Label #RecapCell9Level { Text: ""; Style: (FontSize: 10, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 12); }
+                                    Label #RecapCell9Name { Text: "-"; Style: (FontSize: 11, TextColor: #f0c040, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 26); }
+                                    Group { FlexWeight: 1; }
+                                    Label #RecapCell9Damage { Text: "0 degats"; Style: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center); Anchor: (Height: 16); }
+                                    Group { Anchor: (Height: 4); }
+                                    Group { Anchor: (Height: 1, Left: 8, Right: 8); Background: #1d2836; }
+                                    Group { Anchor: (Height: 4); }
+                                    Label #RecapCell9Kind { Text: ""; Style: (FontSize: 12, TextColor: #9fd3ff, RenderBold: true, HorizontalAlignment: Center, Wrap: true); Anchor: (Height: 22); }
+                                }
+                            }
+                        }
+
+                        Label #RecapNoThreats {
+                            Text: "Aucune menace identifiee.";
+                            Anchor: (Height: 20);
+                            Visible: false;
+                            Style: (FontSize: 12, TextColor: #9fb6d3, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+
+                        Group { FlexWeight: 1; }
+                    }
+                }
+            }
+
+            Group { Anchor: (Height: 8); }
+
+            // =================================================================
+            // PANNEAU DE DETAIL : alimente au clic sur une case
+            // =================================================================
+            Group {
+                Anchor: (Height: 188);
+                LayoutMode: Top;
+                Background: #8b95a8(0.7);
+                Padding: (Full: 2);
+
+                Group {
+                    FlexWeight: 1;
+                    LayoutMode: Top;
+                    Background: @PanelBg;
+
+                    Group {
+                        Anchor: (Height: 34);
+                        Background: #132437;
+                        LayoutMode: Left;
+                        Padding: (Horizontal: 12);
+
+                        Group { FlexWeight: 1; Anchor: (Top: 16, Bottom: 16); Background: @Accent; }
+                        Group { Anchor: (Width: 12); }
+                        Label #RecapThreatDetailTitle {
+                            Anchor: (Height: 22);
+                            Text: "DETAIL DE LA MENACE";
+                            Style: (FontSize: 14, TextColor: #ffe2a6, RenderBold: true, LetterSpacing: 3, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+                        Group { Anchor: (Width: 12); }
+                        Group { FlexWeight: 1; Anchor: (Top: 16, Bottom: 16); Background: @Accent; }
+                    }
+
+                    Group {
+                        LayoutMode: Top;
+                        FlexWeight: 1;
+                        Padding: (Horizontal: 16, Vertical: 10);
+
+                        Label #RecapDetailSubtitle {
+                            Text: "-";
+                            Anchor: (Height: 18);
+                            Style: (FontSize: 13, TextColor: #f0c040, RenderBold: true, VerticalAlignment: Center);
+                        }
+
+                        Group { Anchor: (Height: 6); }
+
+                        // ----- Quatre statistiques -----
+                        Group {
+                            LayoutMode: Left;
+                            Anchor: (Height: 44);
+
+                            Group {
+                                FlexWeight: 1; LayoutMode: Top; Background: #0b141f(0.75); Padding: (Horizontal: 8, Vertical: 5);
+                                Label #RecapDetailDmgLabel { Text: "DEGATS INFLIGES"; Style: (FontSize: 9, TextColor: #ff9a9a, RenderBold: true, LetterSpacing: 1, HorizontalAlignment: Center); Anchor: (Height: 11); }
+                                Label #RecapDetailDmg { Text: "-"; Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); FlexWeight: 1; }
+                            }
+                            Group { Anchor: (Width: 6); }
+                            Group {
+                                FlexWeight: 1; LayoutMode: Top; Background: #0b141f(0.75); Padding: (Horizontal: 8, Vertical: 5);
+                                Label #RecapDetailMitigatedLabel { Text: "VOUS AVEZ MITIGE"; Style: (FontSize: 9, TextColor: #9fd3ff, RenderBold: true, LetterSpacing: 1, HorizontalAlignment: Center); Anchor: (Height: 11); }
+                                Label #RecapDetailMitigated { Text: "-"; Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); FlexWeight: 1; }
+                            }
+                            Group { Anchor: (Width: 6); }
+                            Group {
+                                FlexWeight: 1; LayoutMode: Top; Background: #0b141f(0.75); Padding: (Horizontal: 8, Vertical: 5);
+                                Label #RecapDetailHitsLabel { Text: "COUPS"; Style: (FontSize: 9, TextColor: #ffd070, RenderBold: true, LetterSpacing: 1, HorizontalAlignment: Center); Anchor: (Height: 11); }
+                                Label #RecapDetailHits { Text: "-"; Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); FlexWeight: 1; }
+                            }
+                            Group { Anchor: (Width: 6); }
+                            Group {
+                                FlexWeight: 1; LayoutMode: Top; Background: #0b141f(0.75); Padding: (Horizontal: 8, Vertical: 5);
+                                Label #RecapDetailAvgLabel { Text: "MOY. / COUP"; Style: (FontSize: 9, TextColor: #c0cee5, RenderBold: true, LetterSpacing: 1, HorizontalAlignment: Center); Anchor: (Height: 11); }
+                                Label #RecapDetailAvg { Text: "-"; Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center); FlexWeight: 1; }
+                            }
+                        }
+
+                        Group { Anchor: (Height: 8); }
+
+                        // ----- Repartition par type de degats -----
+                        Label #RecapBreakdownTitle {
+                            Text: "REPARTITION DES DEGATS";
+                            Anchor: (Height: 14);
+                            Style: (FontSize: 10, TextColor: #ffd070, RenderBold: true, LetterSpacing: 2, VerticalAlignment: Center);
+                        }
+
+                        Group { Anchor: (Height: 4); }
+
+                        Group #RecapBreakdown0 { Anchor: (Height: 14); Visible: false;
+                            Label #RecapBreakdown0Text { Text: ""; Style: (FontSize: 11, TextColor: #ffffff, VerticalAlignment: Center); Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); }
+                        }
+                        Group #RecapBreakdown1 { Anchor: (Height: 14); Visible: false;
+                            Label #RecapBreakdown1Text { Text: ""; Style: (FontSize: 11, TextColor: #ffffff, VerticalAlignment: Center); Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); }
+                        }
+                        Group #RecapBreakdown2 { Anchor: (Height: 14); Visible: false;
+                            Label #RecapBreakdown2Text { Text: ""; Style: (FontSize: 11, TextColor: #ffffff, VerticalAlignment: Center); Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); }
+                        }
+                        Group #RecapBreakdown3 { Anchor: (Height: 14); Visible: false;
+                            Label #RecapBreakdown3Text { Text: ""; Style: (FontSize: 11, TextColor: #ffffff, VerticalAlignment: Center); Anchor: (Top: 0, Bottom: 0, Left: 0, Right: 0); }
+                        }
+
+                        Group { FlexWeight: 1; }
+
+                        // ----- Astuce /mort + bascule des recaps -----
+                        Group {
+                            LayoutMode: Left;
+                            Anchor: (Height: 24);
+
+                            Label #RecapHint {
+                                Text: "Astuce : tapez /mort pour rouvrir ce recapitulatif.";
+                                Anchor: (Height: 24);
+                                Style: (FontSize: 10, TextColor: #8fa6c3, VerticalAlignment: Center);
+                            }
+                            Group { FlexWeight: 1; }
+                            @RecapToggleBox #RecapToggle { Value: false; }
+                            Group { Anchor: (Width: 6); }
+                            Label #RecapToggleLabel {
+                                Text: "Desactiver les recaps de mort";
+                                Anchor: (Height: 24);
+                                Style: (FontSize: 10, TextColor: #c0cee5, RenderBold: true, VerticalAlignment: Center);
+                            }
+                        }
+                    }
+                }
+            }
+
+            Group { Anchor: (Height: 8); }
+
+            Group {
+                LayoutMode: Left;
+                Anchor: (Height: 44);
+
+                Group { FlexWeight: 1; }
+                TextButton #RecapCloseButton {
+                    Text: "REPLIER";
+                    Anchor: (Height: 40, Width: 240);
+                    Padding: (Horizontal: 6);
+                    Style: TextButtonStyle(
+                        Default: (Background: (Color: #2a1f08), LabelStyle: (FontSize: 15, TextColor: #ffe2a6, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                        Hovered: (Background: (Color: #3d2e0c), LabelStyle: (FontSize: 15, TextColor: #fff3d0, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                        Pressed: (Background: (Color: #1d1505), LabelStyle: (FontSize: 15, TextColor: #d9c08a, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                        Sounds: $C.@ButtonSounds
+                    );
+                }
+                Group { FlexWeight: 1; }
+            }
+        }
+    }
+    }
+}

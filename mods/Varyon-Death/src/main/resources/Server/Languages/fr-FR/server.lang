@@ -1,0 +1,8 @@
+items.Varyon_Potion_Resurrection_Mineure.name = Potion de résurrection mineure
+items.Varyon_Potion_Resurrection_Mineure.description = Requise dans l'inventaire pour relever un allié à terre. Fixe la durée du relevement à 12 secondes.
+items.Varyon_Potion_Resurrection_Classique.name = Potion de résurrection
+items.Varyon_Potion_Resurrection_Classique.description = Requise dans l'inventaire pour relever un allié à terre. Fixe la durée du relevement à 9 secondes.
+items.Varyon_Potion_Resurrection_Majeure.name = Potion de résurrection majeure
+items.Varyon_Potion_Resurrection_Majeure.description = Requise dans l'inventaire pour relever un allié à terre. Fixe la durée du relevement à 6 secondes.
+items.Varyon_Potion_Resurrection_Mythique.name = Potion de résurrection mythique
+items.Varyon_Potion_Resurrection_Mythique.description = Requise dans l'inventaire pour relever un allié à terre. Fixe la durée du relevement à 1 seconde.

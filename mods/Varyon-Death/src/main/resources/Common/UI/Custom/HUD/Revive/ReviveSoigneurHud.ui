@@ -1,0 +1,59 @@
+// =============================================================================
+// Varyon-Revive - HUD du soigneur
+//
+// Affiche la progression du relevement en cours, le nom de l'allie soigne et,
+// le cas echeant, le multiplicateur apporte par les renforts.
+//
+// Volontairement autonome : aucune texture externe.
+// Les identifiants #ReviveSoigneur... sont pilotes depuis HudSoigneur.java.
+// =============================================================================
+
+Group {
+  LayoutMode: Center;
+
+  Group #ReviveSoigneurBox {
+    Anchor: (Bottom: 120, Width: 340, Height: 74);
+    Background: #000000(0.62);
+    LayoutMode: Top;
+    Padding: (Horizontal: 12, Vertical: 8);
+
+    // ----- Titre : « Relevement de <joueur> » + multiplicateur -----
+    Group {
+      Anchor: (Height: 18);
+      LayoutMode: Left;
+
+      Label #ReviveSoigneurTitre {
+        FlexWeight: 1;
+        Text: "Relèvement";
+        Style: (FontSize: 13, TextColor: #ffe2a6, RenderBold: true, VerticalAlignment: Center);
+      }
+      Label #ReviveSoigneurMultiplicateur {
+        Anchor: (Width: 40);
+        Text: "";
+        Style: (FontSize: 13, TextColor: #7ee081, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+      }
+    }
+
+    Group { Anchor: (Height: 6); }
+
+    // ----- Barre de progression -----
+    Group {
+      Anchor: (Left: 0, Right: 0, Height: 18);
+      Background: #1b2836;
+      ProgressBar #ReviveSoigneurBarreFill {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        Value: 0.0;
+        BarTexturePath: "Common/ProgressBarFill.png";
+      }
+    }
+
+    Group { FlexWeight: 1; }
+
+    // ----- Rappel des conditions -----
+    Label #ReviveSoigneurIndice {
+      Anchor: (Height: 14);
+      Text: "Restez accroupi et immobile";
+      Style: (FontSize: 10, TextColor: #8fa6c3, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+  }
+}

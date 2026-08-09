@@ -1,0 +1,40 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Potion_Resurrection_Classique.name",
+    "Description": "server.items.Varyon_Potion_Resurrection_Classique.description"
+  },
+  "Quality": "Epic",
+  "Categories": [
+    "Items.Potions"
+  ],
+  "Icon": "Icons/ItemsGenerated/Potion_Purify.png",
+  "IconProperties": {
+    "Scale": 0.9,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -9
+    ]
+  },
+  "Model": "Items/Consumables/Potions/Potion.blockymodel",
+  "Texture": "Items/Consumables/Potions/Potion_Textures/Iridescent.png",
+  "PlayerAnimationsId": "Item",
+  "MaxStack": 10,
+  "Tags": {
+    "Type": [
+      "Potion"
+    ],
+    "Varyon": [
+      "PotionResurrection",
+      "PotionResurrectionClassique"
+    ]
+  },
+  "Light": {
+    "Color": "#414"
+  },
+  "ItemSoundSetId": "ISS_Items_Gems"
+}

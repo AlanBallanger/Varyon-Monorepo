@@ -1,0 +1,85 @@
+// =============================================================================
+// Varyon-Revive - HUD du joueur a terre
+//
+// Affiche le compte a rebours avant la mort, l'etat du relevement en cours et
+// la progression de l'abandon (touche Accroupi maintenue).
+//
+// Volontairement autonome : uniquement des aplats de couleur et des elements de
+// base, aucune texture externe. Le HUD reste valide meme si aucun autre pack
+// d'assets n'est charge sur le serveur.
+//
+// Les identifiants #Revive... sont pilotes depuis HudATerre.java.
+// =============================================================================
+
+Group {
+  LayoutMode: Center;
+
+  Group #ReviveATerreBox {
+    Anchor: (Top: 68, Width: 420, Height: 152);
+    Background: #000000(0.62);
+    LayoutMode: Top;
+    Padding: (Horizontal: 14, Vertical: 10);
+
+    // ----- Titre -----
+    Label #ReviveATerreTitre {
+      Anchor: (Height: 22);
+      Text: "VOUS ÊTES À TERRE";
+      Style: (FontSize: 16, TextColor: #ff6b6b, RenderBold: true, LetterSpacing: 3, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+
+    Group { Anchor: (Height: 6); }
+
+    // ----- Compte a rebours du saignement -----
+    Label #ReviveATerreChrono {
+      Anchor: (Height: 30);
+      Text: "0:00";
+      Style: (FontSize: 26, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+
+    Group { Anchor: (Height: 6); }
+
+    // ----- Etat du relevement -----
+    Label #ReviveATerreMessage {
+      Anchor: (Height: 16);
+      Text: "Aucun allié ne vous relève";
+      Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+
+    Group { Anchor: (Height: 4); }
+
+    // Barre de relevement, masquee tant qu'aucun allie n'a commence.
+    Group #ReviveATerreBarreReleve {
+      Anchor: (Left: 0, Right: 0, Height: 14);
+      Visible: false;
+      Background: #1b2836;
+      ProgressBar #ReviveATerreBarreReleveFill {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        Value: 0.0;
+        BarTexturePath: "Common/ProgressBarFill.png";
+      }
+    }
+
+    Group { FlexWeight: 1; }
+
+    // ----- Abandon -----
+    Label #ReviveATerreAbandonTexte {
+      Anchor: (Height: 20);
+      Text: "Maintenez [Accroupi] pour abandonner";
+      Style: (FontSize: 15, TextColor: #8fa6c3, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+
+    Group { Anchor: (Height: 3); }
+
+    // Barre d'abandon, masquee tant que la touche n'est pas maintenue.
+    Group #ReviveATerreBarreAbandon {
+      Anchor: (Left: 0, Right: 0, Height: 10);
+      Visible: false;
+      Background: #2b1414;
+      ProgressBar #ReviveATerreBarreAbandonFill {
+        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+        Value: 0.0;
+        BarTexturePath: "Common/ProgressBarFill.png";
+      }
+    }
+  }
+}
