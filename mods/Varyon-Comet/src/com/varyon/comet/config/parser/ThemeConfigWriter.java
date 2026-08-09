@@ -45,6 +45,7 @@ public class ThemeConfigWriter {
             boolean naturalSpawnsEnabled, boolean globalComets, boolean injectUseForCleanSlateBlocks,
             boolean disableWaveMobLoot,
             boolean verboseWaveLogging,
+            boolean debugLogging,
             List<String> enabledWorlds,
             int waveTimeoutSeconds, double waveSpawnMinRadius, double waveSpawnMaxRadius, String combatMusicAmbienceId,
             String cometLandSoundEventId, String cometDestroySoundEventId, String cometFallingNotifySoundEventId,
@@ -84,6 +85,7 @@ public class ThemeConfigWriter {
         sb.append(INDENT).append(INDENT).append("\"injectUseForCleanSlateBlocks\": ").append(injectUseForCleanSlateBlocks).append(",\n");
         sb.append(INDENT).append(INDENT).append("\"disableWaveMobLoot\": ").append(disableWaveMobLoot).append(",\n");
         sb.append(INDENT).append(INDENT).append("\"verboseWaveLogging\": ").append(verboseWaveLogging).append(",\n");
+        sb.append(INDENT).append(INDENT).append("\"debugLogging\": ").append(debugLogging).append(",\n");
         sb.append(INDENT).append(INDENT).append("\"waveTimeoutSeconds\": ").append(waveTimeoutSeconds).append(",\n");
         sb.append(INDENT).append(INDENT).append("\"waveSpawnMinRadius\": ").append(waveSpawnMinRadius).append(",\n");
         sb.append(INDENT).append(INDENT).append("\"waveSpawnMaxRadius\": ").append(waveSpawnMaxRadius).append(",\n");

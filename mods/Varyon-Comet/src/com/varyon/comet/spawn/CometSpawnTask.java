@@ -226,11 +226,15 @@ public class CometSpawnTask {
         try {
             final int varyonRing = VaryonZoneResolver.resolveVaryonRing(player);
             final int hytaleZone = VaryonZoneResolver.resolveHytaleZone(player);
-            LOGGER.info("Natural spawn: resolved varyonRing=" + varyonRing + " hytaleZone=" + hytaleZone);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Natural spawn: resolved varyonRing=" + varyonRing + " hytaleZone=" + hytaleZone);
+            }
 
             CometTier tier = selectTierForHytaleZone(hytaleZone);
             if (tier == null) {
-                LOGGER.info("Skipping natural comet spawn: no configured tier chances for Hytale zone " + hytaleZone);
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Skipping natural comet spawn: no configured tier chances for Hytale zone " + hytaleZone);
+                }
                 finishSpawn(callback, SpawnResult.SKIPPED_NO_TIER);
                 return;
             }
@@ -333,7 +337,7 @@ public class CometSpawnTask {
             int landingRing = VaryonZoneResolver.resolveVaryonRingForComet(
                     targetBlockPos.x, targetBlockPos.z, currentWorld.getName(), player);
             int ringForWave = landingRing > 0 ? landingRing : 1;
-            if (landingRing != varyonRing) {
+            if (landingRing != varyonRing && CometConfig.getInstance().isDebugLoggingEnabled()) {
                 LOGGER.info("Natural spawn: ring at landing position = " + landingRing
                         + " (player ring was " + varyonRing + ")");
             }

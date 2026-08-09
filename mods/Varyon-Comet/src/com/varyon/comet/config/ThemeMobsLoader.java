@@ -56,7 +56,9 @@ public final class ThemeMobsLoader {
                     applyFromObjectBlock(config, trimmed);
                 }
             }
-            LOGGER.info("Applied mob overrides from " + f.getAbsolutePath());
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Applied mob overrides from " + f.getAbsolutePath());
+            }
         } catch (Exception e) {
             LOGGER.warning("Failed to load " + THEME_MOBS_FILE + ": " + e.getMessage());
         }

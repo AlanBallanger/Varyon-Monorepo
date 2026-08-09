@@ -36,7 +36,9 @@ public final class CometCombatMusic {
             AtomicInteger c = REFS.computeIfAbsent(store, s -> new AtomicInteger(0));
             if (c.incrementAndGet() != 1) {
                 c.decrementAndGet();
-                LOGGER.info("[CometCombatMusic] beginEncounter skipped: encounter already active");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("[CometCombatMusic] beginEncounter skipped: encounter already active");
+                }
                 return;
             }
             try {

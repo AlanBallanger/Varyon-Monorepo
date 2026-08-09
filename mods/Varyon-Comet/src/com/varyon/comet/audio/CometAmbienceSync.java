@@ -7,6 +7,7 @@ import com.hypixel.hytale.protocol.ToClientPacket;
 import com.hypixel.hytale.protocol.packets.world.UpdateForcedMusic;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.varyon.comet.CometConfig;
 
 import java.util.logging.Logger;
 
@@ -55,9 +56,11 @@ public final class CometAmbienceSync {
                 }
             }
             String label = ambienceIdForLog != null ? ambienceIdForLog : "(cleared)";
-            LOGGER.info("[CometAmbience] ambienceId=" + label + " index=" + containerIndex + " packetsSent=" + sent
-                    + " playerRefs=" + playerRefs + " skippedRef=" + skippedBadRef + " viaTracker=" + viaTracker
-                    + " viaDirectPacket=" + viaDirectPacket);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("[CometAmbience] ambienceId=" + label + " index=" + containerIndex + " packetsSent=" + sent
+                        + " playerRefs=" + playerRefs + " skippedRef=" + skippedBadRef + " viaTracker=" + viaTracker
+                        + " viaDirectPacket=" + viaDirectPacket);
+            }
             return sent;
         } catch (Throwable t) {
             LOGGER.warning("pushForcedMusicToAllPlayers failed: " + t.getMessage());

@@ -86,7 +86,9 @@ public class CometReloadCommand extends AbstractWorldCommand {
             }
 
             context.sendMessage(Message.raw(sb.toString()));
-            LOGGER.info("Configuration reloaded via command");
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Configuration reloaded via command");
+            }
 
         } catch (Exception e) {
             context.sendMessage(Message.raw("Error reloading config: " + e.getMessage()));

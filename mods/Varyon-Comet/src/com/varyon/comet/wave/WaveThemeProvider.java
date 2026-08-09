@@ -51,7 +51,9 @@ public class WaveThemeProvider {
             return null;
         }
         ThemeConfig theme = config.getTheme(id);
-        LOGGER.info("Theme " + id + (theme != null ? " (" + theme.getDisplayName() + ")" : "") + " tier " + tier.getName());
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Theme " + id + (theme != null ? " (" + theme.getDisplayName() + ")" : "") + " tier " + tier.getName());
+        }
         return id;
     }
 

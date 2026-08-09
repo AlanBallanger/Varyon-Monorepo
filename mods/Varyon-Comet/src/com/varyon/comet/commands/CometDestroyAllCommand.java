@@ -90,7 +90,9 @@ public class CometDestroyAllCommand extends AbstractWorldCommand {
                 final int finalDestroyed = destroyed;
                 com.hypixel.hytale.server.core.HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
                     context.sendMessage(Message.raw("Destroyed " + finalDestroyed + " comet(s)."));
-                    LOGGER.info("Destroyed " + finalDestroyed + " comets via /comet destroyall");
+                    if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                        LOGGER.info("Destroyed " + finalDestroyed + " comets via /comet destroyall");
+                    }
                 });
             });
             
@@ -109,7 +111,9 @@ public class CometDestroyAllCommand extends AbstractWorldCommand {
             // Prefer normal break logic so block state and drop behavior remain consistent.
             boolean broken = world.breakBlock(pos.x, pos.y, pos.z, 0);
             if (broken) {
-                LOGGER.info("Destroyed comet block at " + pos + " via world.breakBlock");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Destroyed comet block at " + pos + " via world.breakBlock");
+                }
                 return;
             }
 
@@ -136,8 +140,10 @@ public class CometDestroyAllCommand extends AbstractWorldCommand {
                 return;
             }
             chunk.markNeedsSaving();
-            
-            LOGGER.info("Destroyed comet block at " + pos + " via chunk fallback");
+
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Destroyed comet block at " + pos + " via chunk fallback");
+            }
         } catch (Exception e) {
             LOGGER.warning("Error destroying comet block at " + pos + ": " + e.getMessage());
             e.printStackTrace();

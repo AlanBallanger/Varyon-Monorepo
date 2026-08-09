@@ -313,7 +313,9 @@ public class CometModPlugin extends JavaPlugin {
 
     @Override
     protected void shutdown() {
-        LOGGER.info("CometMod shutdown");
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("CometMod shutdown");
+        }
         if (timeoutTask != null) timeoutTask.cancel(false);
         if (fallingCheckTask != null) fallingCheckTask.cancel(false);
         if (spawnTask != null) spawnTask.stop();

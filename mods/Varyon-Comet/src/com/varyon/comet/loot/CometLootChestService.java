@@ -20,6 +20,7 @@ import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
+import com.varyon.comet.CometConfig;
 import com.varyon.comet.audio.CometWorldSounds;
 
 import java.util.List;
@@ -173,7 +174,9 @@ public final class CometLootChestService {
                 return false;
             }
             if (!CometLootBlockStateUtil.initializeContainer(containerState, chestBlockType)) {
-                LOGGER.info("Chest block " + chestBlockType.getId() + " rejected container init; trying next type.");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Chest block " + chestBlockType.getId() + " rejected container init; trying next type.");
+                }
                 CometLootBlockStateUtil.safeBreakBlock(world, pos.x, pos.y, pos.z);
                 return false;
             }
@@ -186,8 +189,10 @@ public final class CometLootChestService {
 
             managedChests.add(key);
             cancelExpiryTask(key);
-            LOGGER.info("Spawned reward chest (" + chestBlockType.getId() + ") at " + pos + " with " + buildResult.addedCount
-                    + " item stacks.");
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Spawned reward chest (" + chestBlockType.getId() + ") at " + pos + " with " + buildResult.addedCount
+                        + " item stacks.");
+            }
             return true;
         } catch (Exception e) {
             LOGGER.warning("Failed to spawn reward chest at " + pos + ": " + e.getMessage());
@@ -434,7 +439,9 @@ public final class CometLootChestService {
         }
         managedChests.remove(key);
         expiryTasks.remove(key);
-        LOGGER.info("Expired reward chest after close timer at " + pos + ".");
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Expired reward chest after close timer at " + pos + ".");
+        }
     }
 
     /**

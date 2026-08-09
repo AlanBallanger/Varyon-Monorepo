@@ -101,7 +101,9 @@ public final class CometSpawnUtil {
             CometTier tier, String themeId, UUID ownerUUID, int zoneId) {
         CometConfig config = CometConfig.getInstance();
         if (config != null && !ClaimProtectionGuard.canSpawnAt(world, blockPos.x, blockPos.y, blockPos.z, config)) {
-            LOGGER.info("Comet block placement blocked by claim/protected-zone rules at " + blockPos);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Comet block placement blocked by claim/protected-zone rules at " + blockPos);
+            }
             return null;
         }
         if (themeId == null || themeId.isBlank()) {
@@ -109,7 +111,9 @@ public final class CometSpawnUtil {
         }
         String tierDefaultId = tier.getBlockId("Comet_Stone");
         String preferredId = tierDefaultId;
-        LOGGER.info("Comet spawn: themeId=" + themeId + ", blockId='" + preferredId + "'");
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Comet spawn: themeId=" + themeId + ", blockId='" + preferredId + "'");
+        }
         BlockType blockType = resolveCometSpawnBlockType(preferredId, tierDefaultId, msg -> LOGGER.warning(msg));
         if (blockType == null) {
             LOGGER.severe("No block type available for comet spawn (asset map empty?). Cannot place.");
@@ -118,7 +122,9 @@ public final class CometSpawnUtil {
         // Inject Use for clean-slate blocks so F (Use) fires UseBlockEvent.Pre and activates the comet
         blockType = ensureBlockHasUseForComet(blockType);
         String blockIdName = blockType.getId();
-        LOGGER.info("Placed comet block: '" + blockIdName + "' at " + blockPos);
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Placed comet block: '" + blockIdName + "' at " + blockPos);
+        }
         long chunkIndex = ChunkUtil.indexChunkFromBlock(blockPos.x, blockPos.z);
         WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
         if (chunk == null) chunk = world.getChunk(chunkIndex);
@@ -192,7 +198,9 @@ public final class CometSpawnUtil {
                 if (idNorm.replace("/", "_").equalsIgnoreCase(preferredId.replace("/", "_"))) return candidate;
             }
         } catch (Exception e) {
-            LOGGER.fine("Scan block map for '" + preferredId + "': " + e.getMessage());
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.fine("Scan block map for '" + preferredId + "': " + e.getMessage());
+            }
         }
         return null;
     }

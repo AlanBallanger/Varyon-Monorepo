@@ -41,7 +41,9 @@ public class CometFallingSystem {
 
     public static void setDespawnTimeMinutes(double minutes) {
         despawnTimeMinutes = minutes;
-        LOGGER.info("Despawn time set to: " + minutes + " minutes");
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Despawn time set to: " + minutes + " minutes");
+        }
     }
 
     // Map to track projectile target positions by UUID
@@ -102,7 +104,9 @@ public class CometFallingSystem {
         if (ownerUUID != null) {
             projectileOwners.put(projectileUUID, ownerUUID);
         }
-        LOGGER.fine("Tracking projectile " + projectileUUID + " -> " + targetBlockPos);
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.fine("Tracking projectile " + projectileUUID + " -> " + targetBlockPos);
+        }
     }
 
     public Vector3i getTrackedTarget(UUID projectileUUID) {
@@ -174,7 +178,9 @@ public class CometFallingSystem {
                         long elapsedSeconds = (System.currentTimeMillis() - spawnTime) / 1000;
                         if (elapsedSeconds >= PROJECTILE_TIMEOUT_SECONDS) {
                             timedOut = true;
-                            LOGGER.info("Projectile " + entityUUID + " timed out after " + elapsedSeconds + "s, force-spawning comet at target");
+                            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                                LOGGER.info("Projectile " + entityUUID + " timed out after " + elapsedSeconds + "s, force-spawning comet at target");
+                            }
                         }
                     }
 
@@ -184,7 +190,9 @@ public class CometFallingSystem {
 
                         // Check if projectile has hit or passed the target Y level OR timed out
                         if (position.y <= targetY + 1.0 || timedOut) {
-                            LOGGER.fine("Fallback: Projectile " + entityUUID + " hit ground" + (timedOut ? " (timed out)" : ""));
+                            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                                LOGGER.fine("Fallback: Projectile " + entityUUID + " hit ground" + (timedOut ? " (timed out)" : ""));
+                            }
 
                             org.joml.Vector3i actualBlockPos;
 
@@ -343,8 +351,10 @@ public class CometFallingSystem {
                     config)) {
                 String regionId = WorldProtectRegionGuard.getPrimaryRegionIdAt(targetWorld, targetBlockPos.x,
                         targetBlockPos.y, targetBlockPos.z);
-                LOGGER.info("Comet spawn blocked by claim/protected-zone rules at " + targetBlockPos +
-                        (regionId != null ? " (region: " + regionId + ")" : ""));
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Comet spawn blocked by claim/protected-zone rules at " + targetBlockPos +
+                            (regionId != null ? " (region: " + regionId + ")" : ""));
+                }
                 return;
             }
 
@@ -447,7 +457,9 @@ public class CometFallingSystem {
                     boolean broken = world.breakBlock(blockPos.x, blockPos.y, blockPos.z, 0);
                     if (broken) {
                         chunk.markNeedsSaving();
-                        LOGGER.info("Despawned block at " + blockPos + (blockIdName != null ? " (" + blockIdName + ")" : ""));
+                        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                            LOGGER.info("Despawned block at " + blockPos + (blockIdName != null ? " (" + blockIdName + ")" : ""));
+                        }
                     } else {
                         LOGGER.warning("Failed to break block at " + blockPos + " for despawn");
                     }
@@ -456,7 +468,9 @@ public class CometFallingSystem {
                         boolean broken = chunk.breakBlock(blockPos.x, blockPos.y, blockPos.z, 0);
                         if (broken) {
                             chunk.markNeedsSaving();
-                            LOGGER.info("Despawned block at " + blockPos + " (using chunk.breakBlock)");
+                            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                                LOGGER.info("Despawned block at " + blockPos + " (using chunk.breakBlock)");
+                            }
                         }
                     } catch (Exception e2) {
                         LOGGER.warning("Failed to despawn block at " + blockPos + ": " + e2.getMessage());

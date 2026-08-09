@@ -69,7 +69,9 @@ public class CometTestCommand extends AbstractWorldCommand {
             
             // Simulate spawn for this player
             context.sendMessage(Message.raw("Simulating comet spawn for zone: " + zoneName));
-            LOGGER.info("Test command: Simulating spawn for player " + player.toString() + " in zone " + zoneName);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Test command: Simulating spawn for player " + player.toString() + " in zone " + zoneName);
+            }
             
             // Trigger spawn immediately (spawnForPlayer handles world.execute internally)
             spawnTask.spawnForPlayerForTest(player, result -> {

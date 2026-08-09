@@ -55,7 +55,9 @@ public final class ThemeConfigLoader {
                         }
                         saveCometMobs(config, cometMobsFile);
                         renameToMigrated(legacyThemesJson);
-                        LOGGER.info("Migrated " + LEGACY_THEMES_JSON_FILE + " to " + COMET_MOBS_FILE_NAME);
+                        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                            LOGGER.info("Migrated " + LEGACY_THEMES_JSON_FILE + " to " + COMET_MOBS_FILE_NAME);
+                        }
                     } catch (Exception e) {
                         LOGGER.warning("Failed to migrate " + LEGACY_THEMES_JSON_FILE + ": " + e.getMessage());
                         saveCometMobs(config, cometMobsFile);
@@ -71,7 +73,9 @@ public final class ThemeConfigLoader {
                         }
                         saveCometMobs(config, cometMobsFile);
                         renameToMigrated(legacyGroupsFile);
-                        LOGGER.info("Migrated themes from " + LEGACY_THEMES_AND_GROUPS_FILE + " to " + COMET_MOBS_FILE_NAME);
+                        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                            LOGGER.info("Migrated themes from " + LEGACY_THEMES_AND_GROUPS_FILE + " to " + COMET_MOBS_FILE_NAME);
+                        }
                     } catch (Exception e) {
                         LOGGER.warning("Failed to migrate legacy themes file: " + e.getMessage());
                         saveCometMobs(config, cometMobsFile);
@@ -95,7 +99,9 @@ public final class ThemeConfigLoader {
                     config.setThemeList(new ArrayList<>(defaultThemes.values()));
                     config.setThemesLoaded(true);
                     saveCometMobs(config, cometMobsFile);
-                    LOGGER.info("Repaired " + COMET_MOBS_FILE_NAME + " with " + defaultThemes.size() + " default entries.");
+                    if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                        LOGGER.info("Repaired " + COMET_MOBS_FILE_NAME + " with " + defaultThemes.size() + " default entries.");
+                    }
                     return;
                 }
                 Map<String, ThemeConfig> externalThemes = ThemeConfigParser.parseThemes(json);
@@ -106,13 +112,17 @@ public final class ThemeConfigLoader {
                     config.setThemeList(new ArrayList<>(defaultThemes.values()));
                     config.setThemesLoaded(true);
                     saveCometMobs(config, cometMobsFile);
-                    LOGGER.info("Repaired " + COMET_MOBS_FILE_NAME + " with " + defaultThemes.size() + " default entries.");
+                    if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                        LOGGER.info("Repaired " + COMET_MOBS_FILE_NAME + " with " + defaultThemes.size() + " default entries.");
+                    }
                     return;
                 }
                 config.setThemes(externalThemes);
                 config.setThemeList(new ArrayList<>(externalThemes.values()));
                 config.setThemesLoaded(true);
-                LOGGER.info("Loaded comet mobs from: " + cometMobsFile.getAbsolutePath() + " (" + externalThemes.size() + " entries)");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Loaded comet mobs from: " + cometMobsFile.getAbsolutePath() + " (" + externalThemes.size() + " entries)");
+                }
             } catch (Exception e) {
                 LOGGER.warning("Failed to load '" + cometMobsFile.getAbsolutePath() + "': " + e.getMessage());
             }
@@ -121,7 +131,9 @@ public final class ThemeConfigLoader {
             if (config != null && config.repairLegacyNaturalSpawnIfAllDisabled()) {
                 File cometMobsFile = getCometMobsFile(baseConfigFile);
                 saveCometMobs(config, cometMobsFile);
-                LOGGER.info("Saved " + cometMobsFile.getName() + " after naturalSpawn repair.");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Saved " + cometMobsFile.getName() + " after naturalSpawn repair.");
+                }
             }
             if (config != null) {
                 config.logThemePoolEligibilityWarnings();
@@ -159,7 +171,9 @@ public final class ThemeConfigLoader {
             File parent = file.getParentFile();
             File target = parent != null ? new File(parent, file.getName() + ".migrated") : new File(file.getName() + ".migrated");
             if (file.renameTo(target)) {
-                LOGGER.info("Renamed legacy file to " + target.getName());
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Renamed legacy file to " + target.getName());
+                }
             }
         } catch (Exception e) {
             LOGGER.warning("Could not rename legacy file: " + e.getMessage());

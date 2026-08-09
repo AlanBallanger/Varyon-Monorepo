@@ -65,7 +65,9 @@ public class CometZoneCommand extends AbstractWorldCommand {
                     store.getComponent(playerRef, com.hypixel.hytale.server.core.modules.entity.component.TransformComponent.getComponentType());
                 if (transform != null) {
                     playerPos = transform.getPosition();
-                    LOGGER.info("Player position: " + playerPos + " - checking zone info");
+                    if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                        LOGGER.info("Player position: " + playerPos + " - checking zone info");
+                    }
                 }
             }
             
@@ -74,7 +76,9 @@ public class CometZoneCommand extends AbstractWorldCommand {
             if (zoneInfo == null) {
                 context.sendMessage(Message.raw("You are not in any zone (or zone not detected yet)."));
                 context.sendMessage(Message.raw("Try moving around a bit - zone detection may take a moment."));
-                LOGGER.info("Player " + player.toString() + " has no zone info");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Player " + player.toString() + " has no zone info");
+                }
                 return;
             }
             
@@ -93,10 +97,12 @@ public class CometZoneCommand extends AbstractWorldCommand {
             ShardDropRange shardRange = cfgZones != null ? cfgZones.getShardDropRangeForVaryonRingOrDefault(varyonRing) : null;
             VaryonMineralBonus mineralBonus = cfgZones != null ? cfgZones.getVaryonMineralBonusForRingOrNull(varyonRing) : null;
 
-            LOGGER.info("Zone parsing - zoneName='" + zoneName + "', region='" + regionName + "', hytaleZone=" + hytaleZone
-                    + ", worldMapRaw=" + worldMapRaw + ", varyonRing=" + varyonRing
-                    + (shardRange != null ? ", shardMinMax=" + shardRange.min + "-" + shardRange.max : "")
-                    + (mineralBonus != null ? ", mineral=" + mineralBonus.itemId() + "@" + mineralBonus.chance() : ""));
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Zone parsing - zoneName='" + zoneName + "', region='" + regionName + "', hytaleZone=" + hytaleZone
+                        + ", worldMapRaw=" + worldMapRaw + ", varyonRing=" + varyonRing
+                        + (shardRange != null ? ", shardMinMax=" + shardRange.min + "-" + shardRange.max : "")
+                        + (mineralBonus != null ? ", mineral=" + mineralBonus.itemId() + "@" + mineralBonus.chance() : ""));
+            }
 
             String tierInfo = getTierInfoForHytaleZone(hytaleZone);
 
@@ -118,7 +124,9 @@ public class CometZoneCommand extends AbstractWorldCommand {
             }
             context.sendMessage(Message.raw("Comet Tier Distribution: " + tierInfo));
 
-            LOGGER.info("Player " + player.toString() + " hytaleZone=" + hytaleZone + " varyonRing=" + varyonRing);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Player " + player.toString() + " hytaleZone=" + hytaleZone + " varyonRing=" + varyonRing);
+            }
             
         } catch (Exception e) {
             LOGGER.warning("Error in zone command: " + e.getMessage());

@@ -245,6 +245,7 @@ public class CometWaveManager {
     private static final long TIMEOUT_CLEANUP_ERROR_LOG_BACKOFF_MS = 10_000;
     private volatile long lastTimeoutCleanupErrorLoggedAt = 0;
     private volatile long lastOrphanedWaveWarnLoggedAt = 0;
+    private volatile long lastCountdownRefreshErrorLoggedAt = 0;
 
     public void checkTimeouts() {
         // Check all active waves for timeout
@@ -259,8 +260,10 @@ public class CometWaveManager {
             long elapsedTime = getEncounterElapsedMs(waveData, currentTime);
 
             if (elapsedTime >= encounterTimeout) {
-                LOGGER.info("[checkTimeouts] TIMEOUT for encounter at " + entry.getKey() +
-                        " (elapsed=" + (elapsedTime / 1000) + "s, budget=" + (encounterTimeout / 1000) + "s)");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("[checkTimeouts] TIMEOUT for encounter at " + entry.getKey() +
+                            " (elapsed=" + (elapsedTime / 1000) + "s, budget=" + (encounterTimeout / 1000) + "s)");
+                }
                 timedOutWaves.add(entry.getKey());
             } else {
                 activeWavesToRefresh.add(waveData);
@@ -360,7 +363,11 @@ public class CometWaveManager {
                 updateWaveCountdown(finalStore, finalPlayerRef, finalWaveData);
             });
         } catch (Exception e) {
-            LOGGER.warning("Error refreshing countdown for wave at " + waveData.blockPos + ": " + e.getMessage());
+            long now = System.currentTimeMillis();
+            if (now - lastCountdownRefreshErrorLoggedAt >= TIMEOUT_CLEANUP_ERROR_LOG_BACKOFF_MS) {
+                lastCountdownRefreshErrorLoggedAt = now;
+                LOGGER.warning("Error refreshing countdown for wave at " + waveData.blockPos + ": " + e.getMessage());
+            }
         }
     }
 
@@ -377,7 +384,9 @@ public class CometWaveManager {
 
         CometConfig config = CometConfig.getInstance();
         if (config != null && !config.isRaidEnabledInWorld(world)) {
-            LOGGER.info("Blocked comet activation at " + blockPos + " in disabled world " + world.getName());
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Blocked comet activation at " + blockPos + " in disabled world " + world.getName());
+            }
             return;
         }
 
@@ -388,7 +397,9 @@ public class CometWaveManager {
             String droplist = com.varyon.comet.loot.CometLootBlockStateUtil.getDroplist(blockState);
             if (droplist != null && droplist.startsWith("Comet_Rewards")) {
                 // Already completed - open container or destroy if empty
-                LOGGER.info("Comet at " + blockPos + " already completed (persisted state)");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Comet at " + blockPos + " already completed (persisted state)");
+                }
 
                 // Try to determine tier from droplist name
                 CometTier tier = CometTier.UNCOMMON;
@@ -404,7 +415,9 @@ public class CometWaveManager {
                 // Don't check if empty here - the droplist might not have populated yet
                 // Just open the container - it will populate when opened
                 // We'll check if empty when the window closes
-                LOGGER.info("Comet already completed, will open container via interaction");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Comet already completed, will open container via interaction");
+                }
                 return;
             }
         }
@@ -430,13 +443,17 @@ public class CometWaveManager {
 
         if (state == CometState.WAVE_ACTIVE) {
             // Wave already active, don't spawn again
-            LOGGER.info("Comet at " + blockPos + " already has active wave");
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Comet at " + blockPos + " already has active wave");
+            }
             return;
         }
 
         if (state == CometState.COMPLETED) {
             // Already completed, allow opening chest
-            LOGGER.info("Comet at " + blockPos + " already completed (memory state)");
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Comet at " + blockPos + " already completed (memory state)");
+            }
             // The interaction will handle opening the container
             return;
         }
@@ -444,8 +461,10 @@ public class CometWaveManager {
         // Start a new wave
         activeComets.put(blockPos, CometState.WAVE_ACTIVE);
 
-        LOGGER.info("Starting wave for comet at " + blockPos + " (tier: " + tier.getName() + ") - 3 second countdown");
-        LOGGER.info("[CometWaveManager] CometCombatMusic.beginEncounter (countdown started)");
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Starting wave for comet at " + blockPos + " (tier: " + tier.getName() + ") - 3 second countdown");
+            LOGGER.info("[CometWaveManager] CometCombatMusic.beginEncounter (countdown started)");
+        }
         CometCombatMusic.beginEncounter(store);
 
         final com.hypixel.hytale.server.core.universe.world.World worldForCountdown = world;
@@ -570,9 +589,11 @@ public class CometWaveManager {
                             // Call directly to apply modifiers immediately (fixes timing issue)
                             CometStatModifierSystem.applyModifiers(store, result.first(), hpMult, damageMult,
                                     scaleMult, speedMult);
-                            LOGGER.info("[CometWave] Applied stat multipliers for " + npcType +
-                                    " (UUID: " + npcUUID + "): HP=" + hpMult + "x, Dmg=" + damageMult + "x, Scale="
-                                    + scaleMult + "x, Speed=" + speedMult + "x, ZoneLevel=" + zoneLevel);
+                            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                                LOGGER.info("[CometWave] Applied stat multipliers for " + npcType +
+                                        " (UUID: " + npcUUID + "): HP=" + hpMult + "x, Dmg=" + damageMult + "x, Scale="
+                                        + scaleMult + "x, Speed=" + speedMult + "x, ZoneLevel=" + zoneLevel);
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -628,16 +649,20 @@ public class CometWaveManager {
         waveData.totalWaveCount = WaveThemeProvider.getWaveCount(themeId);
         waveData.currentWaveIndex = 0;
         waveData.currentWave = 1;
-        LOGGER.info("Theme '" + themeId + "' has " + waveData.totalWaveCount + " waves (" +
-                WaveThemeProvider.getNormalWaveCount(themeId) + " normal, " +
-                WaveThemeProvider.getBossWaveCount(themeId) + " boss)");
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Theme '" + themeId + "' has " + waveData.totalWaveCount + " waves (" +
+                    WaveThemeProvider.getNormalWaveCount(themeId) + " normal, " +
+                    WaveThemeProvider.getBossWaveCount(themeId) + " boss)");
+        }
 
         // Get mob list for wave 0 (first wave)
         String[] mobList = WaveThemeProvider.getMobListForWave(tier, themeId, 0);
 
         // Store theme name for display
         waveData.themeName = WaveThemeProvider.getThemeName(themeId);
-        LOGGER.info("Selected theme: " + waveData.themeName + " (ID: " + themeId + ") for tier " + tier.getName());
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Selected theme: " + waveData.themeName + " (ID: " + themeId + ") for tier " + tier.getName());
+        }
 
         int zoneLevel = Math.max(1, waveState.getZoneOrDefault(blockPos, 1));
 
@@ -725,7 +750,9 @@ public class CometWaveManager {
                     toSpawn = v;
                 } else {
                     failedSpawns.add(new FailedSpawnInfo(npcType, rotation, isRangedMob(npcType)));
-                    LOGGER.info("No valid mob spawn at " + spawnPos + ", will retry near success: " + npcType);
+                    if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                        LOGGER.info("No valid mob spawn at " + spawnPos + ", will retry near success: " + npcType);
+                    }
                     continue;
                 }
             }
@@ -735,7 +762,9 @@ public class CometWaveManager {
             if (result != null && result.first() != null) {
                 waveData.spawnedMobs.add(result.first());
                 successPositions.add(toSpawn);
-                LOGGER.info("Spawned " + npcType + " at " + toSpawn);
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Spawned " + npcType + " at " + toSpawn);
+                }
             } else {
                 LOGGER.warning("Failed to spawn NPC: " + npcType);
             }
@@ -756,7 +785,9 @@ public class CometWaveManager {
                     if (res != null && res.first() != null) {
                         waveData.spawnedMobs.add(res.first());
                         successPositions.add(retryPos);
-                        LOGGER.info("Spawned " + f.npcType + " at " + retryPos + " (retry near success)");
+                        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                            LOGGER.info("Spawned " + f.npcType + " at " + retryPos + " (retry near success)");
+                        }
                     }
                 }
             }
@@ -765,8 +796,10 @@ public class CometWaveManager {
         // Store the actual number of mobs that were successfully spawned
         waveData.initialSpawnCount = waveData.spawnedMobs.size();
         waveData.previousRemainingCount = waveData.initialSpawnCount;
-        LOGGER.info("Successfully spawned " + waveData.initialSpawnCount + " mobs out of " + waveMobCount
-                + " attempted for tier " + tier.getName() + " theme " + themeId);
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Successfully spawned " + waveData.initialSpawnCount + " mobs out of " + waveMobCount
+                    + " attempted for tier " + tier.getName() + " theme " + themeId);
+        }
 
         // Start tracking and updating UI
         waveData.lastTimerUpdate = 0;
@@ -794,8 +827,10 @@ public class CometWaveManager {
                     for (PlayerRef pref : world.getPlayerRefs()) {
                         if (ownerUUID.equals(pref.getUuid())) {
                             currentPlayerRef = pref.getReference();
-                            LOGGER.info("[CometWaveManager] Re-synchronized player " + pref.getUsername()
-                                    + " for wave at " + waveData.blockPos + " after respawn");
+                            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                                LOGGER.info("[CometWaveManager] Re-synchronized player " + pref.getUsername()
+                                        + " for wave at " + waveData.blockPos + " after respawn");
+                            }
                             // We can't update waveData.playerRef because it's final (usually),
                             // but we can use currentPlayerRef for this run.
                             break;
@@ -962,15 +997,19 @@ public class CometWaveManager {
         if (remaining == 0) {
             if (waveData.hasMoreWaves()) {
                 // More waves to spawn - advance to next wave
-                LOGGER.info("=== Wave " + waveData.currentWave + " complete! Spawning wave " +
-                        (waveData.currentWave + 1) + "/" + waveData.totalWaveCount + " at " + waveData.blockPos + " ===");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("=== Wave " + waveData.currentWave + " complete! Spawning wave " +
+                            (waveData.currentWave + 1) + "/" + waveData.totalWaveCount + " at " + waveData.blockPos + " ===");
+                }
                 spawnNextWave(store, playerRef, waveData);
                 // Don't continue processing - spawnNextWave will handle the next update
                 return;
             } else {
                 // All waves complete - finish the comet
-                LOGGER.info("=== All " + waveData.totalWaveCount + " waves defeated! Completing comet at " +
-                        waveData.blockPos + " ===");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("=== All " + waveData.totalWaveCount + " waves defeated! Completing comet at " +
+                            waveData.blockPos + " ===");
+                }
                 completeWave(store, playerRefComponent, waveData);
             }
         }
@@ -1010,7 +1049,9 @@ public class CometWaveManager {
                 }
             }
         } catch (Exception e) {
-            LOGGER.fine("Failed dead-check for tracked mob: " + e.getMessage());
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.fine("Failed dead-check for tracked mob: " + e.getMessage());
+            }
         }
 
         return false;
@@ -1064,8 +1105,10 @@ public class CometWaveManager {
     private void destroyCometAsFailed(Store<EntityStore> store, WaveData waveData,
             String failureSubtitleOverride, java.util.UUID messageRecipientUuid) {
         Vector3i blockPos = waveData.blockPos;
-        LOGGER.info("Destroying comet at " + blockPos + " due to "
-                + (failureSubtitleOverride != null ? "player death" : "timeout"));
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Destroying comet at " + blockPos + " due to "
+                    + (failureSubtitleOverride != null ? "player death" : "timeout"));
+        }
 
         int despawned = 0;
         try {
@@ -1086,7 +1129,7 @@ public class CometWaveManager {
         } catch (Exception e) {
             LOGGER.warning("Could not get CommandBuffer to despawn mobs on wave fail: " + e.getMessage());
         }
-        if (despawned > 0) {
+        if (despawned > 0 && CometConfig.getInstance().isDebugLoggingEnabled()) {
             LOGGER.info("Despawned " + despawned + " mobs due to wave failure at " + blockPos);
         }
 
@@ -1101,7 +1144,9 @@ public class CometWaveManager {
             removeCometMapMarker(world, blockPos);
             CometWorldSounds.playCometDestroy(store, blockPos);
             world.breakBlock(blockPos.x, blockPos.y, blockPos.z, 0);
-            LOGGER.info("Broke comet block at " + blockPos + " (encounter failed)");
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Broke comet block at " + blockPos + " (encounter failed)");
+            }
 
         } catch (Exception e) {
             LOGGER.severe("Error breaking comet block on encounter fail: " + e.getMessage());
@@ -1135,7 +1180,9 @@ public class CometWaveManager {
                         0.0F,
                         0.5F);
 
-                LOGGER.info("Showed wave failed message after encounter failure");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Showed wave failed message after encounter failure");
+                }
 
                 com.hypixel.hytale.server.core.universe.world.World world = ((com.hypixel.hytale.server.core.universe.world.storage.EntityStore) store
                         .getExternalData()).getWorld();
@@ -1145,7 +1192,9 @@ public class CometWaveManager {
                     try {
                         world.execute(() -> {
                             EventTitleUtil.hideEventTitleFromPlayer(finalPlayerRef, 0.0F);
-                            LOGGER.info("Hid wave failed message after 3 seconds");
+                            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                                LOGGER.info("Hid wave failed message after 3 seconds");
+                            }
                         });
                     } catch (Exception e) {
                         LOGGER.warning("Error hiding failed message: " + e.getMessage());
@@ -1252,17 +1301,23 @@ public class CometWaveManager {
         }
         int waveIndex = waveData.currentWaveIndex;
 
-        LOGGER.info("=== SPAWNING WAVE " + waveData.currentWave + "/" + waveData.totalWaveCount +
-                " (index " + waveIndex + ") ===");
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("=== SPAWNING WAVE " + waveData.currentWave + "/" + waveData.totalWaveCount +
+                    " (index " + waveIndex + ") ===");
+        }
 
         // Check wave type and spawn accordingly
         if (WaveThemeProvider.isWaveBoss(themeId, waveIndex)) {
             // Boss wave
-            LOGGER.info("Wave " + waveData.currentWave + " is a BOSS wave");
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Wave " + waveData.currentWave + " is a BOSS wave");
+            }
             spawnBossWaveAtIndex(store, playerRef, waveData, waveIndex);
         } else {
             // Normal wave (mob wave)
-            LOGGER.info("Wave " + waveData.currentWave + " is a NORMAL wave");
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Wave " + waveData.currentWave + " is a NORMAL wave");
+            }
             spawnNormalWaveAtIndex(store, playerRef, waveData, waveIndex);
         }
     }
@@ -1296,7 +1351,9 @@ public class CometWaveManager {
             return;
         }
 
-        LOGGER.info("Spawning " + mobList.length + " mobs for wave " + waveData.currentWave);
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Spawning " + mobList.length + " mobs for wave " + waveData.currentWave);
+        }
 
         // Get spawn radius
         double[] radiusRange = WaveThemeProvider.getSpawnRadius(tier);
@@ -1410,7 +1467,9 @@ public class CometWaveManager {
 
         waveData.initialSpawnCount = waveData.spawnedMobs.size();
         waveData.previousRemainingCount = waveData.initialSpawnCount;
-        LOGGER.info("Spawned " + waveData.initialSpawnCount + " mobs for wave " + waveData.currentWave);
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Spawned " + waveData.initialSpawnCount + " mobs for wave " + waveData.currentWave);
+        }
 
         // Start tracking and force immediate title update
         waveData.lastTimerUpdate = 0;
@@ -1454,7 +1513,9 @@ public class CometWaveManager {
             }
         }
 
-        LOGGER.info("Spawning " + bosses.size() + " boss(es) for wave " + waveData.currentWave);
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Spawning " + bosses.size() + " boss(es) for wave " + waveData.currentWave);
+        }
         waveData.previousRemainingCount = bosses.size();
         waveData.initialSpawnCount = 0;
 
@@ -1523,7 +1584,9 @@ public class CometWaveManager {
 
         waveData.initialSpawnCount = waveData.spawnedMobs.size();
         waveData.previousRemainingCount = waveData.initialSpawnCount;
-        LOGGER.info("Spawned " + waveData.initialSpawnCount + " boss(es) for wave " + waveData.currentWave);
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Spawned " + waveData.initialSpawnCount + " boss(es) for wave " + waveData.currentWave);
+        }
 
         // Start tracking and force immediate title update
         waveData.lastTimerUpdate = 0;
@@ -1564,15 +1627,19 @@ public class CometWaveManager {
     private void completeWave(Store<EntityStore> store, PlayerRef playerRef, WaveData waveData) {
         Vector3i blockPos = waveData.blockPos;
         CometTier tier = cometTiers.getOrDefault(blockPos, CometTier.UNCOMMON);
-        LOGGER.info("[CometWaveManager] completeWave: Tier=" + tier.getName() + " for comet at " + blockPos);
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("[CometWaveManager] completeWave: Tier=" + tier.getName() + " for comet at " + blockPos);
+        }
 
         activeWaves.remove(blockPos);
         CometCombatMusic.endEncounter(store);
 
         // Always drop items and break the block (even if player is dead)
         java.util.List<String> droppedItems = dropRewardsAndBreakBlock(store, blockPos, waveData, tier);
-        LOGGER.info("[CometWaveManager] Rewards dropped: " + (droppedItems != null ? droppedItems.size() : "null")
-                + " items.");
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("[CometWaveManager] Rewards dropped: " + (droppedItems != null ? droppedItems.size() : "null")
+                    + " items.");
+        }
 
         // Show completion title only when player is available (e.g. not dead)
         if (playerRef != null) {
@@ -1629,7 +1696,9 @@ public class CometWaveManager {
                 LOGGER.warning("Error scheduling message hide: " + e.getMessage());
             }
         } else {
-            LOGGER.info("Skipping completion title (player not available); loot dropped at " + blockPos);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Skipping completion title (player not available); loot dropped at " + blockPos);
+            }
         }
     }
 
@@ -1691,7 +1760,9 @@ public class CometWaveManager {
             String themeId = waveData.themeId != null ? waveData.themeId : cometThemes.get(blockPos);
 
             int zoneId = Math.max(1, waveState.getZoneOrDefault(blockPos, 1));
-            LOGGER.info("[CometWaveManager] Reward zone resolved to Varyon ring " + zoneId + " for comet at " + blockPos);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("[CometWaveManager] Reward zone resolved to Varyon ring " + zoneId + " for comet at " + blockPos);
+            }
 
             generateTierRewards(tier, themeId, zoneId, allItems, droppedItemIds);
 
@@ -1715,7 +1786,8 @@ public class CometWaveManager {
                     ? speedCfg.getWaveSpeedRewardMultiplier(waveData.encounterStartTime, waveData.totalWaveCount, tier)
                     : 1.0;
             if (speedCfg != null && speedCfg.waveSpeedRewardEnabled
-                    && (speedMult < 0.999 || speedMult > 1.001)) {
+                    && (speedMult < 0.999 || speedMult > 1.001)
+                    && CometConfig.getInstance().isDebugLoggingEnabled()) {
                 LOGGER.info("[CometWaveManager] Wave speed reward multiplier=" + String.format(java.util.Locale.ROOT, "%.4f", speedMult));
             }
             scaleRewardStacksByMultiplier(allItems, speedMult);
@@ -1725,15 +1797,19 @@ public class CometWaveManager {
             // Timed reward chest: replaces Comet_Stone_* at the comet position, or places in front for other registered blocks
             boolean chestSpawned = CometLootChestService.getInstance().spawnChestOnlyAfterWaveComplete(world, blockPos, allItems, themeId);
             if (chestSpawned) {
-                LOGGER.info("[CometWaveManager] Spawned timed reward chest at " + blockPos +
-                        " with " + allItems.size() + " item stacks (expires 20s after close).");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("[CometWaveManager] Spawned timed reward chest at " + blockPos +
+                            " with " + allItems.size() + " item stacks (expires 20s after close).");
+                }
             } else {
                 // Fallback path: drop entities directly and break the block.
                 org.joml.Vector3d dropPosition = new org.joml.Vector3d(
                         blockPos.x + 0.5D, blockPos.y + 0.5D, blockPos.z + 0.5D);
 
-                LOGGER.info("[CometWaveManager] Chest spawn failed; generating direct item drops for " + allItems.size()
-                        + " item stacks.");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("[CometWaveManager] Chest spawn failed; generating direct item drops for " + allItems.size()
+                            + " item stacks.");
+                }
                 com.hypixel.hytale.component.Holder<com.hypixel.hytale.server.core.universe.world.storage.EntityStore>[] itemEntityHolders = com.hypixel.hytale.server.core.modules.entity.item.ItemComponent
                         .generateItemDrops(
                                 store,
@@ -1747,7 +1823,9 @@ public class CometWaveManager {
                             store.addEntity(holder, com.hypixel.hytale.component.AddReason.SPAWN);
                         }
                     }
-                    LOGGER.info("[CometWaveManager] Dropped " + itemEntityHolders.length + " item entities at " + blockPos);
+                    if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                        LOGGER.info("[CometWaveManager] Dropped " + itemEntityHolders.length + " item entities at " + blockPos);
+                    }
                 } else {
                     LOGGER.warning(
                             "[CometWaveManager] No item entity holders generated for " + allItems.size() + " items!");
@@ -1756,7 +1834,9 @@ public class CometWaveManager {
                 // Break the comet block after fallback drops.
                 CometWorldSounds.playCometDestroy(store, blockPos);
                 world.breakBlock(blockPos.x, blockPos.y, blockPos.z, 0);
-                LOGGER.info("Broke comet block at " + blockPos + " after dropping rewards");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("Broke comet block at " + blockPos + " after dropping rewards");
+                }
             }
 
             // Remove map marker and clean up all tracking so the marker disappears and

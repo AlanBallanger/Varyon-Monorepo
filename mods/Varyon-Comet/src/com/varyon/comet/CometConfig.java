@@ -117,6 +117,13 @@ public class CometConfig {
     /** If true, log per-tick wave progress (mob counts, title updates) at INFO level. If false (default), these are logged at FINE and hidden from normal console output. */
     public boolean verboseWaveLogging = false;
 
+    /** If true, emit verbose diagnostic logs (spawn, despawn, wave lifecycle, ambience) at INFO level. If false (default), these are suppressed; warnings/errors always log. */
+    public boolean debugLogging = false;
+
+    public boolean isDebugLoggingEnabled() {
+        return debugLogging;
+    }
+
     public int waveTimeoutSeconds = 120;
     public double waveSpawnMinRadius = 2.0;
     public double waveSpawnMaxRadius = 8.0;
@@ -701,6 +708,9 @@ public class CometConfig {
             Boolean verboseWaveLogging = extractBooleanValue(parseFrom, "verboseWaveLogging");
             if (verboseWaveLogging != null) config.verboseWaveLogging = verboseWaveLogging;
 
+            Boolean debugLogging = extractBooleanValue(parseFrom, "debugLogging");
+            if (debugLogging != null) config.debugLogging = debugLogging;
+
             Integer waveTimeoutSeconds = extractIntValue(parseFrom, "waveTimeoutSeconds");
             if (waveTimeoutSeconds != null) config.waveTimeoutSeconds = waveTimeoutSeconds;
 
@@ -1028,7 +1038,7 @@ public class CometConfig {
         return ThemeConfigWriter.generateFullConfig(
                 minDelaySeconds, maxDelaySeconds, spawnChance,
                 despawnTimeMinutes, minSpawnDistance, maxSpawnDistance,
-                naturalSpawnsEnabled, globalComets, injectUseForCleanSlateBlocks, disableWaveMobLoot, verboseWaveLogging, getEnabledWorlds(),
+                naturalSpawnsEnabled, globalComets, injectUseForCleanSlateBlocks, disableWaveMobLoot, verboseWaveLogging, debugLogging, getEnabledWorlds(),
                 waveTimeoutSeconds, waveSpawnMinRadius, waveSpawnMaxRadius, combatMusicAmbienceId,
                 cometLandSoundEventId, cometDestroySoundEventId, cometFallingNotifySoundEventId,
                 waveSpeedRewardEnabled, waveSpeedRewardMaxPercent, waveSpeedRewardMinPercent,

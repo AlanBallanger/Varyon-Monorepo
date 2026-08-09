@@ -53,7 +53,9 @@ public final class CometWorldSounds {
             }
             SoundUtil.playSoundEvent2dToPlayer(playerRef, idx, SoundCategory.UI, 0.5f, 1.0f);
         } catch (Throwable t) {
-            LOGGER.fine("Comet falling notify sound skipped: " + t.getMessage());
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.fine("Comet falling notify sound skipped: " + t.getMessage());
+            }
         }
     }
 
@@ -65,7 +67,9 @@ public final class CometWorldSounds {
             Store<EntityStore> store = world.getEntityStore().getStore();
             playCometDestroy(store, blockPos);
         } catch (Throwable t) {
-            LOGGER.fine("Comet destroy sound skipped: " + t.getMessage());
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.fine("Comet destroy sound skipped: " + t.getMessage());
+            }
         }
     }
 

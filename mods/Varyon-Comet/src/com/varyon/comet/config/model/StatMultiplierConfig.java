@@ -1,5 +1,7 @@
 package com.varyon.comet.config.model;
 
+import com.varyon.comet.CometConfig;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -149,7 +151,9 @@ public class StatMultiplierConfig {
 
                 if (tierMults.bossMultipliers != null || tierMults.mobMultipliers != null) {
                     config.setTierMultipliers(themeId, tier, tierMults);
-                    LOGGER.info("[StatMultiplierConfig] Loaded multipliers for theme " + themeId + " tier " + tier);
+                    if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                        LOGGER.info("[StatMultiplierConfig] Loaded multipliers for theme " + themeId + " tier " + tier);
+                    }
                 }
             }
 

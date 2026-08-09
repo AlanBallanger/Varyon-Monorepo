@@ -93,10 +93,14 @@ public class CometDespawnTracker {
         cometTiers.put(key, tierName);
         if (customDespawnMinutes != null) {
             customDespawnTimes.put(key, customDespawnMinutes);
-            LOGGER.info("Registered comet at " + pos + " (tier: " + tierName + ") spawn time: " + spawnTime + " custom despawn: " + customDespawnMinutes + " min");
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Registered comet at " + pos + " (tier: " + tierName + ") spawn time: " + spawnTime + " custom despawn: " + customDespawnMinutes + " min");
+            }
         } else {
             customDespawnTimes.remove(key);
-            LOGGER.info("Registered comet at " + pos + " (tier: " + tierName + ") spawn time: " + spawnTime);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Registered comet at " + pos + " (tier: " + tierName + ") spawn time: " + spawnTime);
+            }
         }
         save();
     }
@@ -109,7 +113,9 @@ public class CometDespawnTracker {
         if (cometSpawnTimes.remove(key) != null) {
             cometTiers.remove(key);
             customDespawnTimes.remove(key);
-            LOGGER.info("Unregistered comet at " + pos);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Unregistered comet at " + pos);
+            }
             save();
         }
     }
@@ -285,8 +291,10 @@ public class CometDespawnTracker {
                 }
             });
         }, remainingSeconds, java.util.concurrent.TimeUnit.SECONDS);
-        
-        LOGGER.info("Scheduled despawn for comet at " + pos + " in " + remainingSeconds + " seconds");
+
+        if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+            LOGGER.info("Scheduled despawn for comet at " + pos + " in " + remainingSeconds + " seconds");
+        }
     }
     
     /**
@@ -393,7 +401,9 @@ public class CometDespawnTracker {
             writer.println("  ]");
             writer.println("}");
             
-            LOGGER.info("Saved " + total + " comet entries to " + dataFile.getAbsolutePath());
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Saved " + total + " comet entries to " + dataFile.getAbsolutePath());
+            }
             
         } catch (Exception e) {
             LOGGER.warning("Failed to save comet data: " + e.getMessage());
@@ -410,11 +420,15 @@ public class CometDespawnTracker {
         File legacy = getLegacyDataFile();
         if (legacy.exists()) {
             loadFromFile(legacy);
-            LOGGER.info("Migrating comet persistence from " + LEGACY_DATA_FILE_NAME + " to " + DATA_FILE_NAME);
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Migrating comet persistence from " + LEGACY_DATA_FILE_NAME + " to " + DATA_FILE_NAME);
+            }
             save();
             try {
                 if (legacy.delete()) {
-                    LOGGER.info("Removed legacy file " + LEGACY_DATA_FILE_NAME);
+                    if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                        LOGGER.info("Removed legacy file " + LEGACY_DATA_FILE_NAME);
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.warning("Could not remove legacy file " + legacy.getAbsolutePath() + ": " + e.getMessage());
@@ -437,7 +451,9 @@ public class CometDespawnTracker {
             String cometsArray = content.substring(cometsStart + 1, cometsEnd).trim();
 
             if (cometsArray.isEmpty()) {
-                LOGGER.info("No comets in data file");
+                if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                    LOGGER.info("No comets in data file");
+                }
                 return;
             }
 
@@ -472,7 +488,9 @@ public class CometDespawnTracker {
                 startIdx = objEnd + 1;
             }
 
-            LOGGER.info("Loaded " + loaded + " comet entries from " + dataFile.getAbsolutePath());
+            if (CometConfig.getInstance().isDebugLoggingEnabled()) {
+                LOGGER.info("Loaded " + loaded + " comet entries from " + dataFile.getAbsolutePath());
+            }
 
         } catch (Exception e) {
             LOGGER.warning("Failed to load comet data: " + e.getMessage());
