@@ -135,6 +135,7 @@ public final class EtreinteGroundSystem extends EntityTickingSystem<EntityStore>
                 .selectNearbyEntities(store, impact, radius, targetRef -> {
                     try {
                         if (targetRef.getIndex() == casterIdx) return;
+                        if (store.getComponent(targetRef, com.hypixel.hytale.server.npc.entities.NPCEntity.getComponentType()) == null) return;
                         EffectControllerComponent ec =
                             store.getComponent(targetRef, EffectControllerComponent.getComponentType());
                         if (ec != null) {

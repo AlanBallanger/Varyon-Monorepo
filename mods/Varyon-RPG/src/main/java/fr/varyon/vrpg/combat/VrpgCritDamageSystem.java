@@ -89,8 +89,7 @@ public final class VrpgCritDamageSystem extends DamageEventSystem {
             damage.setAmount(base * critMult);
             DamageFloatBridge.markCritical(damage);
             if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
-                LOG.atInfo().log(String.format("[Crit] spec=%s chance=%d%% dmg=+%d%% %.1f->%.1f",
-                    spec.getId(), stats.critChancePct(), stats.critDamagePct(), base, base * critMult));
+                VrpgDamageTrace.step(damage, "crit", stats.critDamagePct(), base, base * critMult);
             }
         } catch (Exception ignored) {}
     }

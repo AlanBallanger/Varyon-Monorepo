@@ -21,6 +21,7 @@ import fr.varyon.vrpg.classes.ClassManager;
 import fr.varyon.vrpg.classes.PlayerClass;
 import fr.varyon.vrpg.classes.PlayerSpecialization;
 import fr.varyon.vrpg.classes.WeaponCategory;
+import fr.varyon.vrpg.combat.VrpgDamageTrace;
 import fr.varyon.vrpg.config.VrpgConfig;
 
 import javax.annotation.Nonnull;
@@ -84,23 +85,26 @@ public final class RempartIncomingDamageSystem extends DamageEventSystem {
             // Forteresse
             float forteresseReduc = rempartState.getForteresseReduction(uuid);
             if (forteresseReduc > 0f) {
+                float before = amount;
                 amount *= (1f - forteresseReduc);
-                if (debug) LOG.atInfo().log(String.format("[RempartRecu] Forteresse -%.0f%% %.1f->%.1f", forteresseReduc * 100, incoming, amount));
+                if (debug) VrpgDamageTrace.step(damage, "Forteresse", forteresseReduc * 100, before, amount);
             }
 
             // Garde Rapprochée (auto-réduction)
             float gardeReduc = rempartState.getGardeRapprocheReduction(uuid);
             if (gardeReduc > 0f) {
+                float before = amount;
                 amount *= (1f - gardeReduc);
-                if (debug) LOG.atInfo().log(String.format("[RempartRecu] GardeRapprochee -%.0f%%", gardeReduc * 100));
+                if (debug) VrpgDamageTrace.step(damage, "GardeRapprochee", gardeReduc * 100, before, amount);
             }
 
             // Garde Impénétrable (après blocage)
             int gardeImpRank = rempartState.getGardeImpenetrableRank(uuid);
             if (gardeImpRank > 0) {
                 float gardeImpReduc = RempartPassifs.gardeReductionForRank(gardeImpRank);
+                float before = amount;
                 amount *= (1f - gardeImpReduc);
-                if (debug) LOG.atInfo().log(String.format("[RempartRecu] GardeImpenetrable -%.0f%%", gardeImpReduc * 100));
+                if (debug) VrpgDamageTrace.step(damage, "GardeImpenetrable", gardeImpReduc * 100, before, amount);
             }
 
             // Dernier Bastion (sous 30% HP)
@@ -109,8 +113,9 @@ public final class RempartIncomingDamageSystem extends DamageEventSystem {
                 float hpRatio = getHpRatio(chunk, index, store);
                 if (hpRatio < RempartPassifs.bastionThreshold()) {
                     float bastionReduc = RempartPassifs.bastionReductionForRank(bastionRank);
+                    float before = amount;
                     amount *= (1f - bastionReduc);
-                    if (debug) LOG.atInfo().log(String.format("[RempartRecu] DernierBastion -%.0f%%", bastionReduc * 100));
+                    if (debug) VrpgDamageTrace.step(damage, "DernierBastion", bastionReduc * 100, before, amount);
                 }
             }
 

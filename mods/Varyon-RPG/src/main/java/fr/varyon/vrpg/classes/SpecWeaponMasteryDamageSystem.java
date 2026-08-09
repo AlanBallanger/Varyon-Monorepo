@@ -69,6 +69,7 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
             PlayerClass activeClass = acc.getActiveClass();
             PlayerSpecialization spec = acc.getActiveSpec(activeClass);
 
+            boolean debug = fr.varyon.vrpg.config.VrpgConfig.isDebugCombat();
             float base = damage.getAmount();
             float amount = base;
 
@@ -80,9 +81,11 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
                 try {
                     int level = acc.getProgress(activeClass).getLevel();
                     double levelMult = ClassStatDefinition.atkDisplayMultiplier(level, spec);
+                    float before = amount;
                     amount *= (float) levelMult;
-                    if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
-                        LOG.atInfo().log(String.format("[LevelMult] spec=%s level=%d mult=x%.2f", spec.getId(), level, levelMult));
+                    if (debug) {
+                        fr.varyon.vrpg.combat.VrpgDamageTrace.step(damage,
+                            String.format("niveau %s lvl%d", spec.getId(), level), (float) ((levelMult - 1.0) * 100), before, amount);
                     }
                 } catch (Exception ignored2) {}
             }
@@ -95,10 +98,11 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
                     if (category != null && category != WeaponCategory.AUTRE) {
                         double weaponMult = category.getMultiplierFor(spec);
                         if (weaponMult != 1.0) {
+                            float before = amount;
                             amount *= (float) weaponMult;
-                            if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
-                                LOG.atInfo().log(String.format("[WeaponMastery] spec=%s weapon=%s mult=x%.2f",
-                                    spec.getId(), category.name(), weaponMult));
+                            if (debug) {
+                                fr.varyon.vrpg.combat.VrpgDamageTrace.step(damage,
+                                    "maitrise " + category.name(), (float) ((weaponMult - 1.0) * 100), before, amount);
                             }
                         }
                     }
@@ -107,9 +111,6 @@ public final class SpecWeaponMasteryDamageSystem extends DamageEventSystem {
 
             if (amount != base) {
                 damage.setAmount(amount);
-                if (fr.varyon.vrpg.config.VrpgConfig.isDebugCombat()) {
-                    LOG.atInfo().log(String.format("[Mastery] base=%.1f -> final=%.1f", base, amount));
-                }
             }
         } catch (Exception ignored) {}
     }

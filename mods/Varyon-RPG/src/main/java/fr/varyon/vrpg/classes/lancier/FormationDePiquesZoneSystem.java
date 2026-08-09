@@ -107,6 +107,10 @@ public final class FormationDePiquesZoneSystem extends EntityTickingSystem<Entit
 
                 zone.nextTickAt = now + FormationDePiquesSkill.tickIntervalMs();
 
+                if (store.getComponent(ref,
+                        com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent.getComponentType()) != null) {
+                    continue;
+                }
                 try {
                     DamageSystems.executeDamage(ref, store,
                         new Damage(new Damage.EntitySource(zone.casterRef), DamageCause.PHYSICAL, zone.damagePerTick));
