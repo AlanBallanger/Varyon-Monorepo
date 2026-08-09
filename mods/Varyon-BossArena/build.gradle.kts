@@ -42,6 +42,10 @@ dependencies {
     } else if (resolvedVaryonJar != null) {
         compileOnly(files(resolvedVaryonJar))
     }
+    // Optional at runtime: the RPG HUD bridge is only loaded when Varyon-RPG is present.
+    if (findProject(":mods:Varyon-RPG") != null) {
+        compileOnly(project(":mods:Varyon-RPG"))
+    }
 }
 
 java {

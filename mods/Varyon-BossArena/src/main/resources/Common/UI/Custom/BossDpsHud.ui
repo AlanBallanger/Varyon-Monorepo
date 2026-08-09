@@ -1,7 +1,7 @@
 Group {
   Group #DpsHudPanel {
     Visible: false;
-    Anchor: (Bottom: 16, Left: 16, Width: 250, Height: 292);
+    Anchor: (Top: 57, Left: 12, Width: 250, Height: 292);
     Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.82));
     LayoutMode: Full;
 
@@ -370,7 +370,7 @@ Group {
 
   Group #WaveHudPanel {
     Visible: false;
-    Anchor: (Bottom: 16, Left: 16, Width: 250, Height: 149);
+    Anchor: (Top: 57, Left: 12, Width: 250, Height: 149);
     Background: PatchStyle(TexturePath: "Elements/HudPanel.png", Border: 10, Color: #FFFFFF(0.82));
     LayoutMode: Full;
 

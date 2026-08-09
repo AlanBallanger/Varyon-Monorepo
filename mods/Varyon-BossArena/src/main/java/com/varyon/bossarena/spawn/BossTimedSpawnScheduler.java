@@ -305,7 +305,10 @@ public final class BossTimedSpawnScheduler {
 
     private long resolveInitialNextSpawn(BossArenaConfig.TimedBossSpawn rule, String label, long now) {
         Map<String, Long> persistedMap = persistedNextSpawnByLabel;
-        Long stored = persistedMap.get(label);
+        // Persisted keys are lower-cased on load (see loadPersistedNextSpawnMap); normalize the
+        // lookup key the same way, otherwise a label with any uppercase character (e.g. "TIER1")
+        // never matches and the persisted countdown is silently discarded on every restart.
+        Long stored = persistedMap.get(label.toLowerCase(Locale.ROOT));
         if (rule.isIntervalMode()) {
             if (stored != null && stored > now && stored < WAIT_FOR_DEATH_EPOCH_MS) {
                 return stored;
@@ -540,7 +543,8 @@ public final class BossTimedSpawnScheduler {
                 world,
                 reminderText,
                 rule.announceWorldWide,
-                rule.announceCurrentWorld
+                rule.announceCurrentWorld,
+                rule.announceMinTier
         );
         LOGGER.info("Timed spawn reminder sent for '" + state.label + "' (due in "
                 + Math.max(0L, (due - now) / 1000L) + "s).");
@@ -553,6 +557,14 @@ public final class BossTimedSpawnScheduler {
      * @return status message for UI
      */
     public synchronized String forceSpawnByRow(int rowIndex1Based) {
+        return forceSpawnByRow(rowIndex1Based, false);
+    }
+
+    /**
+     * @param skipPreBossWaves true for the "Boss direct" action: spawns the boss immediately,
+     *                         ignoring any pre-boss wave schedule on the boss definition.
+     */
+    public synchronized String forceSpawnByRow(int rowIndex1Based, boolean skipPreBossWaves) {
         BossArenaConfig.TimedBossSpawn rule = resolveConfiguredRule(rowIndex1Based);
         if (rule == null) {
             return "Règle introuvable.";
@@ -565,10 +577,15 @@ public final class BossTimedSpawnScheduler {
         if (state == null) {
             // Ephemeral state for Manual (or otherwise non-scheduled) rules.
             state = new TimedSpawnState(copyRule(rule), System.currentTimeMillis(), resolveRuleLabel(rule, rowIndex1Based));
+        } else {
+            // The cached state may hold a stale copy of the rule (e.g. announceMinTier edited in the
+            // UI since the last reloadFromConfig); refresh it so a forced spawn always announces
+            // using the currently configured settings.
+            state.rule = copyRule(rule);
         }
 
         long now = System.currentTimeMillis();
-        boolean ok = evaluateSpawn(state, now, true);
+        boolean ok = evaluateSpawn(state, now, true, skipPreBossWaves);
         if (ok) {
             persistState();
         }
@@ -609,10 +626,14 @@ public final class BossTimedSpawnScheduler {
     }
 
     private boolean evaluateSpawn(TimedSpawnState state, long now) {
-        return evaluateSpawn(state, now, false);
+        return evaluateSpawn(state, now, false, false);
     }
 
     private boolean evaluateSpawn(TimedSpawnState state, long now, boolean force) {
+        return evaluateSpawn(state, now, force, false);
+    }
+
+    private boolean evaluateSpawn(TimedSpawnState state, long now, boolean force, boolean skipPreBossWaves) {
         BossArenaConfig.TimedBossSpawn rule = state.rule;
         long retryMs = TimeUnit.SECONDS.toMillis(PROXIMITY_RETRY_SECONDS);
 
@@ -717,7 +738,9 @@ public final class BossTimedSpawnScheduler {
                             state.sawAliveBoss = true;
                             state.nextSpawnEpochMs = WAIT_FOR_DEATH_EPOCH_MS;
                         }
-                    }
+                    },
+                    force,
+                    skipPreBossWaves
             );
             if (result == null) {
                 clearPendingSpawnForRule(rule);
@@ -742,7 +765,8 @@ public final class BossTimedSpawnScheduler {
                         world,
                         rule.worldAnnouncementText,
                         rule.announceWorldWide,
-                        rule.announceCurrentWorld
+                        rule.announceCurrentWorld,
+                        rule.announceMinTier
                 );
             }
             if (BossSpawnService.DEFERRED_SPAWN_UUID.equals(result)) {
@@ -1398,7 +1422,9 @@ public final class BossTimedSpawnScheduler {
     }
 
     private static final class TimedSpawnState {
-        private final BossArenaConfig.TimedBossSpawn rule;
+        /** Not final: {@link #forceSpawnByRow} refreshes this from the live config so a forced
+         * spawn never announces using a stale copy captured at the last reloadFromConfig. */
+        private volatile BossArenaConfig.TimedBossSpawn rule;
         private final String label;
         private volatile long nextSpawnEpochMs;
         private volatile boolean sawAliveBoss;

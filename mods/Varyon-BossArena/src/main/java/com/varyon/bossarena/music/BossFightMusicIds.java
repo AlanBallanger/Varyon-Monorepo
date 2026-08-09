@@ -4,9 +4,6 @@ import java.util.Locale;
 
 final class BossFightMusicIds {
 
-    /** Distinct MusicContainers + track copies so client resume memory cannot reuse progress. */
-    static final int RESTART_SLOTS = 8;
-
     private BossFightMusicIds() {}
 
     static String stem(String musicFileName) {
@@ -47,41 +44,19 @@ final class BossFightMusicIds {
         return s;
     }
 
-    static int normalizeSlot(int restartSlot) {
-        int n = RESTART_SLOTS;
-        int s = restartSlot % n;
-        return s < 0 ? s + n : s;
-    }
-
     static String musicOggFileName(String musicFileName) {
-        return musicOggFileName(musicFileName, 0);
-    }
-
-    static String musicOggFileName(String musicFileName, int restartSlot) {
-        return "VaryonBA_" + token(musicFileName) + "_R" + normalizeSlot(restartSlot) + ".ogg";
+        return "VaryonBA_" + token(musicFileName) + ".ogg";
     }
 
     static String musicCommonTrackPath(String musicFileName) {
-        return musicCommonTrackPath(musicFileName, 0);
-    }
-
-    static String musicCommonTrackPath(String musicFileName, int restartSlot) {
-        return "Music/VaryonBA/" + musicOggFileName(musicFileName, restartSlot);
+        return "Music/VaryonBA/" + musicOggFileName(musicFileName);
     }
 
     static String musicContainerId(String musicFileName) {
-        return musicContainerId(musicFileName, 0);
-    }
-
-    static String musicContainerId(String musicFileName, int restartSlot) {
-        return "VaryonBA_" + token(musicFileName) + "_MC" + normalizeSlot(restartSlot);
+        return "VaryonBA_" + token(musicFileName) + "_MC";
     }
 
     static String ambienceAssetId(String musicFileName) {
-        return ambienceAssetId(musicFileName, 0);
-    }
-
-    static String ambienceAssetId(String musicFileName, int restartSlot) {
-        return "VaryonBA_" + token(musicFileName) + "_Amb" + normalizeSlot(restartSlot);
+        return "VaryonBA_" + token(musicFileName) + "_Amb";
     }
 }

@@ -28,10 +28,15 @@ public final class BossDamageScalingSystem extends DamageEventSystem {
     private static final float EPSILON = 0.0001f;
     /** Prune the overlevel cache once more bosses than this have entries. */
     private static final int MAX_CACHED_BOSSES = 32;
+    private static final long HP_WAVE_WARNING_COOLDOWN_MS = 2000L;
+    private static final String HP_WAVE_WARNING_TEXT =
+            "&c[BossArena] &fCe boss est invulnérable : éliminez la vague de monstres avant de continuer.";
 
     private final BossTrackingSystem trackingSystem;
     /** boss UUID -> attacker UUID -> damage multiplier. Fixed for the boss's lifetime. */
     private final Map<UUID, Map<UUID, Float>> overlevelMultiplierCache = new ConcurrentHashMap<>();
+    /** Per-player cooldown so the HP-% wave shield warning is not spammed on every hit. */
+    private final Map<UUID, Long> hpWaveWarningCooldownByPlayer = new ConcurrentHashMap<>();
 
     public BossDamageScalingSystem(BossTrackingSystem trackingSystem) {
         this.trackingSystem = trackingSystem;
@@ -66,6 +71,7 @@ public final class BossDamageScalingSystem extends DamageEventSystem {
                 && trackingSystem.isBossDamageLockedByHpWave(targetUuid)) {
             damage.setCancelled(true);
             damage.setAmount(0.0f);
+            warnAttackerOfHpWaveShield(targetUuid, damage, store);
             return;
         }
 
@@ -160,6 +166,28 @@ public final class BossDamageScalingSystem extends DamageEventSystem {
             return;
         }
         overlevelMultiplierCache.keySet().removeIf(bossUuid -> !trackingSystem.isTracked(bossUuid));
+    }
+
+    /** Tells the attacking player their hit was blocked by the HP-% wave shield, capped to once
+     * every {@link #HP_WAVE_WARNING_COOLDOWN_MS} per player so it cannot spam the chat. */
+    private void warnAttackerOfHpWaveShield(UUID bossUuid, Damage damage, Store<EntityStore> store) {
+        UUID attackerUuid = extractSourceUuid(damage, store);
+        if (attackerUuid == null) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        Long lastWarnedAt = hpWaveWarningCooldownByPlayer.get(attackerUuid);
+        if (lastWarnedAt != null && now - lastWarnedAt < HP_WAVE_WARNING_COOLDOWN_MS) {
+            return;
+        }
+        BossTrackingSystem.BossData bossData = trackingSystem.getBossData(bossUuid);
+        World world = bossData != null ? bossData.world : null;
+        PlayerRef attacker = findPlayer(world, attackerUuid);
+        if (attacker == null) {
+            return;
+        }
+        hpWaveWarningCooldownByPlayer.put(attackerUuid, now);
+        attacker.sendMessage(BossWaveNotificationService.toColoredMessage(HP_WAVE_WARNING_TEXT));
     }
 
     private static PlayerRef findPlayer(World world, UUID playerUuid) {

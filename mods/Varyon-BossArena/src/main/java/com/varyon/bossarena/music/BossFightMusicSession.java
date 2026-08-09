@@ -48,12 +48,7 @@ final class BossFightMusicSession {
     }
 
     String ambienceAssetId() {
-        return ambienceAssetId(0);
-    }
-
-    String ambienceAssetId(int restartBoost) {
-        int slot = BossFightMusicIds.normalizeSlot((int) generation + restartBoost);
-        return BossFightMusicIds.ambienceAssetId(musicFileName, slot);
+        return BossFightMusicIds.ambienceAssetId(musicFileName);
     }
 
     boolean contains(double px, double py, double pz) {

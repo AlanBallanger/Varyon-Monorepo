@@ -421,6 +421,7 @@ public final class BossArenaConfig {
             }
             // Empty reminder = disabled (do not force a default).
             clean.reminderAnnouncementText = optional(raw.reminderAnnouncementText);
+            clean.announceMinTier = Math.max(0, raw.announceMinTier);
             clean.gracePeriodEnabled = raw.gracePeriodEnabled;
             clean.gracePeriodSeconds = Math.max(0L, raw.gracePeriodSeconds);
             clean.graceTitleText = optional(raw.graceTitleText);
@@ -861,6 +862,12 @@ public final class BossArenaConfig {
         public String worldAnnouncementText = DEFAULT_TIMED_ANNOUNCEMENT_TEXT;
         /** Optional chat reminder sent 5 minutes before scheduled spawn. Empty = no reminder. */
         public String reminderAnnouncementText = DEFAULT_TIMED_REMINDER_TEXT;
+        /**
+         * Varyon zone tier this announcement belongs to. Players only see it once they have
+         * unlocked this tier or higher ({@code varyon.zone.N}). 0 = visible to everyone.
+         * Set per rule: arena names are not a reliable source (an "ice arena" may be tier 5).
+         */
+        public int announceMinTier = 0;
         /** When true, wait {@link #gracePeriodSeconds} after nearby player threshold before spawn. */
         public boolean gracePeriodEnabled = false;
         public long gracePeriodSeconds = 30L;

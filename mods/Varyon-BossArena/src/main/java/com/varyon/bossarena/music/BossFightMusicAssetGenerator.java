@@ -63,33 +63,29 @@ final class BossFightMusicAssetGenerator {
                         .forEach(oggSource -> {
                             try {
                                 String fileName = oggSource.getFileName().toString();
-                                // One physical copy per restart slot so client resume memory
-                                // keyed by track path cannot reuse progress across restarts.
-                                for (int slot = 0; slot < BossFightMusicIds.RESTART_SLOTS; slot++) {
-                                    String oggFileName = BossFightMusicIds.musicOggFileName(fileName, slot);
-                                    Files.copy(
-                                            oggSource,
-                                            oggDestDir.resolve(oggFileName),
-                                            StandardCopyOption.REPLACE_EXISTING);
-                                    expectedOgg.add(oggFileName);
+                                String oggFileName = BossFightMusicIds.musicOggFileName(fileName);
+                                Files.copy(
+                                        oggSource,
+                                        oggDestDir.resolve(oggFileName),
+                                        StandardCopyOption.REPLACE_EXISTING);
+                                expectedOgg.add(oggFileName);
 
-                                    String trackPath = BossFightMusicIds.musicCommonTrackPath(fileName, slot);
-                                    String mcId = BossFightMusicIds.musicContainerId(fileName, slot);
-                                    String mcFileName = mcId + ".json";
-                                    Files.writeString(
-                                            mcDestDir.resolve(mcFileName),
-                                            buildMusicContainerJson(trackPath),
-                                            StandardCharsets.UTF_8);
-                                    expectedMc.add(mcFileName);
+                                String trackPath = BossFightMusicIds.musicCommonTrackPath(fileName);
+                                String mcId = BossFightMusicIds.musicContainerId(fileName);
+                                String mcFileName = mcId + ".json";
+                                Files.writeString(
+                                        mcDestDir.resolve(mcFileName),
+                                        buildMusicContainerJson(trackPath),
+                                        StandardCharsets.UTF_8);
+                                expectedMc.add(mcFileName);
 
-                                    String ambId = BossFightMusicIds.ambienceAssetId(fileName, slot);
-                                    String ambFileName = ambId + ".json";
-                                    Files.writeString(
-                                            ambDestDir.resolve(ambFileName),
-                                            buildAmbienceFxJson(mcId),
-                                            StandardCharsets.UTF_8);
-                                    expectedAmb.add(ambFileName);
-                                }
+                                String ambId = BossFightMusicIds.ambienceAssetId(fileName);
+                                String ambFileName = ambId + ".json";
+                                Files.writeString(
+                                        ambDestDir.resolve(ambFileName),
+                                        buildAmbienceFxJson(mcId),
+                                        StandardCharsets.UTF_8);
+                                expectedAmb.add(ambFileName);
                             } catch (IOException e) {
                                 LOGGER.warning("[BossArena] music pack fail: " + oggSource + " — " + e.getMessage());
                             }

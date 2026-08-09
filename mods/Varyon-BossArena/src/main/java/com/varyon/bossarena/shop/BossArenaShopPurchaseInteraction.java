@@ -196,7 +196,8 @@ public final class BossArenaShopPurchaseInteraction extends ChoiceInteraction {
                     world,
                     timedRule.worldAnnouncementText,
                     timedRule.announceWorldWide,
-                    timedRule.announceCurrentWorld
+                    timedRule.announceCurrentWorld,
+                    timedRule.announceMinTier
             );
         }
 

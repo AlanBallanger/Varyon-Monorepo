@@ -42,7 +42,6 @@ public final class BossFightMusicApplySystem extends EntityTickingSystem<EntityS
     private final Map<UUID, Integer> lastSentIndex = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastAppliedGeneration = new ConcurrentHashMap<>();
     /** Bumps when leaving radius / fight so the next start uses a different track copy. */
-    private final Map<UUID, Integer> restartBoost = new ConcurrentHashMap<>();
     /** Restart must span several ticks: clear (0) then apply — same-tick pulse is coalesced/resumed. */
     private final Map<UUID, PendingRestart> pendingRestart = new ConcurrentHashMap<>();
     private final Map<String, Long> missingAmbienceLoggedAt = new ConcurrentHashMap<>();
@@ -128,23 +127,22 @@ public final class BossFightMusicApplySystem extends EntityTickingSystem<EntityS
             return;
         }
 
-        int boost = restartBoost.getOrDefault(playerUuid, 0);
-        AmbienceFX ambience = AmbienceFX.getAssetMap().getAsset(best.ambienceAssetId(boost));
+        AmbienceFX ambience = AmbienceFX.getAssetMap().getAsset(best.ambienceAssetId());
         if (ambience == null) {
-            logMissingAmbience(best, boost);
+            logMissingAmbience(best);
             releaseForcedMusic(playerRef, tracker, baseline, false);
             lastAppliedGeneration.remove(playerUuid);
             return;
         }
         int idx = ambience.getMusicContainerIndex();
         if (idx < 0) {
-            logMissingAmbience(best, boost);
+            logMissingAmbience(best);
             releaseForcedMusic(playerRef, tracker, baseline, false);
             lastAppliedGeneration.remove(playerUuid);
             return;
         }
 
-        long generationKey = best.getGeneration() * 1000L + BossFightMusicIds.normalizeSlot((int) best.getGeneration() + boost);
+        long generationKey = best.getGeneration();
         Long appliedGen = lastAppliedGeneration.get(playerUuid);
         if (appliedGen == null || appliedGen != generationKey) {
             PendingRestart restart = new PendingRestart(generationKey, idx);
@@ -160,21 +158,18 @@ public final class BossFightMusicApplySystem extends EntityTickingSystem<EntityS
             PlayerRef playerRef,
             ForcedMusicTracker tracker,
             int baseline,
-            boolean bumpRestartSlot) {
+            boolean unusedRestartFlag) {
         UUID uuid = playerRef.getUuid();
         pendingRestart.remove(uuid);
         Integer prev = lastSentIndex.get(uuid);
-        if (prev != null && prev != baseline && bumpRestartSlot) {
-            restartBoost.merge(uuid, 1, Integer::sum);
-        }
         if (prev == null || prev == baseline) {
             return;
         }
         writeForcedMusic(playerRef, tracker, baseline);
     }
 
-    private void logMissingAmbience(BossFightMusicSession session, int boost) {
-        String key = session.ambienceAssetId(boost);
+    private void logMissingAmbience(BossFightMusicSession session) {
+        String key = session.ambienceAssetId();
         long now = System.currentTimeMillis();
         Long prev = missingAmbienceLoggedAt.get(key);
         if (prev != null && now - prev < 10_000L) {

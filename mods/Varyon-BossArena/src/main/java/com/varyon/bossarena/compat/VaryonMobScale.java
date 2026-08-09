@@ -84,6 +84,21 @@ public final class VaryonMobScale {
         }
     }
 
+    /** Strips Varyon loot/essence from an entity so arena wave mobs drop nothing. No-op without Varyon. */
+    public static void suppressVaryonDrops(Store<EntityStore> store, Ref<EntityStore> entityRef) {
+        if (store == null || entityRef == null || !entityRef.isValid() || !isVaryonLoaded()) {
+            return;
+        }
+        if (!ensureBridge()) {
+            return;
+        }
+        try {
+            VaryonMobScaleBridge.zeroLootAndEssence(store, entityRef);
+        } catch (NoClassDefFoundError | Exception e) {
+            LOGGER.log(Level.FINE, "Varyon drop suppression skipped", e);
+        }
+    }
+
     public static BossModifiers applyWorldScale(BossModifiers mods, float worldHp, float worldDamage) {
         BossModifiers base = mods != null ? mods : identityMods();
         float hp = positive(base.hpMultiplier()) * positive(worldHp);

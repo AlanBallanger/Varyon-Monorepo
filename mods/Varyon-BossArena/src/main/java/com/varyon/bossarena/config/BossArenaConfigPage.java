@@ -6,6 +6,7 @@ package com.varyon.bossarena.config;
  * (each owning build/handle logic and tab-specific state) to reduce this class size.
  */
 import com.varyon.bossarena.config.BossArenaConfig;
+import com.varyon.bossarena.compat.ZoneTier;
 import com.varyon.bossarena.BossArenaPlugin;
 import com.varyon.bossarena.data.Arena;
 import com.varyon.bossarena.data.ArenaRegistry;
@@ -84,6 +85,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
     private static final int MAX_TIMED_SPAWN_ROWS = 32;
     /** Pool rows declared in the layout. The list scrolls, so this is only an upper bound. */
     private static final int MAX_BOSS_POOL_ROWS = 32;
+    /** True while the Planification "Textes" modal is open. */
+    private boolean timedTextsModalOpen = false;
     private static final int BOSS_SCROLL_THUMB_STEPS = 10;
     private static final Pattern ARENA_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
     private static final int MAX_SHOP_CURRENCY_PICKS = BossArenaConfigUiControls.MAX_ITEM_PICKS;
@@ -672,6 +675,18 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 continue;
             }
             entries.add(new DropdownEntryInfo(LocalizableString.fromString(id), id));
+        }
+        return entries;
+    }
+
+    /** Minimum Varyon zone tier (0-{@link ZoneTier#MAX_TIER}) required to see a timed rule's
+     * announcements. Tiers are cumulative (a player who unlocked tier 4 sees rules requiring
+     * tier 1-4), so 0 means everyone. */
+    private static List<DropdownEntryInfo> tierDropdownEntries() {
+        List<DropdownEntryInfo> entries = new ArrayList<>();
+        entries.add(new DropdownEntryInfo(LocalizableString.fromString("Tous"), "0"));
+        for (int tier = 1; tier <= ZoneTier.MAX_TIER; tier++) {
+            entries.add(new DropdownEntryInfo(LocalizableString.fromString("Tier " + tier), Integer.toString(tier)));
         }
         return entries;
     }
@@ -1387,6 +1402,12 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         if (TAB_PLANIFICATION.equals(selectedTab)) {
             if ("timed_autosave".equals(action)) {
                 scheduleTimedAutoSave(data);
+            } else if ("timed_texts_open".equals(action)) {
+                timedTextsModalOpen = true;
+                rebuild();
+            } else if ("timed_texts_close".equals(action)) {
+                timedTextsModalOpen = false;
+                rebuild();
             } else if ("timed_add".equals(action)) {
                 handleTimedAdd();
             } else if (action.startsWith("timed_delete_")) {
@@ -1407,6 +1428,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 handleTimedFieldToggle(action.substring("timed_toggle_announce_global_".length()), data, "announce_global");
             } else if (action.startsWith("timed_toggle_announce_world_")) {
                 handleTimedFieldToggle(action.substring("timed_toggle_announce_world_".length()), data, "announce_world");
+            } else if (action.startsWith("timed_pop_boss_only_")) {
+                handleTimedPopBossOnly(action.substring("timed_pop_boss_only_".length()));
             } else if (action.startsWith("timed_pop_")) {
                 handleTimedPop(action.substring("timed_pop_".length()));
             } else if (action.startsWith("timed_pool_open_")) {
@@ -3203,8 +3226,14 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         }
 
         events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedAddButton", EventData.of("Action", "timed_add"));
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedTextsButton",
+                buildBossTimedSnapshotEvent("timed_texts_open"));
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedTextsClose",
+                buildBossTimedSnapshotEvent("timed_texts_close"));
+        cmd.set("#TimedTextsOverlay.Visible", timedTextsModalOpen);
 
         List<DropdownEntryInfo> arenaEntries = arenaDropdownEntries();
+        List<DropdownEntryInfo> tierEntries = tierDropdownEntries();
 
         for (int row = 1; row <= MAX_TIMED_SPAWN_ROWS; row++) {
             String suffix = Integer.toString(row);
@@ -3272,6 +3301,9 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedAnnounceGlobalToggle" + suffix, announceGlobal);
             cmd.set("#TimedAnnounceWorld" + suffix + ".Value", announceWorld ? "true" : "false");
             BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedAnnounceWorldToggle" + suffix, announceWorld);
+            cmd.set("#TimedAnnounceMinTier" + suffix + ".Entries", tierEntries);
+            cmd.set("#TimedAnnounceMinTier" + suffix + ".Value",
+                    Integer.toString(entry != null ? Math.max(0, entry.announceMinTier) : 0));
 
             cmd.set("#TimedAfterDeathLabel" + suffix + ".Visible", afterDeath);
             cmd.set("#TimedEveryHours" + suffix + ".Visible", afterDeath);
@@ -3320,6 +3352,8 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     buildBossTimedSnapshotEvent("timed_pool_open_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedPop" + suffix,
                     EventData.of("Action", "timed_pop_" + row));
+            events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedPopBossOnly" + suffix,
+                    EventData.of("Action", "timed_pop_boss_only_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedDelete" + suffix,
                     EventData.of("Action", "timed_delete_" + row));
             events.addEventBinding(CustomUIEventBindingType.Activating, "#TimedMoveUp" + suffix,
@@ -3329,6 +3363,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
 
             for (String fieldId : new String[]{
                     "#TimedBossId" + suffix, "#TimedArenaId" + suffix, "#TimedMinPlayers" + suffix,
+                    "#TimedAnnounceMinTier" + suffix,
                     "#TimedGraceSeconds" + suffix,
                     "#TimedEveryHours" + suffix, "#TimedEveryMinutes" + suffix, "#TimedEverySeconds" + suffix,
                     "#TimedIntervalHours" + suffix, "#TimedIntervalDays" + suffix, "#TimedIntervalSeconds" + suffix,
@@ -3406,6 +3441,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     .append("@BossWaveSize" + suffix, "#TimedDespawnMinutes" + suffix + ".Value")
                     .append("@TimedAnnounceGlobal" + suffix, "#TimedAnnounceGlobal" + suffix + ".Value")
                     .append("@TimedAnnounceWorld" + suffix, "#TimedAnnounceWorld" + suffix + ".Value")
+                    .append("@TimedAnnounceMinTier" + suffix, "#TimedAnnounceMinTier" + suffix + ".Value")
                     .append("@TimedGraceEnabled" + suffix, "#TimedGraceEnabled" + suffix + ".Value")
                     .append("@TimedGraceSeconds" + suffix, "#TimedGraceSeconds" + suffix + ".Value");
         }
@@ -3535,6 +3571,24 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
         bossStatusText = scheduler.forceSpawnByRow(row);
+        rebuild();
+    }
+
+    /** "Boss direct": force-spawns the boss for this row immediately, skipping pre-boss waves. */
+    private void handleTimedPopBossOnly(String rowToken) {
+        int row;
+        try {
+            row = Integer.parseInt(rowToken);
+        } catch (NumberFormatException ex) {
+            return;
+        }
+        var scheduler = plugin.getTimedSpawnScheduler();
+        if (scheduler == null) {
+            bossStatusText = "Scheduler indisponible.";
+            rebuild();
+            return;
+        }
+        bossStatusText = scheduler.forceSpawnByRow(row, true);
         rebuild();
     }
 
@@ -3680,7 +3734,24 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         } else {
             bossPoolEditorState.putSelected(bossId, 1);
         }
-        rebuild();
+        refreshPoolRow(row, bossId);
+    }
+
+    /**
+     * Updates just the toggled row instead of rebuilding the page: a full rebuild resets the
+     * scroll position, throwing the user back to the top of the list on every click.
+     */
+    private void refreshPoolRow(int row, String bossId) {
+        String suffix = Integer.toString(row);
+        Integer weight = bossPoolEditorState.findSelectedWeight(bossId);
+        boolean selected = weight != null;
+        UICommandBuilder cmd = new UICommandBuilder();
+        BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#BossPoolToggle" + suffix, selected);
+        cmd.set("#BossPoolWeight" + suffix + ".Text", Integer.toString(selected ? weight : 1));
+        cmd.set("#BossPoolPageLabel.Text", "selection: "
+                + bossPoolEditorState.selectedWeights.size()
+                + " / " + bossPoolEditorState.bossIds.size());
+        sendUpdate(cmd, false);
     }
 
     private void handleTimedPoolWeight(String rowToken, int delta) {
@@ -3703,7 +3774,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             return;
         }
         bossPoolEditorState.putSelected(bossId, Math.max(1, current + delta));
-        rebuild();
+        refreshPoolRow(row, bossId);
     }
 
     private void buildBossPoolOverlay(UICommandBuilder cmd, UIEventBuilder events) {
@@ -3887,11 +3958,47 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             }
             persistTimedRows(parsed, data, false);
             bossStatusText = "Règle mise à jour.";
-            rebuild();
+            // "mode" changes which fields are visible on the row, so it needs a full rebuild.
+            // The plain on/off toggles only restyle one button — refresh those in place, since a
+            // rebuild would reset the scroll position and jump the user back to the top.
+            if ("mode".equals(field)) {
+                rebuild();
+            } else {
+                refreshTimedToggle(row, entry, field);
+            }
         } catch (IllegalArgumentException ex) {
             bossStatusText = ex.getMessage();
             rebuild();
         }
+    }
+
+
+    /** Restyles a single Planification toggle without rebuilding (and re-scrolling) the page. */
+    private void refreshTimedToggle(int row, BossArenaConfig.TimedBossSpawn entry, String field) {
+        String suffix = Integer.toString(row);
+        UICommandBuilder cmd = new UICommandBuilder();
+        switch (field) {
+            case "enabled" -> {
+                cmd.set("#TimedEnabled" + suffix + ".Value", entry.enabled ? "true" : "false");
+                BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedEnabledToggle" + suffix, entry.enabled);
+            }
+            case "grace" -> {
+                cmd.set("#TimedGraceEnabled" + suffix + ".Value", entry.gracePeriodEnabled ? "true" : "false");
+                BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedGraceToggle" + suffix, entry.gracePeriodEnabled);
+            }
+            case "announce_global", "announce_world" -> {
+                cmd.set("#TimedAnnounceGlobal" + suffix + ".Value", entry.announceWorldWide ? "true" : "false");
+                BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedAnnounceGlobalToggle" + suffix, entry.announceWorldWide);
+                cmd.set("#TimedAnnounceWorld" + suffix + ".Value", entry.announceCurrentWorld ? "true" : "false");
+                BossArenaConfigUiControls.styleOnOffTextButton(cmd, "#TimedAnnounceWorldToggle" + suffix, entry.announceCurrentWorld);
+            }
+            default -> {
+                rebuild();
+                return;
+            }
+        }
+        cmd.set("#BossStatusLabel.Text", bossStatusText == null ? "" : bossStatusText);
+        sendUpdate(cmd, false);
     }
 
     /**
@@ -4032,6 +4139,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             String despawnMinutesText = optionalText(data.getBossWaveSize(row));
             String announceGlobalText = optionalText(data.getTimedAnnounceGlobal(row));
             String announceWorldText = optionalText(data.getTimedAnnounceWorld(row));
+            String announceMinTierText = optionalText(data.getTimedAnnounceMinTier(row));
             String graceEnabledText = optionalText(data.getTimedGraceEnabled(row));
             String graceSecondsText = optionalText(data.getTimedGraceSeconds(row));
 
@@ -4054,6 +4162,7 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                     || looksLikeUiBindingExpression(despawnMinutesText)
                     || looksLikeUiBindingExpression(announceGlobalText)
                     || looksLikeUiBindingExpression(announceWorldText)
+                    || looksLikeUiBindingExpression(announceMinTierText)
                     || looksLikeUiBindingExpression(graceEnabledText)
                     || looksLikeUiBindingExpression(graceSecondsText)) {
                 // Keep existing row if UI bindings failed
@@ -4269,6 +4378,11 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             entry.despawnAfterSeconds = despawnSeconds;
             entry.announceWorldWide = announceGlobal;
             entry.announceCurrentWorld = announceWorld;
+            entry.announceMinTier = announceMinTierText.isEmpty()
+                    ? (existingRow != null ? Math.max(0, existingRow.announceMinTier) : 0)
+                    : parseRequiredInt(announceMinTierText,
+                            "Ligne " + row + " : Tier min doit être un entier entre 0 et " + ZoneTier.MAX_TIER + ".",
+                            0, ZoneTier.MAX_TIER);
             entry.worldAnnouncementText = resolvedAnnounceText;
             entry.reminderAnnouncementText = resolvedReminderText;
             entry.gracePeriodEnabled = graceEnabled;
@@ -6802,6 +6916,38 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
             b.append(new KeyedCodec<>("@TimedAnnounceWorld30", Codec.STRING), (d, v) -> d.timedAnnounceWorld30 = v, d -> d.timedAnnounceWorld30).add();
             b.append(new KeyedCodec<>("@TimedAnnounceWorld31", Codec.STRING), (d, v) -> d.timedAnnounceWorld31 = v, d -> d.timedAnnounceWorld31).add();
             b.append(new KeyedCodec<>("@TimedAnnounceWorld32", Codec.STRING), (d, v) -> d.timedAnnounceWorld32 = v, d -> d.timedAnnounceWorld32).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier1", Codec.STRING), (d, v) -> d.timedAnnounceMinTier1 = v, d -> d.timedAnnounceMinTier1).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier2", Codec.STRING), (d, v) -> d.timedAnnounceMinTier2 = v, d -> d.timedAnnounceMinTier2).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier3", Codec.STRING), (d, v) -> d.timedAnnounceMinTier3 = v, d -> d.timedAnnounceMinTier3).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier4", Codec.STRING), (d, v) -> d.timedAnnounceMinTier4 = v, d -> d.timedAnnounceMinTier4).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier5", Codec.STRING), (d, v) -> d.timedAnnounceMinTier5 = v, d -> d.timedAnnounceMinTier5).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier6", Codec.STRING), (d, v) -> d.timedAnnounceMinTier6 = v, d -> d.timedAnnounceMinTier6).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier7", Codec.STRING), (d, v) -> d.timedAnnounceMinTier7 = v, d -> d.timedAnnounceMinTier7).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier8", Codec.STRING), (d, v) -> d.timedAnnounceMinTier8 = v, d -> d.timedAnnounceMinTier8).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier9", Codec.STRING), (d, v) -> d.timedAnnounceMinTier9 = v, d -> d.timedAnnounceMinTier9).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier10", Codec.STRING), (d, v) -> d.timedAnnounceMinTier10 = v, d -> d.timedAnnounceMinTier10).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier11", Codec.STRING), (d, v) -> d.timedAnnounceMinTier11 = v, d -> d.timedAnnounceMinTier11).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier12", Codec.STRING), (d, v) -> d.timedAnnounceMinTier12 = v, d -> d.timedAnnounceMinTier12).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier13", Codec.STRING), (d, v) -> d.timedAnnounceMinTier13 = v, d -> d.timedAnnounceMinTier13).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier14", Codec.STRING), (d, v) -> d.timedAnnounceMinTier14 = v, d -> d.timedAnnounceMinTier14).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier15", Codec.STRING), (d, v) -> d.timedAnnounceMinTier15 = v, d -> d.timedAnnounceMinTier15).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier16", Codec.STRING), (d, v) -> d.timedAnnounceMinTier16 = v, d -> d.timedAnnounceMinTier16).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier17", Codec.STRING), (d, v) -> d.timedAnnounceMinTier17 = v, d -> d.timedAnnounceMinTier17).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier18", Codec.STRING), (d, v) -> d.timedAnnounceMinTier18 = v, d -> d.timedAnnounceMinTier18).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier19", Codec.STRING), (d, v) -> d.timedAnnounceMinTier19 = v, d -> d.timedAnnounceMinTier19).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier20", Codec.STRING), (d, v) -> d.timedAnnounceMinTier20 = v, d -> d.timedAnnounceMinTier20).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier21", Codec.STRING), (d, v) -> d.timedAnnounceMinTier21 = v, d -> d.timedAnnounceMinTier21).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier22", Codec.STRING), (d, v) -> d.timedAnnounceMinTier22 = v, d -> d.timedAnnounceMinTier22).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier23", Codec.STRING), (d, v) -> d.timedAnnounceMinTier23 = v, d -> d.timedAnnounceMinTier23).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier24", Codec.STRING), (d, v) -> d.timedAnnounceMinTier24 = v, d -> d.timedAnnounceMinTier24).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier25", Codec.STRING), (d, v) -> d.timedAnnounceMinTier25 = v, d -> d.timedAnnounceMinTier25).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier26", Codec.STRING), (d, v) -> d.timedAnnounceMinTier26 = v, d -> d.timedAnnounceMinTier26).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier27", Codec.STRING), (d, v) -> d.timedAnnounceMinTier27 = v, d -> d.timedAnnounceMinTier27).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier28", Codec.STRING), (d, v) -> d.timedAnnounceMinTier28 = v, d -> d.timedAnnounceMinTier28).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier29", Codec.STRING), (d, v) -> d.timedAnnounceMinTier29 = v, d -> d.timedAnnounceMinTier29).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier30", Codec.STRING), (d, v) -> d.timedAnnounceMinTier30 = v, d -> d.timedAnnounceMinTier30).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier31", Codec.STRING), (d, v) -> d.timedAnnounceMinTier31 = v, d -> d.timedAnnounceMinTier31).add();
+            b.append(new KeyedCodec<>("@TimedAnnounceMinTier32", Codec.STRING), (d, v) -> d.timedAnnounceMinTier32 = v, d -> d.timedAnnounceMinTier32).add();
             b.append(new KeyedCodec<>("@TimedAnnounceText", Codec.STRING), (d, v) -> d.timedAnnounceText = v, d -> d.timedAnnounceText).add();
             b.append(new KeyedCodec<>("@TimedReminderText", Codec.STRING), (d, v) -> d.timedReminderText = v, d -> d.timedReminderText).add();
             b.append(new KeyedCodec<>("@TimedGraceText", Codec.STRING), (d, v) -> d.timedGraceText = v, d -> d.timedGraceText).add();
@@ -7482,6 +7628,38 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
         public String timedAnnounceWorld30;
         public String timedAnnounceWorld31;
         public String timedAnnounceWorld32;
+        public String timedAnnounceMinTier1;
+        public String timedAnnounceMinTier2;
+        public String timedAnnounceMinTier3;
+        public String timedAnnounceMinTier4;
+        public String timedAnnounceMinTier5;
+        public String timedAnnounceMinTier6;
+        public String timedAnnounceMinTier7;
+        public String timedAnnounceMinTier8;
+        public String timedAnnounceMinTier9;
+        public String timedAnnounceMinTier10;
+        public String timedAnnounceMinTier11;
+        public String timedAnnounceMinTier12;
+        public String timedAnnounceMinTier13;
+        public String timedAnnounceMinTier14;
+        public String timedAnnounceMinTier15;
+        public String timedAnnounceMinTier16;
+        public String timedAnnounceMinTier17;
+        public String timedAnnounceMinTier18;
+        public String timedAnnounceMinTier19;
+        public String timedAnnounceMinTier20;
+        public String timedAnnounceMinTier21;
+        public String timedAnnounceMinTier22;
+        public String timedAnnounceMinTier23;
+        public String timedAnnounceMinTier24;
+        public String timedAnnounceMinTier25;
+        public String timedAnnounceMinTier26;
+        public String timedAnnounceMinTier27;
+        public String timedAnnounceMinTier28;
+        public String timedAnnounceMinTier29;
+        public String timedAnnounceMinTier30;
+        public String timedAnnounceMinTier31;
+        public String timedAnnounceMinTier32;
         public String timedMinPlayers1;
         public String timedMinPlayers2;
         public String timedMinPlayers3;
@@ -8076,6 +8254,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedMinPlayers4;
                 case 5 -> timedMinPlayers5;
                 case 6 -> timedMinPlayers6;
+                case 7 -> timedMinPlayers7;
+                case 8 -> timedMinPlayers8;
+                case 9 -> timedMinPlayers9;
+                case 10 -> timedMinPlayers10;
+                case 11 -> timedMinPlayers11;
+                case 12 -> timedMinPlayers12;
+                case 13 -> timedMinPlayers13;
+                case 14 -> timedMinPlayers14;
+                case 15 -> timedMinPlayers15;
+                case 16 -> timedMinPlayers16;
+                case 17 -> timedMinPlayers17;
+                case 18 -> timedMinPlayers18;
+                case 19 -> timedMinPlayers19;
+                case 20 -> timedMinPlayers20;
+                case 21 -> timedMinPlayers21;
+                case 22 -> timedMinPlayers22;
+                case 23 -> timedMinPlayers23;
+                case 24 -> timedMinPlayers24;
+                case 25 -> timedMinPlayers25;
+                case 26 -> timedMinPlayers26;
+                case 27 -> timedMinPlayers27;
+                case 28 -> timedMinPlayers28;
+                case 29 -> timedMinPlayers29;
+                case 30 -> timedMinPlayers30;
+                case 31 -> timedMinPlayers31;
+                case 32 -> timedMinPlayers32;
                 default -> null;
             };
         }
@@ -8088,6 +8292,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedEverySeconds4;
                 case 5 -> timedEverySeconds5;
                 case 6 -> timedEverySeconds6;
+                case 7 -> timedEverySeconds7;
+                case 8 -> timedEverySeconds8;
+                case 9 -> timedEverySeconds9;
+                case 10 -> timedEverySeconds10;
+                case 11 -> timedEverySeconds11;
+                case 12 -> timedEverySeconds12;
+                case 13 -> timedEverySeconds13;
+                case 14 -> timedEverySeconds14;
+                case 15 -> timedEverySeconds15;
+                case 16 -> timedEverySeconds16;
+                case 17 -> timedEverySeconds17;
+                case 18 -> timedEverySeconds18;
+                case 19 -> timedEverySeconds19;
+                case 20 -> timedEverySeconds20;
+                case 21 -> timedEverySeconds21;
+                case 22 -> timedEverySeconds22;
+                case 23 -> timedEverySeconds23;
+                case 24 -> timedEverySeconds24;
+                case 25 -> timedEverySeconds25;
+                case 26 -> timedEverySeconds26;
+                case 27 -> timedEverySeconds27;
+                case 28 -> timedEverySeconds28;
+                case 29 -> timedEverySeconds29;
+                case 30 -> timedEverySeconds30;
+                case 31 -> timedEverySeconds31;
+                case 32 -> timedEverySeconds32;
                 default -> null;
             };
         }
@@ -8100,6 +8330,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedIntervalHours4;
                 case 5 -> timedIntervalHours5;
                 case 6 -> timedIntervalHours6;
+                case 7 -> timedIntervalHours7;
+                case 8 -> timedIntervalHours8;
+                case 9 -> timedIntervalHours9;
+                case 10 -> timedIntervalHours10;
+                case 11 -> timedIntervalHours11;
+                case 12 -> timedIntervalHours12;
+                case 13 -> timedIntervalHours13;
+                case 14 -> timedIntervalHours14;
+                case 15 -> timedIntervalHours15;
+                case 16 -> timedIntervalHours16;
+                case 17 -> timedIntervalHours17;
+                case 18 -> timedIntervalHours18;
+                case 19 -> timedIntervalHours19;
+                case 20 -> timedIntervalHours20;
+                case 21 -> timedIntervalHours21;
+                case 22 -> timedIntervalHours22;
+                case 23 -> timedIntervalHours23;
+                case 24 -> timedIntervalHours24;
+                case 25 -> timedIntervalHours25;
+                case 26 -> timedIntervalHours26;
+                case 27 -> timedIntervalHours27;
+                case 28 -> timedIntervalHours28;
+                case 29 -> timedIntervalHours29;
+                case 30 -> timedIntervalHours30;
+                case 31 -> timedIntervalHours31;
+                case 32 -> timedIntervalHours32;
                 default -> null;
             };
         }
@@ -8112,6 +8368,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedIntervalDays4;
                 case 5 -> timedIntervalDays5;
                 case 6 -> timedIntervalDays6;
+                case 7 -> timedIntervalDays7;
+                case 8 -> timedIntervalDays8;
+                case 9 -> timedIntervalDays9;
+                case 10 -> timedIntervalDays10;
+                case 11 -> timedIntervalDays11;
+                case 12 -> timedIntervalDays12;
+                case 13 -> timedIntervalDays13;
+                case 14 -> timedIntervalDays14;
+                case 15 -> timedIntervalDays15;
+                case 16 -> timedIntervalDays16;
+                case 17 -> timedIntervalDays17;
+                case 18 -> timedIntervalDays18;
+                case 19 -> timedIntervalDays19;
+                case 20 -> timedIntervalDays20;
+                case 21 -> timedIntervalDays21;
+                case 22 -> timedIntervalDays22;
+                case 23 -> timedIntervalDays23;
+                case 24 -> timedIntervalDays24;
+                case 25 -> timedIntervalDays25;
+                case 26 -> timedIntervalDays26;
+                case 27 -> timedIntervalDays27;
+                case 28 -> timedIntervalDays28;
+                case 29 -> timedIntervalDays29;
+                case 30 -> timedIntervalDays30;
+                case 31 -> timedIntervalDays31;
+                case 32 -> timedIntervalDays32;
                 default -> null;
             };
         }
@@ -8124,6 +8406,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedIntervalSeconds4;
                 case 5 -> timedIntervalSeconds5;
                 case 6 -> timedIntervalSeconds6;
+                case 7 -> timedIntervalSeconds7;
+                case 8 -> timedIntervalSeconds8;
+                case 9 -> timedIntervalSeconds9;
+                case 10 -> timedIntervalSeconds10;
+                case 11 -> timedIntervalSeconds11;
+                case 12 -> timedIntervalSeconds12;
+                case 13 -> timedIntervalSeconds13;
+                case 14 -> timedIntervalSeconds14;
+                case 15 -> timedIntervalSeconds15;
+                case 16 -> timedIntervalSeconds16;
+                case 17 -> timedIntervalSeconds17;
+                case 18 -> timedIntervalSeconds18;
+                case 19 -> timedIntervalSeconds19;
+                case 20 -> timedIntervalSeconds20;
+                case 21 -> timedIntervalSeconds21;
+                case 22 -> timedIntervalSeconds22;
+                case 23 -> timedIntervalSeconds23;
+                case 24 -> timedIntervalSeconds24;
+                case 25 -> timedIntervalSeconds25;
+                case 26 -> timedIntervalSeconds26;
+                case 27 -> timedIntervalSeconds27;
+                case 28 -> timedIntervalSeconds28;
+                case 29 -> timedIntervalSeconds29;
+                case 30 -> timedIntervalSeconds30;
+                case 31 -> timedIntervalSeconds31;
+                case 32 -> timedIntervalSeconds32;
                 default -> null;
             };
         }
@@ -8136,6 +8444,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedArrivalHours4;
                 case 5 -> timedArrivalHours5;
                 case 6 -> timedArrivalHours6;
+                case 7 -> timedArrivalHours7;
+                case 8 -> timedArrivalHours8;
+                case 9 -> timedArrivalHours9;
+                case 10 -> timedArrivalHours10;
+                case 11 -> timedArrivalHours11;
+                case 12 -> timedArrivalHours12;
+                case 13 -> timedArrivalHours13;
+                case 14 -> timedArrivalHours14;
+                case 15 -> timedArrivalHours15;
+                case 16 -> timedArrivalHours16;
+                case 17 -> timedArrivalHours17;
+                case 18 -> timedArrivalHours18;
+                case 19 -> timedArrivalHours19;
+                case 20 -> timedArrivalHours20;
+                case 21 -> timedArrivalHours21;
+                case 22 -> timedArrivalHours22;
+                case 23 -> timedArrivalHours23;
+                case 24 -> timedArrivalHours24;
+                case 25 -> timedArrivalHours25;
+                case 26 -> timedArrivalHours26;
+                case 27 -> timedArrivalHours27;
+                case 28 -> timedArrivalHours28;
+                case 29 -> timedArrivalHours29;
+                case 30 -> timedArrivalHours30;
+                case 31 -> timedArrivalHours31;
+                case 32 -> timedArrivalHours32;
                 default -> null;
             };
         }
@@ -8148,6 +8482,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedArrivalMinutes4;
                 case 5 -> timedArrivalMinutes5;
                 case 6 -> timedArrivalMinutes6;
+                case 7 -> timedArrivalMinutes7;
+                case 8 -> timedArrivalMinutes8;
+                case 9 -> timedArrivalMinutes9;
+                case 10 -> timedArrivalMinutes10;
+                case 11 -> timedArrivalMinutes11;
+                case 12 -> timedArrivalMinutes12;
+                case 13 -> timedArrivalMinutes13;
+                case 14 -> timedArrivalMinutes14;
+                case 15 -> timedArrivalMinutes15;
+                case 16 -> timedArrivalMinutes16;
+                case 17 -> timedArrivalMinutes17;
+                case 18 -> timedArrivalMinutes18;
+                case 19 -> timedArrivalMinutes19;
+                case 20 -> timedArrivalMinutes20;
+                case 21 -> timedArrivalMinutes21;
+                case 22 -> timedArrivalMinutes22;
+                case 23 -> timedArrivalMinutes23;
+                case 24 -> timedArrivalMinutes24;
+                case 25 -> timedArrivalMinutes25;
+                case 26 -> timedArrivalMinutes26;
+                case 27 -> timedArrivalMinutes27;
+                case 28 -> timedArrivalMinutes28;
+                case 29 -> timedArrivalMinutes29;
+                case 30 -> timedArrivalMinutes30;
+                case 31 -> timedArrivalMinutes31;
+                case 32 -> timedArrivalMinutes32;
                 default -> null;
             };
         }
@@ -8160,6 +8520,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedArrivalSeconds4;
                 case 5 -> timedArrivalSeconds5;
                 case 6 -> timedArrivalSeconds6;
+                case 7 -> timedArrivalSeconds7;
+                case 8 -> timedArrivalSeconds8;
+                case 9 -> timedArrivalSeconds9;
+                case 10 -> timedArrivalSeconds10;
+                case 11 -> timedArrivalSeconds11;
+                case 12 -> timedArrivalSeconds12;
+                case 13 -> timedArrivalSeconds13;
+                case 14 -> timedArrivalSeconds14;
+                case 15 -> timedArrivalSeconds15;
+                case 16 -> timedArrivalSeconds16;
+                case 17 -> timedArrivalSeconds17;
+                case 18 -> timedArrivalSeconds18;
+                case 19 -> timedArrivalSeconds19;
+                case 20 -> timedArrivalSeconds20;
+                case 21 -> timedArrivalSeconds21;
+                case 22 -> timedArrivalSeconds22;
+                case 23 -> timedArrivalSeconds23;
+                case 24 -> timedArrivalSeconds24;
+                case 25 -> timedArrivalSeconds25;
+                case 26 -> timedArrivalSeconds26;
+                case 27 -> timedArrivalSeconds27;
+                case 28 -> timedArrivalSeconds28;
+                case 29 -> timedArrivalSeconds29;
+                case 30 -> timedArrivalSeconds30;
+                case 31 -> timedArrivalSeconds31;
+                case 32 -> timedArrivalSeconds32;
                 default -> null;
             };
         }
@@ -8172,6 +8558,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedRequirePlayer4;
                 case 5 -> timedRequirePlayer5;
                 case 6 -> timedRequirePlayer6;
+                case 7 -> timedRequirePlayer7;
+                case 8 -> timedRequirePlayer8;
+                case 9 -> timedRequirePlayer9;
+                case 10 -> timedRequirePlayer10;
+                case 11 -> timedRequirePlayer11;
+                case 12 -> timedRequirePlayer12;
+                case 13 -> timedRequirePlayer13;
+                case 14 -> timedRequirePlayer14;
+                case 15 -> timedRequirePlayer15;
+                case 16 -> timedRequirePlayer16;
+                case 17 -> timedRequirePlayer17;
+                case 18 -> timedRequirePlayer18;
+                case 19 -> timedRequirePlayer19;
+                case 20 -> timedRequirePlayer20;
+                case 21 -> timedRequirePlayer21;
+                case 22 -> timedRequirePlayer22;
+                case 23 -> timedRequirePlayer23;
+                case 24 -> timedRequirePlayer24;
+                case 25 -> timedRequirePlayer25;
+                case 26 -> timedRequirePlayer26;
+                case 27 -> timedRequirePlayer27;
+                case 28 -> timedRequirePlayer28;
+                case 29 -> timedRequirePlayer29;
+                case 30 -> timedRequirePlayer30;
+                case 31 -> timedRequirePlayer31;
+                case 32 -> timedRequirePlayer32;
                 default -> null;
             };
         }
@@ -8184,6 +8596,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedGraceEnabled4;
                 case 5 -> timedGraceEnabled5;
                 case 6 -> timedGraceEnabled6;
+                case 7 -> timedGraceEnabled7;
+                case 8 -> timedGraceEnabled8;
+                case 9 -> timedGraceEnabled9;
+                case 10 -> timedGraceEnabled10;
+                case 11 -> timedGraceEnabled11;
+                case 12 -> timedGraceEnabled12;
+                case 13 -> timedGraceEnabled13;
+                case 14 -> timedGraceEnabled14;
+                case 15 -> timedGraceEnabled15;
+                case 16 -> timedGraceEnabled16;
+                case 17 -> timedGraceEnabled17;
+                case 18 -> timedGraceEnabled18;
+                case 19 -> timedGraceEnabled19;
+                case 20 -> timedGraceEnabled20;
+                case 21 -> timedGraceEnabled21;
+                case 22 -> timedGraceEnabled22;
+                case 23 -> timedGraceEnabled23;
+                case 24 -> timedGraceEnabled24;
+                case 25 -> timedGraceEnabled25;
+                case 26 -> timedGraceEnabled26;
+                case 27 -> timedGraceEnabled27;
+                case 28 -> timedGraceEnabled28;
+                case 29 -> timedGraceEnabled29;
+                case 30 -> timedGraceEnabled30;
+                case 31 -> timedGraceEnabled31;
+                case 32 -> timedGraceEnabled32;
                 default -> null;
             };
         }
@@ -8196,6 +8634,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedGraceSeconds4;
                 case 5 -> timedGraceSeconds5;
                 case 6 -> timedGraceSeconds6;
+                case 7 -> timedGraceSeconds7;
+                case 8 -> timedGraceSeconds8;
+                case 9 -> timedGraceSeconds9;
+                case 10 -> timedGraceSeconds10;
+                case 11 -> timedGraceSeconds11;
+                case 12 -> timedGraceSeconds12;
+                case 13 -> timedGraceSeconds13;
+                case 14 -> timedGraceSeconds14;
+                case 15 -> timedGraceSeconds15;
+                case 16 -> timedGraceSeconds16;
+                case 17 -> timedGraceSeconds17;
+                case 18 -> timedGraceSeconds18;
+                case 19 -> timedGraceSeconds19;
+                case 20 -> timedGraceSeconds20;
+                case 21 -> timedGraceSeconds21;
+                case 22 -> timedGraceSeconds22;
+                case 23 -> timedGraceSeconds23;
+                case 24 -> timedGraceSeconds24;
+                case 25 -> timedGraceSeconds25;
+                case 26 -> timedGraceSeconds26;
+                case 27 -> timedGraceSeconds27;
+                case 28 -> timedGraceSeconds28;
+                case 29 -> timedGraceSeconds29;
+                case 30 -> timedGraceSeconds30;
+                case 31 -> timedGraceSeconds31;
+                case 32 -> timedGraceSeconds32;
                 default -> null;
             };
         }
@@ -8208,6 +8672,32 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedAnnounceGlobal4;
                 case 5 -> timedAnnounceGlobal5;
                 case 6 -> timedAnnounceGlobal6;
+                case 7 -> timedAnnounceGlobal7;
+                case 8 -> timedAnnounceGlobal8;
+                case 9 -> timedAnnounceGlobal9;
+                case 10 -> timedAnnounceGlobal10;
+                case 11 -> timedAnnounceGlobal11;
+                case 12 -> timedAnnounceGlobal12;
+                case 13 -> timedAnnounceGlobal13;
+                case 14 -> timedAnnounceGlobal14;
+                case 15 -> timedAnnounceGlobal15;
+                case 16 -> timedAnnounceGlobal16;
+                case 17 -> timedAnnounceGlobal17;
+                case 18 -> timedAnnounceGlobal18;
+                case 19 -> timedAnnounceGlobal19;
+                case 20 -> timedAnnounceGlobal20;
+                case 21 -> timedAnnounceGlobal21;
+                case 22 -> timedAnnounceGlobal22;
+                case 23 -> timedAnnounceGlobal23;
+                case 24 -> timedAnnounceGlobal24;
+                case 25 -> timedAnnounceGlobal25;
+                case 26 -> timedAnnounceGlobal26;
+                case 27 -> timedAnnounceGlobal27;
+                case 28 -> timedAnnounceGlobal28;
+                case 29 -> timedAnnounceGlobal29;
+                case 30 -> timedAnnounceGlobal30;
+                case 31 -> timedAnnounceGlobal31;
+                case 32 -> timedAnnounceGlobal32;
                 default -> null;
             };
         }
@@ -8220,6 +8710,70 @@ public final class BossArenaConfigPage extends InteractiveCustomUIPage<BossArena
                 case 4 -> timedAnnounceWorld4;
                 case 5 -> timedAnnounceWorld5;
                 case 6 -> timedAnnounceWorld6;
+                case 7 -> timedAnnounceWorld7;
+                case 8 -> timedAnnounceWorld8;
+                case 9 -> timedAnnounceWorld9;
+                case 10 -> timedAnnounceWorld10;
+                case 11 -> timedAnnounceWorld11;
+                case 12 -> timedAnnounceWorld12;
+                case 13 -> timedAnnounceWorld13;
+                case 14 -> timedAnnounceWorld14;
+                case 15 -> timedAnnounceWorld15;
+                case 16 -> timedAnnounceWorld16;
+                case 17 -> timedAnnounceWorld17;
+                case 18 -> timedAnnounceWorld18;
+                case 19 -> timedAnnounceWorld19;
+                case 20 -> timedAnnounceWorld20;
+                case 21 -> timedAnnounceWorld21;
+                case 22 -> timedAnnounceWorld22;
+                case 23 -> timedAnnounceWorld23;
+                case 24 -> timedAnnounceWorld24;
+                case 25 -> timedAnnounceWorld25;
+                case 26 -> timedAnnounceWorld26;
+                case 27 -> timedAnnounceWorld27;
+                case 28 -> timedAnnounceWorld28;
+                case 29 -> timedAnnounceWorld29;
+                case 30 -> timedAnnounceWorld30;
+                case 31 -> timedAnnounceWorld31;
+                case 32 -> timedAnnounceWorld32;
+                default -> null;
+            };
+        }
+
+        public String getTimedAnnounceMinTier(int row) {
+            return switch (row) {
+                case 1 -> timedAnnounceMinTier1;
+                case 2 -> timedAnnounceMinTier2;
+                case 3 -> timedAnnounceMinTier3;
+                case 4 -> timedAnnounceMinTier4;
+                case 5 -> timedAnnounceMinTier5;
+                case 6 -> timedAnnounceMinTier6;
+                case 7 -> timedAnnounceMinTier7;
+                case 8 -> timedAnnounceMinTier8;
+                case 9 -> timedAnnounceMinTier9;
+                case 10 -> timedAnnounceMinTier10;
+                case 11 -> timedAnnounceMinTier11;
+                case 12 -> timedAnnounceMinTier12;
+                case 13 -> timedAnnounceMinTier13;
+                case 14 -> timedAnnounceMinTier14;
+                case 15 -> timedAnnounceMinTier15;
+                case 16 -> timedAnnounceMinTier16;
+                case 17 -> timedAnnounceMinTier17;
+                case 18 -> timedAnnounceMinTier18;
+                case 19 -> timedAnnounceMinTier19;
+                case 20 -> timedAnnounceMinTier20;
+                case 21 -> timedAnnounceMinTier21;
+                case 22 -> timedAnnounceMinTier22;
+                case 23 -> timedAnnounceMinTier23;
+                case 24 -> timedAnnounceMinTier24;
+                case 25 -> timedAnnounceMinTier25;
+                case 26 -> timedAnnounceMinTier26;
+                case 27 -> timedAnnounceMinTier27;
+                case 28 -> timedAnnounceMinTier28;
+                case 29 -> timedAnnounceMinTier29;
+                case 30 -> timedAnnounceMinTier30;
+                case 31 -> timedAnnounceMinTier31;
+                case 32 -> timedAnnounceMinTier32;
                 default -> null;
             };
         }

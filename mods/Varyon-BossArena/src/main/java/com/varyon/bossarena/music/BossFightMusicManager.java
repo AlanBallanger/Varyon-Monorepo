@@ -98,15 +98,14 @@ public final class BossFightMusicManager {
         }
         String fileName = resolved.getFileName().toString();
         long generation = generationCounter.getAndIncrement();
-        int slot = BossFightMusicIds.normalizeSlot((int) generation);
-        AmbienceFX packed = AmbienceFX.getAssetMap().getAsset(BossFightMusicIds.ambienceAssetId(fileName, slot));
+        AmbienceFX packed = AmbienceFX.getAssetMap().getAsset(BossFightMusicIds.ambienceAssetId(fileName));
         if (packed == null || packed.getMusicContainerIndex() < 0) {
             rebuildPack();
-            packed = AmbienceFX.getAssetMap().getAsset(BossFightMusicIds.ambienceAssetId(fileName, slot));
+            packed = AmbienceFX.getAssetMap().getAsset(BossFightMusicIds.ambienceAssetId(fileName));
         }
         if (packed == null || packed.getMusicContainerIndex() < 0) {
             LOGGER.warning("[BossArena] Track packé mais AmbienceFX introuvable pour '" + fileName
-                    + "' (id=" + BossFightMusicIds.ambienceAssetId(fileName, slot) + ")");
+                    + "' (id=" + BossFightMusicIds.ambienceAssetId(fileName) + ")");
         }
         sessions.put(
                 sessionId(eventId),
@@ -120,7 +119,6 @@ public final class BossFightMusicManager {
                         fileName,
                         generation));
         LOGGER.info("[BossArena] Musique combat démarrée: " + fileName
-                + " slot=" + slot
                 + " rayon=" + def.getMusicRadius()
                 + " centre=(" + center.x + "," + center.y + "," + center.z + ")"
                 + " monde=" + worldName

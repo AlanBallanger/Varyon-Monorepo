@@ -85,7 +85,6 @@ public final class BossSpawnService {
 
     private final BossTrackingSystem tracking;
     private final BossArenaConfig config;
-    private final Map<UUID, BossModifiers> pendingDetachedAddModifiers = new ConcurrentHashMap<>();
 
     public BossSpawnService(BossTrackingSystem tracking, BossArenaConfig config) {
         this.tracking = tracking;
@@ -282,6 +281,23 @@ public final class BossSpawnService {
                                   Long countdownOverrideMinutes,
                                   Consumer<UUID> onPrimaryBossSpawned,
                                   boolean ignoreProximity) {
+        return spawnBossFromJson(sender, bossId, world, spawnPos, arenaId, countdownOverrideMinutes,
+                onPrimaryBossSpawned, ignoreProximity, false);
+    }
+
+    /**
+     * @param skipPreBossWaves true to spawn the boss immediately, ignoring any pre-boss wave
+     *                         schedule configured on the boss definition ("Boss direct" action).
+     */
+    public UUID spawnBossFromJson(@SuppressWarnings("unused") CommandSender sender,
+                                  String bossId,
+                                  World world,
+                                  Vector3d spawnPos,
+                                  String arenaId,
+                                  Long countdownOverrideMinutes,
+                                  Consumer<UUID> onPrimaryBossSpawned,
+                                  boolean ignoreProximity,
+                                  boolean skipPreBossWaves) {
         BossDefinition def = BossRegistry.get(bossId);
         if (def == null) {
             LOGGER.warning("Boss definition not found: " + bossId);
@@ -364,7 +380,8 @@ public final class BossSpawnService {
             }
         }
         final List<BossDefinition.ExtraMobs.ScheduledWave> resolvedWaves = resolvedWavesBuffer;
-        final List<BossDefinition.ExtraMobs.ScheduledWave> preBossWaves = resolvePreBossWaves(resolvedWaves);
+        final List<BossDefinition.ExtraMobs.ScheduledWave> preBossWaves =
+                skipPreBossWaves ? List.of() : resolvePreBossWaves(resolvedWaves);
         boolean hasPreBossSchedule = !preBossWaves.isEmpty();
         final UUID deferredEventId = hasPreBossSchedule
                 ? tracking.createEvent(
@@ -612,7 +629,7 @@ public final class BossSpawnService {
             tracking.cancelEvent(bossEventId);
             synchronized (pendingPreBossAdds) {
                 for (UUID pendingAdd : pendingPreBossAdds) {
-                    pendingDetachedAddModifiers.remove(pendingAdd);
+                    tracking.takePendingAddModifiers(pendingAdd);
                 }
                 pendingPreBossAdds.clear();
             }
@@ -1225,7 +1242,7 @@ public final class BossSpawnService {
 
         int attached = 0;
         for (UUID addUuid : preBossAdds) {
-            BossModifiers addMods = pendingDetachedAddModifiers.remove(addUuid);
+            BossModifiers addMods = tracking.takePendingAddModifiers(addUuid);
             if (!isEntityAlive(world, addUuid)) {
                 continue;
             }
@@ -1786,6 +1803,8 @@ public final class BossSpawnService {
         BossModifiers combinedAddMods = VaryonMobScale.absorbInto(addStore, addRef, addMods);
         applyModifiers(addStore, addRef, combinedAddMods, addUuid);
         disableDefaultEntityLoot(addStore, addRef, add.npcId);
+        // Wave mobs are pure combat filler: no vanilla drops, and no Varyon loot/essence either.
+        VaryonMobScale.suppressVaryonDrops(addStore, addRef);
         if (!addRef.isValid()) {
             LOGGER.warning("Spawned add '" + add.npcId + "' became invalid during setup; skipping tracking.");
             return null;
@@ -1795,7 +1814,7 @@ public final class BossSpawnService {
             if (bossUuid != null) {
                 tracking.trackAdd(bossUuid, addUuid, combinedAddMods);
             } else {
-                pendingDetachedAddModifiers.put(addUuid, combinedAddMods);
+                tracking.setPendingAddModifiers(addUuid, combinedAddMods);
             }
         }
 

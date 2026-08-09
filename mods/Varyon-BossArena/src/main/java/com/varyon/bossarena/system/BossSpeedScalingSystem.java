@@ -42,6 +42,8 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
     private static final Field INTERACTION_MANAGER_COOLDOWN_HANDLER_FIELD = resolveField(InteractionManager.class, "cooldownHandler");
     private static final Field COOLDOWN_HANDLER_COOLDOWNS_FIELD = resolveField(CooldownHandler.class, "cooldowns");
     private static final Field MOTION_CONTROLLER_MAX_HEAD_ROTATION_SPEED_FIELD = resolveField(MotionControllerBase.class, "maxHeadRotationSpeed");
+    /** Per-entity regen config on the Health stat; emptied to stop natural regen during HP-% waves. */
+    private static final Field REGENERATING_VALUES_FIELD = resolveField(EntityStatValue.class, "regeneratingValues");
 
     private static final long REGEN_INTERVAL_MS = 1000L;
 
@@ -49,6 +51,10 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
     private final Map<MotionControllerBase, Float> baseTurnRateByController =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final Set<UUID> warnedLowSpeedBosses = ConcurrentHashMap.newKeySet();
+    /** HP a boss had when its HP-% wave started; fallback path only, when reflection is unavailable. */
+    private final Map<UUID, Float> heldHealthDuringHpWave = new ConcurrentHashMap<>();
+    /** Regenerating values removed from a boss's Health stat during an HP-% wave, kept for restore. */
+    private final Map<UUID, Object[]> suppressedRegenValues = new ConcurrentHashMap<>();
     /**
      * Per-world wall-clock deadlines so multi-world ticks don't accelerate regen/scalers.
      * tick() may fire more than once per real-time interval (observed in production), so pacing
@@ -135,6 +141,10 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
         if (nextScalerAt == null || now >= nextScalerAt) {
             nextScalerRunAtMsByWorld.put(worldKey, now + UPDATE_INTERVAL_MS);
             applyPeriodicScalers = true;
+            // A boss that died mid-wave is no longer ticked, so its saved regen state would leak.
+            // The entity is gone, so there is nothing left to restore it onto — just drop the entry.
+            suppressedRegenValues.keySet().removeIf(uuid -> !trackingSystem.isTracked(uuid));
+            heldHealthDuringHpWave.keySet().removeIf(uuid -> !trackingSystem.isTracked(uuid));
         }
         if (!applySpeed && !applyPeriodicScalers && !applyRegenTick) {
             return;
@@ -188,6 +198,7 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
             applyTurnRateMultiplier(entityUuid, world, modifiers);
             applyInteractionCooldownScaling(entityUuid, world, modifiers);
             resyncHealthModifier(entityUuid, store, external, modifiers);
+            holdHealthDuringHpWave(entityUuid, store, external);
         }
         if (applyRegenTick) {
             applyFlatRegeneration(entityUuid, store, external, modifiers);
@@ -226,9 +237,109 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
         }
     }
 
+    /**
+     * Suppresses the engine's natural HP regeneration while an HP-% wave is up.
+     *
+     * <p>The boss cannot be damaged during the wave, so out-of-combat regen would heal it back to
+     * full before players can resume. Rather than undoing the healing after the fact, the stat's
+     * per-entity {@code regeneratingValues} are cleared so regen never runs, then restored when the
+     * wave ends. Falls back to pinning current HP if the field cannot be reached.
+     */
+    private void holdHealthDuringHpWave(UUID entityUuid, Store<EntityStore> store, EntityStore external) {
+        boolean locked = trackingSystem.isTracked(entityUuid)
+                && trackingSystem.isBossDamageLockedByHpWave(entityUuid);
+        if (!locked && !heldHealthDuringHpWave.containsKey(entityUuid)
+                && !suppressedRegenValues.containsKey(entityUuid)) {
+            return;
+        }
+        try {
+            Ref<EntityStore> entityRef = external != null ? external.getRefFromUUID(entityUuid) : null;
+            if (entityRef == null || !entityRef.isValid()) {
+                return;
+            }
+            Object statMapObj = store.getComponent(entityRef, EntityStatMap.getComponentType());
+            if (!(statMapObj instanceof EntityStatMap statMap)) {
+                return;
+            }
+            int healthIndex = DefaultEntityStatTypes.getHealth();
+            if (healthIndex < 0) {
+                return;
+            }
+            EntityStatValue health = statMap.get(healthIndex);
+            if (health == null) {
+                return;
+            }
+
+            if (!locked) {
+                restoreRegeneration(entityUuid, health);
+                heldHealthDuringHpWave.remove(entityUuid);
+                return;
+            }
+
+            if (suppressRegeneration(entityUuid, health)) {
+                return;
+            }
+
+            // Reflection unavailable: fall back to pinning HP at the value held when the wave began.
+            float current = health.get();
+            Float held = heldHealthDuringHpWave.get(entityUuid);
+            if (held == null) {
+                heldHealthDuringHpWave.put(entityUuid, current);
+                return;
+            }
+            if (current > held + 0.01f) {
+                statMap.setStatValue(EntityStatMap.Predictable.ALL, healthIndex, held);
+            } else if (current < held) {
+                heldHealthDuringHpWave.put(entityUuid, current);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Failed to hold HP during HP wave for entity " + entityUuid, e);
+        }
+    }
+
+    /** Empties the stat's regenerating values, remembering them for restore. True when applied. */
+    private boolean suppressRegeneration(UUID entityUuid, EntityStatValue health) {
+        if (REGENERATING_VALUES_FIELD == null) {
+            return false;
+        }
+        if (suppressedRegenValues.containsKey(entityUuid)) {
+            return true;
+        }
+        try {
+            Object existing = REGENERATING_VALUES_FIELD.get(health);
+            if (!(existing instanceof Object[] values) || values.length == 0) {
+                return true;
+            }
+            suppressedRegenValues.put(entityUuid, values);
+            REGENERATING_VALUES_FIELD.set(health, java.lang.reflect.Array.newInstance(
+                    values.getClass().getComponentType(), 0));
+            return true;
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Failed to suppress regeneration for entity " + entityUuid, e);
+            return false;
+        }
+    }
+
+    private void restoreRegeneration(UUID entityUuid, EntityStatValue health) {
+        Object[] saved = suppressedRegenValues.remove(entityUuid);
+        if (saved == null || REGENERATING_VALUES_FIELD == null) {
+            return;
+        }
+        try {
+            REGENERATING_VALUES_FIELD.set(health, saved);
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, "Failed to restore regeneration for entity " + entityUuid, e);
+        }
+    }
+
     private void applySpeedMultiplier(UUID entityUuid, World world, BossModifiers modifiers) {
+        // While an HP-% wave is up the boss cannot be damaged, so it must not wander off either:
+        // pin its speed to zero until the wave adds are cleared.
+        boolean frozen = trackingSystem.isTracked(entityUuid)
+                && trackingSystem.isBossDamageLockedByHpWave(entityUuid);
         float speedMultiplier = clampMultiplier(modifiers.speedMultiplier());
-        if (!Float.isFinite(speedMultiplier) || Math.abs(speedMultiplier - 1.0f) <= EPSILON) {
+        if (!frozen
+                && (!Float.isFinite(speedMultiplier) || Math.abs(speedMultiplier - 1.0f) <= EPSILON)) {
             return;
         }
 
@@ -249,6 +360,10 @@ public final class BossSpeedScalingSystem extends TickingSystem<EntityStore> {
             float naturalSpeed = npcEntity.getCurrentHorizontalSpeedMultiplier(entityRef, worldStore);
             if (!Float.isFinite(naturalSpeed)) {
                 naturalSpeed = 1.0f;
+            }
+            if (frozen) {
+                NPC_CACHED_SPEED_FIELD.setFloat(npcEntity, 0.0f);
+                return;
             }
             float desiredSpeed = clampMultiplier(naturalSpeed * speedMultiplier);
             if (desiredSpeed < 0.1f) {

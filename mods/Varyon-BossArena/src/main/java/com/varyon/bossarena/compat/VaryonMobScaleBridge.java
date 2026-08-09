@@ -52,4 +52,29 @@ final class VaryonMobScaleBridge {
         );
         store.putComponent(entityRef, MobScalingComponent.getComponentType(), neutralized);
     }
+
+    /**
+     * Zeroes Varyon's loot and essence multipliers. Arena wave mobs must drop nothing at all, and
+     * their death interaction alone does not stop Varyon-side drops.
+     */
+    static void zeroLootAndEssence(Store<EntityStore> store, Ref<EntityStore> entityRef) {
+        if (MobScalingComponent.getComponentType() == null) {
+            return;
+        }
+        MobScalingComponent scaling = store.getComponent(entityRef, MobScalingComponent.getComponentType());
+        if (scaling == null) {
+            return;
+        }
+        if (scaling.getLootMultiplier() == 0.0f && scaling.getEssenceMultiplier() == 0.0f) {
+            return;
+        }
+        MobScalingComponent stripped = new MobScalingComponent(
+                scaling.getMobLevel(),
+                scaling.getHealthMultiplier(),
+                scaling.getDamageMultiplier(),
+                0.0f,
+                0.0f
+        );
+        store.putComponent(entityRef, MobScalingComponent.getComponentType(), stripped);
+    }
 }

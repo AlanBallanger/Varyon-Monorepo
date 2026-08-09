@@ -5,6 +5,7 @@ import com.varyon.bossarena.config.BossArenaConfig;
 import com.varyon.bossarena.damagechart.BossDamageChartTracker;
 import com.varyon.bossarena.data.Arena;
 import com.varyon.bossarena.data.ArenaRegistry;
+import com.varyon.bossarena.compat.VaryonRpgHud;
 import com.varyon.bossarena.system.BossTrackingSystem;
 import org.joml.Vector3d;
 import com.hypixel.hytale.component.Ref;
@@ -68,12 +69,22 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
                                  List<BossDpsHud.PlayerDamageRow> rows, int personalKills, long expiresAtMs) {
     }
 
+    /**
+     * Marks the fight HUD as shown for this player and hides the Varyon-RPG panels, which occupy
+     * the same screen slot. Restored by {@link VaryonRpgHud#restoreFor} once the HUD goes away.
+     */
+    private void markHudShown(UUID playerUuid) {
+        playersWithHudShown.add(playerUuid);
+        VaryonRpgHud.hideFor(playerUuid);
+    }
+
     /** Drops all per-player tracking state for a disconnected player. Must run on the world thread. */
     public void onPlayerDisconnected(UUID playerUuid) {
         if (playerUuid == null) {
             return;
         }
         playersWithHudShown.remove(playerUuid);
+        VaryonRpgHud.restoreFor(playerUuid);
         consecutiveMissesByPlayer.remove(playerUuid);
         lastFightSnapshotByPlayer.remove(playerUuid);
     }
@@ -149,7 +160,7 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
                 BossDpsHud hud = BossDpsHud.getOrCreate(player, playerRef);
                 hud.updateFight(event.bossName, hp[0], hp[1], rows);
                 playersUpdatedThisTick.add(playerRef.getUuid());
-                playersWithHudShown.add(playerRef.getUuid());
+                markHudShown(playerRef.getUuid());
                 consecutiveMissesByPlayer.remove(playerRef.getUuid());
                 int personalKills = trackingSystem.getEventMobKillsForPlayer(event.eventId, playerRef.getUuid());
                 lastFightSnapshotByPlayer.put(playerRef.getUuid(),
@@ -192,7 +203,7 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
                         snapshot.rows(), snapshot.personalKills());
             }
             playersUpdatedThisTick.add(playerUuid);
-            playersWithHudShown.add(playerUuid);
+            markHudShown(playerUuid);
             consecutiveMissesByPlayer.remove(playerUuid);
         }
     }
@@ -221,7 +232,7 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
                         snapshot.rows());
             }
             playersUpdatedThisTick.add(playerUuid);
-            playersWithHudShown.add(playerUuid);
+            markHudShown(playerUuid);
             consecutiveMissesByPlayer.remove(playerUuid);
             entry.setValue(new FightSnapshot(snapshot.eventId(), snapshot.bossName(), snapshot.bossHpCurrent(),
                     snapshot.bossHpMax(), snapshot.rows(), snapshot.personalKills(), now + POST_KILL_LINGER_MS));
@@ -243,6 +254,7 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
             if (hud != null) {
                 hud.updateFight(null, 0f, 0f, List.of());
             }
+            VaryonRpgHud.restoreFor(playerUuid);
             return true;
         });
     }
@@ -270,7 +282,7 @@ public final class BossDpsHudSystem extends TickingSystem<EntityStore> {
             int personalKills = trackingSystem.getEventMobKillsForPlayer(event.eventId, playerRef.getUuid());
             hud.updateWaveProgress(currentWave, totalWaves, aliveMobs, wavePlannedMobs, totalKilled, personalKills);
             playersUpdatedThisTick.add(playerRef.getUuid());
-            playersWithHudShown.add(playerRef.getUuid());
+            markHudShown(playerRef.getUuid());
             consecutiveMissesByPlayer.remove(playerRef.getUuid());
         }
     }

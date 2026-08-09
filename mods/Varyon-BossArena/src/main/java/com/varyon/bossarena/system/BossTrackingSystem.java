@@ -49,6 +49,9 @@ public class BossTrackingSystem {
      * an already-dying entity before its DeathComponent removes it from tracking. */
     private final Set<UUID> mobKillCountedFor = ConcurrentHashMap.newKeySet();
     private final Map<UUID, BossModifiers> addModifiers = new ConcurrentHashMap<>();
+    /** Modifiers for pre-boss wave adds not yet linked to a boss (no bossUuid exists yet). Consulted
+     * by {@link #getEntityModifiers(UUID)} so their damage is scaled before {@code trackAdd} runs. */
+    private final Map<UUID, BossModifiers> pendingAddModifiers = new ConcurrentHashMap<>();
     /** Baked zone/world HP factor (assetMax × factor × bossMult). Survives before trackAdd. */
     private final Map<UUID, Float> addWorldHealthFactors = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> bossToEvent = new ConcurrentHashMap<>();
@@ -1333,7 +1336,24 @@ public class BossTrackingSystem {
         if (bossData != null) {
             return bossData.modifiers;
         }
-        return addModifiers.get(uuid);
+        BossModifiers mods = addModifiers.get(uuid);
+        if (mods != null) {
+            return mods;
+        }
+        return pendingAddModifiers.get(uuid);
+    }
+
+    /** Registers modifiers for a pre-boss wave add before it has a bossUuid to attach to. */
+    public void setPendingAddModifiers(UUID addUuid, BossModifiers modifiers) {
+        if (addUuid == null || modifiers == null) {
+            return;
+        }
+        pendingAddModifiers.put(addUuid, sanitizeModifiers(modifiers));
+    }
+
+    /** Removes and returns modifiers registered via {@link #setPendingAddModifiers}, if any. */
+    public BossModifiers takePendingAddModifiers(UUID addUuid) {
+        return addUuid == null ? null : pendingAddModifiers.remove(addUuid);
     }
 
     public int getActiveAddCount(UUID bossUuid) {

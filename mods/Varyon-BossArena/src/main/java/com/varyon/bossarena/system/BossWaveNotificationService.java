@@ -1,5 +1,6 @@
 package com.varyon.bossarena.system;
 
+import com.varyon.bossarena.compat.ZoneTier;
 import com.varyon.bossarena.config.BossArenaConfig;
 import com.varyon.bossarena.data.Arena;
 import com.varyon.bossarena.data.ArenaRegistry;
@@ -290,7 +291,8 @@ public final class BossWaveNotificationService {
                                         World world,
                                         String customMessage,
                                         boolean announceServerWide,
-                                        boolean announceWorldWide) {
+                                        boolean announceWorldWide,
+                                        int minTier) {
         LOGGER.info(() -> "notifyTimedSpawn called: boss=" + bossName + " arena=" + arenaId
                 + " world=" + (world != null ? world.getName() : "null")
                 + " serverWide=" + announceServerWide + " worldWide=" + announceWorldWide);
@@ -344,9 +346,16 @@ public final class BossWaveNotificationService {
         int skippedInvalid = 0;
         int chatFailures = 0;
         int titleFailures = 0;
+        int skippedTier = 0;
         for (PlayerRef playerRef : targets) {
             if (playerRef == null || !playerRef.isValid()) {
                 skippedInvalid++;
+                continue;
+            }
+            // Players below the rule's tier don't see it at all: not the chat line, not the title.
+            // A player who unlocked tier 4 still sees tiers 1-4 (tiers are cumulative), just not 5+.
+            if (minTier > 0 && ZoneTier.unlockedTier(playerRef) < minTier) {
+                skippedTier++;
                 continue;
             }
             suppressLocalStatusTitles(playerRef);
@@ -382,12 +391,13 @@ public final class BossWaveNotificationService {
 
         final int notifiedFinal = notified;
         final int skippedInvalidFinal = skippedInvalid;
+        final int skippedTierFinal = skippedTier;
         final int chatFailuresFinal = chatFailures;
         final int titleFailuresFinal = titleFailures;
         LOGGER.info(() -> "notifyTimedSpawn done: boss=" + bossDisplay + " arena=" + arenaDisplay
                 + " scope=" + (announceServerWide ? "server" : "world") + " notified=" + notifiedFinal
-                + " skippedInvalid=" + skippedInvalidFinal + " chatFailures=" + chatFailuresFinal
-                + " titleFailures=" + titleFailuresFinal);
+                + " skippedInvalid=" + skippedInvalidFinal + " skippedTier=" + skippedTierFinal
+                + " chatFailures=" + chatFailuresFinal + " titleFailures=" + titleFailuresFinal);
     }
 
     private static void showToNearbyPlayers(World world,
