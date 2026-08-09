@@ -20,6 +20,7 @@ import com.hypixel.hytale.server.core.universe.world.spawn.ISpawnProvider;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.VaryonPlugin;
 import com.varyon.arena.ArenaManager;
+import com.varyon.compat.BossArenaLookup;
 import com.varyon.config.DifficultyZone;
 import com.varyon.config.ExtractionConfig;
 import com.varyon.config.MessagesConfig;
@@ -85,10 +86,15 @@ public class ExtractCommand extends AbstractPlayerCommand {
 
         Transform playerTransform = playerRef.getTransform();
         double playerX = playerTransform.getPosition().x;
+        double playerY = playerTransform.getPosition().y;
         double playerZ = playerTransform.getPosition().z;
 
         ArenaManager arenaManager = VaryonPlugin.getStaticArenaManager();
-        if (arenaManager != null && arenaManager.findArenaAt(world.getName(), playerX, playerZ) != null) {
+        boolean inVaryonArena = arenaManager != null
+            && arenaManager.findArenaAt(world.getName(), playerX, playerZ) != null;
+        boolean inBossArena = BossArenaLookup.isInBossArena(world.getName(), playerX, playerY, playerZ);
+
+        if (inVaryonArena || inBossArena) {
             if (manager.hasActivePortal(playerId)) {
                 manager.removePlayerPortal(playerId);
             }

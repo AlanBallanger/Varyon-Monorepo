@@ -128,6 +128,7 @@ public class GlobalRewardsManager {
                 distributeFactionReward(FactionManager.Faction.FRACTURE, tier, i + 1);
                 state.markPositiveRewarded();
                 fractureRewardedThisWave = true;
+                announceTierReached(FactionManager.Faction.FRACTURE, i + 1, config.getTiers().size());
             }
 
             if (globalBalance <= -scaledThreshold && state.canRewardNegative(cooldownMs)) {
@@ -135,6 +136,7 @@ public class GlobalRewardsManager {
                 distributeFactionReward(FactionManager.Faction.NOYAU, tier, i + 1);
                 state.markNegativeRewarded();
                 noyauRewardedThisWave = true;
+                announceTierReached(FactionManager.Faction.NOYAU, i + 1, config.getTiers().size());
             }
         }
 
@@ -162,6 +164,37 @@ public class GlobalRewardsManager {
         if (s < 1) s = 1;
         if (s > gaugeAbsMax) s = gaugeAbsMax;
         return s;
+    }
+
+    private static final Color VARYON_TAG_COLOR = Color.decode("#AA55FF");
+
+    private void announceTierReached(@Nonnull FactionManager.Faction faction, int tierNumber, int tierCount) {
+        Color factionColor = faction == FactionManager.Faction.NOYAU ? Color.decode("#5555FF") : Color.decode("#FF8800");
+        Message factionNameMsg = Message.raw(faction.getDisplayName()).color(factionColor);
+
+        Message message;
+        if (tierNumber >= tierCount) {
+            message = Message.join(
+                Message.raw("[Varyon] ").color(VARYON_TAG_COLOR),
+                Message.raw("La faction ").color(Color.WHITE),
+                factionNameMsg,
+                Message.raw(" a dominé Varyon et obtient la dernière récompense ! La jauge est réinitialisée.").color(Color.WHITE)
+            );
+        } else {
+            message = Message.join(
+                Message.raw("[Varyon] ").color(VARYON_TAG_COLOR),
+                Message.raw("La faction ").color(Color.WHITE),
+                factionNameMsg,
+                Message.raw(" a atteint le palier " + tierNumber + " !").color(Color.WHITE)
+            );
+        }
+        broadcastGlobalMessage(message);
+    }
+
+    private static void broadcastGlobalMessage(@Nonnull Message message) {
+        Universe.get().getWorlds().values().forEach(world -> world.execute(() -> {
+            world.getPlayerRefs().forEach(playerRef -> playerRef.sendMessage(message));
+        }));
     }
 
     private static String fragmentGainChatLine(int quantity, int keyTier, @Nonnull String pctLabel) {

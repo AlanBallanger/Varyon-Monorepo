@@ -129,8 +129,9 @@ public class RtpvCommand extends AbstractPlayerCommand {
         DifficultyZone targetZone = zones.get(zoneNumber - 1);
 
         RtpvConfig rtpvConfig = VaryonPlugin.getStaticConfigManager().getRtpvConfig();
+        boolean isAdmin = playerRef.hasPermission("varyon.admin");
         int cooldownSec = rtpvConfig.getCooldownSeconds();
-        if (cooldownSec > 0) {
+        if (!isAdmin && cooldownSec > 0) {
             int remain = RtpvCooldownStore.getRemainingCooldownSeconds(playerRef.getUuid(), cooldownSec);
             if (remain > 0) {
                 context.sendMessage(Message.raw(
@@ -140,7 +141,7 @@ public class RtpvCommand extends AbstractPlayerCommand {
             }
         }
 
-        if (!RtpvCooldownStore.isConsecutiveRtpvAllowed(playerRef.getUuid(), cooldownSec)) {
+        if (!isAdmin && !RtpvCooldownStore.isConsecutiveRtpvAllowed(playerRef.getUuid(), cooldownSec)) {
             context.sendMessage(Message.raw(
                 "Limite atteinte : 5 téléportations aléatoires d'affilée maximum."
             ).color(Color.RED));

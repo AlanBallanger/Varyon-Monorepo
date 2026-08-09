@@ -87,14 +87,12 @@ public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPa
         RtpvConfig rtpvConfig = null;
         List<DifficultyZone> zones = null;
         boolean economyEnabled = false;
-        double safeMultiplier = 2.0;
         try {
             if (VaryonPlugin.getStaticConfigManager() != null) {
                 zonePermissionsConfig = VaryonPlugin.getStaticConfigManager().getZonePermissionsConfig();
                 rtpvConfig = VaryonPlugin.getStaticConfigManager().getRtpvConfig();
                 zones = VaryonPlugin.getStaticConfigManager().getZoneConfig().getZones();
                 economyEnabled = rtpvConfig.isEconomyEnabled();
-                safeMultiplier = rtpvConfig.getSafeCostMultiplier();
             }
         } catch (Exception ignored) {}
 
@@ -118,7 +116,7 @@ public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPa
 
             commandBuilder.set("#ZoneRadius" + i + ".Visible", true);
 
-            int arenaCost = arenaTeleportCost(zones, i, safeMultiplier);
+            int arenaCost = arenaTeleportCost(zones, i);
 
             if (economyEnabled) {
                 commandBuilder.set("#ZoneMainLead" + i + ".Text", TELEPORT_LABEL + " ");
@@ -189,7 +187,7 @@ public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPa
                 ? VaryonPlugin.getStaticConfigManager().getZoneConfig().getZones() : null;
 
             if (rtpvConfig != null && rtpvConfig.isEconomyEnabled()) {
-                int cost = arenaTeleportCost(zones, requestedZone, rtpvConfig.getSafeCostMultiplier());
+                int cost = arenaTeleportCost(zones, requestedZone);
                 BigDecimal costBD = BigDecimal.valueOf(cost);
                 try {
                     if (!hasEnoughBalance(playerRefComp, costBD)) {
@@ -220,12 +218,11 @@ public class ArenasPortalUIPage extends InteractiveCustomUIPage<ArenasPortalUIPa
         }
     }
 
-    private static int arenaTeleportCost(@Nullable List<DifficultyZone> zones, int arenaIndexOneBased, double safeMultiplier) {
+    private static int arenaTeleportCost(@Nullable List<DifficultyZone> zones, int arenaIndexOneBased) {
         if (zones == null || arenaIndexOneBased < 1 || arenaIndexOneBased > zones.size()) {
             return 0;
         }
-        int baseCost = zones.get(arenaIndexOneBased - 1).getTeleportCost();
-        return (int) Math.ceil(baseCost * safeMultiplier);
+        return zones.get(arenaIndexOneBased - 1).getTeleportCost();
     }
 
     private static boolean hasEnoughBalance(PlayerRef playerRef, BigDecimal cost) {
