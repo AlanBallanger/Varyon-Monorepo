@@ -1,0 +1,20 @@
+{
+  "Parent": "Furniture_Ancient_Bookshelf",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Readable_Bookshelf_Ancient.name",
+    "Description": "server.items.Varyon_Readable_Bookshelf_Ancient.description"
+  },
+  "Icon": "Icons/ItemsGenerated/Furniture_Ancient_Bookshelf.png",
+  "Categories": [
+    "Furniture.Containers"
+  ],
+  "Recipe": null,
+  "BlockType": {
+    "Flags": {
+      "IsUsable": true
+    },
+    "Interactions": {
+      "Use": "Varyon_Readable_Book_Open"
+    }
+  }
+}

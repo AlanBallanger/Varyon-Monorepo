@@ -41,4 +41,7 @@ include(
     ":mods:WeaponStatsViewer",
     ":mods:Varyon-ExtendedTeleporters",
     ":mods:Varyon-KillCommand",
+    ":mods:Varyon-Death",
+    ":mods:Varyon-ReadableBooks",
+    ":mods:Varyon-Quiver",
 )

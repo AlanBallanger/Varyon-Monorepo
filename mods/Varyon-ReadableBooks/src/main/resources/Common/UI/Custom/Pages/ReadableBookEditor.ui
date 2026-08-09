@@ -1,0 +1,128 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 460, Height: 380);
+
+    #Title {
+      Group {
+        LayoutMode: Left;
+
+        Label {
+          FlexWeight: 1;
+          Text: "Édition du livre";
+          Style: (...$C.@TitleStyle, HorizontalAlignment: Center);
+        }
+
+        TextButton #CloseButton {
+          Text: "X";
+          Anchor: (Width: 24, Height: 24, Top: 2, Right: 8);
+          Style: TextButtonStyle(
+            Default: (LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Sounds: $C.@ButtonSounds
+          );
+        }
+      }
+    }
+
+    #Content {
+      Padding: (Top: 6, Bottom: 8, Left: 16, Right: 16);
+      LayoutMode: Top;
+
+      Label #PositionLabel {
+        Anchor: (Left: 0, Right: 0, Height: 16);
+        Text: "";
+        Style: (FontSize: 10, TextColor: #7a8a9a, HorizontalAlignment: Center);
+      }
+
+      Label {
+        Anchor: (Top: 8, Left: 0, Right: 0, Height: 16);
+        Text: "Titre";
+        Style: (FontSize: 12, RenderBold: true, TextColor: #b8c0c8, HorizontalAlignment: Start);
+      }
+
+      $C.@TextField #TitleInput {
+        @Anchor = (Top: 2, Left: 0, Right: 0);
+        Value: "";
+        MaxLength: 64;
+      }
+
+      Label {
+        Anchor: (Top: 10, Left: 0, Right: 0, Height: 16);
+        Text: "Texte";
+        Style: (FontSize: 12, RenderBold: true, TextColor: #b8c0c8, HorizontalAlignment: Start);
+      }
+
+      $C.@MultilineTextField #TextInput {
+        @Anchor = (Top: 2, Left: 0, Right: 0, Height: 140);
+        Value: "";
+        MaxLength: 4096;
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Top: 12, Height: 40);
+
+        Button #SaveButton {
+          FlexWeight: 1;
+          Anchor: (Right: 8, Height: 40);
+          Style: ButtonStyle(
+            Default: (Background: (Color: #185a28)),
+            Hovered: (Background: (Color: #286a38)),
+            Pressed: (Background: (Color: #0f4018)),
+            Sounds: $C.@ButtonSounds
+          );
+          OutlineColor: #083818;
+          OutlineSize: 1;
+          Group {
+            LayoutMode: Middle;
+            Label {
+              Text: "Enregistrer";
+              Style: (FontSize: 13, RenderBold: true, TextColor: #aaffaa, HorizontalAlignment: Center);
+            }
+          }
+        }
+
+        Button #PreviewButton {
+          Anchor: (Width: 110, Right: 8, Height: 40);
+          Style: ButtonStyle(
+            Default: (Background: (Color: #2a3d58)),
+            Hovered: (Background: (Color: #38567b)),
+            Pressed: (Background: (Color: #4d77a8)),
+            Sounds: $C.@ButtonSounds
+          );
+          OutlineColor: #16243a;
+          OutlineSize: 1;
+          Group {
+            LayoutMode: Middle;
+            Label {
+              Text: "Aperçu";
+              Style: (FontSize: 13, RenderBold: true, TextColor: #cfe0f5, HorizontalAlignment: Center);
+            }
+          }
+        }
+
+        Button #ClearButton {
+          Anchor: (Width: 110, Height: 40);
+          Style: ButtonStyle(
+            Default: (Background: (Color: #6a1818)),
+            Hovered: (Background: (Color: #7a2828)),
+            Pressed: (Background: (Color: #550f0f)),
+            Sounds: $C.@ButtonSounds
+          );
+          OutlineColor: #3a0808;
+          OutlineSize: 1;
+          Group {
+            LayoutMode: Middle;
+            Label {
+              Text: "Effacer";
+              Style: (FontSize: 13, RenderBold: true, TextColor: #ffaaaa, HorizontalAlignment: Center);
+            }
+          }
+        }
+      }
+    }
+  }
+}

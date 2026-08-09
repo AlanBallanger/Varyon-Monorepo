@@ -1,0 +1,20 @@
+{
+  "Parent": "Furniture_Human_Ruins_Bookshelf",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Readable_Bookshelf_Ruins.name",
+    "Description": "server.items.Varyon_Readable_Bookshelf_Ruins.description"
+  },
+  "Icon": "Icons/ItemsGenerated/Furniture_Human_Ruins_Bookshelf.png",
+  "Categories": [
+    "Furniture.Shelves"
+  ],
+  "Recipe": null,
+  "BlockType": {
+    "Flags": {
+      "IsUsable": true
+    },
+    "Interactions": {
+      "Use": "Varyon_Readable_Book_Open"
+    }
+  }
+}

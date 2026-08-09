@@ -1,0 +1,20 @@
+{
+  "Parent": "Recipe_Book_Magic_Void",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Readable_Grimoire_Void.name",
+    "Description": "server.items.Varyon_Readable_Grimoire_Void.description"
+  },
+  "Icon": "Icons/ItemsGenerated/Recipe_Book_Magic_Void.png",
+  "Categories": [
+    "Items.Recipes"
+  ],
+  "Recipe": null,
+  "BlockType": {
+    "Flags": {
+      "IsUsable": true
+    },
+    "Interactions": {
+      "Use": "Varyon_Readable_Book_Open"
+    }
+  }
+}

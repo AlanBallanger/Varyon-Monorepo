@@ -1,0 +1,20 @@
+{
+  "Parent": "Recipe_Book_Magic_Air",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Readable_Grimoire_Air.name",
+    "Description": "server.items.Varyon_Readable_Grimoire_Air.description"
+  },
+  "Icon": "Icons/ItemsGenerated/Recipe_Book_Magic_Air.png",
+  "Categories": [
+    "Items.Recipes"
+  ],
+  "Recipe": null,
+  "BlockType": {
+    "Flags": {
+      "IsUsable": true
+    },
+    "Interactions": {
+      "Use": "Varyon_Readable_Book_Open"
+    }
+  }
+}

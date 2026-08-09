@@ -1,0 +1,20 @@
+{
+  "Parent": "Deco_Book_Pile_Large",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Readable_Book_Pile.name",
+    "Description": "server.items.Varyon_Readable_Book_Pile.description"
+  },
+  "Icon": "Icons/ItemsGenerated/Deco_Scrap_Book_Pile_Large.png",
+  "Categories": [
+    "Blocks.Deco"
+  ],
+  "Recipe": null,
+  "BlockType": {
+    "Flags": {
+      "IsUsable": true
+    },
+    "Interactions": {
+      "Use": "Varyon_Readable_Book_Open"
+    }
+  }
+}
