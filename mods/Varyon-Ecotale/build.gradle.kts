@@ -24,6 +24,11 @@ dependencies {
     compileOnly("org.checkerframework:checker-qual:3.42.0")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     compileOnly("net.cfh.vault:VaultUnlocked:2.18.3")
+    // Optional at runtime: only used to check for NoLootComponent (mobs spawned by other systems,
+    // e.g. BossArena, that should not award coins). Ecotale still works fine if Varyon is absent.
+    if (findProject(":mods:Varyon") != null) {
+        compileOnly(project(":mods:Varyon"))
+    }
 
     implementation("org.yaml:snakeyaml:2.2")
     implementation("com.h2database:h2:2.2.224")

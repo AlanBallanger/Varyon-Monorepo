@@ -1,4 +1,4 @@
-package com.varyon.essence;
+package com.varyon.points;
 
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
@@ -16,18 +16,18 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-public class EssenceManager {
+public class PointsManager {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-    private final EssenceDatabase database;
-    private final Map<UUID, Double> essenceCache = new ConcurrentHashMap<>();
+    private final PointsDatabase database;
+    private final Map<UUID, Double> pointsCache = new ConcurrentHashMap<>();
     private final GuildGaugePlayerWindow guildGaugePlayerWindow = new GuildGaugePlayerWindow();
     private final Object globalBalanceLock = new Object();
     private volatile ScheduledFuture<?> guildGaugeSampler;
     private GlobalRewardsManager rewardsManager;
 
-    public EssenceManager(@Nonnull File pluginFolder) {
-        this.database = new EssenceDatabase(pluginFolder);
+    public PointsManager(@Nonnull File pluginFolder) {
+        this.database = new PointsDatabase(pluginFolder);
         this.database.initialize();
         this.guildGaugeSampler = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
                 () -> guildGaugePlayerWindow.recordSample(countOnlinePlayersRaw()),
@@ -35,65 +35,65 @@ public class EssenceManager {
                 GuildGaugePlayerWindow.SAMPLE_INTERVAL_MS,
                 TimeUnit.MILLISECONDS);
     }
-    
+
     public void setRewardsManager(GlobalRewardsManager rewardsManager) {
         this.rewardsManager = rewardsManager;
     }
 
-    public double getEssence(UUID playerUuid) {
-        return essenceCache.computeIfAbsent(playerUuid, database::getEssence);
+    public double getPoints(UUID playerUuid) {
+        return pointsCache.computeIfAbsent(playerUuid, database::getPoints);
     }
 
-    public int getEssenceDisplay(UUID playerUuid) {
-        return (int) Math.floor(getEssence(playerUuid));
+    public int getPointsDisplay(UUID playerUuid) {
+        return (int) Math.floor(getPoints(playerUuid));
     }
 
-    public void addEssence(UUID playerUuid, String playerName, double amount) {
+    public void addPoints(UUID playerUuid, String playerName, double amount) {
         if (amount == 0) return;
-        double current = getEssence(playerUuid);
+        double current = getPoints(playerUuid);
         double newAmount = Math.max(0, current + amount);
-        essenceCache.put(playerUuid, newAmount);
-        database.setEssenceUncapped(playerUuid, playerName, newAmount);
+        pointsCache.put(playerUuid, newAmount);
+        database.setPointsUncapped(playerUuid, playerName, newAmount);
         LOGGER.at(Level.FINE).log("Player " + playerName + " " + (amount > 0 ? "+" : "") +
             String.format("%.2f", amount) + " points de faction (total: " + String.format("%.1f", newAmount) + ")");
     }
 
     /**
-     * Adds essence but only up to {@code cap}.
+     * Adds points but only up to {@code cap}.
      * If the player is already at or above the cap, nothing is added.
      * Returns the amount actually added.
      */
-    public double addEssenceCapped(UUID playerUuid, String playerName, double amount, int cap) {
+    public double addPointsCapped(UUID playerUuid, String playerName, double amount, int cap) {
         if (amount <= 0) return 0;
-        double current = getEssence(playerUuid);
+        double current = getPoints(playerUuid);
         if (current >= cap) return 0;
         double actual = Math.min(amount, cap - current);
-        addEssence(playerUuid, playerName, actual);
+        addPoints(playerUuid, playerName, actual);
         return actual;
     }
 
-    public void setEssence(UUID playerUuid, String playerName, double amount) {
-        essenceCache.put(playerUuid, amount);
-        database.setEssence(playerUuid, playerName, amount);
+    public void setPoints(UUID playerUuid, String playerName, double amount) {
+        pointsCache.put(playerUuid, amount);
+        database.setPoints(playerUuid, playerName, amount);
     }
 
     public int clearCarriedFactionPoints(@Nonnull UUID playerUuid, @Nonnull String playerName) {
-        double current = getEssence(playerUuid);
+        double current = getPoints(playerUuid);
         if (current <= 0.0) {
             return 0;
         }
         int lostDisplay = (int) Math.floor(current);
-        setEssence(playerUuid, playerName, 0);
+        setPoints(playerUuid, playerName, 0);
         LOGGER.at(Level.INFO).log("Forfeited carried faction points for " + playerName + ": " + lostDisplay + " (left Varyon world)");
         return lostDisplay;
     }
-    
-    public void setEssenceUncapped(UUID playerUuid, String playerName, double amount) {
-        essenceCache.put(playerUuid, amount);
-        database.setEssenceUncapped(playerUuid, playerName, amount);
+
+    public void setPointsUncapped(UUID playerUuid, String playerName, double amount) {
+        pointsCache.put(playerUuid, amount);
+        database.setPointsUncapped(playerUuid, playerName, amount);
     }
 
-    public List<PlayerEssenceData> getTopPlayers(int limit) {
+    public List<PlayerPointsData> getTopPlayers(int limit) {
         return database.getTopPlayers(limit);
     }
 
@@ -102,16 +102,16 @@ public class EssenceManager {
     }
 
     public void loadPlayer(UUID playerUuid) {
-        double essence = database.getEssence(playerUuid);
-        essenceCache.put(playerUuid, essence);
+        double points = database.getPoints(playerUuid);
+        pointsCache.put(playerUuid, points);
     }
 
     public void savePlayer(UUID playerUuid) {
-        essenceCache.remove(playerUuid);
+        pointsCache.remove(playerUuid);
     }
 
     public void saveAll() {
-        essenceCache.clear();
+        pointsCache.clear();
     }
 
     public void shutdown() {

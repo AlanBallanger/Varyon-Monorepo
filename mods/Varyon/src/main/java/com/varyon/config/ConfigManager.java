@@ -31,7 +31,7 @@ public class ConfigManager {
     private MessagesConfig messagesConfig;
     private ZoneLootConfig zoneLootConfig;
     private MobFragmentsConfig mobFragmentsConfig;
-    private EssenceEconomyConfig essenceEconomyConfig;
+    private PointsEconomyConfig pointsEconomyConfig;
     private ZonePermissionsConfig zonePermissionsConfig;
     private RtphConfig rtphConfig;
     private RtpvConfig rtpvConfig;
@@ -62,7 +62,7 @@ public class ConfigManager {
             zoneLootConfig = ZoneLootConfig.createDefault();
             zoneLootConfig.save(pluginDataFolder);
             mobFragmentsConfig = MobFragmentsConfig.load(pluginDataFolder);
-            essenceEconomyConfig = EssenceEconomyConfig.createDefault();
+            pointsEconomyConfig = PointsEconomyConfig.createDefault();
             zonePermissionsConfig = ZonePermissionsConfig.createDefault();
             zonePermissionsConfig.save(pluginDataFolder);
             rtphConfig = RtphConfig.createDefault();
@@ -88,7 +88,7 @@ public class ConfigManager {
             messagesConfig = MessagesConfig.load(pluginDataFolder);
             zoneLootConfig = ZoneLootConfig.load(pluginDataFolder);
             mobFragmentsConfig = MobFragmentsConfig.load(pluginDataFolder);
-            essenceEconomyConfig = EssenceEconomyConfig.parse(toml);
+            pointsEconomyConfig = PointsEconomyConfig.parse(toml);
             zonePermissionsConfig = ZonePermissionsConfig.load(pluginDataFolder);
             rtphConfig = parseRtphConfig(toml);
             rtpvConfig = parseRtpvConfig(toml);
@@ -109,7 +109,7 @@ public class ConfigManager {
             messagesConfig = MessagesConfig.createDefault();
             zoneLootConfig = ZoneLootConfig.createDefault();
             mobFragmentsConfig = MobFragmentsConfig.load(pluginDataFolder);
-            essenceEconomyConfig = EssenceEconomyConfig.createDefault();
+            pointsEconomyConfig = PointsEconomyConfig.createDefault();
             zonePermissionsConfig = ZonePermissionsConfig.createDefault();
             rtphConfig = RtphConfig.createDefault();
             rtpvConfig = RtpvConfig.createDefault();
@@ -225,12 +225,12 @@ public class ConfigManager {
 
         DeathConfig death = deathConfig != null ? deathConfig : DeathConfig.createDefault();
         sb.append("[death]\n");
-        sb.append("essenceLossPercent = ").append(death.getEssenceLossPercent()).append("\n");
+        sb.append("pointsLossPercent = ").append(death.getPointsLossPercent()).append("\n");
         sb.append("\n");
 
-        EssenceEconomyConfig ee = essenceEconomyConfig != null ? essenceEconomyConfig : EssenceEconomyConfig.createDefault();
-        sb.append("[essence_economy]\n");
-        sb.append("pvpEssenceMultiplier = ").append(ee.getPvpEssenceMultiplier()).append("\n");
+        PointsEconomyConfig ee = pointsEconomyConfig != null ? pointsEconomyConfig : PointsEconomyConfig.createDefault();
+        sb.append("[points_economy]\n");
+        sb.append("pvpPointsMultiplier = ").append(ee.getPvpPointsMultiplier()).append("\n");
         sb.append("defaultMobReward = ").append(ee.getDefaultMobReward()).append("\n");
         sb.append("defaultOreReward = ").append(ee.getDefaultOreReward()).append("\n\n");
 
@@ -305,12 +305,12 @@ public class ConfigManager {
                 double healthMultiplier = zoneToml.getDouble("healthMultiplier", 1.0);
                 double damageMultiplier = zoneToml.getDouble("damageMultiplier", 1.0);
                 double lootMultiplier = zoneToml.getDouble("lootMultiplier", 1.0);
-                double essenceMultiplier = zoneToml.getDouble("essenceMultiplier", 1.0);
+                double pointsMultiplier = zoneToml.getDouble("pointsMultiplier", zoneToml.getDouble("essenceMultiplier", 1.0));
                 int radiusStart = zoneToml.getLong("radiusStart", 0L).intValue();
                 String name = zoneToml.getString("name", "Zone " + id);
                 int teleportCost = zoneToml.getLong("teleportCost", (long)(id * 50)).intValue();
                 zones.add(new DifficultyZone(id, color, healthMultiplier, damageMultiplier,
-                        lootMultiplier, essenceMultiplier, radiusStart, name, teleportCost));
+                        lootMultiplier, pointsMultiplier, radiusStart, name, teleportCost));
             }
         }
 
@@ -422,7 +422,7 @@ public class ConfigManager {
     private DeathConfig parseDeathConfig(@Nonnull Toml toml) {
         Toml deathToml = toml.getTable("death");
         if (deathToml == null) return DeathConfig.createDefault();
-        return new DeathConfig(deathToml.getDouble("essenceLossPercent", 80.0));
+        return new DeathConfig(deathToml.getDouble("pointsLossPercent", deathToml.getDouble("essenceLossPercent", 80.0)));
     }
 
     @Nonnull
@@ -446,7 +446,7 @@ public class ConfigManager {
     @Nonnull public MessagesConfig getMessagesConfig()            { return messagesConfig != null ? messagesConfig : MessagesConfig.createDefault(); }
     @Nonnull public ZoneLootConfig getZoneLootConfig()            { return zoneLootConfig != null ? zoneLootConfig : ZoneLootConfig.createDefault(); }
     @Nonnull public MobFragmentsConfig getMobFragmentsConfig()       { return mobFragmentsConfig != null ? mobFragmentsConfig : MobFragmentsConfig.load(pluginDataFolder); }
-    @Nonnull public EssenceEconomyConfig getEssenceEconomyConfig()    { return essenceEconomyConfig != null ? essenceEconomyConfig : EssenceEconomyConfig.createDefault(); }
+    @Nonnull public PointsEconomyConfig getPointsEconomyConfig()    { return pointsEconomyConfig != null ? pointsEconomyConfig : PointsEconomyConfig.createDefault(); }
     @Nonnull public ZonePermissionsConfig getZonePermissionsConfig() { return zonePermissionsConfig != null ? zonePermissionsConfig : ZonePermissionsConfig.createDefault(); }
     @Nonnull public RtphConfig getRtphConfig()                       { return rtphConfig != null ? rtphConfig : RtphConfig.createDefault(); }
     @Nonnull public RtpvConfig getRtpvConfig()                       { return rtpvConfig != null ? rtpvConfig : RtpvConfig.createDefault(); }

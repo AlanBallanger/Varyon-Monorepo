@@ -60,6 +60,10 @@ public class MobLootScalingSystem extends DeathSystems.OnDeathSystem {
             return;
         }
 
+        if (commandBuffer.getComponent(ref, com.varyon.component.NoLootComponent.getComponentType()) != null) {
+            return;
+        }
+
         // Get the scaling component
         MobScalingComponent scalingComponent = commandBuffer.getComponent(ref, MobScalingComponent.getComponentType());
         if (scalingComponent == null) {

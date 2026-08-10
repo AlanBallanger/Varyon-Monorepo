@@ -42,6 +42,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
         this.addSubCommand(new ClearMapSubCommand());
         this.addSubCommand(new ResetRewardsSubCommand());
         this.addSubCommand(new ResetBalanceSubCommand());
+        this.addSubCommand(new ForceRotateSubCommand());
         this.addSubCommand(new com.varyon.command.CreateDepositSubCommand(depositBlockManager));
         this.addSubCommand(new com.varyon.command.ResetDepositSubCommand(depositBlockManager));
         this.addSubCommand(new WhoIsSubCommand(factionManager));
@@ -90,6 +91,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
                 context.sendMessage(Message.raw("  /varyon resetdeposit : Supprimer tous les blocs de dépôt").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /varyon resetrewards : Reset les cooldowns des récompenses de faction").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /varyon resetbalance : Remettre la jauge globale (points) à 0").color(Color.WHITE));
+                context.sendMessage(Message.raw("  /varyon forcerotate : Forcer la rotation de la zone non-PVP").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /varyon arena add <nom> : Créer une arène non-PvP (rayon 50) à votre position").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /varyon arena remove [nom] : Supprimer une arène (courante si aucun nom)").color(Color.WHITE));
                 context.sendMessage(Message.raw("  /points give <joueur> <montant> : Donner des points de faction à un joueur").color(Color.WHITE));
@@ -206,7 +208,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
         @NonNullDecl
         @Override
         protected CompletableFuture<Void> executeAsync(CommandContext context) {
-            com.varyon.essence.GlobalRewardsManager rewardsManager = VaryonPlugin.getStaticGlobalRewardsManager();
+            com.varyon.points.GlobalRewardsManager rewardsManager = VaryonPlugin.getStaticGlobalRewardsManager();
             
             if (rewardsManager == null) {
                 context.sendMessage(Message.raw("Système de récompenses non initialisé.").color(Color.RED));
@@ -229,15 +231,15 @@ public class VaryonCommand extends AbstractAsyncCommand {
         @NonNullDecl
         @Override
         protected CompletableFuture<Void> executeAsync(CommandContext context) {
-            com.varyon.essence.EssenceManager essenceManager = VaryonPlugin.getStaticEssenceManager();
-            
-            if (essenceManager == null) {
+            com.varyon.points.PointsManager pointsManager = VaryonPlugin.getStaticPointsManager();
+
+            if (pointsManager == null) {
                 context.sendMessage(Message.raw("Système de points de faction non initialisé.").color(Color.RED));
                 return CompletableFuture.completedFuture(null);
             }
-            
-            int oldBalance = essenceManager.getGlobalBalance();
-            essenceManager.setGlobalBalance(0);
+
+            int oldBalance = pointsManager.getGlobalBalance();
+            pointsManager.setGlobalBalance(0);
             
             context.sendMessage(Message.raw("Balance globale réinitialisée: " + oldBalance + " → 0").color(Color.GREEN));
             
@@ -247,6 +249,32 @@ public class VaryonCommand extends AbstractAsyncCommand {
                 plugin.getHudManager().broadcastBalanceUpdate();
             }
             
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    public static class ForceRotateSubCommand extends AbstractAsyncCommand {
+        public ForceRotateSubCommand() {
+            super("forcerotate", "Forcer la rotation de la zone non-PVP");
+            this.requirePermission("varyon.admin");
+        }
+
+        @NonNullDecl
+        @Override
+        protected CompletableFuture<Void> executeAsync(CommandContext context) {
+            com.varyon.safezone.SafeZoneManager safeZoneManager = VaryonPlugin.getStaticSafeZoneManager();
+
+            if (safeZoneManager == null) {
+                context.sendMessage(Message.raw("Système de zone PVP non initialisé.").color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+
+            com.varyon.safezone.SafeZoneQuadrant previous = safeZoneManager.getCurrentQuadrant();
+            safeZoneManager.forceRotate();
+            com.varyon.safezone.SafeZoneQuadrant current = safeZoneManager.getCurrentQuadrant();
+
+            context.sendMessage(Message.raw("Zone non-PVP forcée: " + previous.getDisplayName() + " → " + current.getDisplayName()).color(Color.GREEN));
+
             return CompletableFuture.completedFuture(null);
         }
     }

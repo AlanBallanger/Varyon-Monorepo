@@ -18,14 +18,14 @@ public class MobScalingComponent implements Component<EntityStore> {
     private final float healthMultiplier;
     private final float damageMultiplier;
     private final float lootMultiplier;
-    private final float essenceMultiplier;
+    private final float pointsMultiplier;
 
-    public MobScalingComponent(int mobLevel, float healthMultiplier, float damageMultiplier, float lootMultiplier, float essenceMultiplier) {
+    public MobScalingComponent(int mobLevel, float healthMultiplier, float damageMultiplier, float lootMultiplier, float pointsMultiplier) {
         this.mobLevel = mobLevel;
         this.healthMultiplier = healthMultiplier;
         this.damageMultiplier = damageMultiplier;
         this.lootMultiplier = lootMultiplier;
-        this.essenceMultiplier = essenceMultiplier;
+        this.pointsMultiplier = pointsMultiplier;
     }
 
     public int getMobLevel() {
@@ -44,14 +44,14 @@ public class MobScalingComponent implements Component<EntityStore> {
         return lootMultiplier;
     }
 
-    public float getEssenceMultiplier() {
-        return essenceMultiplier;
+    public float getPointsMultiplier() {
+        return pointsMultiplier;
     }
 
     @Override
     @Nullable
     public Component<EntityStore> clone() {
-        return new MobScalingComponent(mobLevel, healthMultiplier, damageMultiplier, lootMultiplier, essenceMultiplier);
+        return new MobScalingComponent(mobLevel, healthMultiplier, damageMultiplier, lootMultiplier, pointsMultiplier);
     }
 
     @Nonnull

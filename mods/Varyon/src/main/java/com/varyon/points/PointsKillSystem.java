@@ -1,4 +1,4 @@
-package com.varyon.essence;
+package com.varyon.points;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -20,7 +20,7 @@ import com.varyon.VaryonPlugin;
 import com.varyon.component.MobScalingComponent;
 import com.varyon.config.ConfigManager;
 import com.varyon.config.DifficultyZone;
-import com.varyon.config.EssenceRewardsConfig;
+import com.varyon.config.PointsRewardsConfig;
 import com.varyon.safezone.SafeZoneManager;
 import com.varyon.util.ZoneCalculator;
 
@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEvent.KillerMessage> {
+public class PointsKillSystem extends EntityEventSystem<EntityStore, KillFeedEvent.KillerMessage> {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final Set<String> UNSAFE_METHODS = Set.of(
         "remove", "delete", "destroy", "kill", "unload", "clear", "close",
@@ -40,19 +40,19 @@ public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEv
     @Nonnull
     private final ComponentType<EntityStore, PlayerRef> playerRefComponentType = PlayerRef.getComponentType();
 
-    private final EssenceManager        essenceManager;
+    private final PointsManager         pointsManager;
     private final ConfigManager         configManager;
-    private final EssenceRewardsConfig  rewardsConfig;
+    private final PointsRewardsConfig   rewardsConfig;
 
     private volatile Method cachedNameMethod;
     private volatile String cachedNameSource;
     /** Entity classes already scanned without finding a usable name method — skip re-scanning them. */
     private final Set<Class<?>> unresolvableEntityClasses = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
-    public EssenceKillSystem(@Nonnull EssenceManager essenceManager, @Nonnull ConfigManager configManager,
-                             @Nonnull EssenceRewardsConfig rewardsConfig) {
+    public PointsKillSystem(@Nonnull PointsManager pointsManager, @Nonnull ConfigManager configManager,
+                             @Nonnull PointsRewardsConfig rewardsConfig) {
         super(KillFeedEvent.KillerMessage.class);
-        this.essenceManager  = essenceManager;
+        this.pointsManager   = pointsManager;
         this.configManager   = configManager;
         this.rewardsConfig   = rewardsConfig;
     }
@@ -92,14 +92,14 @@ public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEv
             }
 
             DifficultyZone zone = ZoneCalculator.getCurrentZone(store, archetypeChunk.getReferenceTo(index), configManager.getZoneConfig());
-            double zoneMultiplier = zone != null ? zone.getEssenceMultiplier() : 1.0;
+            double zoneMultiplier = zone != null ? zone.getPointsMultiplier() : 1.0;
 
             double lootMultiplier = 1.0;
             if (victimRef != null && victimRef.isValid()) {
                 MobScalingComponent scaling = store.getComponent(victimRef, MobScalingComponent.getComponentType());
                 if (scaling != null) {
                     lootMultiplier = scaling.getLootMultiplier();
-                    zoneMultiplier = scaling.getEssenceMultiplier();
+                    zoneMultiplier = scaling.getPointsMultiplier();
                 }
             }
 
@@ -110,17 +110,17 @@ public class EssenceKillSystem extends EntityEventSystem<EntityStore, KillFeedEv
             if (szm != null) {
                 TransformComponent transform = store.getComponent(killerRef, TransformComponent.getComponentType());
                 if (transform != null && !szm.isInSafeZone(transform.getPosition().x, transform.getPosition().z)) {
-                    pvpMultiplier = rewardsConfig.getPvpEssenceMultiplier();
+                    pvpMultiplier = rewardsConfig.getPvpPointsMultiplier();
                 }
             }
 
-            double essenceGained = baseReward * zoneMultiplier * lootMultiplier * pvpMultiplier;
-            if (essenceGained <= 0) return;
-            double current = essenceManager.getEssence(playerUuid);
+            double pointsGained = baseReward * zoneMultiplier * lootMultiplier * pvpMultiplier;
+            if (pointsGained <= 0) return;
+            double current = pointsManager.getPoints(playerUuid);
             int cap = configManager.getZonePermissionsConfig().getEffectiveCap(playerRef, current);
-            essenceManager.addEssenceCapped(playerUuid, playerUuid.toString(), essenceGained, cap);
+            pointsManager.addPointsCapped(playerUuid, playerUuid.toString(), pointsGained, cap);
         } catch (Exception e) {
-            LOGGER.at(Level.WARNING).log("Error in EssenceKillSystem: " + e.getMessage());
+            LOGGER.at(Level.WARNING).log("Error in PointsKillSystem: " + e.getMessage());
         }
     }
 

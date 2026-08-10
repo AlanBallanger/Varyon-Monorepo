@@ -13,7 +13,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.VaryonPlugin;
 import com.varyon.config.DeathConfig;
-import com.varyon.essence.EssenceManager;
+import com.varyon.points.PointsManager;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -67,14 +67,14 @@ public class DeathDetectionSystem extends DeathSystems.OnDeathSystem {
         deathPointManager.recordDeathPoint(playerRef.getUuid(), worldName, x, y, z);
 
         if (VaryonPlugin.getStaticConfigManager() != null && VaryonPlugin.getStaticConfigManager().getZoneConfig().isWorldEnabled(worldName)) {
-            EssenceManager essenceManager = VaryonPlugin.getStaticEssenceManager();
+            PointsManager pointsManager = VaryonPlugin.getStaticPointsManager();
             DeathConfig deathConfig = VaryonPlugin.getStaticConfigManager().getDeathConfig();
-            if (essenceManager != null && deathConfig.getEssenceLossPercent() > 0) {
-                double current = essenceManager.getEssence(playerRef.getUuid());
-                double loss = current * (deathConfig.getEssenceLossPercent() / 100.0);
+            if (pointsManager != null && deathConfig.getPointsLossPercent() > 0) {
+                double current = pointsManager.getPoints(playerRef.getUuid());
+                double loss = current * (deathConfig.getPointsLossPercent() / 100.0);
                 if (loss > 0) {
-                    essenceManager.addEssence(playerRef.getUuid(), playerRef.getUsername(), -loss);
-                    LOGGER.at(Level.INFO).log("Death: player " + playerRef.getUuid() + " lost " + String.format("%.1f", loss) + " faction points (" + (int) deathConfig.getEssenceLossPercent() + "%)");
+                    pointsManager.addPoints(playerRef.getUuid(), playerRef.getUsername(), -loss);
+                    LOGGER.at(Level.INFO).log("Death: player " + playerRef.getUuid() + " lost " + String.format("%.1f", loss) + " faction points (" + (int) deathConfig.getPointsLossPercent() + "%)");
                 }
             }
         }

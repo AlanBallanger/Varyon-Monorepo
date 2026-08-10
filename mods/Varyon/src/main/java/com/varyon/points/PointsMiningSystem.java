@@ -1,4 +1,4 @@
-package com.varyon.essence;
+package com.varyon.points;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -16,7 +16,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.varyon.VaryonPlugin;
 import com.varyon.config.ConfigManager;
 import com.varyon.config.DifficultyZone;
-import com.varyon.config.EssenceRewardsConfig;
+import com.varyon.config.PointsRewardsConfig;
 import com.varyon.safezone.SafeZoneManager;
 import com.varyon.util.MiningOreBlockIds;
 import com.varyon.util.ZoneCalculator;
@@ -26,22 +26,22 @@ import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class EssenceMiningSystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
+public class PointsMiningSystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     @Nonnull
     private final ComponentType<EntityStore, PlayerRef> playerRefComponentType = PlayerRef.getComponentType();
 
-    private final EssenceManager        essenceManager;
+    private final PointsManager         pointsManager;
     private final ConfigManager         configManager;
-    private final EssenceRewardsConfig  rewardsConfig;
+    private final PointsRewardsConfig   rewardsConfig;
     private final PlacedOreTracker      placedOreTracker;
 
-    public EssenceMiningSystem(@Nonnull EssenceManager essenceManager, @Nonnull ConfigManager configManager,
-                               @Nonnull EssenceRewardsConfig rewardsConfig,
+    public PointsMiningSystem(@Nonnull PointsManager pointsManager, @Nonnull ConfigManager configManager,
+                               @Nonnull PointsRewardsConfig rewardsConfig,
                                @Nonnull PlacedOreTracker placedOreTracker) {
         super(BreakBlockEvent.class);
-        this.essenceManager  = essenceManager;
+        this.pointsManager   = pointsManager;
         this.configManager   = configManager;
         this.rewardsConfig   = rewardsConfig;
         this.placedOreTracker = placedOreTracker;
@@ -82,7 +82,7 @@ public class EssenceMiningSystem extends EntityEventSystem<EntityStore, BreakBlo
 
             Ref<EntityStore> minerRef = archetypeChunk.getReferenceTo(index);
             DifficultyZone zone = ZoneCalculator.getCurrentZone(store, minerRef, world, configManager.getZoneConfig());
-            double zoneMultiplier = zone != null ? zone.getEssenceMultiplier() : 1.0;
+            double zoneMultiplier = zone != null ? zone.getPointsMultiplier() : 1.0;
             double lootMultiplier = zone != null ? zone.getLootMultiplier() : 1.0;
 
             double pvpMultiplier = 1.0;
@@ -90,18 +90,18 @@ public class EssenceMiningSystem extends EntityEventSystem<EntityStore, BreakBlo
             if (szm != null) {
                 TransformComponent transform = store.getComponent(minerRef, TransformComponent.getComponentType());
                 if (transform != null && !szm.isInSafeZone(transform.getPosition().x, transform.getPosition().z)) {
-                    pvpMultiplier = rewardsConfig.getPvpEssenceMultiplier();
+                    pvpMultiplier = rewardsConfig.getPvpPointsMultiplier();
                 }
             }
 
-            double essenceGained = baseReward * zoneMultiplier * lootMultiplier * pvpMultiplier;
-            if (essenceGained <= 0) return;
+            double pointsGained = baseReward * zoneMultiplier * lootMultiplier * pvpMultiplier;
+            if (pointsGained <= 0) return;
 
-            double current = essenceManager.getEssence(playerUuid);
+            double current = pointsManager.getPoints(playerUuid);
             int cap = configManager.getZonePermissionsConfig().getEffectiveCap(playerRef, current);
-            essenceManager.addEssenceCapped(playerUuid, playerUuid.toString(), essenceGained, cap);
+            pointsManager.addPointsCapped(playerUuid, playerUuid.toString(), pointsGained, cap);
         } catch (Exception e) {
-            LOGGER.at(Level.WARNING).log("Error in EssenceMiningSystem: " + e.getMessage());
+            LOGGER.at(Level.WARNING).log("Error in PointsMiningSystem: " + e.getMessage());
         }
     }
 

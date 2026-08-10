@@ -9,24 +9,24 @@ public class DifficultyZone {
     private final double healthMultiplier;
     private final double damageMultiplier;
     private final double lootMultiplier;
-    private final double essenceMultiplier;
+    private final double pointsMultiplier;
     private final int radiusStart;
     private final String name;
     private final int teleportCost;
 
     public DifficultyZone(int zoneId, @Nonnull String color, double healthMultiplier, double damageMultiplier,
-                          double lootMultiplier, double essenceMultiplier, int radiusStart, @Nonnull String name) {
-        this(zoneId, color, healthMultiplier, damageMultiplier, lootMultiplier, essenceMultiplier, radiusStart, name, zoneId * 100);
+                          double lootMultiplier, double pointsMultiplier, int radiusStart, @Nonnull String name) {
+        this(zoneId, color, healthMultiplier, damageMultiplier, lootMultiplier, pointsMultiplier, radiusStart, name, zoneId * 100);
     }
 
     public DifficultyZone(int zoneId, @Nonnull String color, double healthMultiplier, double damageMultiplier,
-                          double lootMultiplier, double essenceMultiplier, int radiusStart, @Nonnull String name, int teleportCost) {
+                          double lootMultiplier, double pointsMultiplier, int radiusStart, @Nonnull String name, int teleportCost) {
         this.zoneId = zoneId;
         this.color = color;
         this.healthMultiplier = healthMultiplier;
         this.damageMultiplier = damageMultiplier;
         this.lootMultiplier = lootMultiplier;
-        this.essenceMultiplier = essenceMultiplier;
+        this.pointsMultiplier = pointsMultiplier;
         this.radiusStart = radiusStart;
         this.name = name;
         this.teleportCost = teleportCost;
@@ -53,8 +53,8 @@ public class DifficultyZone {
         return lootMultiplier;
     }
 
-    public double getEssenceMultiplier() {
-        return essenceMultiplier;
+    public double getPointsMultiplier() {
+        return pointsMultiplier;
     }
 
     /**
@@ -163,6 +163,6 @@ public class DifficultyZone {
     @Override
     public String toString() {
         return name + " (HP x" + healthMultiplier + ", DMG x" + damageMultiplier + ", Loot x" + lootMultiplier +
-                ", Points de faction x" + essenceMultiplier + ", " + radiusStart + "+ blocks, " + color + ")";
+                ", Points de faction x" + pointsMultiplier + ", " + radiusStart + "+ blocks, " + color + ")";
     }
 }

@@ -12,6 +12,7 @@ import fr.varyon.ecotale.jobs.security.AntiFarmSystem;
 import fr.varyon.ecotale.jobs.security.EconomyCap;
 import fr.varyon.ecotale.jobs.util.TierMatcher;
 import fr.varyon.ecotale.jobs.util.JobsLogger;
+import fr.varyon.ecotale.compat.VaryonNoLoot;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
@@ -141,12 +142,19 @@ public class MobRewardSystem extends RefChangeSystem<EntityStore, DeathComponent
     ) {
         // Get the NPCEntity component (guaranteed by our query)
         NPCEntity npc = store.getComponent(ref, NPCEntity.getComponentType());
-        
+
         if (npc == null) {
             // Not an NPC death - ignore (shouldn't happen due to query)
             return;
         }
-        
+
+        // Entities marked by another system (e.g. BossArena) as having their own dedicated
+        // reward handling must not also award coins here.
+        if (VaryonNoLoot.isMarked(store, ref)) {
+            JobsLogger.debug("SKIP: entity marked NoLoot");
+            return;
+        }
+
         String mobId = npc.getNPCTypeId();
         
         // Debug logging for all NPC deaths

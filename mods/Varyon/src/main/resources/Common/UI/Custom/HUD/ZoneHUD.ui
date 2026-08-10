@@ -54,7 +54,7 @@ Group {
               }
               Group {
                 Anchor: (Width: 233, Height: 20, Top: 1);
-                Label #Essence {
+                Label #Points {
                   Text: "Points : 0/1000";
                   Style: (
                     FontSize: 12,
@@ -225,44 +225,44 @@ Group {
       }
     }
 
-    Group #EssenceBarHost {
+    Group #PointsBarHost {
       Anchor: (Width: 770, Height: 56, Left: 0, Top: 5);
       LayoutMode: Center;
 
-      Group #EssenceBarWrapper {
+      Group #PointsBarWrapper {
         Anchor: (Width: 470, Height: 56);
         LayoutMode: Top;
 
-        Group #EssenceBarGroup {
+        Group #PointsBarGroup {
           Anchor: (Width: 470, Height: 39, Left: 0, Top: 0);
 
-          Group #EssenceBarBackground {
+          Group #PointsBarBackground {
             Anchor: (Width: 470, Height: 39, Left: 0, Top: 0);
-            Background: "EssenceBarBackground.png";
+            Background: "PointsBarBackground.png";
           }
 
-          Group #EssenceBarFillTrack {
+          Group #PointsBarFillTrack {
             Anchor: (Width: 397, Height: 11, Left: 36, Top: 15);
 
-            Group #EssenceBarNoyau {
+            Group #PointsBarNoyau {
               Anchor: (Width: 0, Height: 11, Left: 199, Top: 0);
-              Background: "EssenceBarFillNoyau.png";
+              Background: "PointsBarFillNoyau.png";
             }
-            Group #EssenceBarFracture {
+            Group #PointsBarFracture {
               Anchor: (Width: 0, Height: 11, Left: 199, Top: 0);
-              Background: "EssenceBarFillFracture.png";
+              Background: "PointsBarFillFracture.png";
             }
           }
 
-          Group #EssenceBarEffect {
+          Group #PointsBarEffect {
             Anchor: (Width: 400, Height: 16, Left: 35, Top: 12);
-            Background: "EssenceBarEffect.png";
+            Background: "PointsBarEffect.png";
           }
         }
 
-        Group #EssenceValueRow {
+        Group #PointsValueRow {
           Anchor: (Width: 470, Height: 13, Left: 0, Top: -6);
-          Label #EssenceValue {
+          Label #PointsValue {
             Text: "0";
             Style: (
               FontSize: 12,

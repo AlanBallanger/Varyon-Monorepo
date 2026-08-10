@@ -2,20 +2,20 @@ package com.varyon.config;
 
 import javax.annotation.Nonnull;
 
-public class EssenceRewardsConfig {
+public class PointsRewardsConfig {
 
     private static final double REFERENCE_TO_FACTION_POINTS = 1.5;
 
     private MobFragmentsConfig referenceFragments;
-    private EssenceEconomyConfig economy = EssenceEconomyConfig.createDefault();
+    private PointsEconomyConfig economy = PointsEconomyConfig.createDefault();
 
-    public void attach(@Nonnull MobFragmentsConfig referenceFragments, @Nonnull EssenceEconomyConfig economy) {
+    public void attach(@Nonnull MobFragmentsConfig referenceFragments, @Nonnull PointsEconomyConfig economy) {
         this.referenceFragments = referenceFragments;
         this.economy = economy;
     }
 
-    public double getPvpEssenceMultiplier() {
-        return economy.getPvpEssenceMultiplier();
+    public double getPvpPointsMultiplier() {
+        return economy.getPvpPointsMultiplier();
     }
 
     public double getOreReward(@Nonnull String blockId) {

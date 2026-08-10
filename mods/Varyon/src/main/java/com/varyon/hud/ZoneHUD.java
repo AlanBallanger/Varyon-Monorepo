@@ -9,7 +9,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.varyon.VaryonPlugin;
 import com.varyon.config.DifficultyZone;
 import com.varyon.config.MessagesConfig;
-import com.varyon.essence.EssenceManager;
+import com.varyon.points.PointsManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,10 +20,10 @@ public class ZoneHUD extends CustomUIHud {
     private static final int PAGE_COUNT = 2;
     private static final int PAGE_ZONE = 0;
     private static final int PAGE_PVP = 1;
-    private static final int ESSENCE_FILL_TRACK_HALF = 199;
-    private static final int ESSENCE_BAR_TRACK_LEFT = 36;
-    private static final int ESSENCE_BAR_CENTER_X = ESSENCE_BAR_TRACK_LEFT + ESSENCE_FILL_TRACK_HALF;
-    private static final int ESSENCE_BAR_LABEL_AREA_WIDTH = 470;
+    private static final int POINTS_FILL_TRACK_HALF = 199;
+    private static final int POINTS_BAR_TRACK_LEFT = 36;
+    private static final int POINTS_BAR_CENTER_X = POINTS_BAR_TRACK_LEFT + POINTS_FILL_TRACK_HALF;
+    private static final int POINTS_BAR_LABEL_AREA_WIDTH = 470;
     private static final String LOOT_CHEST_ITEM_ID = "Furniture_Dungeon_Chest_Epic";
     private static final String LOOT_KEY_ITEM_ID = "Key_Fragment1";
 
@@ -34,7 +34,7 @@ public class ZoneHUD extends CustomUIHud {
     private DifficultyZone currentZone;
     private double distanceFromSpawn;
     private int globalBalance;
-    private double playerEssence;
+    private double playerPoints;
     private boolean built;
     private long builtAt = 0;
     private static final long BUILD_GRACE_MS = 2000;
@@ -43,7 +43,7 @@ public class ZoneHUD extends CustomUIHud {
     private String safeQuadrantName = "";
     private long safeTimeRemaining;
     private boolean lootSpecialActive = false;
-    private int maxEssenceCap = 1000;
+    private int maxPointsCap = 1000;
 
     public static final String HUD_KEY = "varyon_zone_hud";
 
@@ -72,9 +72,9 @@ public class ZoneHUD extends CustomUIHud {
         return currentPage;
     }
 
-    public void updateZoneInfo(@Nullable DifficultyZone zone, double distance, boolean inSafe, @Nonnull String quadrantName, long timeRemaining, boolean forceUpdate, boolean lootSpecialActive, int maxEssenceCap) {
-        if (this.maxEssenceCap != maxEssenceCap) {
-            this.maxEssenceCap = maxEssenceCap;
+    public void updateZoneInfo(@Nullable DifficultyZone zone, double distance, boolean inSafe, @Nonnull String quadrantName, long timeRemaining, boolean forceUpdate, boolean lootSpecialActive, int maxPointsCap) {
+        if (this.maxPointsCap != maxPointsCap) {
+            this.maxPointsCap = maxPointsCap;
             forceUpdate = true;
         }
         if (this.lootSpecialActive != lootSpecialActive) {
@@ -109,12 +109,12 @@ public class ZoneHUD extends CustomUIHud {
             changed = true;
         }
 
-        EssenceManager essenceManager = VaryonPlugin.getStaticEssenceManager();
-        if (essenceManager != null) {
-            double currentPlayerEssence = essenceManager.getEssence(getPlayerRef().getUuid());
-            int currentGlobalBalance = essenceManager.getGlobalBalance();
-            if (Math.abs(this.playerEssence - currentPlayerEssence) > 0.01 || this.globalBalance != currentGlobalBalance) {
-                this.playerEssence = currentPlayerEssence;
+        PointsManager pointsManager = VaryonPlugin.getStaticPointsManager();
+        if (pointsManager != null) {
+            double currentPlayerPoints = pointsManager.getPoints(getPlayerRef().getUuid());
+            int currentGlobalBalance = pointsManager.getGlobalBalance();
+            if (Math.abs(this.playerPoints - currentPlayerPoints) > 0.01 || this.globalBalance != currentGlobalBalance) {
+                this.playerPoints = currentPlayerPoints;
                 this.globalBalance = currentGlobalBalance;
                 changed = true;
             }
@@ -148,16 +148,16 @@ public class ZoneHUD extends CustomUIHud {
         builder.set("#ZoneName.Text", zoneName + " - " + dist + "m");
         builder.set("#ZoneName.Style.TextColor", "#FFFFFF");
 
-        EssenceManager essenceManager = VaryonPlugin.getStaticEssenceManager();
-        if (essenceManager != null) {
-            playerEssence = essenceManager.getEssence(getPlayerRef().getUuid());
-            globalBalance = essenceManager.getGlobalBalance();
+        PointsManager pointsManager = VaryonPlugin.getStaticPointsManager();
+        if (pointsManager != null) {
+            playerPoints = pointsManager.getPoints(getPlayerRef().getUuid());
+            globalBalance = pointsManager.getGlobalBalance();
         }
-        
-        int currentEssence = (int) Math.floor(playerEssence);
-        int displayMax = Math.max(maxEssenceCap, currentEssence);
-        builder.set("#Essence.Text", "Points : " + currentEssence + "/" + displayMax);
-        builder.set("#Essence.Style.TextColor", "#FFFF55");
+
+        int currentPoints = (int) Math.floor(playerPoints);
+        int displayMax = Math.max(maxPointsCap, currentPoints);
+        builder.set("#Points.Text", "Points : " + currentPoints + "/" + displayMax);
+        builder.set("#Points.Style.TextColor", "#FFFF55");
 
         builder.set("#HPIconPng.Visible", true);
         builder.set("#HPIconPngPvp.Visible", false);
@@ -187,7 +187,7 @@ public class ZoneHUD extends CustomUIHud {
         builder.set("#LootItemIcon.Visible", true);
         builder.set("#LootItemIcon.ItemId", LOOT_CHEST_ITEM_ID);
 
-        updateEssenceBar(builder);
+        updatePointsBar(builder);
     }
 
     private void applyPvpPage(@Nonnull UICommandBuilder builder) {
@@ -202,10 +202,10 @@ public class ZoneHUD extends CustomUIHud {
         builder.set("#ZoneName.Text", zoneName + " - " + dist + "m");
         builder.set("#ZoneName.Style.TextColor", "#FFFFFF");
 
-        int currentEssence = (int) Math.floor(playerEssence);
-        int displayMax = Math.max(maxEssenceCap, currentEssence);
-        builder.set("#Essence.Text", "Points : " + currentEssence + "/" + displayMax);
-        builder.set("#Essence.Style.TextColor", "#FFFF55");
+        int currentPoints = (int) Math.floor(playerPoints);
+        int displayMax = Math.max(maxPointsCap, currentPoints);
+        builder.set("#Points.Text", "Points : " + currentPoints + "/" + displayMax);
+        builder.set("#Points.Style.TextColor", "#FFFF55");
 
         builder.set("#HPIconPng.Visible", false);
         builder.set("#HPIconPngPvp.Visible", true);
@@ -237,7 +237,7 @@ public class ZoneHUD extends CustomUIHud {
         builder.set("#LootCellSpacer.Visible", true);
         builder.set("#LootMult.Text", "");
 
-        updateEssenceBar(builder);
+        updatePointsBar(builder);
     }
 
     @Nullable
@@ -245,66 +245,66 @@ public class ZoneHUD extends CustomUIHud {
         return currentZone;
     }
 
-    private void updateEssenceBar(@Nonnull UICommandBuilder builder) {
-        int halfFill = ESSENCE_FILL_TRACK_HALF;
-        EssenceManager essenceManager = VaryonPlugin.getStaticEssenceManager();
-        int absMax = essenceManager != null ? Math.max(1, essenceManager.getGuildGaugeAbsMax()) : 10000;
+    private void updatePointsBar(@Nonnull UICommandBuilder builder) {
+        int halfFill = POINTS_FILL_TRACK_HALF;
+        PointsManager pointsManager = VaryonPlugin.getStaticPointsManager();
+        int absMax = pointsManager != null ? Math.max(1, pointsManager.getGuildGaugeAbsMax()) : 10000;
         int clamped = Math.max(-absMax, Math.min(absMax, globalBalance));
-        
+
         if (clamped >= 0) {
             int width = (int) Math.round(clamped / (double) absMax * halfFill);
-            
+
             Anchor fractureAnchor = new Anchor();
             fractureAnchor.setLeft(Value.of(halfFill));
             fractureAnchor.setWidth(Value.of(width));
             fractureAnchor.setHeight(Value.of(11));
-            builder.setObject("#EssenceBarFracture.Anchor", fractureAnchor);
-            
+            builder.setObject("#PointsBarFracture.Anchor", fractureAnchor);
+
             Anchor noyauAnchor = new Anchor();
             noyauAnchor.setLeft(Value.of(halfFill));
             noyauAnchor.setWidth(Value.of(0));
             noyauAnchor.setHeight(Value.of(11));
-            builder.setObject("#EssenceBarNoyau.Anchor", noyauAnchor);
+            builder.setObject("#PointsBarNoyau.Anchor", noyauAnchor);
         } else {
             int width = (int) Math.round(Math.abs(clamped) / (double) absMax * halfFill);
             int left = halfFill - width;
-            
+
             Anchor noyauAnchor = new Anchor();
             noyauAnchor.setLeft(Value.of(left));
             noyauAnchor.setWidth(Value.of(width));
             noyauAnchor.setHeight(Value.of(11));
-            builder.setObject("#EssenceBarNoyau.Anchor", noyauAnchor);
-            
+            builder.setObject("#PointsBarNoyau.Anchor", noyauAnchor);
+
             Anchor fractureAnchor = new Anchor();
             fractureAnchor.setLeft(Value.of(halfFill));
             fractureAnchor.setWidth(Value.of(0));
             fractureAnchor.setHeight(Value.of(11));
-            builder.setObject("#EssenceBarFracture.Anchor", fractureAnchor);
+            builder.setObject("#PointsBarFracture.Anchor", fractureAnchor);
         }
 
         int labelWidth = 56;
         int labelLeft;
-        
+
         if (clamped >= 0) {
             int width = (int) Math.round(clamped / (double) absMax * halfFill);
-            int barEnd = ESSENCE_BAR_CENTER_X + width;
+            int barEnd = POINTS_BAR_CENTER_X + width;
             labelLeft = barEnd - (labelWidth / 2);
         } else {
-            labelLeft = ESSENCE_BAR_CENTER_X - (labelWidth / 2);
+            labelLeft = POINTS_BAR_CENTER_X - (labelWidth / 2);
         }
-        
+
         if (labelLeft < 0) {
             labelLeft = 0;
-        } else if (labelLeft > ESSENCE_BAR_LABEL_AREA_WIDTH - labelWidth) {
-            labelLeft = ESSENCE_BAR_LABEL_AREA_WIDTH - labelWidth;
+        } else if (labelLeft > POINTS_BAR_LABEL_AREA_WIDTH - labelWidth) {
+            labelLeft = POINTS_BAR_LABEL_AREA_WIDTH - labelWidth;
         }
 
         Anchor labelAnchor = new Anchor();
         labelAnchor.setLeft(Value.of(labelLeft));
         labelAnchor.setWidth(Value.of(labelWidth));
         labelAnchor.setHeight(Value.of(12));
-        builder.setObject("#EssenceValue.Anchor", labelAnchor);
-        builder.set("#EssenceValue.Text", String.valueOf(Math.abs(clamped)));
+        builder.setObject("#PointsValue.Anchor", labelAnchor);
+        builder.set("#PointsValue.Text", String.valueOf(Math.abs(clamped)));
     }
 
     public void updateGlobalBalance() {
@@ -312,12 +312,12 @@ public class ZoneHUD extends CustomUIHud {
             return;
         }
 
-        EssenceManager essenceManager = VaryonPlugin.getStaticEssenceManager();
-        if (essenceManager != null) {
-            this.globalBalance = essenceManager.getGlobalBalance();
+        PointsManager pointsManager = VaryonPlugin.getStaticPointsManager();
+        if (pointsManager != null) {
+            this.globalBalance = pointsManager.getGlobalBalance();
 
             UICommandBuilder builder = new UICommandBuilder();
-            updateEssenceBar(builder);
+            updatePointsBar(builder);
             update(false, builder);
         }
     }

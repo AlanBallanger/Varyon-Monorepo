@@ -25,7 +25,7 @@ import java.util.logging.Level;
  *   1. Prefer MobScalingComponent mob level when present.
  *   2. Otherwise derive a tier from the NPC zone (see {@link ZoneCalculator}).
  *
- * Key fragments = tier/mineral weights from reference TOMLs (same folder as {@code config.toml}). Faction points use reference × 1.5 (see {@link com.varyon.config.EssenceRewardsConfig}).
+ * Key fragments = tier/mineral weights from reference TOMLs (same folder as {@code config.toml}). Faction points use reference × 1.5 (see {@link com.varyon.config.PointsRewardsConfig}).
  *
  * Segment : "monster_level"
  *   Variant 0 (default) : "Nv.5"

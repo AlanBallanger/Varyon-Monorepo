@@ -116,33 +116,33 @@ public class MobScalingRefSystem extends RefSystem<EntityStore> {
         double currentHealthMult = zone.getHealthMultiplier();
         double currentDamageMult = zone.getDamageMultiplier();
         double currentLootMult = zone.getLootMultiplier();
-        double currentEssenceMult = zone.getEssenceMultiplier();
+        double currentPointsMult = zone.getPointsMultiplier();
         double nextHealthMult = currentHealthMult;
         double nextDamageMult = currentDamageMult;
         double nextLootMult = currentLootMult;
-        double nextEssenceMult = currentEssenceMult;
+        double nextPointsMult = currentPointsMult;
 
         if (zoneIndex + 1 < zones.size()) {
             DifficultyZone nextZone = zones.get(zoneIndex + 1);
             nextHealthMult = nextZone.getHealthMultiplier();
             nextDamageMult = nextZone.getDamageMultiplier();
             nextLootMult = nextZone.getLootMultiplier();
-            nextEssenceMult = nextZone.getEssenceMultiplier();
+            nextPointsMult = nextZone.getPointsMultiplier();
         } else {
             nextHealthMult = currentHealthMult + 0.5;
             nextDamageMult = currentDamageMult + 0.5;
             nextLootMult = currentLootMult + 0.5;
-            nextEssenceMult = currentEssenceMult + 0.5;
+            nextPointsMult = currentPointsMult + 0.5;
         }
 
         double levelProgress = (mobLevel - minLevel) / 10.0;
         float healthMultiplier = (float) (currentHealthMult + (nextHealthMult - currentHealthMult) * levelProgress);
         float damageMultiplier = (float) (currentDamageMult + (nextDamageMult - currentDamageMult) * levelProgress);
         float lootMultiplier = (float) (currentLootMult + (nextLootMult - currentLootMult) * levelProgress);
-        float essenceMultiplier = (float) (currentEssenceMult + (nextEssenceMult - currentEssenceMult) * levelProgress);
+        float pointsMultiplier = (float) (currentPointsMult + (nextPointsMult - currentPointsMult) * levelProgress);
 
         commandBuffer.addComponent(ref, MobScalingComponent.getComponentType(),
-                new MobScalingComponent(mobLevel, healthMultiplier, damageMultiplier, lootMultiplier, essenceMultiplier));
+                new MobScalingComponent(mobLevel, healthMultiplier, damageMultiplier, lootMultiplier, pointsMultiplier));
 
         if (mobLevel >= 1) {
             ComponentType<EntityStore, com.hypixel.hytale.server.core.entity.nameplate.Nameplate> nameplateType = 

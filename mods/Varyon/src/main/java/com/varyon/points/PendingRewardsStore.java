@@ -1,4 +1,4 @@
-package com.varyon.essence;
+package com.varyon.points;
 
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.moandjiezana.toml.Toml;

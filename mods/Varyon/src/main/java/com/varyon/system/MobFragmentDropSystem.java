@@ -121,6 +121,10 @@ public class MobFragmentDropSystem {
                 @Nonnull Store store,
                 @Nonnull CommandBuffer commandBuffer) {
             try {
+                if (store.getComponent(ref, com.varyon.component.NoLootComponent.getComponentType()) != null) {
+                    return;
+                }
+
                 int victimId = System.identityHashCode(ref);
 
                 String worldName = ((EntityStore) store.getExternalData()).getWorld().getName();

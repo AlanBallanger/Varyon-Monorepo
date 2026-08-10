@@ -19,7 +19,7 @@ public class FactionRewardsConfig {
     private static final String SECTION  = "faction_rewards";
 
     private final int cooldownMinutes;
-    private final double minParticipationEssence;
+    private final double minParticipationPoints;
     private final double passiveRewardRate;
     private final List<RewardTier> tiers;
 
@@ -36,16 +36,16 @@ public class FactionRewardsConfig {
         public int getFragmentAmount() { return fragmentAmount; }
     }
 
-    public FactionRewardsConfig(int cooldownMinutes, double minParticipationEssence,
+    public FactionRewardsConfig(int cooldownMinutes, double minParticipationPoints,
                                 double passiveRewardRate, @Nonnull List<RewardTier> tiers) {
         this.cooldownMinutes = cooldownMinutes;
-        this.minParticipationEssence = minParticipationEssence;
+        this.minParticipationPoints = minParticipationPoints;
         this.passiveRewardRate = passiveRewardRate;
         this.tiers = new ArrayList<>(tiers);
     }
 
     public int getCooldownMinutes()             { return cooldownMinutes; }
-    public double getMinParticipationEssence()  { return minParticipationEssence; }
+    public double getMinParticipationPoints()   { return minParticipationPoints; }
     public double getPassiveRewardRate()        { return passiveRewardRate; }
     @Nonnull public List<RewardTier> getTiers() { return Collections.unmodifiableList(tiers); }
 
@@ -63,7 +63,8 @@ public class FactionRewardsConfig {
             if (section == null) return createDefault();
 
             int cooldown = section.getLong("cooldownMinutes", 30L).intValue();
-            double minEss = section.getDouble("minParticipationEssence", 10.0);
+            double minPoints = section.getDouble("minParticipationPoints",
+                section.getDouble("minParticipationEssence", 10.0));
             double passRate = section.getDouble("passiveRewardRate", 0.20);
 
             List<RewardTier> tiers = new ArrayList<>();
@@ -76,7 +77,7 @@ public class FactionRewardsConfig {
                 }
             }
             if (tiers.isEmpty()) return createDefault();
-            return new FactionRewardsConfig(cooldown, minEss, passRate, tiers);
+            return new FactionRewardsConfig(cooldown, minPoints, passRate, tiers);
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("Failed to load faction_rewards.toml, using defaults: " + e.getMessage());
             return createDefault();
@@ -90,7 +91,7 @@ public class FactionRewardsConfig {
             StringBuilder sb = new StringBuilder();
             sb.append("[").append(SECTION).append("]\n");
             sb.append("cooldownMinutes = ").append(cooldownMinutes).append("\n");
-            sb.append("minParticipationEssence = ").append(minParticipationEssence).append("\n");
+            sb.append("minParticipationPoints = ").append(minParticipationPoints).append("\n");
             sb.append("passiveRewardRate = ").append(passiveRewardRate).append("\n\n");
             for (RewardTier tier : tiers) {
                 sb.append("[[").append(SECTION).append(".tiers]]\n");

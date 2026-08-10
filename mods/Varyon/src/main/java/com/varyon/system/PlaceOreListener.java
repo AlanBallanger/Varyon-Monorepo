@@ -15,7 +15,7 @@ import com.hypixel.hytale.server.core.event.events.ecs.PlaceBlockEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.config.ConfigManager;
-import com.varyon.config.EssenceRewardsConfig;
+import com.varyon.config.PointsRewardsConfig;
 import com.varyon.config.MobFragmentsConfig;
 
 import javax.annotation.Nonnull;
@@ -27,11 +27,11 @@ public class PlaceOreListener extends EntityEventSystem<EntityStore, PlaceBlockE
 
     private final PlacedOreTracker tracker;
     private final ConfigManager configManager;
-    private final EssenceRewardsConfig rewardsConfig;
+    private final PointsRewardsConfig rewardsConfig;
 
     public PlaceOreListener(@Nonnull PlacedOreTracker tracker,
                             @Nonnull ConfigManager configManager,
-                            @Nonnull EssenceRewardsConfig rewardsConfig) {
+                            @Nonnull PointsRewardsConfig rewardsConfig) {
         super(PlaceBlockEvent.class);
         this.tracker = tracker;
         this.configManager = configManager;

@@ -118,31 +118,51 @@ public class SafeZoneManager {
         }, 60000, 300000, TimeUnit.MILLISECONDS);
     }
 
+    private static final java.awt.Color VARYON_TAG_COLOR = java.awt.Color.decode("#AA55FF");
+
     private void announceRotation() {
-        String message = "[PvP] La zone non-PvP est maintenant au " + currentQuadrant.getDisplayName() + " !";
-        broadcastMessage(Message.raw(message).color(java.awt.Color.GREEN));
+        Message message = Message.join(
+            Message.raw("[Varyon] ").color(VARYON_TAG_COLOR),
+            Message.raw("La zone non-PVP est maintenant au " + currentQuadrant.getDisplayName() + " !").color(java.awt.Color.WHITE)
+        );
+        broadcastMessage(message);
     }
 
     private void announceOverlapStart() {
-        String message = "[PvP] Début de la transition ! Les zones " + currentQuadrant.getDisplayName() + 
-                        " et " + nextQuadrant.getDisplayName() + " sont toutes les deux non-PvP pendant 10 minutes.";
-        broadcastMessage(Message.raw(message).color(java.awt.Color.GREEN));
+        Message message = Message.join(
+            Message.raw("[Varyon] ").color(VARYON_TAG_COLOR),
+            Message.raw("Début de la transition ! Les zones " + currentQuadrant.getDisplayName() +
+                        " et " + nextQuadrant.getDisplayName() + " sont toutes les deux non-PVP pendant ").color(java.awt.Color.WHITE),
+            Message.raw("10 minutes").color(java.awt.Color.GREEN),
+            Message.raw(".").color(java.awt.Color.WHITE)
+        );
+        broadcastMessage(message);
     }
 
     private void announceTimeRemaining() {
         long currentTime = System.currentTimeMillis();
         long timeRemaining = nextRotationTime - currentTime;
-        
+
         if (timeRemaining <= 0) {
             return;
         }
-        
+
         long minutesRemaining = timeRemaining / 60000;
-        
+
         if (minutesRemaining <= 5) {
-            String message = "[PvP] La zone non-PvP changera dans " + minutesRemaining + " minute(s) !";
-            broadcastMessage(Message.raw(message).color(java.awt.Color.GREEN));
+            announceRotationCountdown(minutesRemaining);
         }
+    }
+
+    private void announceRotationCountdown(long minutesRemaining) {
+        String duration = minutesRemaining + " minute" + (minutesRemaining > 1 ? "s" : "");
+        Message message = Message.join(
+            Message.raw("[Varyon] ").color(VARYON_TAG_COLOR),
+            Message.raw("La zone non-PVP va tourner dans ").color(java.awt.Color.WHITE),
+            Message.raw(duration).color(java.awt.Color.GREEN),
+            Message.raw(" !").color(java.awt.Color.WHITE)
+        );
+        broadcastMessage(message);
     }
 
     private void broadcastMessage(Message message) {
@@ -151,13 +171,20 @@ public class SafeZoneManager {
             if (!zoneConfig.isWorldEnabled(world.getName())) {
                 return;
             }
-            
+
             world.execute(() -> {
                 world.getPlayerRefs().forEach(playerRef -> {
                     playerRef.sendMessage(message);
                 });
             });
         });
+    }
+
+    /**
+     * Force une rotation immédiate de la zone PVP, hors cycle normal (ex: commande admin).
+     */
+    public void forceRotate() {
+        rotate();
     }
 
     public boolean isInSafeZone(double x, double z) {

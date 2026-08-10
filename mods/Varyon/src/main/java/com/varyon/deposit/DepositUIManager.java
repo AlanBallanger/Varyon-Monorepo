@@ -7,8 +7,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 import com.varyon.VaryonPlugin;
 import com.varyon.integration.FactionDepositEcoSync;
-import com.varyon.essence.EssenceManager;
-import com.varyon.essence.GlobalRewardsManager;
+import com.varyon.points.PointsManager;
+import com.varyon.points.GlobalRewardsManager;
 import com.varyon.faction.FactionManager;
 
 import javax.annotation.Nonnull;
@@ -17,11 +17,11 @@ import java.util.logging.Level;
 
 public class DepositUIManager {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-    private final EssenceManager essenceManager;
+    private final PointsManager pointsManager;
     private final FactionManager factionManager;
 
-    public DepositUIManager(@Nonnull EssenceManager essenceManager, @Nonnull FactionManager factionManager) {
-        this.essenceManager = essenceManager;
+    public DepositUIManager(@Nonnull PointsManager pointsManager, @Nonnull FactionManager factionManager) {
+        this.pointsManager = pointsManager;
         this.factionManager = factionManager;
     }
 
@@ -38,31 +38,31 @@ public class DepositUIManager {
                 return;
             }
 
-            int amount = essenceManager.getEssenceDisplay(playerRef.getUuid());
+            int amount = pointsManager.getPointsDisplay(playerRef.getUuid());
             if (amount <= 0) {
                 playerRef.sendMessage(Message.raw("Vous n'avez pas de points de faction à déposer.").color(Color.YELLOW));
                 return;
             }
 
             int contribution = amount * faction.getBalanceMultiplier();
-            if (!essenceManager.canApplyGuildContribution(contribution)) {
+            if (!pointsManager.canApplyGuildContribution(contribution)) {
                 playerRef.sendMessage(Message.raw("Impossible de déposer : la jauge est verrouillée à cet extrême (contribution de votre faction refusée).").color(Color.RED));
                 return;
             }
 
-            essenceManager.addEssence(playerRef.getUuid(), playerRef.getUsername(), -amount);
+            pointsManager.addPoints(playerRef.getUuid(), playerRef.getUsername(), -amount);
 
             GlobalRewardsManager rewardsManager = VaryonPlugin.getStaticGlobalRewardsManager();
             if (rewardsManager != null) {
                 rewardsManager.recordDeposit(playerRef.getUuid(), faction, amount);
             }
 
-            essenceManager.addToGlobalBalance(contribution);
+            pointsManager.addToGlobalBalance(contribution);
 
             FactionDepositEcoSync.applyEcoFactionTokenForDeposit(playerRef, amount);
 
-            int newBalance = essenceManager.getGlobalBalance();
-            int gaugeMax = essenceManager.getGuildGaugeAbsMax();
+            int newBalance = pointsManager.getGlobalBalance();
+            int gaugeMax = pointsManager.getGuildGaugeAbsMax();
             playerRef.sendMessage(Message.raw("Déposé " + amount + " points de faction dans " + faction.getDisplayName()).color(Color.GREEN));
             playerRef.sendMessage(Message.raw(FactionManager.factionPointsAfterDepositLine(newBalance, gaugeMax, faction)).color(Color.YELLOW));
 

@@ -22,18 +22,19 @@ public class ZonePermissionsConfig {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final String FILENAME          = "zone_permissions.toml";
     private static final String SECTION_PERMS     = "zone_permissions";
-    private static final String SECTION_MAX       = "max_essence";
+    private static final String SECTION_MAX       = "max_points";
+    private static final String SECTION_MAX_LEGACY = "max_essence";
 
     private final Map<Integer, String>  permissionByZone;
-    private final Map<Integer, Integer> maxEssenceByZone;
+    private final Map<Integer, Integer> maxPointsByZone;
     private final int adminBase;
     private final int maxZone;
 
     public ZonePermissionsConfig(@Nonnull Map<Integer, String> permissionByZone,
-                                 @Nonnull Map<Integer, Integer> maxEssenceByZone,
+                                 @Nonnull Map<Integer, Integer> maxPointsByZone,
                                  int adminBase) {
         this.permissionByZone = new HashMap<>(permissionByZone);
-        this.maxEssenceByZone = new HashMap<>(maxEssenceByZone);
+        this.maxPointsByZone = new HashMap<>(maxPointsByZone);
         this.adminBase        = adminBase;
         this.maxZone          = permissionByZone.keySet().stream().mapToInt(i -> i).max().orElse(10);
     }
@@ -82,16 +83,16 @@ public class ZonePermissionsConfig {
         return getMaxAccessibleZone(playerRef) >= zoneId;
     }
 
-    public int getMaxEssenceForZone(int zone) {
-        return maxEssenceByZone.getOrDefault(zone, 1000);
+    public int getMaxPointsForZone(int zone) {
+        return maxPointsByZone.getOrDefault(zone, 1000);
     }
 
-    public int getEffectiveCap(@Nonnull PlayerRef playerRef, double currentEssence) {
+    public int getEffectiveCap(@Nonnull PlayerRef playerRef, double currentPoints) {
         if (playerRef.hasPermission("varyon.admin")) {
-            return (int) Math.max(adminBase, currentEssence);
+            return (int) Math.max(adminBase, currentPoints);
         }
         int zone = getMaxAccessibleZone(playerRef);
-        return maxEssenceByZone.getOrDefault(zone, 1000);
+        return maxPointsByZone.getOrDefault(zone, 1000);
     }
 
     @Nonnull
@@ -117,10 +118,13 @@ public class ZonePermissionsConfig {
                 }
             }
 
-            // Max essence caps
+            // Max points caps
             Map<Integer, Integer> caps = new HashMap<>();
             int adminBase = 3000;
             Toml maxSection = toml.getTable(SECTION_MAX);
+            if (maxSection == null) {
+                maxSection = toml.getTable(SECTION_MAX_LEGACY);
+            }
             if (maxSection != null) {
                 for (Map.Entry<String, Object> e : maxSection.toMap().entrySet()) {
                     if ("admin_base".equals(e.getKey())) {
@@ -133,7 +137,7 @@ public class ZonePermissionsConfig {
                     } catch (NumberFormatException ignored) {}
                 }
             }
-            if (caps.isEmpty()) caps = defaultMaxEssenceCaps();
+            if (caps.isEmpty()) caps = defaultMaxPointsCaps();
 
             LOGGER.at(Level.INFO).log("Loaded %s: %s zones, %s caps", FILENAME, perms.size(), caps.size());
             return new ZonePermissionsConfig(perms, caps, adminBase);
@@ -166,13 +170,13 @@ public class ZonePermissionsConfig {
             sb.append(z).append(" = \"").append(permissionByZone.getOrDefault(z, "varyon.zone." + z)).append("\"\n");
         }
 
-        sb.append("\n# Plafonds de points de faction (max_essence)\n");
+        sb.append("\n# Plafonds de points de faction (max_points)\n");
         sb.append("# admin_base : plafond par défaut pour varyon.admin (souple — suit les points ajoutés par commandes admin)\n");
-        sb.append("# zoneId = max_essence : plafond pour les joueurs selon la permission de zone la plus haute\n\n");
+        sb.append("# zoneId = max_points : plafond pour les joueurs selon la permission de zone la plus haute\n\n");
         sb.append("[").append(SECTION_MAX).append("]\n");
         sb.append("admin_base = ").append(adminBase).append("\n");
         for (int z = 1; z <= 10; z++) {
-            sb.append(z).append(" = ").append(maxEssenceByZone.getOrDefault(z, defaultCapFor(z))).append("\n");
+            sb.append(z).append(" = ").append(maxPointsByZone.getOrDefault(z, defaultCapFor(z))).append("\n");
         }
 
         return sb.toString();
@@ -182,11 +186,11 @@ public class ZonePermissionsConfig {
     public static ZonePermissionsConfig createDefault() {
         Map<Integer, String>  perms = new HashMap<>();
         for (int z = 1; z <= 10; z++) perms.put(z, "varyon.zone." + z);
-        return new ZonePermissionsConfig(perms, defaultMaxEssenceCaps(), 3000);
+        return new ZonePermissionsConfig(perms, defaultMaxPointsCaps(), 3000);
     }
 
     @Nonnull
-    private static Map<Integer, Integer> defaultMaxEssenceCaps() {
+    private static Map<Integer, Integer> defaultMaxPointsCaps() {
         Map<Integer, Integer> caps = new HashMap<>();
         for (int z = 1; z <= 10; z++) caps.put(z, defaultCapFor(z));
         return caps;

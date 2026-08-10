@@ -1,4 +1,4 @@
-package com.varyon.essence;
+package com.varyon.points;
 
 public final class GuildGaugeScale {
     private static final int BASE_MAX = 3000;

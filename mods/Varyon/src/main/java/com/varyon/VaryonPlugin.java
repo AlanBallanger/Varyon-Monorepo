@@ -36,8 +36,9 @@ import com.varyon.command.ReturnCommand;
 import com.varyon.announce.ChatAnnouncementScheduler;
 import com.varyon.arena.ArenaManager;
 import com.varyon.component.MobScalingComponent;
+import com.varyon.component.NoLootComponent;
 import com.varyon.config.ConfigManager;
-import com.varyon.config.EssenceRewardsConfig;
+import com.varyon.config.PointsRewardsConfig;
 import com.varyon.death.DeathDetectionSystem;
 import com.varyon.death.DeathPointManager;
 import com.varyon.deposit.DepositBlockInteractionSystem;
@@ -52,12 +53,14 @@ import com.varyon.util.VaryonWorldAccess;
 import com.varyon.rtpv.RtpvJoinManager;
 import com.varyon.deposit.DepositBlockManager;
 import com.varyon.deposit.DepositUIManager;
-import com.varyon.essence.EssenceKillSystem;
-import com.varyon.essence.EssenceManager;
-import com.varyon.essence.GlobalRewardsManager;
+import com.varyon.points.PointsKillSystem;
+import com.varyon.points.PointsManager;
+import com.varyon.points.GlobalRewardsManager;
+import com.varyon.points.FactionBonusManager;
+import com.varyon.points.FactionDamageBonusSystem;
 import com.varyon.extraction.ExtractionPortalManager;
 import com.varyon.system.ExtractionPortalTickSystem;
-import com.varyon.essence.EssenceMiningSystem;
+import com.varyon.points.PointsMiningSystem;
 import com.varyon.faction.FactionManager;
 import com.varyon.hud.ZoneHUDManager;
 import com.varyon.map.ZoneWorldMapProvider;
@@ -87,7 +90,7 @@ import java.util.logging.Level;
 public class VaryonPlugin extends JavaPlugin {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static ConfigManager staticConfigManager;
-    private static EssenceManager staticEssenceManager;
+    private static PointsManager staticPointsManager;
     private static FactionManager staticFactionManager;
     private static SafeZoneManager staticSafeZoneManager;
     private static SafeZoneNotificationSystem staticSafeZoneNotificationSystem;
@@ -95,15 +98,17 @@ public class VaryonPlugin extends JavaPlugin {
     private static GlobalRewardsManager staticGlobalRewardsManager;
     private static VaryonPlugin staticInstance;
     private ConfigManager configManager;
-    private EssenceManager essenceManager;
+    private PointsManager pointsManager;
     private FactionManager factionManager;
     private SafeZoneManager safeZoneManager;
     private SafeZoneNotificationSystem safeZoneNotificationSystem;
     private ArenaManager arenaManager;
     private ZoneHUDManager hudManager;
     private ExtractionPortalManager extractionPortalManager;
-    private EssenceRewardsConfig essenceRewardsConfig;
+    private PointsRewardsConfig pointsRewardsConfig;
     private GlobalRewardsManager globalRewardsManager;
+    private FactionBonusManager factionBonusManager;
+    private volatile java.util.concurrent.ScheduledFuture<?> factionBonusSafetyTick;
     private DepositBlockManager depositBlockManager;
     private DepositUIManager depositUIManager;
     private DeathPointManager deathPointManager;
@@ -150,18 +155,22 @@ public class VaryonPlugin extends JavaPlugin {
                             () -> new MobScalingComponent(0, 1.0f, 1.0f, 1.0f, 1.0f));
             MobScalingComponent.setComponentType(mobScalingComponentType);
 
+            ComponentType<EntityStore, NoLootComponent> noLootComponentType =
+                    this.getEntityStoreRegistry().registerComponent(NoLootComponent.class, NoLootComponent::new);
+            NoLootComponent.setComponentType(noLootComponentType);
+
             configManager = new ConfigManager(this.getDataDirectory());
             configManager.load();
             staticConfigManager = configManager;
             ChatAnnouncementScheduler.init();
 
-            // Initialiser le système d'essence
-            essenceManager = new EssenceManager(this.getDataDirectory().toFile());
-            staticEssenceManager = essenceManager;
+            // Initialiser le système de points
+            pointsManager = new PointsManager(this.getDataDirectory().toFile());
+            staticPointsManager = pointsManager;
 
-            essenceRewardsConfig = new EssenceRewardsConfig();
-            essenceRewardsConfig.attach(configManager.getMobFragmentsConfig(), configManager.getEssenceEconomyConfig());
-            LOGGER.at(Level.INFO).log("Essence system initialized");
+            pointsRewardsConfig = new PointsRewardsConfig();
+            pointsRewardsConfig.attach(configManager.getMobFragmentsConfig(), configManager.getPointsEconomyConfig());
+            LOGGER.at(Level.INFO).log("Points system initialized");
 
             // Initialiser le système de factions
             factionManager = new FactionManager();
@@ -171,19 +180,34 @@ public class VaryonPlugin extends JavaPlugin {
             // Initialiser le système de récompenses de faction
             globalRewardsManager = new GlobalRewardsManager(
                 configManager.getFactionRewardsConfig(),
-                essenceManager,
+                pointsManager,
                 factionManager,
                 configManager.getZonePermissionsConfig(),
                 this.getDataDirectory());
             staticGlobalRewardsManager = globalRewardsManager;
-            
-            // Lier le rewards manager à l'essence manager
-            essenceManager.setRewardsManager(globalRewardsManager);
+
+            // Lier le rewards manager au points manager
+            pointsManager.setRewardsManager(globalRewardsManager);
             
             LOGGER.at(Level.INFO).log("Global rewards system initialized");
-            
+
             // Vérifier les récompenses au démarrage
             globalRewardsManager.checkAndDistributeRewards();
+
+            // Bonus de faction dominante (dégâts/HP selon le palier de la jauge)
+            factionBonusManager = new FactionBonusManager(pointsManager, factionManager);
+            globalRewardsManager.setFactionBonusManager(factionBonusManager);
+            this.getEntityStoreRegistry().registerSystem(new FactionDamageBonusSystem(factionBonusManager));
+            factionBonusSafetyTick = com.hypixel.hytale.server.core.HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        factionBonusManager.refreshAllOnline();
+                    } catch (Exception e) {
+                        LOGGER.at(Level.WARNING).log("Faction bonus safety tick failed: " + e.getMessage());
+                    }
+                },
+                60, 60, java.util.concurrent.TimeUnit.SECONDS);
+            LOGGER.at(Level.INFO).log("Faction bonus system initialized");
 
             extractionPortalManager = new ExtractionPortalManager(configManager.getExtractionConfig());
             ExtractionPortalTickSystem extractionTickSystem = new ExtractionPortalTickSystem();
@@ -207,19 +231,19 @@ public class VaryonPlugin extends JavaPlugin {
             this.getEntityStoreRegistry().registerSystem(mobFragmentDropSystem.createPlayerDamageTagger());
             this.getEntityStoreRegistry().registerSystem(mobFragmentDropSystem.createDropSystem());
 
-            EssenceKillSystem essenceKillSystem = new EssenceKillSystem(essenceManager, configManager, essenceRewardsConfig);
-            this.getEntityStoreRegistry().registerSystem(essenceKillSystem);
+            PointsKillSystem pointsKillSystem = new PointsKillSystem(pointsManager, configManager, pointsRewardsConfig);
+            this.getEntityStoreRegistry().registerSystem(pointsKillSystem);
 
             PlacedOreTracker placedOreTracker = new PlacedOreTracker(this.getDataDirectory());
 
             this.getEntityStoreRegistry().registerSystem(new PlaceOreListener(
                 placedOreTracker,
                 configManager,
-                essenceRewardsConfig));
+                pointsRewardsConfig));
             this.getEntityStoreRegistry().registerSystem(new VaryonBedPlaceBlockSystem());
 
-            EssenceMiningSystem essenceMiningSystem = new EssenceMiningSystem(essenceManager, configManager, essenceRewardsConfig, placedOreTracker);
-            this.getEntityStoreRegistry().registerSystem(essenceMiningSystem);
+            PointsMiningSystem pointsMiningSystem = new PointsMiningSystem(pointsManager, configManager, pointsRewardsConfig, placedOreTracker);
+            this.getEntityStoreRegistry().registerSystem(pointsMiningSystem);
 
             com.varyon.system.MiningFragmentDropSystem miningFragmentDropSystem = new com.varyon.system.MiningFragmentDropSystem(
                 configManager,
@@ -228,8 +252,8 @@ public class VaryonPlugin extends JavaPlugin {
 
             this.getEntityStoreRegistry().registerSystem(new MiningLootScalingSystem(configManager, placedOreTracker));
 
-            this.getEntityStoreRegistry().registerSystem(new BreakOreCleanupListener(placedOreTracker, configManager, essenceRewardsConfig));
-            LOGGER.at(Level.INFO).log("Essence reward systems registered");
+            this.getEntityStoreRegistry().registerSystem(new BreakOreCleanupListener(placedOreTracker, configManager, pointsRewardsConfig));
+            LOGGER.at(Level.INFO).log("Points reward systems registered");
 
             // NameplateBuilder ” zone level tick system (optional, skipped if mod absent)
             try {
@@ -242,9 +266,9 @@ public class VaryonPlugin extends JavaPlugin {
                 LOGGER.at(Level.INFO).log("NameplateBuilder tick system skipped (" + t.getClass().getSimpleName() + ")");
             }
 
-            // Initialiser le système de dépôt d'essence
+            // Initialiser le système de dépôt de points
             depositBlockManager = new DepositBlockManager(this.getDataDirectory());
-            depositUIManager = new DepositUIManager(essenceManager, factionManager);
+            depositUIManager = new DepositUIManager(pointsManager, factionManager);
             
             DepositBlockInteractionSystem depositInteractionSystem = new DepositBlockInteractionSystem(depositBlockManager, depositUIManager);
             this.getEntityStoreRegistry().registerSystem(depositInteractionSystem);
@@ -345,7 +369,7 @@ public class VaryonPlugin extends JavaPlugin {
                         boolean wasInVaryon = VaryonPlayerWorldPresence.isInVaryonEnabledWorld(uuid);
                         boolean destInVaryon = VaryonWorldAccess.isVaryonEnabledWorld(destWorld);
                         if (wasInVaryon && !destInVaryon) {
-                            int lost = essenceManager.clearCarriedFactionPoints(uuid, playerRef.getUsername());
+                            int lost = pointsManager.clearCarriedFactionPoints(uuid, playerRef.getUsername());
                             if (lost > 0) {
                                 playerRef.sendMessage(Message.raw(
                                     "Tu quittes un monde Varyon : " + lost + " points de faction sur toi ont été perdus.")
@@ -372,8 +396,8 @@ public class VaryonPlugin extends JavaPlugin {
                 this.getEventRegistry().registerGlobal(PlayerConnectEvent.class, event -> {
                     try {
                         PlayerRef playerRef = event.getPlayerRef();
-                        // Charger l'essence du joueur depuis la base de données
-                        essenceManager.loadPlayer(playerRef.getUuid());
+                        // Charger les points du joueur depuis la base de données
+                        pointsManager.loadPlayer(playerRef.getUuid());
                     } catch (Exception e) {
                         LOGGER.at(Level.WARNING).log("Failed to load player faction points: " + e.getMessage());
                     }
@@ -393,6 +417,9 @@ public class VaryonPlugin extends JavaPlugin {
                             LOGGER.at(Level.INFO).log("Registered HUD for player: " + playerRef.getUuid());
                             if (globalRewardsManager != null) {
                                 globalRewardsManager.onPlayerReady(playerRef, ref, store);
+                            }
+                            if (factionBonusManager != null) {
+                                factionBonusManager.applyHpBonus(playerRef);
                             }
                         } catch (Exception e) {
                             LOGGER.at(Level.WARNING).log("Failed to register HUD for player: " + e.getMessage());
@@ -420,7 +447,7 @@ public class VaryonPlugin extends JavaPlugin {
                     hudManager.removePlayer(playerRef.getUuid());
                     RtpvJoinManager joinMgr = RtpvJoinManager.getInstance();
                     if (joinMgr != null) joinMgr.onPlayerDisconnect(playerRef.getUuid());
-                    essenceManager.savePlayer(playerRef.getUuid());
+                    pointsManager.savePlayer(playerRef.getUuid());
                     if (safeZoneNotificationSystem != null) {
                         safeZoneNotificationSystem.removePlayer(playerRef.getUuid());
                     }
@@ -437,6 +464,9 @@ public class VaryonPlugin extends JavaPlugin {
                     extractionTickSystem.removePlayer(playerRef.getUuid());
                     zonesPortalTickSystem.removePlayer(playerRef.getUuid());
                     arenasPortalTickSystem.removePlayer(playerRef.getUuid());
+                    if (factionBonusManager != null) {
+                        factionBonusManager.clearPlayer(playerRef.getUuid());
+                    }
                 });
             } else {
                 LOGGER.at(Level.WARNING).log("Zone HUD could not be initialized");
@@ -447,7 +477,7 @@ public class VaryonPlugin extends JavaPlugin {
             this.getCommandRegistry().registerCommand(new ExtractCommand("ex"));
             this.returnCommand = new ReturnCommand();
             this.getCommandRegistry().registerCommand(this.returnCommand);
-            this.getCommandRegistry().registerCommand(new PointsCommand(essenceManager, factionManager));
+            this.getCommandRegistry().registerCommand(new PointsCommand(pointsManager, factionManager));
             this.getCommandRegistry().registerCommand(new RtpzCommand());
             this.getCommandRegistry().registerCommand(new RtpvCommand());
             this.getCommandRegistry().registerCommand(new RtphCommand());
@@ -475,8 +505,11 @@ public class VaryonPlugin extends JavaPlugin {
             }
             rtpvKeyPacketFilter = null;
         }
-        if (essenceManager != null) {
-            essenceManager.shutdown();
+        if (pointsManager != null) {
+            pointsManager.shutdown();
+        }
+        if (factionBonusSafetyTick != null) {
+            factionBonusSafetyTick.cancel(false);
         }
         if (hudManager != null) {
             hudManager.shutdown();
@@ -532,7 +565,7 @@ public class VaryonPlugin extends JavaPlugin {
     }
 
     public void onConfigurationReloaded() {
-        essenceRewardsConfig.attach(configManager.getMobFragmentsConfig(), configManager.getEssenceEconomyConfig());
+        pointsRewardsConfig.attach(configManager.getMobFragmentsConfig(), configManager.getPointsEconomyConfig());
         if (extractionPortalManager != null) {
             extractionPortalManager.setConfig(configManager.getExtractionConfig());
         }
@@ -570,8 +603,8 @@ public class VaryonPlugin extends JavaPlugin {
     }
 
     @Nullable
-    public static EssenceManager getStaticEssenceManager() {
-        return staticEssenceManager;
+    public static PointsManager getStaticPointsManager() {
+        return staticPointsManager;
     }
 
     @Nullable

@@ -11,7 +11,7 @@ import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.config.ConfigManager;
-import com.varyon.config.EssenceRewardsConfig;
+import com.varyon.config.PointsRewardsConfig;
 import com.varyon.config.MobFragmentsConfig;
 
 import javax.annotation.Nonnull;
@@ -22,11 +22,11 @@ public class BreakOreCleanupListener extends EntityEventSystem<EntityStore, Brea
 
     private final PlacedOreTracker tracker;
     private final ConfigManager configManager;
-    private final EssenceRewardsConfig rewardsConfig;
+    private final PointsRewardsConfig rewardsConfig;
 
     public BreakOreCleanupListener(@Nonnull PlacedOreTracker tracker,
                                    @Nonnull ConfigManager configManager,
-                                   @Nonnull EssenceRewardsConfig rewardsConfig) {
+                                   @Nonnull PointsRewardsConfig rewardsConfig) {
         super(BreakBlockEvent.class);
         this.tracker = tracker;
         this.configManager = configManager;

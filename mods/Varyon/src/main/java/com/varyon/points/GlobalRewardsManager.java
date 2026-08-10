@@ -1,4 +1,4 @@
-package com.varyon.essence;
+package com.varyon.points;
 
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -40,14 +40,14 @@ public class GlobalRewardsManager {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     private FactionRewardsConfig config;
-    private final EssenceManager essenceManager;
+    private final PointsManager pointsManager;
     private final FactionManager factionManager;
     private ZonePermissionsConfig zonePermsConfig;
     private final PendingRewardsStore pendingStore;
 
     /**
      * Participation tracking per faction since last tier trigger.
-     * Key = player UUID, Value = essence deposited this cycle.
+     * Key = player UUID, Value = points deposited this cycle.
      */
     private final Map<UUID, Double> fractureParticipation = new ConcurrentHashMap<>();
     private final Map<UUID, Double> noyauParticipation    = new ConcurrentHashMap<>();
@@ -74,13 +74,19 @@ public class GlobalRewardsManager {
 
     private final Map<Integer, TierState> tierStates = new ConcurrentHashMap<>();
 
+    private FactionBonusManager factionBonusManager;
+
+    public void setFactionBonusManager(@Nonnull FactionBonusManager factionBonusManager) {
+        this.factionBonusManager = factionBonusManager;
+    }
+
     public GlobalRewardsManager(@Nonnull FactionRewardsConfig config,
-                                @Nonnull EssenceManager essenceManager,
+                                @Nonnull PointsManager pointsManager,
                                 @Nonnull FactionManager factionManager,
                                 @Nonnull ZonePermissionsConfig zonePermsConfig,
                                 @Nonnull Path dataFolder) {
         this.config = config;
-        this.essenceManager = essenceManager;
+        this.pointsManager = pointsManager;
         this.factionManager = factionManager;
         this.zonePermsConfig = zonePermsConfig;
         this.pendingStore = new PendingRewardsStore(dataFolder);
@@ -102,7 +108,7 @@ public class GlobalRewardsManager {
     }
 
     /**
-     * Called when a player deposits essence for their faction.
+     * Called when a player deposits points for their faction.
      */
     public void recordDeposit(@Nonnull UUID uuid, @Nonnull FactionManager.Faction faction, double amount) {
         Map<UUID, Double> map = faction == FactionManager.Faction.FRACTURE ? fractureParticipation : noyauParticipation;
@@ -110,8 +116,8 @@ public class GlobalRewardsManager {
     }
 
     public void checkAndDistributeRewards() {
-        int globalBalance = essenceManager.getGlobalBalance();
-        int gaugeAbsMax = Math.max(1, essenceManager.getGuildGaugeAbsMax());
+        int globalBalance = pointsManager.getGlobalBalance();
+        int gaugeAbsMax = Math.max(1, pointsManager.getGuildGaugeAbsMax());
         int referenceMax = tierGaugeReferenceMax();
         long cooldownMs = config.getCooldownMinutes() * 60_000L;
 
@@ -147,6 +153,10 @@ public class GlobalRewardsManager {
         if (noyauRewardedThisWave) {
             noyauParticipation.clear();
             LOGGER.at(Level.INFO).log("Participation reset for Noyau after reward wave");
+        }
+
+        if (factionBonusManager != null) {
+            factionBonusManager.refreshAllOnline();
         }
     }
 
@@ -252,7 +262,7 @@ public class GlobalRewardsManager {
                                          int tierNumber) {
         Map<UUID, Double> participation = faction == FactionManager.Faction.FRACTURE
             ? fractureParticipation : noyauParticipation;
-        double minPart   = config.getMinParticipationEssence();
+        double minPart   = config.getMinParticipationPoints();
         double passRate  = config.getPassiveRewardRate();
         int    fullAmt   = tier.getFragmentAmount();
 

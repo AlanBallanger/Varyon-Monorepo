@@ -1,4 +1,4 @@
-package com.varyon.essence;
+package com.varyon.points;
 
 import java.util.ArrayDeque;
 import java.util.function.IntSupplier;

@@ -16,7 +16,7 @@ public class MessagesConfig {
     private ReturnMessages returnMessages;
     private SafeZoneMessages safeZone;
     private RtpMessages rtp;
-    private EssenceMessages essence;
+    private PointsMessages points;
 
     public static class HudMessages {
         public String labelHealth;
@@ -141,7 +141,7 @@ public class MessagesConfig {
         }
     }
 
-    public static class EssenceMessages {
+    public static class PointsMessages {
         public String balanceInfo;
         public String given;
         public String taken;
@@ -150,7 +150,7 @@ public class MessagesConfig {
         public String noFaction;
         public String notEnough;
 
-        public EssenceMessages(String balanceInfo, String given, String taken, String maxSet,
+        public PointsMessages(String balanceInfo, String given, String taken, String maxSet,
                                String deposited, String noFaction, String notEnough) {
             this.balanceInfo = balanceInfo;
             this.given = given;
@@ -163,13 +163,13 @@ public class MessagesConfig {
     }
 
     public MessagesConfig(HudMessages hud, ExtractionMessages extraction, ReturnMessages returnMessages,
-                          SafeZoneMessages safeZone, RtpMessages rtp, EssenceMessages essence) {
+                          SafeZoneMessages safeZone, RtpMessages rtp, PointsMessages points) {
         this.hud = hud;
         this.extraction = extraction;
         this.returnMessages = returnMessages;
         this.safeZone = safeZone;
         this.rtp = rtp;
-        this.essence = essence;
+        this.points = points;
     }
 
     @Nonnull
@@ -246,18 +246,21 @@ public class MessagesConfig {
                 rtpToml.getString("noPermission", "Vous n'avez pas la permission pour cette zone. Permission requise: {permission}")
             );
 
-            Toml essenceToml = toml.getTable("essence");
-            EssenceMessages essence = new EssenceMessages(
-                essenceToml.getString("balanceInfo", "Points de faction : {current}/{max} | Faction : {faction} | Ta faction sur la jauge : {global}/{gaugeMax}"),
-                essenceToml.getString("given", "Don de {amount} points de faction à {player} effectué"),
-                essenceToml.getString("taken", "Retrait de {amount} points de faction de {player} effectué"),
-                essenceToml.getString("maxSet", "Points de faction de {player} : plafond fixé à {max}"),
-                essenceToml.getString("deposited", "Déposé {amount} points de faction pour {faction}. Le nombre de points de ta faction est monté à {global}/{gaugeMax}"),
-                essenceToml.getString("noFaction", "Vous devez rejoindre une faction d'abord (/varyon faction <nom>)"),
-                essenceToml.getString("notEnough", "Vous n'avez pas assez de points de faction")
+            Toml pointsToml = toml.getTable("points");
+            if (pointsToml == null) {
+                pointsToml = toml.getTable("essence");
+            }
+            PointsMessages points = new PointsMessages(
+                pointsToml.getString("balanceInfo", "Points de faction : {current}/{max} | Faction : {faction} | Ta faction sur la jauge : {global}/{gaugeMax}"),
+                pointsToml.getString("given", "Don de {amount} points de faction à {player} effectué"),
+                pointsToml.getString("taken", "Retrait de {amount} points de faction de {player} effectué"),
+                pointsToml.getString("maxSet", "Points de faction de {player} : plafond fixé à {max}"),
+                pointsToml.getString("deposited", "Déposé {amount} points de faction pour {faction}. Le nombre de points de ta faction est monté à {global}/{gaugeMax}"),
+                pointsToml.getString("noFaction", "Vous devez rejoindre une faction d'abord (/varyon faction <nom>)"),
+                pointsToml.getString("notEnough", "Vous n'avez pas assez de points de faction")
             );
 
-            return new MessagesConfig(hud, extraction, returnMsg, safeZone, rtp, essence);
+            return new MessagesConfig(hud, extraction, returnMsg, safeZone, rtp, points);
 
         } catch (Exception e) {
             LOGGER.at(Level.SEVERE).log("Failed to load messages.toml, using defaults: " + e.getMessage());
@@ -324,14 +327,14 @@ public class MessagesConfig {
             sb.append("error = \"").append(rtp.error).append("\"\n");
             sb.append("noPermission = \"").append(rtp.noPermission).append("\"\n\n");
 
-            sb.append("[essence]\n");
-            sb.append("balanceInfo = \"").append(essence.balanceInfo).append("\"\n");
-            sb.append("given = \"").append(essence.given).append("\"\n");
-            sb.append("taken = \"").append(essence.taken).append("\"\n");
-            sb.append("maxSet = \"").append(essence.maxSet).append("\"\n");
-            sb.append("deposited = \"").append(essence.deposited).append("\"\n");
-            sb.append("noFaction = \"").append(essence.noFaction).append("\"\n");
-            sb.append("notEnough = \"").append(essence.notEnough).append("\"\n");
+            sb.append("[points]\n");
+            sb.append("balanceInfo = \"").append(points.balanceInfo).append("\"\n");
+            sb.append("given = \"").append(points.given).append("\"\n");
+            sb.append("taken = \"").append(points.taken).append("\"\n");
+            sb.append("maxSet = \"").append(points.maxSet).append("\"\n");
+            sb.append("deposited = \"").append(points.deposited).append("\"\n");
+            sb.append("noFaction = \"").append(points.noFaction).append("\"\n");
+            sb.append("notEnough = \"").append(points.notEnough).append("\"\n");
 
             try (FileWriter writer = new FileWriter(configFile)) {
                 writer.write(sb.toString());
@@ -397,7 +400,7 @@ public class MessagesConfig {
             "Vous n'avez pas la permission pour cette zone. Permission requise: {permission}"
         );
 
-        EssenceMessages essence = new EssenceMessages(
+        PointsMessages points = new PointsMessages(
             "Points de faction : {current}/{max} | Faction : {faction} | Ta faction sur la jauge : {global}/{gaugeMax}",
             "Don de {amount} points de faction à {player} effectué",
             "Retrait de {amount} points de faction de {player} effectué",
@@ -407,7 +410,7 @@ public class MessagesConfig {
             "Vous n'avez pas assez de points de faction"
         );
 
-        return new MessagesConfig(hud, extraction, returnMsg, safeZone, rtp, essence);
+        return new MessagesConfig(hud, extraction, returnMsg, safeZone, rtp, points);
     }
 
     @Nonnull public HudMessages getHud()             { return hud; }
@@ -415,5 +418,5 @@ public class MessagesConfig {
     @Nonnull public ReturnMessages getReturn()        { return returnMessages; }
     @Nonnull public SafeZoneMessages getSafeZone()    { return safeZone; }
     @Nonnull public RtpMessages getRtp()              { return rtp; }
-    @Nonnull public EssenceMessages getEssence()      { return essence; }
+    @Nonnull public PointsMessages getPoints()       { return points; }
 }

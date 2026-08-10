@@ -6,6 +6,7 @@ import com.varyon.bossarena.data.Arena;
 import com.varyon.bossarena.data.ArenaRegistry;
 import com.varyon.bossarena.data.BossDefinition;
 import com.varyon.bossarena.data.BossRegistry;
+import com.varyon.bossarena.compat.NoLoot;
 import com.varyon.bossarena.compat.VaryonMobScale;
 import com.varyon.bossarena.util.BossScaler;
 import com.varyon.bossarena.util.VecUtil;
@@ -580,6 +581,9 @@ public final class BossSpawnService {
                     applyModifiers(store, npcRef, combinedMods, uuid);
                     fillHealthToMax(store, npcRef);
                     disableDefaultEntityLoot(store, npcRef, def.bossName + "#" + (i + 1));
+                    // The boss has its own dedicated loot chest via BossLootHandler; external
+                    // reward systems (coins, key fragments) must not also pay out on its death.
+                    NoLoot.mark(store, npcRef);
 
                     // Diagnostic logging for NPC behavior
                     Object npcObj = store.getComponent(npcRef, NPCEntity.getComponentType());
@@ -1803,8 +1807,10 @@ public final class BossSpawnService {
         BossModifiers combinedAddMods = VaryonMobScale.absorbInto(addStore, addRef, addMods);
         applyModifiers(addStore, addRef, combinedAddMods, addUuid);
         disableDefaultEntityLoot(addStore, addRef, add.npcId);
-        // Wave mobs are pure combat filler: no vanilla drops, and no Varyon loot/essence either.
+        // Wave mobs are pure combat filler: no vanilla drops, no Varyon loot/essence, and no
+        // external reward-system payouts (coins, key fragments) either.
         VaryonMobScale.suppressVaryonDrops(addStore, addRef);
+        NoLoot.mark(addStore, addRef);
         if (!addRef.isValid()) {
             LOGGER.warning("Spawned add '" + add.npcId + "' became invalid during setup; skipping tracking.");
             return null;
