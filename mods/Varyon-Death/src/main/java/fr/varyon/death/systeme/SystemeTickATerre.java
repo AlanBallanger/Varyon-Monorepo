@@ -26,6 +26,7 @@ import fr.varyon.death.config.ConfigDeath;
 import fr.varyon.death.etat.EtatATerre;
 import fr.varyon.death.etat.GestionnaireATerre;
 import fr.varyon.death.etat.OutilsJoueur;
+import fr.varyon.death.etat.TamponsStore;
 import fr.varyon.death.hud.GestionnaireHud;
 import fr.varyon.death.hud.HudATerre;
 
@@ -162,13 +163,62 @@ public final class SystemeTickATerre extends EntityTickingSystem<EntityStore> {
                           @Nonnull PlayerRef playerRef,
                           @Nonnull Ref<EntityStore> ref,
                           @Nonnull CommandBuffer<EntityStore> tampon) {
+        terminerEtat(gestionnaire, hud, etat, joueur, playerRef, ref, tampon);
+    }
+
+    /**
+     * Meme logique que {@link #terminer}, en statique : utilisee par le bouton ABANDONNER de
+     * {@code DeathRecapPage}, qui n'a pas d'instance de ce systeme. La touche Accroupi reste
+     * la voie normale d'abandon ; ce chemin existe pour le cas ou le clavier ne repond plus
+     * (page custom ouverte, qui capture les entrees du client).
+     *
+     * @return vrai si l'abandon a bien ete declenche
+     */
+    public static boolean abandonnerImmediatement(@Nonnull UUID uuidJoueur) {
+        GestionnaireATerre gestionnaire = GestionnaireATerre.get();
+        GestionnaireHud hud = GestionnaireHud.get();
+        if (gestionnaire == null || hud == null) {
+            return false;
+        }
+        EtatATerre etat = gestionnaire.getEtat(uuidJoueur);
+        if (etat == null) {
+            return false;
+        }
+        PlayerRef playerRef = joueurEnLigne(uuidJoueur);
+        if (playerRef == null) {
+            return false;
+        }
+        Ref<EntityStore> ref = playerRef.getReference();
+        if (ref == null || !ref.isValid()) {
+            return false;
+        }
+        Store<EntityStore> store = ref.getStore();
+        if (store == null) {
+            return false;
+        }
+        // Hors tick ECS (clic sur une page UI) : aucun CommandBuffer n'est fourni par le
+        // framework, seul le Store est accessible. TamponsStore en obtient un par reflexion.
+        return TamponsStore.executer(store, tampon -> {
+            Player joueur = store.getComponent(ref, Player.getComponentType());
+            terminerEtat(gestionnaire, hud, etat, joueur, playerRef, ref, tampon);
+            return true;
+        });
+    }
+
+    private static void terminerEtat(@Nonnull GestionnaireATerre gestionnaire,
+                                     @Nonnull GestionnaireHud hud,
+                                     @Nonnull EtatATerre etat,
+                                     @Nullable Player joueur,
+                                     @Nonnull PlayerRef playerRef,
+                                     @Nonnull Ref<EntityStore> ref,
+                                     @Nonnull CommandBuffer<EntityStore> tampon) {
         // Retire l'etat AVANT d'infliger les degats, sinon le systeme d'interception
         // les absorberait au titre de l'invulnerabilite et le joueur ne mourrait jamais.
         List<UUID> soigneurs = new ArrayList<>(etat.getSoigneurs());
         gestionnaire.retirerDeLEtatATerre(etat.getUuidJoueur());
 
         hud.masquerATerre(joueur, playerRef);
-        masquerHudDesSoigneurs(soigneurs);
+        masquerHudDesSoigneurs(hud, soigneurs);
         OutilsJoueur.retablirCamera(playerRef);
         OutilsJoueur.arreterAnimationATerre(ref, tampon);
         // La mobilite doit etre rendue avant la mort : sinon le joueur reapparaitrait fige.
@@ -177,7 +227,7 @@ public final class SystemeTickATerre extends EntityTickingSystem<EntityStore> {
     }
 
     /** Retire le HUD de relevement des allies qui soignaient ce joueur. */
-    private void masquerHudDesSoigneurs(@Nonnull List<UUID> soigneurs) {
+    private static void masquerHudDesSoigneurs(@Nonnull GestionnaireHud hud, @Nonnull List<UUID> soigneurs) {
         for (UUID uuidSoigneur : soigneurs) {
             PlayerRef refSoigneur = joueurEnLigne(uuidSoigneur);
             if (refSoigneur != null) {

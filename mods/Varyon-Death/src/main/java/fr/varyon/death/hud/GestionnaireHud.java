@@ -64,6 +64,25 @@ public final class GestionnaireHud {
         }
     }
 
+    /**
+     * Affiche ou masque le HUD "a terre" sans le detruire : utilise quand {@code DeathRecapPage}
+     * est depliee, pour eviter que les deux se superposent a l'ecran.
+     */
+    public void definirATerreMasqueParRecap(@Nullable UUID uuid, boolean masque) {
+        if (uuid == null) {
+            return;
+        }
+        HudATerre hud = hudATerre.get(uuid);
+        if (hud == null) {
+            return;
+        }
+        try {
+            hud.definirMasqueParRecap(masque);
+        } catch (RuntimeException ignore) {
+            // Le joueur peut s'etre deconnecte entre-temps.
+        }
+    }
+
     public void masquerATerre(@Nullable Player joueur, @Nullable PlayerRef playerRef) {
         UUID uuid = uuidDe(playerRef);
         if (uuid == null) {

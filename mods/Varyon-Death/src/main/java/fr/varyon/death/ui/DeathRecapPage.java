@@ -34,6 +34,8 @@ import fr.varyon.death.combat.TypeDegats;
 import fr.varyon.death.combat.BanqueRecaps;
 import fr.varyon.death.config.Diagnostic;
 import fr.varyon.death.config.PreferencesRecap;
+import fr.varyon.death.hud.GestionnaireHud;
+import fr.varyon.death.systeme.SystemeTickATerre;
 
 /**
  * Page « VOUS ETES MORT » : classement des menaces sur deux rangees de cinq cases,
@@ -47,6 +49,7 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
     public static final int MAX_CELLS = 10;
     private static final String ACTION_CLOSE = "recap:close";
     private static final String ACTION_REOPEN = "recap:reopen";
+    private static final String ACTION_ABANDON = "recap:abandon";
     private static final String ACTION_TOGGLE = "recap:toggle";
     private static final String ACTION_DETAIL_PREFIX = "recap:detail:";
     private static final int DETAIL_KIND_SLOTS = 4;
@@ -169,6 +172,8 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
         ui.set("#RecapToggleLabel.Text", "Desactiver les recaps de mort");
         ui.set("#RecapHint.Text", "Astuce : tapez /mort pour rouvrir ce recapitulatif.");
         ui.set("#RecapReopenButton.Text", "VOIR LE RECAPITULATIF");
+        ui.set("#RecapAbandonButtonCollapsed.Text", "ABANDONNER");
+        ui.set("#RecapAbandonButtonExpanded.Text", "ABANDONNER");
 
         // Ne pas passer le 4e parametre (locksInterface) : il vaut false et rend les liaisons
         // inertes. La surcharge a 3 arguments utilise true, comme les pages Varyon qui marchent.
@@ -176,6 +181,10 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
                 EventData.of("Action", ACTION_CLOSE));
         events.addEventBinding(CustomUIEventBindingType.Activating, "#RecapReopenButton",
                 EventData.of("Action", ACTION_REOPEN));
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#RecapAbandonButtonCollapsed",
+                EventData.of("Action", ACTION_ABANDON));
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#RecapAbandonButtonExpanded",
+                EventData.of("Action", ACTION_ABANDON));
         events.addEventBinding(CustomUIEventBindingType.ValueChanged, "#RecapToggle",
                 EventData.of("Action", ACTION_TOGGLE));
         for (int i = 0; i < MAX_CELLS; i++) {
@@ -190,6 +199,7 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
         if (playerUuid != null) {
             // La case est cochee quand les recaps sont DESACTIVES (libelle negatif).
             ui.set("#RecapToggle.Value", !PreferencesRecap.estActif(playerUuid));
+            synchroniserHudATerre(playerUuid);
         }
 
         ui.set("#RecapCombatDuration.Text", RecapFormat.duration(snapshot.combatDurationMs()));
@@ -279,6 +289,10 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
         }
         if (ACTION_REOPEN.equals(action)) {
             handleReopen();
+            return;
+        }
+        if (ACTION_ABANDON.equals(action)) {
+            handleAbandonner(playerUuid);
             return;
         }
         if (ACTION_TOGGLE.equals(action)) {
@@ -383,11 +397,33 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
         envoyerEtatDeplie();
     }
 
+    /** Bouton ABANDONNER : declenche l'abandon sans passer par la touche Accroupi. */
+    private void handleAbandonner(@Nonnull UUID playerUuid) {
+        SystemeTickATerre.abandonnerImmediatement(playerUuid);
+        // L'abandon tue le joueur : DeathComponent va s'ajouter, la page devient obsolete.
+        handleClose(playerUuid);
+    }
+
     private void envoyerEtatDeplie() {
         UICommandBuilder ui = new UICommandBuilder();
         ui.set("#RecapCollapsedRoot.Visible", !expanded);
         ui.set("#RecapExpandedRoot.Visible", expanded);
         envoyerMiseAJour(ui);
+        UUID playerUuid = playerRef.getUuid();
+        if (playerUuid != null) {
+            synchroniserHudATerre(playerUuid);
+        }
+    }
+
+    /**
+     * Le HUD "a terre" et le recapitulatif deplie occupent la meme zone de l'ecran : masquer
+     * l'un des lors que l'autre est affiche, plutot que de les superposer.
+     */
+    private void synchroniserHudATerre(@Nonnull UUID playerUuid) {
+        GestionnaireHud hud = GestionnaireHud.get();
+        if (hud != null) {
+            hud.definirATerreMasqueParRecap(playerUuid, expanded);
+        }
     }
 
     @Override
@@ -395,6 +431,12 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
         UUID playerUuid = playerRef.getUuid();
         if (playerUuid != null) {
             OPEN_PAGES.remove(playerUuid, this);
+            // La page disparait quelle que soit la raison (croix, deconnexion...) : le HUD ne
+            // doit pas rester masque indefiniment si ce n'etait pas via le bouton REPLIER.
+            GestionnaireHud hud = GestionnaireHud.get();
+            if (hud != null) {
+                hud.definirATerreMasqueParRecap(playerUuid, false);
+            }
         }
         resolved = true;
         super.onDismiss(ref, store);

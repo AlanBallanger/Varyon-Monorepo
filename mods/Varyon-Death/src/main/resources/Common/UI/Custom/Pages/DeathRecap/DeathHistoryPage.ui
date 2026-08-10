@@ -1,0 +1,216 @@
+// =============================================================================
+// Varyon-DeathRecap - historique des dernieres morts
+//
+// Liste jusqu'a 10 entrees (date, monde, resume) ; un clic ouvre le recapitulatif
+// complet correspondant (DeathRecapPage). Meme esprit visuel que DeathRecapPage.ui :
+// aplats de couleur uniquement, aucune texture externe.
+//
+// Les identifiants #HistXxx sont pilotes depuis DeathHistoryPage.java.
+// =============================================================================
+
+$C = "../../Common.ui";
+
+@PanelBg = #0d1a29;
+@Accent  = #ffe2a6;
+
+$C.@PageOverlay {
+    Group {
+        LayoutMode: Middle;
+
+        Group {
+            Anchor: (Width: 720, Height: 620);
+            LayoutMode: Top;
+            Background: #8b95a8(0.7);
+            Padding: (Full: 2);
+
+            Group {
+                FlexWeight: 1;
+                LayoutMode: Top;
+                Background: @PanelBg;
+
+                // ----- Bandeau de titre -----
+                Group {
+                    Anchor: (Height: 40);
+                    Background: #132437;
+                    LayoutMode: Left;
+                    Padding: (Horizontal: 12);
+
+                    Group { FlexWeight: 1; Anchor: (Top: 19, Bottom: 19); Background: @Accent; }
+                    Group { Anchor: (Width: 14); }
+                    Label #HistTitle {
+                        Anchor: (Height: 24);
+                        Text: "HISTORIQUE DES MORTS";
+                        Style: (FontSize: 17, TextColor: #ffe2a6, RenderBold: true, LetterSpacing: 3, HorizontalAlignment: Center, VerticalAlignment: Center);
+                    }
+                    Group { Anchor: (Width: 14); }
+                    Group { FlexWeight: 1; Anchor: (Top: 19, Bottom: 19); Background: @Accent; }
+                }
+
+                Group {
+                    LayoutMode: Top;
+                    FlexWeight: 1;
+                    Padding: (Horizontal: 16, Vertical: 12);
+
+                    Label #HistEmpty {
+                        Text: "Aucune mort enregistree.";
+                        Anchor: (Height: 24);
+                        Visible: false;
+                        Style: (FontSize: 13, TextColor: #9fb6d3, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                    }
+
+                    Group #HistRow0 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry0 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry0Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry0World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry0Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow1 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry1 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry1Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry1World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry1Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow2 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry2 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry2Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry2World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry2Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow3 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry3 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry3Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry3World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry3Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow4 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry4 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry4Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry4World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry4Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow5 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry5 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry5Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry5World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry5Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow6 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry6 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry6Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry6World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry6Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow7 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry7 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry7Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry7World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry7Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow8 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry8 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry8Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry8World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry8Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+                    Group { Anchor: (Height: 6); }
+
+                    Group #HistRow9 { Anchor: (Height: 46); Visible: false;
+                        Button #HistEntry9 {
+                            Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+                            Style: ButtonStyle(Default: (Background: (Color: #14243a)), Hovered: (Background: (Color: #1e3552)), Pressed: (Background: (Color: #0c1926)), Sounds: $C.@ButtonSounds);
+                            Group { Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0); LayoutMode: Left; Padding: (Horizontal: 12); HitTestVisible: false;
+                                Label #HistEntry9Date { Text: "-"; Anchor: (Width: 150); Style: (FontSize: 12, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center); }
+                                Label #HistEntry9World { FlexWeight: 1; Text: "-"; Style: (FontSize: 12, TextColor: #9fd3ff, VerticalAlignment: Center); }
+                                Label #HistEntry9Summary { Anchor: (Width: 220); Text: "-"; Style: (FontSize: 12, TextColor: #c0cee5, HorizontalAlignment: End, VerticalAlignment: Center); }
+                            }
+                        }
+                    }
+
+                    Group { FlexWeight: 1; }
+                }
+            }
+        }
+
+        Group { Anchor: (Height: 8); }
+
+        Group {
+            LayoutMode: Left;
+            Anchor: (Height: 44);
+
+            Group { FlexWeight: 1; }
+            TextButton #HistCloseButton {
+                Text: "FERMER";
+                Anchor: (Height: 40, Width: 240);
+                Padding: (Horizontal: 6);
+                Style: TextButtonStyle(
+                    Default: (Background: (Color: #2a1f08), LabelStyle: (FontSize: 15, TextColor: #ffe2a6, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Hovered: (Background: (Color: #3d2e0c), LabelStyle: (FontSize: 15, TextColor: #fff3d0, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Pressed: (Background: (Color: #1d1505), LabelStyle: (FontSize: 15, TextColor: #d9c08a, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Sounds: $C.@ButtonSounds
+                );
+            }
+            Group { FlexWeight: 1; }
+        }
+    }
+}

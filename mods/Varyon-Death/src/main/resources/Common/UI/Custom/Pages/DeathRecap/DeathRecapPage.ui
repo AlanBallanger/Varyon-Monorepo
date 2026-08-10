@@ -39,7 +39,7 @@ $C = "../../Common.ui";
 };
 
 Group {
-    // ----- Etat replie : simple bouton pour rouvrir le recapitulatif -----
+    // ----- Etat replie : bouton pour rouvrir le recapitulatif + abandon cliquable -----
     Group #RecapCollapsedRoot {
         LayoutMode: Top;
         Anchor: (Top: 232, Left: 0, Right: 0, Height: 40);
@@ -53,6 +53,20 @@ Group {
                     Default: (Background: (Color: #2a1f08(0.85)), LabelStyle: (FontSize: 13, TextColor: #ffe2a6, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
                     Hovered: (Background: (Color: #3d2e0c(0.9)), LabelStyle: (FontSize: 13, TextColor: #fff3d0, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
                     Pressed: (Background: (Color: #1d1505(0.9)), LabelStyle: (FontSize: 13, TextColor: #d9c08a, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Sounds: $C.@ButtonSounds
+                );
+            }
+            Group { Anchor: (Width: 12); }
+            // La touche Accroupi ne repond plus tant qu'une page custom capture les entrees
+            // du client : ce bouton offre un moyen fiable d'abandonner malgre tout.
+            TextButton #RecapAbandonButtonCollapsed {
+                Text: "ABANDONNER";
+                Anchor: (Height: 36, Width: 180);
+                Padding: (Horizontal: 6);
+                Style: TextButtonStyle(
+                    Default: (Background: (Color: #3a1414(0.85)), LabelStyle: (FontSize: 13, TextColor: #ffb3b3, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Hovered: (Background: (Color: #52201f(0.9)), LabelStyle: (FontSize: 13, TextColor: #ffd6d6, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                    Pressed: (Background: (Color: #250c0c(0.9)), LabelStyle: (FontSize: 13, TextColor: #d99a9a, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
                     Sounds: $C.@ButtonSounds
                 );
             }
@@ -475,6 +489,18 @@ Group {
                         Default: (Background: (Color: #2a1f08), LabelStyle: (FontSize: 15, TextColor: #ffe2a6, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
                         Hovered: (Background: (Color: #3d2e0c), LabelStyle: (FontSize: 15, TextColor: #fff3d0, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
                         Pressed: (Background: (Color: #1d1505), LabelStyle: (FontSize: 15, TextColor: #d9c08a, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                        Sounds: $C.@ButtonSounds
+                    );
+                }
+                Group { Anchor: (Width: 12); }
+                TextButton #RecapAbandonButtonExpanded {
+                    Text: "ABANDONNER";
+                    Anchor: (Height: 40, Width: 180);
+                    Padding: (Horizontal: 6);
+                    Style: TextButtonStyle(
+                        Default: (Background: (Color: #3a1414), LabelStyle: (FontSize: 15, TextColor: #ffb3b3, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                        Hovered: (Background: (Color: #52201f), LabelStyle: (FontSize: 15, TextColor: #ffd6d6, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
+                        Pressed: (Background: (Color: #250c0c), LabelStyle: (FontSize: 15, TextColor: #d99a9a, RenderBold: true, LetterSpacing: 2, HorizontalAlignment: Center, VerticalAlignment: Center)),
                         Sounds: $C.@ButtonSounds
                     );
                 }

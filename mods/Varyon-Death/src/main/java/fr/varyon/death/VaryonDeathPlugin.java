@@ -22,6 +22,7 @@ import com.hypixel.hytale.server.core.universe.world.worldmap.WorldMapManager;
 
 import fr.varyon.death.carte.FournisseurMarqueurs;
 import fr.varyon.death.combat.BanqueRecaps;
+import fr.varyon.death.combat.HistoriqueMorts;
 import fr.varyon.death.combat.SuiviCombat;
 import fr.varyon.death.command.DeathRecapCommand;
 import fr.varyon.death.command.ReleverCommand;
@@ -78,6 +79,7 @@ public final class VaryonDeathPlugin extends JavaPlugin {
     private GestionnaireATerre gestionnaire;
     private GestionnaireHud hud;
     private GestionnairePreferences preferences;
+    private HistoriqueMorts historiqueMorts;
 
     public VaryonDeathPlugin(@Nonnull JavaPluginInit init) {
         super(init);
@@ -94,6 +96,10 @@ public final class VaryonDeathPlugin extends JavaPlugin {
         this.preferences = new GestionnairePreferences(getDataDirectory());
         this.preferences.initialize();
         PreferencesRecap.bind(preferences);
+
+        this.historiqueMorts = new HistoriqueMorts(getDataDirectory());
+        this.historiqueMorts.initialize();
+        HistoriqueMorts.lier(historiqueMorts);
 
         configurerRecapitulatif(config);
         enregistrerSystemes();
@@ -249,6 +255,9 @@ public final class VaryonDeathPlugin extends JavaPlugin {
     protected void shutdown() {
         if (preferences != null) {
             preferences.flush();
+        }
+        if (historiqueMorts != null) {
+            historiqueMorts.flush();
         }
         if (gestionnaire != null) {
             gestionnaire.toutEffacer();

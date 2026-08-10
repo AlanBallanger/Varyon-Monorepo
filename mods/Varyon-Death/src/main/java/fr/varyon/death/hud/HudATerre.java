@@ -27,6 +27,8 @@ public final class HudATerre extends CustomUIHud {
     private volatile float progressionAbandon;
     private volatile int nombreSoigneurs;
     private volatile String nomsSoigneurs = "";
+    /** Masque tout le HUD pendant que le recapitulatif de mort est deplie : l'un ou l'autre. */
+    private volatile boolean masqueParRecap;
 
     /**
      * Passe a vrai quand le serveur a effectivement construit le HUD.
@@ -63,6 +65,20 @@ public final class HudATerre extends CustomUIHud {
     }
 
     /**
+     * Affiche ou masque tout le HUD. Utilise quand le recapitulatif de mort est deplie :
+     * les deux se superposaient sinon, c'est desormais l'un ou l'autre.
+     */
+    public void definirMasqueParRecap(boolean masque) {
+        this.masqueParRecap = masque;
+        if (!construit) {
+            return;
+        }
+        UICommandBuilder commandes = new UICommandBuilder();
+        commandes.set("#ReviveATerreBox.Visible", !masque);
+        update(false, commandes);
+    }
+
+    /**
      * Construction initiale : charge le fichier d'interface puis applique les valeurs.
      * Appele une seule fois par le serveur, a l'ajout du HUD.
      */
@@ -75,6 +91,7 @@ public final class HudATerre extends CustomUIHud {
 
     /** Renseigne les elements du HUD. Utilise aussi bien a la construction qu'aux mises a jour. */
     private void appliquerValeurs(@Nonnull UICommandBuilder commandes) {
+        commandes.set("#ReviveATerreBox.Visible", !masqueParRecap);
         commandes.set("#ReviveATerreTitre.Text", "VOUS ÊTES À TERRE");
         commandes.set("#ReviveATerreChrono.Text", formaterChrono(secondesRestantes));
 
@@ -86,9 +103,15 @@ public final class HudATerre extends CustomUIHud {
         commandes.set("#ReviveATerreBarreReleveFill.Value", progressionReleve);
 
         boolean abandonEnCours = progressionAbandon > 0f;
-        commandes.set("#ReviveATerreAbandonTexte.Text", abandonEnCours
-                ? "Abandon en cours"
-                : "Maintenez [Accroupi] pour abandonner");
+        if (abandonEnCours) {
+            commandes.set("#ReviveATerreAbandonTextePrefixe.Text", "Abandon en cours");
+            commandes.set("#ReviveATerreAbandonToucheTexte.Text", "");
+            commandes.set("#ReviveATerreAbandonSuffixe.Text", "");
+        } else {
+            commandes.set("#ReviveATerreAbandonTextePrefixe.Text", "Maintenez ");
+            commandes.set("#ReviveATerreAbandonToucheTexte.Text", "[Accroupir]");
+            commandes.set("#ReviveATerreAbandonSuffixe.Text", " pour abandonner");
+        }
         commandes.set("#ReviveATerreBarreAbandon.Visible", abandonEnCours);
         commandes.set("#ReviveATerreBarreAbandonFill.Value", progressionAbandon);
     }

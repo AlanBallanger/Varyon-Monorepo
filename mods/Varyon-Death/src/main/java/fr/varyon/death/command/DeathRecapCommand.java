@@ -1,5 +1,6 @@
 package fr.varyon.death.command;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -17,17 +18,20 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import fr.varyon.death.combat.SuiviCombat;
 import fr.varyon.death.combat.BanqueRecaps;
+import fr.varyon.death.combat.HistoriqueMorts;
+import fr.varyon.death.combat.HistoriqueMorts.DeathEntry;
 import fr.varyon.death.config.PreferencesRecap;
-import fr.varyon.death.ui.DeathRecapPage;
+import fr.varyon.death.ui.DeathHistoryPage;
 
 /**
- * {@code /mort} rouvre le dernier recapitulatif, {@code /mort logs} bascule l'affichage.
- * Utile lorsque la page a ete fermee par megarde juste apres la reapparition.
+ * {@code /mort} ouvre l'historique des {@value HistoriqueMorts#MAX_ENTRIES} dernieres morts,
+ * {@code /mort logs} bascule l'affichage. Chaque entree de l'historique ouvre le recapitulatif
+ * complet correspondant.
  */
 public final class DeathRecapCommand extends CommandBase {
 
     public DeathRecapCommand() {
-        super("mort", "Rouvre le recapitulatif de votre derniere mort.");
+        super("mort", "Affiche l'historique de vos dernieres morts.");
         this.addSubCommand(new ToggleSubCommand());
     }
 
@@ -46,8 +50,9 @@ public final class DeathRecapCommand extends CommandBase {
             context.sendMessage(Message.raw("Vos recapitulatifs de mort sont desactives. Utilisez /mort logs pour les reactiver."));
             return;
         }
-        SuiviCombat.Snapshot snapshot = BanqueRecaps.get().peekLast(uuid);
-        if (snapshot == null) {
+        HistoriqueMorts historique = HistoriqueMorts.get();
+        List<DeathEntry> entries = historique != null ? historique.pour(uuid) : List.of();
+        if (entries.isEmpty()) {
             context.sendMessage(Message.raw("Aucun recapitulatif de mort recent."));
             return;
         }
@@ -55,12 +60,10 @@ public final class DeathRecapCommand extends CommandBase {
         // monde, alors que cette methode tourne sur un thread du pool de commandes.
         World world = resolveWorld(playerRef);
         if (world == null) {
-            context.sendMessage(Message.raw("Impossible d'ouvrir le recapitulatif pour le moment."));
+            context.sendMessage(Message.raw("Impossible d'ouvrir l'historique pour le moment."));
             return;
         }
-        // Si la page est deja ouverte mais repliee (bouton seul), /mort la deplie plutot que
-        // de se plaindre qu'elle est "deja ouverte" : c'est une demande explicite de la voir.
-        world.execute(() -> DeathRecapPage.openExpandedFor(playerRef, snapshot));
+        world.execute(() -> DeathHistoryPage.openFor(playerRef, entries));
     }
 
     @Nullable
@@ -119,6 +122,10 @@ public final class DeathRecapCommand extends CommandBase {
             } else {
                 SuiviCombat.get().clear(uuid);
                 BanqueRecaps.get().dropAll(uuid);
+                HistoriqueMorts historique = HistoriqueMorts.get();
+                if (historique != null) {
+                    historique.dropAll(uuid);
+                }
                 context.sendMessage(Message.raw("Recapitulatifs de mort desactives."));
             }
         }

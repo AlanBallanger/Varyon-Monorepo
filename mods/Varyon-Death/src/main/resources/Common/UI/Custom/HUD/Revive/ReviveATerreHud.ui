@@ -12,10 +12,10 @@
 // =============================================================================
 
 Group {
-  LayoutMode: Center;
+  LayoutMode: Middle;
 
   Group #ReviveATerreBox {
-    Anchor: (Top: 68, Width: 420, Height: 152);
+    Anchor: (Width: 420, Height: 152);
     Background: #000000(0.62);
     LayoutMode: Top;
     Padding: (Horizontal: 14, Vertical: 10);
@@ -61,16 +61,10 @@ Group {
 
     Group { FlexWeight: 1; }
 
-    // ----- Abandon -----
-    Label #ReviveATerreAbandonTexte {
-      Anchor: (Height: 20);
-      Text: "Maintenez [Accroupi] pour abandonner";
-      Style: (FontSize: 15, TextColor: #8fa6c3, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-    }
-
-    Group { Anchor: (Height: 3); }
-
-    // Barre d'abandon, masquee tant que la touche n'est pas maintenue.
+    // Barre d'abandon, masquee tant que la touche n'est pas maintenue. Le texte "Maintenez
+    // [Accroupir]..." a ete retire : le bouton ABANDONNER de DeathRecapPage, positionne juste
+    // sous ce HUD, le remplace desormais (la page capture les entrees clavier du client, la
+    // touche Accroupi ne repond plus de facon fiable une fois qu'elle est ouverte).
     Group #ReviveATerreBarreAbandon {
       Anchor: (Left: 0, Right: 0, Height: 10);
       Visible: false;

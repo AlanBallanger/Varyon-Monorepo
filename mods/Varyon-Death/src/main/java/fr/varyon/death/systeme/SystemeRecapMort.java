@@ -14,10 +14,12 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import fr.varyon.death.combat.SuiviCombat;
 import fr.varyon.death.combat.BanqueRecaps;
+import fr.varyon.death.combat.HistoriqueMorts;
 import fr.varyon.death.config.PreferencesRecap;
 
 /**
@@ -67,8 +69,37 @@ public final class SystemeRecapMort extends DeathSystems.OnDeathSystem {
             LOGGER.at(Level.INFO).log("Mort de %s : recap capture (%d menaces, %.0f degats).",
                     uuid, snapshot.topThreats().size(), snapshot.totalDamageTaken());
             BanqueRecaps.get().put(uuid, snapshot);
+            enregistrerHistorique(uuid, snapshot, store);
         } catch (RuntimeException e) {
             LOGGER.at(Level.WARNING).log("Echec capture du recapitulatif pour %s: %s", uuid, e.getMessage());
+        }
+    }
+
+    private static void enregistrerHistorique(@Nonnull UUID uuid,
+                                              @Nonnull SuiviCombat.Snapshot snapshot,
+                                              @Nonnull Store<EntityStore> store) {
+        HistoriqueMorts historique = HistoriqueMorts.get();
+        if (historique == null) {
+            return;
+        }
+        String monde = resolveWorldName(store);
+        HistoriqueMorts.DeathEntry entree =
+                HistoriqueMorts.DeathEntry.of(System.currentTimeMillis(), monde, snapshot);
+        if (entree != null) {
+            historique.enregistrer(uuid, entree);
+        }
+    }
+
+    @Nullable
+    private static String resolveWorldName(@Nonnull Store<EntityStore> store) {
+        try {
+            if (store.getExternalData() == null) {
+                return null;
+            }
+            World world = store.getExternalData().getWorld();
+            return world != null ? world.getName() : null;
+        } catch (RuntimeException ignored) {
+            return null;
         }
     }
 
