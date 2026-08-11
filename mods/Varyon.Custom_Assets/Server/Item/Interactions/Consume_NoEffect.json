@@ -1,0 +1,12 @@
+{
+  "Type": "Simple",
+  "Effects": {
+    "ItemAnimationId": "Consume",
+    "ClearAnimationOnFinish": true
+  },
+  "RunTime": 1,
+  "Next": {
+    "Type": "ModifyInventory",
+    "AdjustHeldItemQuantity": -1
+  }
+}

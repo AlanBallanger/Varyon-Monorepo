@@ -1,0 +1,77 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Rune_Table_Purple.name"
+  },
+  "PlayerAnimationsId": "Block",
+  "IconProperties": {
+    "Scale": 0.58823,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -13.5
+    ]
+  },
+  "MaxStack": 1,
+  "ItemLevel": 10,
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "BlockType": {
+    "Material": "Solid",
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Items/Bench/Rune_Table.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Items/Bench/Rune_Table_Purple.png",
+        "Weight": 1
+      }
+    ],
+    "HitboxType": "Rune_Table_BoundingBox",
+    "VariantRotation": "NESW",
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "BlockSoundSetId": "Stone",
+    "AllowsMultipleUsers": true,
+    "Light": {
+      "Color": "#838"
+    },
+    "CustomModelAnimation": "Items/Bench/Rune_Table_IDLE.blockyanim",
+    "Particles": [
+      {
+        "SystemId": "Rune_Table_IDLE",
+        "TargetEntityPart": "PrimaryItem",
+        "TargetNodeName": "Energy Artefact",
+        "Color": "#b000ff",
+        "Scale": 0.71
+      }
+    ],
+    "InteractionHint": "server.interactionHints.rune_table_examine",
+    "State": {
+      "Definitions": {
+        "Idle": {}
+      }
+    },
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "ChangeState",
+            "Changes": {
+              "default": "Idle",
+              "Idle": "Idle"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Icon": "Icons/ItemsGenerated/Rune_Table_Purple.png"
+}

@@ -1,0 +1,34 @@
+{
+  "Type": "Charging",
+  "FailOnDamage": true,
+  "Effects": {
+    "ItemAnimationId": "Consume",
+    "ClearAnimationOnFinish": true,
+    "ClearSoundEventOnFinish": true
+  },
+  "HorizontalSpeedMultiplier": 0.4,
+  "Next": {
+    "1.0": {
+      "Type": "ModifyInventory",
+      "AdjustHeldItemQuantity": -1,
+      "Next": {
+        "Type": "Serial",
+        "Interactions": [
+          {
+            "Type": "Replace",
+            "Var": "ConsumedSFX",
+            "DefaultOk": true,
+            "DefaultValue": {
+              "Interactions": [
+                "Consumed_SFX"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Failed": {
+    "Type": "Simple"
+  }
+}

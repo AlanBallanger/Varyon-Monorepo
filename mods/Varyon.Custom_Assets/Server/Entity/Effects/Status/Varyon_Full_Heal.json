@@ -1,0 +1,11 @@
+{
+    "StatModifiers": {
+        "Health": 1.0
+    },
+    "OverlapBehavior": "Overwrite",
+    "Infinite": false,
+    "Duration": 1.0,
+    "RemovalBehavior": "Duration",
+    "DamageCalculatorCooldown": 0.1,
+    "StatusEffectIcon": "UI/StatusEffects/Regen/Large.png"
+}

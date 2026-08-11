@@ -1,0 +1,86 @@
+{
+  "Icon": "Icons/ItemsGenerated/Animated_Wheel.png",
+  "BlockType": {
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Rocks"
+      }
+    },
+    "ParticleColor": "#d5d5c8",
+    "State": {
+      "Definitions": {
+        "Turned_On": {
+          "CustomModelAnimation": "Resources/Wheel_Turned_On.blockyanim",
+          "Looping": true,
+          "CustomModel": "Resources/Animated_Wheel.blockymodel",
+          "CustomModelTexture": [
+            {
+              "Texture": "Resources/Wheel_Texture.png"
+            }
+          ],
+          "DrawType": "Model",
+          "AmbientSoundEventId": "SFX_Env_Emit_Geyzer"
+        },
+        "Turned_Off": {
+          "CustomModelAnimation": "Resources/Wheel_Turned_Off.blockyanim",
+          "CustomModel": "Resources/Animated_Wheel.blockymodel",
+          "CustomModelTexture": [
+            {
+              "Texture": "Resources/Wheel_Texture.png"
+            }
+          ],
+          "DrawType": "Model",
+          "AmbientSoundEventId": null
+        }
+      }
+    },
+    "DrawType": "Model",
+    "CustomModelTexture": [
+      {
+        "Texture": "Resources/Wheel_Texture.png"
+      }
+    ],
+    "CustomModel": "Resources/Animated_Wheel.blockymodel",
+    "CustomModelAnimation": "Resources/Wheel_Default.blockyanim",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "ChangeState",
+            "Changes": {
+              "default": "Turned_On",
+              "Turned_On": "Turned_Off",
+              "Turned_Off": "Turned_On"
+            }
+          }
+        ]
+      }
+    },
+    "VariantRotation": "NESW",
+    "Group": "Stone",
+    "Material": "Solid",
+    "Textures": [
+      {}
+    ]
+  },
+  "PlayerAnimationsId": "Block",
+  "IconProperties": {
+    "Scale": 0.58823,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -13.5
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "Categories": [
+    ""
+  ],
+  "Model": "Resources/Animated_Wheel.blockymodel",
+  "Texture": "Resources/Wheel_Texture.png",
+  "Animation": "Resources/Wheel_Default.blockyanim"
+}

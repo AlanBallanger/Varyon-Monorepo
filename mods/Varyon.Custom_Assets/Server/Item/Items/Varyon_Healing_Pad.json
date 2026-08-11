@@ -1,0 +1,104 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Healing_Pad.name",
+    "Description": "server.items.Varyon_Healing_Pad.description"
+  },
+  "Categories": [
+    "Items.Furniture"
+  ],
+  "BlockType": {
+    "Material": "Solid",
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Blocks/Varyon_Healing_Pad/Varyon_Healing_Pad.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Blocks/Varyon_Healing_Pad/Varyon_Healing_Pad.png"
+      }
+    ],
+    "BlockParticleSetId": "Stone",
+    "BlockSoundSetId": "Stone",
+    "InteractionSoundEventId": "SFX_Stone_Hit",
+    "ParticleColor": "#3A8D81",
+    "HitboxType": "Varyon_Healing_Pad_Hitbox",
+    "InteractionHitboxType": "Varyon_Healing_Pad_Hitbox",
+    "State": {
+      "Definitions": {
+        "Pressed": {
+          "CustomModel": "Blocks/Varyon_Healing_Pad/Varyon_Healing_Pad_Pressed.blockymodel"
+        },
+        "Normal": {
+          "CustomModel": "Blocks/Varyon_Healing_Pad/Varyon_Healing_Pad.blockymodel"
+        }
+      }
+    },
+    "Interactions": {
+      "CollisionEnter": {
+        "Interactions": [
+          {
+            "Type": "BlockCondition",
+            "Matchers": [
+              {
+                "Block": {
+                  "State": "Normal"
+                }
+              }
+            ],
+            "Next": {
+              "Type": "ChangeState",
+              "Changes": {
+                "Normal": "Pressed"
+              },
+              "Next": {
+                "Type": "ApplyEffect",
+                "EffectId": "Varyon_Full_Heal"
+              }
+            }
+          }
+        ]
+      },
+      "CollisionLeave": {
+        "Interactions": [
+          {
+            "Type": "BlockCondition",
+            "Matchers": [
+              {
+                "Block": {
+                  "State": "Pressed"
+                }
+              }
+            ],
+            "Next": {
+              "Type": "ChangeState",
+              "Changes": {
+                "Pressed": "Normal"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    }
+  },
+  "PlayerAnimationsId": "Block",
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "IconProperties": {
+    "Scale": 0.58823,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -3
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Varyon_Healing_Pad.png"
+}

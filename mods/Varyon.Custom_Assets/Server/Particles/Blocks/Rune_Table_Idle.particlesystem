@@ -1,0 +1,14 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Rune_Table_Electricity_A1"
+    },
+    {
+      "SpawnerId": "Rune_Table_Wave_A1"
+    },
+    {
+      "SpawnerId": "Rune_Table_Wave_Distortion_A1"
+    }
+  ],
+  "IsImportant": true
+}

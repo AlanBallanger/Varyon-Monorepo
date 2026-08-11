@@ -1,0 +1,10 @@
+{
+  "DrawType": "None",
+  "Opacity": "Transparent",
+  "Material": "Empty",
+  "BlockSoundSetId": "Empty",
+  "Light": {
+    "Color": "#bbaa99",
+    "Radius": 3
+  }
+}

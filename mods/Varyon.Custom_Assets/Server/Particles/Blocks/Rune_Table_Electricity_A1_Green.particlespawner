@@ -1,0 +1,160 @@
+{
+  "RenderMode": "BlendAdd",
+  "ParticleRotationInfluence": "BillboardVelocity",
+  "LinearFiltering": true,
+  "ParticleRotateWithSpawner": false,
+  "ParticleLifeSpan": {
+    "Min": 0.18,
+    "Max": 0.21
+  },
+  "Particle": {
+    "Texture": "Particles/Textures/Electricity/ArcanePower_Electricity_SpriteSheet_A4.png",
+    "FrameSize": {
+      "Width": 512,
+      "Height": 512
+    },
+    "ScaleRatioConstraint": "None",
+    "UVOption": "RandomFlipU",
+    "Animation": {
+      "0": {
+        "Rotation": {
+          "X": {
+            "Min": 0,
+            "Max": 0
+          },
+          "Y": {
+            "Min": 0,
+            "Max": 0
+          },
+          "Z": {
+            "Min": 0,
+            "Max": 0
+          }
+        },
+        "Scale": {
+          "X": {
+            "Min": 0.51,
+            "Max": 0.51
+          }
+        },
+        "Opacity": 1,
+        "FrameIndex": {
+          "Min": 0,
+          "Max": 0
+        }
+      },
+      "55": {
+        "FrameIndex": {
+          "Min": 1,
+          "Max": 1
+        },
+        "Opacity": 1
+      },
+      "90": {
+        "FrameIndex": {
+          "Min": 1,
+          "Max": 1
+        },
+        "Opacity": 0.504
+      },
+      "100": {
+        "Scale": {
+          "X": {
+            "Min": 1,
+            "Max": 1
+          }
+        },
+        "FrameIndex": {
+          "Min": 1,
+          "Max": 1
+        },
+        "Opacity": 0,
+        "Rotation": {
+          "Y": {
+            "Max": 10,
+            "Min": -10
+          },
+          "X": {
+            "Max": 15,
+            "Min": -15
+          },
+          "Z": {
+            "Max": 15,
+            "Min": -15
+          }
+        }
+      }
+    },
+    "InitialAnimationFrame": {
+      "Scale": {
+        "X": {
+          "Min": 0.046,
+          "Max": 0.053
+        },
+        "Y": {
+          "Min": 0.046,
+          "Max": 0.053
+        }
+      },
+      "Opacity": 1,
+      "Rotation": {
+        "Y": {
+          "Max": 360,
+          "Min": 0
+        },
+        "X": {
+          "Max": 0,
+          "Min": 0
+        },
+        "Z": {
+          "Min": 180,
+          "Max": 180
+        }
+      },
+      "Color": "#33ff66"
+    },
+    "SoftParticles": "Enable",
+    "UseSpriteBlending": true
+  },
+  "Shape": "Sphere",
+  "UseEmitDirection": true,
+  "InitialVelocity": {
+    "Pitch": {
+      "Min": 0,
+      "Max": 360
+    },
+    "Speed": {
+      "Min": 0.225,
+      "Max": 0.25
+    },
+    "Yaw": {
+      "Max": 360
+    }
+  },
+  "SpawnBurst": false,
+  "SpawnRate": {
+    "Min": 7,
+    "Max": 8
+  },
+  "MaxConcurrentParticles": 3,
+  "EmitOffset": {
+    "X": {
+      "Min": -0.225,
+      "Max": 0.225
+    },
+    "Y": {
+      "Min": -0.225,
+      "Max": 0.225
+    },
+    "Z": {
+      "Min": -0.225,
+      "Max": 0.225
+    }
+  },
+  "Attractors": [
+    {
+      "RadialAcceleration": -0.45
+    }
+  ],
+  "CameraOffset": 0
+}

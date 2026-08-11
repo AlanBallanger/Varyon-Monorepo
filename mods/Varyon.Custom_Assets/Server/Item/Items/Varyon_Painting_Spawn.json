@@ -1,0 +1,100 @@
+{
+  "TranslationProperties": {
+    "Description": "",
+    "Name": "server.items.Varyon_Painting_Spawn.name"
+  },
+  "PlayerAnimationsId": "Block",
+  "Categories": [
+    "Blocks.Structural"
+  ],
+  "Set": "Furniture_Temple_Light",
+  "Recipe": {
+    "Input": [
+      {
+        "ItemId": "Ingredient_Stick",
+        "Quantity": 3
+      },
+      {
+        "ItemId": "Ingredient_Fibre",
+        "Quantity": 6
+      },
+      {
+        "ItemId": "Plant_Petals_Blue",
+        "Quantity": 1
+      },
+      {
+        "ItemId": "Plant_Petals_Yellow",
+        "Quantity": 1
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Id": "Bench_Violet",
+        "Categories": [
+          "Violet_All",
+          "Violet_Wall_Decor"
+        ]
+      }
+    ]
+  },
+  "IconProperties": {
+    "Scale": 0.44,
+    "Rotation": [
+      19.0,
+      23.0,
+      22.5
+    ],
+    "Translation": [
+      26.0,
+      -26.0
+    ]
+  },
+  "BlockType": {
+    "BlockParticleSetId": "Stone",
+    "BlockSoundSetId": "Cloth",
+    "CustomModel": "Blocks/Varyon_Painting/Painting_2x2_Landscape.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Blocks/Varyon_Painting/Painting_2x2_Spawn.png",
+        "Weight": 1
+      }
+    ],
+    "DrawType": "Model",
+    "Flags": {},
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Woods"
+      }
+    },
+    "HitboxType": "Painting2x2_Landscape",
+    "Material": "Solid",
+    "Opacity": "Transparent",
+    "Support": {
+      "North": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "VariantRotation": "NESW",
+    "ParticleColor": "#cecece",
+    "CustomModelAnimation": "Blocks/Furniture/Banner/Banner_Idle.blockyanim",
+    "Looping": true,
+    "PlacementSettings": {
+      "BlockPreviewVisibility": "AlwaysVisible",
+      "AllowRotationKey": true
+    }
+  },
+  "Tags": {
+    "Type": [
+      "Furniture"
+    ],
+    "Family": [
+      "Kweebec"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Soft",
+  "Scale": 1.0,
+  "UsePlayerAnimations": false
+}

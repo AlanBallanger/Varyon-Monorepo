@@ -1,0 +1,6 @@
+{
+  "Type": "Condition",
+  "Crouching": false,
+  "Next": "Consume_Utility_Inner",
+  "Failed": "Block_Secondary"
+}
