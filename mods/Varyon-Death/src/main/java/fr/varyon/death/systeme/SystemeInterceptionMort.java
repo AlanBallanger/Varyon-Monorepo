@@ -117,6 +117,13 @@ public final class SystemeInterceptionMort extends DamageEventSystem {
             degats.setCancelled(true);
             return;
         }
+        // Invulnerabilite temporaire accordee a la reussite d'un relevement (SystemeReleve),
+        // le temps que le joueur reprenne ses reperes avant de pouvoir etre touche a nouveau.
+        if (gestionnaire.estInvulnerableApresReleve(uuid)) {
+            degats.setAmount(0f);
+            degats.setCancelled(true);
+            return;
+        }
 
         float montant = degats.getAmount();
         if (montant <= 0f) {

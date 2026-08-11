@@ -1,8 +1,8 @@
 items.Varyon_Potion_Resurrection_Mineure.name = Minor Resurrection Potion
-items.Varyon_Potion_Resurrection_Mineure.description = Required in your inventory to revive a downed ally. Sets the revive duration to 12 seconds.
+items.Varyon_Potion_Resurrection_Mineure.description = Usable to revive a downed ally in 12 seconds with 10% hp.
 items.Varyon_Potion_Resurrection_Classique.name = Resurrection Potion
-items.Varyon_Potion_Resurrection_Classique.description = Required in your inventory to revive a downed ally. Sets the revive duration to 9 seconds.
+items.Varyon_Potion_Resurrection_Classique.description = Usable to revive a downed ally in 9 seconds with 30% hp.
 items.Varyon_Potion_Resurrection_Majeure.name = Major Resurrection Potion
-items.Varyon_Potion_Resurrection_Majeure.description = Required in your inventory to revive a downed ally. Sets the revive duration to 6 seconds.
+items.Varyon_Potion_Resurrection_Majeure.description = Usable to revive a downed ally in 6 seconds with 50% hp.
 items.Varyon_Potion_Resurrection_Mythique.name = Mythic Resurrection Potion
-items.Varyon_Potion_Resurrection_Mythique.description = Required in your inventory to revive a downed ally. Sets the revive duration to 1 second.
+items.Varyon_Potion_Resurrection_Mythique.description = Usable to revive a downed ally in 1 second with 100% hp.

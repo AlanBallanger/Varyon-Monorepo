@@ -14,25 +14,25 @@ import fr.varyon.death.config.ConfigDeath;
  */
 public enum TierPotionResurrection {
 
-    MINEURE("Varyon_Potion_Resurrection_Mineure", "potion de résurrection mineure") {
+    MINEURE("Varyon_Potion_Resurrection_Mineure", "potion de résurrection mineure", 10) {
         @Override
         public int dureeTicks(@Nonnull ConfigDeath config) {
             return config.getDureeReleveMineureTicks();
         }
     },
-    CLASSIQUE("Varyon_Potion_Resurrection_Classique", "potion de résurrection") {
+    CLASSIQUE("Varyon_Potion_Resurrection_Classique", "potion de résurrection", 30) {
         @Override
         public int dureeTicks(@Nonnull ConfigDeath config) {
             return config.getDureeReleveClassiqueTicks();
         }
     },
-    MAJEURE("Varyon_Potion_Resurrection_Majeure", "potion de résurrection majeure") {
+    MAJEURE("Varyon_Potion_Resurrection_Majeure", "potion de résurrection majeure", 50) {
         @Override
         public int dureeTicks(@Nonnull ConfigDeath config) {
             return config.getDureeReleveMajeureTicks();
         }
     },
-    MYTHIQUE("Varyon_Potion_Resurrection_Mythique", "potion de résurrection mythique") {
+    MYTHIQUE("Varyon_Potion_Resurrection_Mythique", "potion de résurrection mythique", 100) {
         @Override
         public int dureeTicks(@Nonnull ConfigDeath config) {
             return config.getDureeReleveMythiqueTicks();
@@ -41,10 +41,12 @@ public enum TierPotionResurrection {
 
     private final String itemId;
     private final String nomAffiche;
+    private final int pourcentagePv;
 
-    TierPotionResurrection(@Nonnull String itemId, @Nonnull String nomAffiche) {
+    TierPotionResurrection(@Nonnull String itemId, @Nonnull String nomAffiche, int pourcentagePv) {
         this.itemId = itemId;
         this.nomAffiche = nomAffiche;
+        this.pourcentagePv = pourcentagePv;
     }
 
     @Nonnull
@@ -59,6 +61,11 @@ public enum TierPotionResurrection {
 
     /** Duree de relevement fixee par ce tier, pour un seul soigneur. */
     public abstract int dureeTicks(@Nonnull ConfigDeath config);
+
+    /** Pourcentage des PV maximum rendus au releve par ce tier : 10/30/50/100 %. */
+    public int pourcentagePv() {
+        return pourcentagePv;
+    }
 
     @Nullable
     public static TierPotionResurrection depuisItemId(@Nullable String itemId) {

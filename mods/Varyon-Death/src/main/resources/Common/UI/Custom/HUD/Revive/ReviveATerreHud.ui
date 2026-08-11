@@ -55,7 +55,7 @@ Group {
       ProgressBar #ReviveATerreBarreReleveFill {
         Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
         Value: 0.0;
-        BarTexturePath: "Common/ProgressBarFill.png";
+        BarTexturePath: "HUD/Revive/BarreReleveFill.png";
       }
     }
 
@@ -72,7 +72,7 @@ Group {
       ProgressBar #ReviveATerreBarreAbandonFill {
         Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
         Value: 0.0;
-        BarTexturePath: "Common/ProgressBarFill.png";
+        BarTexturePath: "HUD/Revive/BarreAbandonFill.png";
       }
     }
   }

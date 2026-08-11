@@ -29,6 +29,7 @@ import fr.varyon.death.etat.OutilsJoueur;
 import fr.varyon.death.etat.TamponsStore;
 import fr.varyon.death.hud.GestionnaireHud;
 import fr.varyon.death.hud.HudATerre;
+import fr.varyon.death.ui.DeathRecapPage;
 
 /**
  * Tick principal du mod, execute pour chaque joueur.
@@ -219,6 +220,9 @@ public final class SystemeTickATerre extends EntityTickingSystem<EntityStore> {
 
         hud.masquerATerre(joueur, playerRef);
         masquerHudDesSoigneurs(hud, soigneurs);
+        // Ferme "VOIR LE RECAPITULATIF"/ABANDONNER si encore ouverte : la mort ou l'abandon
+        // rendent la page obsolete, elle ne doit pas rester affichee par-dessus l'ecran de mort.
+        DeathRecapPage.fermerSiOuverte(etat.getUuidJoueur());
         OutilsJoueur.retablirCamera(playerRef);
         OutilsJoueur.arreterAnimationATerre(ref, tampon);
         // La mobilite doit etre rendue avant la mort : sinon le joueur reapparaitrait fige.
@@ -242,7 +246,11 @@ public final class SystemeTickATerre extends EntityTickingSystem<EntityStore> {
                                @Nonnull PlayerRef playerRef,
                                @Nonnull ConfigDeath config) {
         int secondesRestantes = (etat.getTicksRestants() + 19) / 20;
-        float progressionReleve = (float) etat.getTicksReleve() / config.getDureeReleveTicks();
+        // Meme duree que celle utilisee par SystemeReleve pour declencher le relevement : sans
+        // cela la barre restait calculee sur la duree par defaut, desynchronisee des qu'une
+        // potion (mineure, majeure, mythique...) raccourcissait la duree reelle.
+        int dureeReleveTicks = SystemeReleve.dureeEffectiveTicks(etat, config);
+        float progressionReleve = (float) etat.getTicksReleve() / dureeReleveTicks;
         float progressionAbandon = etat.isAbandonEnCours()
                 ? (float) etat.getTicksAbandon() / config.getDureeAbandonTicks()
                 : 0f;

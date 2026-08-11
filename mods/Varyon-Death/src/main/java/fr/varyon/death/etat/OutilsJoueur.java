@@ -101,16 +101,20 @@ public final class OutilsJoueur {
 
     /**
      * Points de vie a rendre au relevement : un pourcentage de la vie MAXIMUM du joueur
-     * releve. La valeur ne depend volontairement pas du soigneur.
+     * releve.
+     *
+     * <p>Le pourcentage depend du tier de la potion de resurrection consommee (10/30/50/100 %
+     * pour mineure/classique/majeure/mythique) : voir {@code TierPotionResurrection.pourcentagePv()}.
+     * Pas de valeur de repli implicite ici, l'appelant doit fournir le pourcentage a appliquer.
      */
     public static float pointsDeVieAuRelevement(@Nullable Ref<EntityStore> ref,
                                                 @Nullable ComponentAccessor<EntityStore> accesseur,
-                                                @Nonnull ConfigDeath config) {
+                                                int pourcentagePv) {
         float max = pointsDeVieMax(ref, accesseur);
         if (max <= 0f) {
             return 1f;
         }
-        return Math.max(1f, max * config.getPvRendusPourcent() / 100f);
+        return Math.max(1f, max * pourcentagePv / 100f);
     }
 
     // --- Animation ----------------------------------------------------------

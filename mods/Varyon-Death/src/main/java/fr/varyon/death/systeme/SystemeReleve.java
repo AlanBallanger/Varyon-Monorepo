@@ -32,6 +32,7 @@ import fr.varyon.death.etat.OutilsJoueur;
 import fr.varyon.death.etat.PotionsResurrection;
 import fr.varyon.death.etat.TierPotionResurrection;
 import fr.varyon.death.hud.GestionnaireHud;
+import fr.varyon.death.ui.DeathRecapPage;
 
 /**
  * Gere le relevement, du cote du soigneur.
@@ -227,8 +228,14 @@ public final class SystemeReleve extends EntityTickingSystem<EntityStore> {
      * Duree de base du relevement, determinee par la meilleure potion de resurrection
      * detenue par n'importe quel soigneur participant. La potion elle-meme n'est fournie
      * qu'a l'achevement : ici on ne fait que lire, jamais consommer.
+     *
+     * <p>Publique : {@code SystemeTickATerre} l'utilise aussi pour que la barre de relevement
+     * affichee cote joueur a terre reflete la meme duree que celle utilisee ici pour declencher
+     * {@link #achever}. Sans ce partage, la barre restait calculee sur la duree par defaut
+     * (habituellement 5 s) meme quand une potion mythique (1 s) achevait le relevement bien
+     * avant qu'elle n'ait visuellement le temps de se remplir.
      */
-    private static int dureeEffectiveTicks(@Nonnull EtatATerre cible, @Nonnull ConfigDeath config) {
+    public static int dureeEffectiveTicks(@Nonnull EtatATerre cible, @Nonnull ConfigDeath config) {
         TierPotionResurrection meilleur = meilleurTierParmiSoigneurs(cible);
         return meilleur == null ? config.getDureeReleveTicks() : meilleur.dureeTicks(config);
     }
@@ -245,14 +252,23 @@ public final class SystemeReleve extends EntityTickingSystem<EntityStore> {
 
     // --- Fin ----------------------------------------------------------------
 
+    /** Duree de l'invulnerabilite accordee juste apres un relevement, quel qu'en soit le tier. */
+    private static final long INVULNERABILITE_APRES_RELEVE_MS = 3_000L;
+
     /** Le relevement a abouti : on rend au joueur ses points de vie et sa camera. */
     private void achever(@Nonnull EtatATerre cible,
                          @Nonnull PlayerRef cibleRef,
                          @Nonnull CommandBuffer<EntityStore> tampon) {
         List<UUID> soigneurs = new ArrayList<>(cible.getSoigneurs());
-        consommerMeilleurePotion(soigneurs);
+        TierPotionResurrection tierConsomme = consommerMeilleurePotion(soigneurs);
         gestionnaire.retirerDeLEtatATerre(cible.getUuidJoueur());
-        appliquerReleve(gestionnaire, hud, cible, cibleRef, tampon);
+        // Sans tier identifiable (ne devrait pas arriver en usage normal, une potion etant
+        // requise pour demarrer le relevement), on retombe sur le pourcentage configurable de
+        // l'administrateur plutot qu'une valeur codee en dur.
+        int pourcentagePv = tierConsomme != null
+                ? tierConsomme.pourcentagePv()
+                : gestionnaire.getConfig().getPvRendusPourcent();
+        appliquerReleve(gestionnaire, hud, cible, cibleRef, tampon, pourcentagePv);
 
         for (UUID uuidSoigneur : soigneurs) {
             PlayerRef refSoigneur = SystemeTickATerre.joueurEnLigne(uuidSoigneur);
@@ -270,6 +286,7 @@ public final class SystemeReleve extends EntityTickingSystem<EntityStore> {
      * Releve immediatement un joueur, sans passer par un soigneur ni consommer de potion.
      * Reservee a l'usage administratif ({@code /relever}) : le relevement normal, lui, passe
      * toujours par {@link #achever}, qui gere en plus les soigneurs et la potion consommee.
+     * Faute de potion, les PV rendus retombent sur le pourcentage configurable de l'administrateur.
      *
      * <p>Doit s'executer sur le thread du monde de la cible. Accepte {@code Store} directement
      * (implemente {@link ComponentAccessor}) : une commande n'a pas de {@code CommandBuffer}
@@ -281,7 +298,7 @@ public final class SystemeReleve extends EntityTickingSystem<EntityStore> {
                                             @Nonnull ComponentAccessor<EntityStore> accesseur) {
         GestionnaireHud hud = GestionnaireHud.get();
         gestionnaire.retirerDeLEtatATerre(cible.getUuidJoueur());
-        appliquerReleve(gestionnaire, hud, cible, cibleRef, accesseur);
+        appliquerReleve(gestionnaire, hud, cible, cibleRef, accesseur, gestionnaire.getConfig().getPvRendusPourcent());
     }
 
     /** Remet le joueur cible sur pied : points de vie, camera, animation, mobilite, HUD. */
@@ -289,17 +306,25 @@ public final class SystemeReleve extends EntityTickingSystem<EntityStore> {
                                         @Nullable GestionnaireHud hud,
                                         @Nonnull EtatATerre cible,
                                         @Nonnull PlayerRef cibleRef,
-                                        @Nonnull ComponentAccessor<EntityStore> accesseur) {
+                                        @Nonnull ComponentAccessor<EntityStore> accesseur,
+                                        int pourcentagePv) {
         Ref<EntityStore> refCible = referenceDe(cibleRef);
-        float pointsDeVie = OutilsJoueur.pointsDeVieAuRelevement(refCible, accesseur, gestionnaire.getConfig());
+        float pointsDeVie = OutilsJoueur.pointsDeVieAuRelevement(refCible, accesseur, pourcentagePv);
         OutilsJoueur.definirPointsDeVie(refCible, accesseur, pointsDeVie);
         OutilsJoueur.retablirCamera(cibleRef);
         OutilsJoueur.arreterAnimationATerre(refCible, accesseur);
         OutilsJoueur.rendreMobilite(refCible, accesseur);
+        // Le temps de reprendre ses reperes (camera, mouvement) avant de pouvoir etre touche
+        // a nouveau : sans cela un joueur pouvait mourir une seconde fois avant meme d'avoir
+        // repris la main.
+        gestionnaire.accorderInvulnerabiliteTemporaire(cible.getUuidJoueur(), INVULNERABILITE_APRES_RELEVE_MS);
 
         if (hud != null) {
             hud.masquerATerre(null, cibleRef);
         }
+        // Ferme "VOIR LE RECAPITULATIF"/ABANDONNER si encore ouverte : le relevement rend la
+        // page obsolete, elle ne doit pas rester affichee une fois le joueur remis sur pied.
+        DeathRecapPage.fermerSiOuverte(cible.getUuidJoueur());
         envoyer(cibleRef, "Vous avez été relevé");
     }
 
@@ -308,21 +333,26 @@ public final class SystemeReleve extends EntityTickingSystem<EntityStore> {
      * Si plusieurs d'entre eux (ou un seul avec plusieurs exemplaires) possedent ce tier,
      * une seule potion disparait au total : les autres potions, y compris de tiers
      * inferieurs, restent intactes dans les inventaires.
+     *
+     * @return le tier effectivement consomme (determine le % de PV rendus), {@code null} si
+     *         aucun soigneur n'en detenait
      */
-    private static void consommerMeilleurePotion(@Nonnull List<UUID> soigneurs) {
+    @Nullable
+    private static TierPotionResurrection consommerMeilleurePotion(@Nonnull List<UUID> soigneurs) {
         TierPotionResurrection meilleur = null;
         for (UUID uuidSoigneur : soigneurs) {
             meilleur = TierPotionResurrection.meilleur(
                     meilleur, PotionsResurrection.meilleurTierDetenu(uuidSoigneur));
         }
         if (meilleur == null) {
-            return;
+            return null;
         }
         for (UUID uuidSoigneur : soigneurs) {
             if (PotionsResurrection.consommer(uuidSoigneur, meilleur)) {
-                return;
+                return meilleur;
             }
         }
+        return null;
     }
 
     /** Detache le soigneur de sa cible et retire son HUD. */

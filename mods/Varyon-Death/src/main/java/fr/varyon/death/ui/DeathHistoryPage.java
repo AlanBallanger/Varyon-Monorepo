@@ -43,8 +43,12 @@ public final class DeathHistoryPage extends InteractiveCustomUIPage<DeathHistory
 
     private static final String ACTION_CLOSE = "hist:close";
     private static final String ACTION_ENTRY_PREFIX = "hist:entry:";
+    // Le serveur peut tourner dans un autre fuseau (souvent UTC) : on fixe explicitement
+    // Europe/Paris, qui gere lui-meme le passage heure d'ete/hiver (CEST/CET), plutot que
+    // ZoneId.systemDefault() qui suivait le fuseau de la machine hote.
+    private static final ZoneId FUSEAU_AFFICHAGE = ZoneId.of("Europe/Paris");
     private static final DateTimeFormatter DATE_FORMAT =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.FRANCE).withZone(ZoneId.systemDefault());
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.FRANCE).withZone(FUSEAU_AFFICHAGE);
 
     private final List<DeathEntry> entries;
     private volatile boolean resolved;
@@ -144,9 +148,10 @@ public final class DeathHistoryPage extends InteractiveCustomUIPage<DeathHistory
             return;
         }
         // Ouvrir une nouvelle page remplace celle-ci (un seul slot de page custom cote client) :
-        // pas besoin de fermer explicitement, le recap prend directement la main.
+        // pas besoin de fermer explicitement, le recap prend directement la main. La liste
+        // complete est transmise pour que le bouton RETOUR du recap puisse y revenir.
         resolved = true;
-        DeathRecapPage.openExpandedFor(playerRef, entries.get(index).snapshot());
+        DeathRecapPage.openHistorique(playerRef, entries.get(index).snapshot(), entries);
     }
 
     private void releaseInterface() {

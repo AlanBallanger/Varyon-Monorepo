@@ -34,6 +34,9 @@ public final class GestionnaireATerre {
     /** Position du soigneur au demarrage du relevement, pour detecter qu'il a bouge. */
     private final Map<UUID, double[]> ancrageParSoigneur = new ConcurrentHashMap<>();
 
+    /** Instant (epoch ms) jusqu'auquel un joueur fraichement releve reste invulnerable. */
+    private final Map<UUID, Long> invulnerabiliteApresReleveJusqua = new ConcurrentHashMap<>();
+
     public GestionnaireATerre(@Nonnull ConfigDeath config) {
         this.config = config;
     }
@@ -151,10 +154,38 @@ public final class GestionnaireATerre {
         return uuidSoigneur == null ? null : ancrageParSoigneur.get(uuidSoigneur);
     }
 
+    // --- Invulnerabilite post-relevement -------------------------------------
+
+    /** Rend {@code uuidJoueur} invulnerable pour {@code dureeMs} a partir de maintenant. */
+    public void accorderInvulnerabiliteTemporaire(@Nonnull UUID uuidJoueur, long dureeMs) {
+        invulnerabiliteApresReleveJusqua.put(uuidJoueur, System.currentTimeMillis() + dureeMs);
+    }
+
+    /**
+     * Vrai si {@code uuidJoueur} beneficie encore de l'invulnerabilite accordee a son dernier
+     * relevement. Purge automatiquement l'entree une fois expiree, pour ne pas laisser grossir
+     * la map indefiniment.
+     */
+    public boolean estInvulnerableApresReleve(@Nullable UUID uuidJoueur) {
+        if (uuidJoueur == null) {
+            return false;
+        }
+        Long expiration = invulnerabiliteApresReleveJusqua.get(uuidJoueur);
+        if (expiration == null) {
+            return false;
+        }
+        if (System.currentTimeMillis() >= expiration) {
+            invulnerabiliteApresReleveJusqua.remove(uuidJoueur, expiration);
+            return false;
+        }
+        return true;
+    }
+
     /** Vide tout le registre, a l'arret du serveur. */
     public void toutEffacer() {
         aTerreParJoueur.clear();
         cibleParSoigneur.clear();
         ancrageParSoigneur.clear();
+        invulnerabiliteApresReleveJusqua.clear();
     }
 }

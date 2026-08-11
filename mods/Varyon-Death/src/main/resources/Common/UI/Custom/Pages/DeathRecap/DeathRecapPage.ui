@@ -40,11 +40,19 @@ $C = "../../Common.ui";
 
 Group {
     // ----- Etat replie : bouton pour rouvrir le recapitulatif + abandon cliquable -----
-    Group #RecapCollapsedRoot {
-        LayoutMode: Top;
-        Anchor: (Top: 232, Left: 0, Right: 0, Height: 40);
+    // Positionne juste sous le HUD "a terre" (centre a l'ecran, hauteur 152, donc bord bas a
+    // +76 depuis le centre) : les deux zones doivent rester alignees quelle que soit la
+    // resolution. Le LayoutMode: Middle doit etre pose sur ce Group englobant (il determine
+    // comment SES enfants sont positionnes par rapport au centre de l'ecran) ; #RecapCollapsedRoot
+    // lui-meme n'a pas a en avoir un puisqu'il n'est plus qu'un point d'ancrage.
+    // Meme schema que ReviveATerreHud.ui, qui centre correctement : un seul niveau
+    // LayoutMode: Middle sur le Group englobant, une largeur FIXE (pas Left:0/Right:0) sur le
+    // Group positionne, LayoutMode: Left dessus pour aligner ses deux boutons en rangee.
+    Group { LayoutMode: Middle;
+        Group #RecapCollapsedRoot {
+            Anchor: (Top: 200, Width: 452, Height: 40);
+            LayoutMode: Left;
 
-        Group { LayoutMode: Middle;
             TextButton #RecapReopenButton {
                 Text: "VOIR LE RECAPITULATIF";
                 Anchor: (Height: 36, Width: 260);

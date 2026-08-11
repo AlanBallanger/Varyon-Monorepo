@@ -103,15 +103,6 @@ public final class HudATerre extends CustomUIHud {
         commandes.set("#ReviveATerreBarreReleveFill.Value", progressionReleve);
 
         boolean abandonEnCours = progressionAbandon > 0f;
-        if (abandonEnCours) {
-            commandes.set("#ReviveATerreAbandonTextePrefixe.Text", "Abandon en cours");
-            commandes.set("#ReviveATerreAbandonToucheTexte.Text", "");
-            commandes.set("#ReviveATerreAbandonSuffixe.Text", "");
-        } else {
-            commandes.set("#ReviveATerreAbandonTextePrefixe.Text", "Maintenez ");
-            commandes.set("#ReviveATerreAbandonToucheTexte.Text", "[Accroupir]");
-            commandes.set("#ReviveATerreAbandonSuffixe.Text", " pour abandonner");
-        }
         commandes.set("#ReviveATerreBarreAbandon.Visible", abandonEnCours);
         commandes.set("#ReviveATerreBarreAbandonFill.Value", progressionAbandon);
     }
