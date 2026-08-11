@@ -48,7 +48,7 @@ final class VaryonMobScaleBridge {
                 1.0f,
                 1.0f,
                 scaling.getLootMultiplier(),
-                scaling.getEssenceMultiplier()
+                scaling.getPointsMultiplier()
         );
         store.putComponent(entityRef, MobScalingComponent.getComponentType(), neutralized);
     }
@@ -65,7 +65,7 @@ final class VaryonMobScaleBridge {
         if (scaling == null) {
             return;
         }
-        if (scaling.getLootMultiplier() == 0.0f && scaling.getEssenceMultiplier() == 0.0f) {
+        if (scaling.getLootMultiplier() == 0.0f && scaling.getPointsMultiplier() == 0.0f) {
             return;
         }
         MobScalingComponent stripped = new MobScalingComponent(

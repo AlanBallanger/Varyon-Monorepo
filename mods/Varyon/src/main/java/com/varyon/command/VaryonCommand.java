@@ -273,7 +273,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
             safeZoneManager.forceRotate();
             com.varyon.safezone.SafeZoneQuadrant current = safeZoneManager.getCurrentQuadrant();
 
-            context.sendMessage(Message.raw("Zone non-PVP forcée: " + previous.getDisplayName() + " → " + current.getDisplayName()).color(Color.GREEN));
+            context.sendMessage(Message.raw("Rotation de zone non-PVP forcée : " + previous.getDisplayName() + " -> " + current.getDisplayName()).color(Color.GREEN));
 
             return CompletableFuture.completedFuture(null);
         }

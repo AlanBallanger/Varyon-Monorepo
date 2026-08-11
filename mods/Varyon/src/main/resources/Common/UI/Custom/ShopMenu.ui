@@ -59,10 +59,20 @@ $C.@PageOverlay {
             Label #Item1Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item1KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton1 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton1 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton1 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
         Group #Item2 {
@@ -91,10 +101,20 @@ $C.@PageOverlay {
             Label #Item2Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item2KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton2 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton2 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton2 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
         Group #Item3 {
@@ -123,10 +143,20 @@ $C.@PageOverlay {
             Label #Item3Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item3KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton3 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton3 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton3 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
       }
@@ -160,10 +190,20 @@ $C.@PageOverlay {
             Label #Item4Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item4KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton4 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton4 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton4 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
         Group #Item5 {
@@ -192,10 +232,20 @@ $C.@PageOverlay {
             Label #Item5Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item5KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton5 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton5 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton5 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
         Group #Item6 {
@@ -224,10 +274,20 @@ $C.@PageOverlay {
             Label #Item6Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item6KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton6 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton6 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton6 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
       }
@@ -261,10 +321,20 @@ $C.@PageOverlay {
             Label #Item7Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item7KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton7 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton7 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton7 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
         Group #Item8 {
@@ -293,10 +363,20 @@ $C.@PageOverlay {
             Label #Item8Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item8KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton8 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton8 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton8 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
         Group #Item9 {
@@ -325,10 +405,20 @@ $C.@PageOverlay {
             Label #Item9Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item9KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton9 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton9 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton9 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
       }
@@ -362,10 +452,20 @@ $C.@PageOverlay {
             Label #Item10Reward { Text: "1x"; Style: (FontSize: 14, TextColor: #88dd88, VerticalAlignment: Center); Anchor: (Width: 32, Right: 2); }
             ItemIcon #Item10KeyIcon { Anchor: (Width: 40, Height: 40, Right: 16); }
           }
-          Button #BuyButton10 {
+          Group {
+            LayoutMode: Left;
             Anchor: (Height: 36, Bottom: 4, Left: 0, Right: 0);
-            Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
-            Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            Button #BuyButton10 {
+              FlexWeight: 2;
+              Anchor: (Right: 4);
+              Style: ButtonStyle(Default: (Background: (Color: #1a5a9a)), Hovered: (Background: (Color: #2a6aaa)), Pressed: (Background: (Color: #104878)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Acheter"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
+            Button #MaxButton10 {
+              FlexWeight: 1;
+              Style: ButtonStyle(Default: (Background: (Color: #2a7a3a)), Hovered: (Background: (Color: #3a8a4a)), Pressed: (Background: (Color: #1a5a28)), Disabled: (Background: (Color: #4a4a4a)), Sounds: $C.@ButtonSounds);
+              Group { LayoutMode: Middle; Label { Text: "Max"; Style: (FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center); } }
+            }
           }
         }
         Group { FlexWeight: 1; }

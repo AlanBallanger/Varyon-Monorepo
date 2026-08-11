@@ -1399,6 +1399,72 @@ public final class BossTimedSpawnScheduler {
         return Set.copyOf(spawnedTimedBossUuids);
     }
 
+    /**
+     * Snapshot of all active timed-spawn rules for UI display (e.g. varyon-UI's boss timer widget).
+     * Excludes Manual rules (never scheduled) and rules whose boss/arena is unresolved.
+     */
+    public List<UpcomingSpawnInfo> snapshotUpcomingSpawns() {
+        List<TimedSpawnState> current = states;
+        if (current.isEmpty()) {
+            return List.of();
+        }
+        List<UpcomingSpawnInfo> out = new ArrayList<>();
+        for (TimedSpawnState state : current) {
+            if (state == null || state.rule == null) {
+                continue;
+            }
+            BossArenaConfig.TimedBossSpawn rule = state.rule;
+            String bossName = resolveExpectedBossName(
+                    !optional(state.rolledBossId).isEmpty() ? state.rolledBossId
+                            : (rule.resolveBossPool().isEmpty() ? rule.bossId : rule.resolveBossPool().get(0).bossId));
+            boolean waitingForDeath = state.nextSpawnEpochMs >= WAIT_FOR_DEATH_EPOCH_MS;
+            // Once the player/arrival threshold is met, nextSpawnEpochMs stops being "time until
+            // spawn" and becomes an internal re-check deadline for the grace countdown/title
+            // (refreshed every GRACE_TITLE_REFRESH_MS) — from here the boss is imminent, so report
+            // it as ready rather than showing a UI countdown that appears to "restart" at ~30s.
+            boolean readyOrInGrace = !waitingForDeath && state.graceDeadlineMs > 0L;
+            out.add(new UpcomingSpawnInfo(
+                    state.label,
+                    bossName,
+                    optional(rule.arenaId),
+                    Math.max(0, rule.announceMinTier),
+                    waitingForDeath ? -1L : state.nextSpawnEpochMs,
+                    waitingForDeath,
+                    readyOrInGrace
+            ));
+        }
+        return out;
+    }
+
+    /** Read-only snapshot row for {@link #snapshotUpcomingSpawns()}. */
+    public static final class UpcomingSpawnInfo {
+        public final String label;
+        public final String bossName;
+        public final String arenaId;
+        public final int minTier;
+        /** Epoch millis of next spawn, or -1 when {@link #waitingForBossDeath} is true. */
+        public final long nextSpawnEpochMs;
+        /** True while parked waiting for the current boss to die (AFTER_DEATH mode). */
+        public final boolean waitingForBossDeath;
+        /**
+         * True once the arrival/player threshold is met and the spawn is imminent (grace countdown
+         * running, or no grace configured and about to spawn on the next tick). {@link #nextSpawnEpochMs}
+         * is no longer a meaningful countdown at that point — treat this rule as ready.
+         */
+        public final boolean readyOrInGrace;
+
+        UpcomingSpawnInfo(String label, String bossName, String arenaId, int minTier,
+                          long nextSpawnEpochMs, boolean waitingForBossDeath, boolean readyOrInGrace) {
+            this.label = label;
+            this.bossName = bossName;
+            this.arenaId = arenaId;
+            this.minTier = minTier;
+            this.nextSpawnEpochMs = nextSpawnEpochMs;
+            this.waitingForBossDeath = waitingForBossDeath;
+            this.readyOrInGrace = readyOrInGrace;
+        }
+    }
+
     public void forgetSpawnedTimedBoss(UUID bossUuid) {
         if (bossUuid == null) {
             return;

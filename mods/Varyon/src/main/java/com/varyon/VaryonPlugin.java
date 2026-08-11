@@ -92,6 +92,7 @@ public class VaryonPlugin extends JavaPlugin {
     private static ConfigManager staticConfigManager;
     private static PointsManager staticPointsManager;
     private static FactionManager staticFactionManager;
+    private static FactionBonusManager staticFactionBonusManager;
     private static SafeZoneManager staticSafeZoneManager;
     private static SafeZoneNotificationSystem staticSafeZoneNotificationSystem;
     private static ArenaManager staticArenaManager;
@@ -196,6 +197,7 @@ public class VaryonPlugin extends JavaPlugin {
 
             // Bonus de faction dominante (dégâts/HP selon le palier de la jauge)
             factionBonusManager = new FactionBonusManager(pointsManager, factionManager);
+            staticFactionBonusManager = factionBonusManager;
             globalRewardsManager.setFactionBonusManager(factionBonusManager);
             this.getEntityStoreRegistry().registerSystem(new FactionDamageBonusSystem(factionBonusManager));
             factionBonusSafetyTick = com.hypixel.hytale.server.core.HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
@@ -625,6 +627,11 @@ public class VaryonPlugin extends JavaPlugin {
     @Nullable
     public static GlobalRewardsManager getStaticGlobalRewardsManager() {
         return staticGlobalRewardsManager;
+    }
+
+    @Nullable
+    public static FactionBonusManager getStaticFactionBonusManager() {
+        return staticFactionBonusManager;
     }
 
     public ZoneHUDManager getHudManager() {

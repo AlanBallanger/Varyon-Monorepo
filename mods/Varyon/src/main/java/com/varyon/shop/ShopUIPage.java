@@ -64,6 +64,8 @@ public class ShopUIPage extends InteractiveCustomUIPage<ShopUIPage.EventDataClas
 
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BuyButton" + i,
                 EventData.of("Action", "buy").append("Index", String.valueOf(i - 1)));
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#MaxButton" + i,
+                EventData.of("Action", "buymax").append("Index", String.valueOf(i - 1)));
         }
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton",
@@ -97,6 +99,7 @@ public class ShopUIPage extends InteractiveCustomUIPage<ShopUIPage.EventDataClas
             int fragmentCount = countItems(container, item.getCostItem());
             boolean canAfford = fragmentCount >= item.getCostAmount();
             commandBuilder.set("#BuyButton" + i + ".Disabled", !canAfford);
+            commandBuilder.set("#MaxButton" + i + ".Disabled", !canAfford);
         }
     }
 
@@ -112,7 +115,7 @@ public class ShopUIPage extends InteractiveCustomUIPage<ShopUIPage.EventDataClas
             return;
         }
 
-        if ("buy".equals(data.action) && data.index != null) {
+        if (("buy".equals(data.action) || "buymax".equals(data.action)) && data.index != null) {
             ShopConfig shopConfig = getShopConfig();
             if (shopConfig == null) return;
 
@@ -130,13 +133,15 @@ public class ShopUIPage extends InteractiveCustomUIPage<ShopUIPage.EventDataClas
             CombinedItemContainer container = player.getInventory().getCombinedHotbarFirst();
 
             int fragmentCount = countItems(container, item.getCostItem());
-            if (fragmentCount < item.getCostAmount()) {
+            int quantity = "buymax".equals(data.action) ? fragmentCount / item.getCostAmount() : 1;
+
+            if (quantity < 1) {
                 PlayerRef playerRefMsg = store.getComponent(ref, PlayerRef.getComponentType());
                 if (playerRefMsg != null) playerRefMsg.sendMessage(Message.raw("Fragments insuffisants.").color(Color.RED));
                 return;
             }
 
-            ItemStack toRemove = new ItemStack(item.getCostItem(), item.getCostAmount());
+            ItemStack toRemove = new ItemStack(item.getCostItem(), item.getCostAmount() * quantity);
             if (!container.canRemoveItemStack(toRemove)) {
                 PlayerRef playerRefMsg = store.getComponent(ref, PlayerRef.getComponentType());
                 if (playerRefMsg != null) playerRefMsg.sendMessage(Message.raw("Fragments insuffisants.").color(Color.RED));
@@ -146,7 +151,7 @@ public class ShopUIPage extends InteractiveCustomUIPage<ShopUIPage.EventDataClas
 
             PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
             if (playerRef != null) {
-                String cmd = "lb givekey " + playerRef.getUsername() + " " + item.getTierId() + " 1";
+                String cmd = "lb givekey " + playerRef.getUsername() + " " + item.getTierId() + " " + quantity;
                 CommandManager.get().handleCommand((CommandSender) ConsoleSender.INSTANCE, cmd);
             }
 
@@ -154,7 +159,7 @@ public class ShopUIPage extends InteractiveCustomUIPage<ShopUIPage.EventDataClas
             buildBuyButtonStates(ref, store, cb);
             sendUpdate(cb, new UIEventBuilder(), false);
 
-            if (playerRef != null) playerRef.sendMessage(Message.raw("Achat réussi: " + item.getLabel()).color(Color.GREEN));
+            if (playerRef != null) playerRef.sendMessage(Message.raw("Achat réussi: " + item.getLabel() + " x" + quantity).color(Color.GREEN));
         }
     }
 
