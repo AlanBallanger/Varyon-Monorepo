@@ -1,0 +1,50 @@
+$C = "../../Common.ui";
+
+Group {
+  Anchor: (Width: 74, Height: 74, Right: 2, Bottom: 2);
+
+  Button #SlotButton {
+    Anchor: (Full: 0);
+    Style: $C.@TertiaryButtonStyle;
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    TooltipText: "";
+
+    Group #SlotBg {
+      Anchor: (Full: 0);
+      Background: (TexturePath: "Textures/Slot.png", Border: 10);
+
+      AssetImage #RarityBgImage {
+        Anchor: (Full: 0);
+        Visible: false;
+      }
+
+      Group #SlotCenter {
+        Anchor: (Full: 0);
+        LayoutMode: CenterMiddle;
+
+        AssetImage #ItemIconAsset {
+          Anchor: (Width: 56, Height: 56);
+          Visible: false;
+        }
+
+        ItemIcon #ItemIcon {
+          Anchor: (Width: 56, Height: 56);
+        }
+      }
+
+      Label #QtyBadge {
+        Visible: false;
+        Anchor: (Width: 48, Height: 16, Right: 5, Bottom: 5);
+        Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: End, VerticalAlignment: Center);
+        Text: "";
+      }
+
+      Label #PriceBadge {
+        Visible: false;
+        Anchor: (Width: 74, Height: 16, Top: 9);
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Center, VerticalAlignment: Center);
+        Text: "";
+      }
+    }
+  }
+}

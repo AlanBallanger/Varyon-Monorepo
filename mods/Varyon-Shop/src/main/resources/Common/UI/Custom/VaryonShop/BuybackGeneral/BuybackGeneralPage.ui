@@ -1,0 +1,19 @@
+$C = "../../Common.ui";
+
+$C.@PageOverlay #BuybackGeneralRoot {
+  LayoutMode: CenterMiddle;
+
+  Group #Layout {
+    Anchor: (Width: 1140, Height: 840, Top: 80);
+
+    Group #MainSlot {
+      Anchor: (Width: 1140, Height: 350, Left: 0, Top: 0);
+    }
+
+    Group #InventorySlot {
+      Anchor: (Width: 760, Height: 470, Left: 190, Top: 370);
+    }
+  }
+}
+
+$C.@BackButton {}

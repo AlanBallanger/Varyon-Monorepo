@@ -44,4 +44,5 @@ include(
     ":mods:Varyon-Death",
     ":mods:Varyon-ReadableBooks",
     ":mods:Varyon-Quiver",
+    ":mods:Varyon-Shop",
 )

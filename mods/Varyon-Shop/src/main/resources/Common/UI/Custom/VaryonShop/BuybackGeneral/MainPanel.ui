@@ -1,0 +1,164 @@
+$C = "../../Common.ui";
+
+$C.@DecoratedContainer {
+  Anchor: (Full: 0);
+
+  #Title {
+    $C.@Title #DepositTitle { @Text = "RACHETEUR GENERAL"; }
+  }
+
+  #Content {
+    LayoutMode: Left;
+
+    Group #DepositColumn {
+      Anchor: (Width: 760, Right: 20);
+      LayoutMode: Top;
+
+      Group #DepositHeaderRow {
+        Anchor: (Width: 760, Height: 16, Bottom: 8);
+        LayoutMode: Left;
+
+        Label #DepositLabel {
+          Anchor: (Height: 16, Right: 16);
+          Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: Start);
+          Text: "DEPOSEZ VOS OBJETS";
+        }
+
+        Button #ClearChestButton {
+          Anchor: (Width: 90, Height: 24);
+          Style: $C.@TertiaryButtonStyle;
+          Group {
+            LayoutMode: CenterMiddle;
+            Anchor: (Full: 0);
+
+            Group {
+              Anchor: (Width: 14, Height: 14, Right: 6);
+              Background: (TexturePath: "Textures/IconTrash.png");
+            }
+
+            Label {
+              Style: (...$C.@DefaultLabelStyle, FontSize: 10, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: Start, VerticalAlignment: Center);
+              Text: "VIDER";
+            }
+          }
+        }
+      }
+
+      Group #ChestGrid {
+        Anchor: (Width: 760, Height: 228, Bottom: 6);
+        LayoutMode: LeftCenterWrap;
+        Padding: (Full: 0);
+      }
+
+      Group #UsageBar {
+        Anchor: (Width: 760, Height: 16);
+        LayoutMode: Left;
+
+        Label #UsageLabel {
+          Anchor: (Height: 16);
+          Style: (...$C.@DefaultLabelStyle, FontSize: 11, RenderBold: true, TextColor: #7a9cc6, HorizontalAlignment: Start, LetterSpacing: 1);
+          Text: "EMPLACEMENTS UTILISES";
+        }
+
+        Group { FlexWeight: 1; }
+
+        Label #UsageCount {
+          Anchor: (Height: 16);
+          Style: (...$C.@DefaultLabelStyle, FontSize: 11, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: End);
+          Text: "0 / 27";
+        }
+      }
+    }
+
+    Group #SummaryColumn {
+      FlexWeight: 1;
+      LayoutMode: Top;
+
+      Group #DetailItemsRow {
+        Anchor: (Width: 280, Height: 18, Bottom: 6);
+        LayoutMode: Left;
+
+        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Objets a vendre:"; }
+        Label #DetailItemsValue { Anchor: (Height: 16); Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: Start); Text: "0"; }
+      }
+
+      Group #DetailValueRow {
+        Anchor: (Width: 280, Height: 18, Bottom: 6);
+        LayoutMode: Left;
+
+        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Valeur totale:"; }
+        Label #DetailValueValue { Anchor: (Height: 16); Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Start); Text: "0"; }
+      }
+
+      Group #DetailBonusRow {
+        Anchor: (Width: 280, Height: 18, Bottom: 14);
+        LayoutMode: Left;
+
+        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Bonus de rachat:"; }
+        Label #DetailBonusValue { Anchor: (Height: 16); Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #6fd67a, HorizontalAlignment: Start); Text: "+0%"; }
+      }
+
+      Group #DetailSep {
+        Anchor: (Width: 280, Height: 1, Bottom: 14);
+        Background: (Color: #1b2533);
+      }
+
+      Group #EstimateCard {
+        Anchor: (Width: 280, Height: 64, Bottom: 16);
+        Background: (Color: #101823);
+
+        Group {
+          LayoutMode: CenterMiddle;
+          Anchor: (Full: 0);
+          Padding: (Left: 14, Right: 14);
+
+          Group #CoinIconWrap {
+            Anchor: (Width: 32, Right: 12);
+            LayoutMode: Middle;
+
+            Group #CoinIcon {
+              Anchor: (Width: 32, Height: 32);
+              Background: (Color: #f4c542);
+            }
+          }
+
+          Group #EstimateTextWrap {
+            LayoutMode: Middle;
+
+            Group {
+              LayoutMode: Top;
+              Anchor: (Height: 40);
+
+              Label #EstimateLabel {
+                Anchor: (Height: 14, Bottom: 2);
+                Style: (...$C.@DefaultLabelStyle, FontSize: 10, RenderBold: true, TextColor: #7a9cc6, HorizontalAlignment: Start, LetterSpacing: 1);
+                Text: "ESTIMATION TOTALE";
+              }
+
+              Label #EstimateValue {
+                Anchor: (Height: 24);
+                Style: (...$C.@DefaultLabelStyle, FontSize: 20, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Start);
+                Text: "0";
+              }
+            }
+          }
+        }
+      }
+
+      Button #SellAllButton {
+        Anchor: (Width: 280, Height: 48);
+        Style: $C.@TertiaryButtonStyle;
+
+        Group {
+          LayoutMode: CenterMiddle;
+          Anchor: (Full: 0);
+
+          Label {
+            Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center);
+            Text: "VENDRE TOUT";
+          }
+        }
+      }
+    }
+  }
+}

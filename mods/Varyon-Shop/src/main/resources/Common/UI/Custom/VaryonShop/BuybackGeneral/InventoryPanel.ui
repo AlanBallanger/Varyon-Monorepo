@@ -1,0 +1,30 @@
+$C = "../../Common.ui";
+
+$C.@DecoratedContainer {
+  Anchor: (Full: 0);
+
+  #Title {
+    $C.@Title #InventoryTitle { @Text = "INVENTAIRE"; }
+  }
+
+  #Content {
+    LayoutMode: Top;
+
+    Group #InventoryGrid {
+      Anchor: (Width: 760, Height: 304, Bottom: 8);
+      LayoutMode: LeftCenterWrap;
+      Padding: (Full: 0);
+    }
+
+    Group #HotbarSeparator {
+      Anchor: (Width: 760, Height: 1, Bottom: 8);
+      Background: (Color: #1b2533);
+    }
+
+    Group #HotbarGrid {
+      Anchor: (Width: 760, Height: 76);
+      LayoutMode: LeftCenterWrap;
+      Padding: (Full: 0);
+    }
+  }
+}
