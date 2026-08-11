@@ -24,8 +24,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class BookParticleTickSystem extends EntityTickingSystem<EntityStore> {
     private static final String PARTICLE_ID = "Chest_Sparks";
-    private static final int CHECK_INTERVAL = 60;
-    private static final double PARTICLE_RANGE_SQ = 24.0 * 24.0;
+    private static final int CHECK_INTERVAL = 20;
+    private static final double PARTICLE_RANGE_SQ = 10.0 * 10.0;
+    private static final double[][] OFFSETS = {
+        {-0.4, 0.1, -0.4},
+        {0.4, 0.1, -0.4},
+        {-0.4, 0.1, 0.4},
+        {0.4, 0.1, 0.4},
+    };
 
     private final ComponentType<EntityStore, PlayerRef> playerRefType = PlayerRef.getComponentType();
     private final Map<UUID, Integer> tickCounters = new ConcurrentHashMap<>();
@@ -67,7 +73,13 @@ public final class BookParticleTickSystem extends EntityTickingSystem<EntityStor
                 double dz = playerPos.z - gz;
                 if (dx * dx + dy * dy + dz * dz > PARTICLE_RANGE_SQ) continue;
 
-                ParticleUtil.spawnParticleEffect(PARTICLE_ID, new Vector3d(gx, gy, gz), store);
+                for (double[] offset : OFFSETS) {
+                    ParticleUtil.spawnParticleEffect(
+                        PARTICLE_ID,
+                        new Vector3d(gx + offset[0], gy + offset[1], gz + offset[2]),
+                        store
+                    );
+                }
             }
         } catch (Exception ignored) {}
     }
