@@ -26,17 +26,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * Yeux de Lynx (nœud 9, Chasseur) — vision nocturne passive.
  *
  * Rank → rayon de lumière (byte) :
- *   1 → 10  (Vision faible)
- *   2 → 20  (Vision modérée)
- *   3 → 30  (Vision renforcée)
- *   4 → 40  (Vision avancée)
- *   5 → 50  (Vision parfaite)
+ *   1 → 5   (Vision faible)
+ *   2 → 10  (Vision modérée)
+ *   3 → 15  (Vision renforcée)
+ *   4 → 20  (Vision avancée)
+ *   5 → 25  (Vision parfaite)
  */
 public final class YeuxLynxTickSystem extends EntityTickingSystem<EntityStore> {
 
     private static final int CHECK_INTERVAL = 20;
     private static final String NODE_ID = "9";
-    private static final byte[] RADIUS_PER_RANK = {0, 10, 20, 30, 40, 50};
+    private static final byte[] RADIUS_PER_RANK = {0, 5, 10, 15, 20, 25};
 
     private final ProfessionManager professionManager;
     private final ComponentType<EntityStore, PlayerRef> playerRefType = PlayerRef.getComponentType();
