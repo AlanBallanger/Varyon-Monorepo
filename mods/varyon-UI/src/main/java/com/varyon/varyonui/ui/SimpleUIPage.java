@@ -34,17 +34,21 @@ import com.varyon.varyonui.config.HomeConfig;
 import com.varyon.varyonui.config.TutorielConfig;
 import com.varyon.varyonui.config.VaryonConfig;
 import com.varyon.varyonui.hud.VaryonMenuHud;
+import com.varyon.varyonui.integration.BossArenaBridge;
 import com.varyon.varyonui.integration.CombatProfilBridge;
 import com.varyon.varyonui.integration.DamageNumberBridge;
 import com.varyon.varyonui.integration.EcotaleEconomyBridge;
+import com.varyon.varyonui.integration.FactionBonusBridge;
 import com.varyon.varyonui.integration.MenuRpgBridge;
 import com.varyon.varyonui.integration.HytlSkinPreview;
 import com.varyon.varyonui.integration.PlaytimeBridge;
+import com.varyon.varyonui.integration.ZoneTierResolver;
 import com.varyon.varyonui.VaryonUIPlugin;
 import com.hypixel.hytale.server.core.modules.item.ItemModule;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -138,6 +142,12 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
     private final AtomicBoolean portraitRefreshInFlight = new AtomicBoolean(false);
     private final AtomicBoolean portraitRefreshNeededAgain = new AtomicBoolean(false);
 
+    /** Pages currently open, keyed by player UUID — polled by {@link #BOSS_TIMER_REFRESH_INTERVAL_MS}
+     * so the "varyon" tab's boss countdown updates live without requiring a player interaction. */
+    private static final Map<UUID, SimpleUIPage> OPEN_PAGES = new ConcurrentHashMap<>();
+    private static final long BOSS_TIMER_REFRESH_INTERVAL_MS = 5000L;
+    private static final AtomicBoolean BOSS_TIMER_TICKER_STARTED = new AtomicBoolean(false);
+
     public SimpleUIPage(@Nonnull PlayerRef playerRef) {
         this(playerRef, "home", false);
     }
@@ -152,6 +162,57 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         this.activeTab = (initialTab.equals("admin") && !isAdmin) ? "home"
                 : "profil".equals(initialTab) ? "home"
                 : initialTab;
+        UUID uuid = playerRef.getUuid();
+        if (uuid != null) {
+            OPEN_PAGES.put(uuid, this);
+        }
+        ensureBossTimerTickerStarted();
+    }
+
+    private static void ensureBossTimerTickerStarted() {
+        if (!BOSS_TIMER_TICKER_STARTED.compareAndSet(false, true)) {
+            return;
+        }
+        HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
+                SimpleUIPage::refreshOpenVaryonTabs,
+                BOSS_TIMER_REFRESH_INTERVAL_MS,
+                BOSS_TIMER_REFRESH_INTERVAL_MS,
+                TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Refreshes only the boss-timer widget inside the "varyon" tab — never the sidebar, tab bar,
+     * or other page content. Using {@link #rebuild()} here would re-run the full page build for
+     * every open page every {@link #BOSS_TIMER_REFRESH_INTERVAL_MS}, momentarily resetting/flashing
+     * unrelated UI (sidebar stats, tab bar) that has nothing to do with the boss countdown.
+     */
+    private static void refreshOpenVaryonTabs() {
+        for (SimpleUIPage page : OPEN_PAGES.values()) {
+            try {
+                if (!"varyon".equals(page.activeTab)) {
+                    continue;
+                }
+                Ref<EntityStore> ref = (Ref<EntityStore>) page.playerRef.getReference();
+                if (ref == null || !ref.isValid()) {
+                    continue;
+                }
+                Store<EntityStore> store = ref.getStore();
+                World world = store.getExternalData().getWorld();
+                if (world == null) {
+                    continue;
+                }
+                world.execute(() -> {
+                    if (!ref.isValid()) {
+                        return;
+                    }
+                    UICommandBuilder cb = new UICommandBuilder();
+                    page.buildVaryonBossTimers(cb);
+                    page.sendUpdate(cb);
+                });
+            } catch (Throwable t) {
+                LOG.log(Level.FINE, "SimpleUIPage: boss timer refresh failed", t);
+            }
+        }
     }
 
     @Override
@@ -1107,7 +1168,95 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
 
     private void buildVaryonContent(@Nonnull UICommandBuilder commandBuilder) {
         buildVaryonQuickRow(commandBuilder);
+        buildVaryonBonusAndTier(commandBuilder);
+        buildVaryonBossTimers(commandBuilder);
         buildScrollableTextContent(commandBuilder, "#VaryonTextContainer", VaryonConfig.getInstance().getContent());
+    }
+
+    private void buildVaryonBonusAndTier(@Nonnull UICommandBuilder commandBuilder) {
+        int tier = ZoneTierResolver.unlockedTier(playerRef);
+        commandBuilder.set("#VaryonTierRow.Visible", true);
+        commandBuilder.set("#VaryonTierLabel.TextSpans", Message.raw("Tu es actuellement tier " + tier + " !"));
+
+        FactionBonusBridge.FactionBonusInfo bonus = FactionBonusBridge.getBonusForPlayer(playerRef);
+        boolean hasBonus = bonus != null && bonus.hasBonus();
+        commandBuilder.set("#VaryonBonusRow.Visible", hasBonus);
+        if (hasBonus) {
+            int dmgPct = Math.round((bonus.damageMultiplier - 1.0f) * 100f);
+            int hpPct = Math.round((bonus.hpMultiplier - 1.0f) * 100f);
+            StringBuilder text = new StringBuilder("Faction dominante : ").append(bonus.factionDisplayName).append(" (");
+            List<String> parts = new java.util.ArrayList<>();
+            if (hpPct > 0) parts.add("+" + hpPct + "% HP");
+            if (dmgPct > 0) parts.add("+" + dmgPct + "% ATK");
+            text.append(String.join(" / ", parts)).append(")");
+            commandBuilder.set("#VaryonBonusLabel.TextSpans", Message.raw(text.toString()));
+        }
+    }
+
+    private static String formatBossCountdown(long remainingMs) {
+        long totalSeconds = Math.max(0L, remainingMs / 1000L);
+        long h = totalSeconds / 3600L;
+        long m = (totalSeconds % 3600L) / 60L;
+        long s = totalSeconds % 60L;
+        if (h > 0) return String.format(Locale.ROOT, "%dh %02dm", h, m);
+        if (m > 0) return String.format(Locale.ROOT, "%dm %02ds", m, s);
+        return s + "s";
+    }
+
+    private static final int BOSS_TIMERS_PER_ROW = 2;
+
+    private void buildVaryonBossTimers(@Nonnull UICommandBuilder commandBuilder) {
+        int playerTier = ZoneTierResolver.unlockedTier(playerRef);
+        List<BossArenaBridge.UpcomingSpawn> spawns = BossArenaBridge.snapshotUpcomingSpawns();
+        List<BossArenaBridge.UpcomingSpawn> visible = new java.util.ArrayList<>();
+        for (BossArenaBridge.UpcomingSpawn spawn : spawns) {
+            if (spawn.minTier <= playerTier) {
+                visible.add(spawn);
+            }
+        }
+
+        commandBuilder.set("#VaryonBossTimersHeader.Visible", !visible.isEmpty());
+        commandBuilder.clear("#VaryonBossTimersContainer");
+        if (visible.isEmpty()) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        for (int i = 0; i < visible.size(); i += BOSS_TIMERS_PER_ROW) {
+            int rowIdx = (i / BOSS_TIMERS_PER_ROW) + 1;
+            commandBuilder.appendInline("#VaryonBossTimersContainer",
+                "Group #VaryonBossTimerRow" + rowIdx + " { LayoutMode: Left; Anchor: (Height: 44, Bottom: 6); }");
+
+            for (int col = 0; col < BOSS_TIMERS_PER_ROW; col++) {
+                int cardIdx = i + col + 1;
+                boolean hasCard = i + col < visible.size();
+                String anchor = col == BOSS_TIMERS_PER_ROW - 1 ? "(Width: 300)" : "(Width: 300, Right: 12)";
+                commandBuilder.appendInline("#VaryonBossTimerRow" + rowIdx,
+                    "Group #VaryonBossTimerCard" + cardIdx + " { LayoutMode: Top; Anchor: " + anchor
+                        + "; Visible: " + hasCard + "; Padding: (Left: 10, Right: 10, Top: 6, Bottom: 6); Background: (Color: #1c2733); }");
+                if (!hasCard) {
+                    continue;
+                }
+                BossArenaBridge.UpcomingSpawn spawn = visible.get(i + col);
+                String statusText;
+                if (spawn.waitingForBossDeath) {
+                    statusText = "En combat";
+                } else if (spawn.isReady()) {
+                    statusText = "Prêt !";
+                } else {
+                    statusText = formatBossCountdown(spawn.nextSpawnEpochMs - now);
+                }
+                String statusColor = spawn.isReady() ? "#7CFC00" : "#ffd166";
+
+                commandBuilder.appendInline("#VaryonBossTimerCard" + cardIdx,
+                    "Label #VaryonBossTimerName" + cardIdx + " { Style: (FontSize: 13, TextColor: #dceeff, RenderBold: true, Wrap: true); Anchor: (Bottom: 2); }");
+                commandBuilder.set("#VaryonBossTimerName" + cardIdx + ".TextSpans",
+                    Message.raw(spawn.bossName + " (tier " + spawn.minTier + ")"));
+                commandBuilder.appendInline("#VaryonBossTimerCard" + cardIdx,
+                    "Label #VaryonBossTimerStatus" + cardIdx + " { Style: (FontSize: 13, RenderBold: true, TextColor: " + statusColor + "); }");
+                commandBuilder.set("#VaryonBossTimerStatus" + cardIdx + ".TextSpans", Message.raw(statusText));
+            }
+        }
     }
 
     private static final String VARYON_QUICK_ICON = "Icons/Varyon_Icon.png";
@@ -1591,6 +1740,10 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
     @Override
     public void onDismiss(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
         super.onDismiss(ref, store);
+        UUID uuid = playerRef.getUuid();
+        if (uuid != null) {
+            OPEN_PAGES.remove(uuid, this);
+        }
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player != null) {
             player.getHudManager().getCustomHuds().values().forEach(

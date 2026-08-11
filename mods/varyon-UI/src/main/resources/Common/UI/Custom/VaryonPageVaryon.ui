@@ -8,6 +8,18 @@ $Sounds = "Sounds.ui";
             Visible: false;
             Padding: (Top: 0, Bottom: 0, Left: 0, Right: 0);
 
+            Group #VaryonTierRow {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 10);
+              Visible: false;
+
+              Label #VaryonTierLabel {
+                Text: "";
+                Style: (FontSize: 16, TextColor: #ffd166, RenderBold: true, VerticalAlignment: Center, Wrap: true);
+                FlexWeight: 1;
+              }
+            }
+
             Group #VaryonQuickRow {
               LayoutMode: Left;
               Anchor: (Height: 53, Bottom: 8);
@@ -166,6 +178,37 @@ $Sounds = "Sounds.ui";
                   }
                 }
               }
+            }
+
+            Group #VaryonBonusRow {
+              LayoutMode: Left;
+              Anchor: (Height: 30, Bottom: 6, Top: 4);
+              Visible: false;
+
+              Label #VaryonBonusLabel {
+                Text: "";
+                Style: (FontSize: 14, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, Wrap: true);
+                FlexWeight: 1;
+              }
+            }
+
+            Group #VaryonBossTimersHeader {
+              LayoutMode: Left;
+              Anchor: (Top: 4, Bottom: 8, Left: 0, Right: 0);
+              Visible: false;
+              Padding: (Left: 10, Right: 12, Top: 8, Bottom: 8);
+              Background: "Icons/BgCategory.png";
+
+              Label #VaryonBossTimersTitle {
+                Text: "Boss à venir";
+                Style: (FontSize: 18, RenderBold: true, TextColor: #dceeff, VerticalAlignment: Center);
+                FlexWeight: 1;
+              }
+            }
+
+            Group #VaryonBossTimersContainer {
+              LayoutMode: Top;
+              Anchor: (Bottom: 8);
             }
 
             Group #VaryonTextContainer {
