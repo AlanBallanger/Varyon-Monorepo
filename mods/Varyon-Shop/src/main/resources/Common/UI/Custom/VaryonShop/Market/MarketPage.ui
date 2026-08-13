@@ -15,12 +15,6 @@ $C.@PageOverlay #MarketRoot {
 
         Group { FlexWeight: 1; }
 
-        Label #PurchaseBonusLabel {
-          Anchor: (Height: 20, Right: 10);
-          Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #6fd67a, HorizontalAlignment: End);
-          Text: "";
-        }
-
         Label #WalletValue {
           Anchor: (Height: 20, Right: 36);
           Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: End);
@@ -110,7 +104,7 @@ $C.@PageOverlay #MarketRoot {
         LayoutMode: Top;
 
         Group #DetailHeaderRow {
-          Anchor: (Left: 0, Right: 0, Height: 78, Bottom: 16);
+          Anchor: (Left: 0, Right: 0, Height: 100, Bottom: 16);
           LayoutMode: Left;
 
           Group #DetailIconWrap {
@@ -134,14 +128,20 @@ $C.@PageOverlay #MarketRoot {
             }
 
             Label #DetailPriceLabel {
-              Anchor: (Left: 0, Right: 0, Height: 20);
-              Style: (...$C.@DefaultLabelStyle, FontSize: 15, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Start);
+              Anchor: (Left: 0, Right: 0, Height: 24);
+              Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Start);
+              Text: "";
+            }
+
+            Label #DetailDiscountLabel {
+              Anchor: (Left: 0, Right: 0, Height: 16);
+              Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #6fd67a, HorizontalAlignment: Start);
               Text: "";
             }
 
             Label #DetailStockLabel {
-              Anchor: (Left: 0, Right: 0, Height: 16);
-              Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, TextColor: #6fd67a, HorizontalAlignment: Start);
+              Anchor: (Left: 0, Right: 0, Height: 18);
+              Style: (...$C.@DefaultLabelStyle, FontSize: 15, RenderBold: true, TextColor: #6fd67a, HorizontalAlignment: Start);
               Text: "";
             }
           }

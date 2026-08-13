@@ -116,7 +116,7 @@ $C.@PageOverlay {
         }
 
         Label {
-          Text: "BONUS D'ACHAT (%)";
+          Text: "RÉDUCTION D'ACHAT (%)";
           Style: (FontSize: 12, RenderBold: true, TextColor: #ffaa00);
           Anchor: (Bottom: 4);
         }

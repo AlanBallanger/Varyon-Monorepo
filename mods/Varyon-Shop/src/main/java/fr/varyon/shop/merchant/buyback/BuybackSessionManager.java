@@ -65,9 +65,9 @@ public final class BuybackSessionManager {
 
         double baseRate = fullRate ? 1.0 : Math.max(0.0, shopSettings.generalBuybackRate());
         double bonus = Math.max(0.0, shopSettings.buybackBonus());
-        double rate = baseRate + bonus;
+        double rate = baseRate * (1.0 + bonus);
         try {
-            BuybackGeneralPage page = new BuybackGeneralPage(priceRepository, economyBridge, playerRef, merchantName, categoryFilter, rate, bonus);
+            BuybackGeneralPage page = new BuybackGeneralPage(priceRepository, economyBridge, playerRef, merchantName, categoryFilter, rate);
             player.getPageManager().openCustomPage(ref, store, (CustomUIPage) page);
             return true;
         } catch (Throwable t) {

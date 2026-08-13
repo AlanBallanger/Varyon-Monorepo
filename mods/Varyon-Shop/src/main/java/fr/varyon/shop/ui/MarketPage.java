@@ -254,7 +254,8 @@ public final class MarketPage extends InteractiveCustomUIPage<MarketPage.EventDa
     }
 
     private double effectivePrice(ShopCatalog.Entry entry) {
-        return basePrice(entry) * (priceMultiplier + purchaseBonus);
+        double discount = Math.min(1.0, purchaseBonus);
+        return basePrice(entry) * priceMultiplier * (1.0 - discount);
     }
 
     private String formatPrice(ShopCatalog.Entry entry, double price) {
@@ -312,7 +313,6 @@ public final class MarketPage extends InteractiveCustomUIPage<MarketPage.EventDa
 
     private void renderDynamic(UICommandBuilder cmd, UIEventBuilder evt) {
         cmd.set("#MarketTitle.Text", catalog.displayName == null ? "BOUTIQUE" : catalog.displayName.toUpperCase());
-        cmd.set("#PurchaseBonusLabel.Text", purchaseBonus > 0.0 ? "Bonus : +" + Math.round(purchaseBonus * 100) + "%" : "");
         cmd.set("#WalletValue.Text", economyBridge.isAvailable()
                 ? formatWallet(economyBridge.format(economyBridge.getBalance(playerRef.getUuid())))
                 : "");
@@ -382,6 +382,7 @@ public final class MarketPage extends InteractiveCustomUIPage<MarketPage.EventDa
             cmd.set("#DetailQtyRow.Visible", false);
             cmd.set("#DetailName.Text", "Sélectionnez un objet");
             cmd.set("#DetailPriceLabel.Text", "");
+            cmd.set("#DetailDiscountLabel.Text", "");
             cmd.set("#DetailStockLabel.Text", "");
             return;
         }
@@ -396,6 +397,7 @@ public final class MarketPage extends InteractiveCustomUIPage<MarketPage.EventDa
         cmd.set("#DetailIcon.ItemId", selected.displayIconItemId());
         cmd.set("#DetailName.Text", displayName(selected));
         cmd.set("#DetailPriceLabel.Text", formatPrice(selected, price) + (selected.isService() ? "" : " / u"));
+        cmd.set("#DetailDiscountLabel.Text", "Réduction : " + Math.round(Math.min(1.0, purchaseBonus) * 100) + "%");
         cmd.set("#DetailStockLabel.Text", selected.isService() || remaining == Integer.MAX_VALUE
                 ? ""
                 : "Restant : " + remaining);

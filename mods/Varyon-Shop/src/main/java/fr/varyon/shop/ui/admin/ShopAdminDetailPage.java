@@ -5,6 +5,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
@@ -19,8 +20,11 @@ import fr.varyon.shop.config.ShopCatalog;
 import fr.varyon.shop.util.ItemRarityUtil;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Detail/settings screen for a single shop catalog: display name, rotation size, price
@@ -40,6 +44,11 @@ public final class ShopAdminDetailPage extends InteractiveCustomUIPage<ShopAdmin
     /** Set while re-rendering after a text-field ValueChanged (auto-save), to avoid resending
      * .Value and fighting the client's in-progress keystrokes (drops chars, e.g. spaces). */
     private boolean isFieldRefresh = false;
+    /** Debounces the shopId rename triggered by a display-name edit: renaming (and reopening the
+     * page) on every keystroke would drop the client's typing focus, so we wait for a pause. */
+    @Nullable
+    private ScheduledFuture<?> renameDebounceTask;
+    private static final long RENAME_DEBOUNCE_MS = 900;
 
     public ShopAdminDetailPage(@NotNull VaryonShopPlugin plugin, @NotNull PlayerRef playerRef, @NotNull String shopId) {
         super(playerRef, CustomPageLifetime.CanDismiss, ShopAdminEventData.CODEC);
@@ -52,6 +61,55 @@ public final class ShopAdminDetailPage extends InteractiveCustomUIPage<ShopAdmin
         return plugin.getShopCatalogRepository().get(shopId).orElse(null);
     }
 
+    private void scheduleRenameDebounced() {
+        if (renameDebounceTask != null) {
+            renameDebounceTask.cancel(false);
+        }
+        renameDebounceTask = HytaleServer.SCHEDULED_EXECUTOR.schedule(this::performDebouncedRename,
+                RENAME_DEBOUNCE_MS, TimeUnit.MILLISECONDS);
+    }
+
+    private void performDebouncedRename() {
+        renameDebounceTask = null;
+        Ref<EntityStore> liveRef = playerRef.getReference();
+        if (liveRef == null || !liveRef.isValid() || liveRef.getStore() == null) {
+            return;
+        }
+        EntityStore es = liveRef.getStore().getExternalData();
+        if (es == null || es.getWorld() == null) {
+            return;
+        }
+        es.getWorld().execute(() -> {
+            Ref<EntityStore> ref = playerRef.getReference();
+            if (ref == null || !ref.isValid()) {
+                return;
+            }
+            Store<EntityStore> store = ref.getStore();
+            if (store == null) {
+                return;
+            }
+            Player player = store.getComponent(ref, Player.getComponentType());
+            if (player == null || player.getPageManager() == null) {
+                return;
+            }
+            if (player.getPageManager().getCustomPage() != this) {
+                return;
+            }
+            ShopCatalog catalog = catalog();
+            if (catalog == null || catalog.displayName == null || catalog.displayName.isBlank()) {
+                return;
+            }
+            String slug = plugin.getShopCatalogRepository().slugify(catalog.displayName, shopId);
+            String newId = plugin.getShopCatalogRepository().rename(shopId, slug);
+            if (!newId.equals(shopId)) {
+                plugin.getMerchantRegistry().renameShopId(shopId, newId);
+                plugin.getShopRotationState().renameShopId(shopId, newId);
+                plugin.getShopPurchaseTracker().renameShopId(shopId, newId);
+                player.getPageManager().openCustomPage(ref, store, new ShopAdminDetailPage(plugin, playerRef, newId));
+            }
+        });
+    }
+
     @Override
     public void build(@NotNull Ref<EntityStore> ref, @NotNull UICommandBuilder cmd, @NotNull UIEventBuilder evt, @NotNull Store<EntityStore> store) {
         if (firstBuild) {
@@ -59,6 +117,14 @@ public final class ShopAdminDetailPage extends InteractiveCustomUIPage<ShopAdmin
             firstBuild = false;
         }
         renderDynamic(ref, store, cmd, evt);
+    }
+
+    @Override
+    public void onDismiss(@NotNull Ref<EntityStore> ref, @NotNull Store<EntityStore> store) {
+        if (renameDebounceTask != null) {
+            renameDebounceTask.cancel(false);
+            renameDebounceTask = null;
+        }
     }
 
     private void ensureItemGridSize(UICommandBuilder cmd, int itemCount) {
@@ -199,15 +265,7 @@ public final class ShopAdminDetailPage extends InteractiveCustomUIPage<ShopAdmin
                 plugin.getShopCatalogRepository().save(shopId);
                 boolean nameChanged = !catalog.displayName.equals(previousName == null ? "" : previousName);
                 if (nameChanged && !catalog.displayName.isBlank()) {
-                    String slug = plugin.getShopCatalogRepository().slugify(catalog.displayName, shopId);
-                    String newId = plugin.getShopCatalogRepository().rename(shopId, slug);
-                    if (!newId.equals(shopId)) {
-                        plugin.getMerchantRegistry().renameShopId(shopId, newId);
-                        plugin.getShopRotationState().renameShopId(shopId, newId);
-                        plugin.getShopPurchaseTracker().renameShopId(shopId, newId);
-                        player.getPageManager().openCustomPage(ref, store, new ShopAdminDetailPage(plugin, playerRef, newId));
-                        return;
-                    }
+                    scheduleRenameDebounced();
                 }
                 isFieldRefresh = true;
             }

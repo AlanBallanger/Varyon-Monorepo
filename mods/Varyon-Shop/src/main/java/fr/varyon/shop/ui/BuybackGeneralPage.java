@@ -52,7 +52,6 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
     private final String merchantName;
     private final String categoryFilter;
     private final double rate;
-    private final double bonus;
     private boolean firstBuild = true;
 
     public BuybackGeneralPage(
@@ -91,20 +90,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             @Nullable String categoryFilter,
             double rate
     ) {
-        this(priceRepository, economyBridge, playerRef, merchantName, categoryFilter, rate, 0.0);
-    }
-
-    /** bonus: server-wide buyback bonus already folded into rate, kept separately just for the "+X%" display. */
-    public BuybackGeneralPage(
-            @NotNull BuybackPriceRepository priceRepository,
-            @NotNull VaultEconomyBridge economyBridge,
-            @NotNull PlayerRef playerRef,
-            @Nullable String merchantName,
-            @Nullable String categoryFilter,
-            double rate,
-            double bonus
-    ) {
-        this(priceRepository, economyBridge, playerRef, new SimpleItemContainer(DEPOSIT_SLOTS), merchantName, categoryFilter, rate, bonus);
+        this(priceRepository, economyBridge, playerRef, new SimpleItemContainer(DEPOSIT_SLOTS), merchantName, categoryFilter, rate);
     }
 
     private BuybackGeneralPage(
@@ -114,8 +100,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             @NotNull ItemContainer depositContainer,
             @Nullable String merchantName,
             @Nullable String categoryFilter,
-            double rate,
-            double bonus
+            double rate
     ) {
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, EventDataPayload.CODEC);
         this.priceRepository = priceRepository;
@@ -125,7 +110,6 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
         this.merchantName = merchantName;
         this.categoryFilter = categoryFilter;
         this.rate = Math.max(0.0, rate);
-        this.bonus = Math.max(0.0, bonus);
     }
 
     @Override
@@ -158,17 +142,18 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
         cmd.set("#DepositLabel.Text", (categoryFilter == null || categoryFilter.isBlank())
                 ? "DÉPOSEZ VOS OBJETS"
                 : "DÉPOSEZ VOS OBJETS (" + categoryFilter.toUpperCase() + ")");
-        cmd.set("#DetailBonusRow.Visible", bonus > 0.0);
-        cmd.set("#DetailBonusValue.Text", "+" + Math.round(bonus * 100) + "%");
+        cmd.set("#DetailBonusValue.Text", Math.round(rate * 100) + "%");
 
         int usedSlots = 0;
         int sellableCount = 0;
         double totalEstimate = 0.0;
+        double totalListed = 0.0;
 
         for (int i = 0; i < DEPOSIT_SLOTS; i++) {
             String selector = "#ChestGrid[" + i + "]";
             ItemStack stack = depositContainer.getItemStack((short) i);
-            double unitPrice = isValidStack(stack) ? priceRepository.priceOf(stack.getItemId(), categoryFilter) * rate : 0.0;
+            double listedPrice = isValidStack(stack) ? priceRepository.priceOf(stack.getItemId(), categoryFilter) : 0.0;
+            double unitPrice = listedPrice * rate;
             applySlot(cmd, selector, stack, unitPrice);
             bindSlotClicks(evt, selector, "chest", i);
 
@@ -177,6 +162,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
                 if (unitPrice > 0.0) {
                     sellableCount++;
                     totalEstimate += unitPrice * Math.max(1, stack.getQuantity());
+                    totalListed += listedPrice * Math.max(1, stack.getQuantity());
                 }
             }
         }
@@ -201,13 +187,13 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
 
         cmd.set("#UsageCount.Text", usedSlots + " / " + DEPOSIT_SLOTS);
 
-        String formattedTotal = formatPlain(totalEstimate) + " Coins";
-        cmd.set("#EstimateValue.Text", formattedTotal);
+        cmd.set("#EstimateValue.Text", formatPlain(totalEstimate) + " Coins");
         cmd.set("#DetailItemsValue.Text", String.valueOf(sellableCount));
-        cmd.set("#DetailValueValue.Text", formattedTotal);
+        cmd.set("#DetailValueValue.Text", formatPlain(totalListed) + " Coins");
 
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#SellAllButton", EventData.of("Action", "sellAll"), false);
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#ClearChestButton", EventData.of("Action", "clearChest"), false);
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#DepositAllButton", EventData.of("Action", "depositAll"), false);
     }
 
     private void bindSlotClicks(UIEventBuilder evt, String selector, String source, int slot) {
@@ -274,6 +260,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             case "transferAll" -> transferAll(player, data.source, parseInt(data.slot));
             case "transferHalf" -> transferHalf(player, data.source, parseInt(data.slot));
             case "clearChest" -> moveAllFromDepositToPlayer(player);
+            case "depositAll" -> moveAllFromStorageToDeposit(player);
             case "sellAll" -> sellAll();
             default -> { }
         }
@@ -378,6 +365,26 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
         }
         if (anyStuck) {
             playerRef.sendMessage(Message.raw("Racheteur General: inventaire plein, impossible de rendre tous les objets deposes. Videz de la place et reessayez avant de fermer la fenetre."));
+        }
+    }
+
+    /** Moves every item from the player's storage inventory (hotbar excluded) into the deposit grid. */
+    private void moveAllFromStorageToDeposit(Player player) {
+        ItemContainer storage = EntityApiCompat.getStorageContainer(player);
+        if (storage == null) {
+            return;
+        }
+        boolean anyStuck = false;
+        for (short i = 0; i < INV_SLOTS; i++) {
+            if (!isValidStack(storage.getItemStack(i))) {
+                continue;
+            }
+            if (!nativeMove(storage, i, depositContainer)) {
+                anyStuck = true;
+            }
+        }
+        if (anyStuck) {
+            playerRef.sendMessage(Message.raw("Racheteur General: dépôt plein, transfert partiel."));
         }
     }
 
