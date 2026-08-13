@@ -45,4 +45,5 @@ include(
     ":mods:Varyon-ReadableBooks",
     ":mods:Varyon-Quiver",
     ":mods:Varyon-Shop",
+    ":mods:Varyon-Dummy",
 )

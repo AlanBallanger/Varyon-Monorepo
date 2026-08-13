@@ -1,0 +1,20 @@
+{
+  "Group": "Varyon",
+  "Name": "Varyon-Dummy",
+  "Version": "1.0.0",
+  "Description": "Replaces the training dummy block with a custom entity that can be damaged.",
+  "Authors": [
+    {
+      "Name": "Varyon Team"
+    }
+  ],
+  "Website": "",
+  "ServerVersion": "2026.03.26-89796e57b",
+  "Dependencies": {
+    "Hytale:NPC": "*"
+  },
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "Main": "com.varyon.dummy.DummyPlugin",
+  "IncludesAssetPack": true
+}

@@ -1,0 +1,12 @@
+/.idea/
+*.iml
+/target/
+/build/
+/.gradle/
+/libs/
+/dev-notes/
+/logs/
+/.aiassistant/
+.prism.json
+Assets.zip
+/workspace/
