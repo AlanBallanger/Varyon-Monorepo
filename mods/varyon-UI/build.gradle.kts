@@ -14,6 +14,7 @@ repositories {
 dependencies {
     compileOnly("org.jetbrains:annotations:24.1.0")
     compileOnly("org.jspecify:jspecify:0.3.0")
+    compileOnly("net.luckperms:api:5.4")
     compileOnly(files("../../libs/HytaleServer.jar"))
     implementation("com.moandjiezana.toml:toml4j:0.7.2")
     implementation("com.google.code.gson:gson:2.10.1")

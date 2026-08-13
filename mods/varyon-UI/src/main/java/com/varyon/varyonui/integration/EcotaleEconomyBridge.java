@@ -19,8 +19,8 @@ public final class EcotaleEconomyBridge {
     private static final String ITEM_COIN_LEGACY = "Coin_Copper";
 
     private static final String BALANCE_SLOT = "#SidebarBalanceItemSlot";
-    private static final java.util.regex.Pattern TRAILING_ZERO_DECIMALS =
-            java.util.regex.Pattern.compile("[.,]00$");
+    private static final java.util.regex.Pattern TRAILING_DECIMALS =
+            java.util.regex.Pattern.compile("[.,]\\d+$");
 
     private static Boolean available = null;
     private static Class<?> economyBridgeClass = null;
@@ -55,7 +55,7 @@ public final class EcotaleEconomyBridge {
         }
         try {
             double bal = ((Number) getBalanceMethod.invoke(null, uuid)).doubleValue();
-            String text = TRAILING_ZERO_DECIMALS.matcher(formatAmountOnlyReflect(economyBridgeClass, bal)).replaceAll("");
+            String text = TRAILING_DECIMALS.matcher(formatAmountOnlyReflect(economyBridgeClass, bal)).replaceAll("");
             ui.set("#SidebarStatBalanceValueMain.TextSpans", Message.raw(text));
         } catch (Throwable t) {
             LOG.log(Level.WARNING, "[EcotaleSidebar] apply failed uuid=" + uuid, t);
