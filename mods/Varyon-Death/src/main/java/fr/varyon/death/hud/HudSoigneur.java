@@ -3,6 +3,8 @@ package fr.varyon.death.hud;
 import javax.annotation.Nonnull;
 
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
+import com.hypixel.hytale.server.core.ui.Anchor;
+import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
@@ -51,9 +53,22 @@ public final class HudSoigneur extends CustomUIHud {
         construit = true;
     }
 
+    /**
+     * Largeur interieure disponible pour la barre : {@code Width} de {@code #ReviveSoigneurBox}
+     * (340) moins le padding horizontal applique au conteneur (12 de chaque cote).
+     */
+    private static final int LARGEUR_BARRE_PX = 340 - 2 * 12;
+
     private void appliquerValeurs(@Nonnull UICommandBuilder commandes) {
         commandes.set("#ReviveSoigneurTitre.Text", "Relèvement de " + nomCible);
-        commandes.set("#ReviveSoigneurBarreFill.Value", progression);
+        // Pas de ProgressBar/BarTexturePath (aucune texture de remplissage lineaire fiable
+        // dans ce moteur) : la largeur en pixels d'un Group colore est recalculee directement.
+        Anchor ancrage = new Anchor();
+        ancrage.setLeft(Value.of(0));
+        ancrage.setTop(Value.of(0));
+        ancrage.setBottom(Value.of(0));
+        ancrage.setWidth(Value.of(Math.round(progression * LARGEUR_BARRE_PX)));
+        commandes.setObject("#ReviveSoigneurBarreFill.Anchor", ancrage);
         // Affiche « x2 », « x3 »... des qu'un renfort accelere le relevement.
         commandes.set("#ReviveSoigneurMultiplicateur.Text",
                 nombreSoigneurs > 1 ? "x" + nombreSoigneurs : "");

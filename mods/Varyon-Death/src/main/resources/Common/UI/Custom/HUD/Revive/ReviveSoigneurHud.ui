@@ -37,13 +37,14 @@ Group {
     Group { Anchor: (Height: 6); }
 
     // ----- Barre de progression -----
+    // Pas de ProgressBar/BarTexturePath : Group colore dont la largeur (pixels) est
+    // recalculee cote Java a chaque mise a jour selon le pourcentage de progression.
     Group {
       Anchor: (Left: 0, Right: 0, Height: 18);
       Background: #1b2836;
-      ProgressBar #ReviveSoigneurBarreFill {
-        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-        Value: 0.0;
-        BarTexturePath: "HUD/Revive/BarreReleveFill.png";
+      Group #ReviveSoigneurBarreFill {
+        Anchor: (Left: 0, Top: 0, Bottom: 0, Width: 0);
+        Background: #7ee081;
       }
     }
 

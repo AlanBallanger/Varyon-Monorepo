@@ -48,14 +48,16 @@ Group {
     Group { Anchor: (Height: 4); }
 
     // Barre de relevement, masquee tant qu'aucun allie n'a commence.
+    // Pas de ProgressBar/BarTexturePath (aucune texture de remplissage lineaire fiable
+    // trouvee dans ce moteur) : un simple Group colore dont la largeur (en pixels) est
+    // recalculee cote Java a chaque mise a jour selon le pourcentage de progression.
     Group #ReviveATerreBarreReleve {
       Anchor: (Left: 0, Right: 0, Height: 14);
       Visible: false;
       Background: #1b2836;
-      ProgressBar #ReviveATerreBarreReleveFill {
-        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-        Value: 0.0;
-        BarTexturePath: "HUD/Revive/BarreReleveFill.png";
+      Group #ReviveATerreBarreReleveFill {
+        Anchor: (Left: 0, Top: 0, Bottom: 0, Width: 0);
+        Background: #9fd3ff;
       }
     }
 
@@ -69,10 +71,9 @@ Group {
       Anchor: (Left: 0, Right: 0, Height: 10);
       Visible: false;
       Background: #2b1414;
-      ProgressBar #ReviveATerreBarreAbandonFill {
-        Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
-        Value: 0.0;
-        BarTexturePath: "HUD/Revive/BarreAbandonFill.png";
+      Group #ReviveATerreBarreAbandonFill {
+        Anchor: (Left: 0, Top: 0, Bottom: 0, Width: 0);
+        Background: #ff6b6b;
       }
     }
   }

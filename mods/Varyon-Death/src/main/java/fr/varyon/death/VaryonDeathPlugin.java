@@ -16,9 +16,15 @@ import com.hypixel.hytale.server.core.io.adapter.PlayerPacketFilter;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.events.AddWorldEvent;
+import com.hypixel.hytale.server.core.universe.world.events.StartWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.universe.world.worldmap.WorldMapManager;
+import com.hypixel.hytale.server.npc.NPCPlugin;
+import com.hypixel.hytale.server.npc.blackboard.Blackboard;
+import com.hypixel.hytale.server.npc.blackboard.view.attitude.AttitudeView;
 
 import fr.varyon.death.carte.FournisseurMarqueurs;
 import fr.varyon.death.combat.BanqueRecaps;
@@ -33,10 +39,10 @@ import fr.varyon.death.config.PreferencesRecap;
 import fr.varyon.death.etat.GestionnaireATerre;
 import fr.varyon.death.etat.OutilsJoueur;
 import fr.varyon.death.hud.GestionnaireHud;
+import fr.varyon.death.systeme.AttitudeProviderATerre;
 import fr.varyon.death.systeme.FiltrePaquetsATerre;
 import fr.varyon.death.systeme.SystemeDegatsRecus;
 import fr.varyon.death.systeme.SystemeDegatsSoigneur;
-import fr.varyon.death.systeme.SystemeDesaggro;
 import fr.varyon.death.systeme.SystemeInterceptionMort;
 import fr.varyon.death.systeme.SystemeRecapMort;
 import fr.varyon.death.systeme.SystemeReleve;
@@ -104,6 +110,7 @@ public final class VaryonDeathPlugin extends JavaPlugin {
         configurerRecapitulatif(config);
         enregistrerSystemes();
         enregistrerEvenements();
+        enregistrerAttitudeATerre();
 
         // Lit la touche Accroupi dans les paquets bruts du client, fige l'orientation du
         // corps et bloque les attaques d'un joueur a terre.
@@ -150,7 +157,6 @@ public final class VaryonDeathPlugin extends JavaPlugin {
         registre(new SystemeTickATerre(gestionnaire, hud));
         registre(systemeReleve);
         registre(new SystemeDegatsSoigneur(gestionnaire, systemeReleve));
-        registre(new SystemeDesaggro(gestionnaire));
 
         registre(new SystemesBlocage.BlocageCasseBloc(gestionnaire));
         registre(new SystemesBlocage.BlocageDegatsBloc(gestionnaire));
@@ -190,6 +196,56 @@ public final class VaryonDeathPlugin extends JavaPlugin {
                 PreferencesRecap.ensureLoaded(playerRef.getUuid());
             }
         });
+    }
+
+    /**
+     * Injecte {@link AttitudeProviderATerre} dans le {@code Blackboard} NPC de chaque monde,
+     * deja actif ou futur. C'est le point d'extension officiel du moteur pour l'attitude des
+     * NPC ({@code AttitudeView.registerProvider}) : contrairement a {@code WorldSupport.overrideAttitude}
+     * (jamais consulte par le ciblage reel), le moteur interroge directement ce provider a
+     * chaque evaluation. Meme technique que {@code OmbreStealthAttitudeProvider} de Varyon-RPG.
+     */
+    private void enregistrerAttitudeATerre() {
+        AttitudeProviderATerre provider = new AttitudeProviderATerre(gestionnaire);
+        Universe universe = Universe.get();
+        if (universe != null) {
+            for (World monde : universe.getWorlds().values()) {
+                injecterProviderATerre(monde, provider);
+            }
+        }
+        getEventRegistry().registerGlobal(StartWorldEvent.class,
+                evenement -> injecterProviderATerre(evenement.getWorld(), provider));
+    }
+
+    private void injecterProviderATerre(@Nullable World monde, @Nonnull AttitudeProviderATerre provider) {
+        if (monde == null) {
+            return;
+        }
+        try {
+            monde.execute(() -> {
+                try {
+                    NPCPlugin npcPlugin = NPCPlugin.get();
+                    if (npcPlugin == null) {
+                        return;
+                    }
+                    Blackboard blackboard = monde.getEntityStore().getStore()
+                            .getResource(npcPlugin.getBlackboardResourceType());
+                    if (blackboard == null) {
+                        return;
+                    }
+                    blackboard.forEachView(AttitudeView.class,
+                            vue -> vue.registerProvider(-1, provider));
+                } catch (RuntimeException erreur) {
+                    LOGGER.at(Level.WARNING).log(
+                            "Injection de l'attitude a terre echouee pour %s : %s",
+                            monde.getName(), erreur.getMessage());
+                }
+            });
+        } catch (RuntimeException erreur) {
+            LOGGER.at(Level.WARNING).log(
+                    "Planification de l'injection d'attitude echouee pour %s : %s",
+                    monde.getName(), erreur.getMessage());
+        }
     }
 
     private void onMondeAjoute(@Nullable AddWorldEvent evenement) {

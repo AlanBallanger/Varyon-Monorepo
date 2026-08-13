@@ -157,7 +157,7 @@ public final class SystemeInterceptionMort extends DamageEventSystem {
 
         degats.setAmount(0f);
         degats.setCancelled(true);
-        mettreATerre(uuid, joueur, playerRef, ref, tampon, degats);
+        mettreATerre(uuid, joueur, playerRef, ref, store, tampon, degats);
     }
 
     /**
@@ -190,6 +190,7 @@ public final class SystemeInterceptionMort extends DamageEventSystem {
                               @Nullable Player joueur,
                               @Nonnull PlayerRef playerRef,
                               @Nonnull Ref<EntityStore> ref,
+                              @Nonnull Store<EntityStore> store,
                               @Nonnull CommandBuffer<EntityStore> tampon,
                               @Nonnull Damage coupFatal) {
         ConfigDeath config = gestionnaire.getConfig();
@@ -203,6 +204,11 @@ public final class SystemeInterceptionMort extends DamageEventSystem {
         // retrouve a l'interieur du modele reste debout.
         OutilsJoueur.jouerAnimationATerre(ref, tampon);
         OutilsJoueur.activerCameraATerre(playerRef, config);
+
+        // AttitudeProviderATerre empeche tout NOUVEAU ciblage tant que le joueur est a terre,
+        // mais un NPC ayant deja verrouille sa cible juste avant cet instant la garderait sans
+        // ce reset immediat de sa memoire de ciblage.
+        ResetAggroATerre.resetAggroAutourDe(ref, store);
 
         hud.afficherATerre(joueur, playerRef, config.getDureeSaignementSecondes(),
                 0f, 0f, 0, "");

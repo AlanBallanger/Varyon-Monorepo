@@ -5,6 +5,8 @@ import java.util.StringJoiner;
 import javax.annotation.Nonnull;
 
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
+import com.hypixel.hytale.server.core.ui.Anchor;
+import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
@@ -89,6 +91,12 @@ public final class HudATerre extends CustomUIHud {
         construit = true;
     }
 
+    /**
+     * Largeur interieure disponible pour les barres : {@code Width} de {@code #ReviveATerreBox}
+     * (420) moins le padding horizontal applique au conteneur (14 de chaque cote).
+     */
+    private static final int LARGEUR_BARRES_PX = 420 - 2 * 14;
+
     /** Renseigne les elements du HUD. Utilise aussi bien a la construction qu'aux mises a jour. */
     private void appliquerValeurs(@Nonnull UICommandBuilder commandes) {
         commandes.set("#ReviveATerreBox.Visible", !masqueParRecap);
@@ -100,11 +108,26 @@ public final class HudATerre extends CustomUIHud {
                 ? messageReleve(nombreSoigneurs, nomsSoigneurs)
                 : "Aucun allié ne vous relève");
         commandes.set("#ReviveATerreBarreReleve.Visible", enCoursDeReleve);
-        commandes.set("#ReviveATerreBarreReleveFill.Value", progressionReleve);
+        // Pas de ProgressBar/BarTexturePath (aucune texture de remplissage lineaire fiable
+        // dans ce moteur) : la largeur en pixels d'un Group colore est recalculee directement,
+        // via un objet Anchor complet (setObject), seule facon reconnue de cibler juste la
+        // largeur sans ecraser le reste de l'ancrage (Left/Top/Bottom).
+        commandes.setObject("#ReviveATerreBarreReleveFill.Anchor", ancrageLargeur(progressionReleve));
 
         boolean abandonEnCours = progressionAbandon > 0f;
         commandes.set("#ReviveATerreBarreAbandon.Visible", abandonEnCours);
-        commandes.set("#ReviveATerreBarreAbandonFill.Value", progressionAbandon);
+        commandes.setObject("#ReviveATerreBarreAbandonFill.Anchor", ancrageLargeur(progressionAbandon));
+    }
+
+    @Nonnull
+    private static Anchor ancrageLargeur(float progression) {
+        int largeur = Math.round(borner(progression) * LARGEUR_BARRES_PX);
+        Anchor ancrage = new Anchor();
+        ancrage.setLeft(Value.of(0));
+        ancrage.setTop(Value.of(0));
+        ancrage.setBottom(Value.of(0));
+        ancrage.setWidth(Value.of(largeur));
+        return ancrage;
     }
 
     @Nonnull

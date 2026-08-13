@@ -541,8 +541,31 @@ public final class DeathRecapPage extends InteractiveCustomUIPage<DeathRecapPage
         if (fermetureExterne && contexte == Contexte.A_TERRE && playerUuid != null) {
             GestionnaireATerre gestionnaire = GestionnaireATerre.get();
             if (gestionnaire != null && gestionnaire.estATerre(playerUuid)) {
-                openFor(playerRef, snapshot);
+                // Differe d'un tick : rouvrir une page dans le meme callback que le dismiss (le
+                // framework est encore en train de traiter la fermeture cote client/PageManager)
+                // faisait echouer la reouverture des le deuxieme cycle fermeture/reouverture.
+                UUID uuidFinal = playerUuid;
+                World world = store.getExternalData() != null ? store.getExternalData().getWorld() : null;
+                if (world != null) {
+                    world.execute(() -> rouvrirApresDismissExterne(uuidFinal));
+                }
             }
+        }
+    }
+
+    /**
+     * Rouvre la page repliee un tick apres un dismiss externe (Echap). Reprend une reference
+     * fraiche : le champ herite {@code playerRef} peut etre obsolete une fois cette page fermee.
+     */
+    private void rouvrirApresDismissExterne(@Nonnull UUID playerUuid) {
+        GestionnaireATerre gestionnaire = GestionnaireATerre.get();
+        if (gestionnaire == null || !gestionnaire.estATerre(playerUuid)) {
+            return;
+        }
+        Universe universe = Universe.get();
+        PlayerRef frais = universe != null ? universe.getPlayer(playerUuid) : null;
+        if (frais != null && frais.isValid()) {
+            openFor(frais, snapshot);
         }
     }
 

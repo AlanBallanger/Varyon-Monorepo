@@ -88,6 +88,10 @@ public final class SystemeTickATerre extends EntityTickingSystem<EntityStore> {
         // Reapplique a chaque tick : le serveur reevalue les reglages de deplacement
         // (monde, effets, monture) et ecraserait une immobilisation appliquee une seule fois.
         OutilsJoueur.immobiliser(ref, tampon, playerRef);
+        // Idem pour l'animation "a terre" : un coup encaisse (meme annule par ce mod juste
+        // apres) declenche cote serveur une reaction/animation par defaut qui ecrase le slot
+        // Status, faisant apparaitre le joueur "debout" un instant sans qu'il soit releve.
+        OutilsJoueur.jouerAnimationATerre(ref, tampon);
 
         if (traiterAbandon(etat, joueur, playerRef, ref, tampon, config)) {
             return;
