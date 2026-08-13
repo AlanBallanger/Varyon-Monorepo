@@ -87,6 +87,9 @@ val fatJar = tasks.register<Zip>("fatJar") {
     exclude("**/package-info.class")
     exclude("LICENSE")
     exclude("NOTICE")
+
+    // sqlite-jdbc bundles native libs for every OS/arch; the server only runs on Linux x86_64.
+    exclude { it.path.startsWith("org/sqlite/native/") && !it.path.startsWith("org/sqlite/native/Linux/x86_64/") }
 }
 
 val exportModJar = tasks.register<Copy>("exportModJar") {
