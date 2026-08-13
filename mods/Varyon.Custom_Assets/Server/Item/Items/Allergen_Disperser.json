@@ -52,7 +52,7 @@
     "TimeSeconds": 4,
     "Input": [
       {
-        "ResourceTypeId": "Plant_Flower",
+        "ItemId": "Plant_Flower_Tall_Yellow",
         "Quantity": 100
       }
     ],

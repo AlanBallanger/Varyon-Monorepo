@@ -52,19 +52,23 @@
     "TimeSeconds": 4,
     "Input": [
       {
-        "ResourceTypeId": "Food_Fish",
+        "ItemId": "Food_Fish_Raw",
         "Quantity": 100
       },
       {
-        "ResourceTypeId": "Food_Kebab",
+        "ItemId": "Food_Fish_Grilled",
         "Quantity": 100
       },
       {
-        "ResourceTypeId": "Food_Wildmeat",
+        "ItemId": "Food_Kebab_Meat",
         "Quantity": 100
       },
       {
-        "ResourceTypeId": "Food_Pie",
+        "ResourceTypeId": "Meats",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Food_Pie_Apple",
         "Quantity": 100
       },
       {

@@ -41,13 +41,13 @@
   "IconProperties": {
     "Scale": 0.44,
     "Rotation": [
-      19.0,
-      23.0,
+      19,
+      23,
       22.5
     ],
     "Translation": [
-      26.0,
-      -26.0
+      26,
+      -26
     ]
   },
   "BlockType": {
@@ -96,5 +96,6 @@
   },
   "ItemSoundSetId": "ISS_Blocks_Soft",
   "Scale": 1.0,
-  "UsePlayerAnimations": false
+  "UsePlayerAnimations": false,
+  "Icon": "Icons/ItemsGenerated/Varyon_Painting_Naeliz.png"
 }

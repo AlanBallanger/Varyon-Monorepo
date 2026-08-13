@@ -41,13 +41,13 @@
   "IconProperties": {
     "Scale": 0.4,
     "Rotation": [
-      19.0,
-      23.0,
+      19,
+      23,
       22.5
     ],
     "Translation": [
-      27.0,
-      -26.0
+      27,
+      -26
     ]
   },
   "BlockType": {
@@ -96,5 +96,6 @@
   },
   "ItemSoundSetId": "ISS_Blocks_Soft",
   "Scale": 1.0,
-  "UsePlayerAnimations": false
+  "UsePlayerAnimations": false,
+  "Icon": "Icons/ItemsGenerated/Varyon_Painting_Noyau.png"
 }

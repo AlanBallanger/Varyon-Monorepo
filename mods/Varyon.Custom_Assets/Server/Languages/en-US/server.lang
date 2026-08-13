@@ -70,4 +70,4 @@ items.Unbound_Hourglass.name=Sablepalier
 items.Unbound_Hourglass.description=Ce sablier n'a pas l'air d'une grande utilité
 items.Varyon_Healing_Pad.name=Dalle de soin Varyon
 items.Varyon_Healing_Pad.description=Une dalle imprégnée d'une énergie apaisante qui soigne quiconque s'y tient
-server.resourceType.Food_Fish.name=ddd
+server.resourceType.Meats.name=Viande
