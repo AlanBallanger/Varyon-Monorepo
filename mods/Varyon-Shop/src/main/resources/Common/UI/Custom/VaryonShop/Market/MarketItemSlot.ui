@@ -1,0 +1,56 @@
+$C = "../../Common.ui";
+
+Group #MarketSlotRoot {
+  Anchor: (Width: 108, Height: 144, Right: 8, Bottom: 8);
+
+  Button #MarketSlotButton {
+    Anchor: (Full: 0);
+    Style: $C.@TertiaryButtonStyle;
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    TooltipText: "";
+
+    Group {
+      LayoutMode: Top;
+      Anchor: (Full: 0);
+      Padding: (Full: 6);
+
+      Group #MarketSlotBgWrap {
+        Anchor: (Left: 0, Right: 0, Height: 84, Bottom: 6);
+        LayoutMode: CenterMiddle;
+
+        Group #MarketSlotBg {
+          Anchor: (Width: 84, Height: 84);
+          LayoutMode: CenterMiddle;
+          Background: (Color: #101823);
+
+          AssetImage #MarketSlotRarityBg {
+            Anchor: (Full: 0);
+            Visible: false;
+          }
+
+          ItemIcon #MarketSlotIcon {
+            Anchor: (Width: 64, Height: 64);
+          }
+        }
+      }
+
+      Label #MarketSlotName {
+        Anchor: (Left: 0, Right: 0, Height: 15, Bottom: 3);
+        Style: (...$C.@DefaultLabelStyle, FontSize: 11, TextColor: #c8d4e0, HorizontalAlignment: Center, ShrinkTextToFit: true, MinShrinkTextToFitFontSize: 8);
+        Text: "Objet";
+      }
+
+      Label #MarketSlotPrice {
+        Anchor: (Left: 0, Right: 0, Height: 18);
+        Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Center, ShrinkTextToFit: true, MinShrinkTextToFitFontSize: 9);
+        Text: "0";
+      }
+    }
+
+    Group #MarketSlotOutOfStockOverlay {
+      Anchor: (Full: 0);
+      Background: (Color: #050810(0.65));
+      Visible: false;
+    }
+  }
+}

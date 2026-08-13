@@ -1,0 +1,199 @@
+$C = "../../Common.ui";
+
+$C.@PageOverlay {
+  LayoutMode: Middle;
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 640, Height: 640);
+
+    #Title {
+      Group {
+        LayoutMode: Left;
+
+        Label {
+          FlexWeight: 1;
+          Text: "ADMINISTRATION VARYON-SHOP";
+          Style: (FontSize: 15, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center);
+        }
+
+        TextButton #AdminCloseButton {
+          Text: "X";
+          Anchor: (Width: 24, Height: 24, Top: 2, Right: 8);
+          Style: TextButtonStyle(
+            Default: (LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Sounds: $C.@ButtonSounds
+          );
+        }
+      }
+    }
+
+    #Content {
+      Padding: (Top: 4, Bottom: 10, Left: 10, Right: 10);
+      LayoutMode: Top;
+
+      Group #TabRow {
+        Anchor: (Height: 34, Bottom: 10);
+        LayoutMode: Left;
+
+        Button #ShopsTabButton {
+          FlexWeight: 1;
+          Anchor: (Height: 34, Right: 4);
+          TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+          TooltipText: "";
+          Style: ButtonStyle(
+            Default: (Background: (Color: #185a28)),
+            Hovered: (Background: (Color: #286a38)),
+            Pressed: (Background: (Color: #0f4018)),
+            Sounds: $C.@ButtonSounds
+          );
+          Group {
+            LayoutMode: CenterMiddle;
+            Anchor: (Full: 0);
+            Label {
+              Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center);
+              Text: "BOUTIQUES";
+            }
+          }
+        }
+
+        Button #SettingsTabButton {
+          FlexWeight: 1;
+          Anchor: (Height: 34, Left: 4);
+          TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+          TooltipText: "";
+          Style: ButtonStyle(
+            Default: (Background: (Color: #185a28)),
+            Hovered: (Background: (Color: #286a38)),
+            Pressed: (Background: (Color: #0f4018)),
+            Sounds: $C.@ButtonSounds
+          );
+          Group {
+            LayoutMode: CenterMiddle;
+            Anchor: (Full: 0);
+            Label {
+              Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center);
+              Text: "RÉGLAGES";
+            }
+          }
+        }
+      }
+
+      Group #SettingsTabContent {
+        LayoutMode: Top;
+        Visible: false;
+
+        Label {
+          Text: "TAUX DE RACHAT GÉNÉRAL (%)";
+          Style: (FontSize: 12, RenderBold: true, TextColor: #ffaa00);
+          Anchor: (Bottom: 4);
+        }
+
+        TextField #GeneralRateInput {
+          Value: "70";
+          Anchor: (Width: 80, Height: 28, Bottom: 14);
+          Background: (Color: #0d1520);
+          OutlineColor: #3a4a5a;
+          OutlineSize: 1;
+          Padding: (Left: 8);
+          Style: $C.@DefaultInputFieldStyle;
+        }
+
+        Label {
+          Text: "BONUS DE RACHAT (%)";
+          Style: (FontSize: 12, RenderBold: true, TextColor: #ffaa00);
+          Anchor: (Bottom: 4);
+        }
+
+        TextField #BuybackBonusInput {
+          Value: "0";
+          Anchor: (Width: 80, Height: 28, Bottom: 14);
+          Background: (Color: #0d1520);
+          OutlineColor: #3a4a5a;
+          OutlineSize: 1;
+          Padding: (Left: 8);
+          Style: $C.@DefaultInputFieldStyle;
+        }
+
+        Label {
+          Text: "BONUS D'ACHAT (%)";
+          Style: (FontSize: 12, RenderBold: true, TextColor: #ffaa00);
+          Anchor: (Bottom: 4);
+        }
+
+        TextField #PurchaseBonusInput {
+          Value: "0";
+          Anchor: (Width: 80, Height: 28, Bottom: 14);
+          Background: (Color: #0d1520);
+          OutlineColor: #3a4a5a;
+          OutlineSize: 1;
+          Padding: (Left: 8);
+          Style: $C.@DefaultInputFieldStyle;
+        }
+
+        Label {
+          Text: "DEVISES";
+          Style: (FontSize: 12, RenderBold: true, TextColor: #ffaa00);
+          Anchor: (Bottom: 4);
+        }
+
+        Group #CurrencyListScroll {
+          Anchor: (Height: 220, Bottom: 6);
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Background: (Color: #0a0f17);
+          Padding: (Full: 4);
+
+          Group #CurrencyList {
+            LayoutMode: Top;
+          }
+        }
+
+        Group {
+          LayoutMode: Left;
+
+          TextField #NewCurrencyLabelInput {
+            Value: "";
+            FlexWeight: 1;
+            Anchor: (Height: 28);
+            Background: (Color: #0d1520);
+            OutlineColor: #3a4a5a;
+            OutlineSize: 1;
+            Padding: (Left: 8);
+            Style: $C.@DefaultInputFieldStyle;
+          }
+
+          $C.@TertiaryTextButton #AddCurrencyButton {
+            @Text = "OBJET EN MAIN";
+            @Anchor = (Width: 150, Height: 28, Left: 8);
+          }
+        }
+      }
+
+      Group #ShopsTabContent {
+        LayoutMode: Top;
+
+        Group #ShopListScroll {
+          Anchor: (Height: 480);
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Background: (Color: #0a0f17);
+          Padding: (Full: 4);
+
+          Label #ShopEmptyLabel {
+            Anchor: (Height: 24);
+            Visible: false;
+            Text: "Aucune boutique.";
+            Style: (FontSize: 13, TextColor: #96a9be, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+
+          Group #ShopList {
+            LayoutMode: Top;
+          }
+        }
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

@@ -1,0 +1,23 @@
+$C = "../../Common.ui";
+
+Group {
+  Anchor: (Width: 120, Height: 28, Right: 6, Bottom: 6);
+
+  Button #OptionButton {
+    Anchor: (Full: 0);
+    Style: ButtonStyle(
+      Default: (Background: (Color: #172639)),
+      Hovered: (Background: (Color: #22364d)),
+      Pressed: (Background: (Color: #0f1c2b)),
+      Sounds: $C.@ButtonSounds
+    );
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    TooltipText: "";
+    Group {
+      LayoutMode: Middle;
+      Label #OptionLabel {
+        Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+      }
+    }
+  }
+}

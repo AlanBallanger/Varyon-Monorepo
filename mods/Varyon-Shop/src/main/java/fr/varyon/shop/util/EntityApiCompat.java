@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.entity.Entity;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.InventoryComponent;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -114,6 +115,20 @@ public final class EntityApiCompat {
     public static ItemContainer getToolsContainer(Player player) {
         InventoryComponent.Tool tool = getComponentOf(player, InventoryComponent.Tool.getComponentType());
         return tool == null ? null : tool.getInventory();
+    }
+
+    /** The item currently held in the player's active hotbar slot, or null if empty/unavailable. */
+    public static ItemStack getHeldItem(Player player) {
+        InventoryComponent.Hotbar hotbar = getComponentOf(player, InventoryComponent.Hotbar.getComponentType());
+        if (hotbar == null) {
+            return null;
+        }
+        try {
+            ItemStack stack = hotbar.getActiveItem();
+            return (stack == null || stack.isEmpty()) ? null : stack;
+        } catch (Throwable ignored) {
+            return null;
+        }
     }
 
     private static <T extends Component<EntityStore>> T getComponentOf(Player player, ComponentType<EntityStore, T> type) {

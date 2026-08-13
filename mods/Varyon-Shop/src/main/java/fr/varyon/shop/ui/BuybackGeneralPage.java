@@ -50,6 +50,9 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
     private final PlayerRef playerRef;
     private final ItemContainer depositContainer;
     private final String merchantName;
+    private final String categoryFilter;
+    private final double rate;
+    private final double bonus;
     private boolean firstBuild = true;
 
     public BuybackGeneralPage(
@@ -57,7 +60,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             @NotNull VaultEconomyBridge economyBridge,
             @NotNull PlayerRef playerRef
     ) {
-        this(priceRepository, economyBridge, playerRef, null);
+        this(priceRepository, economyBridge, playerRef, null, null, 1.0);
     }
 
     public BuybackGeneralPage(
@@ -66,7 +69,42 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             @NotNull PlayerRef playerRef,
             @Nullable String merchantName
     ) {
-        this(priceRepository, economyBridge, playerRef, new SimpleItemContainer(DEPOSIT_SLOTS), merchantName);
+        this(priceRepository, economyBridge, playerRef, merchantName, null, 1.0);
+    }
+
+    public BuybackGeneralPage(
+            @NotNull BuybackPriceRepository priceRepository,
+            @NotNull VaultEconomyBridge economyBridge,
+            @NotNull PlayerRef playerRef,
+            @Nullable String merchantName,
+            @Nullable String categoryFilter
+    ) {
+        this(priceRepository, economyBridge, playerRef, merchantName, categoryFilter, 1.0);
+    }
+
+    /** rate: fraction of the listed buyback price actually paid (1.0 = 100%, e.g. profession merchants). */
+    public BuybackGeneralPage(
+            @NotNull BuybackPriceRepository priceRepository,
+            @NotNull VaultEconomyBridge economyBridge,
+            @NotNull PlayerRef playerRef,
+            @Nullable String merchantName,
+            @Nullable String categoryFilter,
+            double rate
+    ) {
+        this(priceRepository, economyBridge, playerRef, merchantName, categoryFilter, rate, 0.0);
+    }
+
+    /** bonus: server-wide buyback bonus already folded into rate, kept separately just for the "+X%" display. */
+    public BuybackGeneralPage(
+            @NotNull BuybackPriceRepository priceRepository,
+            @NotNull VaultEconomyBridge economyBridge,
+            @NotNull PlayerRef playerRef,
+            @Nullable String merchantName,
+            @Nullable String categoryFilter,
+            double rate,
+            double bonus
+    ) {
+        this(priceRepository, economyBridge, playerRef, new SimpleItemContainer(DEPOSIT_SLOTS), merchantName, categoryFilter, rate, bonus);
     }
 
     private BuybackGeneralPage(
@@ -74,7 +112,10 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             @NotNull VaultEconomyBridge economyBridge,
             @NotNull PlayerRef playerRef,
             @NotNull ItemContainer depositContainer,
-            @Nullable String merchantName
+            @Nullable String merchantName,
+            @Nullable String categoryFilter,
+            double rate,
+            double bonus
     ) {
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, EventDataPayload.CODEC);
         this.priceRepository = priceRepository;
@@ -82,6 +123,9 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
         this.playerRef = playerRef;
         this.depositContainer = depositContainer;
         this.merchantName = merchantName;
+        this.categoryFilter = categoryFilter;
+        this.rate = Math.max(0.0, rate);
+        this.bonus = Math.max(0.0, bonus);
     }
 
     @Override
@@ -110,7 +154,12 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             return;
         }
 
-        cmd.set("#DepositTitle.Text", (merchantName == null || merchantName.isBlank()) ? "RACHETEUR GENERAL" : merchantName.toUpperCase());
+        cmd.set("#DepositTitle.Text", (merchantName == null || merchantName.isBlank()) ? "RACHETEUR GÉNÉRAL" : merchantName.toUpperCase());
+        cmd.set("#DepositLabel.Text", (categoryFilter == null || categoryFilter.isBlank())
+                ? "DÉPOSEZ VOS OBJETS"
+                : "DÉPOSEZ VOS OBJETS (" + categoryFilter.toUpperCase() + ")");
+        cmd.set("#DetailBonusRow.Visible", bonus > 0.0);
+        cmd.set("#DetailBonusValue.Text", "+" + Math.round(bonus * 100) + "%");
 
         int usedSlots = 0;
         int sellableCount = 0;
@@ -119,7 +168,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
         for (int i = 0; i < DEPOSIT_SLOTS; i++) {
             String selector = "#ChestGrid[" + i + "]";
             ItemStack stack = depositContainer.getItemStack((short) i);
-            double unitPrice = isValidStack(stack) ? priceRepository.priceOf(stack.getItemId()) : 0.0;
+            double unitPrice = isValidStack(stack) ? priceRepository.priceOf(stack.getItemId(), categoryFilter) * rate : 0.0;
             applySlot(cmd, selector, stack, unitPrice);
             bindSlotClicks(evt, selector, "chest", i);
 
@@ -190,7 +239,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             if (unitPrice > 0.0) {
                 cmd.set(priceSel + ".Text", formatPlain(unitPrice * qty));
                 cmd.set(priceSel + ".Visible", true);
-                cmd.set(btnSel + ".TooltipText", stack.getItemId() + "\n" + formatPlain(unitPrice) + " / unite");
+                cmd.set(btnSel + ".TooltipText", stack.getItemId() + " - " + formatPlain(unitPrice) + " / unite");
             } else {
                 cmd.set(priceSel + ".Visible", false);
                 cmd.set(btnSel + ".TooltipText", stack.getItemId());
@@ -200,7 +249,15 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             cmd.set(iconSel + ".Visible", false);
             cmd.set(qtySel + ".Visible", false);
             cmd.set(priceSel + ".Visible", false);
-            cmd.set(btnSel + ".TooltipText", "");
+            cmd.setNull(btnSel + ".TooltipText");
+        }
+    }
+
+    @Override
+    public void onDismiss(@NotNull Ref<EntityStore> ref, @NotNull Store<EntityStore> store) {
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player != null) {
+            moveAllFromDepositToPlayer(player);
         }
     }
 
@@ -306,6 +363,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
         ItemContainer storage = EntityApiCompat.getStorageContainer(player);
         ItemContainer hotbar = EntityApiCompat.getHotbarContainer(player);
         short cap = depositContainer.getCapacity();
+        boolean anyStuck = false;
         for (short i = 0; i < cap; i++) {
             if (!isValidStack(depositContainer.getItemStack(i))) {
                 continue;
@@ -313,9 +371,13 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             if (storage != null && nativeMove(depositContainer, i, storage)) {
                 continue;
             }
-            if (hotbar != null) {
-                nativeMove(depositContainer, i, hotbar);
+            if (hotbar != null && nativeMove(depositContainer, i, hotbar)) {
+                continue;
             }
+            anyStuck = true;
+        }
+        if (anyStuck) {
+            playerRef.sendMessage(Message.raw("Racheteur General: inventaire plein, impossible de rendre tous les objets deposes. Videz de la place et reessayez avant de fermer la fenetre."));
         }
     }
 
@@ -375,7 +437,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
             if (!isValidStack(stack)) {
                 continue;
             }
-            double unitPrice = priceRepository.priceOf(stack.getItemId());
+            double unitPrice = priceRepository.priceOf(stack.getItemId(), categoryFilter) * rate;
             int qty = Math.max(1, stack.getQuantity());
             try {
                 depositContainer.removeItemStackFromSlot(slot, qty);
@@ -414,7 +476,7 @@ public final class BuybackGeneralPage extends InteractiveCustomUIPage<BuybackGen
     }
 
     private String formatPlain(double amount) {
-        return String.format("%.0f", amount);
+        return String.format("%.2f", amount);
     }
 
     private int parseInt(@Nullable String s) {

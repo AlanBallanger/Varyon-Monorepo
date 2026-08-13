@@ -1,0 +1,27 @@
+$C = "../../Common.ui";
+
+Group {
+  Anchor: (Left: 0, Right: 0, Height: 36, Bottom: 4);
+
+  Button #CategoryButton {
+    Anchor: (Full: 0);
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    TooltipText: "";
+    Style: ButtonStyle(
+      Default: (Background: (Color: #1c4a7a)),
+      Hovered: (Background: (Color: #2c5f96)),
+      Pressed: (Background: (Color: #143a63)),
+      Sounds: $C.@ButtonSounds
+    );
+
+    Group {
+      LayoutMode: CenterMiddle;
+      Anchor: (Full: 0);
+
+      Label #CategoryButtonLabel {
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #ffffff, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+        Text: "Catégorie";
+      }
+    }
+  }
+}

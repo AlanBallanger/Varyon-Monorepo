@@ -1,0 +1,18 @@
+$C = "../../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 0, Right: 0, Height: 36, Bottom: 2);
+  Background: (Color: #172639);
+  Padding: (Left: 8, Right: 4, Top: 4, Bottom: 4);
+
+  Label #NpcRowLabel {
+    FlexWeight: 1;
+    Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start);
+  }
+
+  $C.@CancelTextButton #NpcUnbindButton {
+    @Text = "DELIER";
+    @Anchor = (Width: 90, Height: 28, Left: 6);
+  }
+}

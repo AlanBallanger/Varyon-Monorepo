@@ -1,0 +1,43 @@
+$C = "../../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 0, Right: 0, Height: 36, Bottom: 2);
+  Background: (Color: #172639);
+  Padding: (Left: 4, Right: 4, Top: 4, Bottom: 4);
+
+  Button #ShopOpenButton {
+    FlexWeight: 1;
+    Style: ButtonStyle(
+      Default: (Background: (Color: #000000(0))),
+      Hovered: (Background: (Color: #000000(0.2))),
+      Pressed: (Background: (Color: #000000(0.3))),
+      Sounds: $C.@ButtonSounds
+    );
+    Padding: (Left: 8);
+    Group {
+      LayoutMode: Middle;
+      Label #ShopRowLabel {
+        Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start);
+      }
+    }
+  }
+
+  Button #ShopDeleteButton {
+    Anchor: (Width: 26, Height: 26, Left: 6);
+    Style: ButtonStyle(
+      Default: (Background: (Color: #7a1f2b)),
+      Hovered: (Background: (Color: #9c2837)),
+      Pressed: (Background: (Color: #5c1620)),
+      Sounds: $C.@ButtonSounds
+    );
+    Group {
+      LayoutMode: CenterMiddle;
+      Anchor: (Full: 0);
+      Label {
+        Style: (TextColor: #ffffff, FontSize: 12, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+        Text: "X";
+      }
+    }
+  }
+}

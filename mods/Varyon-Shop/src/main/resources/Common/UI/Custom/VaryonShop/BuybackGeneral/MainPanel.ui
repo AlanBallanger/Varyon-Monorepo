@@ -4,7 +4,7 @@ $C.@DecoratedContainer {
   Anchor: (Full: 0);
 
   #Title {
-    $C.@Title #DepositTitle { @Text = "RACHETEUR GENERAL"; }
+    $C.@Title #DepositTitle { @Text = "RACHETEUR GÉNÉRAL"; }
   }
 
   #Content {
@@ -21,7 +21,7 @@ $C.@DecoratedContainer {
         Label #DepositLabel {
           Anchor: (Height: 16, Right: 16);
           Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: Start);
-          Text: "DEPOSEZ VOS OBJETS";
+          Text: "DÉPOSEZ VOS OBJETS";
         }
 
         Button #ClearChestButton {
@@ -57,7 +57,7 @@ $C.@DecoratedContainer {
         Label #UsageLabel {
           Anchor: (Height: 16);
           Style: (...$C.@DefaultLabelStyle, FontSize: 11, RenderBold: true, TextColor: #7a9cc6, HorizontalAlignment: Start, LetterSpacing: 1);
-          Text: "EMPLACEMENTS UTILISES";
+          Text: "EMPLACEMENTS UTILISÉS";
         }
 
         Group { FlexWeight: 1; }
@@ -75,36 +75,36 @@ $C.@DecoratedContainer {
       LayoutMode: Top;
 
       Group #DetailItemsRow {
-        Anchor: (Width: 280, Height: 18, Bottom: 6);
+        Anchor: (Width: 220, Height: 18, Bottom: 6);
         LayoutMode: Left;
 
-        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Objets a vendre:"; }
+        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Objets a vendre :"; }
         Label #DetailItemsValue { Anchor: (Height: 16); Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: Start); Text: "0"; }
       }
 
       Group #DetailValueRow {
-        Anchor: (Width: 280, Height: 18, Bottom: 6);
+        Anchor: (Width: 220, Height: 18, Bottom: 6);
         LayoutMode: Left;
 
-        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Valeur totale:"; }
+        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Valeur totale :"; }
         Label #DetailValueValue { Anchor: (Height: 16); Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Start); Text: "0"; }
       }
 
       Group #DetailBonusRow {
-        Anchor: (Width: 280, Height: 18, Bottom: 14);
+        Anchor: (Width: 220, Height: 18, Bottom: 14);
         LayoutMode: Left;
 
-        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Bonus de rachat:"; }
+        Label { Anchor: (Height: 16, Right: 6); Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Start); Text: "Bonus de rachat :"; }
         Label #DetailBonusValue { Anchor: (Height: 16); Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, TextColor: #6fd67a, HorizontalAlignment: Start); Text: "+0%"; }
       }
 
       Group #DetailSep {
-        Anchor: (Width: 280, Height: 1, Bottom: 14);
+        Anchor: (Width: 220, Height: 1, Bottom: 14);
         Background: (Color: #1b2533);
       }
 
       Group #EstimateCard {
-        Anchor: (Width: 280, Height: 64, Bottom: 16);
+        Anchor: (Width: 220, Height: 64, Bottom: 16);
         Background: (Color: #101823);
 
         Group {
@@ -146,8 +146,13 @@ $C.@DecoratedContainer {
       }
 
       Button #SellAllButton {
-        Anchor: (Width: 280, Height: 48);
-        Style: $C.@TertiaryButtonStyle;
+        Anchor: (Width: 220, Height: 48);
+        Style: ButtonStyle(
+          Default: (Background: (Color: #185a28)),
+          Hovered: (Background: (Color: #286a38)),
+          Pressed: (Background: (Color: #0f4018)),
+          Sounds: $C.@ButtonSounds
+        );
 
         Group {
           LayoutMode: CenterMiddle;

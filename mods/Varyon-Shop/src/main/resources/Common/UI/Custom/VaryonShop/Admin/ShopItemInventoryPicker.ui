@@ -1,0 +1,51 @@
+$C = "../../Common.ui";
+
+$C.@PageOverlay {
+  LayoutMode: Middle;
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 800, Height: 520);
+
+    #Title {
+      Label #PickerTitle {
+        Text: "CHOISIR L'OBJET";
+        Style: (FontSize: 15, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center);
+      }
+    }
+
+    #Content {
+      Padding: (Top: 4, Bottom: 10, Left: 10, Right: 10);
+      LayoutMode: Top;
+
+      Label {
+        Text: "Cliquez sur un objet de votre inventaire pour le sélectionner.";
+        Style: (FontSize: 12, TextColor: #96a9be, HorizontalAlignment: Center);
+        Anchor: (Height: 20, Bottom: 8);
+      }
+
+      Group #PickerInventoryGrid {
+        Anchor: (Width: 760, Height: 304, Bottom: 8);
+        LayoutMode: LeftCenterWrap;
+        Padding: (Full: 0);
+      }
+
+      Group #HotbarSeparator {
+        Anchor: (Width: 760, Height: 1, Bottom: 8);
+        Background: (Color: #1b2533);
+      }
+
+      Group #PickerHotbarGrid {
+        Anchor: (Width: 760, Height: 76, Bottom: 10);
+        LayoutMode: LeftCenterWrap;
+        Padding: (Full: 0);
+      }
+
+      $C.@SecondaryTextButton #PickerCancelButton {
+        @Text = "ANNULER";
+        @Anchor = (Width: 120, Height: 36);
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

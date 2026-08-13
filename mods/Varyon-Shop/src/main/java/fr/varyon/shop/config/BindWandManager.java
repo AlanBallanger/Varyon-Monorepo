@@ -6,22 +6,35 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Tracks players who ran "/vshop bind <type>" (or "/vshop unbind") and are now expected to
- * interact with (right click) the Denizen NPC they want to bind or unbind. Mirrors
- * QuestLinesDenizens' own SelectionManager wand pattern: armed state with a TTL, consumed on
- * the next interaction.
+ * Tracks players who ran "/vshop bind <type> [category|shopId]" (or "/vshop unbind") and are
+ * now expected to interact with (right click) the Denizen NPC they want to bind or unbind.
+ * Mirrors QuestLinesDenizens' own SelectionManager wand pattern: armed state with a TTL,
+ * consumed on the next interaction.
  */
 public final class BindWandManager {
     private static final long WAND_TTL_MS = 60_000L;
 
-    /** Empty type means "unbind on next interact"; present type means "bind to this type". */
-    private record ArmedRequest(Optional<MerchantRegistry.MerchantType> type, long armedAtMillis) {
+    /** Empty binding means "unbind on next interact"; present binding means "bind to this". */
+    private record ArmedRequest(Optional<MerchantRegistry.Binding> binding, long armedAtMillis) {
     }
 
     private final Map<UUID, ArmedRequest> armed = new ConcurrentHashMap<>();
 
     public void arm(UUID playerUuid, MerchantRegistry.MerchantType type) {
-        armed.put(playerUuid, new ArmedRequest(Optional.ofNullable(type), System.currentTimeMillis()));
+        armBind(playerUuid, type, null, null);
+    }
+
+    public void arm(UUID playerUuid, MerchantRegistry.MerchantType type, String category) {
+        armBind(playerUuid, type, category, null);
+    }
+
+    public void armBind(UUID playerUuid, MerchantRegistry.MerchantType type, String category, String shopId) {
+        MerchantRegistry.Binding binding = type == null ? null : new MerchantRegistry.Binding(type, category, shopId);
+        armed.put(playerUuid, new ArmedRequest(Optional.ofNullable(binding), System.currentTimeMillis()));
+    }
+
+    public void armUnbind(UUID playerUuid) {
+        armed.put(playerUuid, new ArmedRequest(Optional.empty(), System.currentTimeMillis()));
     }
 
     public void disarm(UUID playerUuid) {
@@ -35,14 +48,14 @@ public final class BindWandManager {
     /**
      * Consumes the armed request for this player, if any and not expired.
      * Returns null if nothing is armed; an empty Optional if armed for unbind; a present
-     * Optional with the merchant type if armed for bind.
+     * Optional with the merchant binding if armed for bind.
      */
-    public Optional<MerchantRegistry.MerchantType> consume(UUID playerUuid) {
+    public Optional<MerchantRegistry.Binding> consume(UUID playerUuid) {
         ArmedRequest request = armed.remove(playerUuid);
         if (request == null || isExpired(request)) {
             return null;
         }
-        return request.type();
+        return request.binding();
     }
 
     private ArmedRequest peek(UUID playerUuid) {

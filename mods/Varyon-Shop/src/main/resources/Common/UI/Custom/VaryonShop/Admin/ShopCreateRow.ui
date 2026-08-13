@@ -1,0 +1,26 @@
+$C = "../../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 0, Right: 0, Height: 36, Bottom: 2);
+  Background: (Color: #14351f);
+
+  Button #ShopCreateButton {
+    FlexWeight: 1;
+    Style: ButtonStyle(
+      Default: (Background: (Color: #000000(0))),
+      Hovered: (Background: (Color: #000000(0.15))),
+      Pressed: (Background: (Color: #000000(0.25))),
+      Sounds: $C.@ButtonSounds
+    );
+    Padding: (Left: 8);
+    Group {
+      LayoutMode: Left;
+      Anchor: (Full: 0);
+      Label {
+        Style: (TextColor: #aaffaa, FontSize: 12, RenderBold: true, VerticalAlignment: Center, HorizontalAlignment: Start);
+        Text: "+ CRÉER UNE BOUTIQUE";
+      }
+    }
+  }
+}

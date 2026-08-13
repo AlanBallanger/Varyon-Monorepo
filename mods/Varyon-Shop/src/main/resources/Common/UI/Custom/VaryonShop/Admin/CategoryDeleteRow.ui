@@ -1,0 +1,18 @@
+$C = "../../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 0, Right: 0, Height: 24, Bottom: 2);
+  Background: (Color: #172639);
+  Padding: (Left: 6, Right: 4);
+
+  Label #CategoryDeleteLabel {
+    FlexWeight: 1;
+    Style: (TextColor: #c8d4e0, FontSize: 10, VerticalAlignment: Center, HorizontalAlignment: Start);
+  }
+
+  $C.@CancelTextButton #CategoryDeleteButton {
+    @Text = "X";
+    @Anchor = (Width: 22, Height: 18, Left: 4);
+  }
+}

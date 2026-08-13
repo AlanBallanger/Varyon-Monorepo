@@ -1,0 +1,26 @@
+$C = "../../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 0, Right: 0, Height: 28, Bottom: 2);
+  Background: (Color: #172639);
+
+  Button #CategoryRowButton {
+    Anchor: (Full: 0);
+    Style: ButtonStyle(
+      Default: (Background: (Color: #000000(0))),
+      Hovered: (Background: (Color: #000000(0.2))),
+      Pressed: (Background: (Color: #000000(0.3))),
+      Sounds: $C.@ButtonSounds
+    );
+    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    TooltipText: "";
+    Padding: (Left: 8);
+    Group {
+      LayoutMode: Middle;
+      Label #CategoryRowLabel {
+        Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start);
+      }
+    }
+  }
+}

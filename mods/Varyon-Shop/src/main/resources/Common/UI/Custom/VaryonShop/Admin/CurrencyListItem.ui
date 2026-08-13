@@ -1,0 +1,18 @@
+$C = "../../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 0, Right: 0, Height: 32, Bottom: 2);
+  Background: (Color: #172639);
+  Padding: (Left: 8, Right: 4, Top: 4, Bottom: 4);
+
+  Label #CurrencyRowLabel {
+    FlexWeight: 1;
+    Style: (TextColor: #ffffff, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Start);
+  }
+
+  $C.@CancelTextButton #CurrencyRemoveButton {
+    @Text = "X";
+    @Anchor = (Width: 24, Height: 24, Left: 6);
+  }
+}

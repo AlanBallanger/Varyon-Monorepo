@@ -10,14 +10,20 @@ import fr.varyon.shop.commands.VShopCommand;
 import fr.varyon.shop.config.BindWandManager;
 import fr.varyon.shop.config.BuybackPriceRepository;
 import fr.varyon.shop.config.MerchantRegistry;
+import fr.varyon.shop.config.ShopCatalogRepository;
+import fr.varyon.shop.config.ShopPurchaseTracker;
+import fr.varyon.shop.config.ShopRotationState;
+import fr.varyon.shop.config.ShopSettings;
 import fr.varyon.shop.economy.VaultEconomyBridge;
 import fr.varyon.shop.integration.DenizensBridge;
 import fr.varyon.shop.merchant.buyback.BuybackSessionManager;
+import fr.varyon.shop.merchant.market.MarketSessionManager;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
+import java.util.Optional;
 import java.util.UUID;
 
 public final class VaryonShopPlugin extends JavaPlugin {
@@ -25,11 +31,16 @@ public final class VaryonShopPlugin extends JavaPlugin {
 
     private Path modDataPath;
     private BuybackPriceRepository buybackPriceRepository;
+    private ShopCatalogRepository shopCatalogRepository;
+    private ShopRotationState shopRotationState;
+    private ShopSettings shopSettings;
+    private ShopPurchaseTracker shopPurchaseTracker;
     private MerchantRegistry merchantRegistry;
     private BindWandManager bindWandManager;
     private VaultEconomyBridge economyBridge;
     private DenizensBridge denizensBridge;
     private BuybackSessionManager buybackSessionManager;
+    private MarketSessionManager marketSessionManager;
 
     public VaryonShopPlugin(JavaPluginInit init) {
         super(init);
@@ -46,6 +57,19 @@ public final class VaryonShopPlugin extends JavaPlugin {
         buybackPriceRepository = new BuybackPriceRepository(modDataPath.resolve("buyback_prices.json"));
         buybackPriceRepository.load();
 
+        shopCatalogRepository = new ShopCatalogRepository(modDataPath.resolve("shops"));
+        shopCatalogRepository.load();
+
+        shopRotationState = new ShopRotationState(modDataPath.resolve("shop_rotation_state.json"));
+        shopRotationState.load();
+
+        shopSettings = new ShopSettings(modDataPath.resolve("shop_settings.json"));
+        shopSettings.load();
+
+        shopPurchaseTracker = new ShopPurchaseTracker(modDataPath.resolve("shop_purchases.json"));
+        shopPurchaseTracker.load();
+        shopRotationState.setPurchaseTracker(shopPurchaseTracker);
+
         merchantRegistry = new MerchantRegistry(modDataPath.resolve("merchant_bindings.json"));
         merchantRegistry.load();
 
@@ -53,7 +77,7 @@ public final class VaryonShopPlugin extends JavaPlugin {
 
         economyBridge = VaultEconomyBridge.connect();
         if (!economyBridge.isAvailable()) {
-            System.err.println("[Varyon-Shop] VaultUnlocked not found — buyback merchants will be unable to pay players.");
+            System.err.println("[Varyon-Shop] VaultUnlocked not found — merchants will be unable to pay/charge players.");
         }
 
         denizensBridge = DenizensBridge.connect();
@@ -61,7 +85,8 @@ public final class VaryonShopPlugin extends JavaPlugin {
             System.out.println("[Varyon-Shop] QuestLinesDenizens not detected yet — /vshop bind will report unavailable until it loads.");
         }
 
-        buybackSessionManager = new BuybackSessionManager(buybackPriceRepository, economyBridge);
+        buybackSessionManager = new BuybackSessionManager(buybackPriceRepository, economyBridge, shopSettings);
+        marketSessionManager = new MarketSessionManager(shopCatalogRepository, shopRotationState, economyBridge, buybackPriceRepository, shopPurchaseTracker, shopSettings);
 
         CommandManager.get().register(new BuybackCommand(buybackSessionManager));
         CommandManager.get().register(new VShopCommand(this, merchantRegistry, bindWandManager));
@@ -88,13 +113,16 @@ public final class VaryonShopPlugin extends JavaPlugin {
             return;
         }
         UUID playerUuid = playerRef.getUuid();
-        java.util.Optional<MerchantRegistry.MerchantType> armedRequest = playerUuid == null ? null : bindWandManager.consume(playerUuid);
+        Optional<MerchantRegistry.Binding> armedRequest = playerUuid == null ? null : bindWandManager.consume(playerUuid);
         if (armedRequest != null) {
             String name = denizensBridge.getName(denizenId);
             String displayName = name == null ? denizenId.toString() : name;
             if (armedRequest.isPresent()) {
-                merchantRegistry.bind(denizenId, armedRequest.get());
-                playerRef.sendMessage(Message.raw("Varyon-Shop: " + displayName + " lie au marchand " + armedRequest.get().name() + "."));
+                MerchantRegistry.Binding binding = armedRequest.get();
+                merchantRegistry.bind(denizenId, binding.type(), binding.category(), binding.shopId());
+                String suffix = binding.category() != null ? " (categorie: " + binding.category() + ")"
+                        : binding.shopId() != null ? " (boutique: " + binding.shopId() + ")" : "";
+                playerRef.sendMessage(Message.raw("Varyon-Shop: " + displayName + " lie au marchand " + binding.type().name() + suffix + "."));
             } else {
                 merchantRegistry.unbind(denizenId);
                 playerRef.sendMessage(Message.raw("Varyon-Shop: " + displayName + " delie de tout marchand."));
@@ -102,13 +130,15 @@ public final class VaryonShopPlugin extends JavaPlugin {
             return;
         }
 
-        MerchantRegistry.MerchantType type = merchantRegistry.typeOf(denizenId);
-        if (type == null) {
+        MerchantRegistry.Binding binding = merchantRegistry.bindingOf(denizenId);
+        if (binding == null) {
             return;
         }
         String merchantName = denizensBridge.getName(denizenId);
-        switch (type) {
-            case BUYBACK_GENERAL -> buybackSessionManager.open(playerRef, merchantName);
+        switch (binding.type()) {
+            case BUYBACK_GENERAL -> buybackSessionManager.open(playerRef, merchantName, binding.category(), false);
+            case BUYBACK_PROFESSION -> buybackSessionManager.open(playerRef, merchantName, binding.category(), true);
+            case MARKET_SHOP -> marketSessionManager.open(playerRef, binding.shopId());
             default -> { }
         }
     }
@@ -121,11 +151,30 @@ public final class VaryonShopPlugin extends JavaPlugin {
         if (merchantRegistry != null) {
             merchantRegistry.save();
         }
+        if (shopRotationState != null) {
+            shopRotationState.save();
+        }
         System.out.println("[Varyon-Shop] Stopped.");
     }
 
     public BuybackPriceRepository getBuybackPriceRepository() {
         return buybackPriceRepository;
+    }
+
+    public ShopCatalogRepository getShopCatalogRepository() {
+        return shopCatalogRepository;
+    }
+
+    public ShopRotationState getShopRotationState() {
+        return shopRotationState;
+    }
+
+    public ShopSettings getShopSettings() {
+        return shopSettings;
+    }
+
+    public ShopPurchaseTracker getShopPurchaseTracker() {
+        return shopPurchaseTracker;
     }
 
     public MerchantRegistry getMerchantRegistry() {
@@ -148,9 +197,15 @@ public final class VaryonShopPlugin extends JavaPlugin {
         return buybackSessionManager;
     }
 
-    /** Reloads buyback prices and merchant bindings from disk without restarting the server. */
+    public MarketSessionManager getMarketSessionManager() {
+        return marketSessionManager;
+    }
+
+    /** Reloads buyback prices, shop catalogs, and merchant bindings from disk without restarting the server. */
     public void reloadConfig() {
         buybackPriceRepository.load();
+        shopCatalogRepository.load();
         merchantRegistry.load();
+        shopSettings.load();
     }
 }
