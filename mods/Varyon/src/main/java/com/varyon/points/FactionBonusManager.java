@@ -1,5 +1,7 @@
 package com.varyon.points;
 
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
@@ -7,6 +9,8 @@ import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.faction.FactionManager;
 
 import javax.annotation.Nonnull;
@@ -83,7 +87,14 @@ public final class FactionBonusManager {
         try {
             for (PlayerRef playerRef : Universe.get().getPlayers()) {
                 if (playerRef == null || !playerRef.isValid()) continue;
-                applyHpBonus(playerRef);
+                try {
+                    Ref ref = playerRef.getReference();
+                    Store store = ref.getStore();
+                    World world = ((EntityStore) store.getExternalData()).getWorld();
+                    world.execute(() -> applyHpBonus(playerRef));
+                } catch (Exception e) {
+                    LOGGER.at(Level.WARNING).log("Failed to schedule HP bonus refresh for " + playerRef.getUsername() + ": " + e.getMessage());
+                }
             }
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("FactionBonusManager.refreshAllOnline: " + e.getMessage());
