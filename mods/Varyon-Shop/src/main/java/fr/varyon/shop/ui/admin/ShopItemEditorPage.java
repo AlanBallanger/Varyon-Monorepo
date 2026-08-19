@@ -128,6 +128,7 @@ public final class ShopItemEditorPage extends InteractiveCustomUIPage<ShopAdminE
             cmd.set("#NameInput.Value", entry.name == null ? "" : entry.name);
             cmd.set("#StockMinInput.Value", String.valueOf(entry.maxPerPlayerMin));
             cmd.set("#StockMaxInput.Value", String.valueOf(entry.maxPerPlayerMax));
+            cmd.set("#OverridePriceInput.Value", entry.overridePrice == null ? "" : String.format(java.util.Locale.ROOT, "%.2f", entry.overridePrice));
         }
 
         renderCategoryOptions(cmd, evt);
@@ -140,13 +141,15 @@ public final class ShopItemEditorPage extends InteractiveCustomUIPage<ShopAdminE
                 .append("@MaxPerPlayerMin", "#StockMinInput.Value")
                 .append("@MaxPerPlayerMax", "#StockMaxInput.Value")
                 .append("@CurrencyItemId", "#CurrencyDropdown.Value")
-                .append("@Category", "#CategoryDropdown.Value");
+                .append("@Category", "#CategoryDropdown.Value")
+                .append("@OverridePrice", "#OverridePriceInput.Value");
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#CommandInput", autoSaveEvent, false);
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#NameInput", autoSaveEvent, false);
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#CategoryDropdown", autoSaveEvent, false);
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#StockMinInput", autoSaveEvent, false);
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#StockMaxInput", autoSaveEvent, false);
         evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#CurrencyDropdown", autoSaveEvent, false);
+        evt.addEventBinding(CustomUIEventBindingType.ValueChanged, "#OverridePriceInput", autoSaveEvent, false);
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#DeleteItemButton", EventData.of("Action", "delete"), false);
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#BackToShopButton", EventData.of("Action", "back"), false);
     }
@@ -291,6 +294,16 @@ public final class ShopItemEditorPage extends InteractiveCustomUIPage<ShopAdminE
         entry.category = selectedCategory;
         selectedCurrencyItemId = blankToNull(data.getCurrencyItemId());
         entry.currencyItemId = selectedCurrencyItemId;
+        String rawPrice = blankToNull(data.getOverridePrice());
+        if (rawPrice == null) {
+            entry.overridePrice = null;
+        } else {
+            try {
+                entry.overridePrice = Math.max(0.0, Double.parseDouble(rawPrice.replace(',', '.')));
+            } catch (NumberFormatException ignored) {
+                // Keep the previous override price if the input isn't parseable.
+            }
+        }
     }
 
     private String blankToNull(String raw) {

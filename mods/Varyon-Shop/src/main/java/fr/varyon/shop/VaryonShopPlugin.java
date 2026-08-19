@@ -1,10 +1,17 @@
 package fr.varyon.shop;
 
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
+import com.hypixel.hytale.server.core.modules.entity.component.Interactable;
+import com.hypixel.hytale.server.core.modules.interaction.Interactions;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.shop.commands.BuybackCommand;
 import fr.varyon.shop.commands.VShopCommand;
 import fr.varyon.shop.config.BindWandManager;
@@ -101,6 +108,8 @@ public final class VaryonShopPlugin extends JavaPlugin {
         }
         if (denizensBridge.isAvailable()) {
             denizensBridge.addInteractListener(this::handleDenizenInteract);
+            com.hypixel.hytale.server.core.HytaleServer.SCHEDULED_EXECUTOR.schedule(
+                    this::reapplyAllInteractionHints, 10, java.util.concurrent.TimeUnit.SECONDS);
             System.out.println("[Varyon-Shop] QuestLinesDenizens detected — NPC merchants enabled.");
         } else {
             System.out.println("[Varyon-Shop] QuestLinesDenizens not detected — NPC merchants disabled, /racheteur still works.");
@@ -123,9 +132,11 @@ public final class VaryonShopPlugin extends JavaPlugin {
                 String suffix = binding.category() != null ? " (categorie: " + binding.category() + ")"
                         : binding.shopId() != null ? " (boutique: " + binding.shopId() + ")" : "";
                 playerRef.sendMessage(Message.raw("Varyon-Shop: " + displayName + " lie au marchand " + binding.type().name() + suffix + "."));
+                applyInteractionHint(denizenId, playerRef, "Appuyez sur \"F\" pour parler");
             } else {
                 merchantRegistry.unbind(denizenId);
                 playerRef.sendMessage(Message.raw("Varyon-Shop: " + displayName + " delie de tout marchand."));
+                clearInteractionHint(denizenId, playerRef);
             }
             return;
         }
@@ -140,6 +151,62 @@ public final class VaryonShopPlugin extends JavaPlugin {
             case BUYBACK_PROFESSION -> buybackSessionManager.open(playerRef, merchantName, binding.category(), true);
             case MARKET_SHOP -> marketSessionManager.open(playerRef, binding.shopId());
             default -> { }
+        }
+    }
+
+    /** Marks the Denizen's live entity as interactable and shows the given hint text (e.g. "Appuyez sur "F" pour parler"). */
+    private void applyInteractionHint(UUID denizenId, PlayerRef playerRef, String hint) {
+        withDenizenEntity(denizenId, playerRef, (store, entityRef) -> {
+            store.ensureComponent(entityRef, Interactable.getComponentType());
+            Interactions interactions = store.ensureAndGetComponent(entityRef, Interactions.getComponentType());
+            interactions.setInteractionHint(hint);
+        });
+    }
+
+    private void clearInteractionHint(UUID denizenId, PlayerRef playerRef) {
+        withDenizenEntity(denizenId, playerRef, (store, entityRef) -> {
+            Interactions interactions = store.ensureAndGetComponent(entityRef, Interactions.getComponentType());
+            interactions.setInteractionHint(null);
+        });
+    }
+
+    private void withDenizenEntity(UUID denizenId, PlayerRef playerRef, java.util.function.BiConsumer<Store<EntityStore>, Ref<EntityStore>> action) {
+        UUID worldUuid = playerRef == null ? null : playerRef.getWorldUuid();
+        World world = worldUuid == null ? null : Universe.get().getWorld(worldUuid);
+        if (world != null && withDenizenEntityInWorld(denizenId, world, action)) {
+            return;
+        }
+        // No player context (e.g. plugin startup) or the entity isn't in the player's world:
+        // fall back to scanning every loaded world for it.
+        for (World candidate : Universe.get().getWorlds().values()) {
+            if (withDenizenEntityInWorld(denizenId, candidate, action)) {
+                return;
+            }
+        }
+    }
+
+    /** Returns true if the entity was found (and the action ran) in this world. */
+    private boolean withDenizenEntityInWorld(UUID denizenId, World world, java.util.function.BiConsumer<Store<EntityStore>, Ref<EntityStore>> action) {
+        UUID entityUuid = denizensBridge.getEntityUuid(denizenId);
+        if (entityUuid == null || world.getEntityStore() == null) {
+            return false;
+        }
+        Store<EntityStore> store = world.getEntityStore().getStore();
+        if (store == null) {
+            return false;
+        }
+        Ref<EntityStore> entityRef = world.getEntityRef(entityUuid);
+        if (entityRef == null) {
+            return false;
+        }
+        action.accept(store, entityRef);
+        return true;
+    }
+
+    /** Re-applies the "F to interact" hint to every currently-bound Denizen's live entity, across all loaded worlds. */
+    private void reapplyAllInteractionHints() {
+        for (UUID denizenId : merchantRegistry.listBoundDenizenIds()) {
+            applyInteractionHint(denizenId, null, "Appuyez sur \"F\" pour parler");
         }
     }
 

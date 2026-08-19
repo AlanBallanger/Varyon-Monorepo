@@ -18,7 +18,6 @@ import fr.varyon.shop.VaryonShopPlugin;
 import fr.varyon.shop.config.MerchantRegistry;
 import fr.varyon.shop.config.ShopCatalog;
 import fr.varyon.shop.config.ShopSettings;
-import fr.varyon.shop.util.EntityApiCompat;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -172,14 +171,10 @@ public final class ShopAdminListPage extends InteractiveCustomUIPage<ShopAdminEv
                     return;
                 }
             }
-            case "addCurrency" -> {
-                ItemStack held = EntityApiCompat.getHeldItem(player);
-                if (held == null) {
-                    playerRef.sendMessage(Message.raw("Varyon-Shop: aucun objet en main a utiliser comme devise."));
-                } else {
-                    plugin.getShopSettings().addCurrency(held.getItemId(), data.getNewCurrencyLabel());
-                    playerRef.sendMessage(Message.raw("Varyon-Shop: devise '" + held.getItemId() + "' ajoutee."));
-                }
+            case "pickCurrency" -> {
+                player.getPageManager().openCustomPage(ref, store,
+                        new ShopItemInventoryPickerPage(plugin, playerRef, null, -1, ShopItemInventoryPickerPage.Target.CURRENCY));
+                return;
             }
             case "removeCurrency" -> {
                 String itemId = data.getShopId();

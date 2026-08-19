@@ -28,9 +28,10 @@ public final class ShopCatalog {
      * iconItemId (an item id used only for its icon) are used for display since there's no real
      * item involved.
      *
-     * Price is not stored here: it's looked up from BuybackPriceRepository by itemId (0 if
-     * unlisted), then multiplied by the owning shop's price multiplier. This keeps a single
-     * source of truth for item values across buyback and purchase.
+     * Price is usually looked up from BuybackPriceRepository by itemId (0 if unlisted), then
+     * multiplied by the owning shop's price multiplier — this keeps a single source of truth for
+     * item values shared with buyback. overridePrice, if set, replaces the buyback-listed price
+     * for this entry only, without affecting that item's buyback price anywhere else.
      */
     public static final class Entry {
         public String itemId;
@@ -52,6 +53,13 @@ public final class ShopCatalog {
         @Deprecated
         public Integer maxPerPlayer;
         public String currencyItemId;
+        /**
+         * Optional fixed price that overrides BuybackPriceRepository's listed price for this
+         * item, in this shop only. Null means "use the buyback-listed price" (default). Set means
+         * this shop sells the item at this price regardless of whether/how it's configured for
+         * buyback — lets a shop stock items that aren't (and shouldn't be) sellable back to NPCs.
+         */
+        public Double overridePrice;
 
         public Entry() {
         }

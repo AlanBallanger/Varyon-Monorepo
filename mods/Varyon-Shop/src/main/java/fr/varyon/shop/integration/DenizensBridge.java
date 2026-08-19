@@ -121,6 +121,22 @@ public final class DenizensBridge {
         }
     }
 
+    /** Resolves the live entity UUID (world-spawned instance) backing this Denizen id, or null if not spawned/known. */
+    public UUID getEntityUuid(UUID denizenId) {
+        if (!available || getEntityUuidMethod == null || denizenId == null) {
+            return null;
+        }
+        try {
+            Object result = getEntityUuidMethod.invoke(api, denizenId);
+            if (result instanceof java.util.Optional<?> opt) {
+                return opt.map(v -> (UUID) v).orElse(null);
+            }
+            return result instanceof UUID uuid ? uuid : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
     /** Lists every Denizen id known to the registry. */
     @SuppressWarnings("unchecked")
     public java.util.List<UUID> listAllIds() {

@@ -247,6 +247,9 @@ public final class MarketPage extends InteractiveCustomUIPage<MarketPage.EventDa
     }
 
     private double basePrice(ShopCatalog.Entry entry) {
+        if (entry.overridePrice != null) {
+            return entry.overridePrice;
+        }
         if (entry.itemId == null || entry.itemId.isBlank()) {
             return 0.0;
         }
@@ -260,7 +263,7 @@ public final class MarketPage extends InteractiveCustomUIPage<MarketPage.EventDa
 
     private String formatPrice(ShopCatalog.Entry entry, double price) {
         if (entry.hasItemCurrency()) {
-            return formatPlain(price) + " x " + formatItemName(entry.currencyItemId);
+            return (int) Math.ceil(price) + " x " + formatItemName(entry.currencyItemId);
         }
         return formatPlain(price) + " Coins";
     }

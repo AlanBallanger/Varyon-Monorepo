@@ -104,7 +104,7 @@ $C.@PageOverlay #MarketRoot {
         LayoutMode: Top;
 
         Group #DetailHeaderRow {
-          Anchor: (Left: 0, Right: 0, Height: 100, Bottom: 16);
+          Anchor: (Left: 0, Right: 0, Height: 114, Bottom: 16);
           LayoutMode: Left;
 
           Group #DetailIconWrap {
@@ -122,14 +122,14 @@ $C.@PageOverlay #MarketRoot {
             LayoutMode: Top;
 
             Label #DetailName {
-              Anchor: (Left: 0, Right: 0, Height: 20, Bottom: 4);
-              Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: Start);
+              Anchor: (Left: 0, Right: 0, Height: 34, Bottom: 4);
+              Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true, TextColor: #f5e9d8, HorizontalAlignment: Start, Wrap: true, ShrinkTextToFit: true, MinShrinkTextToFitFontSize: 10);
               Text: "Sélectionnez un objet";
             }
 
             Label #DetailPriceLabel {
               Anchor: (Left: 0, Right: 0, Height: 24);
-              Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Start);
+              Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, TextColor: #f4c542, HorizontalAlignment: Start, ShrinkTextToFit: true, MinShrinkTextToFitFontSize: 12);
               Text: "";
             }
 

@@ -284,10 +284,30 @@ $C.@PageOverlay {
             Anchor: (Bottom: 8);
           }
           DropdownBox #CurrencyDropdown {
-            Anchor: (Height: 28);
+            Anchor: (Height: 28, Bottom: 16);
             Style: $C.@DefaultDropdownBoxStyle;
             Value: "";
             DropdownEntry { Value: ""; Text: "Coins"; }
+          }
+
+          Label {
+            Text: "PRIX";
+            Style: (FontSize: 12, RenderBold: true, TextColor: #ffaa00);
+            Anchor: (Bottom: 8);
+          }
+          Label {
+            Text: "Prix fixe (vide = prix de rachat par défaut)";
+            Style: (FontSize: 11, TextColor: #96a9be);
+            Anchor: (Bottom: 3);
+          }
+          TextField #OverridePriceInput {
+            Value: "";
+            Anchor: (Height: 28);
+            Background: (Color: #0d1520);
+            OutlineColor: #3a4a5a;
+            OutlineSize: 1;
+            Padding: (Left: 8);
+            Style: $C.@DefaultInputFieldStyle;
           }
         }
 

@@ -24,6 +24,7 @@ public final class ShopAdminEventData {
                     .addField(new KeyedCodec<>("@Name", Codec.STRING), (d, v) -> d.name = v, d -> d.name)
                     .addField(new KeyedCodec<>("@IconItemId", Codec.STRING), (d, v) -> d.iconItemId = v, d -> d.iconItemId)
                     .addField(new KeyedCodec<>("@Price", Codec.STRING), (d, v) -> d.price = v, d -> d.price)
+                    .addField(new KeyedCodec<>("@OverridePrice", Codec.STRING), (d, v) -> d.overridePrice = v, d -> d.overridePrice)
                     .addField(new KeyedCodec<>("Category", Codec.STRING), (d, v) -> d.category = v, d -> d.category)
                     .addField(new KeyedCodec<>("@Category", Codec.STRING), (d, v) -> d.categoryFree = v, d -> d.categoryFree)
                     .addField(new KeyedCodec<>("@Quantity", Codec.STRING), (d, v) -> d.quantity = v, d -> d.quantity)
@@ -53,6 +54,7 @@ public final class ShopAdminEventData {
     String name;
     String iconItemId;
     String price;
+    String overridePrice;
     String category;
     String categoryFree;
     String quantity;
@@ -81,6 +83,7 @@ public final class ShopAdminEventData {
     public String getName() { return name; }
     public String getIconItemId() { return iconItemId; }
     public String getPrice() { return price; }
+    public String getOverridePrice() { return overridePrice; }
     public String getCategory() { return category; }
     public String getCategoryFree() { return categoryFree; }
     public String getQuantity() { return quantity; }
