@@ -12,7 +12,7 @@ public final class VaryonMixinTransformer implements ClassTransformer {
             "com.hypixel.hytale.server.core.io.handlers.game.InventoryPacketHandler";
 
     public VaryonMixinTransformer() {
-        System.out.println("[Varyon-MixinAgent] Early-plugin 0.1.0 active — stack-by-permission hook (Wood_Ash_Trunk)");
+        System.out.println("[Varyon-MixinAgent] Early-plugin 0.2.0 active — stack-by-permission hook (categories x tiers)");
     }
 
     @Override

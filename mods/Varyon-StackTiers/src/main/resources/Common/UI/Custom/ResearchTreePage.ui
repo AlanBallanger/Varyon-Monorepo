@@ -1,0 +1,859 @@
+$C = "Common.ui";
+
+@PageWidth = 1000;
+@PageHeight = 740;
+
+@Ink = #E8DCC8;
+@InkMuted = #A89E90;
+@Gold = #D4AF37(0.92);
+@CardBg = #1C1A15;
+@CardBgReady = #3A2F16;
+@CardBgDone = #1E3A24;
+@Veil = #0A0A0A(0.72);
+@Backdrop = #000000(0.5);
+@Rail = #E8DCC8(0.22);
+@SidebarBg = #14120E;
+@SidebarLine = #E8DCC8(0.18);
+
+@TitleStyle = (FontSize: 20, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@NameStyle = (FontSize: 13, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@BonusStyle = (FontSize: 10, TextColor: @Gold, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@CostStyle = (FontSize: 12, TextColor: @Gold, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@ItemStyle = (FontSize: 10, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@TimeStyle = (FontSize: 11, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+@TierStyle = (FontSize: 14, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+
+@NodeBtn = (
+  Default: ( Background: #000000(0.0) ),
+  Hovered: ( Background: #FFFFFF(0.08) ),
+  Pressed: ( Background: #FFFFFF(0.14) ),
+  Disabled: ( Background: #000000(0.0) ),
+  Sounds: $C.@ButtonSounds
+);
+
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+  Background: @Backdrop;
+  LayoutMode: Middle;
+
+  Group {
+    Anchor: (Width: @PageWidth, Height: @PageHeight);
+    Background: PatchStyle(TexturePath: "Common/ContainerFullPatch.png", Border: 20, Color: #FFFFFFE6);
+    LayoutMode: Top;
+    Padding: (Full: 18);
+
+    Label #ResearchTreeTitle { Anchor: (Left: 0, Right: 0, Height: 28); Style: @TitleStyle; Text: "Arbre de recherche"; }
+    Group { Anchor: (Height: 8); }
+
+    Group {
+      FlexWeight: 1;
+      LayoutMode: TopScrolling;
+      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+
+      Group #ResearchTreeCanvas { Anchor: (Width: 910, Height: 1640); LayoutMode: Full;
+
+      Group #ResearchEdgeSeg0 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg1 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg2 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg3 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg4 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg5 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg6 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg7 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg8 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg9 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg10 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg11 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg12 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg13 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg14 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg15 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg16 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg17 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg18 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg19 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg20 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg21 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg22 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg23 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg24 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg25 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg26 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg27 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg28 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg29 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg30 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg31 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg32 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg33 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg34 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg35 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg36 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg37 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg38 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg39 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg40 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg41 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg42 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg43 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg44 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg45 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg46 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg47 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg48 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg49 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg50 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg51 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg52 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg53 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg54 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg55 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg56 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg57 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg58 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg59 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg60 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg61 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg62 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg63 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg64 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg65 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg66 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg67 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg68 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg69 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg70 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg71 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg72 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg73 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg74 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg75 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg76 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg77 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg78 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg79 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg80 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg81 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg82 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg83 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg84 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg85 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg86 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg87 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg88 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg89 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg90 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg91 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg92 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg93 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg94 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg95 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg96 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg97 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg98 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg99 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg100 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg101 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg102 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg103 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg104 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg105 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg106 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg107 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg108 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg109 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg110 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg111 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg112 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg113 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg114 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg115 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg116 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg117 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg118 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg119 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg120 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg121 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg122 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg123 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg124 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg125 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg126 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg127 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg128 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg129 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg130 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg131 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg132 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg133 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg134 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg135 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg136 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg137 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg138 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg139 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg140 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg141 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg142 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg143 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg144 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg145 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg146 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg147 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg148 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg149 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg150 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg151 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg152 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg153 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg154 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg155 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg156 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg157 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg158 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg159 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg160 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg161 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg162 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg163 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg164 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg165 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg166 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg167 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg168 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg169 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg170 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg171 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg172 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg173 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg174 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg175 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg176 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg177 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg178 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg179 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg180 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg181 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg182 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg183 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg184 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg185 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg186 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg187 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg188 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg189 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg190 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg191 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg192 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg193 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg194 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg195 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg196 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg197 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg198 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg199 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg200 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg201 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg202 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg203 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg204 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg205 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg206 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg207 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg208 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg209 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg210 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg211 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg212 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg213 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg214 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg215 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg216 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg217 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg218 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg219 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg220 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg221 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg222 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg223 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg224 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg225 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg226 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg227 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg228 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg229 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg230 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg231 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg232 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg233 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg234 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg235 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg236 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg237 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg238 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg239 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg240 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg241 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg242 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg243 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg244 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg245 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg246 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg247 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg248 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg249 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg250 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg251 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg252 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg253 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg254 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg255 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg256 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg257 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg258 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg259 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg260 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg261 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg262 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg263 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg264 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg265 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg266 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg267 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg268 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg269 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg270 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg271 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg272 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg273 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg274 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg275 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg276 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg277 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg278 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg279 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg280 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg281 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg282 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg283 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg284 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg285 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg286 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg287 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg288 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg289 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg290 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg291 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg292 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg293 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg294 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg295 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg296 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg297 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg298 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg299 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg300 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg301 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg302 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg303 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg304 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg305 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg306 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg307 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg308 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg309 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg310 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg311 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg312 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg313 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg314 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg315 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg316 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg317 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg318 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+      Group #ResearchEdgeSeg319 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
+
+      Group #ResearchSidebarTier1 { Anchor: (Left: 0, Top: 20, Width: 100, Height: 540); Background: @SidebarBg; LayoutMode: Middle;
+        Label #ResearchSidebarTier1Text { Anchor: (Width: 88, Height: 20); Style: @TierStyle; Text: "Palier 1"; }
+      }
+      Group #ResearchSidebarSep1 { Anchor: (Left: 0, Top: 559, Width: 100, Height: 2); Background: @SidebarLine; }
+      Group #ResearchSidebarTier2 { Anchor: (Left: 0, Top: 560, Width: 100, Height: 540); Background: @SidebarBg; LayoutMode: Middle;
+        Label #ResearchSidebarTier2Text { Anchor: (Width: 88, Height: 20); Style: @TierStyle; Text: "Palier 2"; }
+      }
+      Group #ResearchSidebarSep2 { Anchor: (Left: 0, Top: 1099, Width: 100, Height: 2); Background: @SidebarLine; }
+      Group #ResearchSidebarTier3 { Anchor: (Left: 0, Top: 1100, Width: 100, Height: 540); Background: @SidebarBg; LayoutMode: Middle;
+        Label #ResearchSidebarTier3Text { Anchor: (Width: 88, Height: 20); Style: @TierStyle; Text: "Palier 3"; }
+      }
+
+      Group #ResearchNodesoil1Slot { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodesoil1Ready { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodesoil1Done { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodesoil1NameText { Anchor: (Left: 132, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Terre - Tier 1"; }
+      Label #ResearchNodesoil1BonusText { Anchor: (Left: 132, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodesoil1Icon { Anchor: (Left: 132, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNodesoil1CostText { Anchor: (Left: 166, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "500x"; }
+      Label #ResearchNodesoil1ItemText { Anchor: (Left: 166, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Terre"; }
+      Label #ResearchNodesoil1StateText { Anchor: (Left: 132, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "10min"; }
+      Group #ResearchNodesoil1Veil { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodesoil1 { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodesoil2Slot { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodesoil2Ready { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodesoil2Done { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodesoil2NameText { Anchor: (Left: 132, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Terre - Tier 2"; }
+      Label #ResearchNodesoil2BonusText { Anchor: (Left: 132, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodesoil2Icon { Anchor: (Left: 132, Top: 608, Width: 28, Height: 28); }
+      Label #ResearchNodesoil2CostText { Anchor: (Left: 166, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "1250x"; }
+      Label #ResearchNodesoil2ItemText { Anchor: (Left: 166, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Terre"; }
+      Label #ResearchNodesoil2StateText { Anchor: (Left: 132, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h30"; }
+      Group #ResearchNodesoil2Veil { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodesoil2 { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodesoil3Slot { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodesoil3Ready { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodesoil3Done { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodesoil3NameText { Anchor: (Left: 132, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Terre - Tier 3"; }
+      Label #ResearchNodesoil3BonusText { Anchor: (Left: 132, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodesoil3Icon { Anchor: (Left: 132, Top: 1148, Width: 28, Height: 28); }
+      Label #ResearchNodesoil3CostText { Anchor: (Left: 166, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "3125x"; }
+      Label #ResearchNodesoil3ItemText { Anchor: (Left: 166, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Terre"; }
+      Label #ResearchNodesoil3StateText { Anchor: (Left: 132, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "5h00"; }
+      Group #ResearchNodesoil3Veil { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodesoil3 { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodewood1Slot { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodewood1Ready { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodewood1Done { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodewood1NameText { Anchor: (Left: 132, Top: 208, Width: 106, Height: 16); Style: @NameStyle; Text: "Bois - Tier 1"; }
+      Label #ResearchNodewood1BonusText { Anchor: (Left: 132, Top: 226, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodewood1Icon { Anchor: (Left: 132, Top: 248, Width: 28, Height: 28); }
+      Label #ResearchNodewood1CostText { Anchor: (Left: 166, Top: 250, Width: 72, Height: 14); Style: @CostStyle; Text: "500x"; }
+      Label #ResearchNodewood1ItemText { Anchor: (Left: 166, Top: 265, Width: 72, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
+      Label #ResearchNodewood1StateText { Anchor: (Left: 132, Top: 286, Width: 106, Height: 13); Style: @TimeStyle; Text: "10min"; }
+      Group #ResearchNodewood1Veil { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodewood1 { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodewood2Slot { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodewood2Ready { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodewood2Done { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodewood2NameText { Anchor: (Left: 132, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Bois - Tier 2"; }
+      Label #ResearchNodewood2BonusText { Anchor: (Left: 132, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodewood2Icon { Anchor: (Left: 132, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNodewood2CostText { Anchor: (Left: 166, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "1250x"; }
+      Label #ResearchNodewood2ItemText { Anchor: (Left: 166, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
+      Label #ResearchNodewood2StateText { Anchor: (Left: 132, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h30"; }
+      Group #ResearchNodewood2Veil { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodewood2 { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodewood3Slot { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodewood3Ready { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodewood3Done { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodewood3NameText { Anchor: (Left: 292, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Bois - Tier 3"; }
+      Label #ResearchNodewood3BonusText { Anchor: (Left: 292, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodewood3Icon { Anchor: (Left: 292, Top: 1148, Width: 28, Height: 28); }
+      Label #ResearchNodewood3CostText { Anchor: (Left: 326, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "3125x"; }
+      Label #ResearchNodewood3ItemText { Anchor: (Left: 326, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
+      Label #ResearchNodewood3StateText { Anchor: (Left: 292, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "5h00"; }
+      Group #ResearchNodewood3Veil { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodewood3 { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNoderock1Slot { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderock1Ready { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderock1Done { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderock1NameText { Anchor: (Left: 132, Top: 388, Width: 106, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 1"; }
+      Label #ResearchNoderock1BonusText { Anchor: (Left: 132, Top: 406, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNoderock1Icon { Anchor: (Left: 132, Top: 428, Width: 28, Height: 28); }
+      Label #ResearchNoderock1CostText { Anchor: (Left: 166, Top: 430, Width: 72, Height: 14); Style: @CostStyle; Text: "500x"; }
+      Label #ResearchNoderock1ItemText { Anchor: (Left: 166, Top: 445, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
+      Label #ResearchNoderock1StateText { Anchor: (Left: 132, Top: 466, Width: 106, Height: 13); Style: @TimeStyle; Text: "10min"; }
+      Group #ResearchNoderock1Veil { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderock1 { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNoderock2Slot { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderock2Ready { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderock2Done { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderock2NameText { Anchor: (Left: 132, Top: 928, Width: 106, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 2"; }
+      Label #ResearchNoderock2BonusText { Anchor: (Left: 132, Top: 946, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNoderock2Icon { Anchor: (Left: 132, Top: 968, Width: 28, Height: 28); }
+      Label #ResearchNoderock2CostText { Anchor: (Left: 166, Top: 970, Width: 72, Height: 14); Style: @CostStyle; Text: "1250x"; }
+      Label #ResearchNoderock2ItemText { Anchor: (Left: 166, Top: 985, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
+      Label #ResearchNoderock2StateText { Anchor: (Left: 132, Top: 1006, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h30"; }
+      Group #ResearchNoderock2Veil { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderock2 { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNoderock3Slot { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderock3Ready { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderock3Done { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderock3NameText { Anchor: (Left: 292, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 3"; }
+      Label #ResearchNoderock3BonusText { Anchor: (Left: 292, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNoderock3Icon { Anchor: (Left: 292, Top: 1328, Width: 28, Height: 28); }
+      Label #ResearchNoderock3CostText { Anchor: (Left: 326, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "3125x"; }
+      Label #ResearchNoderock3ItemText { Anchor: (Left: 326, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
+      Label #ResearchNoderock3StateText { Anchor: (Left: 292, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "5h00"; }
+      Group #ResearchNoderock3Veil { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderock3 { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeplant1Slot { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeplant1Ready { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeplant1Done { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeplant1NameText { Anchor: (Left: 292, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Plante - Tier 1"; }
+      Label #ResearchNodeplant1BonusText { Anchor: (Left: 292, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodeplant1Icon { Anchor: (Left: 292, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNodeplant1CostText { Anchor: (Left: 326, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "200x"; }
+      Label #ResearchNodeplant1ItemText { Anchor: (Left: 326, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
+      Label #ResearchNodeplant1StateText { Anchor: (Left: 292, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "10min"; }
+      Group #ResearchNodeplant1Veil { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeplant1 { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeplant2Slot { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeplant2Ready { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeplant2Done { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeplant2NameText { Anchor: (Left: 292, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Plante - Tier 2"; }
+      Label #ResearchNodeplant2BonusText { Anchor: (Left: 292, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodeplant2Icon { Anchor: (Left: 292, Top: 608, Width: 28, Height: 28); }
+      Label #ResearchNodeplant2CostText { Anchor: (Left: 326, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "500x"; }
+      Label #ResearchNodeplant2ItemText { Anchor: (Left: 326, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
+      Label #ResearchNodeplant2StateText { Anchor: (Left: 292, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h30"; }
+      Group #ResearchNodeplant2Veil { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeplant2 { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeplant3Slot { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeplant3Ready { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeplant3Done { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeplant3NameText { Anchor: (Left: 292, Top: 1468, Width: 106, Height: 16); Style: @NameStyle; Text: "Plante - Tier 3"; }
+      Label #ResearchNodeplant3BonusText { Anchor: (Left: 292, Top: 1486, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodeplant3Icon { Anchor: (Left: 292, Top: 1508, Width: 28, Height: 28); }
+      Label #ResearchNodeplant3CostText { Anchor: (Left: 326, Top: 1510, Width: 72, Height: 14); Style: @CostStyle; Text: "1250x"; }
+      Label #ResearchNodeplant3ItemText { Anchor: (Left: 326, Top: 1525, Width: 72, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
+      Label #ResearchNodeplant3StateText { Anchor: (Left: 292, Top: 1546, Width: 106, Height: 13); Style: @TimeStyle; Text: "5h00"; }
+      Group #ResearchNodeplant3Veil { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeplant3 { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodecloth1Slot { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodecloth1Ready { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodecloth1Done { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodecloth1NameText { Anchor: (Left: 292, Top: 208, Width: 106, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 1"; }
+      Label #ResearchNodecloth1BonusText { Anchor: (Left: 292, Top: 226, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodecloth1Icon { Anchor: (Left: 292, Top: 248, Width: 28, Height: 28); }
+      Label #ResearchNodecloth1CostText { Anchor: (Left: 326, Top: 250, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
+      Label #ResearchNodecloth1ItemText { Anchor: (Left: 326, Top: 265, Width: 72, Height: 13); Style: @ItemStyle; Text: "Laine"; }
+      Label #ResearchNodecloth1StateText { Anchor: (Left: 292, Top: 286, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodecloth1Veil { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodecloth1 { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodecloth2Slot { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodecloth2Ready { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodecloth2Done { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodecloth2NameText { Anchor: (Left: 292, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 2"; }
+      Label #ResearchNodecloth2BonusText { Anchor: (Left: 292, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodecloth2Icon { Anchor: (Left: 292, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNodecloth2CostText { Anchor: (Left: 326, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
+      Label #ResearchNodecloth2ItemText { Anchor: (Left: 326, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Laine"; }
+      Label #ResearchNodecloth2StateText { Anchor: (Left: 292, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodecloth2Veil { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodecloth2 { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodecloth3Slot { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodecloth3Ready { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodecloth3Done { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodecloth3NameText { Anchor: (Left: 132, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 3"; }
+      Label #ResearchNodecloth3BonusText { Anchor: (Left: 132, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodecloth3Icon { Anchor: (Left: 132, Top: 1328, Width: 28, Height: 28); }
+      Label #ResearchNodecloth3CostText { Anchor: (Left: 166, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
+      Label #ResearchNodecloth3ItemText { Anchor: (Left: 166, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Laine"; }
+      Label #ResearchNodecloth3StateText { Anchor: (Left: 132, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodecloth3Veil { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodecloth3 { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeingredient1Slot { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeingredient1Ready { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeingredient1Done { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeingredient1NameText { Anchor: (Left: 452, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 1"; }
+      Label #ResearchNodeingredient1BonusText { Anchor: (Left: 452, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodeingredient1Icon { Anchor: (Left: 452, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNodeingredient1CostText { Anchor: (Left: 486, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
+      Label #ResearchNodeingredient1ItemText { Anchor: (Left: 486, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
+      Label #ResearchNodeingredient1StateText { Anchor: (Left: 452, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodeingredient1Veil { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeingredient1 { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeingredient2Slot { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeingredient2Ready { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeingredient2Done { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeingredient2NameText { Anchor: (Left: 292, Top: 928, Width: 106, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 2"; }
+      Label #ResearchNodeingredient2BonusText { Anchor: (Left: 292, Top: 946, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodeingredient2Icon { Anchor: (Left: 292, Top: 968, Width: 28, Height: 28); }
+      Label #ResearchNodeingredient2CostText { Anchor: (Left: 326, Top: 970, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
+      Label #ResearchNodeingredient2ItemText { Anchor: (Left: 326, Top: 985, Width: 72, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
+      Label #ResearchNodeingredient2StateText { Anchor: (Left: 292, Top: 1006, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodeingredient2Veil { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeingredient2 { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeingredient3Slot { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeingredient3Ready { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeingredient3Done { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeingredient3NameText { Anchor: (Left: 452, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 3"; }
+      Label #ResearchNodeingredient3BonusText { Anchor: (Left: 452, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodeingredient3Icon { Anchor: (Left: 452, Top: 1148, Width: 28, Height: 28); }
+      Label #ResearchNodeingredient3CostText { Anchor: (Left: 486, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
+      Label #ResearchNodeingredient3ItemText { Anchor: (Left: 486, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
+      Label #ResearchNodeingredient3StateText { Anchor: (Left: 452, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodeingredient3Veil { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeingredient3 { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefish1Slot { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefish1Ready { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefish1Done { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefish1NameText { Anchor: (Left: 292, Top: 388, Width: 106, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 1"; }
+      Label #ResearchNodefish1BonusText { Anchor: (Left: 292, Top: 406, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodefish1Icon { Anchor: (Left: 292, Top: 428, Width: 28, Height: 28); }
+      Label #ResearchNodefish1CostText { Anchor: (Left: 326, Top: 430, Width: 72, Height: 14); Style: @CostStyle; Text: "50x"; }
+      Label #ResearchNodefish1ItemText { Anchor: (Left: 326, Top: 445, Width: 72, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
+      Label #ResearchNodefish1StateText { Anchor: (Left: 292, Top: 466, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodefish1Veil { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefish1 { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefish2Slot { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefish2Ready { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefish2Done { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefish2NameText { Anchor: (Left: 452, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 2"; }
+      Label #ResearchNodefish2BonusText { Anchor: (Left: 452, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodefish2Icon { Anchor: (Left: 452, Top: 608, Width: 28, Height: 28); }
+      Label #ResearchNodefish2CostText { Anchor: (Left: 486, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "125x"; }
+      Label #ResearchNodefish2ItemText { Anchor: (Left: 486, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
+      Label #ResearchNodefish2StateText { Anchor: (Left: 452, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodefish2Veil { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefish2 { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefish3Slot { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefish3Ready { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefish3Done { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefish3NameText { Anchor: (Left: 452, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 3"; }
+      Label #ResearchNodefish3BonusText { Anchor: (Left: 452, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodefish3Icon { Anchor: (Left: 452, Top: 1328, Width: 28, Height: 28); }
+      Label #ResearchNodefish3CostText { Anchor: (Left: 486, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "312x"; }
+      Label #ResearchNodefish3ItemText { Anchor: (Left: 486, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
+      Label #ResearchNodefish3StateText { Anchor: (Left: 452, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodefish3Veil { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefish3 { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefood1Slot { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefood1Ready { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefood1Done { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefood1NameText { Anchor: (Left: 452, Top: 208, Width: 106, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 1"; }
+      Label #ResearchNodefood1BonusText { Anchor: (Left: 452, Top: 226, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodefood1Icon { Anchor: (Left: 452, Top: 248, Width: 28, Height: 28); }
+      Label #ResearchNodefood1CostText { Anchor: (Left: 486, Top: 250, Width: 72, Height: 14); Style: @CostStyle; Text: "15x"; }
+      Label #ResearchNodefood1ItemText { Anchor: (Left: 486, Top: 265, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pain"; }
+      Label #ResearchNodefood1StateText { Anchor: (Left: 452, Top: 286, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodefood1Veil { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefood1 { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefood2Slot { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefood2Ready { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefood2Done { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefood2NameText { Anchor: (Left: 452, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 2"; }
+      Label #ResearchNodefood2BonusText { Anchor: (Left: 452, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodefood2Icon { Anchor: (Left: 452, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNodefood2CostText { Anchor: (Left: 486, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "150x"; }
+      Label #ResearchNodefood2ItemText { Anchor: (Left: 486, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pain"; }
+      Label #ResearchNodefood2StateText { Anchor: (Left: 452, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodefood2Veil { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefood2 { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefood3Slot { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefood3Ready { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefood3Done { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefood3NameText { Anchor: (Left: 612, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 3"; }
+      Label #ResearchNodefood3BonusText { Anchor: (Left: 612, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodefood3Icon { Anchor: (Left: 612, Top: 1148, Width: 28, Height: 28); }
+      Label #ResearchNodefood3CostText { Anchor: (Left: 646, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "1200x"; }
+      Label #ResearchNodefood3ItemText { Anchor: (Left: 646, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pain"; }
+      Label #ResearchNodefood3StateText { Anchor: (Left: 612, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodefood3Veil { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefood3 { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodepotion1Slot { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodepotion1Ready { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodepotion1Done { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodepotion1NameText { Anchor: (Left: 772, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Potion - Tier 1"; }
+      Label #ResearchNodepotion1BonusText { Anchor: (Left: 772, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodepotion1Icon { Anchor: (Left: 772, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNodepotion1CostText { Anchor: (Left: 806, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "15x"; }
+      Label #ResearchNodepotion1ItemText { Anchor: (Left: 806, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
+      Label #ResearchNodepotion1StateText { Anchor: (Left: 772, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodepotion1Veil { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodepotion1 { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodepotion2Slot { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodepotion2Ready { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodepotion2Done { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodepotion2NameText { Anchor: (Left: 612, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Potion - Tier 2"; }
+      Label #ResearchNodepotion2BonusText { Anchor: (Left: 612, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodepotion2Icon { Anchor: (Left: 612, Top: 608, Width: 28, Height: 28); }
+      Label #ResearchNodepotion2CostText { Anchor: (Left: 646, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "150x"; }
+      Label #ResearchNodepotion2ItemText { Anchor: (Left: 646, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
+      Label #ResearchNodepotion2StateText { Anchor: (Left: 612, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodepotion2Veil { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodepotion2 { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodepotion3Slot { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodepotion3Ready { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodepotion3Done { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodepotion3NameText { Anchor: (Left: 612, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Potion - Tier 3"; }
+      Label #ResearchNodepotion3BonusText { Anchor: (Left: 612, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodepotion3Icon { Anchor: (Left: 612, Top: 1328, Width: 28, Height: 28); }
+      Label #ResearchNodepotion3CostText { Anchor: (Left: 646, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "1200x"; }
+      Label #ResearchNodepotion3ItemText { Anchor: (Left: 646, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
+      Label #ResearchNodepotion3StateText { Anchor: (Left: 612, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodepotion3Veil { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodepotion3 { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodemetal1Slot { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodemetal1Ready { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodemetal1Done { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodemetal1NameText { Anchor: (Left: 452, Top: 388, Width: 106, Height: 16); Style: @NameStyle; Text: "Métal - Tier 1"; }
+      Label #ResearchNodemetal1BonusText { Anchor: (Left: 452, Top: 406, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodemetal1Icon { Anchor: (Left: 452, Top: 428, Width: 28, Height: 28); }
+      Label #ResearchNodemetal1CostText { Anchor: (Left: 486, Top: 430, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
+      Label #ResearchNodemetal1ItemText { Anchor: (Left: 486, Top: 445, Width: 72, Height: 13); Style: @ItemStyle; Text: "Fer"; }
+      Label #ResearchNodemetal1StateText { Anchor: (Left: 452, Top: 466, Width: 106, Height: 13); Style: @TimeStyle; Text: "30min"; }
+      Group #ResearchNodemetal1Veil { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodemetal1 { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodemetal2Slot { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodemetal2Ready { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodemetal2Done { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodemetal2NameText { Anchor: (Left: 612, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Métal - Tier 2"; }
+      Label #ResearchNodemetal2BonusText { Anchor: (Left: 612, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodemetal2Icon { Anchor: (Left: 612, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNodemetal2CostText { Anchor: (Left: 646, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
+      Label #ResearchNodemetal2ItemText { Anchor: (Left: 646, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Fer"; }
+      Label #ResearchNodemetal2StateText { Anchor: (Left: 612, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h30"; }
+      Group #ResearchNodemetal2Veil { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodemetal2 { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodemetal3Slot { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodemetal3Ready { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodemetal3Done { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodemetal3NameText { Anchor: (Left: 612, Top: 1468, Width: 106, Height: 16); Style: @NameStyle; Text: "Métal - Tier 3"; }
+      Label #ResearchNodemetal3BonusText { Anchor: (Left: 612, Top: 1486, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodemetal3Icon { Anchor: (Left: 612, Top: 1508, Width: 28, Height: 28); }
+      Label #ResearchNodemetal3CostText { Anchor: (Left: 646, Top: 1510, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
+      Label #ResearchNodemetal3ItemText { Anchor: (Left: 646, Top: 1525, Width: 72, Height: 13); Style: @ItemStyle; Text: "Fer"; }
+      Label #ResearchNodemetal3StateText { Anchor: (Left: 612, Top: 1546, Width: 106, Height: 13); Style: @TimeStyle; Text: "7h00"; }
+      Group #ResearchNodemetal3Veil { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodemetal3 { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeore1Slot { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeore1Ready { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeore1Done { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeore1NameText { Anchor: (Left: 772, Top: 208, Width: 106, Height: 16); Style: @NameStyle; Text: "Minerai - Tier 1"; }
+      Label #ResearchNodeore1BonusText { Anchor: (Left: 772, Top: 226, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodeore1Icon { Anchor: (Left: 772, Top: 248, Width: 28, Height: 28); }
+      Label #ResearchNodeore1CostText { Anchor: (Left: 806, Top: 250, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
+      Label #ResearchNodeore1ItemText { Anchor: (Left: 806, Top: 265, Width: 72, Height: 13); Style: @ItemStyle; Text: "Minerai de fer"; }
+      Label #ResearchNodeore1StateText { Anchor: (Left: 772, Top: 286, Width: 106, Height: 13); Style: @TimeStyle; Text: "30min"; }
+      Group #ResearchNodeore1Veil { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeore1 { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeore2Slot { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeore2Ready { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeore2Done { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeore2NameText { Anchor: (Left: 612, Top: 928, Width: 106, Height: 16); Style: @NameStyle; Text: "Minerai - Tier 2"; }
+      Label #ResearchNodeore2BonusText { Anchor: (Left: 612, Top: 946, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodeore2Icon { Anchor: (Left: 612, Top: 968, Width: 28, Height: 28); }
+      Label #ResearchNodeore2CostText { Anchor: (Left: 646, Top: 970, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
+      Label #ResearchNodeore2ItemText { Anchor: (Left: 646, Top: 985, Width: 72, Height: 13); Style: @ItemStyle; Text: "Minerai de fer"; }
+      Label #ResearchNodeore2StateText { Anchor: (Left: 612, Top: 1006, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h30"; }
+      Group #ResearchNodeore2Veil { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeore2 { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodeore3Slot { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeore3Ready { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeore3Done { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeore3NameText { Anchor: (Left: 772, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Minerai - Tier 3"; }
+      Label #ResearchNodeore3BonusText { Anchor: (Left: 772, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodeore3Icon { Anchor: (Left: 772, Top: 1148, Width: 28, Height: 28); }
+      Label #ResearchNodeore3CostText { Anchor: (Left: 806, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
+      Label #ResearchNodeore3ItemText { Anchor: (Left: 806, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Minerai de fer"; }
+      Label #ResearchNodeore3StateText { Anchor: (Left: 772, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "7h00"; }
+      Group #ResearchNodeore3Veil { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeore3 { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefurniture1Slot { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefurniture1Ready { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefurniture1Done { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefurniture1NameText { Anchor: (Left: 772, Top: 388, Width: 106, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 1"; }
+      Label #ResearchNodefurniture1BonusText { Anchor: (Left: 772, Top: 406, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodefurniture1Icon { Anchor: (Left: 772, Top: 428, Width: 28, Height: 28); }
+      Label #ResearchNodefurniture1CostText { Anchor: (Left: 806, Top: 430, Width: 72, Height: 14); Style: @CostStyle; Text: "20x"; }
+      Label #ResearchNodefurniture1ItemText { Anchor: (Left: 806, Top: 445, Width: 72, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
+      Label #ResearchNodefurniture1StateText { Anchor: (Left: 772, Top: 466, Width: 106, Height: 13); Style: @TimeStyle; Text: "30min"; }
+      Group #ResearchNodefurniture1Veil { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefurniture1 { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefurniture2Slot { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefurniture2Ready { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefurniture2Done { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefurniture2NameText { Anchor: (Left: 772, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 2"; }
+      Label #ResearchNodefurniture2BonusText { Anchor: (Left: 772, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodefurniture2Icon { Anchor: (Left: 772, Top: 608, Width: 28, Height: 28); }
+      Label #ResearchNodefurniture2CostText { Anchor: (Left: 806, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "200x"; }
+      Label #ResearchNodefurniture2ItemText { Anchor: (Left: 806, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
+      Label #ResearchNodefurniture2StateText { Anchor: (Left: 772, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h30"; }
+      Group #ResearchNodefurniture2Veil { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefurniture2 { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNodefurniture3Slot { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefurniture3Ready { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefurniture3Done { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefurniture3NameText { Anchor: (Left: 772, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 3"; }
+      Label #ResearchNodefurniture3BonusText { Anchor: (Left: 772, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodefurniture3Icon { Anchor: (Left: 772, Top: 1328, Width: 28, Height: 28); }
+      Label #ResearchNodefurniture3CostText { Anchor: (Left: 806, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "1600x"; }
+      Label #ResearchNodefurniture3ItemText { Anchor: (Left: 806, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
+      Label #ResearchNodefurniture3StateText { Anchor: (Left: 772, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "7h00"; }
+      Group #ResearchNodefurniture3Veil { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefurniture3 { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNoderesources1Slot { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderesources1Ready { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderesources1Done { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderesources1NameText { Anchor: (Left: 612, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Ressources - Tier 1"; }
+      Label #ResearchNoderesources1BonusText { Anchor: (Left: 612, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNoderesources1Icon { Anchor: (Left: 612, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNoderesources1CostText { Anchor: (Left: 646, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
+      Label #ResearchNoderesources1ItemText { Anchor: (Left: 646, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Diamant"; }
+      Label #ResearchNoderesources1StateText { Anchor: (Left: 612, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h00"; }
+      Group #ResearchNoderesources1Veil { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderesources1 { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNoderesources2Slot { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderesources2Ready { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderesources2Done { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderesources2NameText { Anchor: (Left: 772, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Ressources - Tier 2"; }
+      Label #ResearchNoderesources2BonusText { Anchor: (Left: 772, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNoderesources2Icon { Anchor: (Left: 772, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNoderesources2CostText { Anchor: (Left: 806, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
+      Label #ResearchNoderesources2ItemText { Anchor: (Left: 806, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Diamant"; }
+      Label #ResearchNoderesources2StateText { Anchor: (Left: 772, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "4h00"; }
+      Group #ResearchNoderesources2Veil { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderesources2 { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      Group #ResearchNoderesources3Slot { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderesources3Ready { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderesources3Done { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderesources3NameText { Anchor: (Left: 772, Top: 1468, Width: 106, Height: 16); Style: @NameStyle; Text: "Ressources - Tier 3"; }
+      Label #ResearchNoderesources3BonusText { Anchor: (Left: 772, Top: 1486, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNoderesources3Icon { Anchor: (Left: 772, Top: 1508, Width: 28, Height: 28); }
+      Label #ResearchNoderesources3CostText { Anchor: (Left: 806, Top: 1510, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
+      Label #ResearchNoderesources3ItemText { Anchor: (Left: 806, Top: 1525, Width: 72, Height: 13); Style: @ItemStyle; Text: "Diamant"; }
+      Label #ResearchNoderesources3StateText { Anchor: (Left: 772, Top: 1546, Width: 106, Height: 13); Style: @TimeStyle; Text: "8h00"; }
+      Group #ResearchNoderesources3Veil { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderesources3 { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+
+      }
+    }
+  }
+}

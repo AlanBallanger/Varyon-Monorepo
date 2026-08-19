@@ -1,10 +1,10 @@
 {
   "Group": "fr.varyon.mixinagent",
   "Name": "Mixin-Varyon-StackSize",
-  "Version": "0.1.0",
+  "Version": "0.2.0",
   "ServerVersion": ">=0.5.0 <0.6.0",
   "Authors": [{"Name": "Varyon Team"}],
-  "Description": "Early plugin (ASM class transformer) — stack max par permission pour Wood_Ash_Trunk (100 -> 200 avec varyon.stack.wood_ash_trunk.200).",
+  "Description": "Early plugin (ASM class transformer) — stack max par permission et par catégorie d'items (varyon.stack.<all|categorie>.tier{1,2,3} = x1.25/x1.5/x2).",
   "Website": "",
   "IncludesAssetPack": false,
   "Dependencies": {},
