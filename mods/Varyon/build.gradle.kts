@@ -57,6 +57,9 @@ val fatJar = tasks.register<Zip>("fatJar") {
     from({
         implementationJars.map { zipTree(it) }
     })
+
+    // sqlite-jdbc bundles native libs for every OS/arch; the server only runs on Linux x86_64.
+    exclude { it.path.startsWith("org/sqlite/native/") && !it.path.startsWith("org/sqlite/native/Linux/x86_64/") }
 }
 
 // Le plugin hytale-mod force destinationDirectory des taches d'archive vers build/output a la
