@@ -131,6 +131,8 @@ public final class ProfessionManager extends AbstractPlayerManager<PlayerAccount
         lock.lock();
         try {
             PlayerAccount acc = getOrLoad(uuid);
+            Profession oldSlot0 = acc.getActiveSlot0();
+            Profession oldSlot1 = acc.getActiveSlot1();
             for (Profession p : Profession.values()) {
                 acc.getProgress(p).setLevel(1, 0L);
                 acc.resetTalents(p);
@@ -139,6 +141,8 @@ public final class ProfessionManager extends AbstractPlayerManager<PlayerAccount
             acc.setActiveSlot1(Profession.FERMIER);
             acc.setLastReconvertAt(0L);
             dirty.add(uuid);
+            JobPermissionSync.syncJob(uuid, oldSlot0, Profession.MINEUR);
+            JobPermissionSync.syncJob(uuid, oldSlot1, Profession.FERMIER);
         } finally {
             lock.unlock();
         }
@@ -211,6 +215,7 @@ public final class ProfessionManager extends AbstractPlayerManager<PlayerAccount
             else                acc.setActiveSlot1(newProfession);
             acc.setLastReconvertAt(now);
             dirty.add(uuid);
+            JobPermissionSync.syncJob(uuid, current, newProfession);
             ProfessionXpHud.refreshIfPresent(uuid);
             return ReconvertResult.SUCCESS;
         } finally {

@@ -443,7 +443,17 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 PlayerRef ref = event.getHolder().getComponent(PlayerRef.getComponentType());
                 if (player == null || ref == null || professionManager == null) return;
                 professionManager.ensureAccount(ref.getUuid(), ref.getUsername());
-                if (classManager != null) classManager.ensureAccount(ref.getUuid(), ref.getUsername());
+                PlayerAccount profAcc = professionManager.getAccount(ref.getUuid());
+                if (profAcc != null) {
+                    fr.varyon.vrpg.rpg.JobPermissionSync.resyncJobs(ref.getUuid(), profAcc.getActiveSlot0(), profAcc.getActiveSlot1());
+                }
+                if (classManager != null) {
+                    classManager.ensureAccount(ref.getUuid(), ref.getUsername());
+                    fr.varyon.vrpg.classes.ClassAccount classAcc = classManager.getAccount(ref.getUuid());
+                    if (classAcc != null) {
+                        fr.varyon.vrpg.rpg.JobPermissionSync.resyncClass(ref.getUuid(), classAcc.getActiveClass());
+                    }
+                }
                 if (uiPreferencesManager != null) uiPreferencesManager.ensureLoaded(ref.getUuid());
                 pendingProfessionHudInit.put(ref.getUuid(), ref);
             });

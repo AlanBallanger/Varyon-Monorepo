@@ -165,8 +165,11 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         ReentrantLock lock = lockFor(uuid);
         lock.lock();
         try {
-            getOrLoad(uuid).setActiveClass(playerClass);
+            ClassAccount acc = getOrLoad(uuid);
+            PlayerClass previous = acc.getActiveClass();
+            acc.setActiveClass(playerClass);
             dirty.add(uuid);
+            fr.varyon.vrpg.rpg.JobPermissionSync.syncClass(uuid, previous, playerClass);
         } finally {
             lock.unlock();
         }
@@ -260,6 +263,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         lock.lock();
         try {
             ClassAccount acc = getOrLoad(uuid);
+            PlayerClass previous = acc.getActiveClass();
             for (PlayerClass c : PlayerClass.values()) {
                 acc.getProgress(c).setLevel(1, 0L);
                 acc.getProgress(c).setActiveSpec(null);
@@ -267,6 +271,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
                 acc.getSkillSlots(c).clear();
             }
             acc.setActiveClass(null);
+            fr.varyon.vrpg.rpg.JobPermissionSync.syncClass(uuid, previous, null);
             for (ClassProfile profile : acc.getProfiles()) {
                 profile.setActiveClass(null);
                 for (PlayerClass c : PlayerClass.values()) {
@@ -287,6 +292,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         lock.lock();
         try {
             ClassAccount acc = getOrLoad(uuid);
+            PlayerClass previous = acc.getActiveClass();
             ClassProfile profile = acc.getProfiles()[profileIndex];
             profile.setActiveClass(null);
             for (PlayerClass c : PlayerClass.values()) {
@@ -297,6 +303,7 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
             }
             if (profileIndex == acc.getActiveProfileIndex()) {
                 profile.applyTo(acc);
+                fr.varyon.vrpg.rpg.JobPermissionSync.syncClass(uuid, previous, acc.getActiveClass());
             }
             dirty.add(uuid);
         } finally {
@@ -308,8 +315,11 @@ public final class ClassManager extends AbstractPlayerManager<ClassAccount, Play
         ReentrantLock lock = lockFor(uuid);
         lock.lock();
         try {
-            getOrLoad(uuid).switchProfile(profileIndex);
+            ClassAccount acc = getOrLoad(uuid);
+            PlayerClass previous = acc.getActiveClass();
+            acc.switchProfile(profileIndex);
             dirty.add(uuid);
+            fr.varyon.vrpg.rpg.JobPermissionSync.syncClass(uuid, previous, acc.getActiveClass());
         } finally {
             lock.unlock();
         }
