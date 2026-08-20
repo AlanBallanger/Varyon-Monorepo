@@ -1,0 +1,124 @@
+{
+  "QuestlineId": "mineur_collectes",
+  "QuestlineTitle": "Contrats du Mineur",
+  "Title": "Cargaison d'adamantite",
+  "Requirements": [],
+  "Actions": [],
+  "Repeatable": false,
+  "Pages": [
+    "mineur_adamantite_completed",
+    "mineur_adamantite_turnin",
+    "mineur_adamantite_progress",
+    "mineur_adamantite_intro"
+  ],
+  "PageData": {
+    "mineur_adamantite_completed": {
+      "Title": "Cargaison livrée",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "questCompleted:mineur_collecte_adamantite"
+      ],
+      "Dialog": "L'adamantite a déjà été livrée. Reviens quand tu en auras rassemblé une nouvelle cargaison.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_adamantite_turnin": {
+      "Title": "Une cargaison complète",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questStarted:mineur_collecte_adamantite",
+        "item:Ore_Adamantite:100"
+      ],
+      "Objectives": [
+        "item:Ore_Adamantite:100::Adamantite brute"
+      ],
+      "Dialog": "100 minerais d'adamantite. Le compte est bon. Pose ça sur l'établi, je m'occupe du reste.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "Voilà ta cargaison.",
+          "Requirements": [
+            "item:Ore_Adamantite:100:true"
+          ],
+          "Actions": [
+            "completequest:mineur_collecte_adamantite"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_adamantite_progress": {
+      "Title": "Encore un peu d'adamantite",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questStarted:mineur_collecte_adamantite",
+        "not:item:Ore_Adamantite:100"
+      ],
+      "Objectives": [
+        "item:Ore_Adamantite:100::Adamantite brute"
+      ],
+      "Dialog": "Tu as {item:Ore_Adamantite} minerais d'adamantite sur les 100 demandés. Continue de creuser, ça viendra.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_adamantite_intro": {
+      "Title": "Une commande d'adamantite",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questNotStarted:mineur_collecte_adamantite"
+      ],
+      "Dialog": "Ah, un mineur. On a besoin d'adamantite, ce n'est pas rien à demander. Rapporte-moi 100 minerais d'adamantite et je te paierai correctement.",
+      "GoalText": "Rassembler 100 minerais d'adamantite",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "C'est comme si c'était fait.",
+          "Requirements": [
+            "questNotStarted:mineur_collecte_adamantite"
+          ],
+          "Actions": [
+            "startquest:mineur_collecte_adamantite"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    }
+  }
+}

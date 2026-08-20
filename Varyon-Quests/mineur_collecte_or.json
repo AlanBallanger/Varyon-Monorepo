@@ -1,0 +1,124 @@
+{
+  "QuestlineId": "mineur_collectes",
+  "QuestlineTitle": "Contrats du Mineur",
+  "Title": "Cargaison d'or",
+  "Requirements": [],
+  "Actions": [],
+  "Repeatable": false,
+  "Pages": [
+    "mineur_or_completed",
+    "mineur_or_turnin",
+    "mineur_or_progress",
+    "mineur_or_intro"
+  ],
+  "PageData": {
+    "mineur_or_completed": {
+      "Title": "Cargaison livrée",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "questCompleted:mineur_collecte_or"
+      ],
+      "Dialog": "L'or a déjà été livré. Reviens quand tu en auras rassemblé une nouvelle cargaison.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_or_turnin": {
+      "Title": "Une cargaison complète",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questStarted:mineur_collecte_or",
+        "item:Ore_Gold:100"
+      ],
+      "Objectives": [
+        "item:Ore_Gold:100::Or brut"
+      ],
+      "Dialog": "100 minerais d'or. Le compte est bon. Pose ça sur l'établi, je m'occupe du reste.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "Voilà ta cargaison.",
+          "Requirements": [
+            "item:Ore_Gold:100:true"
+          ],
+          "Actions": [
+            "completequest:mineur_collecte_or"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_or_progress": {
+      "Title": "Encore un peu d'or",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questStarted:mineur_collecte_or",
+        "not:item:Ore_Gold:100"
+      ],
+      "Objectives": [
+        "item:Ore_Gold:100::Or brut"
+      ],
+      "Dialog": "Tu as {item:Ore_Gold} minerais d'or sur les 100 demandés. Continue de creuser, ça viendra.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_or_intro": {
+      "Title": "Une commande d'or",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questNotStarted:mineur_collecte_or"
+      ],
+      "Dialog": "Ah, un mineur. On a besoin d'or, beaucoup d'or. Rapporte-moi 100 minerais d'or et je te paierai correctement.",
+      "GoalText": "Rassembler 100 minerais d'or",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "C'est comme si c'était fait.",
+          "Requirements": [
+            "questNotStarted:mineur_collecte_or"
+          ],
+          "Actions": [
+            "startquest:mineur_collecte_or"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    }
+  }
+}

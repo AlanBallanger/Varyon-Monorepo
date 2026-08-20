@@ -1,0 +1,124 @@
+{
+  "QuestlineId": "mineur_collectes",
+  "QuestlineTitle": "Contrats du Mineur",
+  "Title": "Cargaison de fer",
+  "Requirements": [],
+  "Actions": [],
+  "Repeatable": false,
+  "Pages": [
+    "mineur_fer_completed",
+    "mineur_fer_turnin",
+    "mineur_fer_progress",
+    "mineur_fer_intro"
+  ],
+  "PageData": {
+    "mineur_fer_completed": {
+      "Title": "Cargaison livrée",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "questCompleted:mineur_collecte_fer"
+      ],
+      "Dialog": "Le fer a déjà été livré. Reviens quand tu en auras rassemblé une nouvelle cargaison.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_fer_turnin": {
+      "Title": "Une cargaison complète",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questStarted:mineur_collecte_fer",
+        "item:Ore_Iron:100"
+      ],
+      "Objectives": [
+        "item:Ore_Iron:100::Fer brut"
+      ],
+      "Dialog": "100 minerais de fer. Le compte est bon. Pose ça sur l'établi, je m'occupe du reste.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "Voilà ta cargaison.",
+          "Requirements": [
+            "item:Ore_Iron:100:true"
+          ],
+          "Actions": [
+            "completequest:mineur_collecte_fer"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_fer_progress": {
+      "Title": "Encore un peu de fer",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questStarted:mineur_collecte_fer",
+        "not:item:Ore_Iron:100"
+      ],
+      "Objectives": [
+        "item:Ore_Iron:100::Fer brut"
+      ],
+      "Dialog": "Tu as {item:Ore_Iron} minerais de fer sur les 100 demandés. Continue de creuser, ça viendra.",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    },
+    "mineur_fer_intro": {
+      "Title": "Une commande de fer",
+      "Name": "{b}Mineur de Fraktale",
+      "Requirements": [
+        "permission:has:vrpg.job.mineur",
+        "questNotStarted:mineur_collecte_fer"
+      ],
+      "Dialog": "Ah, un mineur. On a besoin de fer, beaucoup de fer. Rapporte-moi 100 minerais de fer et je te paierai correctement.",
+      "GoalText": "Rassembler 100 minerais de fer",
+      "DialogWidth": "Mid",
+      "Responses": [
+        {
+          "Text": "C'est comme si c'était fait.",
+          "Requirements": [
+            "questNotStarted:mineur_collecte_fer"
+          ],
+          "Actions": [
+            "startquest:mineur_collecte_fer"
+          ],
+          "Color": "E5BB32",
+          "TextColor": "#ffffff",
+          "Icon": "Icons_Exclamation",
+          "IconSide": "right",
+          "BackgroundOpacity": 50
+        },
+        {
+          "Text": "{i}Fermer le dialogue",
+          "Actions": [],
+          "Icon": "Icons_RedX",
+          "IconSide": "right"
+        }
+      ]
+    }
+  }
+}
