@@ -46,4 +46,6 @@ include(
     ":mods:Varyon-Quiver",
     ":mods:Varyon-Shop",
     ":mods:Varyon-Dummy",
+    ":mods:Mixin-Varyon-StackSize",
+    ":mods:Varyon-StackTiers",
 )
