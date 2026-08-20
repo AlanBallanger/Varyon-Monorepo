@@ -16,9 +16,7 @@ public final class ResearchLabels {
             Map.entry("food", "Nourriture"),
             Map.entry("potion", "Potion"),
             Map.entry("metal", "Métal"),
-            Map.entry("ore", "Minerai"),
-            Map.entry("furniture", "Mobilier"),
-            Map.entry("resources", "Ressources")
+            Map.entry("furniture", "Mobilier")
     );
 
     /** Nom français de la catégorie, ou le slug brut si non traduit. */

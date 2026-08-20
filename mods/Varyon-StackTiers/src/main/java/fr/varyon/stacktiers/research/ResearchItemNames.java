@@ -14,17 +14,15 @@ public final class ResearchItemNames {
             "Soil_Dirt", "Terre",
             "Plant_Crop_Carrot_Item", "Carotte",
             "Cloth_Block_Wool_Black", "Laine",
-            "Metal_Iron", "Fer",
+            "Ingredient_Bar_Iron", "Lingot de fer",
             "Fish_Catfish_Item", "Poisson-chat",
             "Food_Bread", "Pain",
-            "Potion_Health", "Potion de vie",
-            "Ore_Iron", "Minerai de fer"
+            "Potion_Health", "Potion de vie"
     );
 
     private static final Map<String, String> EXTRA = Map.of(
             "Furniture_Ancient_Chest_Small", "Coffre ancien",
-            "Ingredient_Crystal_Blue", "Cristal bleu",
-            "Rock_Gem_Diamond", "Diamant"
+            "Ingredient_Crystal_Blue", "Cristal bleu"
     );
 
     /** Nom lisible de l'item, ou l'identifiant brut si aucun libellé n'est défini. */

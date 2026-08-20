@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * Persistance JSON de l'état de recherche de tous les joueurs (un seul fichier pour tout le
@@ -23,6 +24,7 @@ import java.util.UUID;
  * absolus, versionné pour permettre une migration future du format.
  */
 public final class ResearchFileStorage {
+    private static final Logger LOGGER = Logger.getLogger("Varyon-StackTiers");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final int PERSISTENCE_VERSION = 1;
 
@@ -35,12 +37,17 @@ public final class ResearchFileStorage {
     public synchronized Map<UUID, PlayerResearchState> load() {
         Map<UUID, PlayerResearchState> result = new HashMap<>();
         if (!Files.exists(file)) {
+            LOGGER.info(file + " n'existe pas encore — aucun état de recherche à charger (normal au tout premier démarrage).");
             return result;
         }
         try {
             String json = Files.readString(file, StandardCharsets.UTF_8);
             PersistedState persisted = GSON.fromJson(json, PersistedState.class);
             if (persisted == null || persisted.players == null) {
+                LOGGER.severe(file + " existe (" + json.length() + " caractères) mais n'a pas pu être "
+                        + "interprété comme un état de recherche valide (players null/absent) — "
+                        + "tout l'état de recherche de tous les joueurs sera reparti à zéro. "
+                        + "Contenu brut : " + (json.length() > 500 ? json.substring(0, 500) + "..." : json));
                 return result;
             }
             for (Map.Entry<String, PersistedPlayerRow> entry : persisted.players.entrySet()) {
@@ -60,6 +67,7 @@ public final class ResearchFileStorage {
                 state.completionEpochMs = row.completionEpochMs;
                 result.put(uuid, state);
             }
+            LOGGER.info("Chargé l'état de recherche de " + result.size() + " joueur(s) depuis " + file);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load " + file, e);
         }

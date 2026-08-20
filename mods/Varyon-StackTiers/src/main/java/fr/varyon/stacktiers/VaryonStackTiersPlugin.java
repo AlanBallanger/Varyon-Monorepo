@@ -1,9 +1,11 @@
 package fr.varyon.stacktiers;
 
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.server.OpenCustomUIInteraction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 
+import fr.varyon.stacktiers.bench.StackTiersBenchPageSupplier;
 import fr.varyon.stacktiers.command.VaryonResearchCommand;
 import fr.varyon.stacktiers.command.VaryonStackCommand;
 import fr.varyon.stacktiers.research.PlayerResearchState;
@@ -16,7 +18,6 @@ public class VaryonStackTiersPlugin extends JavaPlugin {
     private static final Logger LOGGER = Logger.getLogger("Varyon-StackTiers");
 
     private static VaryonStackTiersPlugin staticInstance;
-    private PlayerTierStore tierStore;
     private ResearchManager researchManager;
 
     public VaryonStackTiersPlugin(JavaPluginInit init) {
@@ -26,15 +27,16 @@ public class VaryonStackTiersPlugin extends JavaPlugin {
     @Override
     protected void setup() {
         staticInstance = this;
-        tierStore = new PlayerTierStore(this.getDataDirectory());
-        tierStore.loadFromDisk();
 
-        researchManager = new ResearchManager(tierStore, this.getDataDirectory());
+        researchManager = new ResearchManager(this.getDataDirectory());
         researchManager.loadFromDisk();
         researchManager.start();
 
-        this.getCommandRegistry().registerCommand(new VaryonStackCommand(tierStore, researchManager));
+        this.getCommandRegistry().registerCommand(new VaryonStackCommand(researchManager));
         this.getCommandRegistry().registerCommand(new VaryonResearchCommand(researchManager));
+
+        this.getCodecRegistry(OpenCustomUIInteraction.PAGE_CODEC)
+                .register("StackTiersBench", StackTiersBenchPageSupplier.class, StackTiersBenchPageSupplier.CODEC);
 
         this.getEventRegistry().registerGlobal(PlayerConnectEvent.class, this::onPlayerConnect);
     }
@@ -54,8 +56,6 @@ public class VaryonStackTiersPlugin extends JavaPlugin {
 
     @Override
     protected void shutdown() {
-        // tierStore persiste déjà au fil de l'eau (set/remove) ; researchManager doit
-        // flusher son état + arrêter son exécuteur planifié.
         if (researchManager != null) {
             researchManager.shutdown();
         }
@@ -66,10 +66,6 @@ public class VaryonStackTiersPlugin extends JavaPlugin {
     }
 
     /** Exposé pour une future UI (varyon-UI) qui voudrait lire/écrire les paliers d'un joueur. */
-    public PlayerTierStore getTierStore() {
-        return tierStore;
-    }
-
     public ResearchManager getResearchManager() {
         return researchManager;
     }

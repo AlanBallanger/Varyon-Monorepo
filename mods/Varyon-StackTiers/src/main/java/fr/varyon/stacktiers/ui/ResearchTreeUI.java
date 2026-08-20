@@ -34,39 +34,59 @@ import java.util.UUID;
  * Page de l'arbre de recherche : 39 nœuds, un bouton par nœud disponible pour lancer une
  * recherche. Countdown affiché en direct — voir ResearchTickSystem qui rappelle sendUpdate()
  * périodiquement pour les joueurs ayant cette page ouverte.
+ *
+ * L'arbre affiché/modifié est celui de {@code targetUuid} (par défaut le joueur qui a ouvert la
+ * page — voir le constructeur à un seul PlayerRef) ; {@code playerRef} reste le joueur devant
+ * l'écran, à qui les messages sont envoyés et dont on vérifie la permission admin. Les deux
+ * diffèrent en mode consultation admin (/varyonstack view &lt;joueur&gt;) : un admin peut ouvrir
+ * l'arbre d'un autre joueur pour le consulter ou l'éditer.
+ *
+ * Mode admin : si le joueur devant l'écran a la permission varyon.stacktiers.admin, cliquer sur
+ * un nœud disponible le complète instantanément (équivalent de /varyonstack set) au lieu de
+ * lancer une recherche normale — sans consommer de ressources ni attendre, que ce soit dans son
+ * propre arbre ou celui d'un autre joueur consulté.
  */
 public final class ResearchTreeUI extends InteractiveCustomUIPage<ResearchTreeUI.Data> {
+    private static final String ADMIN_PERMISSION = "varyon.stacktiers.admin";
+
     private final PlayerRef playerRef;
+    private final UUID targetUuid;
     private final ResearchManager researchManager;
+    private final boolean adminMode;
 
     public ResearchTreeUI(@Nonnull PlayerRef playerRef, @Nonnull ResearchManager researchManager) {
+        this(playerRef, playerRef.getUuid(), researchManager);
+    }
+
+    /** Ouvre l'arbre de targetUuid pour playerRef (mode consultation/édition admin si différents). */
+    public ResearchTreeUI(@Nonnull PlayerRef playerRef, @Nonnull UUID targetUuid, @Nonnull ResearchManager researchManager) {
         super(playerRef, CustomPageLifetime.CanDismiss, Data.CODEC);
         this.playerRef = playerRef;
+        this.targetUuid = targetUuid;
         this.researchManager = researchManager;
+        this.adminMode = playerRef.hasPermission(ADMIN_PERMISSION, false);
     }
 
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder uiBuilder,
                        @Nonnull UIEventBuilder eventBuilder, @Nonnull Store<EntityStore> store) {
-        UUID uuid = playerRef.getUuid();
-        researchManager.resolveIfDue(uuid, researchManager.snapshot(uuid), System.currentTimeMillis());
-        PlayerResearchState state = researchManager.snapshot(uuid);
+        researchManager.resolveIfDue(targetUuid, researchManager.snapshot(targetUuid), System.currentTimeMillis());
+        PlayerResearchState state = researchManager.snapshot(targetUuid);
 
         uiBuilder.append("ResearchTreePage.ui");
         applyNodeState(uiBuilder, eventBuilder, state);
-        researchManager.registerOpenPage(uuid, this);
+        researchManager.registerOpenPage(targetUuid, this);
     }
 
     @Override
     public void onDismiss(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
-        researchManager.unregisterOpenPage(playerRef.getUuid());
+        researchManager.unregisterOpenPage(targetUuid);
     }
 
     /** Rafraîchit uniquement l'état visuel des nœuds (countdown live) sans reconstruire toute la page. */
     public void refreshNodeState() {
-        UUID uuid = playerRef.getUuid();
-        researchManager.resolveIfDue(uuid, researchManager.snapshot(uuid), System.currentTimeMillis());
-        PlayerResearchState state = researchManager.snapshot(uuid);
+        researchManager.resolveIfDue(targetUuid, researchManager.snapshot(targetUuid), System.currentTimeMillis());
+        PlayerResearchState state = researchManager.snapshot(targetUuid);
 
         UICommandBuilder cmd = new UICommandBuilder();
         applyNodeState(cmd, null, state);
@@ -144,22 +164,45 @@ public final class ResearchTreeUI extends InteractiveCustomUIPage<ResearchTreeUI
         if (data.action == null) {
             return;
         }
-        if ("start".equals(data.action) && data.node != null) {
-            Player player = store.getComponent(ref, Player.getComponentType());
-            if (player == null) {
-                return;
-            }
-            ItemContainer storageC = InventoryCompat.getStorageContainer(player);
-            ItemContainer hotbarC = InventoryCompat.getHotbarContainer(player);
-            ResearchManager.Eligibility result = researchManager.startResearch(playerRef.getUuid(), data.node, storageC, hotbarC);
-            if (result == ResearchManager.Eligibility.OK) {
-                rebuild();
-            } else {
-                ResearchNode node = ResearchTree.byId(data.node);
-                playerRef.sendMessage(
-                        Message.raw(messageFor(result, node, storageC, hotbarC)).color(Color.RED));
-            }
+        if (!"start".equals(data.action) || data.node == null) {
+            return;
         }
+        if (adminMode) {
+            grantInstantly(data.node);
+            return;
+        }
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player == null) {
+            return;
+        }
+        ItemContainer storageC = InventoryCompat.getStorageContainer(player);
+        ItemContainer hotbarC = InventoryCompat.getHotbarContainer(player);
+        ResearchManager.Eligibility result = researchManager.startResearch(targetUuid, data.node, storageC, hotbarC);
+        if (result == ResearchManager.Eligibility.OK) {
+            rebuild();
+        } else {
+            ResearchNode node = ResearchTree.byId(data.node);
+            playerRef.sendMessage(
+                    Message.raw(messageFor(result, node, storageC, hotbarC)).color(Color.RED));
+        }
+    }
+
+    /** Complète le nœud instantanément (équivalent /varyonstack set) — mode admin uniquement, aucune ressource ni délai. */
+    private void grantInstantly(String nodeId) {
+        ResearchNode node = ResearchTree.byId(nodeId);
+        if (node == null) {
+            return;
+        }
+        PlayerResearchState state = researchManager.snapshot(targetUuid);
+        if (state.completedNodeIds.contains(nodeId)) {
+            return;
+        }
+        if (!ResearchTree.isUnlockable(node, state.completedNodeIds)) {
+            playerRef.sendMessage(Message.raw(missingPrerequisitesMessage(node)).color(Color.RED));
+            return;
+        }
+        researchManager.setTier(targetUuid, node.category(), node.tier());
+        rebuild();
     }
 
     private String messageFor(ResearchManager.Eligibility result, ResearchNode node,
@@ -190,7 +233,7 @@ public final class ResearchTreeUI extends InteractiveCustomUIPage<ResearchTreeUI
         if (node == null) {
             return "Recherche verrouillée.";
         }
-        PlayerResearchState state = researchManager.snapshot(playerRef.getUuid());
+        PlayerResearchState state = researchManager.snapshot(targetUuid);
         List<String> missing = ResearchTree.missingPrerequisites(node, state.completedNodeIds);
         if (missing.isEmpty()) {
             return "Recherche verrouillée.";

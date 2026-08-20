@@ -1,0 +1,71 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Stacks_CraftingBench.name",
+    "Description": "server.items.Stacks_CraftingBench.description"
+  },
+  "PlayerAnimationsId": "Block",
+  "IconProperties": {
+    "Scale": 0.42,
+    "Rotation": [
+      22.5,
+      45.0,
+      22.5
+    ],
+    "Translation": [
+      12.9,
+      -11.7
+    ]
+  },
+  "MaxStack": 1,
+  "ItemLevel": 1,
+  "ItemSoundSetId": "ISS_Blocks_Wood",
+  "Categories": [
+    "Furniture.Benches"
+  ],
+  "Tags": {
+    "Type": [
+      "Bench"
+    ]
+  },
+  "BlockType": {
+    "Material": "Solid",
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Items/Bench/Stacks.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Items/Bench/Stacks.png",
+        "Weight": 1
+      }
+    ],
+    "HitboxType": "Stacks_CraftingBench",
+    "VariantRotation": "NESW",
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Benches"
+      }
+    },
+    "BlockSoundSetId": "Wood",
+    "PhysicalMaterialId": "Wood",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "OpenCustomUI",
+            "Page": {
+              "Id": "StackTiersBench"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Icon": "Icons/ItemsGenerated/Stacks_CraftingBench.png"
+}

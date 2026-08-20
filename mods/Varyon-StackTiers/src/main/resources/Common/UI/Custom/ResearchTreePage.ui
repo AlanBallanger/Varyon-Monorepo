@@ -1,6 +1,6 @@
 $C = "Common.ui";
 
-@PageWidth = 1000;
+@PageWidth = 1040;
 @PageHeight = 740;
 
 @Ink = #E8DCC8;
@@ -50,7 +50,7 @@ Group {
       LayoutMode: TopScrolling;
       ScrollbarStyle: $C.@DefaultScrollbarStyle;
 
-      Group #ResearchTreeCanvas { Anchor: (Width: 910, Height: 1640); LayoutMode: Full;
+      Group #ResearchTreeCanvas { Anchor: (Width: 920, Height: 2180); LayoutMode: Full;
 
       Group #ResearchEdgeSeg0 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
       Group #ResearchEdgeSeg1 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
@@ -373,485 +373,413 @@ Group {
       Group #ResearchEdgeSeg318 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
       Group #ResearchEdgeSeg319 { Anchor: (Left: 0, Top: 0, Width: 3, Height: 3); Background: @Rail; Visible: false; }
 
-      Group #ResearchSidebarTier1 { Anchor: (Left: 0, Top: 20, Width: 100, Height: 540); Background: @SidebarBg; LayoutMode: Middle;
+      Group #ResearchSidebarTier1 { Anchor: (Left: 0, Top: 20, Width: 100, Height: 720); Background: @SidebarBg; LayoutMode: Middle;
         Label #ResearchSidebarTier1Text { Anchor: (Width: 88, Height: 20); Style: @TierStyle; Text: "Palier 1"; }
       }
-      Group #ResearchSidebarSep1 { Anchor: (Left: 0, Top: 559, Width: 100, Height: 2); Background: @SidebarLine; }
-      Group #ResearchSidebarTier2 { Anchor: (Left: 0, Top: 560, Width: 100, Height: 540); Background: @SidebarBg; LayoutMode: Middle;
+      Group #ResearchSidebarSep1 { Anchor: (Left: 0, Top: 739, Width: 100, Height: 2); Background: @SidebarLine; }
+      Group #ResearchSidebarTier2 { Anchor: (Left: 0, Top: 740, Width: 100, Height: 720); Background: @SidebarBg; LayoutMode: Middle;
         Label #ResearchSidebarTier2Text { Anchor: (Width: 88, Height: 20); Style: @TierStyle; Text: "Palier 2"; }
       }
-      Group #ResearchSidebarSep2 { Anchor: (Left: 0, Top: 1099, Width: 100, Height: 2); Background: @SidebarLine; }
-      Group #ResearchSidebarTier3 { Anchor: (Left: 0, Top: 1100, Width: 100, Height: 540); Background: @SidebarBg; LayoutMode: Middle;
+      Group #ResearchSidebarSep2 { Anchor: (Left: 0, Top: 1459, Width: 100, Height: 2); Background: @SidebarLine; }
+      Group #ResearchSidebarTier3 { Anchor: (Left: 0, Top: 1460, Width: 100, Height: 720); Background: @SidebarBg; LayoutMode: Middle;
         Label #ResearchSidebarTier3Text { Anchor: (Width: 88, Height: 20); Style: @TierStyle; Text: "Palier 3"; }
       }
 
-      Group #ResearchNodesoil1Slot { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodesoil1Ready { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodesoil1Done { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodesoil1NameText { Anchor: (Left: 132, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Terre - Tier 1"; }
-      Label #ResearchNodesoil1BonusText { Anchor: (Left: 132, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodesoil1Icon { Anchor: (Left: 132, Top: 68, Width: 28, Height: 28); }
-      Label #ResearchNodesoil1CostText { Anchor: (Left: 166, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "500x"; }
-      Label #ResearchNodesoil1ItemText { Anchor: (Left: 166, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Terre"; }
-      Label #ResearchNodesoil1StateText { Anchor: (Left: 132, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "10min"; }
-      Group #ResearchNodesoil1Veil { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodesoil1 { Anchor: (Left: 120, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodesoil1Slot { Anchor: (Left: 130, Top: 200, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodesoil1Ready { Anchor: (Left: 130, Top: 200, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodesoil1Done { Anchor: (Left: 130, Top: 200, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodesoil1NameText { Anchor: (Left: 142, Top: 208, Width: 146, Height: 16); Style: @NameStyle; Text: "Terre - Tier 1"; }
+      Label #ResearchNodesoil1BonusText { Anchor: (Left: 142, Top: 226, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodesoil1Icon { Anchor: (Left: 142, Top: 248, Width: 28, Height: 28); }
+      Label #ResearchNodesoil1CostText { Anchor: (Left: 176, Top: 250, Width: 112, Height: 14); Style: @CostStyle; Text: "500x"; }
+      Label #ResearchNodesoil1ItemText { Anchor: (Left: 176, Top: 265, Width: 112, Height: 13); Style: @ItemStyle; Text: "Terre"; }
+      Label #ResearchNodesoil1StateText { Anchor: (Left: 142, Top: 286, Width: 146, Height: 13); Style: @TimeStyle; Text: "10min"; }
+      Group #ResearchNodesoil1Veil { Anchor: (Left: 130, Top: 200, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodesoil1 { Anchor: (Left: 130, Top: 200, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodesoil2Slot { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodesoil2Ready { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodesoil2Done { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodesoil2NameText { Anchor: (Left: 132, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Terre - Tier 2"; }
-      Label #ResearchNodesoil2BonusText { Anchor: (Left: 132, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodesoil2Icon { Anchor: (Left: 132, Top: 608, Width: 28, Height: 28); }
-      Label #ResearchNodesoil2CostText { Anchor: (Left: 166, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "1250x"; }
-      Label #ResearchNodesoil2ItemText { Anchor: (Left: 166, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Terre"; }
-      Label #ResearchNodesoil2StateText { Anchor: (Left: 132, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h30"; }
-      Group #ResearchNodesoil2Veil { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodesoil2 { Anchor: (Left: 120, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodesoil2Slot { Anchor: (Left: 130, Top: 920, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodesoil2Ready { Anchor: (Left: 130, Top: 920, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodesoil2Done { Anchor: (Left: 130, Top: 920, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodesoil2NameText { Anchor: (Left: 142, Top: 928, Width: 146, Height: 16); Style: @NameStyle; Text: "Terre - Tier 2"; }
+      Label #ResearchNodesoil2BonusText { Anchor: (Left: 142, Top: 946, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodesoil2Icon { Anchor: (Left: 142, Top: 968, Width: 28, Height: 28); }
+      Label #ResearchNodesoil2CostText { Anchor: (Left: 176, Top: 970, Width: 112, Height: 14); Style: @CostStyle; Text: "1250x"; }
+      Label #ResearchNodesoil2ItemText { Anchor: (Left: 176, Top: 985, Width: 112, Height: 13); Style: @ItemStyle; Text: "Terre"; }
+      Label #ResearchNodesoil2StateText { Anchor: (Left: 142, Top: 1006, Width: 146, Height: 13); Style: @TimeStyle; Text: "1h30"; }
+      Group #ResearchNodesoil2Veil { Anchor: (Left: 130, Top: 920, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodesoil2 { Anchor: (Left: 130, Top: 920, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodesoil3Slot { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodesoil3Ready { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodesoil3Done { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodesoil3NameText { Anchor: (Left: 132, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Terre - Tier 3"; }
-      Label #ResearchNodesoil3BonusText { Anchor: (Left: 132, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodesoil3Icon { Anchor: (Left: 132, Top: 1148, Width: 28, Height: 28); }
-      Label #ResearchNodesoil3CostText { Anchor: (Left: 166, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "3125x"; }
-      Label #ResearchNodesoil3ItemText { Anchor: (Left: 166, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Terre"; }
-      Label #ResearchNodesoil3StateText { Anchor: (Left: 132, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "5h00"; }
-      Group #ResearchNodesoil3Veil { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodesoil3 { Anchor: (Left: 120, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodesoil3Slot { Anchor: (Left: 130, Top: 1640, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodesoil3Ready { Anchor: (Left: 130, Top: 1640, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodesoil3Done { Anchor: (Left: 130, Top: 1640, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodesoil3NameText { Anchor: (Left: 142, Top: 1648, Width: 146, Height: 16); Style: @NameStyle; Text: "Terre - Tier 3"; }
+      Label #ResearchNodesoil3BonusText { Anchor: (Left: 142, Top: 1666, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodesoil3Icon { Anchor: (Left: 142, Top: 1688, Width: 28, Height: 28); }
+      Label #ResearchNodesoil3CostText { Anchor: (Left: 176, Top: 1690, Width: 112, Height: 14); Style: @CostStyle; Text: "3125x"; }
+      Label #ResearchNodesoil3ItemText { Anchor: (Left: 176, Top: 1705, Width: 112, Height: 13); Style: @ItemStyle; Text: "Terre"; }
+      Label #ResearchNodesoil3StateText { Anchor: (Left: 142, Top: 1726, Width: 146, Height: 13); Style: @TimeStyle; Text: "5h00"; }
+      Group #ResearchNodesoil3Veil { Anchor: (Left: 130, Top: 1640, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodesoil3 { Anchor: (Left: 130, Top: 1640, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodewood1Slot { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodewood1Ready { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodewood1Done { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodewood1NameText { Anchor: (Left: 132, Top: 208, Width: 106, Height: 16); Style: @NameStyle; Text: "Bois - Tier 1"; }
-      Label #ResearchNodewood1BonusText { Anchor: (Left: 132, Top: 226, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodewood1Icon { Anchor: (Left: 132, Top: 248, Width: 28, Height: 28); }
-      Label #ResearchNodewood1CostText { Anchor: (Left: 166, Top: 250, Width: 72, Height: 14); Style: @CostStyle; Text: "500x"; }
-      Label #ResearchNodewood1ItemText { Anchor: (Left: 166, Top: 265, Width: 72, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
-      Label #ResearchNodewood1StateText { Anchor: (Left: 132, Top: 286, Width: 106, Height: 13); Style: @TimeStyle; Text: "10min"; }
-      Group #ResearchNodewood1Veil { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodewood1 { Anchor: (Left: 120, Top: 200, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodewood1Slot { Anchor: (Left: 330, Top: 20, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodewood1Ready { Anchor: (Left: 330, Top: 20, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodewood1Done { Anchor: (Left: 330, Top: 20, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodewood1NameText { Anchor: (Left: 342, Top: 28, Width: 146, Height: 16); Style: @NameStyle; Text: "Bois - Tier 1"; }
+      Label #ResearchNodewood1BonusText { Anchor: (Left: 342, Top: 46, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodewood1Icon { Anchor: (Left: 342, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNodewood1CostText { Anchor: (Left: 376, Top: 70, Width: 112, Height: 14); Style: @CostStyle; Text: "500x"; }
+      Label #ResearchNodewood1ItemText { Anchor: (Left: 376, Top: 85, Width: 112, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
+      Label #ResearchNodewood1StateText { Anchor: (Left: 342, Top: 106, Width: 146, Height: 13); Style: @TimeStyle; Text: "10min"; }
+      Group #ResearchNodewood1Veil { Anchor: (Left: 330, Top: 20, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodewood1 { Anchor: (Left: 330, Top: 20, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodewood2Slot { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodewood2Ready { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodewood2Done { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodewood2NameText { Anchor: (Left: 132, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Bois - Tier 2"; }
-      Label #ResearchNodewood2BonusText { Anchor: (Left: 132, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodewood2Icon { Anchor: (Left: 132, Top: 788, Width: 28, Height: 28); }
-      Label #ResearchNodewood2CostText { Anchor: (Left: 166, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "1250x"; }
-      Label #ResearchNodewood2ItemText { Anchor: (Left: 166, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
-      Label #ResearchNodewood2StateText { Anchor: (Left: 132, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h30"; }
-      Group #ResearchNodewood2Veil { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodewood2 { Anchor: (Left: 120, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodewood2Slot { Anchor: (Left: 330, Top: 740, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodewood2Ready { Anchor: (Left: 330, Top: 740, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodewood2Done { Anchor: (Left: 330, Top: 740, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodewood2NameText { Anchor: (Left: 342, Top: 748, Width: 146, Height: 16); Style: @NameStyle; Text: "Bois - Tier 2"; }
+      Label #ResearchNodewood2BonusText { Anchor: (Left: 342, Top: 766, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodewood2Icon { Anchor: (Left: 342, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNodewood2CostText { Anchor: (Left: 376, Top: 790, Width: 112, Height: 14); Style: @CostStyle; Text: "1250x"; }
+      Label #ResearchNodewood2ItemText { Anchor: (Left: 376, Top: 805, Width: 112, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
+      Label #ResearchNodewood2StateText { Anchor: (Left: 342, Top: 826, Width: 146, Height: 13); Style: @TimeStyle; Text: "1h30"; }
+      Group #ResearchNodewood2Veil { Anchor: (Left: 330, Top: 740, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodewood2 { Anchor: (Left: 330, Top: 740, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodewood3Slot { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodewood3Ready { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodewood3Done { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodewood3NameText { Anchor: (Left: 292, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Bois - Tier 3"; }
-      Label #ResearchNodewood3BonusText { Anchor: (Left: 292, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodewood3Icon { Anchor: (Left: 292, Top: 1148, Width: 28, Height: 28); }
-      Label #ResearchNodewood3CostText { Anchor: (Left: 326, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "3125x"; }
-      Label #ResearchNodewood3ItemText { Anchor: (Left: 326, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
-      Label #ResearchNodewood3StateText { Anchor: (Left: 292, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "5h00"; }
-      Group #ResearchNodewood3Veil { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodewood3 { Anchor: (Left: 280, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodewood3Slot { Anchor: (Left: 330, Top: 1460, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodewood3Ready { Anchor: (Left: 330, Top: 1460, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodewood3Done { Anchor: (Left: 330, Top: 1460, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodewood3NameText { Anchor: (Left: 342, Top: 1468, Width: 146, Height: 16); Style: @NameStyle; Text: "Bois - Tier 3"; }
+      Label #ResearchNodewood3BonusText { Anchor: (Left: 342, Top: 1486, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodewood3Icon { Anchor: (Left: 342, Top: 1508, Width: 28, Height: 28); }
+      Label #ResearchNodewood3CostText { Anchor: (Left: 376, Top: 1510, Width: 112, Height: 14); Style: @CostStyle; Text: "3125x"; }
+      Label #ResearchNodewood3ItemText { Anchor: (Left: 376, Top: 1525, Width: 112, Height: 13); Style: @ItemStyle; Text: "Tronc"; }
+      Label #ResearchNodewood3StateText { Anchor: (Left: 342, Top: 1546, Width: 146, Height: 13); Style: @TimeStyle; Text: "5h00"; }
+      Group #ResearchNodewood3Veil { Anchor: (Left: 330, Top: 1460, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodewood3 { Anchor: (Left: 330, Top: 1460, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNoderock1Slot { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNoderock1Ready { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNoderock1Done { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNoderock1NameText { Anchor: (Left: 132, Top: 388, Width: 106, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 1"; }
-      Label #ResearchNoderock1BonusText { Anchor: (Left: 132, Top: 406, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNoderock1Icon { Anchor: (Left: 132, Top: 428, Width: 28, Height: 28); }
-      Label #ResearchNoderock1CostText { Anchor: (Left: 166, Top: 430, Width: 72, Height: 14); Style: @CostStyle; Text: "500x"; }
-      Label #ResearchNoderock1ItemText { Anchor: (Left: 166, Top: 445, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
-      Label #ResearchNoderock1StateText { Anchor: (Left: 132, Top: 466, Width: 106, Height: 13); Style: @TimeStyle; Text: "10min"; }
-      Group #ResearchNoderock1Veil { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNoderock1 { Anchor: (Left: 120, Top: 380, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNoderock1Slot { Anchor: (Left: 130, Top: 20, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderock1Ready { Anchor: (Left: 130, Top: 20, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderock1Done { Anchor: (Left: 130, Top: 20, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderock1NameText { Anchor: (Left: 142, Top: 28, Width: 146, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 1"; }
+      Label #ResearchNoderock1BonusText { Anchor: (Left: 142, Top: 46, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNoderock1Icon { Anchor: (Left: 142, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNoderock1CostText { Anchor: (Left: 176, Top: 70, Width: 112, Height: 14); Style: @CostStyle; Text: "500x"; }
+      Label #ResearchNoderock1ItemText { Anchor: (Left: 176, Top: 85, Width: 112, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
+      Label #ResearchNoderock1StateText { Anchor: (Left: 142, Top: 106, Width: 146, Height: 13); Style: @TimeStyle; Text: "10min"; }
+      Group #ResearchNoderock1Veil { Anchor: (Left: 130, Top: 20, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderock1 { Anchor: (Left: 130, Top: 20, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNoderock2Slot { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNoderock2Ready { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNoderock2Done { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNoderock2NameText { Anchor: (Left: 132, Top: 928, Width: 106, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 2"; }
-      Label #ResearchNoderock2BonusText { Anchor: (Left: 132, Top: 946, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNoderock2Icon { Anchor: (Left: 132, Top: 968, Width: 28, Height: 28); }
-      Label #ResearchNoderock2CostText { Anchor: (Left: 166, Top: 970, Width: 72, Height: 14); Style: @CostStyle; Text: "1250x"; }
-      Label #ResearchNoderock2ItemText { Anchor: (Left: 166, Top: 985, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
-      Label #ResearchNoderock2StateText { Anchor: (Left: 132, Top: 1006, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h30"; }
-      Group #ResearchNoderock2Veil { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNoderock2 { Anchor: (Left: 120, Top: 920, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNoderock2Slot { Anchor: (Left: 130, Top: 740, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderock2Ready { Anchor: (Left: 130, Top: 740, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderock2Done { Anchor: (Left: 130, Top: 740, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderock2NameText { Anchor: (Left: 142, Top: 748, Width: 146, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 2"; }
+      Label #ResearchNoderock2BonusText { Anchor: (Left: 142, Top: 766, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNoderock2Icon { Anchor: (Left: 142, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNoderock2CostText { Anchor: (Left: 176, Top: 790, Width: 112, Height: 14); Style: @CostStyle; Text: "1250x"; }
+      Label #ResearchNoderock2ItemText { Anchor: (Left: 176, Top: 805, Width: 112, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
+      Label #ResearchNoderock2StateText { Anchor: (Left: 142, Top: 826, Width: 146, Height: 13); Style: @TimeStyle; Text: "1h30"; }
+      Group #ResearchNoderock2Veil { Anchor: (Left: 130, Top: 740, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderock2 { Anchor: (Left: 130, Top: 740, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNoderock3Slot { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNoderock3Ready { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNoderock3Done { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNoderock3NameText { Anchor: (Left: 292, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 3"; }
-      Label #ResearchNoderock3BonusText { Anchor: (Left: 292, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNoderock3Icon { Anchor: (Left: 292, Top: 1328, Width: 28, Height: 28); }
-      Label #ResearchNoderock3CostText { Anchor: (Left: 326, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "3125x"; }
-      Label #ResearchNoderock3ItemText { Anchor: (Left: 326, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
-      Label #ResearchNoderock3StateText { Anchor: (Left: 292, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "5h00"; }
-      Group #ResearchNoderock3Veil { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNoderock3 { Anchor: (Left: 280, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNoderock3Slot { Anchor: (Left: 130, Top: 1460, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNoderock3Ready { Anchor: (Left: 130, Top: 1460, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNoderock3Done { Anchor: (Left: 130, Top: 1460, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNoderock3NameText { Anchor: (Left: 142, Top: 1468, Width: 146, Height: 16); Style: @NameStyle; Text: "Pierre - Tier 3"; }
+      Label #ResearchNoderock3BonusText { Anchor: (Left: 142, Top: 1486, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNoderock3Icon { Anchor: (Left: 142, Top: 1508, Width: 28, Height: 28); }
+      Label #ResearchNoderock3CostText { Anchor: (Left: 176, Top: 1510, Width: 112, Height: 14); Style: @CostStyle; Text: "3125x"; }
+      Label #ResearchNoderock3ItemText { Anchor: (Left: 176, Top: 1525, Width: 112, Height: 13); Style: @ItemStyle; Text: "Pierre"; }
+      Label #ResearchNoderock3StateText { Anchor: (Left: 142, Top: 1546, Width: 146, Height: 13); Style: @TimeStyle; Text: "5h00"; }
+      Group #ResearchNoderock3Veil { Anchor: (Left: 130, Top: 1460, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNoderock3 { Anchor: (Left: 130, Top: 1460, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeplant1Slot { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeplant1Ready { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeplant1Done { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeplant1NameText { Anchor: (Left: 292, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Plante - Tier 1"; }
-      Label #ResearchNodeplant1BonusText { Anchor: (Left: 292, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodeplant1Icon { Anchor: (Left: 292, Top: 68, Width: 28, Height: 28); }
-      Label #ResearchNodeplant1CostText { Anchor: (Left: 326, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "200x"; }
-      Label #ResearchNodeplant1ItemText { Anchor: (Left: 326, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
-      Label #ResearchNodeplant1StateText { Anchor: (Left: 292, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "10min"; }
-      Group #ResearchNodeplant1Veil { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeplant1 { Anchor: (Left: 280, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodeplant1Slot { Anchor: (Left: 530, Top: 200, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeplant1Ready { Anchor: (Left: 530, Top: 200, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeplant1Done { Anchor: (Left: 530, Top: 200, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeplant1NameText { Anchor: (Left: 542, Top: 208, Width: 146, Height: 16); Style: @NameStyle; Text: "Plante - Tier 1"; }
+      Label #ResearchNodeplant1BonusText { Anchor: (Left: 542, Top: 226, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodeplant1Icon { Anchor: (Left: 542, Top: 248, Width: 28, Height: 28); }
+      Label #ResearchNodeplant1CostText { Anchor: (Left: 576, Top: 250, Width: 112, Height: 14); Style: @CostStyle; Text: "200x"; }
+      Label #ResearchNodeplant1ItemText { Anchor: (Left: 576, Top: 265, Width: 112, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
+      Label #ResearchNodeplant1StateText { Anchor: (Left: 542, Top: 286, Width: 146, Height: 13); Style: @TimeStyle; Text: "10min"; }
+      Group #ResearchNodeplant1Veil { Anchor: (Left: 530, Top: 200, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeplant1 { Anchor: (Left: 530, Top: 200, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeplant2Slot { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeplant2Ready { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeplant2Done { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeplant2NameText { Anchor: (Left: 292, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Plante - Tier 2"; }
-      Label #ResearchNodeplant2BonusText { Anchor: (Left: 292, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodeplant2Icon { Anchor: (Left: 292, Top: 608, Width: 28, Height: 28); }
-      Label #ResearchNodeplant2CostText { Anchor: (Left: 326, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "500x"; }
-      Label #ResearchNodeplant2ItemText { Anchor: (Left: 326, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
-      Label #ResearchNodeplant2StateText { Anchor: (Left: 292, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h30"; }
-      Group #ResearchNodeplant2Veil { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeplant2 { Anchor: (Left: 280, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodeplant2Slot { Anchor: (Left: 530, Top: 920, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeplant2Ready { Anchor: (Left: 530, Top: 920, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeplant2Done { Anchor: (Left: 530, Top: 920, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeplant2NameText { Anchor: (Left: 542, Top: 928, Width: 146, Height: 16); Style: @NameStyle; Text: "Plante - Tier 2"; }
+      Label #ResearchNodeplant2BonusText { Anchor: (Left: 542, Top: 946, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodeplant2Icon { Anchor: (Left: 542, Top: 968, Width: 28, Height: 28); }
+      Label #ResearchNodeplant2CostText { Anchor: (Left: 576, Top: 970, Width: 112, Height: 14); Style: @CostStyle; Text: "500x"; }
+      Label #ResearchNodeplant2ItemText { Anchor: (Left: 576, Top: 985, Width: 112, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
+      Label #ResearchNodeplant2StateText { Anchor: (Left: 542, Top: 1006, Width: 146, Height: 13); Style: @TimeStyle; Text: "1h30"; }
+      Group #ResearchNodeplant2Veil { Anchor: (Left: 530, Top: 920, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeplant2 { Anchor: (Left: 530, Top: 920, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeplant3Slot { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeplant3Ready { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeplant3Done { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeplant3NameText { Anchor: (Left: 292, Top: 1468, Width: 106, Height: 16); Style: @NameStyle; Text: "Plante - Tier 3"; }
-      Label #ResearchNodeplant3BonusText { Anchor: (Left: 292, Top: 1486, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodeplant3Icon { Anchor: (Left: 292, Top: 1508, Width: 28, Height: 28); }
-      Label #ResearchNodeplant3CostText { Anchor: (Left: 326, Top: 1510, Width: 72, Height: 14); Style: @CostStyle; Text: "1250x"; }
-      Label #ResearchNodeplant3ItemText { Anchor: (Left: 326, Top: 1525, Width: 72, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
-      Label #ResearchNodeplant3StateText { Anchor: (Left: 292, Top: 1546, Width: 106, Height: 13); Style: @TimeStyle; Text: "5h00"; }
-      Group #ResearchNodeplant3Veil { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeplant3 { Anchor: (Left: 280, Top: 1460, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodeplant3Slot { Anchor: (Left: 530, Top: 1640, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeplant3Ready { Anchor: (Left: 530, Top: 1640, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeplant3Done { Anchor: (Left: 530, Top: 1640, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeplant3NameText { Anchor: (Left: 542, Top: 1648, Width: 146, Height: 16); Style: @NameStyle; Text: "Plante - Tier 3"; }
+      Label #ResearchNodeplant3BonusText { Anchor: (Left: 542, Top: 1666, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodeplant3Icon { Anchor: (Left: 542, Top: 1688, Width: 28, Height: 28); }
+      Label #ResearchNodeplant3CostText { Anchor: (Left: 576, Top: 1690, Width: 112, Height: 14); Style: @CostStyle; Text: "1250x"; }
+      Label #ResearchNodeplant3ItemText { Anchor: (Left: 576, Top: 1705, Width: 112, Height: 13); Style: @ItemStyle; Text: "Carotte"; }
+      Label #ResearchNodeplant3StateText { Anchor: (Left: 542, Top: 1726, Width: 146, Height: 13); Style: @TimeStyle; Text: "5h00"; }
+      Group #ResearchNodeplant3Veil { Anchor: (Left: 530, Top: 1640, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeplant3 { Anchor: (Left: 530, Top: 1640, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodecloth1Slot { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodecloth1Ready { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodecloth1Done { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodecloth1NameText { Anchor: (Left: 292, Top: 208, Width: 106, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 1"; }
-      Label #ResearchNodecloth1BonusText { Anchor: (Left: 292, Top: 226, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodecloth1Icon { Anchor: (Left: 292, Top: 248, Width: 28, Height: 28); }
-      Label #ResearchNodecloth1CostText { Anchor: (Left: 326, Top: 250, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
-      Label #ResearchNodecloth1ItemText { Anchor: (Left: 326, Top: 265, Width: 72, Height: 13); Style: @ItemStyle; Text: "Laine"; }
-      Label #ResearchNodecloth1StateText { Anchor: (Left: 292, Top: 286, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
-      Group #ResearchNodecloth1Veil { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodecloth1 { Anchor: (Left: 280, Top: 200, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodecloth1Slot { Anchor: (Left: 730, Top: 20, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodecloth1Ready { Anchor: (Left: 730, Top: 20, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodecloth1Done { Anchor: (Left: 730, Top: 20, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodecloth1NameText { Anchor: (Left: 742, Top: 28, Width: 146, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 1"; }
+      Label #ResearchNodecloth1BonusText { Anchor: (Left: 742, Top: 46, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodecloth1Icon { Anchor: (Left: 742, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNodecloth1CostText { Anchor: (Left: 776, Top: 70, Width: 112, Height: 14); Style: @CostStyle; Text: "100x"; }
+      Label #ResearchNodecloth1ItemText { Anchor: (Left: 776, Top: 85, Width: 112, Height: 13); Style: @ItemStyle; Text: "Laine"; }
+      Label #ResearchNodecloth1StateText { Anchor: (Left: 742, Top: 106, Width: 146, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodecloth1Veil { Anchor: (Left: 730, Top: 20, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodecloth1 { Anchor: (Left: 730, Top: 20, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodecloth2Slot { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodecloth2Ready { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodecloth2Done { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodecloth2NameText { Anchor: (Left: 292, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 2"; }
-      Label #ResearchNodecloth2BonusText { Anchor: (Left: 292, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodecloth2Icon { Anchor: (Left: 292, Top: 788, Width: 28, Height: 28); }
-      Label #ResearchNodecloth2CostText { Anchor: (Left: 326, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
-      Label #ResearchNodecloth2ItemText { Anchor: (Left: 326, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Laine"; }
-      Label #ResearchNodecloth2StateText { Anchor: (Left: 292, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
-      Group #ResearchNodecloth2Veil { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodecloth2 { Anchor: (Left: 280, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodecloth2Slot { Anchor: (Left: 730, Top: 740, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodecloth2Ready { Anchor: (Left: 730, Top: 740, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodecloth2Done { Anchor: (Left: 730, Top: 740, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodecloth2NameText { Anchor: (Left: 742, Top: 748, Width: 146, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 2"; }
+      Label #ResearchNodecloth2BonusText { Anchor: (Left: 742, Top: 766, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodecloth2Icon { Anchor: (Left: 742, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNodecloth2CostText { Anchor: (Left: 776, Top: 790, Width: 112, Height: 14); Style: @CostStyle; Text: "250x"; }
+      Label #ResearchNodecloth2ItemText { Anchor: (Left: 776, Top: 805, Width: 112, Height: 13); Style: @ItemStyle; Text: "Laine"; }
+      Label #ResearchNodecloth2StateText { Anchor: (Left: 742, Top: 826, Width: 146, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodecloth2Veil { Anchor: (Left: 730, Top: 740, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodecloth2 { Anchor: (Left: 730, Top: 740, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodecloth3Slot { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodecloth3Ready { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodecloth3Done { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodecloth3NameText { Anchor: (Left: 132, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 3"; }
-      Label #ResearchNodecloth3BonusText { Anchor: (Left: 132, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodecloth3Icon { Anchor: (Left: 132, Top: 1328, Width: 28, Height: 28); }
-      Label #ResearchNodecloth3CostText { Anchor: (Left: 166, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
-      Label #ResearchNodecloth3ItemText { Anchor: (Left: 166, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Laine"; }
-      Label #ResearchNodecloth3StateText { Anchor: (Left: 132, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
-      Group #ResearchNodecloth3Veil { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodecloth3 { Anchor: (Left: 120, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodecloth3Slot { Anchor: (Left: 730, Top: 1460, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodecloth3Ready { Anchor: (Left: 730, Top: 1460, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodecloth3Done { Anchor: (Left: 730, Top: 1460, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodecloth3NameText { Anchor: (Left: 742, Top: 1468, Width: 146, Height: 16); Style: @NameStyle; Text: "Tissu - Tier 3"; }
+      Label #ResearchNodecloth3BonusText { Anchor: (Left: 742, Top: 1486, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodecloth3Icon { Anchor: (Left: 742, Top: 1508, Width: 28, Height: 28); }
+      Label #ResearchNodecloth3CostText { Anchor: (Left: 776, Top: 1510, Width: 112, Height: 14); Style: @CostStyle; Text: "625x"; }
+      Label #ResearchNodecloth3ItemText { Anchor: (Left: 776, Top: 1525, Width: 112, Height: 13); Style: @ItemStyle; Text: "Laine"; }
+      Label #ResearchNodecloth3StateText { Anchor: (Left: 742, Top: 1546, Width: 146, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodecloth3Veil { Anchor: (Left: 730, Top: 1460, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodecloth3 { Anchor: (Left: 730, Top: 1460, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeingredient1Slot { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeingredient1Ready { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeingredient1Done { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeingredient1NameText { Anchor: (Left: 452, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 1"; }
-      Label #ResearchNodeingredient1BonusText { Anchor: (Left: 452, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodeingredient1Icon { Anchor: (Left: 452, Top: 68, Width: 28, Height: 28); }
-      Label #ResearchNodeingredient1CostText { Anchor: (Left: 486, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
-      Label #ResearchNodeingredient1ItemText { Anchor: (Left: 486, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
-      Label #ResearchNodeingredient1StateText { Anchor: (Left: 452, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
-      Group #ResearchNodeingredient1Veil { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeingredient1 { Anchor: (Left: 440, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodeingredient1Slot { Anchor: (Left: 330, Top: 380, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeingredient1Ready { Anchor: (Left: 330, Top: 380, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeingredient1Done { Anchor: (Left: 330, Top: 380, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeingredient1NameText { Anchor: (Left: 342, Top: 388, Width: 146, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 1"; }
+      Label #ResearchNodeingredient1BonusText { Anchor: (Left: 342, Top: 406, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodeingredient1Icon { Anchor: (Left: 342, Top: 428, Width: 28, Height: 28); }
+      Label #ResearchNodeingredient1CostText { Anchor: (Left: 376, Top: 430, Width: 112, Height: 14); Style: @CostStyle; Text: "100x"; }
+      Label #ResearchNodeingredient1ItemText { Anchor: (Left: 376, Top: 445, Width: 112, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
+      Label #ResearchNodeingredient1StateText { Anchor: (Left: 342, Top: 466, Width: 146, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodeingredient1Veil { Anchor: (Left: 330, Top: 380, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeingredient1 { Anchor: (Left: 330, Top: 380, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeingredient2Slot { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeingredient2Ready { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeingredient2Done { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeingredient2NameText { Anchor: (Left: 292, Top: 928, Width: 106, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 2"; }
-      Label #ResearchNodeingredient2BonusText { Anchor: (Left: 292, Top: 946, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodeingredient2Icon { Anchor: (Left: 292, Top: 968, Width: 28, Height: 28); }
-      Label #ResearchNodeingredient2CostText { Anchor: (Left: 326, Top: 970, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
-      Label #ResearchNodeingredient2ItemText { Anchor: (Left: 326, Top: 985, Width: 72, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
-      Label #ResearchNodeingredient2StateText { Anchor: (Left: 292, Top: 1006, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
-      Group #ResearchNodeingredient2Veil { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeingredient2 { Anchor: (Left: 280, Top: 920, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodeingredient2Slot { Anchor: (Left: 330, Top: 1100, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeingredient2Ready { Anchor: (Left: 330, Top: 1100, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeingredient2Done { Anchor: (Left: 330, Top: 1100, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeingredient2NameText { Anchor: (Left: 342, Top: 1108, Width: 146, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 2"; }
+      Label #ResearchNodeingredient2BonusText { Anchor: (Left: 342, Top: 1126, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodeingredient2Icon { Anchor: (Left: 342, Top: 1148, Width: 28, Height: 28); }
+      Label #ResearchNodeingredient2CostText { Anchor: (Left: 376, Top: 1150, Width: 112, Height: 14); Style: @CostStyle; Text: "250x"; }
+      Label #ResearchNodeingredient2ItemText { Anchor: (Left: 376, Top: 1165, Width: 112, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
+      Label #ResearchNodeingredient2StateText { Anchor: (Left: 342, Top: 1186, Width: 146, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodeingredient2Veil { Anchor: (Left: 330, Top: 1100, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeingredient2 { Anchor: (Left: 330, Top: 1100, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeingredient3Slot { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeingredient3Ready { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeingredient3Done { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeingredient3NameText { Anchor: (Left: 452, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 3"; }
-      Label #ResearchNodeingredient3BonusText { Anchor: (Left: 452, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodeingredient3Icon { Anchor: (Left: 452, Top: 1148, Width: 28, Height: 28); }
-      Label #ResearchNodeingredient3CostText { Anchor: (Left: 486, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
-      Label #ResearchNodeingredient3ItemText { Anchor: (Left: 486, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
-      Label #ResearchNodeingredient3StateText { Anchor: (Left: 452, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
-      Group #ResearchNodeingredient3Veil { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeingredient3 { Anchor: (Left: 440, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodeingredient3Slot { Anchor: (Left: 330, Top: 1820, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodeingredient3Ready { Anchor: (Left: 330, Top: 1820, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodeingredient3Done { Anchor: (Left: 330, Top: 1820, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodeingredient3NameText { Anchor: (Left: 342, Top: 1828, Width: 146, Height: 16); Style: @NameStyle; Text: "Ingrédient - Tier 3"; }
+      Label #ResearchNodeingredient3BonusText { Anchor: (Left: 342, Top: 1846, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodeingredient3Icon { Anchor: (Left: 342, Top: 1868, Width: 28, Height: 28); }
+      Label #ResearchNodeingredient3CostText { Anchor: (Left: 376, Top: 1870, Width: 112, Height: 14); Style: @CostStyle; Text: "625x"; }
+      Label #ResearchNodeingredient3ItemText { Anchor: (Left: 376, Top: 1885, Width: 112, Height: 13); Style: @ItemStyle; Text: "Cristal bleu"; }
+      Label #ResearchNodeingredient3StateText { Anchor: (Left: 342, Top: 1906, Width: 146, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodeingredient3Veil { Anchor: (Left: 330, Top: 1820, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodeingredient3 { Anchor: (Left: 330, Top: 1820, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodefish1Slot { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefish1Ready { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefish1Done { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefish1NameText { Anchor: (Left: 292, Top: 388, Width: 106, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 1"; }
-      Label #ResearchNodefish1BonusText { Anchor: (Left: 292, Top: 406, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodefish1Icon { Anchor: (Left: 292, Top: 428, Width: 28, Height: 28); }
-      Label #ResearchNodefish1CostText { Anchor: (Left: 326, Top: 430, Width: 72, Height: 14); Style: @CostStyle; Text: "50x"; }
-      Label #ResearchNodefish1ItemText { Anchor: (Left: 326, Top: 445, Width: 72, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
-      Label #ResearchNodefish1StateText { Anchor: (Left: 292, Top: 466, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
-      Group #ResearchNodefish1Veil { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefish1 { Anchor: (Left: 280, Top: 380, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefish1Slot { Anchor: (Left: 530, Top: 20, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefish1Ready { Anchor: (Left: 530, Top: 20, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefish1Done { Anchor: (Left: 530, Top: 20, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefish1NameText { Anchor: (Left: 542, Top: 28, Width: 146, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 1"; }
+      Label #ResearchNodefish1BonusText { Anchor: (Left: 542, Top: 46, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodefish1Icon { Anchor: (Left: 542, Top: 68, Width: 28, Height: 28); }
+      Label #ResearchNodefish1CostText { Anchor: (Left: 576, Top: 70, Width: 112, Height: 14); Style: @CostStyle; Text: "50x"; }
+      Label #ResearchNodefish1ItemText { Anchor: (Left: 576, Top: 85, Width: 112, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
+      Label #ResearchNodefish1StateText { Anchor: (Left: 542, Top: 106, Width: 146, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodefish1Veil { Anchor: (Left: 530, Top: 20, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefish1 { Anchor: (Left: 530, Top: 20, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodefish2Slot { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefish2Ready { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefish2Done { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefish2NameText { Anchor: (Left: 452, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 2"; }
-      Label #ResearchNodefish2BonusText { Anchor: (Left: 452, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodefish2Icon { Anchor: (Left: 452, Top: 608, Width: 28, Height: 28); }
-      Label #ResearchNodefish2CostText { Anchor: (Left: 486, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "125x"; }
-      Label #ResearchNodefish2ItemText { Anchor: (Left: 486, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
-      Label #ResearchNodefish2StateText { Anchor: (Left: 452, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
-      Group #ResearchNodefish2Veil { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefish2 { Anchor: (Left: 440, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefish2Slot { Anchor: (Left: 530, Top: 740, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefish2Ready { Anchor: (Left: 530, Top: 740, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefish2Done { Anchor: (Left: 530, Top: 740, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefish2NameText { Anchor: (Left: 542, Top: 748, Width: 146, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 2"; }
+      Label #ResearchNodefish2BonusText { Anchor: (Left: 542, Top: 766, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodefish2Icon { Anchor: (Left: 542, Top: 788, Width: 28, Height: 28); }
+      Label #ResearchNodefish2CostText { Anchor: (Left: 576, Top: 790, Width: 112, Height: 14); Style: @CostStyle; Text: "125x"; }
+      Label #ResearchNodefish2ItemText { Anchor: (Left: 576, Top: 805, Width: 112, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
+      Label #ResearchNodefish2StateText { Anchor: (Left: 542, Top: 826, Width: 146, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodefish2Veil { Anchor: (Left: 530, Top: 740, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefish2 { Anchor: (Left: 530, Top: 740, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodefish3Slot { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefish3Ready { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefish3Done { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefish3NameText { Anchor: (Left: 452, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 3"; }
-      Label #ResearchNodefish3BonusText { Anchor: (Left: 452, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodefish3Icon { Anchor: (Left: 452, Top: 1328, Width: 28, Height: 28); }
-      Label #ResearchNodefish3CostText { Anchor: (Left: 486, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "312x"; }
-      Label #ResearchNodefish3ItemText { Anchor: (Left: 486, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
-      Label #ResearchNodefish3StateText { Anchor: (Left: 452, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
-      Group #ResearchNodefish3Veil { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefish3 { Anchor: (Left: 440, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefish3Slot { Anchor: (Left: 530, Top: 1460, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefish3Ready { Anchor: (Left: 530, Top: 1460, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefish3Done { Anchor: (Left: 530, Top: 1460, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefish3NameText { Anchor: (Left: 542, Top: 1468, Width: 146, Height: 16); Style: @NameStyle; Text: "Poisson - Tier 3"; }
+      Label #ResearchNodefish3BonusText { Anchor: (Left: 542, Top: 1486, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodefish3Icon { Anchor: (Left: 542, Top: 1508, Width: 28, Height: 28); }
+      Label #ResearchNodefish3CostText { Anchor: (Left: 576, Top: 1510, Width: 112, Height: 14); Style: @CostStyle; Text: "312x"; }
+      Label #ResearchNodefish3ItemText { Anchor: (Left: 576, Top: 1525, Width: 112, Height: 13); Style: @ItemStyle; Text: "Poisson-chat"; }
+      Label #ResearchNodefish3StateText { Anchor: (Left: 542, Top: 1546, Width: 146, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodefish3Veil { Anchor: (Left: 530, Top: 1460, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefish3 { Anchor: (Left: 530, Top: 1460, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodefood1Slot { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefood1Ready { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefood1Done { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefood1NameText { Anchor: (Left: 452, Top: 208, Width: 106, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 1"; }
-      Label #ResearchNodefood1BonusText { Anchor: (Left: 452, Top: 226, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodefood1Icon { Anchor: (Left: 452, Top: 248, Width: 28, Height: 28); }
-      Label #ResearchNodefood1CostText { Anchor: (Left: 486, Top: 250, Width: 72, Height: 14); Style: @CostStyle; Text: "15x"; }
-      Label #ResearchNodefood1ItemText { Anchor: (Left: 486, Top: 265, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pain"; }
-      Label #ResearchNodefood1StateText { Anchor: (Left: 452, Top: 286, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
-      Group #ResearchNodefood1Veil { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefood1 { Anchor: (Left: 440, Top: 200, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefood1Slot { Anchor: (Left: 530, Top: 560, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefood1Ready { Anchor: (Left: 530, Top: 560, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefood1Done { Anchor: (Left: 530, Top: 560, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefood1NameText { Anchor: (Left: 542, Top: 568, Width: 146, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 1"; }
+      Label #ResearchNodefood1BonusText { Anchor: (Left: 542, Top: 586, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodefood1Icon { Anchor: (Left: 542, Top: 608, Width: 28, Height: 28); }
+      Label #ResearchNodefood1CostText { Anchor: (Left: 576, Top: 610, Width: 112, Height: 14); Style: @CostStyle; Text: "15x"; }
+      Label #ResearchNodefood1ItemText { Anchor: (Left: 576, Top: 625, Width: 112, Height: 13); Style: @ItemStyle; Text: "Pain"; }
+      Label #ResearchNodefood1StateText { Anchor: (Left: 542, Top: 646, Width: 146, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodefood1Veil { Anchor: (Left: 530, Top: 560, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefood1 { Anchor: (Left: 530, Top: 560, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodefood2Slot { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefood2Ready { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefood2Done { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefood2NameText { Anchor: (Left: 452, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 2"; }
-      Label #ResearchNodefood2BonusText { Anchor: (Left: 452, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodefood2Icon { Anchor: (Left: 452, Top: 788, Width: 28, Height: 28); }
-      Label #ResearchNodefood2CostText { Anchor: (Left: 486, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "150x"; }
-      Label #ResearchNodefood2ItemText { Anchor: (Left: 486, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pain"; }
-      Label #ResearchNodefood2StateText { Anchor: (Left: 452, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
-      Group #ResearchNodefood2Veil { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefood2 { Anchor: (Left: 440, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefood2Slot { Anchor: (Left: 530, Top: 1280, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefood2Ready { Anchor: (Left: 530, Top: 1280, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefood2Done { Anchor: (Left: 530, Top: 1280, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefood2NameText { Anchor: (Left: 542, Top: 1288, Width: 146, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 2"; }
+      Label #ResearchNodefood2BonusText { Anchor: (Left: 542, Top: 1306, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodefood2Icon { Anchor: (Left: 542, Top: 1328, Width: 28, Height: 28); }
+      Label #ResearchNodefood2CostText { Anchor: (Left: 576, Top: 1330, Width: 112, Height: 14); Style: @CostStyle; Text: "150x"; }
+      Label #ResearchNodefood2ItemText { Anchor: (Left: 576, Top: 1345, Width: 112, Height: 13); Style: @ItemStyle; Text: "Pain"; }
+      Label #ResearchNodefood2StateText { Anchor: (Left: 542, Top: 1366, Width: 146, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodefood2Veil { Anchor: (Left: 530, Top: 1280, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefood2 { Anchor: (Left: 530, Top: 1280, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodefood3Slot { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefood3Ready { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefood3Done { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefood3NameText { Anchor: (Left: 612, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 3"; }
-      Label #ResearchNodefood3BonusText { Anchor: (Left: 612, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodefood3Icon { Anchor: (Left: 612, Top: 1148, Width: 28, Height: 28); }
-      Label #ResearchNodefood3CostText { Anchor: (Left: 646, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "1200x"; }
-      Label #ResearchNodefood3ItemText { Anchor: (Left: 646, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Pain"; }
-      Label #ResearchNodefood3StateText { Anchor: (Left: 612, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
-      Group #ResearchNodefood3Veil { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefood3 { Anchor: (Left: 600, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefood3Slot { Anchor: (Left: 530, Top: 2000, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefood3Ready { Anchor: (Left: 530, Top: 2000, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefood3Done { Anchor: (Left: 530, Top: 2000, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefood3NameText { Anchor: (Left: 542, Top: 2008, Width: 146, Height: 16); Style: @NameStyle; Text: "Nourriture - Tier 3"; }
+      Label #ResearchNodefood3BonusText { Anchor: (Left: 542, Top: 2026, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodefood3Icon { Anchor: (Left: 542, Top: 2048, Width: 28, Height: 28); }
+      Label #ResearchNodefood3CostText { Anchor: (Left: 576, Top: 2050, Width: 112, Height: 14); Style: @CostStyle; Text: "1200x"; }
+      Label #ResearchNodefood3ItemText { Anchor: (Left: 576, Top: 2065, Width: 112, Height: 13); Style: @ItemStyle; Text: "Pain"; }
+      Label #ResearchNodefood3StateText { Anchor: (Left: 542, Top: 2086, Width: 146, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodefood3Veil { Anchor: (Left: 530, Top: 2000, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefood3 { Anchor: (Left: 530, Top: 2000, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodepotion1Slot { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodepotion1Ready { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodepotion1Done { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodepotion1NameText { Anchor: (Left: 772, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Potion - Tier 1"; }
-      Label #ResearchNodepotion1BonusText { Anchor: (Left: 772, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodepotion1Icon { Anchor: (Left: 772, Top: 68, Width: 28, Height: 28); }
-      Label #ResearchNodepotion1CostText { Anchor: (Left: 806, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "15x"; }
-      Label #ResearchNodepotion1ItemText { Anchor: (Left: 806, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
-      Label #ResearchNodepotion1StateText { Anchor: (Left: 772, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "20min"; }
-      Group #ResearchNodepotion1Veil { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodepotion1 { Anchor: (Left: 760, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodepotion1Slot { Anchor: (Left: 730, Top: 560, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodepotion1Ready { Anchor: (Left: 730, Top: 560, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodepotion1Done { Anchor: (Left: 730, Top: 560, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodepotion1NameText { Anchor: (Left: 742, Top: 568, Width: 146, Height: 16); Style: @NameStyle; Text: "Potion - Tier 1"; }
+      Label #ResearchNodepotion1BonusText { Anchor: (Left: 742, Top: 586, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodepotion1Icon { Anchor: (Left: 742, Top: 608, Width: 28, Height: 28); }
+      Label #ResearchNodepotion1CostText { Anchor: (Left: 776, Top: 610, Width: 112, Height: 14); Style: @CostStyle; Text: "15x"; }
+      Label #ResearchNodepotion1ItemText { Anchor: (Left: 776, Top: 625, Width: 112, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
+      Label #ResearchNodepotion1StateText { Anchor: (Left: 742, Top: 646, Width: 146, Height: 13); Style: @TimeStyle; Text: "20min"; }
+      Group #ResearchNodepotion1Veil { Anchor: (Left: 730, Top: 560, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodepotion1 { Anchor: (Left: 730, Top: 560, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodepotion2Slot { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodepotion2Ready { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodepotion2Done { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodepotion2NameText { Anchor: (Left: 612, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Potion - Tier 2"; }
-      Label #ResearchNodepotion2BonusText { Anchor: (Left: 612, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodepotion2Icon { Anchor: (Left: 612, Top: 608, Width: 28, Height: 28); }
-      Label #ResearchNodepotion2CostText { Anchor: (Left: 646, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "150x"; }
-      Label #ResearchNodepotion2ItemText { Anchor: (Left: 646, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
-      Label #ResearchNodepotion2StateText { Anchor: (Left: 612, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h00"; }
-      Group #ResearchNodepotion2Veil { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodepotion2 { Anchor: (Left: 600, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodepotion2Slot { Anchor: (Left: 730, Top: 1280, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodepotion2Ready { Anchor: (Left: 730, Top: 1280, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodepotion2Done { Anchor: (Left: 730, Top: 1280, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodepotion2NameText { Anchor: (Left: 742, Top: 1288, Width: 146, Height: 16); Style: @NameStyle; Text: "Potion - Tier 2"; }
+      Label #ResearchNodepotion2BonusText { Anchor: (Left: 742, Top: 1306, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodepotion2Icon { Anchor: (Left: 742, Top: 1328, Width: 28, Height: 28); }
+      Label #ResearchNodepotion2CostText { Anchor: (Left: 776, Top: 1330, Width: 112, Height: 14); Style: @CostStyle; Text: "150x"; }
+      Label #ResearchNodepotion2ItemText { Anchor: (Left: 776, Top: 1345, Width: 112, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
+      Label #ResearchNodepotion2StateText { Anchor: (Left: 742, Top: 1366, Width: 146, Height: 13); Style: @TimeStyle; Text: "2h00"; }
+      Group #ResearchNodepotion2Veil { Anchor: (Left: 730, Top: 1280, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodepotion2 { Anchor: (Left: 730, Top: 1280, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodepotion3Slot { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodepotion3Ready { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodepotion3Done { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodepotion3NameText { Anchor: (Left: 612, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Potion - Tier 3"; }
-      Label #ResearchNodepotion3BonusText { Anchor: (Left: 612, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodepotion3Icon { Anchor: (Left: 612, Top: 1328, Width: 28, Height: 28); }
-      Label #ResearchNodepotion3CostText { Anchor: (Left: 646, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "1200x"; }
-      Label #ResearchNodepotion3ItemText { Anchor: (Left: 646, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
-      Label #ResearchNodepotion3StateText { Anchor: (Left: 612, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "6h00"; }
-      Group #ResearchNodepotion3Veil { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodepotion3 { Anchor: (Left: 600, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodepotion3Slot { Anchor: (Left: 730, Top: 2000, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodepotion3Ready { Anchor: (Left: 730, Top: 2000, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodepotion3Done { Anchor: (Left: 730, Top: 2000, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodepotion3NameText { Anchor: (Left: 742, Top: 2008, Width: 146, Height: 16); Style: @NameStyle; Text: "Potion - Tier 3"; }
+      Label #ResearchNodepotion3BonusText { Anchor: (Left: 742, Top: 2026, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodepotion3Icon { Anchor: (Left: 742, Top: 2048, Width: 28, Height: 28); }
+      Label #ResearchNodepotion3CostText { Anchor: (Left: 776, Top: 2050, Width: 112, Height: 14); Style: @CostStyle; Text: "1200x"; }
+      Label #ResearchNodepotion3ItemText { Anchor: (Left: 776, Top: 2065, Width: 112, Height: 13); Style: @ItemStyle; Text: "Potion de vie"; }
+      Label #ResearchNodepotion3StateText { Anchor: (Left: 742, Top: 2086, Width: 146, Height: 13); Style: @TimeStyle; Text: "6h00"; }
+      Group #ResearchNodepotion3Veil { Anchor: (Left: 730, Top: 2000, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodepotion3 { Anchor: (Left: 730, Top: 2000, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodemetal1Slot { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodemetal1Ready { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodemetal1Done { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodemetal1NameText { Anchor: (Left: 452, Top: 388, Width: 106, Height: 16); Style: @NameStyle; Text: "Métal - Tier 1"; }
-      Label #ResearchNodemetal1BonusText { Anchor: (Left: 452, Top: 406, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodemetal1Icon { Anchor: (Left: 452, Top: 428, Width: 28, Height: 28); }
-      Label #ResearchNodemetal1CostText { Anchor: (Left: 486, Top: 430, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
-      Label #ResearchNodemetal1ItemText { Anchor: (Left: 486, Top: 445, Width: 72, Height: 13); Style: @ItemStyle; Text: "Fer"; }
-      Label #ResearchNodemetal1StateText { Anchor: (Left: 452, Top: 466, Width: 106, Height: 13); Style: @TimeStyle; Text: "30min"; }
-      Group #ResearchNodemetal1Veil { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodemetal1 { Anchor: (Left: 440, Top: 380, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodemetal1Slot { Anchor: (Left: 130, Top: 560, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodemetal1Ready { Anchor: (Left: 130, Top: 560, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodemetal1Done { Anchor: (Left: 130, Top: 560, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodemetal1NameText { Anchor: (Left: 142, Top: 568, Width: 146, Height: 16); Style: @NameStyle; Text: "Métal - Tier 1"; }
+      Label #ResearchNodemetal1BonusText { Anchor: (Left: 142, Top: 586, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodemetal1Icon { Anchor: (Left: 142, Top: 608, Width: 28, Height: 28); }
+      Label #ResearchNodemetal1CostText { Anchor: (Left: 176, Top: 610, Width: 112, Height: 14); Style: @CostStyle; Text: "100x"; }
+      Label #ResearchNodemetal1ItemText { Anchor: (Left: 176, Top: 625, Width: 112, Height: 13); Style: @ItemStyle; Text: "Lingot de fer"; }
+      Label #ResearchNodemetal1StateText { Anchor: (Left: 142, Top: 646, Width: 146, Height: 13); Style: @TimeStyle; Text: "30min"; }
+      Group #ResearchNodemetal1Veil { Anchor: (Left: 130, Top: 560, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodemetal1 { Anchor: (Left: 130, Top: 560, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodemetal2Slot { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodemetal2Ready { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodemetal2Done { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodemetal2NameText { Anchor: (Left: 612, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Métal - Tier 2"; }
-      Label #ResearchNodemetal2BonusText { Anchor: (Left: 612, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodemetal2Icon { Anchor: (Left: 612, Top: 788, Width: 28, Height: 28); }
-      Label #ResearchNodemetal2CostText { Anchor: (Left: 646, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
-      Label #ResearchNodemetal2ItemText { Anchor: (Left: 646, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Fer"; }
-      Label #ResearchNodemetal2StateText { Anchor: (Left: 612, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h30"; }
-      Group #ResearchNodemetal2Veil { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodemetal2 { Anchor: (Left: 600, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodemetal2Slot { Anchor: (Left: 130, Top: 1280, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodemetal2Ready { Anchor: (Left: 130, Top: 1280, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodemetal2Done { Anchor: (Left: 130, Top: 1280, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodemetal2NameText { Anchor: (Left: 142, Top: 1288, Width: 146, Height: 16); Style: @NameStyle; Text: "Métal - Tier 2"; }
+      Label #ResearchNodemetal2BonusText { Anchor: (Left: 142, Top: 1306, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodemetal2Icon { Anchor: (Left: 142, Top: 1328, Width: 28, Height: 28); }
+      Label #ResearchNodemetal2CostText { Anchor: (Left: 176, Top: 1330, Width: 112, Height: 14); Style: @CostStyle; Text: "250x"; }
+      Label #ResearchNodemetal2ItemText { Anchor: (Left: 176, Top: 1345, Width: 112, Height: 13); Style: @ItemStyle; Text: "Lingot de fer"; }
+      Label #ResearchNodemetal2StateText { Anchor: (Left: 142, Top: 1366, Width: 146, Height: 13); Style: @TimeStyle; Text: "2h30"; }
+      Group #ResearchNodemetal2Veil { Anchor: (Left: 130, Top: 1280, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodemetal2 { Anchor: (Left: 130, Top: 1280, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodemetal3Slot { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodemetal3Ready { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodemetal3Done { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodemetal3NameText { Anchor: (Left: 612, Top: 1468, Width: 106, Height: 16); Style: @NameStyle; Text: "Métal - Tier 3"; }
-      Label #ResearchNodemetal3BonusText { Anchor: (Left: 612, Top: 1486, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodemetal3Icon { Anchor: (Left: 612, Top: 1508, Width: 28, Height: 28); }
-      Label #ResearchNodemetal3CostText { Anchor: (Left: 646, Top: 1510, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
-      Label #ResearchNodemetal3ItemText { Anchor: (Left: 646, Top: 1525, Width: 72, Height: 13); Style: @ItemStyle; Text: "Fer"; }
-      Label #ResearchNodemetal3StateText { Anchor: (Left: 612, Top: 1546, Width: 106, Height: 13); Style: @TimeStyle; Text: "7h00"; }
-      Group #ResearchNodemetal3Veil { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodemetal3 { Anchor: (Left: 600, Top: 1460, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodemetal3Slot { Anchor: (Left: 130, Top: 2000, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodemetal3Ready { Anchor: (Left: 130, Top: 2000, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodemetal3Done { Anchor: (Left: 130, Top: 2000, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodemetal3NameText { Anchor: (Left: 142, Top: 2008, Width: 146, Height: 16); Style: @NameStyle; Text: "Métal - Tier 3"; }
+      Label #ResearchNodemetal3BonusText { Anchor: (Left: 142, Top: 2026, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodemetal3Icon { Anchor: (Left: 142, Top: 2048, Width: 28, Height: 28); }
+      Label #ResearchNodemetal3CostText { Anchor: (Left: 176, Top: 2050, Width: 112, Height: 14); Style: @CostStyle; Text: "625x"; }
+      Label #ResearchNodemetal3ItemText { Anchor: (Left: 176, Top: 2065, Width: 112, Height: 13); Style: @ItemStyle; Text: "Lingot de fer"; }
+      Label #ResearchNodemetal3StateText { Anchor: (Left: 142, Top: 2086, Width: 146, Height: 13); Style: @TimeStyle; Text: "7h00"; }
+      Group #ResearchNodemetal3Veil { Anchor: (Left: 130, Top: 2000, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodemetal3 { Anchor: (Left: 130, Top: 2000, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeore1Slot { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeore1Ready { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeore1Done { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeore1NameText { Anchor: (Left: 772, Top: 208, Width: 106, Height: 16); Style: @NameStyle; Text: "Minerai - Tier 1"; }
-      Label #ResearchNodeore1BonusText { Anchor: (Left: 772, Top: 226, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodeore1Icon { Anchor: (Left: 772, Top: 248, Width: 28, Height: 28); }
-      Label #ResearchNodeore1CostText { Anchor: (Left: 806, Top: 250, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
-      Label #ResearchNodeore1ItemText { Anchor: (Left: 806, Top: 265, Width: 72, Height: 13); Style: @ItemStyle; Text: "Minerai de fer"; }
-      Label #ResearchNodeore1StateText { Anchor: (Left: 772, Top: 286, Width: 106, Height: 13); Style: @TimeStyle; Text: "30min"; }
-      Group #ResearchNodeore1Veil { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeore1 { Anchor: (Left: 760, Top: 200, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefurniture1Slot { Anchor: (Left: 730, Top: 380, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefurniture1Ready { Anchor: (Left: 730, Top: 380, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefurniture1Done { Anchor: (Left: 730, Top: 380, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefurniture1NameText { Anchor: (Left: 742, Top: 388, Width: 146, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 1"; }
+      Label #ResearchNodefurniture1BonusText { Anchor: (Left: 742, Top: 406, Width: 146, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
+      ItemIcon #ResearchNodefurniture1Icon { Anchor: (Left: 742, Top: 428, Width: 28, Height: 28); }
+      Label #ResearchNodefurniture1CostText { Anchor: (Left: 776, Top: 430, Width: 112, Height: 14); Style: @CostStyle; Text: "20x"; }
+      Label #ResearchNodefurniture1ItemText { Anchor: (Left: 776, Top: 445, Width: 112, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
+      Label #ResearchNodefurniture1StateText { Anchor: (Left: 742, Top: 466, Width: 146, Height: 13); Style: @TimeStyle; Text: "30min"; }
+      Group #ResearchNodefurniture1Veil { Anchor: (Left: 730, Top: 380, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefurniture1 { Anchor: (Left: 730, Top: 380, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeore2Slot { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeore2Ready { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeore2Done { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeore2NameText { Anchor: (Left: 612, Top: 928, Width: 106, Height: 16); Style: @NameStyle; Text: "Minerai - Tier 2"; }
-      Label #ResearchNodeore2BonusText { Anchor: (Left: 612, Top: 946, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodeore2Icon { Anchor: (Left: 612, Top: 968, Width: 28, Height: 28); }
-      Label #ResearchNodeore2CostText { Anchor: (Left: 646, Top: 970, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
-      Label #ResearchNodeore2ItemText { Anchor: (Left: 646, Top: 985, Width: 72, Height: 13); Style: @ItemStyle; Text: "Minerai de fer"; }
-      Label #ResearchNodeore2StateText { Anchor: (Left: 612, Top: 1006, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h30"; }
-      Group #ResearchNodeore2Veil { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeore2 { Anchor: (Left: 600, Top: 920, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefurniture2Slot { Anchor: (Left: 730, Top: 1100, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefurniture2Ready { Anchor: (Left: 730, Top: 1100, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefurniture2Done { Anchor: (Left: 730, Top: 1100, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefurniture2NameText { Anchor: (Left: 742, Top: 1108, Width: 146, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 2"; }
+      Label #ResearchNodefurniture2BonusText { Anchor: (Left: 742, Top: 1126, Width: 146, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
+      ItemIcon #ResearchNodefurniture2Icon { Anchor: (Left: 742, Top: 1148, Width: 28, Height: 28); }
+      Label #ResearchNodefurniture2CostText { Anchor: (Left: 776, Top: 1150, Width: 112, Height: 14); Style: @CostStyle; Text: "200x"; }
+      Label #ResearchNodefurniture2ItemText { Anchor: (Left: 776, Top: 1165, Width: 112, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
+      Label #ResearchNodefurniture2StateText { Anchor: (Left: 742, Top: 1186, Width: 146, Height: 13); Style: @TimeStyle; Text: "2h30"; }
+      Group #ResearchNodefurniture2Veil { Anchor: (Left: 730, Top: 1100, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefurniture2 { Anchor: (Left: 730, Top: 1100, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
-      Group #ResearchNodeore3Slot { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodeore3Ready { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodeore3Done { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodeore3NameText { Anchor: (Left: 772, Top: 1108, Width: 106, Height: 16); Style: @NameStyle; Text: "Minerai - Tier 3"; }
-      Label #ResearchNodeore3BonusText { Anchor: (Left: 772, Top: 1126, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodeore3Icon { Anchor: (Left: 772, Top: 1148, Width: 28, Height: 28); }
-      Label #ResearchNodeore3CostText { Anchor: (Left: 806, Top: 1150, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
-      Label #ResearchNodeore3ItemText { Anchor: (Left: 806, Top: 1165, Width: 72, Height: 13); Style: @ItemStyle; Text: "Minerai de fer"; }
-      Label #ResearchNodeore3StateText { Anchor: (Left: 772, Top: 1186, Width: 106, Height: 13); Style: @TimeStyle; Text: "7h00"; }
-      Group #ResearchNodeore3Veil { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodeore3 { Anchor: (Left: 760, Top: 1100, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
-
-      Group #ResearchNodefurniture1Slot { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefurniture1Ready { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefurniture1Done { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefurniture1NameText { Anchor: (Left: 772, Top: 388, Width: 106, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 1"; }
-      Label #ResearchNodefurniture1BonusText { Anchor: (Left: 772, Top: 406, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNodefurniture1Icon { Anchor: (Left: 772, Top: 428, Width: 28, Height: 28); }
-      Label #ResearchNodefurniture1CostText { Anchor: (Left: 806, Top: 430, Width: 72, Height: 14); Style: @CostStyle; Text: "20x"; }
-      Label #ResearchNodefurniture1ItemText { Anchor: (Left: 806, Top: 445, Width: 72, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
-      Label #ResearchNodefurniture1StateText { Anchor: (Left: 772, Top: 466, Width: 106, Height: 13); Style: @TimeStyle; Text: "30min"; }
-      Group #ResearchNodefurniture1Veil { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefurniture1 { Anchor: (Left: 760, Top: 380, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
-
-      Group #ResearchNodefurniture2Slot { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefurniture2Ready { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefurniture2Done { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefurniture2NameText { Anchor: (Left: 772, Top: 568, Width: 106, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 2"; }
-      Label #ResearchNodefurniture2BonusText { Anchor: (Left: 772, Top: 586, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNodefurniture2Icon { Anchor: (Left: 772, Top: 608, Width: 28, Height: 28); }
-      Label #ResearchNodefurniture2CostText { Anchor: (Left: 806, Top: 610, Width: 72, Height: 14); Style: @CostStyle; Text: "200x"; }
-      Label #ResearchNodefurniture2ItemText { Anchor: (Left: 806, Top: 625, Width: 72, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
-      Label #ResearchNodefurniture2StateText { Anchor: (Left: 772, Top: 646, Width: 106, Height: 13); Style: @TimeStyle; Text: "2h30"; }
-      Group #ResearchNodefurniture2Veil { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefurniture2 { Anchor: (Left: 760, Top: 560, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
-
-      Group #ResearchNodefurniture3Slot { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNodefurniture3Ready { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNodefurniture3Done { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNodefurniture3NameText { Anchor: (Left: 772, Top: 1288, Width: 106, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 3"; }
-      Label #ResearchNodefurniture3BonusText { Anchor: (Left: 772, Top: 1306, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNodefurniture3Icon { Anchor: (Left: 772, Top: 1328, Width: 28, Height: 28); }
-      Label #ResearchNodefurniture3CostText { Anchor: (Left: 806, Top: 1330, Width: 72, Height: 14); Style: @CostStyle; Text: "1600x"; }
-      Label #ResearchNodefurniture3ItemText { Anchor: (Left: 806, Top: 1345, Width: 72, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
-      Label #ResearchNodefurniture3StateText { Anchor: (Left: 772, Top: 1366, Width: 106, Height: 13); Style: @TimeStyle; Text: "7h00"; }
-      Group #ResearchNodefurniture3Veil { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNodefurniture3 { Anchor: (Left: 760, Top: 1280, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
-
-      Group #ResearchNoderesources1Slot { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNoderesources1Ready { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNoderesources1Done { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNoderesources1NameText { Anchor: (Left: 612, Top: 28, Width: 106, Height: 16); Style: @NameStyle; Text: "Ressources - Tier 1"; }
-      Label #ResearchNoderesources1BonusText { Anchor: (Left: 612, Top: 46, Width: 106, Height: 13); Style: @BonusStyle; Text: "+25% taille de stack"; }
-      ItemIcon #ResearchNoderesources1Icon { Anchor: (Left: 612, Top: 68, Width: 28, Height: 28); }
-      Label #ResearchNoderesources1CostText { Anchor: (Left: 646, Top: 70, Width: 72, Height: 14); Style: @CostStyle; Text: "100x"; }
-      Label #ResearchNoderesources1ItemText { Anchor: (Left: 646, Top: 85, Width: 72, Height: 13); Style: @ItemStyle; Text: "Diamant"; }
-      Label #ResearchNoderesources1StateText { Anchor: (Left: 612, Top: 106, Width: 106, Height: 13); Style: @TimeStyle; Text: "1h00"; }
-      Group #ResearchNoderesources1Veil { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNoderesources1 { Anchor: (Left: 600, Top: 20, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
-
-      Group #ResearchNoderesources2Slot { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNoderesources2Ready { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNoderesources2Done { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNoderesources2NameText { Anchor: (Left: 772, Top: 748, Width: 106, Height: 16); Style: @NameStyle; Text: "Ressources - Tier 2"; }
-      Label #ResearchNoderesources2BonusText { Anchor: (Left: 772, Top: 766, Width: 106, Height: 13); Style: @BonusStyle; Text: "+50% taille de stack"; }
-      ItemIcon #ResearchNoderesources2Icon { Anchor: (Left: 772, Top: 788, Width: 28, Height: 28); }
-      Label #ResearchNoderesources2CostText { Anchor: (Left: 806, Top: 790, Width: 72, Height: 14); Style: @CostStyle; Text: "250x"; }
-      Label #ResearchNoderesources2ItemText { Anchor: (Left: 806, Top: 805, Width: 72, Height: 13); Style: @ItemStyle; Text: "Diamant"; }
-      Label #ResearchNoderesources2StateText { Anchor: (Left: 772, Top: 826, Width: 106, Height: 13); Style: @TimeStyle; Text: "4h00"; }
-      Group #ResearchNoderesources2Veil { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNoderesources2 { Anchor: (Left: 760, Top: 740, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
-
-      Group #ResearchNoderesources3Slot { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Background: @CardBg; }
-      Group #ResearchNoderesources3Ready { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Background: @CardBgReady; Visible: false; }
-      Group #ResearchNoderesources3Done { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Background: @CardBgDone; Visible: false; }
-      Label #ResearchNoderesources3NameText { Anchor: (Left: 772, Top: 1468, Width: 106, Height: 16); Style: @NameStyle; Text: "Ressources - Tier 3"; }
-      Label #ResearchNoderesources3BonusText { Anchor: (Left: 772, Top: 1486, Width: 106, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
-      ItemIcon #ResearchNoderesources3Icon { Anchor: (Left: 772, Top: 1508, Width: 28, Height: 28); }
-      Label #ResearchNoderesources3CostText { Anchor: (Left: 806, Top: 1510, Width: 72, Height: 14); Style: @CostStyle; Text: "625x"; }
-      Label #ResearchNoderesources3ItemText { Anchor: (Left: 806, Top: 1525, Width: 72, Height: 13); Style: @ItemStyle; Text: "Diamant"; }
-      Label #ResearchNoderesources3StateText { Anchor: (Left: 772, Top: 1546, Width: 106, Height: 13); Style: @TimeStyle; Text: "8h00"; }
-      Group #ResearchNoderesources3Veil { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Background: @Veil; Visible: false; }
-      Button #ResearchNoderesources3 { Anchor: (Left: 760, Top: 1460, Width: 130, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
+      Group #ResearchNodefurniture3Slot { Anchor: (Left: 730, Top: 1820, Width: 170, Height: 110); Background: @CardBg; }
+      Group #ResearchNodefurniture3Ready { Anchor: (Left: 730, Top: 1820, Width: 170, Height: 110); Background: @CardBgReady; Visible: false; }
+      Group #ResearchNodefurniture3Done { Anchor: (Left: 730, Top: 1820, Width: 170, Height: 110); Background: @CardBgDone; Visible: false; }
+      Label #ResearchNodefurniture3NameText { Anchor: (Left: 742, Top: 1828, Width: 146, Height: 16); Style: @NameStyle; Text: "Mobilier - Tier 3"; }
+      Label #ResearchNodefurniture3BonusText { Anchor: (Left: 742, Top: 1846, Width: 146, Height: 13); Style: @BonusStyle; Text: "+100% taille de stack"; }
+      ItemIcon #ResearchNodefurniture3Icon { Anchor: (Left: 742, Top: 1868, Width: 28, Height: 28); }
+      Label #ResearchNodefurniture3CostText { Anchor: (Left: 776, Top: 1870, Width: 112, Height: 14); Style: @CostStyle; Text: "1600x"; }
+      Label #ResearchNodefurniture3ItemText { Anchor: (Left: 776, Top: 1885, Width: 112, Height: 13); Style: @ItemStyle; Text: "Coffre ancien"; }
+      Label #ResearchNodefurniture3StateText { Anchor: (Left: 742, Top: 1906, Width: 146, Height: 13); Style: @TimeStyle; Text: "7h00"; }
+      Group #ResearchNodefurniture3Veil { Anchor: (Left: 730, Top: 1820, Width: 170, Height: 110); Background: @Veil; Visible: false; }
+      Button #ResearchNodefurniture3 { Anchor: (Left: 730, Top: 1820, Width: 170, Height: 110); Style: @NodeBtn; LayoutMode: Top; }
 
       }
     }

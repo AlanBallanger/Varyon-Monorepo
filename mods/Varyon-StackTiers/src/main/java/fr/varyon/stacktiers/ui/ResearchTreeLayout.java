@@ -19,7 +19,7 @@ import java.util.Map;
  */
 final class ResearchTreeLayout {
 
-    static final int CARD_W = 130;
+    static final int CARD_W = 170;
     static final int CARD_H = 110;
     static final int EDGE_POOL = 320;
 
@@ -27,7 +27,7 @@ final class ResearchTreeLayout {
     private static final String EDGE_PREFIX = "#ResearchEdgeSeg";
 
     static final int SIDEBAR_W = 100;
-    private static final int[] COL_X = {120, 280, 440, 600, 760};
+    private static final int[] COL_X = {130, 330, 530, 730};
     private static final int ROW_H = 180;
     private static final int TOP = 20;
 

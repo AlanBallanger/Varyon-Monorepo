@@ -1,12 +1,14 @@
 package fr.varyon.stacktiers.research;
 
-import fr.varyon.stacktiers.PlayerTierStore;
+import fr.varyon.stacktiers.OverrideBridge;
+import fr.varyon.stacktiers.StackCategories;
 
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +21,13 @@ import java.util.logging.Logger;
 /**
  * Cycle de vie des recherches : éligibilité, démarrage (consomme les ressources), résolution
  * des recherches arrivées à échéance (tick périodique + résolution opportuniste), application
- * du palier via PlayerTierStore.set(...) (API existante, inchangée).
+ * du palier de stack via le pont réflexif OverrideBridge.
+ *
+ * research-state.json (completedNodeIds par joueur) est la SEULE source de vérité pour les
+ * paliers de stack — pas de fichier séparé (tier-overrides.txt a existé un temps, supprimé :
+ * un palier par catégorie n'est jamais qu'un résumé du plus haut tier complété dans cette
+ * catégorie, donc le stocker à part aurait dupliqué l'information et pu diverger). Le palier
+ * effectif d'une catégorie se calcule à la volée via tierOf()/applyBridge().
  *
  * Le tick (5s, même cadence que BossTimedSpawnScheduler côté Varyon-BossArena) garantit
  * qu'une recherche se termine même si le joueur ne rouvre jamais l'UI ni ne se reconnecte —
@@ -29,7 +37,7 @@ public final class ResearchManager {
     private static final Logger LOGGER = Logger.getLogger("Varyon-StackTiers");
     private static final long TICK_SECONDS = 5L;
 
-    private final PlayerTierStore tierStore;
+    private final OverrideBridge bridge = OverrideBridge.attach();
     private final ResearchFileStorage storage;
     private final Map<UUID, PlayerResearchState> states = new ConcurrentHashMap<>();
     private final Map<UUID, fr.varyon.stacktiers.ui.ResearchTreeUI> openPages = new ConcurrentHashMap<>();
@@ -39,13 +47,95 @@ public final class ResearchManager {
         return t;
     });
 
-    public ResearchManager(PlayerTierStore tierStore, Path dataDirectory) {
-        this.tierStore = tierStore;
+    public ResearchManager(Path dataDirectory) {
         this.storage = new ResearchFileStorage(dataDirectory);
+    }
+
+    public boolean isBridgeActive() {
+        return bridge.isActive();
     }
 
     public void loadFromDisk() {
         states.putAll(storage.load());
+        for (Map.Entry<UUID, PlayerResearchState> e : states.entrySet()) {
+            applyBridge(e.getKey(), e.getValue());
+        }
+    }
+
+    /** Palier effectif (0 si aucun) d'une catégorie pour un joueur, dérivé de completedNodeIds. */
+    public int tierOf(UUID playerUuid, String category) {
+        PlayerResearchState state = snapshot(playerUuid);
+        int best = 0;
+        for (int t = 1; t <= 3; t++) {
+            ResearchNode n = ResearchTree.byCategoryTier(category, t);
+            if (n != null && state.completedNodeIds.contains(n.id())) {
+                best = t;
+            }
+        }
+        return best;
+    }
+
+    /** Paliers effectifs de toutes les catégories ayant au moins un tier complété. */
+    public Map<String, Integer> listTiers(UUID playerUuid) {
+        Map<String, Integer> result = new HashMap<>();
+        for (String category : StackCategories.KNOWN) {
+            int tier = tierOf(playerUuid, category);
+            if (tier > 0) {
+                result.put(category, tier);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Marque toute la chaîne de prérequis jusqu'au tier donné comme complétée (utilisé par
+     * /varyonstack set) et pousse immédiatement le résultat dans le bridge.
+     * @return le palier précédent (0 si aucun).
+     */
+    public synchronized int setTier(UUID playerUuid, String category, int tier) {
+        int previous = tierOf(playerUuid, category);
+        PlayerResearchState state = snapshot(playerUuid);
+        for (String nodeId : ResearchTree.chainUpTo(category, tier)) {
+            state.completedNodeIds.add(nodeId);
+        }
+        applyBridge(playerUuid, state);
+        persist();
+        return previous;
+    }
+
+    /** Retire tous les nœuds complétés de cette catégorie (désenclenche le palier entièrement). */
+    public synchronized boolean removeCategory(UUID playerUuid, String category) {
+        PlayerResearchState state = snapshot(playerUuid);
+        boolean removed = false;
+        for (int t = 1; t <= 3; t++) {
+            ResearchNode n = ResearchTree.byCategoryTier(category, t);
+            if (n != null) {
+                removed |= state.completedNodeIds.remove(n.id());
+            }
+        }
+        if (removed) {
+            applyBridge(playerUuid, state);
+            persist();
+        }
+        return removed;
+    }
+
+    /** Recalcule et pousse dans le bridge le palier effectif de toutes les catégories d'un joueur. */
+    private void applyBridge(UUID playerUuid, PlayerResearchState state) {
+        for (String category : StackCategories.KNOWN) {
+            int tier = 0;
+            for (int t = 1; t <= 3; t++) {
+                ResearchNode n = ResearchTree.byCategoryTier(category, t);
+                if (n != null && state.completedNodeIds.contains(n.id())) {
+                    tier = t;
+                }
+            }
+            if (tier > 0) {
+                bridge.put(playerUuid.toString(), category, tier);
+            } else {
+                bridge.remove(playerUuid.toString(), category);
+            }
+        }
     }
 
     public void start() {
@@ -225,20 +315,13 @@ public final class ResearchManager {
         }
         ResearchNode node = ResearchTree.byId(state.inProgressNodeId);
         if (node != null) {
-            tierStore.set(playerUuid, node.category(), node.tier());
             state.completedNodeIds.add(node.id());
+            applyBridge(playerUuid, state);
         }
         state.inProgressNodeId = null;
         state.startEpochMs = 0L;
         state.completionEpochMs = 0L;
         return true;
-    }
-
-    /** Marque un nœud (et sa chaîne de prérequis) comme complété sans passer par une recherche — utilisé par /varyonstack set. */
-    public synchronized void markCompleted(UUID playerUuid, String nodeId) {
-        PlayerResearchState state = snapshot(playerUuid);
-        state.completedNodeIds.add(nodeId);
-        persist();
     }
 
     private void persist() {

@@ -17,12 +17,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
-/** Ouvre l'arbre de recherche pour le joueur. Ouvert à tous, aucune permission requise. */
+/**
+ * Ouvre l'arbre de recherche pour le joueur. Le moyen normal est désormais d'interagir avec
+ * l'établi Stacks en jeu (voir fr.varyon.stacktiers.bench.StackTiersBenchPageSupplier) — cette
+ * commande reste en repli (tests, absence d'établi placé), réservée aux admins.
+ */
 public final class VaryonResearchCommand extends AbstractCommandCollection {
     private final ResearchManager researchManager;
 
     public VaryonResearchCommand(@Nonnull ResearchManager researchManager) {
-        super("varyonresearch", "Ouvrir l'arbre de recherche");
+        super("varyonresearch", "Ouvrir l'arbre de recherche (repli admin — utiliser l'établi en jeu)");
+        this.requirePermission("varyon.stacktiers.admin");
         this.researchManager = researchManager;
     }
 
