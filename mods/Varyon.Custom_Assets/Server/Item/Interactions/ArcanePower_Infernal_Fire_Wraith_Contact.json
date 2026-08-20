@@ -1,0 +1,41 @@
+{
+  "Type": "Explode",
+  "Config": {
+    "DamageEntities": true,
+    "EntityDamage": 4,
+    "EntityDamageRadius": 5,
+    "DamageBlocks": false,
+    "BlockDamageRadius": 2,
+    "Knockback": {
+      "Force": 2
+    },
+    "EntityDamageFalloff": 0.85
+  },
+  "Effects": {
+    "Particles": [
+      {
+        "SystemId": "ArcanePower_FireBall_Explosion",
+        "Color": "#ffffff",
+        "TargetEntityPart": "Entity"
+      }
+    ],
+    "WorldSoundEventId": "SFX_Staff_Flame_Fireball_Impact",
+    "LocalSoundEventId": "SFX_Staff_Flame_Fireball_Impact"
+  },
+  "RunTime": 0.1,
+  "Parent": "Explode_Generic_Entities",
+  "Next": {
+    "Type": "DamageEntity",
+    "EntityStatsOnHit": [
+      {
+        "EntityStatId": "SignatureEnergy",
+        "Amount": 5
+      }
+    ],
+    "DamageCalculator": {
+      "BaseDamage": {
+        "Fire": 1
+      }
+    }
+  }
+}

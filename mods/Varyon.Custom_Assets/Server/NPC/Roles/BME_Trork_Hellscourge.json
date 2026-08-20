@@ -1,0 +1,73 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Intelligent",
+  "Modify": {
+    "MaxHealth": 284,
+    "DropList": "Drop_BME_Trork_Hellscourge",
+    "Appearance": "BME_Trork_Hellscourge",
+    "AttitudeGroup": "Void",
+    "DefaultOffHandSlot": -1,
+    "NighttimeOffhandSlot": -1,
+    "Weapons": [
+      "BME_Fire_Club"
+    ],
+    "OffHand": [],
+    "FlockArray": [
+      "Skeleton_Incandescent_Mage_Patrol"
+    ],
+    "Patrol": false,
+    "ApplySeparation": false,
+    "Attack": "Root_NPC_Attack_Melee",
+    "IsMemory": true,
+    "MemoriesCategory": "Trork",
+    "AttackDistance": 4.5,
+    "DesiredAttackDistanceRange": [
+      1,
+      3.5
+    ],
+    "_InteractionVars": {
+      "Melee_Damage": {
+        "Interactions": [
+          {
+            "Parent": "NPC_Attack_Melee_Damage",
+            "DamageCalculator": {
+              "Type": "Absolute",
+              "BaseDamage": {
+                "Physical": 40
+              },
+              "RandomPercentageModifier": 0.1
+            }
+          },
+          {
+            "Type": "Condition",
+            "RequiredGameMode": "Adventure",
+            "Next": {
+              "Type": "ApplyEffect",
+              "EffectId": {
+                "Duration": 2,
+                "OverlapBehavior": "Overwrite",
+                "ApplicationEffects": {
+                  "HorizontalSpeedMultiplier": 0.5
+                }
+              },
+              "Next": {
+                "Type": "ApplyEffect",
+                "Entity": "Target",
+                "EffectId": "Burn"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "NameTranslationKey": {
+      "Compute": "NameTranslationKey"
+    }
+  },
+  "Parameters": {
+    "NameTranslationKey": {
+      "Value": "BME.Trork_Hellscourge.name",
+      "Description": "Translation key for NPC name display"
+    }
+  }
+}

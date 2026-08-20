@@ -1,0 +1,4 @@
+{
+  "_BaseAssetPath": "Server/Item/Items/Food_Fish_Grilled.json",
+  "ResourceTypes": [{ "Id": "Food_Fish" }]
+}

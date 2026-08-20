@@ -1,0 +1,27 @@
+{
+  "Interactions": [
+    {
+      "Type": "Simple",
+      "RunTime": 0.05,
+      "Effects": {
+        "LocalSoundEventId": "ArcanePower_SFX_Shock_Spellbook_ThunderStrike"
+      }
+    },
+    {
+      "Type": "DamageEntity",
+      "DamageEffects": {
+        "WorldParticles": [
+          {
+            "SystemId": "ArcanePower_Shock_Primary_Impact"
+          }
+        ],
+        "PlayerSoundEventId": "ArcanePower_SFX_Shock_Impact_Mono"
+      },
+      "DamageCalculator": {
+        "BaseDamage": {
+          "Elemental": 18
+        }
+      }
+    }
+  ]
+}

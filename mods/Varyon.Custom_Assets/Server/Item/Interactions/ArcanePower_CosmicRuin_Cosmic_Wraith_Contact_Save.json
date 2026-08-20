@@ -1,0 +1,26 @@
+{
+  "Type": "Explode",
+  "Config": {
+    "DamageEntities": true,
+    "EntityDamage": 3,
+    "EntityDamageRadius": 6.5,
+    "DamageBlocks": false,
+    "BlockDamageRadius": 2,
+    "Knockback": {
+      "Force": 2
+    },
+    "EntityDamageFalloff": 0.3
+  },
+  "Effects": {
+    "Particles": [
+      {
+        "SystemId": "ArcanePower_CosmicRuin_Explosion",
+        "Color": "#ffffff",
+        "TargetEntityPart": "Entity",
+        "Scale": 0.525
+      }
+    ],
+    "LocalSoundEventId": "ArcanePower_SFX_CosmicRuin_Impact_Mono",
+    "WorldSoundEventId": "ArcanePower_SFX_CosmicRuin_Impact_Mono"
+  }
+}

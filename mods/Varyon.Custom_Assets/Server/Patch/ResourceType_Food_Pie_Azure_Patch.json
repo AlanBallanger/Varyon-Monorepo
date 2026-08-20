@@ -1,0 +1,4 @@
+{
+  "_BaseAssetPath": "Server/Item/Items/Food_Pie_Azure.json",
+  "ResourceTypes": [{ "Id": "Food_Pie" }]
+}
