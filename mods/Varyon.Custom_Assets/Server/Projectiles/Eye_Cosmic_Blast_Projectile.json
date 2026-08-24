@@ -1,5 +1,5 @@
 {
-  "Appearance": "ArcanePower_NebulaFlurry_Shortbow_Projectile",
+  "Appearance": "Eye_Void_Blast",
   "SticksVertically": true,
   "MuzzleVelocity": 55,
   "TerminalVelocity": 40,
@@ -10,9 +10,9 @@
   "DeadTimeMiss": 0,
   "TimeToLive": 5,
   "HitParticles": {
-    "SystemId": "ArcanePower_Shortbow_NebulaFlurry_Impact_FX"
+    "SystemId": "VoidImpact"
   },
   "DeathParticles": {
-    "SystemId": "ArcanePower_Shortbow_NebulaFlurry_Impact_FX"
+    "SystemId": "VoidImpact"
   }
 }

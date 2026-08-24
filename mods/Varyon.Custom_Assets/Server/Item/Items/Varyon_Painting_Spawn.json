@@ -79,8 +79,6 @@
     },
     "VariantRotation": "NESW",
     "ParticleColor": "#cecece",
-    "CustomModelAnimation": "Blocks/Furniture/Banner/Banner_Idle.blockyanim",
-    "Looping": true,
     "PlacementSettings": {
       "BlockPreviewVisibility": "AlwaysVisible",
       "AllowRotationKey": true

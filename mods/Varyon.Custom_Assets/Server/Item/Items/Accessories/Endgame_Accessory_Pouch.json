@@ -10,11 +10,10 @@
   "Quality": "Legendary",
   "Model": "Items/Back/Endgame_Accessory_Pouch.blockymodel",
   "Texture": "Items/Back/Endgame_Accessory_Pouch_Texture.png",
-  "Icon": "Icons/ItemsGenerated/Endgame_Accessory_Pouch_Icon.png",
+  "Icon": "Icons/ItemsGenerated/Endgame_Accessory_Pouch.png",
   "Scale": 0.5,
   "DropOnDeath": false,
   "PlayerAnimationsId": "Item",
-  "DropOnDeath": false,
   "Interactions": {
     "Secondary": {
       "Interactions": [

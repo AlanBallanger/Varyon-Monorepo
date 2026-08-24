@@ -12,13 +12,6 @@
     "EntityDamageFalloff": 0.85
   },
   "Effects": {
-    "Particles": [
-      {
-        "SystemId": "ArcanePower_FireBall_Explosion",
-        "Color": "#ffffff",
-        "TargetEntityPart": "Entity"
-      }
-    ],
     "WorldSoundEventId": "SFX_Staff_Flame_Fireball_Impact",
     "LocalSoundEventId": "SFX_Staff_Flame_Fireball_Impact"
   },
