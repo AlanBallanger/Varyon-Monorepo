@@ -8,20 +8,19 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
-public final class PortalCommandBlockAttacher {
+public final class PortalConfigAttacher {
 
-    private PortalCommandBlockAttacher() {
+    private PortalConfigAttacher() {
     }
 
     /**
      * World#getBlockComponentHolder returns a copy — mutating it alone does nothing,
      * the write has to go through the live entity or WorldChunk#setState.
      */
-    public static boolean attach(World world, int x, int y, int z, String command, boolean asServer) {
+    public static boolean attach(World world, int x, int y, int z, VaryonPortalConfig config) {
         if (world == null) {
             return false;
         }
-        VaryonPortalCommandBlock custom = new VaryonPortalCommandBlock(command, asServer);
         long chunkIndex = com.hypixel.hytale.math.util.ChunkUtil.indexChunkFromBlock(x, z);
         WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
         if (chunk == null) {
@@ -35,8 +34,8 @@ public final class PortalCommandBlockAttacher {
             if (entityRef != null) {
                 Store<ChunkStore> chunkStore = entityRef.getStore();
                 if (chunkStore != null) {
-                    chunkStore.putComponent(entityRef, VaryonPortalCommandBlock.getComponentType(), custom);
-                    if (VaryonPortalCommandBlock.getAt(world, x, y, z) != null) {
+                    chunkStore.putComponent(entityRef, VaryonPortalConfig.getComponentType(), config);
+                    if (VaryonPortalConfig.getAt(world, x, y, z) != null) {
                         chunk.markNeedsSaving();
                         return true;
                     }
@@ -50,14 +49,14 @@ public final class PortalCommandBlockAttacher {
             if (holder == null) {
                 holder = ChunkStore.REGISTRY.newHolder();
             }
-            holder.tryRemoveComponent(VaryonPortalCommandBlock.getComponentType());
-            holder.putComponent(VaryonPortalCommandBlock.getComponentType(), custom);
+            holder.tryRemoveComponent(VaryonPortalConfig.getComponentType());
+            holder.putComponent(VaryonPortalConfig.getComponentType(), config);
             BlockType blockType = world.getBlockType(x, y, z);
             if (blockType != null) {
                 int rotation = chunk.getRotationIndex(localX, y, localZ);
                 chunk.setState(localX, y, localZ, blockType, rotation, holder);
             }
-            boolean ok = VaryonPortalCommandBlock.getAt(world, x, y, z) != null;
+            boolean ok = VaryonPortalConfig.getAt(world, x, y, z) != null;
             if (ok) {
                 chunk.markNeedsSaving();
             }

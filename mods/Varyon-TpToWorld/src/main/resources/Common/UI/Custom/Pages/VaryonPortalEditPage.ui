@@ -5,7 +5,7 @@ $C.@PageOverlay {
 }
 
 $C.@Container {
-  Anchor: (Width: 560, Height: 220);
+  Anchor: (Width: 560, Height: 262);
 
   #Title {
     $C.@Title {
@@ -36,7 +36,26 @@ $C.@Container {
     Label {
       Text: "Executee sur le joueur qui traverse le portail (ex: tp @p 50 50 50). Laisser vide pour revenir au comportement par defaut (retour au spawn).";
       Style: (TextColor: #6f7f92, FontSize: 11, Wrap: true);
-      Anchor: (Left: 0, Right: 0, Height: 48, Bottom: 12);
+      Anchor: (Left: 0, Right: 0, Height: 48, Bottom: 10);
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 10, Height: 32);
+
+      Label {
+        Text: "Executer en :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      DropdownBox #AsServerInput {
+        Anchor: (Height: 32, Width: 350);
+        Style: $C.@DefaultDropdownBoxStyle;
+        Value: "true";
+        DropdownEntry { Value: "true"; Text: "Serveur"; }
+        DropdownEntry { Value: "false"; Text: "Joueur"; }
+      }
     }
 
     Group #ButtonSection {

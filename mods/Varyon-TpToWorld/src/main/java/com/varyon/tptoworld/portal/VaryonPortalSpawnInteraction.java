@@ -63,12 +63,28 @@ public class VaryonPortalSpawnInteraction extends SimpleBlockInteraction {
             return;
         }
 
+        String storedCommand = null;
+        boolean asServer = true;
         VaryonPortalCommandBlock customCommand = VaryonPortalCommandBlock.getAt(world, targetBlock);
         if (customCommand != null && !customCommand.getCommand().isBlank()) {
+            storedCommand = customCommand.getCommand();
+            asServer = customCommand.isAsServer();
+        } else {
+            VaryonPortalConfig config = VaryonPortalConfig.getAt(world, targetBlock);
+            if (config != null && !config.getCommand().isBlank()) {
+                storedCommand = config.getCommand();
+                asServer = config.isAsServer();
+            }
+        }
+        if (storedCommand != null) {
             PlayerRef playerRef = commandBuffer.getComponent(ref, PlayerRef.getComponentType());
             if (playerRef != null) {
-                String resolved = resolvePlaceholders(customCommand.getCommand(), playerRef);
-                CommandManager.get().handleCommand(ConsoleSender.INSTANCE, resolved);
+                String resolved = resolvePlaceholders(storedCommand, playerRef);
+                if (asServer) {
+                    CommandManager.get().handleCommand(ConsoleSender.INSTANCE, resolved);
+                } else {
+                    CommandManager.get().handleCommand(playerRef, resolved);
+                }
                 return;
             }
         }

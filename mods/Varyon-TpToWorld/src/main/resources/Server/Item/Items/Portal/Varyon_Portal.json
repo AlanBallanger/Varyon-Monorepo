@@ -1,7 +1,7 @@
 {
   "TranslationProperties": {
-    "Name": "items.Varyon_Portal.name",
-    "Description": "items.Varyon_Portal.description"
+    "Name": "server.items.Varyon_Portal.name",
+    "Description": "server.items.Varyon_Portal.description"
   },
   "Icon": "Icons/ItemsGenerated/Varyon_Portal_Device.png",
   "Categories": [

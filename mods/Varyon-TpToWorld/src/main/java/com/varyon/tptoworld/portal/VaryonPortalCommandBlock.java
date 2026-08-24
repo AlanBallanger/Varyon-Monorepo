@@ -18,9 +18,12 @@ public final class VaryonPortalCommandBlock implements Component<ChunkStore> {
                     VaryonPortalCommandBlock.class, VaryonPortalCommandBlock::new)
             .append(new KeyedCodec<>("Command", Codec.STRING),
                     (b, v) -> b.command = v, b -> b.command).add()
+            .append(new KeyedCodec<>("AsServer", Codec.BOOLEAN),
+                    (b, v) -> b.asServer = v, b -> b.asServer).add()
             .build();
 
     private String command = "";
+    private boolean asServer = true;
 
     public static ComponentType<ChunkStore, VaryonPortalCommandBlock> getComponentType() {
         ComponentType<ChunkStore, VaryonPortalCommandBlock> type = componentType;
@@ -50,7 +53,12 @@ public final class VaryonPortalCommandBlock implements Component<ChunkStore> {
     }
 
     public VaryonPortalCommandBlock(String command) {
+        this(command, true);
+    }
+
+    public VaryonPortalCommandBlock(String command, boolean asServer) {
         this.command = command != null ? command : "";
+        this.asServer = asServer;
     }
 
     public String getCommand() {
@@ -61,8 +69,16 @@ public final class VaryonPortalCommandBlock implements Component<ChunkStore> {
         this.command = command != null ? command : "";
     }
 
+    public boolean isAsServer() {
+        return asServer;
+    }
+
+    public void setAsServer(boolean asServer) {
+        this.asServer = asServer;
+    }
+
     @Override
     public Component<ChunkStore> clone() {
-        return new VaryonPortalCommandBlock(this.command);
+        return new VaryonPortalCommandBlock(this.command, this.asServer);
     }
 }

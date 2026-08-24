@@ -1,0 +1,28 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "MagicPortal_ForgottenTemple_Spawn"
+    },
+    {
+      "SpawnerId": "MagicPortal_ForgottenTemple_CenterCircle"
+    },
+    {
+      "SpawnerId": "MagicPortal_ForgottenTemple_Sparks"
+    },
+    {
+      "SpawnerId": "MagicPortal_ForgottenTemple_Center",
+      "StartDelay": 0.5
+    },
+    {
+      "SpawnerId": "MagicPortal_ForgottenTemple_OuterCircle",
+      "RotationOffset": {
+        "Pitch": 90.0
+      },
+      "PositionOffset": {
+        "X": 0.0
+      }
+    }
+  ],
+  "CullDistance": 120.0,
+  "IsImportant": true
+}

@@ -1,0 +1,25 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "MagicPortal_VoidSpawn"
+    },
+    {
+      "SpawnerId": "MagicPortal_VoidCenterCircle"
+    },
+    {
+      "SpawnerId": "MagicPortal_VoidSparks"
+    },
+    {
+      "SpawnerId": "MagicPortal_Center",
+      "StartDelay": 0.5
+    },
+    {
+      "SpawnerId": "MagicPortal_VoidOuterCircle",
+      "RotationOffset": {
+        "Pitch": 90.0
+      }
+    }
+  ],
+  "CullDistance": 50.0,
+  "IsImportant": true
+}

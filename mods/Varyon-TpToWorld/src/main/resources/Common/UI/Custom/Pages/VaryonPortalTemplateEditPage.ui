@@ -1,0 +1,185 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+  LayoutMode: Middle;
+}
+
+$C.@Container {
+  Anchor: (Width: 560, Height: 574);
+
+  #Title {
+    $C.@Title {
+      @Text = "CONFIGURATION DU PORTAIL PERSONNALISABLE";
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Padding: (Full: 16);
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 10, Height: 32);
+
+      Label {
+        Text: "Type :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      DropdownBox #TypeInput {
+        Anchor: (Height: 32, Width: 350);
+        Style: $C.@DefaultDropdownBoxStyle;
+        Value: "MagicPortal_ForgottenTemple";
+        DropdownEntry { Value: "Varyon_Portal_Purple"; Text: "Rond (Violet)"; }
+        DropdownEntry { Value: "MagicPortal_ForgottenTemple"; Text: "Ovale (Bleu)"; }
+        DropdownEntry { Value: "Varyon_Portal_Blue_Light"; Text: "Ovale (Bleu) - Effets reduits"; }
+        DropdownEntry { Value: "MagicPortal_VoidKeyArt"; Text: "Ovale (Violet)"; }
+        DropdownEntry { Value: "Varyon_Portal_Return_Light"; Text: "Ovale (Violet) - Effets reduits"; }
+      }
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 10, Height: 32);
+
+      Label {
+        Text: "Fond :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      DropdownBox #BackgroundInput {
+        Anchor: (Height: 32, Width: 350);
+        Style: $C.@DefaultDropdownBoxStyle;
+        Value: "";
+        DropdownEntry { Value: ""; Text: "Aucun"; }
+        DropdownEntry { Value: "Varyon_CreativeWorld_Blue_Novale_Standalone"; Text: "Novale City"; }
+        DropdownEntry { Value: "Varyon_CreativeWorld_Blue_Fraktale_Standalone"; Text: "Fraktale City"; }
+        DropdownEntry { Value: "Varyon_CreativeWorld_Blue_Haven_Standalone"; Text: "Haven"; }
+      }
+    }
+
+    Label {
+      Text: "Le fond est ignore pour le type Violet, qui a deja sa propre image integree.";
+      Style: (TextColor: #6f7f92, FontSize: 11, Wrap: true);
+      Anchor: (Left: 0, Right: 0, Height: 20, Bottom: 10);
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 10, Height: 32);
+
+      Label {
+        Text: "Taille :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      $C.@TextField #ScaleInput {
+        @Anchor = (Height: 32, Width: 350);
+        Value: "1.0";
+      }
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 10, Height: 32);
+
+      Label {
+        Text: "Hauteur :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      $C.@TextField #CenterOffsetYInput {
+        @Anchor = (Height: 32, Width: 350);
+        Value: "0.0";
+      }
+    }
+
+    Label {
+      Text: "Decalage vertical du centre du portail par rapport au bloc (en blocs).";
+      Style: (TextColor: #6f7f92, FontSize: 11, Wrap: true);
+      Anchor: (Left: 0, Right: 0, Height: 20, Bottom: 10);
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 10, Height: 32);
+
+      Label {
+        Text: "Direction :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      DropdownBox #DirectionInput {
+        Anchor: (Height: 32, Width: 350);
+        Style: $C.@DefaultDropdownBoxStyle;
+        Value: "0";
+        DropdownEntry { Value: "0"; Text: "Nord"; }
+        DropdownEntry { Value: "90"; Text: "Est"; }
+        DropdownEntry { Value: "180"; Text: "Sud"; }
+        DropdownEntry { Value: "270"; Text: "Ouest"; }
+      }
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 8);
+
+      Label {
+        Text: "Commande :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      $C.@TextField #CommandInput {
+        @Anchor = (Height: 32);
+        FlexWeight: 1;
+      }
+    }
+
+    Label {
+      Text: "Executee sur le joueur qui traverse le portail (ex: tp @p 50 50 50). Laisser vide pour revenir au comportement par defaut (retour au spawn).";
+      Style: (TextColor: #6f7f92, FontSize: 11, Wrap: true);
+      Anchor: (Left: 0, Right: 0, Height: 48, Bottom: 10);
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 10, Height: 32);
+
+      Label {
+        Text: "Executer en :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 100);
+      }
+
+      DropdownBox #AsServerInput {
+        Anchor: (Height: 32, Width: 350);
+        Style: $C.@DefaultDropdownBoxStyle;
+        Value: "true";
+        DropdownEntry { Value: "true"; Text: "Serveur"; }
+        DropdownEntry { Value: "false"; Text: "Joueur"; }
+      }
+    }
+
+    Group #ButtonSection {
+      LayoutMode: Left;
+
+      $C.@TextButton #SaveButton {
+        @Text = "ENREGISTRER";
+        @Anchor = (Width: 140, Height: 36);
+      }
+
+      $C.@SecondaryTextButton #CancelButton {
+        @Text = "ANNULER";
+        @Anchor = (Left: 8, Width: 100, Height: 36);
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

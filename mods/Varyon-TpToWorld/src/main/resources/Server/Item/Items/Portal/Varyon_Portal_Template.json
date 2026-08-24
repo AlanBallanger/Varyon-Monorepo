@@ -1,13 +1,14 @@
 {
   "TranslationProperties": {
-    "Name": "server.items.Varyon_Portal_Purple_Novale.name",
-    "Description": "server.items.Varyon_Portal_Purple_Novale.description"
+    "Name": "server.items.Varyon_Portal_Template.name",
+    "Description": "server.items.Varyon_Portal_Template.description"
   },
-  "Icon": "Icons/ItemsGenerated/Varyon_Portal_Device.png",
+  "Icon": "Icons/ItemsGenerated/Portal_Return.png",
   "Categories": [
     "Blocks.Portals"
   ],
   "BlockType": {
+    "AmbientSoundEventId": "SFX_Portal_Neutral",
     "DrawType": "Model",
     "Material": "Empty",
     "Opacity": "Transparent",
@@ -33,16 +34,8 @@
       }
     },
     "Light": {
-      "Color": "#a83bff",
-      "Radius": 3
+      "Color": "#59d"
     },
-    "AmbientSoundEventId": "SFX_Portal_Neutral",
-    "Particles": [
-      {
-        "SystemId": "Varyon_Portal_Purple_Novale",
-        "Scale": 1.2
-      }
-    ],
     "Interactions": {
       "CollisionEnter": {
         "Cooldown": {

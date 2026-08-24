@@ -1,0 +1,13 @@
+{
+  "CullDistance": 192,
+  "Spawners": [
+    {
+      "SpawnerId": "Varyon_CreativeWorld_Blue_Novale",
+      "PositionOffset": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0.03
+      }
+    }
+  ]
+}
