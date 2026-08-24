@@ -102,12 +102,12 @@ public final class ResearchTreeUI extends InteractiveCustomUIPage<ResearchTreeUI
             NodeVisual visual = computeVisual(node, state);
 
             // L'état est porté par la couleur de fond, pas par un texte : sombre + voile
-            // = verrouillé, marron = disponible, vert = débloqué. La ligne en bas à droite
-            // affiche la durée, ou le compte à rebours si la recherche est en cours.
+            // = verrouillé, marron = disponible, bleu = recherche en cours, vert = débloqué.
+            // La ligne en bas à droite affiche la durée, ou le compte à rebours en cours.
             uiBuilder.set(prefix + "StateText.TextSpans", Message.raw(labelFor(node, visual, state, now)));
             uiBuilder.set(prefix + "Veil.Visible", visual == NodeVisual.LOCKED);
-            uiBuilder.set(prefix + "Ready.Visible",
-                    visual == NodeVisual.AVAILABLE || visual == NodeVisual.IN_PROGRESS);
+            uiBuilder.set(prefix + "Ready.Visible", visual == NodeVisual.AVAILABLE);
+            uiBuilder.set(prefix + "Progress.Visible", visual == NodeVisual.IN_PROGRESS);
             uiBuilder.set(prefix + "Done.Visible", visual == NodeVisual.COMPLETED);
             uiBuilder.set(prefix + "Icon.ItemId", node.resourceItemId());
 
