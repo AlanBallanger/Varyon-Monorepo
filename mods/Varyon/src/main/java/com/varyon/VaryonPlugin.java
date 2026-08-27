@@ -97,9 +97,11 @@ public class VaryonPlugin extends JavaPlugin {
     private static SafeZoneNotificationSystem staticSafeZoneNotificationSystem;
     private static ArenaManager staticArenaManager;
     private static GlobalRewardsManager staticGlobalRewardsManager;
+    private static com.varyon.tiers.TierLeaderboardManager staticTierLeaderboardManager;
     private static VaryonPlugin staticInstance;
     private ConfigManager configManager;
     private PointsManager pointsManager;
+    private com.varyon.tiers.TierLeaderboardManager tierLeaderboardManager;
     private FactionManager factionManager;
     private SafeZoneManager safeZoneManager;
     private SafeZoneNotificationSystem safeZoneNotificationSystem;
@@ -168,6 +170,16 @@ public class VaryonPlugin extends JavaPlugin {
             // Initialiser le système de points
             pointsManager = new PointsManager(this.getDataDirectory().toFile());
             staticPointsManager = pointsManager;
+
+            // Initialiser le classement des tiers
+            tierLeaderboardManager = new com.varyon.tiers.TierLeaderboardManager(this.getDataDirectory().toFile(), configManager.getZonePermissionsConfig());
+            staticTierLeaderboardManager = tierLeaderboardManager;
+            this.getEventRegistry().registerGlobal(PlayerConnectEvent.class, event -> {
+                PlayerRef playerRef = event.getPlayerRef();
+                if (playerRef != null) {
+                    tierLeaderboardManager.recordPlayer(playerRef.getUuid(), playerRef.getUsername());
+                }
+            });
 
             pointsRewardsConfig = new PointsRewardsConfig();
             pointsRewardsConfig.attach(configManager.getMobFragmentsConfig(), configManager.getPointsEconomyConfig());
@@ -510,6 +522,9 @@ public class VaryonPlugin extends JavaPlugin {
         if (pointsManager != null) {
             pointsManager.shutdown();
         }
+        if (tierLeaderboardManager != null) {
+            tierLeaderboardManager.close();
+        }
         if (factionBonusSafetyTick != null) {
             factionBonusSafetyTick.cancel(false);
         }
@@ -607,6 +622,11 @@ public class VaryonPlugin extends JavaPlugin {
     @Nullable
     public static PointsManager getStaticPointsManager() {
         return staticPointsManager;
+    }
+
+    @Nullable
+    public static com.varyon.tiers.TierLeaderboardManager getStaticTierLeaderboardManager() {
+        return staticTierLeaderboardManager;
     }
 
     @Nullable

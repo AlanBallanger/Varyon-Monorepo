@@ -20,6 +20,8 @@ import com.varyon.config.ConfigManager;
 import com.varyon.faction.FactionManager;
 import com.varyon.deposit.DepositBlockManager;
 import com.varyon.shop.ShopUIPage;
+import com.varyon.tiers.TierLeaderboardGui;
+import com.varyon.tiers.TierLeaderboardManager;
 
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
@@ -48,6 +50,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
         this.addSubCommand(new WhoIsSubCommand(factionManager));
         this.addSubCommand(new ShopSubCommand());
         this.addSubCommand(new ArenaCommand(arenaManager));
+        this.addSubCommand(new TiersSubCommand());
     }
 
     @NonNullDecl
@@ -79,6 +82,7 @@ public class VaryonCommand extends AbstractAsyncCommand {
             context.sendMessage(Message.raw("  /varyon extract : Invoque un portail d'extraction").color(Color.WHITE));
             context.sendMessage(Message.raw("  /varyon shop : Boutique (clés contre fragments)").color(Color.WHITE));
             context.sendMessage(Message.raw("  /varyon whois : Voir votre faction détectée").color(Color.WHITE));
+            context.sendMessage(Message.raw("  /varyon tiers : Classement des tiers débloqués").color(Color.WHITE));
             context.sendMessage(Message.raw("  /return : Menu de confirmation (retour près de votre point de mort)").color(Color.WHITE));
             context.sendMessage(Message.raw("  /points : Voir vos points de faction").color(Color.WHITE));
             context.sendMessage(Message.raw("  /points top : Classement des points de faction").color(Color.WHITE));
@@ -308,6 +312,45 @@ public class VaryonCommand extends AbstractAsyncCommand {
                 Player playerComp = store.getComponent(ref, Player.getComponentType());
                 if (playerRef == null || playerComp == null) return;
                 ShopUIPage page = new ShopUIPage(playerRef);
+                playerComp.getPageManager().openCustomPage(ref, store, page);
+            }, world);
+        }
+    }
+
+    public static class TiersSubCommand extends AbstractAsyncCommand {
+        public TiersSubCommand() {
+            super("tiers", "Affiche le classement des tiers débloqués");
+        }
+
+        @NonNullDecl
+        @Override
+        protected CompletableFuture<Void> executeAsync(CommandContext context) {
+            CommandSender sender = context.sender();
+            if (!(sender instanceof PlayerRef)) {
+                context.sendMessage(Message.raw("Commande joueur uniquement.").color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+            Ref<EntityStore> ref = context.senderAsPlayerRef();
+            if (ref == null || !ref.isValid()) {
+                context.sendMessage(Message.raw("Joueur non connecté au monde.").color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+            Store<EntityStore> store = ref.getStore();
+            World world = ((EntityStore) store.getExternalData()).getWorld();
+            if (world == null) {
+                context.sendMessage(Message.raw("Monde indisponible.").color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+            TierLeaderboardManager tierLeaderboardManager = VaryonPlugin.getStaticTierLeaderboardManager();
+            if (tierLeaderboardManager == null) {
+                context.sendMessage(Message.raw("Classement des tiers indisponible.").color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+            return CompletableFuture.runAsync(() -> {
+                PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+                Player playerComp = store.getComponent(ref, Player.getComponentType());
+                if (playerRef == null || playerComp == null) return;
+                TierLeaderboardGui page = new TierLeaderboardGui(playerRef, tierLeaderboardManager);
                 playerComp.getPageManager().openCustomPage(ref, store, page);
             }, world);
         }
