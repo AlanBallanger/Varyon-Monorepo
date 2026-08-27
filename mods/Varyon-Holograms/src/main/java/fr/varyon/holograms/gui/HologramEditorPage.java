@@ -208,6 +208,11 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
                 plugin.getHologramManager().setHologramBillboard(hologramName, !hologram.isBillboard());
                 refreshUI(ref, store);
             }
+            case "toggleGlowGlobal" -> {
+                if (!canEdit) { deny(playerRef, ref, store); return; }
+                plugin.getHologramManager().setHologramGlow(hologramName, !hologram.isGlow());
+                refreshUI(ref, store);
+            }
             case "selectAnim" -> {
                 if (!canEdit) { deny(playerRef, ref, store); return; }
                 String anim = data.getAnim();
@@ -425,6 +430,8 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
             EventData.of("Action", "setFacing").append("Facing", "west"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#BillboardGlobalButton",
             EventData.of("Action", "toggleBillboardGlobal"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#GlowGlobalButton",
+            EventData.of("Action", "toggleGlowGlobal"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#BackToListButton",
             EventData.of("Action", "backToList"));
         evt.addEventBinding(CustomUIEventBindingType.Activating, "#MoveHereButton",
@@ -615,6 +622,7 @@ public class HologramEditorPage extends InteractiveCustomUIPage<HologramEditorEv
         cmd.set("#FacingEastButton.Background",  f == HologramFacing.EAST  ? "#3a6a9e" : "#2a3544");
         cmd.set("#FacingWestButton.Background",  f == HologramFacing.WEST  ? "#3a6a9e" : "#2a3544");
         cmd.set("#BillboardGlobalButton.Background", hologram.isBillboard() ? "#3a6a9e" : "#2a3544");
+        cmd.set("#GlowGlobalButton.Background", hologram.isGlow() ? "#3a6a9e" : "#2a3544");
     }
 
     private void buildHologramAnimSection(@Nonnull Hologram hologram, @Nonnull UICommandBuilder cmd,

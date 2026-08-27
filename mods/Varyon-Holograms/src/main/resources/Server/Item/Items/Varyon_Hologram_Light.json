@@ -1,0 +1,17 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Hologram_Light.name",
+    "Description": "server.items.Varyon_Hologram_Light.description"
+  },
+  "BlockType": {
+    "DrawType": "Empty",
+    "Opacity": "Transparent",
+    "Material": "Empty",
+    "BlockSoundSetId": "Empty",
+    "Light": {
+      "Color": "#fda",
+      "Radius": 0
+    },
+    "Support": {}
+  }
+}

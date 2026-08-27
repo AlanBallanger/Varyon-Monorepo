@@ -59,6 +59,7 @@ public final class HologramCommand extends AbstractCommandCollection {
         addSubCommand(new CleanupCommand(plugin));
         addSubCommand(new AnimListCommand());
         addSubCommand(new EntityResendCommand(plugin));
+        addSubCommand(new GlowCommand(plugin));
     }
 
     @Override
@@ -505,6 +506,38 @@ public final class HologramCommand extends AbstractCommandCollection {
             context.sendMessage(Message.raw("Autre: ").color(YELLOW).insert(Message.raw("wave, flip, flip_full").color(WHITE)));
             context.sendMessage(Message.raw("Usage: ").color(GRAY).insert(Message.raw(":anim_<nom> dans une ligne").color(YELLOW)));
             context.sendMessage(Message.raw("Exemple: ").color(GRAY).insert(Message.raw("image:logo:anim_bounce").color(WHITE)));
+        }
+    }
+
+    private static class GlowCommand extends CommandBase {
+        private final VaryonHologramsPlugin plugin;
+        private final RequiredArg<String> nameArg;
+        private final RequiredArg<Boolean> enabledArg;
+
+        GlowCommand(@Nonnull VaryonHologramsPlugin plugin) {
+            super("glow", "Activer/désactiver la lueur nocturne d'un hologramme");
+            this.plugin = plugin;
+            this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
+            this.enabledArg = withRequiredArg("actif", "true/false", (ArgumentType<Boolean>) ArgTypes.BOOLEAN);
+        }
+
+        @Override protected boolean canGeneratePermission() { return false; }
+
+        @Override
+        protected void executeSync(@Nonnull CommandContext context) {
+            if (!perm(context, "varyon.holograms.edit")) {
+                context.sendMessage(Message.raw("Permission refusée.").color(RED)); return;
+            }
+            String name = nameArg.get(context);
+            boolean enabled = enabledArg.get(context);
+            try {
+                plugin.getHologramManager().setHologramGlow(name, enabled);
+                context.sendMessage(Message.raw("Lueur de '").color(GREEN)
+                    .insert(Message.raw(name).color(YELLOW))
+                    .insert(Message.raw("' " + (enabled ? "activée" : "désactivée") + ".").color(GREEN)));
+            } catch (Exception e) {
+                context.sendMessage(Message.raw(e.getMessage()).color(RED));
+            }
         }
     }
 

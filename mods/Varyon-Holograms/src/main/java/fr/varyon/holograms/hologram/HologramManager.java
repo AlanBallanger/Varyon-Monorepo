@@ -8,6 +8,8 @@ import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.asset.type.model.config.Model;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
@@ -63,6 +65,7 @@ public class HologramManager {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final Pattern HOLO_PATTERN = Pattern.compile("\\{(.*?)\\}", Pattern.DOTALL);
+    private static final String GLOW_BLOCK_ID = "Varyon_Hologram_Light";
 
     private final VaryonHologramsPlugin plugin;
     private final Map<UUID, Hologram> holograms = new ConcurrentHashMap<>();
@@ -72,6 +75,7 @@ public class HologramManager {
     private final BillboardManager billboardManager;
     private final CarouselManager carouselManager;
     private final Map<UUID, Map<UUID, Vector3d>> carouselBasePositions = new ConcurrentHashMap<>();
+    private final Map<UUID, int[]> glowBlockPositions = new ConcurrentHashMap<>();
     private boolean spawned = false;
 
     public HologramManager(@Nonnull VaryonHologramsPlugin plugin) {
@@ -209,6 +213,15 @@ public class HologramManager {
         updateHologram(hologram);
     }
 
+    public void setHologramGlow(@Nonnull String hologramName, boolean glow) {
+        Hologram hologram = getHologram(hologramName);
+        if (hologram == null) {
+            throw new IllegalArgumentException("Hologramme introuvable: " + hologramName);
+        }
+        hologram.setGlow(glow);
+        updateHologram(hologram);
+    }
+
     @Nonnull
     public String getWorldName(@Nonnull Hologram hologram) {
         World world = findWorld(hologram.getWorldId());
@@ -306,6 +319,9 @@ public class HologramManager {
                     carouselManager.register(hologram);
                 } else {
                     carouselManager.unregister(hologram.getId());
+                }
+                if (hologram.isGlow()) {
+                    placeGlowBlock(world, hologram);
                 }
             } catch (Exception e) {
                 LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur spawn hologram %s: %s", hologram.getName(), e.getMessage());
@@ -589,6 +605,9 @@ public class HologramManager {
         carouselBasePositions.remove(hologram.getId());
         plugin.getAnimationManager().unregisterHologramAnimation(hologram.getId());
         entityIds.forEach(billboardManager::unregister);
+        if (world != null) {
+            removeGlowBlock(world, hologram);
+        }
         if (world != null && !entityIds.isEmpty()) {
             world.execute(() -> removeEntities(world, entityIds));
         }
@@ -602,6 +621,9 @@ public class HologramManager {
         carouselBasePositions.remove(hologram.getId());
         plugin.getAnimationManager().unregisterHologramAnimation(hologram.getId());
         entityIds.forEach(billboardManager::unregister);
+        if (world != null) {
+            removeGlowBlock(world, hologram);
+        }
         if (world == null || entityIds.isEmpty()) return;
         Runnable logic = () -> removeEntities(world, entityIds);
         try {
@@ -629,6 +651,63 @@ public class HologramManager {
                 LOGGER.at(Level.FINE).log("[Varyon-Holograms] Erreur suppression entité %s: %s", id, e.getMessage());
             }
         }
+    }
+
+    private void placeGlowBlock(@Nonnull World world, @Nonnull Hologram hologram) {
+        Vector3d pos = hologram.getPosition();
+        int blockX = (int) Math.floor(pos.x);
+        int blockY = (int) Math.floor(pos.y) + 1;
+        int blockZ = (int) Math.floor(pos.z);
+        Runnable logic = () -> {
+            try {
+                WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockX, blockZ));
+                if (chunk == null) {
+                    LOGGER.at(Level.WARNING).log("[Varyon-Holograms] placeGlowBlock: chunk non chargé pour %d,%d,%d", blockX, blockY, blockZ);
+                    return;
+                }
+                int existing = chunk.getBlock(blockX, blockY, blockZ);
+                if (existing != 0) {
+                    LOGGER.at(Level.WARNING).log("[Varyon-Holograms] placeGlowBlock: position %d,%d,%d occupée (blockId=%d), skip", blockX, blockY, blockZ, existing);
+                    return;
+                }
+                int glowBlockId = BlockType.getAssetMap().getIndex(GLOW_BLOCK_ID);
+                if (glowBlockId < 0) {
+                    LOGGER.at(Level.WARNING).log("[Varyon-Holograms] placeGlowBlock: id introuvable pour '%s' (getIndex=%d)", GLOW_BLOCK_ID, glowBlockId);
+                    return;
+                }
+                BlockType glowBlockType = BlockType.getAssetMap().getAsset(glowBlockId);
+                if (glowBlockType == null) {
+                    LOGGER.at(Level.WARNING).log("[Varyon-Holograms] placeGlowBlock: BlockType '%s' introuvable (id=%d)", GLOW_BLOCK_ID, glowBlockId);
+                    return;
+                }
+                chunk.setBlock(blockX, blockY, blockZ, glowBlockId, glowBlockType, 0, 0, 256);
+                glowBlockPositions.put(hologram.getId(), new int[]{blockX, blockY, blockZ});
+                LOGGER.at(Level.INFO).log("[Varyon-Holograms] placeGlowBlock: posé en %d,%d,%d (id=%d) pour %s", blockX, blockY, blockZ, glowBlockId, hologram.getName());
+            } catch (Exception e) {
+                LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur placeGlowBlock %s: %s", hologram.getName(), e.getMessage());
+            }
+        };
+        if (world.isInThread()) logic.run(); else world.execute(logic);
+    }
+
+    private void removeGlowBlock(@Nonnull World world, @Nonnull Hologram hologram) {
+        int[] blockPos = glowBlockPositions.remove(hologram.getId());
+        if (blockPos == null) return;
+        int blockX = blockPos[0];
+        int blockY = blockPos[1];
+        int blockZ = blockPos[2];
+        Runnable logic = () -> {
+            try {
+                WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockX, blockZ));
+                if (chunk == null) return;
+                int glowBlockId = BlockType.getAssetMap().getIndex(GLOW_BLOCK_ID);
+                if (chunk.getBlock(blockX, blockY, blockZ) != glowBlockId) return;
+                chunk.setBlock(blockX, blockY, blockZ, 0, BlockType.EMPTY, 0, 0, 256);
+            } catch (Exception e) {
+                LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur removeGlowBlock %s: %s", hologram.getName(), e.getMessage());
+            }
+        };
+        if (world.isInThread()) logic.run(); else world.execute(logic);
     }
 
     private void removeAllHolograms() {
@@ -844,6 +923,9 @@ public class HologramManager {
         if (h.isBillboard()) {
             sb.append(",\n      \"billboard\": true");
         }
+        if (h.isGlow()) {
+            sb.append(",\n      \"glow\": true");
+        }
         if (h.getPageCount() > 1 || h.isCarouselEnabled()) {
             sb.append(",\n      \"pages\": [\n");
             for (int p = 0; p < h.getPageCount(); p++) {
@@ -894,6 +976,7 @@ public class HologramManager {
             HologramLayout layout = HologramLayout.parse(extractStrNullable(body, "layout"));
             HologramFacing facing = HologramFacing.parse(extractStrNullable(body, "facing"));
             boolean billboard = extractBool(body, "billboard");
+            boolean glow = extractBool(body, "glow");
             List<List<String>> pages = extractPages(body);
             List<String> lines = extractStringArray(body, "lines");
             if (pages.isEmpty() && !lines.isEmpty()) {
@@ -909,7 +992,7 @@ public class HologramManager {
             if (carouselInterval <= 0f) carouselInterval = 5f;
             CarouselTransition carouselTransition = CarouselTransition.parse(extractStrNullable(body, "carouselTransition"));
             return new Hologram(id, name, new Vector3d(x, y, z), worldId, pages, lineSpacing, visible, creatorId,
-                group, animation, layout, facing, billboard, carouselEnabled, carouselInterval, carouselTransition);
+                group, animation, layout, facing, billboard, carouselEnabled, carouselInterval, carouselTransition, glow);
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("[Varyon-Holograms] Erreur parsing hologram JSON: %s", e.getMessage());
             return null;

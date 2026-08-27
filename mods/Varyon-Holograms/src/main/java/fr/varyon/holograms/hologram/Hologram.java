@@ -27,6 +27,7 @@ public class Hologram {
     private boolean carouselEnabled;
     private float carouselIntervalSeconds;
     @Nonnull private CarouselTransition carouselTransition;
+    private boolean glow;
     @Nonnull private final List<UUID> lineEntityIds;
 
     public Hologram(@Nonnull String name, @Nonnull Vector3d position, @Nonnull UUID worldId) {
@@ -45,6 +46,7 @@ public class Hologram {
         this.carouselEnabled = false;
         this.carouselIntervalSeconds = 5f;
         this.carouselTransition = CarouselTransition.SLIDE_LEFT;
+        this.glow = false;
     }
 
     public Hologram(@Nonnull UUID id, @Nonnull String name, @Nonnull Vector3d position, @Nonnull UUID worldId,
@@ -52,7 +54,7 @@ public class Hologram {
                     @Nullable String group, @Nullable String animation, @Nonnull HologramLayout layout,
                     @Nonnull HologramFacing facing, boolean billboard,
                     boolean carouselEnabled, float carouselIntervalSeconds,
-                    @Nonnull CarouselTransition carouselTransition) {
+                    @Nonnull CarouselTransition carouselTransition, boolean glow) {
         this.id = id;
         this.name = name;
         this.position = new Vector3d(position);
@@ -73,6 +75,7 @@ public class Hologram {
         this.carouselEnabled = carouselEnabled;
         this.carouselIntervalSeconds = carouselIntervalSeconds;
         this.carouselTransition = carouselTransition;
+        this.glow = glow;
     }
 
     @Nonnull public UUID getId() { return id; }
@@ -90,6 +93,7 @@ public class Hologram {
     public boolean isCarouselEnabled() { return carouselEnabled; }
     public float getCarouselIntervalSeconds() { return carouselIntervalSeconds; }
     @Nonnull public CarouselTransition getCarouselTransition() { return carouselTransition; }
+    public boolean isGlow() { return glow; }
 
     public void setPosition(@Nonnull Vector3d position) { this.position = new Vector3d(position); }
     public void setName(@Nonnull String name) { this.name = name; }
@@ -108,6 +112,7 @@ public class Hologram {
     public void setCarouselTransition(@Nonnull CarouselTransition carouselTransition) {
         this.carouselTransition = carouselTransition;
     }
+    public void setGlow(boolean glow) { this.glow = glow; }
 
     public boolean isCarouselActive() {
         return carouselEnabled && getPageCount() > 1;

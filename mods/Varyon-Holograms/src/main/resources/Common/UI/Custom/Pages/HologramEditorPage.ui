@@ -217,13 +217,25 @@ $C.@Container {
         }
 
         Button #BillboardGlobalButton {
-          Anchor: (Width: 130, Height: 28);
+          Anchor: (Width: 130, Height: 28, Right: 4);
           Padding: (Horizontal: 2, Vertical: 1);
           Background: #2a3544;
           Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
 
           Label {
             Text: "SUIT DU REGARD";
+            Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
+          }
+        }
+
+        Button #GlowGlobalButton {
+          Anchor: (Width: 90, Height: 28);
+          Padding: (Horizontal: 2, Vertical: 1);
+          Background: #2a3544;
+          Style: (Hovered: (Background: #3a4a5e), Sounds: $C.@ButtonSounds);
+
+          Label {
+            Text: "LUEUR";
             Style: (TextColor: #ffffff, FontSize: 11, HorizontalAlignment: Center, VerticalAlignment: Center);
           }
         }
