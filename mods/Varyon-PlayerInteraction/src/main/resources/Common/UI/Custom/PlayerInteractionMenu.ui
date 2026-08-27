@@ -17,12 +17,12 @@ Group {
     Button #MurmurerButton {
       Anchor: (Height: 46, Bottom: 8);
       Style: ButtonStyle(
-        Default: (Background: (Color: #2a3a52aa)),
-        Hovered: (Background: (Color: #3a4a62cc)),
-        Pressed: (Background: (Color: #1c2a3ecc)),
+        Default: (Background: (Color: #2a3a52)),
+        Hovered: (Background: (Color: #3a4a62)),
+        Pressed: (Background: (Color: #1c2a3e)),
         Sounds: $C.@ButtonSounds
       );
-      OutlineColor: #16202eaa;
+      OutlineColor: #16202e;
       OutlineSize: 1;
       Group {
         LayoutMode: Middle;
@@ -36,12 +36,12 @@ Group {
     Button #EchangerButton {
       Anchor: (Height: 46, Bottom: 8);
       Style: ButtonStyle(
-        Default: (Background: (Color: #185a28aa)),
-        Hovered: (Background: (Color: #286a38cc)),
-        Pressed: (Background: (Color: #0f4018cc)),
+        Default: (Background: (Color: #185a28)),
+        Hovered: (Background: (Color: #286a38)),
+        Pressed: (Background: (Color: #0f4018)),
         Sounds: $C.@ButtonSounds
       );
-      OutlineColor: #083818aa;
+      OutlineColor: #083818;
       OutlineSize: 1;
       Group {
         LayoutMode: Middle;
@@ -55,12 +55,12 @@ Group {
     Button #InviterButton {
       Anchor: (Height: 46, Bottom: 8);
       Style: ButtonStyle(
-        Default: (Background: (Color: #5a4a18aa)),
-        Hovered: (Background: (Color: #6a5a28cc)),
-        Pressed: (Background: (Color: #40340fcc)),
+        Default: (Background: (Color: #5a4a18)),
+        Hovered: (Background: (Color: #6a5a28)),
+        Pressed: (Background: (Color: #40340f)),
         Sounds: $C.@ButtonSounds
       );
-      OutlineColor: #382c08aa;
+      OutlineColor: #382c08;
       OutlineSize: 1;
       Group {
         LayoutMode: Middle;
@@ -74,12 +74,12 @@ Group {
     Button #ProfilButton {
       Anchor: (Height: 46);
       Style: ButtonStyle(
-        Default: (Background: (Color: #3a3a3aaa)),
-        Hovered: (Background: (Color: #4a4a4acc)),
-        Pressed: (Background: (Color: #262626cc)),
+        Default: (Background: (Color: #3a3a3a)),
+        Hovered: (Background: (Color: #4a4a4a)),
+        Pressed: (Background: (Color: #262626)),
         Sounds: $C.@ButtonSounds
       );
-      OutlineColor: #1a1a1aaa;
+      OutlineColor: #1a1a1a;
       OutlineSize: 1;
       Group {
         LayoutMode: Middle;

@@ -16,7 +16,7 @@ import java.util.List;
 
 public class PlayerInteractionPlugin extends JavaPlugin {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-    private static final String INTERACT_HINT = "Appuyez sur [{key}] pour interagir";
+    private static final String INTERACT_HINT_KEY = "server.interactionHints.playerInteract";
     private static final String ASSET_PACK = "Varyon:Varyon-PlayerInteraction";
 
     public PlayerInteractionPlugin(JavaPluginInit init) {
@@ -46,7 +46,7 @@ public class PlayerInteractionPlugin extends JavaPlugin {
             if (holder == null) return;
             holder.ensureComponent(Interactable.getComponentType());
             Interactions interactions = holder.ensureAndGetComponent(Interactions.getComponentType());
-            interactions.setInteractionHint(INTERACT_HINT);
+            interactions.setInteractionHint(INTERACT_HINT_KEY);
             interactions.setInteractionId(InteractionType.Use, PlayerInteractionMenuInteraction.ID);
         });
 
