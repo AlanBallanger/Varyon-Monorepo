@@ -1292,69 +1292,10 @@ public final class ClassSkillService {
         float staminaCost = fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.staminaCostForRank(rank);
         if (!ClassSkillStamina.hasEnough(playerRef, staminaCost)) return false;
 
-        try {
-            TransformComponent tc = store.getComponent(entityRef, TransformComponent.getComponentType());
-            com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
-                store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
-            if (tc != null && hr != null) {
-                org.joml.Vector3d dir = hr.getDirection();
-                double dx = dir.x, dz = dir.z;
-                double len = Math.sqrt(dx*dx + dz*dz);
-                if (len > 1e-6) { dx /= len; dz /= len; }
-
-                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
-                    commandBuffer != null
-                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
-                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
-                if (vel != null) {
-                    vel.getInstructions().clear();
-                    vel.addInstruction(
-                        new org.joml.Vector3d(dx * 22.0, 0.5, dz * 22.0),
-                        null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
-                }
-
-                int weaponDmg = fr.varyon.vrpg.classes.WeaponDamageReader.readHeldWeaponDamage(playerRef);
-                float dmg = (weaponDmg > 0 ? weaponDmg : 1f) * fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.damagePctForRank(rank);
-                long casterIdx = entityRef.getIndex();
-                double dist = fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.dashDistanceForRank(rank);
-                org.joml.Vector3d startPos = tc.getPosition();
-                java.util.HashSet<Long> hitSet = new java.util.HashSet<>();
-
-                for (double t = 0.5; t <= dist; t += 0.8) {
-                    org.joml.Vector3d sample = new org.joml.Vector3d(
-                        startPos.x + dx * t,
-                        startPos.y + 0.5,
-                        startPos.z + dz * t);
-                    final double fx = dx, fz = dz;
-                    com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector.selectNearbyEntities(
-                        store, sample, 1.8, targetRef -> {
-                            try {
-                                long tidx = targetRef.getIndex();
-                                if (tidx == casterIdx || !hitSet.add(tidx)) return;
-                                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targetRef, store,
-                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
-                                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(entityRef),
-                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
-                                com.hypixel.hytale.server.core.modules.physics.component.Velocity targetVel =
-                                    store.getComponent(targetRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
-                                if (targetVel != null) {
-                                    targetVel.getInstructions().clear();
-                                    targetVel.addInstruction(
-                                        new org.joml.Vector3d(fx * 12.0, 6.0, fz * 12.0),
-                                        null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
-                                }
-                            } catch (Exception ignored) {}
-                        }, ref -> ref.getIndex() != casterIdx);
-                }
-
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Sword", "StabDashCharged", true, commandBuffer != null ? commandBuffer : store);
-                ClassSkillSounds.playSkillSound("SFX_Sword_T2_Lunge_Local", playerRef, tc.getPosition(), commandBuffer);
-            }
-        } catch (Exception ignored) {}
-
+        if (!fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.execute(playerRef, entityRef, store, commandBuffer, rank)) return false;
         ClassSkillStamina.consume(playerRef, staminaCost);
         if (!bypass) cooldowns.markUsed(uuid, fr.varyon.vrpg.classes.rempart.ChargeLourdeSkill.SKILL_ID);
-        notifySkill(uuid, "Charge Lourde");
+        notifySkill(uuid, "Bélier");
         return true;
     }
 
@@ -1774,8 +1715,8 @@ public final class ClassSkillService {
                         ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
                         : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
                 if (vel != null) {
-                    double hSpeed = fr.varyon.vrpg.classes.berserker.AssautBestialSkill.dashDistanceForRank(rank) * 2.4;
-                    org.joml.Vector3d leapVel = new org.joml.Vector3d(dx * hSpeed, 16.0, dz * hSpeed);
+                    double hSpeed = fr.varyon.vrpg.classes.berserker.AssautBestialSkill.dashDistanceForRank(rank) * 2.0;
+                    org.joml.Vector3d leapVel = new org.joml.Vector3d(dx * hSpeed, 12.0, dz * hSpeed);
                     vel.setClient(leapVel);
                     vel.getInstructions().clear();
                     vel.addInstruction(leapVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
@@ -1814,7 +1755,7 @@ public final class ClassSkillService {
                             long casterIdx = fEntityRef.getIndex();
                             java.util.HashSet<Long> hitSet = new java.util.HashSet<>();
 
-                            double sweepRadius = 3.5;
+                            double sweepRadius = 3.0;
                             double sweepAngle = Math.PI * 2.0 / 3.0;
                             double casterYaw = Math.atan2(-fdx, -fdz);
                             int steps = 16;
@@ -1825,7 +1766,7 @@ public final class ClassSkillService {
                                     landPos.y + 0.8,
                                     landPos.z - Math.cos(angle) * sweepRadius * 0.5);
                                 com.hypixel.hytale.server.core.modules.interaction.interaction.config.selector.Selector
-                                    .selectNearbyEntities(fStore, sample, 2.2, targetRef -> {
+                                    .selectNearbyEntities(fStore, sample, 1.9, targetRef -> {
                                         try {
                                             long tidx = targetRef.getIndex();
                                             if (tidx == casterIdx || !hitSet.add(tidx)) return;
@@ -2140,8 +2081,8 @@ public final class ClassSkillService {
                         ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
                         : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
                 if (vel != null) {
-                    double hSpeed = fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.dashDistanceForRank(rank) * 1.2;
-                    org.joml.Vector3d leapVel = new org.joml.Vector3d(dx * hSpeed, 16.0, dz * hSpeed);
+                    double hSpeed = fr.varyon.vrpg.classes.ravageur.BondEcrasantSkill.dashDistanceForRank(rank) * 2.0;
+                    org.joml.Vector3d leapVel = new org.joml.Vector3d(dx * hSpeed, 12.0, dz * hSpeed);
                     vel.setClient(leapVel);
                     vel.getInstructions().clear();
                     vel.addInstruction(leapVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
@@ -2592,24 +2533,62 @@ public final class ClassSkillService {
                 double dx = dir.x, dz = dir.z;
                 double len = Math.sqrt(dx*dx + dz*dz);
                 if (len > 1e-6) { dx /= len; dz /= len; }
-                double rightX = dz, rightZ = -dx;
 
                 double dist = fr.varyon.vrpg.classes.bagarreur.JeuDeJambesSkill.dashDistanceForRank(rank);
-                double dashSpeed = dist * 3.0;
+                double dashSpeed = dist * 3.4;
 
                 com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
                     commandBuffer != null
                         ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
                         : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
                 if (vel != null) {
-                    org.joml.Vector3d dashVel = new org.joml.Vector3d(rightX * dashSpeed, 2.0, rightZ * dashSpeed);
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(dx * dashSpeed, 2.0, dz * dashSpeed);
                     vel.setClient(dashVel);
                     vel.getInstructions().clear();
                     vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
                 }
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Daggers", "DashBackward", true,
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Daggers", "DashForward", true,
                     commandBuffer != null ? commandBuffer : store);
                 ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, tc.getPosition(), commandBuffer);
+
+                final double fdx = dx, fdz = dz;
+                final PlayerRef fPlayerRef = playerRef;
+                final Ref<EntityStore> fEntityRef = entityRef;
+
+                com.hypixel.hytale.server.core.universe.world.World world = null;
+                try {
+                    java.util.UUID wUuid = playerRef.getWorldUuid();
+                    if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+                } catch (Exception ignored2) {}
+                if (world != null) {
+                    final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                    final Store<EntityStore> fStore = store;
+                    SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
+                        try {
+                            Ref<EntityStore> targeted = findTargetedNpcRef(fPlayerRef, fEntityRef, fStore, 3.0);
+                            if (targeted != null) {
+                                float dmg = getBaseDamage(fPlayerRef) * 4f;
+                                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, fStore,
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(fEntityRef),
+                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+                            }
+                            TransformComponent ftc = fStore.getComponent(fEntityRef, TransformComponent.getComponentType());
+                            if (ftc != null) ClassSkillSounds.playSkillSound("SFX_Vrpg_Punch", fPlayerRef, ftc.getPosition(), null);
+                            AnimationUtils.playAnimation(fEntityRef, AnimationSlot.Action, "Club", "SwingRight", true, fStore);
+
+                            com.hypixel.hytale.server.core.modules.physics.component.Velocity backVel =
+                                fStore.getComponent(fEntityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
+                            if (backVel != null) {
+                                org.joml.Vector3d retreatVel = new org.joml.Vector3d(-fdx * dashSpeed, 2.0, -fdz * dashSpeed);
+                                backVel.setClient(retreatVel);
+                                backVel.getInstructions().clear();
+                                backVel.addInstruction(retreatVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                            }
+                            AnimationUtils.playAnimation(fEntityRef, AnimationSlot.Action, "Daggers", "DashBackward", true, fStore);
+                        } catch (Exception ignored2) {}
+                    }), 250, java.util.concurrent.TimeUnit.MILLISECONDS);
+                }
             }
         } catch (Exception ignored) {}
 
@@ -2902,26 +2881,20 @@ public final class ClassSkillService {
 
                 double dashX = -fwdX, dashZ = -fwdZ;
 
-                double baseForce = 12.0 + fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.dashDistanceForRank(rank) * 0.875;
-                com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig dashConfig =
-                    new com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig();
-                dashConfig.setAirResistance(0.97f);
-                dashConfig.setAirResistanceMax(0.96f);
-                dashConfig.setGroundResistance(0.94f);
-                dashConfig.setGroundResistanceMax(0.82f);
-                dashConfig.setThreshold(5.0f);
-                dashConfig.setStyle(com.hypixel.hytale.protocol.VelocityThresholdStyle.Exp);
-
-                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
-                    commandBuffer != null
-                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
-                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
-                if (vel != null) {
-                    org.joml.Vector3d dashVel = new org.joml.Vector3d(dashX * baseForce, 0.2, dashZ * baseForce);
-                    vel.setClient(dashVel);
-                    vel.getInstructions().clear();
-                    vel.addInstruction(dashVel, dashConfig, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
-                }
+                double dist = fr.varyon.vrpg.classes.arcaniste.DistorsionSkill.dashDistanceForRank(rank);
+                org.joml.Vector3d newPos = new org.joml.Vector3d(
+                    tc.getPosition().x + dashX * dist,
+                    tc.getPosition().y,
+                    tc.getPosition().z + dashZ * dist);
+                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
+                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(
+                    curRot.pitch(), curRot.yaw(), curRot.roll());
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(
+                        newPos, keepRot);
+                tele.withoutVelocityReset();
+                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
 
                 try {
                     String animName = "DashBackward";
@@ -3678,25 +3651,21 @@ public final class ClassSkillService {
                 double fwdLen = Math.sqrt(fwdX * fwdX + fwdZ * fwdZ);
                 if (fwdLen > 1e-6) { fwdX /= fwdLen; fwdZ /= fwdLen; }
                 double dashX = -fwdX, dashZ = -fwdZ;
-                double baseForce = 12.0 + fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.dashDistanceForRank(rank) * 0.875;
-                com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig dashConfig =
-                    new com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig();
-                dashConfig.setAirResistance(0.97f);
-                dashConfig.setAirResistanceMax(0.96f);
-                dashConfig.setGroundResistance(0.94f);
-                dashConfig.setGroundResistanceMax(0.82f);
-                dashConfig.setThreshold(5.0f);
-                dashConfig.setStyle(com.hypixel.hytale.protocol.VelocityThresholdStyle.Exp);
-                com.hypixel.hytale.server.core.modules.physics.component.Velocity vel =
-                    commandBuffer != null
-                        ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
-                        : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
-                if (vel != null) {
-                    org.joml.Vector3d dashVel = new org.joml.Vector3d(dashX * baseForce, 0.2, dashZ * baseForce);
-                    vel.setClient(dashVel);
-                    vel.getInstructions().clear();
-                    vel.addInstruction(dashVel, dashConfig, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
-                }
+                double dist = fr.varyon.vrpg.classes.gardiendesgaia.EvasionSylvestreSkill.dashDistanceForRank(rank);
+                org.joml.Vector3d newPos = new org.joml.Vector3d(
+                    tc.getPosition().x + dashX * dist,
+                    tc.getPosition().y,
+                    tc.getPosition().z + dashZ * dist);
+                com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
+                com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(
+                    curRot.pitch(), curRot.yaw(), curRot.roll());
+                com.hypixel.hytale.server.core.modules.entity.teleport.Teleport tele =
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.createForPlayer(
+                        newPos, keepRot);
+                tele.withoutVelocityReset();
+                (commandBuffer != null ? commandBuffer : store).addComponent(entityRef,
+                    com.hypixel.hytale.server.core.modules.entity.teleport.Teleport.getComponentType(), tele);
+
                 ClassSkillSounds.playSkillSound("SFX_Vrpg_OmbreVanish", playerRef, tc.getPosition(), commandBuffer);
             }
         } catch (Exception ignored) {}
@@ -5191,15 +5160,15 @@ public final class ClassSkillService {
                 double len = Math.sqrt(dx*dx + dz*dz);
                 if (len > 1e-6) { dx /= len; dz /= len; }
 
-                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "DashBackward", true,
+                AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "DashForward", true,
                     commandBuffer != null ? commandBuffer : store);
                 ClassSkillSounds.playSkillSound("SFX_Daggers_T1_Pounce", playerRef, tc.getPosition(), commandBuffer);
 
                 double dist = fr.varyon.vrpg.classes.lancier.PerceeSkill.dashDistanceForRank(rank);
                 org.joml.Vector3d newPos = new org.joml.Vector3d(
-                    tc.getPosition().x - dx * dist,
+                    tc.getPosition().x + dx * dist,
                     tc.getPosition().y,
-                    tc.getPosition().z - dz * dist);
+                    tc.getPosition().z + dz * dist);
                 com.hypixel.hytale.math.vector.Rotation3fc curRot = hr.getRotation();
                 com.hypixel.hytale.math.vector.Rotation3f keepRot = new com.hypixel.hytale.math.vector.Rotation3f(
                     curRot.pitch(), curRot.yaw(), curRot.roll());
@@ -5214,10 +5183,46 @@ public final class ClassSkillService {
                         ? commandBuffer.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType())
                         : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
                 if (vel != null) {
-                    org.joml.Vector3d dashVel = new org.joml.Vector3d(-dx * 30.0, 0.2, -dz * 30.0);
+                    org.joml.Vector3d dashVel = new org.joml.Vector3d(dx * 30.0, 0.2, dz * 30.0);
                     vel.setClient(dashVel);
                     vel.getInstructions().clear();
                     vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                }
+
+                final PlayerRef fPlayerRef = playerRef;
+                final Ref<EntityStore> fEntityRef = entityRef;
+                com.hypixel.hytale.server.core.universe.world.World world = null;
+                try {
+                    java.util.UUID wUuid = playerRef.getWorldUuid();
+                    if (wUuid != null) world = com.hypixel.hytale.server.core.universe.Universe.get().getWorld(wUuid);
+                } catch (Exception ignored2) {}
+                if (world != null) {
+                    final com.hypixel.hytale.server.core.universe.world.World fw = world;
+                    final Store<EntityStore> fStore = store;
+                    SKILL_SCHEDULER.schedule(() -> fw.execute(() -> {
+                        try {
+                            int stabIdx = com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction
+                                .getAssetMap().getIndex("Spear_Stab");
+                            if (stabIdx >= 0) {
+                                String heldItemId = getHeldItemId(fPlayerRef);
+                                com.hypixel.hytale.protocol.packets.interaction.PlayInteractionFor stabPacket =
+                                    new com.hypixel.hytale.protocol.packets.interaction.PlayInteractionFor(
+                                        (int) fEntityRef.getIndex(), 0, null, 0, stabIdx,
+                                        heldItemId, com.hypixel.hytale.protocol.InteractionType.Primary, false);
+                                com.hypixel.hytale.server.core.universe.world.PlayerUtil.forEachPlayerThatCanSeeEntity(
+                                    fEntityRef, (seenEntity, viewer, accessor) -> viewer.getPacketHandler().write(stabPacket), fStore);
+                            }
+
+                            Ref<EntityStore> targeted = findTargetedNpcRef(fPlayerRef, fEntityRef, fStore, 3.0);
+                            if (targeted != null) {
+                                float dmg = getBaseDamage(fPlayerRef);
+                                com.hypixel.hytale.server.core.modules.entity.damage.DamageSystems.executeDamage(targeted, fStore,
+                                    new com.hypixel.hytale.server.core.modules.entity.damage.Damage(
+                                        new com.hypixel.hytale.server.core.modules.entity.damage.Damage.EntitySource(fEntityRef),
+                                        com.hypixel.hytale.server.core.modules.entity.damage.DamageCause.PHYSICAL, dmg));
+                            }
+                        } catch (Exception ignored2) {}
+                    }), 200, java.util.concurrent.TimeUnit.MILLISECONDS);
                 }
             }
         } catch (Exception ignored) {}

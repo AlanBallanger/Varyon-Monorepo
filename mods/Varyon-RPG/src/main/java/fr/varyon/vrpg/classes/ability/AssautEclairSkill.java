@@ -33,7 +33,7 @@ public final class AssautEclairSkill {
     private static final long[]  COOLDOWN_MS = {20000, 18000, 16000, 14000, 12000};
     private static final float[] STAMINA_COST = {6f, 7f, 8f, 9f, 10f};
     private static final float   DASH_SPEED   = 24f;
-    private static final double  DASH_DISTANCE = 5.0;
+    private static final double  DASH_DISTANCE = 6.5;
     private static final double  HIT_RADIUS    = 1.8;
 
     private AssautEclairSkill() {}

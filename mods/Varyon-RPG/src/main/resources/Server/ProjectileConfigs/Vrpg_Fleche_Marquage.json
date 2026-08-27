@@ -8,7 +8,7 @@
     "TerminalVelocityWater": 15,
     "RotationMode": "VelocityDamped",
     "Bounciness": 0.0,
-    "SticksVertically": true
+    "SticksVertically": false
   },
   "SpawnOffset": {
     "X": 0.15,
@@ -20,6 +20,14 @@
       "Cooldown": { "Cooldown": 0 },
       "Interactions": [
         {
+          "Type": "Simple",
+          "RunTime": 0,
+          "Effects": {
+            "LocalSoundEventId": "SFX_Arrow_FullCharge_Hit",
+            "WorldSoundEventId": "SFX_Arrow_FullCharge_Hit"
+          }
+        },
+        {
           "Parent": "DamageEntityParent",
           "DamageCalculator": {
             "BaseDamage": {
@@ -27,22 +35,6 @@
             }
           }
         },
-        {
-          "Type": "Simple",
-          "Effects": {
-            "LocalSoundEventId": "SFX_Arrow_FullCharge_Hit",
-            "WorldSoundEventId": "SFX_Arrow_FullCharge_Hit"
-          }
-        },
-        {
-          "Type": "RemoveEntity",
-          "Entity": "User"
-        }
-      ]
-    },
-    "ProjectileMiss": {
-      "Cooldown": { "Cooldown": 0 },
-      "Interactions": [
         {
           "Type": "RemoveEntity",
           "Entity": "User"

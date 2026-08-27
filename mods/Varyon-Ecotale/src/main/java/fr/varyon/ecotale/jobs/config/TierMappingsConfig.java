@@ -13,7 +13,7 @@ import java.util.*;
 public class TierMappingsConfig {
     
     // Current mappings version - increment when adding new mobs
-    public static final int CURRENT_VERSION = 1;
+    public static final int CURRENT_VERSION = 2;
     
     public static final BuilderCodec<TierMappingsConfig> CODEC = BuilderCodec.builder(TierMappingsConfig.class, TierMappingsConfig::new)
         .append(new KeyedCodec<>("Version", Codec.INTEGER),
@@ -139,7 +139,29 @@ public class TierMappingsConfig {
         m.put("Yeti", "ELITE");                  // 226 HP, tough mythic
         m.put("Golem_*", "ELITE");               // All golems are elite
         m.put("*_Void", "ELITE");                // Void creatures
-        
+
+        // ---- Arcane_Power ----
+        m.put("ArcanePower_Eye_Cosmic", "ELITE");
+        m.put("ArcanePower_Skeleton_Cosmic_Wraith", "ELITE");
+        m.put("ArcanePower_Skeleton_Cosmic_Wraith_Patrol", "ELITE");
+        m.put("ArcanePower_Skeleton_Cosmic_Wraith_Wander", "ELITE");
+        m.put("ArcanePower_Skeleton_Fire_Wraith", "ELITE");
+        m.put("ArcanePower_Skeleton_Fire_Wraith_Patrol", "ELITE");
+        m.put("ArcanePower_Skeleton_Fire_Wraith_Wander", "ELITE");
+        m.put("ArcanePower_Skeleton_Thunder_Wraith", "ELITE");
+        m.put("ArcanePower_Skeleton_Thunder_Wraith_Patrol", "ELITE");
+        m.put("ArcanePower_Skeleton_Thunder_Wraith_Wander", "ELITE");
+
+        // ---- BetterMobExpansion ----
+        m.put("BME_Bigfoot", "ELITE");
+        m.put("BME_Elder_Crocodile", "ELITE");
+        m.put("BME_Fen_Crocodile", "ELITE");
+        m.put("BME_Feran_Beastmaster", "ELITE");
+        m.put("BME_Shark_Megalodon", "ELITE");
+
+        // ---- Blooks_Pirates ----
+        m.put("Blook_Skeleton_Pirate_Captain", "MINIBOSS");
+
         // ============ HOSTILE (Danger 100-300) ============
         // Standard combat enemies
         m.put("Raptor_Cave", "HOSTILE");         // 103 HP, 27 DMG -> 211
@@ -229,7 +251,13 @@ public class TierMappingsConfig {
         m.put("Crawler_Void", "PASSIVE");
         m.put("Eye_Void", "PASSIVE");
         m.put("Larva_Silk", "PASSIVE");
-        
+
+        // ---- BetterMobExpansion ----
+        m.put("BME_Fairy", "PASSIVE");
+        m.put("BME_Lost_Kweebec", "PASSIVE");
+        m.put("BME_Slime", "PASSIVE");
+        m.put("BME_Slime_Red", "PASSIVE");
+
         // ============ CRITTER (Danger 0-50) ============
         // Tiny creatures, babies, passive wildlife
         m.put("*_Chick", "CRITTER");
@@ -293,7 +321,10 @@ public class TierMappingsConfig {
         m.put("Goblin_Lobber*", "CRITTER");
         m.put("Temple_*", "CRITTER");
         m.put("Snake_Marsh", "CRITTER");
-        
+
+        // ---- BetterMobExpansion ----
+        m.put("BME_Butterfly", "CRITTER");
+
         return m;
     }
     
@@ -314,7 +345,12 @@ public class TierMappingsConfig {
         // Wolf companions (tamed)
         ex.add("Wolf_Trork_*");
         ex.add("Wolf_Outlander_*");
-        
+
+        // BetterMobExpansion: loot crates, not creatures
+        ex.add("BME_Airdrop");
+        ex.add("BME_Airdrop_Frost");
+        ex.add("BME_Airdrop_Sand");
+
         return ex;
     }
 }
