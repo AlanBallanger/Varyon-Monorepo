@@ -118,12 +118,19 @@ public final class MusicZone implements Comparable<MusicZone> {
     }
 
     public boolean contains(double x, double y, double z) {
-        return x >= minX
-                && x <= maxX
-                && y >= minY
-                && y <= maxY
-                && z >= minZ
-                && z <= maxZ;
+        return contains(x, y, z, 0.0);
+    }
+
+    // margin > 0 élargit la zone (hystérésis de sortie : rester "dedans" tant qu'on n'a pas
+    // dépassé la bordure de margin blocs, pour éviter le flicker si la position oscille pile
+    // sur la limite exacte de la zone).
+    public boolean contains(double x, double y, double z, double margin) {
+        return x >= minX - margin
+                && x <= maxX + margin
+                && y >= minY - margin
+                && y <= maxY + margin
+                && z >= minZ - margin
+                && z <= maxZ + margin;
     }
 
     public double volume() {

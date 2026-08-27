@@ -4,6 +4,9 @@ import com.hypixel.hytale.assetstore.AssetPack;
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.AssetModule;
+import com.hypixel.hytale.server.core.asset.common.CommonAssetModule;
+import com.hypixel.hytale.server.core.asset.type.ambiencefx.config.AmbienceFX;
+import com.hypixel.hytale.server.core.asset.type.musiccontainer.config.MusicContainer;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 
 import java.io.IOException;
@@ -72,6 +75,7 @@ final class ZoneMusicAssetGenerator {
             return;
         }
 
+        AssetPack pack;
         if (am.getAssetPack(PACK_ID) == null) {
             LOGGER.atInfo().log("[MusicZones] registerPack...");
             PluginManifest m = new PluginManifest();
@@ -84,9 +88,42 @@ final class ZoneMusicAssetGenerator {
             }
             am.registerPack(PACK_ID, packRoot, m, AssetPack.PackSource.MODS);
             am.initPendingStores();
+            pack = am.getAssetPack(PACK_ID);
             LOGGER.atInfo().log("[MusicZones] Pack enregistré, zones=" + zones.size());
         } else {
+            pack = am.getAssetPack(PACK_ID);
             LOGGER.atInfo().log("[MusicZones] Pack déjà enregistré, fichiers mis à jour en place, zones=" + zones.size());
+        }
+
+        // registerPack() ne déclenche loadCommonAssets() (indexation synchrone des .ogg dans
+        // CommonAssetRegistry) qu'au tout premier enregistrement du pack via AssetPackRegisterEvent.
+        // Sur la branche "pack déjà enregistré" (création/suppression de zone après le boot), cet
+        // event ne refire jamais : sans ce réappel explicite, seul le file watcher asynchrone finit
+        // par indexer les .ogg (~3s plus tard), trop tard pour la validation immédiate du
+        // MusicContainer qui suit, qui échoue alors avec "Common Asset ... doesn't exist".
+        if (pack != null) {
+            try {
+                CommonAssetModule.get().loadCommonAssets(pack, System.currentTimeMillis());
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[MusicZones] échec rechargement des Common Assets (ogg)");
+            }
+        }
+
+        // initPendingStores() ne recharge que les AssetStore créés APRES le boot.
+        // Les stores AmbienceFX/MusicContainer existent déjà au démarrage du serveur,
+        // il faut donc forcer leur (re)chargement explicitement, MusicContainer avant AmbienceFX
+        // (AmbienceFX résout et met en cache l'index de son MusicContainer à son propre chargement).
+        try {
+            var mcResult = MusicContainer.getAssetStore().loadAssetsFromDirectory(PACK_ID, mcDestDir);
+            LOGGER.atInfo().log("[MusicZones] MusicContainer rechargés depuis " + mcDestDir + " -> " + mcResult);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[MusicZones] échec rechargement MusicContainer");
+        }
+        try {
+            var ambResult = AmbienceFX.getAssetStore().loadAssetsFromDirectory(PACK_ID, ambDestDir);
+            LOGGER.atInfo().log("[MusicZones] AmbienceFX rechargés depuis " + ambDestDir + " -> " + ambResult);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[MusicZones] échec rechargement AmbienceFX");
         }
     }
 
@@ -145,7 +182,9 @@ final class ZoneMusicAssetGenerator {
                 + "  \"Type\": \"SingleTrack\",\n"
                 + "  \"Track\": \""
                 + commonTrackPath
-                + "\"\n"
+                + "\",\n"
+                + "  \"LoopCount\": 0,\n"
+                + "  \"ResumeMemoryDuration\": 0\n"
                 + "}\n";
     }
 
@@ -154,8 +193,9 @@ final class ZoneMusicAssetGenerator {
                 + "  \"MusicContainer\": \""
                 + musicContainerId
                 + "\",\n"
-                + "  \"Priority\": 100,\n"
-                + "  \"AudioCategory\": \"AudioCat_Music\"\n"
+                + "  \"Priority\": 0,\n"
+                + "  \"AudioCategory\": \"AudioCat_Music\",\n"
+                + "  \"Conditions\": { \"Never\": true }\n"
                 + "}\n";
     }
 }
