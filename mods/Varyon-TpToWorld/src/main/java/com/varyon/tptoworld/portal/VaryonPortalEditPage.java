@@ -129,8 +129,8 @@ public class VaryonPortalEditPage extends InteractiveCustomUIPage<VaryonPortalEd
 
     private void replayPortalEffect(@Nonnull Store<EntityStore> store, @Nonnull VaryonPortalConfig config) {
         try {
-            double centerX = x + (isWide ? 1.0 : 0.5);
-            org.joml.Vector3d center = new org.joml.Vector3d(centerX, y + config.getEffectiveOffsetY(), z + 0.5);
+            org.joml.Vector3d center = new org.joml.Vector3d(0, y + config.getEffectiveOffsetY(), 0);
+            VaryonPortalConfig.computeHorizontalCenter(world, x, y, z, isWide, center);
             ComponentAccessor<EntityStore> accessor = store;
             SpatialResource<Ref<EntityStore>, EntityStore> playerSpatial =
                     accessor.getResource(EntityModule.get().getPlayerSpatialResourceType());
@@ -139,12 +139,13 @@ public class VaryonPortalEditPage extends InteractiveCustomUIPage<VaryonPortalEd
                     center, PortalTemplateTickSystem.PARTICLE_RENDER_DISTANCE, playerRefs);
 
             float yawRadians = (float) Math.toRadians(config.getYaw());
-            ParticleUtil.spawnParticleEffect(config.getType(), center.x, center.y, center.z,
+            ParticleUtil.spawnParticleEffect(VaryonPortalConfig.resolveParticleSystemId(config.getType()), center.x, center.y, center.z,
                     yawRadians, 0f, 0f, config.getScale(), null, null, playerRefs, accessor,
                     PortalTemplateTickSystem.PARTICLE_MAX_DURATION_SECONDS);
 
             if (config.hasBackground()) {
-                ParticleUtil.spawnParticleEffect(config.getBackground(), center.x, center.y, center.z,
+                String backgroundId = VaryonPortalConfig.resolveBackgroundParticleSystemId(config.getType(), config.getBackground());
+                ParticleUtil.spawnParticleEffect(backgroundId, center.x, center.y, center.z,
                         yawRadians, 0f, 0f, config.getScale(), null, null, playerRefs, accessor,
                         PortalTemplateTickSystem.PARTICLE_MAX_DURATION_SECONDS);
             }

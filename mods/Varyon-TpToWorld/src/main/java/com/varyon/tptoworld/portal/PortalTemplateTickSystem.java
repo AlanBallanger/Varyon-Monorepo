@@ -80,10 +80,13 @@ public final class PortalTemplateTickSystem extends EntityTickingSystem<EntitySt
             }
 
             Vector3d playerPos = transform.getPosition();
+            Vector3d center = new Vector3d();
             for (PortalTemplateEntry portal : portals) {
-                double gx = portal.x() + (portal.wide() ? 1.0 : 0.5);
                 double gy = portal.y() + portal.centerOffsetY() + VaryonPortalConfig.baseHeightOffsetFor(portal.type());
-                double gz = portal.z() + 0.5;
+                center.y = gy;
+                VaryonPortalConfig.computeHorizontalCenter(world, portal.x(), portal.y(), portal.z(), portal.wide(), center);
+                double gx = center.x;
+                double gz = center.z;
 
                 double dx = playerPos.x - gx;
                 double dy = playerPos.y - gy;
@@ -109,12 +112,13 @@ public final class PortalTemplateTickSystem extends EntityTickingSystem<EntitySt
                     PARTICLE_RENDER_DISTANCE, playerRefs);
 
             float yawRadians = (float) Math.toRadians(portal.yaw());
-            ParticleUtil.spawnParticleEffect(portal.type(), gx, gy, gz,
+            ParticleUtil.spawnParticleEffect(VaryonPortalConfig.resolveParticleSystemId(portal.type()), gx, gy, gz,
                     yawRadians, 0f, 0f, portal.scale(), null, null, playerRefs, accessor,
                     PARTICLE_MAX_DURATION_SECONDS);
 
             if (portal.hasBackground()) {
-                ParticleUtil.spawnParticleEffect(portal.background(), gx, gy, gz,
+                String backgroundId = VaryonPortalConfig.resolveBackgroundParticleSystemId(portal.type(), portal.background());
+                ParticleUtil.spawnParticleEffect(backgroundId, gx, gy, gz,
                         yawRadians, 0f, 0f, portal.scale(), null, null, playerRefs, accessor,
                         PARTICLE_MAX_DURATION_SECONDS);
             }

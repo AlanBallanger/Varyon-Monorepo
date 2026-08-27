@@ -24,6 +24,6 @@ public record PortalTemplateEntry(
     }
 
     public boolean hasBackground() {
-        return background != null && !background.isBlank() && VaryonPortalConfig.supportsCustomBackground(type);
+        return background != null && !background.isBlank();
     }
 }

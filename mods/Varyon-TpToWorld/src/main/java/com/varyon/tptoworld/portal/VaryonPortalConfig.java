@@ -6,8 +6,11 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+import org.joml.Vector3d;
 import org.joml.Vector3i;
 
 public final class VaryonPortalConfig implements Component<ChunkStore> {
@@ -34,13 +37,56 @@ public final class VaryonPortalConfig implements Component<ChunkStore> {
     }
 
     /**
-     * Varyon_Portal_Purple already bakes its own generic city-background spawner
-     * (Varyon_CreativeWorld_Purple) into its particlesystem. Stacking one of the
-     * Novale/Fraktale/Haven backgrounds on top of it would double up the image, so the
-     * user-selected background is ignored for this type instead of being spawned twice.
+     * The dynamic template uses "Varyon_Portal_Purple" as its stored/UI type value, but its own
+     * generic Varyon city background is baked into that shared particlesystem (also used by the
+     * static, non-customizable Varyon_Portal_Purple item). Spawning the template with that id
+     * would always show the Varyon background regardless of the user's Background selection, so
+     * the template resolves to a bare variant with no baked background instead; the Varyon
+     * background is offered as one of the selectable Background options.
      */
-    public static boolean supportsCustomBackground(String type) {
-        return !"Varyon_Portal_Purple".equals(type);
+    public static String resolveParticleSystemId(String type) {
+        if ("Varyon_Portal_Purple".equals(type)) {
+            return "Varyon_Portal_Purple_Template";
+        }
+        return type;
+    }
+
+    /**
+     * The Background dropdown's Blue_*_Standalone systems are vertically tuned for the oval
+     * Blue portal (whose ring already sits +2.0 higher, see baseHeightOffsetFor), so layering
+     * them on the round Purple portal (base offset 0.0) puts the background image below where
+     * the ring is drawn. Purple has its own vertically-matched Purple_*_Standalone systems for
+     * the same backgrounds; this routes to those when the selected type is Purple.
+     */
+    public static String resolveBackgroundParticleSystemId(String type, String background) {
+        if ("Varyon_Portal_Purple".equals(type) && background != null && background.startsWith("Varyon_CreativeWorld_Blue_")) {
+            return "Varyon_CreativeWorld_Purple_" + background.substring("Varyon_CreativeWorld_Blue_".length());
+        }
+        return background;
+    }
+
+    /**
+     * The X2 template's hitbox is 2 blocks wide, but which world direction it actually spans
+     * depends on the block's placement rotation (VariantRotation: NESW) — hardcoding a fixed
+     * +X offset put the portal a block off from its hitbox whenever it wasn't placed facing
+     * the default direction. BlockType#getBlockCenter returns the true block-local center of
+     * the rotation-selected hitbox variant, so it's used instead when available.
+     */
+    public static void computeHorizontalCenter(World world, int x, int y, int z, boolean wide, Vector3d out) {
+        try {
+            long chunkIndex = com.hypixel.hytale.math.util.ChunkUtil.indexChunkFromBlock(x, z);
+            WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
+            BlockType blockType = world.getBlockType(x, y, z);
+            if (chunk != null && blockType != null) {
+                int rotationIndex = chunk.getRotationIndex(x & 31, y, z & 31);
+                Vector3d localCenter = new Vector3d();
+                blockType.getBlockCenter(rotationIndex, localCenter);
+                out.set(x + localCenter.x, out.y, z + localCenter.z);
+                return;
+            }
+        } catch (Exception ignored) {
+        }
+        out.set(x + (wide ? 1.0 : 0.5), out.y, z + 0.5);
     }
 
     public static final float DEFAULT_YAW = 0f;
@@ -144,7 +190,7 @@ public final class VaryonPortalConfig implements Component<ChunkStore> {
     }
 
     public boolean hasBackground() {
-        return background != null && !background.isBlank() && supportsCustomBackground(type);
+        return background != null && !background.isBlank();
     }
 
     @Override

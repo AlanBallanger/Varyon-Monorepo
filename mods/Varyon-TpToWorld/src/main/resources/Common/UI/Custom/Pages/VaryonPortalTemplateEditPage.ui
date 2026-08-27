@@ -54,16 +54,12 @@ $C.@Container {
         Style: $C.@DefaultDropdownBoxStyle;
         Value: "";
         DropdownEntry { Value: ""; Text: "Aucun"; }
+        DropdownEntry { Value: "Varyon_CreativeWorld_Purple_Standalone"; Text: "Varyon"; }
+        DropdownEntry { Value: "Varyon_CreativeWorld_Purple_Spawn_Standalone"; Text: "Varyon Spawn"; }
         DropdownEntry { Value: "Varyon_CreativeWorld_Blue_Novale_Standalone"; Text: "Novale City"; }
         DropdownEntry { Value: "Varyon_CreativeWorld_Blue_Fraktale_Standalone"; Text: "Fraktale City"; }
         DropdownEntry { Value: "Varyon_CreativeWorld_Blue_Haven_Standalone"; Text: "Haven"; }
       }
-    }
-
-    Label {
-      Text: "Le fond est ignore pour le type Violet, qui a deja sa propre image integree.";
-      Style: (TextColor: #6f7f92, FontSize: 11, Wrap: true);
-      Anchor: (Left: 0, Right: 0, Height: 20, Bottom: 10);
     }
 
     Group {
