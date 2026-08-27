@@ -1,0 +1,93 @@
+$C = "Common.ui";
+
+Group {
+  LayoutMode: CenterMiddle;
+  Anchor: (Full: 0);
+
+  Group {
+    Anchor: (Width: 300);
+    LayoutMode: Top;
+
+    Label #TargetNameLabel {
+      Text: "";
+      Anchor: (Height: 30, Bottom: 14, Left: 0, Right: 0);
+      Style: (FontSize: 20, RenderBold: true, TextColor: #ffb84d, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+
+    Button #MurmurerButton {
+      Anchor: (Height: 46, Bottom: 8);
+      Style: ButtonStyle(
+        Default: (Background: (Color: #2a3a52aa)),
+        Hovered: (Background: (Color: #3a4a62cc)),
+        Pressed: (Background: (Color: #1c2a3ecc)),
+        Sounds: $C.@ButtonSounds
+      );
+      OutlineColor: #16202eaa;
+      OutlineSize: 1;
+      Group {
+        LayoutMode: Middle;
+        Label {
+          Text: "Murmurer";
+          Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff, HorizontalAlignment: Center, Wrap: true);
+        }
+      }
+    }
+
+    Button #EchangerButton {
+      Anchor: (Height: 46, Bottom: 8);
+      Style: ButtonStyle(
+        Default: (Background: (Color: #185a28aa)),
+        Hovered: (Background: (Color: #286a38cc)),
+        Pressed: (Background: (Color: #0f4018cc)),
+        Sounds: $C.@ButtonSounds
+      );
+      OutlineColor: #083818aa;
+      OutlineSize: 1;
+      Group {
+        LayoutMode: Middle;
+        Label {
+          Text: "Echanger";
+          Style: (FontSize: 14, RenderBold: true, TextColor: #aaffaa, HorizontalAlignment: Center, Wrap: true);
+        }
+      }
+    }
+
+    Button #InviterButton {
+      Anchor: (Height: 46, Bottom: 8);
+      Style: ButtonStyle(
+        Default: (Background: (Color: #5a4a18aa)),
+        Hovered: (Background: (Color: #6a5a28cc)),
+        Pressed: (Background: (Color: #40340fcc)),
+        Sounds: $C.@ButtonSounds
+      );
+      OutlineColor: #382c08aa;
+      OutlineSize: 1;
+      Group {
+        LayoutMode: Middle;
+        Label {
+          Text: "Inviter dans le groupe";
+          Style: (FontSize: 14, RenderBold: true, TextColor: #ffe8aa, HorizontalAlignment: Center, Wrap: true);
+        }
+      }
+    }
+
+    Button #ProfilButton {
+      Anchor: (Height: 46);
+      Style: ButtonStyle(
+        Default: (Background: (Color: #3a3a3aaa)),
+        Hovered: (Background: (Color: #4a4a4acc)),
+        Pressed: (Background: (Color: #262626cc)),
+        Sounds: $C.@ButtonSounds
+      );
+      OutlineColor: #1a1a1aaa;
+      OutlineSize: 1;
+      Group {
+        LayoutMode: Middle;
+        Label {
+          Text: "Consulter le profil";
+          Style: (FontSize: 14, RenderBold: true, TextColor: #dddddd, HorizontalAlignment: Center, Wrap: true);
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-package fr.varyon.shareitem;
+package fr.varyon.playerinteraction;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;

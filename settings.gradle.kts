@@ -16,7 +16,7 @@ rootProject.name = "Varyon-Monorepo"
 
 include(
     ":mods:Varyon",
-    ":mods:Varyon-ShareItem",
+    ":mods:Varyon-PlayerInteraction",
     ":mods:Varyon-BossArena",
     ":mods:Varyon-Comet",
     ":mods:Varyon-EasyHunger",
