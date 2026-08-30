@@ -28,6 +28,43 @@ final class ZoneMusicAssetGenerator {
 
     private ZoneMusicAssetGenerator() {}
 
+    // Mise à jour légère : ne réécrit que les JSON MusicContainer + AmbienceFX et recharge ces
+    // deux stores. Ne touche pas aux .ogg, ne rappelle ni registerPack() ni loadCommonAssets()
+    // (c'est ce dernier qui prend le lock lourd du CommonAssetRegistry et peut figer le tick si
+    // le file-watcher recharge en parallèle). À utiliser quand seuls des champs du MusicContainer
+    // changent — p.ex. le Volume via /mz intensity — pas la liste des zones ni leurs fichiers.
+    static void rebuildContainersOnly(Path packRoot, List<MusicZone> zones) throws IOException {
+        Path ambDestDir = packRoot.resolve("Server").resolve("Audio").resolve("AmbienceFX").resolve("Music").resolve("Global");
+        Path mcDestDir = packRoot.resolve("Server").resolve("Audio").resolve("MusicContainer").resolve("VaryonMZ");
+        Files.createDirectories(ambDestDir);
+        Files.createDirectories(mcDestDir);
+
+        for (MusicZone zone : zones) {
+            String mcId = zone.musicContainerId();
+            Files.writeString(
+                    mcDestDir.resolve(mcId + ".json"),
+                    buildMusicContainerJson(zone.musicCommonTrackPath(), zone.getVolumeDb()),
+                    StandardCharsets.UTF_8);
+            Files.writeString(
+                    ambDestDir.resolve(zone.ambienceAssetId() + ".json"),
+                    buildAmbienceFxJson(mcId),
+                    StandardCharsets.UTF_8);
+        }
+
+        try {
+            var mcResult = MusicContainer.getAssetStore().loadAssetsFromDirectory(PACK_ID, mcDestDir);
+            LOGGER.atInfo().log("[MusicZones] (light) MusicContainer rechargés -> " + mcResult);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[MusicZones] (light) échec rechargement MusicContainer");
+        }
+        try {
+            var ambResult = AmbienceFX.getAssetStore().loadAssetsFromDirectory(PACK_ID, ambDestDir);
+            LOGGER.atInfo().log("[MusicZones] (light) AmbienceFX rechargés -> " + ambResult);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("[MusicZones] (light) échec rechargement AmbienceFX");
+        }
+    }
+
     static void rebuildPack(JavaPlugin plugin, Path packRoot, List<MusicZone> zones) throws IOException {
 
         Path oggDestDir = packRoot.resolve("Common").resolve("Music").resolve("VaryonMZ");
@@ -56,7 +93,10 @@ final class ZoneMusicAssetGenerator {
 
             String mcId = zone.musicContainerId();
             String mcFileName = mcId + ".json";
-            Files.writeString(mcDestDir.resolve(mcFileName), buildMusicContainerJson(zone.musicCommonTrackPath()), StandardCharsets.UTF_8);
+            Files.writeString(
+                    mcDestDir.resolve(mcFileName),
+                    buildMusicContainerJson(zone.musicCommonTrackPath(), zone.getVolumeDb()),
+                    StandardCharsets.UTF_8);
             expectedMc.add(mcFileName);
 
             String ambId = zone.ambienceAssetId();
@@ -177,12 +217,15 @@ final class ZoneMusicAssetGenerator {
         return fnStem.equalsIgnoreCase(stem);
     }
 
-    private static String buildMusicContainerJson(String commonTrackPath) {
+    private static String buildMusicContainerJson(String commonTrackPath, double volumeDb) {
         return "{\n"
                 + "  \"Type\": \"SingleTrack\",\n"
                 + "  \"Track\": \""
                 + commonTrackPath
                 + "\",\n"
+                + "  \"Volume\": "
+                + volumeDb
+                + ",\n"
                 + "  \"LoopCount\": 0,\n"
                 + "  \"ResumeMemoryDuration\": 0\n"
                 + "}\n";

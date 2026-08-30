@@ -65,7 +65,11 @@ public final class CreateZoneSubCommand extends MusicZoneAdminCommandBase {
             return CompletableFuture.completedFuture(null);
         }
         String storedFileName = musicPath.getFileName().toString();
-        return onWorld(context, () -> {
+
+        // Étape 1 (thread-monde) : lire l'entity store / la box en attente, écrire la zone dans
+        // le repo. Aucun IO d'asset ici.
+        String[] createdAmbId = new String[1];
+        CompletableFuture<Void> resolve = onWorld(context, () -> {
             Ref<EntityStore> ref = context.senderAsPlayerRef();
             Store<EntityStore> store = ref != null ? ref.getStore() : null;
             PlayerRef pr = store != null ? store.getComponent(ref, PlayerRef.getComponentType()) : null;
@@ -94,6 +98,17 @@ public final class CreateZoneSubCommand extends MusicZoneAdminCommandBase {
             MusicZone zone = new MusicZone(zoneId, worldName, minX, minY, minZ, maxX, maxY, maxZ, storedFileName);
             plugin.getRepository().addOrReplace(zone);
             plugin.getRepository().save();
+            createdAmbId[0] = zone.ambienceAssetId();
+        });
+
+        // Étape 2 (pool async, JAMAIS le thread-monde) : rebuild du pack (copie des .ogg,
+        // loadCommonAssets, rechargement des stores). loadCommonAssets/loadAssetsFromDirectory
+        // prennent des locks d'AssetStore partagés avec le file-watcher : les appeler depuis le
+        // thread-tick du monde fige le serveur.
+        return resolve.thenRunAsync(() -> {
+            if (createdAmbId[0] == null) {
+                return;
+            }
             try {
                 plugin.rebuildAssetPack();
             } catch (Exception e) {
@@ -101,7 +116,7 @@ public final class CreateZoneSubCommand extends MusicZoneAdminCommandBase {
                 return;
             }
             context.sendMessage(Message.raw(
-                    "Zone « " + zoneId + " » créée. AmbienceFX : " + zone.ambienceAssetId() + " (reconnexion client si besoin)"));
+                    "Zone « " + zoneId + " » créée. AmbienceFX : " + createdAmbId[0] + " (reconnexion client si besoin)"));
         });
     }
 }

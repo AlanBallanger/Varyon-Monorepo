@@ -25,7 +25,9 @@ public final class MusicZoneRepository {
                     + "\\s*\"maxX\"\\s*:\\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*,"
                     + "\\s*\"maxY\"\\s*:\\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*,"
                     + "\\s*\"maxZ\"\\s*:\\s*(-?[0-9]+(?:\\.[0-9]+)?)\\s*,"
-                    + "\\s*\"musicFileName\"\\s*:\\s*\"((?:\\\\.|[^\"])*)\"\\s*\\}",
+                    + "\\s*\"musicFileName\"\\s*:\\s*\"((?:\\\\.|[^\"])*)\""
+                    + "(?:\\s*,\\s*\"volumeDb\"\\s*:\\s*(-?[0-9]+(?:\\.[0-9]+)?))?"
+                    + "\\s*\\}",
             Pattern.DOTALL);
 
     private final Path dataDir;
@@ -117,7 +119,8 @@ public final class MusicZoneRepository {
             double maxY = Double.parseDouble(m.group(7));
             double maxZ = Double.parseDouble(m.group(8));
             String musicFileName = unescape(m.group(9));
-            return new MusicZone(id, worldName, minX, minY, minZ, maxX, maxY, maxZ, musicFileName);
+            double volumeDb = m.group(10) != null ? Double.parseDouble(m.group(10)) : 0.0;
+            return new MusicZone(id, worldName, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, volumeDb);
         } catch (Exception e) {
             return null;
         }
@@ -164,7 +167,9 @@ public final class MusicZoneRepository {
                 + z.getMaxZ()
                 + ", \"musicFileName\": \""
                 + escape(z.getMusicFileName())
-                + "\" }";
+                + "\", \"volumeDb\": "
+                + z.getVolumeDb()
+                + " }";
     }
 
     private static String escape(String s) {

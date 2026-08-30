@@ -41,7 +41,10 @@ public final class RemoveZoneSubCommand extends MusicZoneAdminCommandBase {
             return CompletableFuture.completedFuture(null);
         }
         String zoneId = idArg.get(context).trim();
-        return onWorld(context, () -> {
+
+        // Étape 1 (thread-monde) : résoudre le monde du joueur et retirer la zone du repo.
+        boolean[] removed = new boolean[1];
+        CompletableFuture<Void> resolve = onWorld(context, () -> {
             Ref<EntityStore> ref = context.senderAsPlayerRef();
             Store<EntityStore> store = ref != null ? ref.getStore() : null;
             PlayerRef pr = store != null ? store.getComponent(ref, PlayerRef.getComponentType()) : null;
@@ -49,16 +52,26 @@ public final class RemoveZoneSubCommand extends MusicZoneAdminCommandBase {
             String worldName = w != null ? w.getName() : "";
             if (plugin.getRepository().remove(worldName, zoneId)) {
                 plugin.getRepository().save();
-                try {
-                    plugin.rebuildAssetPack();
-                } catch (Exception e) {
-                    context.sendMessage(Message.raw("Supprimé mais pack audio : " + e.getMessage()));
-                    return;
-                }
-                context.sendMessage(Message.raw("Zone « " + zoneId + " » supprimée."));
+                removed[0] = true;
             } else {
                 context.sendMessage(Message.raw("Aucune zone « " + zoneId + " » dans " + worldName + "."));
             }
+        });
+
+        // Étape 2 (pool async, JAMAIS le thread-monde) : rebuild du pack. Les appels de
+        // (re)chargement d'assets prennent des locks partagés avec le file-watcher et figent le
+        // serveur s'ils tournent sur le thread-tick du monde.
+        return resolve.thenRunAsync(() -> {
+            if (!removed[0]) {
+                return;
+            }
+            try {
+                plugin.rebuildAssetPack();
+            } catch (Exception e) {
+                context.sendMessage(Message.raw("Supprimé mais pack audio : " + e.getMessage()));
+                return;
+            }
+            context.sendMessage(Message.raw("Zone « " + zoneId + " » supprimée."));
         });
     }
 }

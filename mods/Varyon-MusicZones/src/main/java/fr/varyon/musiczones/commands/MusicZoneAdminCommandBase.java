@@ -15,6 +15,7 @@ public abstract class MusicZoneAdminCommandBase extends AbstractAsyncCommand {
 
     protected MusicZoneAdminCommandBase(String name, String description) {
         super(name, description);
+        requireNoPermission();
     }
 
     protected static boolean isMusicZoneAdmin(CommandContext context) {
@@ -39,10 +40,5 @@ public abstract class MusicZoneAdminCommandBase extends AbstractAsyncCommand {
             return CompletableFuture.completedFuture(null);
         }
         return CompletableFuture.runAsync(action, world);
-    }
-
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
     }
 }

@@ -78,6 +78,9 @@ public final class InfoZoneSubCommand extends MusicZoneAdminCommandBase {
             context.sendMessage(Message.raw("ID       : " + active.getId()));
             context.sendMessage(Message.raw("Musique  : " + active.getMusicFileName()));
             context.sendMessage(Message.raw("Asset    : " + active.ambienceAssetId()));
+            context.sendMessage(Message.raw(String.format(
+                    "Intensité: %.0f%% (%.1f dB)",
+                    MusicZone.dbToPercent(active.getVolumeDb()), active.getVolumeDb())));
             context.sendMessage(Message.raw("Taille   : " + fmt(sizeX) + " x " + fmt(sizeY) + " x " + fmt(sizeZ)));
             context.sendMessage(Message.raw("Coins    : [" + fmt(active.getMinX()) + ", " + fmt(active.getMinY()) + ", " + fmt(active.getMinZ()) + "] → [" + fmt(active.getMaxX()) + ", " + fmt(active.getMaxY()) + ", " + fmt(active.getMaxZ()) + "]"));
             if (matching.size() > 1) {

@@ -43,6 +43,13 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
         return visualizer;
     }
 
+    public MusicZoneApplySystem getApplySystem() {
+        if (applySystem == null) {
+            throw new IllegalStateException("Plugin not started");
+        }
+        return applySystem;
+    }
+
     public MusicZoneRepository getRepository() {
         if (repository == null) {
             throw new IllegalStateException("Plugin not started");
@@ -108,6 +115,13 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
             });
         } catch (Exception ignored) {
         }
+    }
+
+    // Mise à jour légère pour un simple changement de champ du MusicContainer (ex. Volume) :
+    // n'écrit que les JSON MC/AmbienceFX et recharge ces stores, sans recopier les .ogg ni
+    // rappeler loadCommonAssets (qui peut figer le tick en cas de contention avec le watcher).
+    public void rebuildContainersOnly() throws Exception {
+        ZoneMusicAssetGenerator.rebuildContainersOnly(packRoot, repository.getZonesReadOnly());
     }
 
     public void rebuildAssetPack() throws Exception {

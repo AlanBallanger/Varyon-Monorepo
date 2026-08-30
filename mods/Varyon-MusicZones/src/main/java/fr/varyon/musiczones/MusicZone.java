@@ -13,6 +13,7 @@ public final class MusicZone implements Comparable<MusicZone> {
     private final double maxY;
     private final double maxZ;
     private final String musicFileName;
+    private final double volumeDb;
 
     public MusicZone(
             String id,
@@ -24,6 +25,20 @@ public final class MusicZone implements Comparable<MusicZone> {
             double maxY,
             double maxZ,
             String musicFileName) {
+        this(id, worldName, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, 0.0);
+    }
+
+    public MusicZone(
+            String id,
+            String worldName,
+            double minX,
+            double minY,
+            double minZ,
+            double maxX,
+            double maxY,
+            double maxZ,
+            String musicFileName,
+            double volumeDb) {
         this.id = id;
         this.worldName = worldName;
         this.minX = minX;
@@ -33,6 +48,36 @@ public final class MusicZone implements Comparable<MusicZone> {
         this.maxY = maxY;
         this.maxZ = maxZ;
         this.musicFileName = musicFileName;
+        this.volumeDb = volumeDb;
+    }
+
+    // Gain en décibels appliqué au MusicContainer généré : 0.0 = intensité nominale (défaut
+    // vanilla), négatif = plus doux, <= -100 = muet. Le codec MusicContainer.Volume lit/écrit
+    // en dB (AudioUtil.decibelsToLinearGain), pas en gain linéaire.
+    public double getVolumeDb() {
+        return volumeDb;
+    }
+
+    public MusicZone withVolumeDb(double newVolumeDb) {
+        return new MusicZone(id, worldName, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, newVolumeDb);
+    }
+
+    // Échelle opérateur 0–100 % -> dB perçus (courbe -20*log10). 100 -> 0 dB, 50 -> ~-6 dB,
+    // 0 -> muet.
+    public static double percentToDb(double percent) {
+        double p = Math.max(0.0, Math.min(100.0, percent));
+        if (p <= 0.0) {
+            return -100.0;
+        }
+        return 20.0 * Math.log10(p / 100.0);
+    }
+
+    public static double dbToPercent(double db) {
+        if (db <= -100.0) {
+            return 0.0;
+        }
+        double p = 100.0 * Math.pow(10.0, db / 20.0);
+        return Math.max(0.0, Math.min(100.0, p));
     }
 
     public String getId() {

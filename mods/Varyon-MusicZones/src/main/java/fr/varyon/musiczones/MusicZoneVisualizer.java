@@ -35,7 +35,7 @@ public final class MusicZoneVisualizer extends EntityTickingSystem<EntityStore> 
     private static final float EDGE_THICKNESS = 0.15f;
     private static final float LINE_TTL = 1.2f;
     private static final float OPACITY = 0.85f;
-    private static final byte FLAGS = (byte) (1 << DebugFlags.NoWireframe.getValue());
+    private static final byte FLAGS = DebugFlags.NoWireframe;
     private static final Vector3f COLOR = new Vector3f(1.0f, 0.85f, 0.0f);
 
     private final VaryonMusicZonesPlugin plugin;

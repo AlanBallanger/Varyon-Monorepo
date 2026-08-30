@@ -165,6 +165,14 @@ public final class MusicZoneApplySystem extends EntityTickingSystem<EntityStore>
         }
     }
 
+    // Après un rebuild du pack (ex. changement d'intensité d'une zone), le client garde en
+    // cache l'ancien MusicContainer. Oublier l'index envoyé force le prochain tick à réémettre
+    // UpdateForcedMusic, ce qui pousse le client à relire le container et son nouveau Volume.
+    public void forgetAll() {
+        lastSentIndex.clear();
+        lastLoggedState.clear();
+    }
+
     @Override
     @Nonnull
     public Query<EntityStore> getQuery() {
