@@ -72,7 +72,7 @@ public class RecipesManager {
                                 .filter(cat -> !cat.equalsIgnoreCase("Tools"))
                                 .toArray(String[]::new);
                     }
-                    tempList.add(new BenchRequirement(req.type, req.id, newCategories, 999));
+                    tempList.add(new BenchRequirement(req.type, req.id, newCategories, 999, req.requiredAugmentTags));
                 }
                 restrictedReqs = tempList.toArray(new BenchRequirement[0]);
             } else {
