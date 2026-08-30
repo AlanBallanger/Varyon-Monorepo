@@ -32,16 +32,13 @@ public final class BookCommand extends AbstractCommandCollection {
 
     public BookCommand() {
         super("vbook", "Gérer les livres lisibles");
+        requireNoPermission();
         this.addAliases(new String[]{"varyonbook"});
         this.addSubCommand(new EditSubCommand());
         this.addSubCommand(new ListSubCommand());
         this.addSubCommand(new ReloadSubCommand());
     }
 
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
-    }
 
     static boolean perm(@Nonnull CommandContext context) {
         if (context.sender() instanceof ConsoleSender) {
@@ -53,6 +50,7 @@ public final class BookCommand extends AbstractCommandCollection {
     private static final class EditSubCommand extends AbstractAsyncCommand {
         EditSubCommand() {
             super("edit", "Active/désactive ton mode édition des livres");
+            requireNoPermission();
         }
 
         @NonNullDecl
@@ -92,6 +90,7 @@ public final class BookCommand extends AbstractCommandCollection {
     private static final class ListSubCommand extends AbstractAsyncCommand {
         ListSubCommand() {
             super("list", "Liste les livres configurés");
+            requireNoPermission();
         }
 
         @NonNullDecl
@@ -124,6 +123,7 @@ public final class BookCommand extends AbstractCommandCollection {
     private static final class ReloadSubCommand extends AbstractAsyncCommand {
         ReloadSubCommand() {
             super("reload", "Recharge les livres depuis le disque");
+            requireNoPermission();
         }
 
         @NonNullDecl
