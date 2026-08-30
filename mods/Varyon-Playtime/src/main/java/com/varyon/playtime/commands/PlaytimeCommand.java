@@ -28,6 +28,7 @@ public class PlaytimeCommand extends AbstractPlayerCommand {
 
     public PlaytimeCommand(String name, String... aliases) {
         super(name, Playtime.get().getConfigManager().getConfig().command.description);
+        requireNoPermission();
 
         if (aliases != null && aliases.length > 0) {
             addAliases(aliases);
@@ -40,10 +41,6 @@ public class PlaytimeCommand extends AbstractPlayerCommand {
         addUsageVariant(new AdminSetTimeCommand(name));
     }
 
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
-    }
 
     @Override
     protected void execute(
@@ -197,13 +194,10 @@ public class PlaytimeCommand extends AbstractPlayerCommand {
 
         ActionCommand(String name) {
             super(name);
+            requireNoPermission();
             this.arg1 = withRequiredArg("action", "Sous-commande", ArgTypes.STRING);
         }
 
-        @Override
-        protected boolean canGeneratePermission() {
-            return false;
-        }
 
         @Override
         protected void execute(
@@ -326,14 +320,11 @@ public class PlaytimeCommand extends AbstractPlayerCommand {
 
         DoubleArgCommand(String name) {
             super(name);
+            requireNoPermission();
             this.arg1 = withRequiredArg("arg1", "Premier argument", ArgTypes.STRING);
             this.arg2 = withRequiredArg("arg2", "Deuxième argument", ArgTypes.STRING);
         }
 
-        @Override
-        protected boolean canGeneratePermission() {
-            return false;
-        }
 
         @Override
         protected void execute(
@@ -373,15 +364,12 @@ public class PlaytimeCommand extends AbstractPlayerCommand {
 
         AdminThreeArgCommand(String name) {
             super(name);
+            requireNoPermission();
             this.arg1 = withRequiredArg("admin", "admin", ArgTypes.STRING);
             this.arg2 = withRequiredArg("action", "action", ArgTypes.STRING);
             this.arg3 = withRequiredArg("target", "cible", ArgTypes.STRING);
         }
 
-        @Override
-        protected boolean canGeneratePermission() {
-            return false;
-        }
 
         @Override
         protected void execute(
@@ -433,16 +421,13 @@ public class PlaytimeCommand extends AbstractPlayerCommand {
 
         AdminSetTimeCommand(String name) {
             super(name);
+            requireNoPermission();
             this.arg1 = withRequiredArg("admin", "admin", ArgTypes.STRING);
             this.arg2 = withRequiredArg("action", "action", ArgTypes.STRING);
             this.arg3 = withRequiredArg("target", "cible", ArgTypes.STRING);
             this.arg4 = withRequiredArg("value", "valeur", ArgTypes.STRING);
         }
 
-        @Override
-        protected boolean canGeneratePermission() {
-            return false;
-        }
 
         @Override
         protected void execute(
@@ -488,6 +473,7 @@ public class PlaytimeCommand extends AbstractPlayerCommand {
 
         AdminAddRewardCommand(String name) {
             super(name);
+            requireNoPermission();
             this.arg1 = withRequiredArg("admin", "admin", ArgTypes.STRING);
             this.arg2 = withRequiredArg("action", "action", ArgTypes.STRING);
             this.idArg = withRequiredArg("id", "Identifiant", ArgTypes.STRING);
@@ -496,10 +482,6 @@ public class PlaytimeCommand extends AbstractPlayerCommand {
             this.commandArg = withRequiredArg("command", "Commande", ArgTypes.STRING);
         }
 
-        @Override
-        protected boolean canGeneratePermission() {
-            return false;
-        }
 
         @Override
         protected void execute(

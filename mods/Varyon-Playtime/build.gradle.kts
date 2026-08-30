@@ -1,13 +1,12 @@
 import org.gradle.api.tasks.bundling.Zip
 
 plugins {
-    `maven-publish`
     idea
     id("hytale-mod") version "0.+"
 }
 
 group = "com.varyon"
-version = "1.0.0"
+version = "1.1.0"
 val javaVersion = 25
 
 repositories {
@@ -60,10 +59,14 @@ tasks.named<ProcessResources>("processResources") {
 // Standard Jar task was found to intermittently/consistently fail to write its output file in
 // this environment (Java 25 + Gradle 9.2.1) despite reporting success. Zip is a reliable
 // substitute already used successfully by sibling modules (Varyon-Damage_Number, Varyon-TravelingCamera).
+// The stock `jar` task must be disabled: when it is enabled, its output collides with
+// `fatJar` under build/libs and Gradle 9.2.1 + Java 25 silently drops the fatJar archive.
+tasks.named<Jar>("jar") {
+    enabled = false
+}
+
 val fatJar = tasks.register<Zip>("fatJar") {
-    archiveBaseName.set("Varyon-Playtime")
-    archiveVersion.set(version.toString())
-    archiveExtension.set("jar")
+    archiveFileName.set("Varyon-Playtime-${version}.jar")
     destinationDirectory.set(layout.buildDirectory.dir("libs"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
@@ -92,27 +95,13 @@ val fatJar = tasks.register<Zip>("fatJar") {
     exclude { it.path.startsWith("org/sqlite/native/") && !it.path.startsWith("org/sqlite/native/Linux/x86_64/") }
 }
 
-val exportModJar = tasks.register<Copy>("exportModJar") {
-    group = "build"
-    description = "Copie le JAR vers Varyon-Monorepo/build/output"
-    dependsOn(fatJar)
-    from(fatJar)
-    into(rootProject.layout.buildDirectory.dir("output"))
-}
+// NB: the global init script ~/.gradle/init.d/deploy-output.gradle already redirects this
+// fatJar's output to Varyon-Monorepo/build/output and copies it to the dev server mods dir.
+// A separate exportModJar copying build/output -> build/output truncates the archive to 0 bytes,
+// so it is intentionally omitted here.
 
 tasks.named("build") {
     dependsOn(fatJar)
-    finalizedBy(exportModJar)
-}
-
-tasks.named<Jar>("jar") {
-    archiveClassifier.set("thin")
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-publishing {
-    repositories {}
-    publications { create<MavenPublication>("maven") { from(components["java"]) } }
 }
 
 idea {
