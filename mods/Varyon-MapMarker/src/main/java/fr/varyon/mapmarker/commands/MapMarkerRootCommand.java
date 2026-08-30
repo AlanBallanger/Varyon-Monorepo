@@ -6,6 +6,7 @@ public final class MapMarkerRootCommand extends AbstractCommandCollection {
 
     public MapMarkerRootCommand(String rootName) {
         super(rootName, "Marqueurs personnalisés sur la carte (opérateurs)");
+        requireNoPermission();
         addSubCommand(new SetMarkerSubCommand());
         addSubCommand(new UiMarkerSubCommand());
         addSubCommand(new EditMarkerSubCommand());
@@ -16,8 +17,4 @@ public final class MapMarkerRootCommand extends AbstractCommandCollection {
         addSubCommand(new ReloadMarkerSubCommand());
     }
 
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
-    }
 }

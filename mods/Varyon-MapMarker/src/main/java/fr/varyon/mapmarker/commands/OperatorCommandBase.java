@@ -9,6 +9,7 @@ public abstract class OperatorCommandBase extends CommandBase {
 
     protected OperatorCommandBase(String name, String description) {
         super(name, description);
+        requireNoPermission();
     }
 
     public static boolean isMapMarkerOperator(CommandContext context) {
@@ -37,8 +38,4 @@ public abstract class OperatorCommandBase extends CommandBase {
         return false;
     }
 
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
-    }
 }
