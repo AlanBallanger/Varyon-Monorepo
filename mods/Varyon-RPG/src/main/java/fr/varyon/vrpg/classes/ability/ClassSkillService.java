@@ -3287,7 +3287,7 @@ public final class ClassSkillService {
                     EntityStoreCommandBuffers.runWithResult(ws, cb -> {
                         java.util.UUID projectileId = java.util.UUID.randomUUID();
                         Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
-                            .spawnProjectile(projectileId, fRef, cb, fCfg, fPos, fDir);
+                            .spawnProjectile(projectileId, null, fRef, cb, fCfg, fPos, fDir);
                         if (projectileRef != null) {
                             outProjectileId.set(projectileId);
                         }
@@ -3415,7 +3415,7 @@ public final class ClassSkillService {
             EntityStoreCommandBuffers.runWithResult(store, cb -> {
                 java.util.UUID projectileId = java.util.UUID.randomUUID();
                 Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
-                    .spawnProjectile(projectileId, casterRef, cb, cfg, fPos, dir);
+                    .spawnProjectile(projectileId, null, casterRef, cb, cfg, fPos, dir);
                 if (projectileRef != null) {
                     outProjectileRef.set(projectileRef);
                     if (fGround != null) fGround.trackArrow(projectileRef, casterUuid, dmg);
@@ -3448,7 +3448,7 @@ public final class ClassSkillService {
                     EntityStoreCommandBuffers.runWithResult(ws, cb -> {
                         java.util.UUID projectileId = java.util.UUID.randomUUID();
                         Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
-                            .spawnProjectile(projectileId, fRef, cb, fCfg, fPos, fDir);
+                            .spawnProjectile(projectileId, null, fRef, cb, fCfg, fPos, fDir);
                         if (projectileRef != null) {
                             outProjectileId.set(projectileId);
                         }

@@ -900,17 +900,6 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgDamageCritResetSystem");
             }
             try {
-                getEntityStoreRegistry().registerSystem(new fr.varyon.vrpg.combat.VrpgDamageProbeSystem());
-            } catch (Exception e) {
-                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgDamageProbeSystem");
-            }
-            try {
-                getEntityStoreRegistry().registerSystem(new fr.varyon.vrpg.combat.VrpgNativeArmorTraceSystem.Before());
-                getEntityStoreRegistry().registerSystem(new fr.varyon.vrpg.combat.VrpgNativeArmorTraceSystem.After());
-            } catch (Exception e) {
-                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgNativeArmorTraceSystem");
-            }
-            try {
                 getEntityStoreRegistry().registerSystem(new VrpgCritDamageSystem(classManager));
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgCritDamageSystem");
@@ -920,6 +909,17 @@ public final class VaryonRpgPlugin extends JavaPlugin {
                     new fr.varyon.vrpg.combat.VrpgArmorDamageSystem(classManager));
             } catch (Exception e) {
                 LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgArmorDamageSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(new fr.varyon.vrpg.combat.VrpgDamageProbeSystem());
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgDamageProbeSystem");
+            }
+            try {
+                getEntityStoreRegistry().registerSystem(new fr.varyon.vrpg.combat.VrpgNativeArmorTraceSystem.Before());
+                getEntityStoreRegistry().registerSystem(new fr.varyon.vrpg.combat.VrpgNativeArmorTraceSystem.After());
+            } catch (Exception e) {
+                LOGGER.atWarning().withCause(e).log("[VaryonRPG] register VrpgNativeArmorTraceSystem");
             }
             try {
                 getEntityStoreRegistry().registerSystem(new fr.varyon.vrpg.combat.VrpgDamageLogSystem());

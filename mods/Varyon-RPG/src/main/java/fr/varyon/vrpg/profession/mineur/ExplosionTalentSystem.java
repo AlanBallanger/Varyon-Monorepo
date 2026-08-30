@@ -8,6 +8,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import org.joml.Vector3d;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.entity.ExplosionUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
@@ -66,7 +67,7 @@ public final class ExplosionTalentSystem extends EntityTickingSystem<EntityStore
                 blastSoundIndex = SoundEvent.getAssetMap().getIndex(BLAST_SOUND_ID);
             }
             LOGGER.atInfo().log("[Blast] performExplosion pos=" + pos.x + "," + pos.y + "," + pos.z);
-            ExplosionUtils.performExplosion(DAMAGE_SOURCE, pos, CONFIG, ref, commandBuffer, chunkStoreStore);
+            ExplosionUtils.performExplosion(DAMAGE_SOURCE, pos, new Rotation3f(0, 0, 0), CONFIG, ref, commandBuffer, chunkStoreStore);
             if (blastSoundIndex != 0) {
                 SoundUtil.playSoundEvent3d(blastSoundIndex, SoundCategory.SFX, pos.x, pos.y, pos.z, commandBuffer);
             }

@@ -6,7 +6,6 @@ import com.hypixel.hytale.server.core.asset.type.attitude.Attitude;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.blackboard.view.attitude.IAttitudeProvider;
-import com.hypixel.hytale.server.npc.role.Role;
 
 import javax.annotation.Nonnull;
 
@@ -23,7 +22,7 @@ public final class OmbreStealthAttitudeProvider implements IAttitudeProvider {
 
     @Override
     public Attitude getAttitude(@Nonnull Ref<EntityStore> npcRef,
-                                @Nonnull Role role,
+                                int roleIndex,
                                 @Nonnull Ref<EntityStore> targetRef,
                                 @Nonnull ComponentAccessor<EntityStore> accessor) {
         try {

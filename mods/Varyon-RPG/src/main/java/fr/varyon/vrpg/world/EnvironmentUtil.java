@@ -95,7 +95,7 @@ public final class EnvironmentUtil {
                                                @Nonnull TransformComponent transform,
                                                @Nonnull ComponentAccessor<EntityStore> accessor) {
         try {
-            Ref<ChunkStore> chunkRef = transform.getChunkRef();
+            Ref<ChunkStore> chunkRef = transform.getSectionRef();
             if (chunkRef != null && chunkRef.isValid()) {
                 World world = accessor.getExternalData().getWorld();
                 if (world != null) {
