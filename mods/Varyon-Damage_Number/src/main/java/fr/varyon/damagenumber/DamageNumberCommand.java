@@ -19,13 +19,10 @@ public final class DamageNumberCommand extends AbstractPlayerCommand {
 
     public DamageNumberCommand() {
         super("dmgnum", "Basculer l'affichage custom des degats");
+        requireNoPermission();
         addAliases(new String[] {"degats", "damagenumbers"});
     }
 
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
-    }
 
     @Override
     protected void execute(@Nonnull CommandContext context,
