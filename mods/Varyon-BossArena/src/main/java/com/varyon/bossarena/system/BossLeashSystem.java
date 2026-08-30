@@ -197,7 +197,6 @@ public final class BossLeashSystem extends TickingSystem<EntityStore> {
 
             Vector3d back = new Vector3d(anchor.center.x, anchor.center.y, anchor.center.z);
             transform.teleportPosition(back);
-            transform.markChunkDirty(store);
         } catch (Exception e) {
             LOGGER.log(Level.FINE, "Failed to leash entity " + entityUuid, e);
         }
