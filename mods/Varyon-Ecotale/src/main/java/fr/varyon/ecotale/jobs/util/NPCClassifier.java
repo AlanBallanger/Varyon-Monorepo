@@ -289,28 +289,11 @@ public class NPCClassifier {
                 String dropList = role.getDropListId();
                 hasDropList = dropList != null && !dropList.isEmpty();
                 
-                // Combat support
-                CombatSupport combat = role.getCombatSupport();
-                hasCombatSupport = combat != null;
-                
-                // Attitude group
-                WorldSupport world = role.getWorldSupport();
-                if (world != null) {
-                    int groupIndex = world.getAttitudeGroup();
-                    if (groupIndex != Integer.MIN_VALUE) {
-                        try {
-                            AttitudeGroup group = AttitudeGroup.getAssetMap().getAsset(groupIndex);
-                            if (group != null) {
-                                attitudeGroup = group.getId();
-                                isAggressive = isAggressiveGroup(attitudeGroup);
-                            }
-                        } catch (Exception e) {
-                            // Si falla, intentar inferir del índice
-                            isAggressive = groupIndex > 5;  // Heurística básica
-                        }
-                    }
-                }
-                
+                // Combat support / attitude group: Update 6 moved NPC support state from Role
+                // to ECS components, which are not reachable from a bare NPCEntity here.
+                // The classifier falls back to name-pattern heuristics when these are absent.
+                hasCombatSupport = false;
+
                 // Daño estimado desde InteractionVars
                 Map<String, String> interactionVars = role.getInteractionVars();
                 if (interactionVars != null) {

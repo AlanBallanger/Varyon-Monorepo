@@ -184,8 +184,8 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
             return; // No tool equipped - no mining reward
         }
         
-        ItemToolSpec spec = BlockHarvestUtils.getSpecPowerDamageBlock(heldItem, blockType, tool);
-        
+        ItemToolSpec spec = resolveToolSpec(heldItem, tool, gatherType, breaking.getQuality());
+
         if (spec == null || spec.isIncorrect()) {
             return; // Wrong tool type for this block
         }
@@ -369,7 +369,14 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
             JobsLogger.debug("[MINING-SECURITY] Blocked non-ore block: %s", blockId);
             return "NONE";
         }
-        
+
+        // "Cracked" variants (e.g. Ore_Iron_Basalt_Cracked, Ore_Adamantite_Magma_Cracked)
+        // are decorative terrain blocks, not real minable veins.
+        if (blockId.contains("Cracked")) {
+            JobsLogger.debug("[MINING-SECURITY] Blocked cracked deco block: %s", blockId);
+            return "NONE";
+        }
+
         // 1. Check manual override first
         if (tierOverrides != null && tierOverrides.containsKey(blockId)) {
             return tierOverrides.get(blockId);
@@ -505,4 +512,32 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
     
     @Nullable
     public MiningConfig getConfig() { return config; }
+
+    /**
+     * Reimplementation of the (now package-private in Update 6) BlockHarvestUtils#getSpecPowerDamageBlock:
+     * picks the tool spec matching the block's gather type, or null if the tool cannot correctly harvest it.
+     */
+    @Nullable
+    private static ItemToolSpec resolveToolSpec(@Nullable Item item, @Nullable ItemTool tool,
+                                                @Nullable String blockGatherType, int blockQuality) {
+        if (blockGatherType == null) {
+            return null;
+        }
+        if (item != null && (item.getWeapon() != null || item.getBuilderTool() != null)) {
+            return null;
+        }
+        if (tool != null && tool.getSpecs() != null) {
+            for (ItemToolSpec spec : tool.getSpecs()) {
+                if (java.util.Objects.equals(spec.getGatherType(), blockGatherType)) {
+                    return spec.getQuality() < blockQuality ? null : spec;
+                }
+            }
+            return null;
+        }
+        ItemToolSpec fallback = ItemToolSpec.getAssetMap().getAsset(blockGatherType);
+        if (fallback != null && fallback.getQuality() < blockQuality) {
+            return null;
+        }
+        return fallback;
+    }
 }
