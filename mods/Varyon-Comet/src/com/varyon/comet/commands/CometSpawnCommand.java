@@ -275,7 +275,7 @@ public class CometSpawnCommand extends AbstractWorldCommand {
             try {
                 com.hypixel.hytale.component.Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule
                         .get()
-                        .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, spawnPos,
+                        .spawnProjectile(projectileUUID, null, playerRef, commandBuffer, projectileConfig, spawnPos,
                                 VecUtil.toHytale(direction));
 
                 if (projectileRef != null) {

@@ -386,7 +386,7 @@ public class CometFallingSystem {
             if (commandBuffer == null) return;
 
             Ref<EntityStore> projectileRef = com.hypixel.hytale.server.core.modules.projectile.ProjectileModule.get()
-                    .spawnProjectile(projectileUUID, playerRef, commandBuffer, projectileConfig, spawnPos, VecUtil.toHytale(direction));
+                    .spawnProjectile(projectileUUID, null, playerRef, commandBuffer, projectileConfig, spawnPos, VecUtil.toHytale(direction));
 
             if (projectileRef != null) {
                 trackProjectile(projectileUUID, targetBlockPos, spawnPos.y, tier, themeId, ownerUUID, zoneId);
