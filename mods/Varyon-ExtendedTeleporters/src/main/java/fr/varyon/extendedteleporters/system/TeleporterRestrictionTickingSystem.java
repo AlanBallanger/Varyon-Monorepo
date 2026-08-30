@@ -15,7 +15,6 @@ import com.hypixel.hytale.server.core.modules.block.BlockModule.BlockStateInfo;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -220,13 +219,12 @@ public final class TeleporterRestrictionTickingSystem extends EntityTickingSyste
          }
 
          long chunkIndex = ChunkUtil.indexChunkFromBlock(blockX, blockZ);
-         BlockComponentChunk blockComponentChunk = (BlockComponentChunk)chunkStore.getChunkComponent(chunkIndex, BlockComponentChunk.getComponentType());
+         WorldChunk blockComponentChunk = (WorldChunk)chunkStore.getChunkComponent(chunkIndex, WorldChunk.getComponentType());
          if (blockComponentChunk == null) {
             return;
          }
 
-         int blockIndex = ChunkUtil.indexBlockInColumn(blockX, blockY, blockZ);
-         Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
+         Ref<ChunkStore> blockRef = blockComponentChunk.getBlockComponentEntity(blockX, blockY, blockZ);
          if (blockRef == null || !blockRef.isValid()) {
             return;
          }
@@ -236,7 +234,7 @@ public final class TeleporterRestrictionTickingSystem extends EntityTickingSyste
             return;
          }
 
-         Ref<ChunkStore> chunkRef = blockStateInfo.getChunkRef();
+         Ref<ChunkStore> chunkRef = blockStateInfo.getSectionRef();
          if (chunkRef == null || !chunkRef.isValid()) {
             return;
          }
@@ -265,13 +263,12 @@ public final class TeleporterRestrictionTickingSystem extends EntityTickingSyste
       try {
          ChunkStore chunkStore = world.getChunkStore();
          long chunkIndex = ChunkUtil.indexChunkFromBlock(info.blockX(), info.blockZ());
-         BlockComponentChunk blockChunk = (BlockComponentChunk)chunkStore.getChunkComponent(chunkIndex, BlockComponentChunk.getComponentType());
+         WorldChunk blockChunk = (WorldChunk)chunkStore.getChunkComponent(chunkIndex, WorldChunk.getComponentType());
          if (blockChunk == null) {
             return null;
          }
 
-         int blockIndex = ChunkUtil.indexBlockInColumn(info.blockX(), info.blockY(), info.blockZ());
-         Ref<ChunkStore> blockRef = blockChunk.getEntityReference(blockIndex);
+         Ref<ChunkStore> blockRef = blockChunk.getBlockComponentEntity(info.blockX(), info.blockY(), info.blockZ());
          return blockRef != null && blockRef.isValid() ? (Teleporter)chunkStore.getStore().getComponent(blockRef, Teleporter.getComponentType()) : null;
       } catch (Exception e) {
          return null;

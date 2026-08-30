@@ -15,7 +15,6 @@ import com.hypixel.hytale.server.core.Constants;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.modules.block.BlockModule.BlockStateInfo;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import fr.varyon.extendedteleporters.config.ExtendedTeleportConfig;
@@ -879,13 +878,12 @@ public final class TeleporterManager {
       try {
          ChunkStore chunkStore = world.getChunkStore();
          long chunkIndex = ChunkUtil.indexChunkFromBlock(blockX, blockZ);
-         BlockComponentChunk blockComponentChunk = (BlockComponentChunk)chunkStore.getChunkComponent(chunkIndex, BlockComponentChunk.getComponentType());
+         WorldChunk blockComponentChunk = (WorldChunk)chunkStore.getChunkComponent(chunkIndex, WorldChunk.getComponentType());
          if (blockComponentChunk == null) {
             return null;
          }
 
-         int blockIndex = ChunkUtil.indexBlockInColumn(blockX, blockY, blockZ);
-         Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
+         Ref<ChunkStore> blockRef = blockComponentChunk.getBlockComponentEntity(blockX, blockY, blockZ);
          return blockRef != null && blockRef.isValid() ? (Teleporter)chunkStore.getStore().getComponent(blockRef, Teleporter.getComponentType()) : null;
       } catch (Exception e) {
          this.logger.at(Level.WARNING).log("Failed to get teleporter component: " + e.getMessage());
@@ -942,13 +940,12 @@ public final class TeleporterManager {
       try {
          ChunkStore chunkStore = world.getChunkStore();
          long chunkIndex = ChunkUtil.indexChunkFromBlock(info.blockX(), info.blockZ());
-         BlockComponentChunk blockComponentChunk = (BlockComponentChunk)chunkStore.getChunkComponent(chunkIndex, BlockComponentChunk.getComponentType());
+         WorldChunk blockComponentChunk = (WorldChunk)chunkStore.getChunkComponent(chunkIndex, WorldChunk.getComponentType());
          if (blockComponentChunk == null) {
             return false;
          }
 
-         int blockIndex = ChunkUtil.indexBlockInColumn(info.blockX(), info.blockY(), info.blockZ());
-         Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
+         Ref<ChunkStore> blockRef = blockComponentChunk.getBlockComponentEntity(info.blockX(), info.blockY(), info.blockZ());
          if (blockRef != null && blockRef.isValid()) {
             Teleporter teleporter = (Teleporter)chunkStore.getStore().getComponent(blockRef, Teleporter.getComponentType());
             if (teleporter == null) {
@@ -974,7 +971,7 @@ public final class TeleporterManager {
                WorldChunk worldChunk = (WorldChunk)chunkStore.getChunkComponent(chunkIndex, WorldChunk.getComponentType());
                BlockStateInfo blockStateInfo = (BlockStateInfo)chunkStore.getStore().getComponent(blockRef, BlockStateInfo.getComponentType());
                if (worldChunk != null && blockStateInfo != null) {
-                  CreateWarpWhenTeleporterPlacedSystem.createWarp(worldChunk, blockStateInfo, newWarpName);
+                  CreateWarpWhenTeleporterPlacedSystem.createWarp(chunkStore.getStore(), blockStateInfo.getSectionRef(), blockStateInfo, newWarpName);
                }
             }
 
@@ -1002,13 +999,12 @@ public final class TeleporterManager {
       try {
          ChunkStore chunkStore = world.getChunkStore();
          long chunkIndex = ChunkUtil.indexChunkFromBlock(info.blockX(), info.blockZ());
-         BlockComponentChunk blockComponentChunk = (BlockComponentChunk)chunkStore.getChunkComponent(chunkIndex, BlockComponentChunk.getComponentType());
+         WorldChunk blockComponentChunk = (WorldChunk)chunkStore.getChunkComponent(chunkIndex, WorldChunk.getComponentType());
          if (blockComponentChunk == null) {
             return false;
          }
 
-         int blockIndex = ChunkUtil.indexBlockInColumn(info.blockX(), info.blockY(), info.blockZ());
-         Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
+         Ref<ChunkStore> blockRef = blockComponentChunk.getBlockComponentEntity(info.blockX(), info.blockY(), info.blockZ());
          if (blockRef != null && blockRef.isValid()) {
             Teleporter teleporter = (Teleporter)chunkStore.getStore().getComponent(blockRef, Teleporter.getComponentType());
             if (teleporter == null) {
@@ -1016,7 +1012,7 @@ public final class TeleporterManager {
             }
 
             BlockStateInfo blockStateInfo = (BlockStateInfo)chunkStore.getStore().getComponent(blockRef, BlockStateInfo.getComponentType());
-            Ref<ChunkStore> chunkRef = blockStateInfo != null ? blockStateInfo.getChunkRef() : null;
+            Ref<ChunkStore> chunkRef = blockStateInfo != null ? blockStateInfo.getSectionRef() : null;
             WorldChunk worldChunk = chunkRef != null && chunkRef.isValid()
                ? (WorldChunk)chunkRef.getStore().getComponent(chunkRef, WorldChunk.getComponentType())
                : null;

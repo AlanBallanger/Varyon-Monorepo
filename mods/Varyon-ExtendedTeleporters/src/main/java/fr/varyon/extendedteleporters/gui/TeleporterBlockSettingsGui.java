@@ -92,11 +92,11 @@ public final class TeleporterBlockSettingsGui extends InteractiveCustomUIPage<Te
       this.activeState = activeState != null ? activeState : "active";
       this.dimension = world.getName();
       BlockStateInfo blockStateInfo = (BlockStateInfo)blockRef.getStore().getComponent(blockRef, BlockStateInfo.getComponentType());
-      if (blockStateInfo != null) {
-         int index = blockStateInfo.getIndex();
-         this.blockX = ChunkUtil.xFromBlockInColumn(index);
-         this.blockY = ChunkUtil.yFromBlockInColumn(index);
-         this.blockZ = ChunkUtil.zFromBlockInColumn(index);
+      org.joml.Vector3i worldPos = new org.joml.Vector3i();
+      if (blockStateInfo != null && blockStateInfo.fillWorldPos(blockRef.getStore(), worldPos)) {
+         this.blockX = worldPos.x;
+         this.blockY = worldPos.y;
+         this.blockZ = worldPos.z;
       } else {
          this.blockX = 0;
          this.blockY = 0;
@@ -399,12 +399,9 @@ public final class TeleporterBlockSettingsGui extends InteractiveCustomUIPage<Te
 
             BlockStateInfo blockStateInfo = (BlockStateInfo)this.blockRef.getStore().getComponent(this.blockRef, BlockStateInfo.getComponentType());
             if (blockStateInfo != null) {
-               Ref<ChunkStore> chunkRef = blockStateInfo.getChunkRef();
+               Ref<ChunkStore> chunkRef = blockStateInfo.getSectionRef();
                if (chunkRef != null && chunkRef.isValid()) {
-                  WorldChunk worldChunk = (WorldChunk)chunkRef.getStore().getComponent(chunkRef, WorldChunk.getComponentType());
-                  if (worldChunk != null) {
-                     CreateWarpWhenTeleporterPlacedSystem.createWarp(worldChunk, blockStateInfo, finalWarpName);
-                  }
+                  CreateWarpWhenTeleporterPlacedSystem.createWarp(this.blockRef.getStore(), chunkRef, blockStateInfo, finalWarpName);
                }
             }
 
@@ -533,12 +530,13 @@ public final class TeleporterBlockSettingsGui extends InteractiveCustomUIPage<Te
             return;
          }
 
-         Ref<ChunkStore> chunkRef = blockStateInfo.getChunkRef();
+         Ref<ChunkStore> chunkRef = blockStateInfo.getSectionRef();
          if (chunkRef == null || !chunkRef.isValid()) {
             return;
          }
 
-         WorldChunk worldChunk = (WorldChunk)chunkRef.getStore().getComponent(chunkRef, WorldChunk.getComponentType());
+         long chunkIndex = ChunkUtil.indexChunkFromBlock(this.blockX, this.blockZ);
+         WorldChunk worldChunk = (WorldChunk)this.world.getChunkStore().getChunkComponent(chunkIndex, WorldChunk.getComponentType());
          if (worldChunk == null) {
             return;
          }

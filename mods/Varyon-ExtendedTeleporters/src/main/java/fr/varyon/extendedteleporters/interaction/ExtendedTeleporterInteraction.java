@@ -80,14 +80,13 @@ public class ExtendedTeleporterInteraction extends SimpleBlockInteraction {
    ) {
       ChunkStore chunkStore = world.getChunkStore();
       long chunkIndex = ChunkUtil.indexChunkFromBlock(targetBlock.x, targetBlock.z);
-      BlockComponentChunk blockComponentChunk = (BlockComponentChunk)chunkStore.getChunkComponent(chunkIndex, BlockComponentChunk.getComponentType());
-      if (blockComponentChunk != null) {
-         int blockIndex = ChunkUtil.indexBlockInColumn(targetBlock.x, targetBlock.y, targetBlock.z);
-         Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
+      WorldChunk worldChunk = (WorldChunk)chunkStore.getChunkComponent(chunkIndex, WorldChunk.getComponentType());
+      if (worldChunk != null) {
+         Ref<ChunkStore> blockRef = worldChunk.getBlockComponentEntity(targetBlock.x, targetBlock.y, targetBlock.z);
          if (blockRef != null && blockRef.isValid()) {
             BlockStateInfo blockStateInfoComponent = (BlockStateInfo)blockRef.getStore().getComponent(blockRef, BlockStateInfo.getComponentType());
             if (blockStateInfoComponent != null) {
-               Ref<ChunkStore> chunkRef = blockStateInfoComponent.getChunkRef();
+               Ref<ChunkStore> chunkRef = blockStateInfoComponent.getSectionRef();
                if (chunkRef != null && chunkRef.isValid()) {
                   Teleporter teleporter = (Teleporter)chunkStore.getStore().getComponent(blockRef, Teleporter.getComponentType());
                   if (teleporter != null) {

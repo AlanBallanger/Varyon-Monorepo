@@ -15,7 +15,7 @@ import com.hypixel.hytale.server.core.entity.entities.player.pages.CustomUIPage;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.server.OpenCustomUIInteraction.CustomPageSupplier;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import fr.varyon.extendedteleporters.TeleporterManager;
@@ -54,15 +54,14 @@ public class TeleporterSettingsPageSupplier implements CustomPageSupplier {
       ChunkStore chunkStore = world.getChunkStore();
       long chunkIndex = ChunkUtil.indexChunkFromBlock(targetBlock.x, targetBlock.z);
       Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(chunkIndex);
-      BlockComponentChunk blockComponentChunk = chunkRef == null
+      WorldChunk blockComponentChunk = chunkRef == null
          ? null
-         : chunkStore.getStore().getComponent(chunkRef, BlockComponentChunk.getComponentType());
+         : chunkStore.getStore().getComponent(chunkRef, WorldChunk.getComponentType());
       if (blockComponentChunk == null) {
          return null;
       }
 
-      int blockIndex = ChunkUtil.indexBlockInColumn(targetBlock.x, targetBlock.y, targetBlock.z);
-      Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
+      Ref<ChunkStore> blockRef = blockComponentChunk.getBlockComponentEntity(targetBlock.x, targetBlock.y, targetBlock.z);
       if (blockRef != null && blockRef.isValid()) {
          Teleporter teleporter = (Teleporter)chunkStore.getStore().getComponent(blockRef, Teleporter.getComponentType());
          if (teleporter == null) {
