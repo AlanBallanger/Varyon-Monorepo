@@ -3,6 +3,7 @@ package fr.varyon.holograms.animation;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.modules.entity.component.EntityScaleComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -122,12 +123,11 @@ public class AnimationManager {
                 if (transform == null) continue;
 
                 Vector3d finalPos = group.getMemberPosition(member.lineOffset);
-                transform.getPosition().set(finalPos.x, finalPos.y, finalPos.z);
+                transform.teleportPosition(new Vector3d(finalPos.x, finalPos.y, finalPos.z));
                 member.setLastSetPosition(new Vector3d(finalPos));
 
                 Vector3f finalRot = group.getMemberRotation(member.baseRotation);
-                transform.getRotation().set(finalRot.x, finalRot.y, finalRot.z);
-                transform.markChunkDirty(store);
+                transform.teleportRotation(new Rotation3f(finalRot.x, finalRot.y, finalRot.z));
 
                 EntityScaleComponent scale = store.getComponent(ref, EntityScaleComponent.getComponentType());
                 if (scale != null) {

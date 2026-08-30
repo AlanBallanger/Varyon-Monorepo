@@ -36,6 +36,7 @@ public class ImageManager {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final String ASSET_PREFIX = "VaryonHolograms_Image_";
     private static final String PACK_NAME = "VaryonHologramsAssets";
+    private static final boolean DISABLE_MODELASSET_INJECTION = false;
 
     private final VaryonHologramsPlugin plugin;
     private final Path imagesFolder;
@@ -175,9 +176,11 @@ public class ImageManager {
                 }
             }
 
-            if (!modelAssets.isEmpty()) {
+            if (!modelAssets.isEmpty() && !DISABLE_MODELASSET_INJECTION) {
                 modelStore.loadAssets(PACK_NAME, modelAssets);
                 LOGGER.at(Level.INFO).log("[Varyon-Holograms] %s ModelAssets injectés dans le registry", modelAssets.size());
+            } else if (DISABLE_MODELASSET_INJECTION) {
+                LOGGER.at(Level.WARNING).log("[Varyon-Holograms] BISECT: injection ModelAsset DÉSACTIVÉE (%s ignorés)", modelAssets.size());
             }
 
             pendingSend.clear();

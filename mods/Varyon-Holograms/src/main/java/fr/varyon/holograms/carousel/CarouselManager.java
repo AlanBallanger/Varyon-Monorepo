@@ -169,11 +169,10 @@ public class CarouselManager {
             if (ref == null || !ref.isValid()) continue;
             TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
             if (transform == null) continue;
-            transform.getPosition().set(
+            transform.teleportPosition(new Vector3d(
                 base.x + slideOffset.x,
                 base.y + slideOffset.y,
-                base.z + slideOffset.z);
-            transform.markChunkDirty(store);
+                base.z + slideOffset.z));
         }
     }
 

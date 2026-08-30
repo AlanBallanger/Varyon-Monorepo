@@ -41,6 +41,7 @@ public final class HologramCommand extends AbstractCommandCollection {
 
     public HologramCommand(@Nonnull VaryonHologramsPlugin plugin) {
         super("hologram", "Gérer les hologrammes");
+        requireNoPermission();
         addAliases(new String[]{"holo", "hg"});
         addSubCommand(new CreateCommand(plugin));
         addSubCommand(new RenameCommand(plugin));
@@ -62,8 +63,6 @@ public final class HologramCommand extends AbstractCommandCollection {
         addSubCommand(new GlowCommand(plugin));
     }
 
-    @Override
-    protected boolean canGeneratePermission() { return false; }
 
     static boolean perm(@Nonnull CommandContext context, @Nonnull String permission) {
         if (context.sender() instanceof ConsoleSender) return true;
@@ -76,11 +75,11 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         CreateCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("create", "Créer un hologramme à votre position");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
@@ -113,12 +112,12 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         RenameCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("rename", "Renommer un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.oldNameArg = withRequiredArg("ancien", "Nom actuel", (ArgumentType<String>) ArgTypes.STRING);
             this.newNameArg = withRequiredArg("nouveau", "Nouveau nom", (ArgumentType<String>) ArgTypes.STRING);
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
@@ -146,11 +145,11 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         EditCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("edit", "Ouvrir l'éditeur GUI d'un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
@@ -173,12 +172,12 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         DeleteCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("delete", "Supprimer un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
             addAliases(new String[]{"remove", "del"});
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -197,9 +196,9 @@ public final class HologramCommand extends AbstractCommandCollection {
     private static class TestUiCommand extends AbstractPlayerCommand {
         TestUiCommand() {
             super("testui", "Ouvrir une page UI minimale de diagnostic");
+            requireNoPermission();
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
@@ -214,10 +213,10 @@ public final class HologramCommand extends AbstractCommandCollection {
     private static class CloseUiCommand extends AbstractPlayerCommand {
         CloseUiCommand() {
             super("close", "Fermer l'interface hologramme ouverte");
+            requireNoPermission();
             addAliases(new String[]{"fermer", "ui"});
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
@@ -234,10 +233,10 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         ListCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("list", "Ouvrir l'interface de gestion des hologrammes");
+            requireNoPermission();
             this.plugin = plugin;
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
@@ -257,12 +256,12 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         MoveToCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("moveto", "Se téléporter à un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
             addAliases(new String[]{"tp", "goto"});
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
@@ -286,12 +285,12 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         MoveHereCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("movehere", "Déplacer un hologramme ici");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
             addAliases(new String[]{"move"});
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
@@ -315,12 +314,12 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         AddLineCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("addline", "Ajouter une ligne à un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
             this.textArg = withRequiredArg("texte", "Texte à ajouter", (ArgumentType<String>) ArgTypes.GREEDY_STRING);
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -345,13 +344,13 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         SetLineCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("setline", "Modifier une ligne d'un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
             this.lineArg = withRequiredArg("ligne", "Numéro de ligne (à partir de 1)", (ArgumentType<Integer>) ArgTypes.INTEGER);
             this.textArg = withRequiredArg("texte", "Nouveau texte", (ArgumentType<String>) ArgTypes.GREEDY_STRING);
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -377,13 +376,13 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         RemoveLineCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("removeline", "Supprimer une ligne d'un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
             this.lineArg = withRequiredArg("ligne", "Numéro de ligne (à partir de 1)", (ArgumentType<Integer>) ArgTypes.INTEGER);
             addAliases(new String[]{"delline"});
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -408,11 +407,11 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         InfoCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("info", "Informations sur un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -440,10 +439,10 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         ReloadCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("reload", "Recharger les hologrammes");
+            requireNoPermission();
             this.plugin = plugin;
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -464,11 +463,11 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         CleanupCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("cleanup", "Supprimer les entités hologramme orphelines");
+            requireNoPermission();
             this.plugin = plugin;
             addAliases(new String[]{"clean", "purge"});
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -487,10 +486,10 @@ public final class HologramCommand extends AbstractCommandCollection {
     private static class AnimListCommand extends CommandBase {
         AnimListCommand() {
             super("animlist", "Lister les animations disponibles");
+            requireNoPermission();
             addAliases(new String[]{"animations", "anims"});
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -516,12 +515,12 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         GlowCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("glow", "Activer/désactiver la lueur nocturne d'un hologramme");
+            requireNoPermission();
             this.plugin = plugin;
             this.nameArg = withRequiredArg("nom", "Nom de l'hologramme", (ArgumentType<String>) ArgTypes.STRING);
             this.enabledArg = withRequiredArg("actif", "true/false", (ArgumentType<Boolean>) ArgTypes.BOOLEAN);
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
@@ -546,11 +545,11 @@ public final class HologramCommand extends AbstractCommandCollection {
 
         EntityResendCommand(@Nonnull VaryonHologramsPlugin plugin) {
             super("entityresend", "Renvoyer les entités à tous les joueurs");
+            requireNoPermission();
             this.plugin = plugin;
             addAliases(new String[]{"resend", "er"});
         }
 
-        @Override protected boolean canGeneratePermission() { return false; }
 
         @Override
         protected void executeSync(@Nonnull CommandContext context) {
