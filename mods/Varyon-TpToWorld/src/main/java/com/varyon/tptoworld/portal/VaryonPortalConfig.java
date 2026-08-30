@@ -66,6 +66,22 @@ public final class VaryonPortalConfig implements Component<ChunkStore> {
     }
 
     /**
+     * The tick system spawns the background at gy, the visual centre of the ring (gy already
+     * folds in baseHeightOffsetFor). The *_Standalone background systems carry no baked Y offset,
+     * so for oval types (ring drawn at gy) they line up as-is. The round Varyon_Portal_Purple
+     * ring, however, is drawn 1.5 higher than gy because Varyon_Portal_Purple_Template's spawners
+     * bake PositionOffset.Y = 1.5 while baseHeightOffsetFor returns 0.0 for it. This adds that
+     * same 1.5 to the background's Y for the round type only, so the image stays centred on the
+     * ring; every other type gets 0.
+     */
+    public static float backgroundHeightOffsetFor(String type) {
+        if ("Varyon_Portal_Purple".equals(type)) {
+            return 1.5f;
+        }
+        return 0.0f;
+    }
+
+    /**
      * The X2 template's hitbox is 2 blocks wide, but which world direction it actually spans
      * depends on the block's placement rotation (VariantRotation: NESW) — hardcoding a fixed
      * +X offset put the portal a block off from its hitbox whenever it wasn't placed facing
@@ -131,8 +147,22 @@ public final class VaryonPortalConfig implements Component<ChunkStore> {
         componentType = type;
     }
 
+    /**
+     * Reads the block component from a chunk already in memory. world.getBlockComponentHolder(...)
+     * routes through World#getChunk, which since the game update can kick off an async chunk load
+     * — illegal from inside a system/interaction tick ("Store is currently processing"). Callers
+     * always target a portal in a loaded chunk, so getChunkIfInMemory is enough.
+     */
     public static VaryonPortalConfig getAt(World world, int x, int y, int z) {
-        Holder<ChunkStore> holder = world.getBlockComponentHolder(x, y, z);
+        if (y < 0 || y >= 320) {
+            return null;
+        }
+        WorldChunk chunk = world.getChunkIfInMemory(
+                com.hypixel.hytale.math.util.ChunkUtil.indexChunkFromBlock(x, z));
+        if (chunk == null) {
+            return null;
+        }
+        Holder<ChunkStore> holder = chunk.getBlockComponentHolder(x, y, z);
         if (holder == null) {
             return null;
         }

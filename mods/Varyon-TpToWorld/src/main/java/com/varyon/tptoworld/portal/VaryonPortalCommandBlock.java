@@ -6,7 +6,9 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
+import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import org.joml.Vector3i;
 
@@ -37,8 +39,22 @@ public final class VaryonPortalCommandBlock implements Component<ChunkStore> {
         componentType = type;
     }
 
+    /**
+     * Reads the block component via a chunk that is already in memory. Going through
+     * world.getBlockComponentHolder(...) instead would call World#getChunk, which since the game
+     * update can trigger an async chunk load (loadChunkIfInMemory -> startsTicking -> addEntities)
+     * — illegal from inside a system/interaction tick ("Store is currently processing"). Any
+     * portal a player is interacting with is in a loaded chunk, so getChunkIfInMemory suffices.
+     */
     public static VaryonPortalCommandBlock getAt(World world, int x, int y, int z) {
-        Holder<ChunkStore> holder = world.getBlockComponentHolder(x, y, z);
+        if (y < 0 || y >= 320) {
+            return null;
+        }
+        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
+        if (chunk == null) {
+            return null;
+        }
+        Holder<ChunkStore> holder = chunk.getBlockComponentHolder(x, y, z);
         if (holder == null) {
             return null;
         }
