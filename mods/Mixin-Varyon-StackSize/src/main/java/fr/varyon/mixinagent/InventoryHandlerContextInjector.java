@@ -3,6 +3,7 @@ package fr.varyon.mixinagent;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -44,31 +45,18 @@ final class InventoryHandlerContextInjector {
     static final String CONTEXT_FIELD_NAME = "varyon$currentPlayerRef";
     private static final String CONTEXT_FIELD_DESC = "Ljava/lang/ThreadLocal;";
 
-    // lambda$handle$5(Ref, MoveItemStack, Store, PlayerRef) -> PlayerRef est le paramètre local #3
+    // lambda$handle$5 capture un PlayerRef directement en paramètre. L'ordre exact
+    // des paramètres a bougé entre versions d'Hytale (cf. Update 6) : on résout le
+    // slot du PlayerRef depuis le descripteur plutôt que de le figer.
     private static final String MOVE_LAMBDA = "lambda$handle$5";
-    private static final int MOVE_LAMBDA_PLAYER_REF_SLOT = 3;
 
-    // lambda$handle$6(Store, Ref, SmartMoveItemStack) -> pas de PlayerRef capturé,
-    // à résoudre via store.getComponent(ref, PlayerRef.getComponentType())
+    // Ces lambdas ne capturent pas de PlayerRef : il est résolu via
+    // store.getComponent(ref, PlayerRef.getComponentType()). Les slots de Store et
+    // Ref sont déduits du descripteur (leur ordre a été inversé en Update 6).
     private static final String SMART_MOVE_LAMBDA = "lambda$handle$6";
-    private static final int SMART_MOVE_LAMBDA_STORE_SLOT = 0;
-    private static final int SMART_MOVE_LAMBDA_REF_SLOT = 1;
-
-    // lambda$handle$8(Store, Ref, InventoryAction) -> Sort / QuickStack / TakeAll / PutAll,
-    // pas de PlayerRef capturé, mêmes slots que lambda$handle$6.
     private static final String INVENTORY_ACTION_LAMBDA = "lambda$handle$8";
-    private static final int INVENTORY_ACTION_LAMBDA_STORE_SLOT = 0;
-    private static final int INVENTORY_ACTION_LAMBDA_REF_SLOT = 1;
-
-    // lambda$handle$0(Store, Ref, SetCreativeItem) -> give créatif (clic direct dans l'inventaire créatif)
     private static final String SET_CREATIVE_ITEM_LAMBDA = "lambda$handle$0";
-    private static final int SET_CREATIVE_ITEM_LAMBDA_STORE_SLOT = 0;
-    private static final int SET_CREATIVE_ITEM_LAMBDA_REF_SLOT = 1;
-
-    // lambda$handle$3(Store, Ref, SmartGiveCreativeItem) -> give créatif (double-clic / smart give)
     private static final String SMART_GIVE_CREATIVE_ITEM_LAMBDA = "lambda$handle$3";
-    private static final int SMART_GIVE_CREATIVE_ITEM_LAMBDA_STORE_SLOT = 0;
-    private static final int SMART_GIVE_CREATIVE_ITEM_LAMBDA_REF_SLOT = 1;
 
     private static final String MARKER_NAME = "varyon$contextAware";
 
@@ -96,26 +84,23 @@ final class InventoryHandlerContextInjector {
 
         for (MethodNode m : cn.methods) {
             if (MOVE_LAMBDA.equals(m.name)) {
-                setAtStart(m, loadPlayerRefFromLocal(MOVE_LAMBDA_PLAYER_REF_SLOT));
+                setAtStart(m, loadPlayerRefFromLocal(argSlot(m, PLAYER_REF)));
                 clearBeforeEachReturn(m);
                 patchedMove = true;
             } else if (SMART_MOVE_LAMBDA.equals(m.name)) {
-                setAtStart(m, loadPlayerRefFromEcsComponent(SMART_MOVE_LAMBDA_STORE_SLOT, SMART_MOVE_LAMBDA_REF_SLOT));
+                setAtStart(m, loadPlayerRefFromEcsComponent(argSlot(m, STORE), argSlot(m, REF)));
                 clearBeforeEachReturn(m);
                 patchedSmartMove = true;
             } else if (INVENTORY_ACTION_LAMBDA.equals(m.name)) {
-                setAtStart(m, loadPlayerRefFromEcsComponent(
-                        INVENTORY_ACTION_LAMBDA_STORE_SLOT, INVENTORY_ACTION_LAMBDA_REF_SLOT));
+                setAtStart(m, loadPlayerRefFromEcsComponent(argSlot(m, STORE), argSlot(m, REF)));
                 clearBeforeEachReturn(m);
                 patchedInventoryAction = true;
             } else if (SET_CREATIVE_ITEM_LAMBDA.equals(m.name)) {
-                setAtStart(m, loadPlayerRefFromEcsComponent(
-                        SET_CREATIVE_ITEM_LAMBDA_STORE_SLOT, SET_CREATIVE_ITEM_LAMBDA_REF_SLOT));
+                setAtStart(m, loadPlayerRefFromEcsComponent(argSlot(m, STORE), argSlot(m, REF)));
                 clearBeforeEachReturn(m);
                 patchedSetCreativeItem = true;
             } else if (SMART_GIVE_CREATIVE_ITEM_LAMBDA.equals(m.name)) {
-                setAtStart(m, loadPlayerRefFromEcsComponent(
-                        SMART_GIVE_CREATIVE_ITEM_LAMBDA_STORE_SLOT, SMART_GIVE_CREATIVE_ITEM_LAMBDA_REF_SLOT));
+                setAtStart(m, loadPlayerRefFromEcsComponent(argSlot(m, STORE), argSlot(m, REF)));
                 clearBeforeEachReturn(m);
                 patchedSmartGiveCreativeItem = true;
             }
@@ -184,6 +169,27 @@ final class InventoryHandlerContextInjector {
                 clinit.instructions.add(init);
             }
         }
+    }
+
+    /**
+     * Slot de la variable locale du premier paramètre de type internalName dans m.
+     * m est un lambda synthétique `private static` : les paramètres commencent au
+     * slot 0 et chaque type référence occupe un slot. Résout dynamiquement l'ordre
+     * des paramètres, qui a changé entre versions d'Hytale (Update 6).
+     */
+    private static int argSlot(MethodNode m, String internalName) {
+        Type wanted = Type.getObjectType(internalName);
+        Type[] args = Type.getArgumentTypes(m.desc);
+        int slot = 0;
+        for (Type arg : args) {
+            if (arg.equals(wanted)) {
+                return slot;
+            }
+            slot += arg.getSize();
+        }
+        throw new IllegalStateException(
+                m.name + m.desc + " has no parameter of type " + internalName
+                        + " (Hytale internals changed) — hook not installed");
     }
 
     /** Charge le PlayerRef déjà présent en variable locale, puis appelle FIELD.set(playerRef). */
