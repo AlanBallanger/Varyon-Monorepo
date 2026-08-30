@@ -16,11 +16,9 @@ import javax.annotation.Nonnull;
 public class WeaponsCommand extends AbstractPlayerCommand {
     public WeaponsCommand(String name, String description) {
         super(name, description, false);
+        requireNoPermission();
     }
 
-    protected boolean canGeneratePermission() {
-        return false;
-    }
 
     @Override
     protected void execute(
