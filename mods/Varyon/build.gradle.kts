@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.example"
-version = "0.1.4"
+version = "0.2.0"
 val javaVersion = 25
 
 repositories {
@@ -43,7 +43,7 @@ dependencies {
 // substitute already used successfully by sibling modules (Varyon-Damage_Number, Varyon-TravelingCamera).
 val fatJar = tasks.register<Zip>("fatJar") {
     archiveBaseName.set("Varyon")
-    archiveVersion.set("0.1.4")
+    archiveVersion.set(version.toString())
     archiveExtension.set("jar")
     destinationDirectory.set(layout.buildDirectory.dir("libs"))
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
