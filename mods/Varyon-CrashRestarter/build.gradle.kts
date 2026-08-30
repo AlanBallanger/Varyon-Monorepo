@@ -43,14 +43,6 @@ tasks.named<Jar>("jar") {
     archiveBaseName.set("Varyon-CrashRestarter")
 }
 
-val exportModJar = tasks.register<Copy>("exportModJar") {
-    group = "build"
-    description = "Copie le JAR vers Varyon-Monorepo/build/output"
-    dependsOn(tasks.named("jar"))
-    from(tasks.named<Jar>("jar").flatMap { it.archiveFile })
-    into(rootProject.layout.buildDirectory.dir("output"))
-}
-
-tasks.named("build") {
-    finalizedBy(exportModJar)
-}
+// The global init script ~/.gradle/init.d/deploy-output.gradle already redirects the `jar`
+// output to Varyon-Monorepo/build/output and copies it to the dev server mods dir. A separate
+// exportModJar copying build/output -> build/output truncated the archive to 0 bytes.
