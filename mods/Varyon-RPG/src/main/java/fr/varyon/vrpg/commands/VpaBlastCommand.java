@@ -38,6 +38,7 @@ public final class VpaBlastCommand extends AbstractAsyncCommand {
     public VpaBlastCommand(ExplosionTalentSystem explosionSystem) {
         super("blast", "Diplomatie Miniere -- explosion controlee");
         this.addAliases("vpb");
+        requireNoPermission();
         this.explosionSystem = explosionSystem;
     }
 

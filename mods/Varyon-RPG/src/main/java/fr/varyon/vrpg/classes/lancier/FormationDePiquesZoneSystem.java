@@ -71,8 +71,15 @@ public final class FormationDePiquesZoneSystem extends EntityTickingSystem<Entit
         double depth     = FormationDePiquesSkill.zoneDepth();
         float slow       = FormationDePiquesSkill.slowFactor(rank);
         long durationMs  = FormationDePiquesSkill.durationMsForRank(rank);
+        Vector3d dir = new Vector3d(direction);
+        double dirLen = dir.length();
+        if (Double.isFinite(dirLen) && dirLen > 1e-6) {
+            dir.mul(1.0 / dirLen);
+        } else {
+            dir.set(0.0, 0.0, 1.0);
+        }
         zones.put(casterUuid, new PiqueZone(casterUuid, casterRef, new Vector3d(center),
-            new Vector3d(direction).normalize(), halfWidth, depth, damagePerTick, slow, durationMs, controleRank));
+            dir, halfWidth, depth, damagePerTick, slow, durationMs, controleRank));
         if (controleRank > 0) {
             lancierState.armCcDamage(casterUuid, controleRank,
                 LancierPassifs.controleDurationMsForRank(controleRank));

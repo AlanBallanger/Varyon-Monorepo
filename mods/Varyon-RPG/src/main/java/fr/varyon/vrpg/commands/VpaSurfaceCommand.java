@@ -44,6 +44,7 @@ public final class VpaSurfaceCommand extends AbstractAsyncCommand {
     public VpaSurfaceCommand() {
         super("surface", "Wagon Express -- retour a la surface");
         this.addAliases("vps");
+        requireNoPermission();
     }
 
     @NonNullDecl

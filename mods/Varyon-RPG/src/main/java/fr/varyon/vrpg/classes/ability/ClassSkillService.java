@@ -5155,10 +5155,8 @@ public final class ClassSkillService {
             com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
                 store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
             if (tc != null && hr != null) {
-                org.joml.Vector3d dir = hr.getDirection();
-                double dx = dir.x, dz = dir.z;
-                double len = Math.sqrt(dx*dx + dz*dz);
-                if (len > 1e-6) { dx /= len; dz /= len; }
+                org.joml.Vector3d flatDir = SkillVectorMath.horizontalDir(hr.getDirection(), 0.0, 1.0);
+                double dx = flatDir.x, dz = flatDir.z;
 
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "DashForward", true,
                     commandBuffer != null ? commandBuffer : store);
@@ -5184,9 +5182,11 @@ public final class ClassSkillService {
                         : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
                 if (vel != null) {
                     org.joml.Vector3d dashVel = new org.joml.Vector3d(dx * 30.0, 0.2, dz * 30.0);
-                    vel.setClient(dashVel);
-                    vel.getInstructions().clear();
-                    vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                    if (SkillVectorMath.isFinite(dashVel)) {
+                        vel.setClient(dashVel);
+                        vel.getInstructions().clear();
+                        vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                    }
                 }
 
                 final PlayerRef fPlayerRef = playerRef;
@@ -5253,10 +5253,8 @@ public final class ClassSkillService {
             com.hypixel.hytale.server.core.modules.entity.component.HeadRotation hr =
                 store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.entity.component.HeadRotation.getComponentType());
             if (tc != null && hr != null) {
-                org.joml.Vector3d dir = hr.getDirection();
-                double dx = dir.x, dz = dir.z;
-                double len = Math.sqrt(dx*dx + dz*dz);
-                if (len > 1e-6) { dx /= len; dz /= len; }
+                org.joml.Vector3d flatDir = SkillVectorMath.horizontalDir(hr.getDirection(), 0.0, 1.0);
+                double dx = flatDir.x, dz = flatDir.z;
 
                 AnimationUtils.playAnimation(entityRef, AnimationSlot.Action, "Spear", "DashForward", true,
                     commandBuffer != null ? commandBuffer : store);
@@ -5311,9 +5309,11 @@ public final class ClassSkillService {
                         : store.getComponent(entityRef, com.hypixel.hytale.server.core.modules.physics.component.Velocity.getComponentType());
                 if (vel != null) {
                     org.joml.Vector3d dashVel = new org.joml.Vector3d(dx * 36.0, 0.5, dz * 36.0);
-                    vel.setClient(dashVel);
-                    vel.getInstructions().clear();
-                    vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                    if (SkillVectorMath.isFinite(dashVel)) {
+                        vel.setClient(dashVel);
+                        vel.getInstructions().clear();
+                        vel.addInstruction(dashVel, null, com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                    }
                 }
             }
         } catch (Exception ignored) {}
@@ -5386,15 +5386,22 @@ public final class ClassSkillService {
 
                 org.joml.Vector3d toPlayer = new org.joml.Vector3d(tcCaster.getPosition()).sub(tcTarget.getPosition());
                 double pullLen = toPlayer.length();
-                if (pullLen > 1e-6) toPlayer.mul(1.0 / pullLen);
+                if (Double.isFinite(pullLen) && pullLen > 1e-6) {
+                    toPlayer.mul(1.0 / pullLen);
+                } else {
+                    toPlayer.set(0.0, 0.0, 0.0);
+                }
                 double pullStrength = fr.varyon.vrpg.classes.lancier.HarponnageSkill.pullStrength();
-                com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent kbComp =
-                    new com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent();
-                kbComp.setVelocity(new org.joml.Vector3d(toPlayer.x * pullStrength, 0.3, toPlayer.z * pullStrength));
-                kbComp.setVelocityType(com.hypixel.hytale.protocol.ChangeVelocityType.Set);
-                kbComp.setDuration(0.0f);
-                (commandBuffer != null ? commandBuffer : store).putComponent(targeted,
-                    com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent.getComponentType(), kbComp);
+                org.joml.Vector3d pullVel = new org.joml.Vector3d(toPlayer.x * pullStrength, 0.3, toPlayer.z * pullStrength);
+                if (SkillVectorMath.isFinite(pullVel)) {
+                    com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent kbComp =
+                        new com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent();
+                    kbComp.setVelocity(pullVel);
+                    kbComp.setVelocityType(com.hypixel.hytale.protocol.ChangeVelocityType.Set);
+                    kbComp.setDuration(0.0f);
+                    (commandBuffer != null ? commandBuffer : store).putComponent(targeted,
+                        com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent.getComponentType(), kbComp);
+                }
 
                 int controleRank = acc.getTalentRank(PlayerClass.TIREUR, fr.varyon.vrpg.classes.lancier.LancierPassifs.CONTROLE_NODE);
                 if (controleRank > 0) lancierState.armCcDamage(uuid, controleRank,
