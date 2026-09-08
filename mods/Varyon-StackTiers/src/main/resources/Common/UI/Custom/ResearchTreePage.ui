@@ -16,13 +16,13 @@ $C = "Common.ui";
 @SidebarBg = #14120E;
 @SidebarLine = #E8DCC8(0.18);
 
-@TitleStyle = (FontSize: 20, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-@NameStyle = (FontSize: 13, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
-@BonusStyle = (FontSize: 10, TextColor: @Gold, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
-@CostStyle = (FontSize: 12, TextColor: @Gold, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
-@ItemStyle = (FontSize: 10, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
-@TimeStyle = (FontSize: 11, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
-@TierStyle = (FontSize: 14, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@TitleStyle = (FontSize: 23, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@NameStyle = (FontSize: 15, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@BonusStyle = (FontSize: 12, TextColor: @Gold, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@CostStyle = (FontSize: 14, TextColor: @Gold, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@ItemStyle = (FontSize: 12, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: Start, VerticalAlignment: Center);
+@TimeStyle = (FontSize: 13, TextColor: @InkMuted, RenderBold: true, HorizontalAlignment: End, VerticalAlignment: Center);
+@TierStyle = (FontSize: 16, TextColor: @Ink, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
 
 @NodeBtn = (
   Default: ( Background: #000000(0.0) ),
