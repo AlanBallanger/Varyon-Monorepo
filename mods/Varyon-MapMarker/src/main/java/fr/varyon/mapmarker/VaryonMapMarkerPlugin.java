@@ -14,8 +14,6 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.universe.world.worldmap.WorldMapManager;
-import com.hypixel.hytale.server.core.universe.world.worldmap.markers.user.UserMapMarker;
-import com.hypixel.hytale.server.core.universe.world.worldmap.markers.worldstore.WorldMarkersResource;
 import fr.varyon.mapmarker.commands.MapMarkerRootCommand;
 import fr.varyon.mapmarker.assets.MapMarkerAssetPack;
 import fr.varyon.mapmarker.assets.MapMarkerAssetPublisher;
@@ -31,7 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +39,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static final String SHARED_MARKER_ID_PREFIX = "mk-shared-";
+    private final SharedMarkerProvider markerProvider = new SharedMarkerProvider(this);
     private static final String MARKERS_STATE_FILE = "markers.json";
     private static final String MARKERS_LEGACY_FILE = "markers.db";
     private static final String CONFIG_FILE = "config.yml";
@@ -82,8 +80,27 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 
     @Override
     protected void shutdown() {
+        unregisterProviders();
         debug("Arrêt terminé");
         instance = null;
+    }
+
+    private void unregisterProviders() {
+        Universe universe = Universe.get();
+        if (universe == null) {
+            return;
+        }
+        for (World world : universe.getWorlds().values()) {
+            try {
+                WorldMapManager mapManager = world.getWorldMapManager();
+                if (mapManager != null) {
+                    mapManager.getMarkerProviders().remove(SharedMarkerProvider.PROVIDER_KEY);
+                }
+            } catch (Exception e) {
+                ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
+                        .log("[Varyon-MapMarker] Échec retrait MarkerProvider monde %s", world.getName());
+            }
+        }
     }
 
     public Path getImagesDir() {
@@ -243,13 +260,37 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
 
     private void onPlayerReadyPushMapMarkerTextures(PlayerReadyEvent event) {
         Player player = event.getPlayer();
-        if (player != null) {
-            try {
-                player.getWorldMapTracker().clear();
-            } catch (Exception e) {
-                ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                        .log("[Varyon-MapMarker] Échec clear tracker carte après connexion joueur");
+        if (player == null) {
+            return;
+        }
+        Universe universe = Universe.get();
+        if (universe != null) {
+            for (World world : universe.getWorlds().values()) {
+                ensureProviderRegistered(world);
             }
+        }
+        try {
+            player.getWorldMapTracker().clear();
+        } catch (Exception e) {
+            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
+                    .log("[Varyon-MapMarker] Échec clear tracker carte après connexion joueur");
+        }
+    }
+
+    private void ensureProviderRegistered(@Nonnull World world) {
+        try {
+            WorldMapManager mapManager = world.getWorldMapManager();
+            if (mapManager == null) {
+                return;
+            }
+            if (mapManager.getMarkerProviders().containsKey(SharedMarkerProvider.PROVIDER_KEY)) {
+                return;
+            }
+            mapManager.addMarkerProvider(SharedMarkerProvider.PROVIDER_KEY, markerProvider);
+            debug("MarkerProvider enregistré monde=%s", world.getName());
+        } catch (Exception e) {
+            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
+                    .log("[Varyon-MapMarker] Échec enregistrement MarkerProvider monde %s", world.getName());
         }
     }
 
@@ -278,11 +319,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                     playerUuid,
                     displayName,
                     null));
-            if (getWorldMarkersResource(world) == null) {
-                playerRef.sendMessage(Message.raw("Erreur : échec de la création du marqueur sur la carte."));
-                return;
-            }
-            rebuildManagedMarkersForWorld(world);
+            ensureProviderRegistered(world);
             refreshWorldMapTrackers(world);
             debug(
                     "Marqueur créé monde=%s id=%s image=%s nom=%s x=%.2f z=%.2f",
@@ -339,7 +376,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         if (existing == null) return;
         upsertSavedMarker(new SavedMarker(existing.id(), existing.worldName(), existing.imageName(),
                 newName, existing.x(), existing.z(), existing.createdByUuid(), existing.createdByName(), existing.group()));
-        rebuildManagedMarkersForWorld(world);
+        ensureProviderRegistered(world);
         refreshWorldMapTrackers(world);
     }
 
@@ -357,7 +394,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         pushMapMarkerPngToAllOnlinePlayers(fileName);
         upsertSavedMarker(new SavedMarker(existing.id(), existing.worldName(), fileName,
                 existing.markerName(), existing.x(), existing.z(), existing.createdByUuid(), existing.createdByName(), existing.group()));
-        rebuildManagedMarkersForWorld(world);
+        ensureProviderRegistered(world);
         refreshWorldMapTrackers(world);
     }
 
@@ -371,7 +408,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
         if (existing == null) return;
         upsertSavedMarker(new SavedMarker(existing.id(), existing.worldName(), existing.imageName(),
                 existing.markerName(), newX, newZ, existing.createdByUuid(), existing.createdByName(), existing.group()));
-        rebuildManagedMarkersForWorld(world);
+        ensureProviderRegistered(world);
         refreshWorldMapTrackers(world);
     }
 
@@ -406,7 +443,7 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             savedMarkers.removeIf(sm -> id.equals(sm.id()));
         }
         saveSavedMarkers();
-        rebuildManagedMarkersForWorld(world);
+        ensureProviderRegistered(world);
         refreshWorldMapTrackers(world);
     }
 
@@ -468,43 +505,20 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
             return 0;
         }
         debug("clearMarkersByName monde=%s nom=%s", world.getName(), markerName);
-        try {
-            WorldMarkersResource resource = getWorldMarkersResource(world);
-            if (resource == null) {
-                return 0;
-            }
-            ArrayList<UserMapMarker> updated = new ArrayList<>();
-            int removedCount = 0;
-            for (UserMapMarker marker : resource.getUserMapMarkers()) {
-                if (marker == null) {
-                    continue;
-                }
-                if (isManagedMarker(marker) && markerName.equalsIgnoreCase(marker.getName())) {
-                    removedCount++;
-                    continue;
-                }
-                updated.add(marker);
-            }
-            if (removedCount > 0) {
-                resource.setUserMapMarkers(updated);
-                removeSavedMarkersByWorldAndName(world.getName(), markerName);
-                refreshWorldMapTrackers(world);
-                debug(
-                        "Marqueurs retirés monde=%s nom=%s count=%s restants=%s",
-                        world.getName(),
-                        markerName,
-                        removedCount,
-                        updated.size());
-            }
-            return removedCount;
-        } catch (Exception e) {
-            ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
-                    .log(
-                            "[Varyon-MapMarker] Échec suppression marqueurs nom %s monde %s",
-                            markerName,
-                            world.getName());
-            return 0;
+        String wname = world.getName();
+        int removedCount;
+        synchronized (savedMarkers) {
+            int before = savedMarkers.size();
+            savedMarkers.removeIf(sm -> wname.equals(sm.worldName())
+                    && markerName.equalsIgnoreCase(sm.markerName()));
+            removedCount = before - savedMarkers.size();
         }
+        if (removedCount > 0) {
+            saveSavedMarkers();
+            refreshWorldMapTrackers(world);
+            debug("clearMarkersByName monde=%s nom=%s count=%s", wname, markerName, removedCount);
+        }
+        return removedCount;
     }
 
     public boolean reloadMarkerAssets() {
@@ -533,18 +547,8 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                 debug("importSavedMarkers annulé : univers nul");
                 return false;
             }
-            ArrayList<CompletableFuture<Void>> rebuilds = new ArrayList<>();
             for (World world : universe.getWorlds().values()) {
-                CompletableFuture<Void> rebuild = new CompletableFuture<>();
-                rebuilds.add(rebuild);
-                world.execute(() -> {
-                    try {
-                        rebuildManagedMarkersForWorld(world);
-                        rebuild.complete(null);
-                    } catch (Exception e) {
-                        rebuild.completeExceptionally(e);
-                    }
-                });
+                ensureProviderRegistered(world);
             }
             synchronized (savedMarkers) {
                 for (SavedMarker savedMarker : savedMarkers) {
@@ -561,9 +565,6 @@ public final class VaryonMapMarkerPlugin extends JavaPlugin {
                         pushMapMarkerPngToAllOnlinePlayers(source.getFileName().toString());
                     }
                 }
-            }
-            for (CompletableFuture<Void> completableFuture : rebuilds) {
-                completableFuture.join();
             }
             refreshAllWorldMapTrackers();
             debug("importSavedMarkers terminé");
@@ -752,59 +753,6 @@ commands_help:
         return null;
     }
 
-    private WorldMarkersResource getWorldMarkersResource(World world) {
-        return (WorldMarkersResource)
-                world.getChunkStore().getStore().getResource(WorldMarkersResource.getResourceType());
-    }
-
-    private boolean isManagedMarker(UserMapMarker marker) {
-        return marker.getId() != null && marker.getId().startsWith(SHARED_MARKER_ID_PREFIX);
-    }
-
-    private void rebuildManagedMarkersForWorld(World world) {
-        WorldMarkersResource resource = getWorldMarkersResource(world);
-        if (resource == null) {
-            debug("rebuildManagedMarkersForWorld annulé : resource nulle monde=%s", world.getName());
-            return;
-        }
-        ArrayList<UserMapMarker> updated = new ArrayList<>();
-        int removed = 0;
-        for (UserMapMarker marker : resource.getUserMapMarkers()) {
-            if (marker == null) {
-                continue;
-            }
-            if (isManagedMarker(marker)) {
-                removed++;
-                continue;
-            }
-            updated.add(marker);
-        }
-        int restored = 0;
-        synchronized (savedMarkers) {
-            for (SavedMarker savedMarker : savedMarkers) {
-                if (!world.getName().equals(savedMarker.worldName())) {
-                    continue;
-                }
-                UserMapMarker marker = new UserMapMarker();
-                marker.setId(savedMarker.id());
-                marker.setPosition(savedMarker.x(), savedMarker.z());
-                marker.setName(savedMarker.markerName());
-                marker.setIcon(MapMarkerAssetPack.normalizeIconFileName(savedMarker.imageName()));
-                marker.withCreatedByUuid(savedMarker.createdByUuid());
-                marker.withCreatedByName(savedMarker.createdByName());
-                updated.add(marker);
-                restored++;
-            }
-        }
-        resource.setUserMapMarkers(updated);
-        debug(
-                "rebuildManagedMarkersForWorld monde=%s retirés=%s restaurés=%s total=%s",
-                world.getName(),
-                removed,
-                restored,
-                updated.size());
-    }
-
     private void upsertSavedMarker(SavedMarker marker) {
         synchronized (savedMarkers) {
             savedMarkers.removeIf(existing -> existing.id().equals(marker.id()));
@@ -816,19 +764,6 @@ commands_help:
                 marker.worldName(),
                 marker.imageName(),
                 marker.markerName(),
-                savedMarkers.size());
-        saveSavedMarkers();
-    }
-
-    private void removeSavedMarkersByWorldAndName(String worldName, String markerName) {
-        synchronized (savedMarkers) {
-            savedMarkers.removeIf(marker -> worldName.equals(marker.worldName())
-                    && markerName.equalsIgnoreCase(marker.markerName()));
-        }
-        debug(
-                "Marqueurs retirés du stockage monde=%s nom=%s total=%s",
-                worldName,
-                markerName,
                 savedMarkers.size());
         saveSavedMarkers();
     }
