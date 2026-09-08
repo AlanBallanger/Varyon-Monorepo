@@ -2,7 +2,7 @@ package fr.varyon.quiver;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
-import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
@@ -16,12 +16,19 @@ import com.hypixel.hytale.server.core.inventory.container.CombinedItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemStackItemContainer;
 import com.hypixel.hytale.server.core.inventory.transaction.ItemStackTransaction;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 
 public final class QuiverSupplySystem extends EntityTickingSystem<EntityStore> {
     private static final int MAGAZINE_SIZE = 10;
+    private static final int REFILL_INTERVAL_TICKS = 10;
     private static final String[] QUIVER_IDS = new String[]{"Utility_Leather_Quiver", "Light_Leather_Quiver", "Medium_Leather_Quiver", "Heavy_Leather_Quiver"};
+
+    private final Map<UUID, Integer> tickCounter = new ConcurrentHashMap<>();
 
     @Override
     public Query<EntityStore> getQuery() {
@@ -39,6 +46,19 @@ public final class QuiverSupplySystem extends EntityTickingSystem<EntityStore> {
         if (player == null) {
             return;
         }
+        Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
+        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return;
+        }
+        UUID playerId = playerRef.getUuid();
+
+        int count = this.tickCounter.merge(playerId, 1, Integer::sum);
+        if (count < REFILL_INTERVAL_TICKS) {
+            return;
+        }
+        this.tickCounter.put(playerId, 0);
+
         WindowManager windowManager = player.getWindowManager();
         if (windowManager != null) {
             for (Window window : windowManager.getWindows()) {
@@ -48,8 +68,7 @@ public final class QuiverSupplySystem extends EntityTickingSystem<EntityStore> {
             }
         }
         CombinedItemContainer flatInventory = InventoryComponent.getCombined(commandBuffer, archetypeChunk, index, InventoryComponent.STORAGE_HOTBAR_BACKPACK);
-        CombinedItemContainer searchInventory = InventoryComponent.getCombined(commandBuffer, archetypeChunk, index, InventoryComponent.EVERYTHING);
-        if (flatInventory == null || searchInventory == null) {
+        if (flatInventory == null) {
             return;
         }
         int flatArrows = this.countFlatArrows(flatInventory);
@@ -57,6 +76,14 @@ public final class QuiverSupplySystem extends EntityTickingSystem<EntityStore> {
         if (remaining <= 0) {
             return;
         }
+        CombinedItemContainer searchInventory = InventoryComponent.getCombined(commandBuffer, archetypeChunk, index, InventoryComponent.EVERYTHING);
+        if (searchInventory == null) {
+            return;
+        }
+        this.refill(searchInventory, flatInventory, remaining);
+    }
+
+    private void refill(CombinedItemContainer searchInventory, CombinedItemContainer flatInventory, int remaining) {
         outer:
         for (int ci = 0; ci < searchInventory.getContainersSize(); ++ci) {
             ItemContainer section = searchInventory.getContainer(ci);
@@ -116,6 +143,10 @@ public final class QuiverSupplySystem extends EntityTickingSystem<EntityStore> {
             }
         }
         return total;
+    }
+
+    public void removePlayer(@Nonnull UUID playerId) {
+        this.tickCounter.remove(playerId);
     }
 
     private boolean isQuiverItem(ItemStack item) {
