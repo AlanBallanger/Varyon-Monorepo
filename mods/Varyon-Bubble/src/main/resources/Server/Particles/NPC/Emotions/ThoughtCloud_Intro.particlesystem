@@ -1,0 +1,9 @@
+{
+  "Spawners": [
+    { "SpawnerId": "ThoughtCloud_Small", "FixedRotation": false },
+    { "SpawnerId": "ThoughtCloud_Medium", "FixedRotation": false },
+    { "SpawnerId": "ThoughtCloud_Move", "FixedRotation": false }
+  ],
+  "LifeSpan": 2,
+  "IsImportant": false
+}

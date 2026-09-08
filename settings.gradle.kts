@@ -48,4 +48,9 @@ include(
     ":mods:Varyon-Dummy",
     ":mods:Mixin-Varyon-StackSize",
     ":mods:Varyon-StackTiers",
+    ":mods:Varyon-Trade",
+    ":mods:Varyon-ItemFrames",
+    ":mods:Varyon-Bubble",
+    ":mods:Varyon-InfCanary",
+    ":mods:Varyon-PickupRange",
 )

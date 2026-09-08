@@ -1,0 +1,13 @@
+$C = "../../Common.ui";
+
+
+Button #Button {
+    LayoutMode: CenterMiddle;
+    Anchor: (Width: 35, Height: 35);
+    Style: $C.@TertiaryButtonStyle;
+
+    Group #Icon {
+        Anchor: (Width: 20, Height: 20);
+        Background: "../Icons/center.png";
+    }
+}

@@ -1,0 +1,111 @@
+$C = "../../../Common.ui";
+
+Group #QuantityDialogOverlay {
+    Visible: false;
+    Background: #000000(0.55);
+    LayoutMode: CenterMiddle;
+
+    $C.@Container #QuantityDialog {
+        Anchor: (Width: 360, Height: 210);
+
+        #Title {
+            $C.@Title #QtyDialogTitle {
+                @Text = "Quantity";
+            }
+        }
+
+        #Content {
+            LayoutMode: Top;
+            Padding: (Full: 14);
+
+            Label #QtyItemName {
+                Text: "Item";
+                Style: (TextColor: #f4af43, HorizontalAlignment: Center, FontSize: 15, LetterSpacing: 1);
+            }
+
+            Group #Spacer { Anchor: (Height: 12); }
+
+            Group #QtyRow {
+                LayoutMode: CenterMiddle;
+
+                Button #QtyMinusBtn {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 34, Height: 30, Right: 6);
+                    Style: $C.@SecondaryButtonStyle;
+                    Label #Label {
+                        Text: "-";
+                        Style: (TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, FontSize: 18);
+                    }
+                }
+
+                $C.@NumberField #QtyField {
+                    Anchor: (Width: 130, Height: 30);
+                    Style: (FontSize: 14, TextColor: #ffffff);
+                    Format: (MinValue: 1, MaxValue: 9999, MaxDecimalPlaces: 0, Step: 1);
+                }
+
+                Button #QtyPlusBtn {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 34, Height: 30, Left: 6);
+                    Style: $C.@SecondaryButtonStyle;
+                    Label #Label {
+                        Text: "+";
+                        Style: (TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, FontSize: 18);
+                    }
+                }
+            }
+
+            Group #Spacer { Anchor: (Height: 10); }
+
+            Group #QtyPresetRow {
+                LayoutMode: CenterMiddle;
+
+                Button #QtyHalfBtn {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 90, Height: 28, Right: 6);
+                    Style: $C.@SecondaryButtonStyle;
+                    Label #Label {
+                        Text: "HALF";
+                        Style: (TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, FontSize: 13, LetterSpacing: 1);
+                    }
+                }
+
+                Button #QtyMaxBtn {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 90, Height: 28, Left: 6);
+                    Style: $C.@SecondaryButtonStyle;
+                    Label #Label {
+                        Text: "MAX";
+                        Style: (TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center, FontSize: 13, LetterSpacing: 1);
+                    }
+                }
+            }
+
+            Group #Spacer { Anchor: (Height: 14); }
+
+            Group #QtyButtons {
+                LayoutMode: CenterMiddle;
+
+                Button #QtyConfirmBtn {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 140, Height: 30, Right: 6);
+                    Style: $C.@DefaultButtonStyle;
+                    Label #Label {
+                        Text: "ADD";
+                        Style: (TextColor: #ffffff, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, FontSize: 14, LetterSpacing: 1);
+                    }
+                }
+
+                Button #QtyCancelBtn {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 140, Height: 30, Left: 6);
+                    Style: $C.@CancelButtonStyle;
+                    Label #Label {
+                        Text: "CANCEL";
+                        Style: (TextColor: #ffffff, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, FontSize: 14, LetterSpacing: 1);
+                    }
+                }
+            }
+        }
+    }
+}

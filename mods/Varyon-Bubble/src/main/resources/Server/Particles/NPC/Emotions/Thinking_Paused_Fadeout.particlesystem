@@ -1,0 +1,10 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "ThoughtCloud_Ellipsis_Paused_Fadeout",
+      "FixedRotation": false
+    }
+  ],
+  "LifeSpan": 1,
+  "IsImportant": false
+}

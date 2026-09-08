@@ -1,0 +1,30 @@
+$C = "../../../Common.ui";
+
+$C.@Container {
+    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+    FlexWeight: 1;
+    LayoutMode: Top;
+
+    #Title {
+        Group {
+            Anchor: (Horizontal: 1);
+
+            $C.@Title #InventoryTitle {
+                @Text = "Inventory";
+                Style: (TextColor: #ffffff, Alignment: Center);
+            }
+        }
+    }
+
+    #Content {
+        Anchor: (Horizontal: 1);
+        FlexWeight: 1;
+        Padding: (Full: 10);
+
+        Group #Inventory {
+            LayoutMode: TopScrolling;
+            Padding: (Left: 10);
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        }
+    }
+}

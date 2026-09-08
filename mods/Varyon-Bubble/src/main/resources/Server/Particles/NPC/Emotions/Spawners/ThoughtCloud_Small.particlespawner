@@ -1,0 +1,36 @@
+{
+  "EmitOffset": {
+    "X": { "Min": -0.05, "Max": 0.05 },
+    "Y": { "Min": -0.55, "Max": -0.45 }
+  },
+  "ParticleRotationInfluence": "Billboard",
+  "LightInfluence": 0.0,
+  "MaxConcurrentParticles": 1,
+  "ParticleLifeSpan": { "Min": 2, "Max": 2 },
+  "SpawnRate": { "Min": 1, "Max": 1 },
+  "ParticleRotateWithSpawner": false,
+  "Particle": {
+    "Texture": "Particles/Textures/Shapes/Thoughts/CloudPuff.png",
+    "FrameSize": { "Width": 32, "Height": 32 },
+    "ScaleRatioConstraint": "OneToOne",
+    "UVOption": "None",
+    "Animation": {
+      "0":   { "Opacity": 0, "Scale": { "X": { "Min": 0, "Max": 0 } } },
+      "2":   { "Opacity": 1, "Scale": { "X": { "Min": 0.5, "Max": 0.5 } } },
+      "5":   { "Opacity": 1, "Scale": { "X": { "Min": 0.6, "Max": 0.6 } } },
+      "15":  { "Opacity": 1, "Scale": { "X": { "Min": 0.6, "Max": 0.6 } } },
+      "22":  { "Opacity": 0, "Scale": { "X": { "Min": 0.3, "Max": 0.3 } } }
+    },
+    "InitialAnimationFrame": {
+      "Scale": { "X": { "Min": 0, "Max": 0 } },
+      "Opacity": 0,
+      "Rotation": { "Z": { "Min": -10, "Max": 10 } },
+      "Color": "#f3e1ca"
+    }
+  },
+  "RenderMode": "Erosion",
+  "SpawnBurst": true,
+  "TrailSpawnerPositionMultiplier": 0,
+  "TrailSpawnerRotationMultiplier": 1,
+  "LinearFiltering": true
+}

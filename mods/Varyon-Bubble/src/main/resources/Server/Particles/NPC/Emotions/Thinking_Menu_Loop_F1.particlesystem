@@ -1,0 +1,10 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "ThoughtCloud_Ellipsis_Menu_Loop_F1",
+      "FixedRotation": false
+    }
+  ],
+  "LifeSpan": 2,
+  "IsImportant": false
+}

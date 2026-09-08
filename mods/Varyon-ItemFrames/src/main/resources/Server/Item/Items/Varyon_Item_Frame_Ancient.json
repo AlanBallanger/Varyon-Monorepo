@@ -1,0 +1,105 @@
+{
+  "TranslationProperties": {
+    "Name": "items.Varyon_Item_Frame_Ancient.name"
+  },
+  "Icon": "Icons/ItemsGenerated/Varyon_Item_Frame_Ancient.png",
+  "Categories": [
+    "Blocks.Deco"
+  ],
+  "Set": "Varyon_Item_Frame",
+  "Recipe": {
+    "Input": [
+      {
+        "ResourceTypeId": "Wood_Trunk",
+        "Quantity": 2
+      },
+      {
+        "ItemId": "Ingredient_Tree_Sap",
+        "Quantity": 1
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Id": "Furniture_Bench",
+        "Categories": [
+          "Furniture_Misc"
+        ]
+      }
+    ]
+  },
+  "BlockType": {
+    "Material": "Solid",
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "CustomModel": "Blocks/Decorative_Sets/Ancient/Painting.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Weight": 1,
+        "Texture": "Blocks/Decorative_Sets/Ancient/Painting_Texture.png"
+      }
+    ],
+    "BlockEntity": {
+      "Components": {}
+    },
+    "CustomModelScale": 1,
+    "HitboxType": "Painting",
+    "VariantRotation": "NESW",
+    "Gathering": {
+      "Soft": {}
+    },
+    "BlockParticleSetId": "Wood",
+    "BlockSoundSetId": "Wood",
+    "Support": {
+      "North": [
+        {
+          "FaceType": "Full"
+        },
+        {
+          "TagId": "Type=Furniture"
+        }
+      ]
+    },
+    "ParticleColor": "#5b3222",
+    "InteractionHint": "server.interactionHints.interactVaryonItemFrame",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "VaryonItemFrameInteraction"
+          }
+        ]
+      }
+    }
+  },
+  "PlayerAnimationsId": "Block",
+  "IconProperties": {
+    "Scale": 0.68,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      8.5,
+      -19.7
+    ]
+  },
+  "ResourceTypes": [
+    {
+      "Id": "Fuel"
+    },
+    {
+      "Id": "Charcoal"
+    }
+  ],
+  "Tags": {
+    "Type": [
+      "Furniture"
+    ],
+    "Family": [
+      "Village"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Wood"
+}

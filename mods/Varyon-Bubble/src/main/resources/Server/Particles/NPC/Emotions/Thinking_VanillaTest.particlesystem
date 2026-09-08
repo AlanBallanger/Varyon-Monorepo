@@ -1,0 +1,6 @@
+{
+  "Spawners": [
+    { "SpawnerId": "Hearts", "FixedRotation": false }
+  ],
+  "LifeSpan": 3
+}

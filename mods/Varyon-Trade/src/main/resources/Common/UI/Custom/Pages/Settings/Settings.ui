@@ -1,0 +1,138 @@
+$C = "../../Common.ui";
+
+
+Group {
+    LayoutMode: CenterMiddle;
+    FlexWeight: 1;
+
+    $C.@Container #Settings {
+        Anchor: (Width: 520, Height: 700);
+
+        #Title {
+            $C.@Title #SettingsTitle {
+                @Text = "Varyon-Trade Settings";
+            }
+        }
+
+        #Content {
+            FlexWeight: 1;
+
+            Group {
+                LayoutMode: Top;
+                FlexWeight: 1;
+
+                //Language label
+                Label #LanguageTitle {
+                    Text: "Language";
+                    Anchor: (Bottom: 5);
+                    Style: (RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+                }
+
+                //Language selector
+                $C.@DropdownBox #LanguageSelector {
+                  Anchor: (Height: $C.@DropdownBoxHeight, Bottom: 15);
+                }
+
+                //Layout & Position label
+                Label #PositionLayoutTitle {
+                    Text: "Position & Layout";
+                    Anchor: (Bottom: 5);
+                    Style: (RenderBold: true, RenderUppercase: true, LetterSpacing: 1);
+                }
+
+                //Layout & Position buttons
+                Group #LayoutPositionButtons {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Bottom: 15);
+                }
+
+                $C.@Container {
+                    FlexWeight: 1;
+
+                    #Title {
+                        LayoutMode: Left;
+
+                        Label #IgnoredPlayerTitle {
+                            Anchor: (Left: 20, Right: 40);
+                            Text: "Ignored Players";
+                            Style: (RenderBold: true, RenderUppercase: true, LetterSpacing: 1, VerticalAlignment: Center);
+                        }
+
+                        Group {
+                            LayoutMode: Right;
+                            Anchor: (Right: 10);
+                            FlexWeight: 1;
+
+                            $C.@TextField #TextField {
+                                Anchor: (Height: 22);
+                                FlexWeight: 1;
+                                Background: PatchStyle(TexturePath: "Common/SearchBg.png", Border: 4);
+                                PlaceholderText: "Enter a username...";
+                            }
+
+                            Button #SearchBtn {
+                                LayoutMode: CenterMiddle;
+                                Anchor: (Width: 25, Height: 25, Left: 2);
+                                Style: @TertiaryButtonStyle;
+
+                                Group {
+                                    Anchor: (Width: 20, Height: 20);
+                                    Background: "../Icons/search.png";
+                                }
+                            }
+
+                            Button #AddBtn {
+                                LayoutMode: CenterMiddle;
+                                Anchor: (Width: 25, Height: 25, Left: 2);
+                                Style: @TertiaryButtonStyle;
+
+                                Group {
+                                    Anchor: (Width: 20, Height: 20);
+                                    Background: "../Icons/add.png";
+                                }
+                            }
+                        }
+                    }
+
+                    #Content {
+                        FlexWeight: 1;
+                        Group {
+                            Group #IgnoredPlayersList {
+                                LayoutMode: TopScrolling;
+                                ScrollbarStyle: $C.@DefaultScrollbarStyle;
+                                Anchor: (Top: -5, Right: -5);
+                            }
+                        }
+                    }
+                }
+
+                Group {
+                    Anchor: (Bottom: 10, Top: 15);
+
+                    //Ignore trades checkbox
+                    $C.@CheckBoxWithLabel #IgnoreTradeRequestsCheckbox {
+                        @Text = "Ignore all trade requests";
+                        @Checked = false;
+                    }
+                }
+            }
+
+            //Close & signature
+            Group {
+                LayoutMode: Top;
+                Anchor: (Top: 10);
+
+                $C.@TextButton #CloseBtn {
+                    @Text = "Close";
+                    Anchor: (Height: 40);
+                }
+
+                Label #Signature {
+                    Text: "Varyon Team";
+                    Style: (TextColor: #3C4959, HorizontalAlignment: Center, FontSize: 12);
+                    Anchor: (Top: 10);
+                }
+            }
+        }
+    }
+}

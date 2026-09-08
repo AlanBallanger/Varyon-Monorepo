@@ -1,0 +1,18 @@
+$C = "../../Common.ui";
+
+
+Button #Button {
+    LayoutMode: CenterMiddle;
+    Anchor: (Width: 35, Height: 35);
+    Style: ButtonStyle(
+        Default: (Background: PatchStyle(TexturePath: "../../Common/Buttons/SelectedBtn.png", Border: 8)),
+        Hovered: (Background: PatchStyle(TexturePath: "../../Common/Buttons/SelectedBtn_Hovered.png", Border: 8)),
+        Pressed: (Background: PatchStyle(TexturePath: "../../Common/Buttons/SelectedBtn_Pressed.png", Border: 8)),
+        Sounds: $C.@ButtonSounds,
+    );
+
+    Group #Icon {
+        Anchor: (Width: 20, Height: 20);
+        Background: "../Icons/center.png";
+    }
+}

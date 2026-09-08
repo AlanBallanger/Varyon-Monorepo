@@ -1,0 +1,38 @@
+$C = "../../../Common.ui";
+
+
+//Cancel/Trade buttons
+Group {
+    LayoutMode: CenterMiddle;
+    Anchor: (Horizontal: 1);
+    Padding: (Top: 15, Bottom: 5);
+
+    //Cancel button
+    Button #CancelBtn {
+        LayoutMode: CenterMiddle;
+        Anchor: (Width: 120, Height: 40);
+        Padding: (Horizontal: 10);
+        Style: $C.@SecondaryButtonStyle;
+
+        Label #Label {
+            Text: "CANCEL";
+            Style: (TextColor: #ffffff, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, FontSize: 16, LetterSpacing: 1);
+        }
+    }
+
+    //Spacer
+    Group { Anchor: (Width: 20); }
+
+    //Validate button
+    Button #ValidateBtn {
+        LayoutMode: CenterMiddle;
+        Anchor: (Width: 120, Height: 40);
+        Padding: (Horizontal: 10);
+        Style: $C.@DefaultButtonStyle;
+
+        Label #Label {
+            Text: "TRADE";
+            Style: (TextColor: #ffffff, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, FontSize: 16, LetterSpacing: 1);
+        }
+    }
+}

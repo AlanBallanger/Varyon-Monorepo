@@ -1,0 +1,10 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "ThoughtCloud_Ellipsis_Inventory",
+      "FixedRotation": false
+    }
+  ],
+  "LifeSpan": 5,
+  "IsImportant": false
+}

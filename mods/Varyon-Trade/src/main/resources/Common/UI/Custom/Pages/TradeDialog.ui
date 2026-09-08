@@ -1,0 +1,81 @@
+$C = "../Common.ui";
+
+
+Group {
+    LayoutMode: CenterMiddle;
+    FlexWeight: 1;
+
+    $C.@Container #TradePanel {
+        Anchor: (Width: 525, Height: 160);
+
+        #Title {
+            $C.@Title #DialogTitle {
+                @Text = "Trade";
+            }
+        }
+
+        #Content {
+            LayoutMode: Top;
+
+            Group {
+                LayoutMode: CenterMiddle;
+
+                Label #SenderUsername {
+                    Text: "Player";
+                    Style: (TextColor: #f4af43, HorizontalAlignment: Center, FontSize: 16, LetterSpacing: 1);
+                }
+
+                Label #AskPhrase {
+                    Text: " wants to trade with you. Do you accept?";
+                    Style: (TextColor: #ffffff, HorizontalAlignment: Center, FontSize: 16, LetterSpacing: 1);
+                }
+            }
+
+            Group #Spacer { Anchor: (Height: 30); }
+
+            Group #Buttons {
+                LayoutMode: CenterMiddle;
+
+                Button #YesButton {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 120, Height: 30);
+                    Padding: (Horizontal: 10);
+                    Style: $C.@DefaultButtonStyle;
+
+                    Label #Label {
+                        Text: "YES";
+                        Style: (TextColor: #ffffff, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, FontSize: 16, LetterSpacing: 1);
+                    }
+                }
+
+                Group #Spacer { Anchor: (Width: 5); }
+
+                Button #NoButton {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 120, Height: 30);
+                    Padding: (Horizontal: 10);
+                    Style: $C.@CancelButtonStyle;
+
+                    Label #Label {
+                        Text: "NO";
+                        Style: (TextColor: #ffffff, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, FontSize: 16, LetterSpacing: 1);
+                    }
+                }
+
+                Group #Spacer { Anchor: (Width: 5); }
+
+                Button #IgnoreButton {
+                    LayoutMode: CenterMiddle;
+                    Anchor: (Width: 120, Height: 30);
+                    Padding: (Horizontal: 10);
+                    Style: $C.@SecondaryButtonStyle;
+
+                    Label #Label {
+                        Text: "IGNORE";
+                        Style: (TextColor: #ffffff, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, FontSize: 16, LetterSpacing: 1);
+                    }
+                }
+            }
+        }
+    }
+}

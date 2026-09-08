@@ -1,0 +1,56 @@
+$C = "../../Common.ui";
+
+
+Group {
+    Background: #000000(0.3);
+
+    $C.@DecoratedContainer #TradePanel {
+        #Title {
+            Group {
+                $C.@Title #PanelTitle {
+                    @Text = "Trade";
+                }
+
+                Group #TopRight {
+                    LayoutMode: Right;
+                    Anchor: (Height: 25, Right: 15);
+
+                    Button #ChangeLayout {
+                        Anchor: (Width: 25, Height: 25, Right: 15);
+                        Style: @TertiaryButtonStyle;
+                        TooltipText: "Change Layout";
+                        Visible: true;
+                        Padding: (Full: 6);
+
+                        Group #VerticalLayoutIcon {
+                            Visible: true;
+                            Background: "../Icons/verticalLayout.png";
+                        }
+
+                        Group #HorizontalLayoutIcon {
+                            Visible: false;
+                            Background: "../Icons/horizontalLayout.png";
+                        }
+                    }
+
+                    $C.@TextButton #MoveLeftBtn {
+                        @Text = "<";
+                        Anchor: (Width: 25, Height: 25, Right: 5);
+                        Style: @TertiaryTextButtonStyle;
+                        TooltipText: "Move left";
+                    }
+
+                    $C.@TextButton #MoveRightBtn {
+                        @Text = ">";
+                        Anchor: (Width: 25, Height: 25);
+                        Style: @TertiaryTextButtonStyle;
+                        TooltipText: "Move right";
+                    }
+                }
+            }
+        }
+
+        //Global content
+        #Content { }
+    }
+}

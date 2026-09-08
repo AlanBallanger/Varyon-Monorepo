@@ -1,0 +1,57 @@
+$C = "../../../Common.ui";
+
+
+$C.@Container #TradePoolYours {
+    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+    FlexWeight: 1;
+    LayoutMode: Top;
+
+    #Title {
+        Group {
+            Group #MoneyGroup {
+                LayoutMode: CenterMiddle;
+                Anchor: (Width: 100, Left: 20);
+                Visible: false;
+
+                Group {
+                    Anchor: (Width: 20, Height: 20, Right: 5);
+                    Panel #CurrencyIcon {
+                       Background: "../../Icons/currency.png";
+                    }
+                }
+
+                $C.@NumberField #YourMoney {
+                    Anchor: (Height: 25);
+                    FlexWeight: 1;
+                    Style: (FontSize: 12, TextColor: #b2c5c6);
+                    Format: (MaxValue: 9999999, MaxDecimalPlaces: 2, Step: 0.01);
+                }
+            }
+
+            $C.@Title #YourUsername {
+                @Text = "Yours";
+                Style: (TextColor: #ffffff, Alignment: Center);
+            }
+
+            Group {
+                Anchor: (Width: 30, Height: 30, Right: 20);
+                Panel #YourCheckmark {
+                   Visible: false;
+                   Background: "../../Icons/checkmark.png";
+                }
+            }
+        }
+    }
+
+    #Content {
+        Anchor: (Horizontal: 1);
+        FlexWeight: 1;
+        Padding: (Full: 10);
+
+        Group #YoursList {
+            LayoutMode: TopScrolling;
+            Padding: (Left: 10);
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        }
+    }
+}

@@ -1,0 +1,28 @@
+$C = "../../Common.ui";
+
+
+Group {
+    LayoutMode: Left;
+    Anchor: (Bottom: 5);
+    Padding: (Horizontal: 5, Vertical: 2);
+
+    Group {
+        LayoutMode: CenterMiddle;
+        Anchor: (Height: 28);
+        FlexWeight: 1;
+        Background: #303C49;
+
+        Label #PlayerName {
+            FlexWeight: 1;
+            Anchor: (Horizontal: 15);
+            Text: "PlayerName (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)";
+            Style: (TextColor: #95a7bb, FontSize: 14);
+        }
+    }
+
+    $C.@TextButton #RemovePlayer {
+        @Text = "X";
+        Style: $C.@CancelTextButtonStyle;
+        Anchor: (Width: 28, Height: 28, Left: 10);
+    }
+}

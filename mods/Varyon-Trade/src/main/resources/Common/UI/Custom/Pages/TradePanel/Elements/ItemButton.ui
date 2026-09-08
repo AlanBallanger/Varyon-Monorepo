@@ -1,0 +1,34 @@
+$C = "../../../Common.ui";
+
+Button #ItemButtonLine {
+    LayoutMode: Left;
+    Anchor: (Height: 40, Top: 2);
+    Style: $C.@SecondaryButtonStyle;
+    Padding: (Full: 10);
+
+    ItemIcon #ItemIcon {
+        Anchor: (Width: 32, Height: 32);
+        Visible: true;
+    }
+
+    Label #ItemName {
+        FlexWeight: 1;
+        Padding: (Horizontal: 10);
+        
+        Style: (
+            FontSize: 14,
+            RenderBold: false,
+            TextColor: #ffffff,
+            VerticalAlignment: Center
+        );
+    }
+
+    Label #ItemQte {
+        Style: (
+            FontSize: 14,
+            RenderBold: false,
+            TextColor: #ffffff,
+            VerticalAlignment: Center
+        );
+    }
+}
