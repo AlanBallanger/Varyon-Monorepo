@@ -30,6 +30,7 @@ public final class TpToWorldPlugin extends JavaPlugin {
             getCommandRegistry().registerCommand(new TpToWorldCommand());
             getCommandRegistry().registerCommand(new PortalEditCommand());
             getCommandRegistry().registerCommand(new TpTempCommand());
+            getCommandRegistry().registerCommand(new TpTopCommand());
         } catch (Exception e) {
             ((HytaleLogger.Api) LOGGER.at(Level.WARNING).withCause(e))
                     .log("[Varyon-TpToWorld] Échec enregistrement des commandes");

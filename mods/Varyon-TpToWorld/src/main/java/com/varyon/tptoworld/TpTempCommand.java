@@ -4,6 +4,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.math.vector.Rotation3fc;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
@@ -12,6 +13,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
@@ -19,26 +21,47 @@ import org.joml.Vector3d;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public final class TpTempCommand extends CommandBase {
 
-    private final RequiredArg<PlayerRef> playerArg;
+    private static final int COUNTDOWN_SECONDS = 3;
 
     public TpTempCommand() {
-        super("tptemp", "Relâche un joueur téléporté temporairement (/tptemp <joueur>) vers sa position d'origine");
-        this.requirePermission("varyon.admin");
-        this.playerArg = this.withRequiredArg("joueur", "Joueur à relâcher", ArgTypes.PLAYER_REF);
+        super("tptemp", "Reviens à ta position d'origine après une téléportation temporaire (/tptemp)");
+        this.addUsageVariant(new ReleaseVariant());
         this.addUsageVariant(new TeleportVariant());
     }
 
     @Override
     protected void executeSync(@Nonnull CommandContext context) {
-        PlayerRef playerRef = context.get(playerArg);
+        PlayerRef playerRef = resolveSender(context);
         if (playerRef == null || !playerRef.isValid()) {
-            context.sendMessage(Message.raw("Ce joueur n'est pas dans le monde.").color(Color.RED));
+            context.sendMessage(Message.raw("Seul un joueur en jeu peut utiliser cette commande.").color(Color.RED));
             return;
         }
-        release(context, playerRef);
+        selfReturn(context, playerRef);
+    }
+
+    private static final class ReleaseVariant extends CommandBase {
+        private final RequiredArg<PlayerRef> playerArg;
+
+        ReleaseVariant() {
+            super("Renvoie un joueur téléporté temporairement (/tptemp <joueur>) vers sa position d'origine");
+            this.requirePermission("varyon.admin");
+            this.playerArg = this.withRequiredArg("joueur", "Joueur à renvoyer", ArgTypes.PLAYER_REF);
+        }
+
+        @Override
+        protected void executeSync(@Nonnull CommandContext context) {
+            PlayerRef playerRef = context.get(playerArg);
+            if (playerRef == null || !playerRef.isValid()) {
+                context.sendMessage(Message.raw("Ce joueur n'est pas dans le monde.").color(Color.RED));
+                return;
+            }
+            release(context, playerRef);
+        }
     }
 
     private static final class TeleportVariant extends CommandBase {
@@ -87,6 +110,9 @@ public final class TpTempCommand extends CommandBase {
 
         String playerName = nameOf(playerRef);
         String destinationName = nameOf(destinationRef);
+        PlayerRef initiator = resolveSender(context);
+        UUID initiatorUuid = initiator != null ? initiator.getUuid() : null;
+        String initiatorName = initiator != null ? nameOf(initiator) : null;
 
         destWorld.execute(() -> {
             TransformComponent destTransform = destStore.getComponent(destRef, TransformComponent.getComponentType());
@@ -109,15 +135,45 @@ public final class TpTempCommand extends CommandBase {
                 Vector3d originPosition = new Vector3d(transform.getPosition());
                 Rotation3f originRotation = copyRotation(transform.getRotation());
                 TempTeleportManager.save(playerRef.getUuid(),
-                        new TempTeleportManager.SavedLocation(originWorld, originPosition, originRotation));
-
-                Teleport teleportComponent = Teleport.createForPlayer(destWorld, destPosition, destRotation);
-                store.addComponent(ref, Teleport.getComponentType(), teleportComponent);
+                        new TempTeleportManager.SavedLocation(originWorld, originPosition, originRotation,
+                                initiatorUuid, initiatorName));
 
                 context.sendMessage(Message.raw(playerName + " téléporté temporairement vers " + destinationName + ".").color(Color.GREEN));
-                playerRef.sendMessage(Message.raw("Tu as été téléporté temporairement vers " + destinationName + ".").color(Color.GREEN));
+
+                Runnable doTeleport = () -> originWorld.execute(() -> {
+                    if (!ref.isValid()) {
+                        return;
+                    }
+                    Teleport teleportComponent = Teleport.createForPlayer(destWorld, destPosition, destRotation);
+                    store.addComponent(ref, Teleport.getComponentType(), teleportComponent);
+                    playerRef.sendMessage(Message.raw("Tu as été téléporté temporairement vers " + destinationName + ".").color(Color.GREEN));
+                    playerRef.sendMessage(Message.raw("Fais /tptemp à tout moment pour revenir à ta position d'origine.").color(Color.YELLOW));
+                });
+
+                runWithCountdown(playerRef, "Téléportation vers " + destinationName, doTeleport);
             });
         });
+    }
+
+    private static void selfReturn(@Nonnull CommandContext context, @Nonnull PlayerRef playerRef) {
+        TempTeleportManager.SavedLocation saved = TempTeleportManager.remove(playerRef.getUuid());
+        if (saved == null) {
+            context.sendMessage(Message.raw("Tu n'as pas de téléportation temporaire en cours.").color(Color.RED));
+            return;
+        }
+
+        Ref<EntityStore> ref = playerRef.getReference();
+        Store<EntityStore> store = ref != null && ref.isValid() ? ref.getStore() : null;
+        World currentWorld = store != null && store.getExternalData() != null ? store.getExternalData().getWorld() : null;
+        if (store == null || currentWorld == null) {
+            context.sendMessage(Message.raw("Impossible de te renvoyer à ta position d'origine pour le moment.").color(Color.RED));
+            TempTeleportManager.save(playerRef.getUuid(), saved);
+            return;
+        }
+
+        String playerName = nameOf(playerRef);
+        performReturn(playerRef, ref, store, currentWorld, saved);
+        notifyInitiator(saved, playerName + " est reparti à sa position d'origine.");
     }
 
     private static void release(@Nonnull CommandContext context, @Nonnull PlayerRef playerRef) {
@@ -131,21 +187,76 @@ public final class TpTempCommand extends CommandBase {
         Store<EntityStore> store = ref != null && ref.isValid() ? ref.getStore() : null;
         World currentWorld = store != null && store.getExternalData() != null ? store.getExternalData().getWorld() : null;
         if (store == null || currentWorld == null) {
-            context.sendMessage(Message.raw("Impossible de relâcher ce joueur pour le moment.").color(Color.RED));
+            context.sendMessage(Message.raw("Impossible de renvoyer ce joueur pour le moment.").color(Color.RED));
+            TempTeleportManager.save(playerRef.getUuid(), saved);
             return;
         }
 
         String playerName = nameOf(playerRef);
-        currentWorld.execute(() -> {
+        context.sendMessage(Message.raw(playerName + " a été renvoyé à sa position d'origine.").color(Color.GREEN));
+        performReturn(playerRef, ref, store, currentWorld, saved);
+    }
+
+    private static void performReturn(@Nonnull PlayerRef playerRef, @Nonnull Ref<EntityStore> ref,
+                                      @Nonnull Store<EntityStore> store, @Nonnull World currentWorld,
+                                      @Nonnull TempTeleportManager.SavedLocation saved) {
+        Runnable doTeleport = () -> currentWorld.execute(() -> {
             if (!ref.isValid()) {
                 return;
             }
             Teleport teleportComponent = Teleport.createForPlayer(saved.world(), saved.position(), saved.rotation());
             store.addComponent(ref, Teleport.getComponentType(), teleportComponent);
-
-            context.sendMessage(Message.raw(playerName + " a été relâché et renvoyé à sa position d'origine.").color(Color.GREEN));
             playerRef.sendMessage(Message.raw("Tu as été renvoyé à ta position d'origine.").color(Color.GREEN));
         });
+
+        runWithCountdown(playerRef, "Retour à ta position d'origine", doTeleport);
+    }
+
+    private static void notifyInitiator(@Nonnull TempTeleportManager.SavedLocation saved, @Nonnull String message) {
+        UUID initiatorUuid = saved.initiatorUuid();
+        if (initiatorUuid == null) {
+            return;
+        }
+        Universe universe = Universe.get();
+        PlayerRef initiator = universe != null ? universe.getPlayer(initiatorUuid) : null;
+        if (initiator != null && initiator.isValid()) {
+            initiator.sendMessage(Message.raw(message).color(Color.YELLOW));
+        }
+    }
+
+    private static void runWithCountdown(@Nonnull PlayerRef playerRef, @Nonnull String label, @Nonnull Runnable teleport) {
+        if (isOp(playerRef)) {
+            teleport.run();
+            return;
+        }
+
+        playerRef.sendMessage(Message.raw(label + " dans " + COUNTDOWN_SECONDS + " secondes...").color(Color.YELLOW));
+        for (int i = COUNTDOWN_SECONDS; i >= 1; i--) {
+            final int remaining = i;
+            HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+                if (playerRef.isValid()) {
+                    playerRef.sendMessage(Message.raw(String.valueOf(remaining) + "...").color(Color.YELLOW));
+                }
+            }, (long) (COUNTDOWN_SECONDS - remaining), TimeUnit.SECONDS);
+        }
+        HytaleServer.SCHEDULED_EXECUTOR.schedule(teleport, COUNTDOWN_SECONDS, TimeUnit.SECONDS);
+    }
+
+    private static boolean isOp(@Nonnull PlayerRef playerRef) {
+        return playerRef.hasPermission("*") || playerRef.hasPermission("varyon.admin");
+    }
+
+    @Nullable
+    private static PlayerRef resolveSender(@Nonnull CommandContext context) {
+        if (!context.isPlayer() || context.sender() == null) {
+            return null;
+        }
+        UUID uuid = context.sender().getUuid();
+        if (uuid == null) {
+            return null;
+        }
+        Universe universe = Universe.get();
+        return universe != null ? universe.getPlayer(uuid) : null;
     }
 
     @Nonnull
