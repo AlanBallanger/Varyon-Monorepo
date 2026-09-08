@@ -1,0 +1,29 @@
+{
+  "Appearance": "Fireball",
+  "Radius": 0.2,
+  "Height": 0.2,
+  "VerticalCenterShot": 0.1,
+  "HorizontalCenterShot": 0.1,
+  "DepthShot": 1,
+  "PitchAdjustShot": false,
+  "SticksVertically": true,
+  "MuzzleVelocity": 70,
+  "TerminalVelocity": 100,
+  "Gravity": 4,
+  "Bounciness": 0,
+  "ImpactSlowdown": 0,
+  "TimeToLive": 0,
+  "Damage": 15,
+  "DeadTime": 0,
+  "DeadTimeMiss": 0,
+  "MissParticles": {
+    "SystemId": "Explosion_Medium"
+  },
+  "DeathParticles": {
+    "SystemId": "Explosion_Medium"
+  },
+  "DeathEffectsOnHit": true,
+  "BounceSoundEventId": "SFX_Fireball_Bounce",
+  "MissSoundEventId": "SFX_Fireball_Miss",
+  "DeathSoundEventId": "SFX_Fireball_Death"
+}

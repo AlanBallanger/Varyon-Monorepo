@@ -1,0 +1,53 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_BME_Shark",
+  "Modify": {
+    "Appearance": "BME_Shark",
+    "DropList": "Drop_BME_Shark",
+    "MaxHealth": 145,
+    "AlertedRange": 12,
+    "ViewRange": 12,
+    "AlertedTime": [
+      0,
+      1
+    ],
+    "AttackRange": 1.6,
+    "IsMemory": true,
+    "MemoriesCategory": "Abyssal",
+    "NameTranslationKey": {
+      "Compute": "NameTranslationKey"
+    },
+    "_InteractionVars": {
+      "Melee_Start": {
+        "Interactions": [
+          {
+            "Parent": "NPC_Attack_Melee_Simple",
+            "$Comment": "Sets animations and delay before hit",
+            "RunTime": 0.333
+          }
+        ]
+      },
+      "Melee_Damage": {
+        "Interactions": [
+          {
+            "Parent": "NPC_Attack_Melee_Damage",
+            "$Comment": "Sets damage and onhit effects",
+            "DamageCalculator": {
+              "Type": "Absolute",
+              "BaseDamage": {
+                "Physical": 20
+              },
+              "RandomPercentageModifier": 0.1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "NameTranslationKey": {
+      "Value": "BME.Shark.name",
+      "Description": "Translation key for NPC name display"
+    }
+  }
+}

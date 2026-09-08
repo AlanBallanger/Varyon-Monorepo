@@ -1,6 +1,6 @@
 {
   "TranslationProperties": {
-    "Description": "",
+    "Description": "server.items.Varyon_Painting_Fracture.description",
     "Name": "server.items.Varyon_Painting_Fracture.name"
   },
   "PlayerAnimationsId": "Block",

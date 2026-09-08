@@ -1,0 +1,83 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Intelligent",
+  "Parameters": {
+    "WanderRadius": {
+      "Value": 3,
+      "Description": "General wander radius for idle wander and wander on the break."
+    },
+    "FollowPatrolPath": {
+      "Value": true,
+      "Description": "Whether this NPC will follow patrol paths at all."
+    },
+    "Patrol": {
+      "Value": true,
+      "Description": "Whether or not this NPC will patrol during its waking hours, either alone or as part of a group."
+    },
+    "ApplySeparation": {
+      "Value": false,
+      "Description": "When set to false, NPCs wont try to avoid each other or player, it can lead to them stacking together, but can help to avoid jerky-like movemenet in enclosed space."
+    },
+    "NameTranslationKey": {
+      "Value": "BME.Feran_Beastmaster.name",
+      "Description": "Translation key for NPC name display"
+    },
+    "FlockArray": {
+      "Value": [
+        "BME_Feran_Beastmaster"
+      ]
+    }
+  },
+  "Modify": {
+    "AttitudeGroup": "Golem",
+    "MaxHealth": 60,
+    "HearingRange": 8,
+    "ViewSector": 270,
+    "WakingPeriod": [
+      0,
+      24
+    ],
+    "DropList": "Drop_BME_Feran_Beastmaster",
+    "Appearance": "BME_Feran_Beastmaster",
+    "Weapons": [
+      "Weapon_Staff_Bone"
+    ],
+    "FlockArray": {
+      "Compute": "FlockArray"
+    },
+    "FollowPatrolPath": {
+      "Compute": "FollowPatrolPath"
+    },
+    "Patrol": {
+      "Compute": "Patrol"
+    },
+    "WanderRadius": {
+      "Compute": "WanderRadius"
+    },
+    "Attack": "BME_Feran_Beastmaster",
+    "CombatBackOffAfterAttack": false,
+    "AttackDistance": 15,
+    "CombatStrafeWeight": 3,
+    "CombatFleeIfTooCloseDistance": 1.5,
+    "CombatBackOffDistanceRange": [
+      5,
+      5
+    ],
+    "DesiredAttackDistanceRange": [
+      5,
+      15
+    ],
+    "CombatBehaviorDistance": 15,
+    "TargetRange": 15,
+    "LeashMinPlayerDistance": 18,
+    "ApplySeparation": {
+      "Compute": "ApplySeparation"
+    },
+    "IsMemory": true,
+    "MemoriesCategory": "Feran",
+    "BreathesInWater": false,
+    "NameTranslationKey": {
+      "Compute": "NameTranslationKey"
+    }
+  }
+}

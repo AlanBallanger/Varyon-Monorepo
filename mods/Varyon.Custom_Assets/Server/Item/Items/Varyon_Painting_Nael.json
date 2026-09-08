@@ -1,6 +1,6 @@
 {
   "TranslationProperties": {
-    "Description": "",
+    "Description": "server.items.Varyon_Painting_Nael.description",
     "Name": "server.items.Varyon_Painting_Nael.name"
   },
   "PlayerAnimationsId": "Block",
