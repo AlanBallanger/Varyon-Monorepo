@@ -41,14 +41,10 @@ final class ZoneMusicAssetGenerator {
 
         for (MusicZone zone : zones) {
             String mcId = zone.musicContainerId();
-            Files.writeString(
-                    mcDestDir.resolve(mcId + ".json"),
-                    buildMusicContainerJson(zone.musicCommonTrackPath(), zone.getVolumeDb()),
-                    StandardCharsets.UTF_8);
-            Files.writeString(
+            writeAtomic(mcDestDir.resolve(mcId + ".json"), buildMusicContainerJson(zone.musicCommonTrackPath(), zone.getVolumeDb()));
+            writeAtomic(
                     ambDestDir.resolve(zone.ambienceAssetId() + ".json"),
-                    buildAmbienceFxJson(mcId),
-                    StandardCharsets.UTF_8);
+                    buildAmbienceFxJson(mcId));
         }
 
         try {
@@ -66,6 +62,18 @@ final class ZoneMusicAssetGenerator {
     }
 
     static void rebuildPack(JavaPlugin plugin, Path packRoot, List<MusicZone> zones) throws IOException {
+        rebuildPack(plugin, packRoot, zones, false);
+    }
+
+    // pruneOrphans : true UNIQUEMENT au démarrage serveur (packRoot est un temp dir neuf, aucun
+    // client connecté). À chaud c'est TOUJOURS false : supprimer un .ogg / MC / AmbienceFX du
+    // pack fait envoyer un paquet AssetUpdate de suppression aux clients connectés ; si l'un
+    // d'eux a encore un MusicContainer qui référence la piste retirée, il tente de la relire,
+    // ne la trouve pas -> KeyNotFoundException NON catché -> crash client, MÊME pour un joueur
+    // hors de la zone modifiée. En add-only, les assets orphelins restent chargés jusqu'au
+    // prochain reboot (quelques Mo, sans effet de bord).
+    static void rebuildPack(JavaPlugin plugin, Path packRoot, List<MusicZone> zones, boolean pruneOrphans)
+            throws IOException {
 
         Path oggDestDir = packRoot.resolve("Common").resolve("Music").resolve("VaryonMZ");
         Path ambDestDir = packRoot.resolve("Server").resolve("Audio").resolve("AmbienceFX").resolve("Music").resolve("Global");
@@ -81,6 +89,23 @@ final class ZoneMusicAssetGenerator {
         Set<String> expectedAmb = new HashSet<>();
         Set<String> expectedMc = new HashSet<>();
 
+        // Copier TOUS les .ogg de music/ dans le pack, pas seulement ceux référencés par une
+        // zone. Ainsi une clé .ogg n'a jamais besoin d'être ajoutée à chaud quand une zone
+        // change de musique : le fichier est déjà là. (Le contenu d'une clé donnée ne change
+        // jamais non plus, puisque la clé dérive du nom de fichier source.)
+        if (Files.isDirectory(musicSrc, LinkOption.NOFOLLOW_LINKS)) {
+            try (Stream<Path> stream = Files.list(musicSrc)) {
+                for (Path src : (Iterable<Path>) stream.filter(Files::isRegularFile)
+                        .filter(p -> p.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".ogg"))::iterator) {
+                    String stem = src.getFileName().toString();
+                    stem = stem.substring(0, stem.length() - 4);
+                    String oggFileName = "VaryonMZ_" + MusicZone.sanitizeToken(stem) + ".ogg";
+                    Files.copy(src, oggDestDir.resolve(oggFileName), StandardCopyOption.REPLACE_EXISTING);
+                    expectedOgg.add(oggFileName);
+                }
+            }
+        }
+
         for (MusicZone zone : zones) {
             Path oggSource = resolveMusicFile(musicSrc, zone.getMusicFileName());
             if (!Files.isRegularFile(oggSource, LinkOption.NOFOLLOW_LINKS)) {
@@ -93,21 +118,20 @@ final class ZoneMusicAssetGenerator {
 
             String mcId = zone.musicContainerId();
             String mcFileName = mcId + ".json";
-            Files.writeString(
-                    mcDestDir.resolve(mcFileName),
-                    buildMusicContainerJson(zone.musicCommonTrackPath(), zone.getVolumeDb()),
-                    StandardCharsets.UTF_8);
+            writeAtomic(mcDestDir.resolve(mcFileName), buildMusicContainerJson(zone.musicCommonTrackPath(), zone.getVolumeDb()));
             expectedMc.add(mcFileName);
 
             String ambId = zone.ambienceAssetId();
             String ambFileName = ambId + ".json";
-            Files.writeString(ambDestDir.resolve(ambFileName), buildAmbienceFxJson(mcId), StandardCharsets.UTF_8);
+            writeAtomic(ambDestDir.resolve(ambFileName), buildAmbienceFxJson(mcId));
             expectedAmb.add(ambFileName);
         }
 
-        deleteStaleFiles(oggDestDir, expectedOgg);
-        deleteStaleFiles(ambDestDir, expectedAmb);
-        deleteStaleFiles(mcDestDir, expectedMc);
+        if (pruneOrphans) {
+            deleteStaleFiles(oggDestDir, expectedOgg);
+            deleteStaleFiles(ambDestDir, expectedAmb);
+            deleteStaleFiles(mcDestDir, expectedMc);
+        }
 
         AssetModule am = AssetModule.get();
         if (am == null) {
@@ -149,6 +173,21 @@ final class ZoneMusicAssetGenerator {
             }
         }
 
+        // Laisser le paquet AssetUpdate du .ogg (Common Asset) partir et s'installer chez les
+        // clients connectés AVANT de recharger MusicContainer/AmbienceFX. Le client applique les
+        // stores dans l'ordre de réception et ne réordonne pas les dépendances : s'il reçoit le
+        // MusicContainer (qui référence Music/VaryonMZ/VaryonMZ_*.ogg) avant le .ogg, il résout la
+        // track immédiatement, ne la trouve pas et lève un KeyNotFoundException NON catché ->
+        // crash client ("The given key '...' was not present in the dictionary"). Ce sleep tourne
+        // dans la partie async du rebuild (jamais le thread-monde), le bloquer est sans risque.
+        if (pack != null) {
+            try {
+                Thread.sleep(750L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
         // initPendingStores() ne recharge que les AssetStore créés APRES le boot.
         // Les stores AmbienceFX/MusicContainer existent déjà au démarrage du serveur,
         // il faut donc forcer leur (re)chargement explicitement, MusicContainer avant AmbienceFX
@@ -164,6 +203,21 @@ final class ZoneMusicAssetGenerator {
             LOGGER.atInfo().log("[MusicZones] AmbienceFX rechargés depuis " + ambDestDir + " -> " + ambResult);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[MusicZones] échec rechargement AmbienceFX");
+        }
+    }
+
+    // Écriture atomique : un lecteur concurrent (loadAssetsFromDirectory du file-watcher, ou
+    // un autre rebuild) voit soit l'ancien fichier complet, soit le nouveau complet, jamais un
+    // fichier tronqué en cours d'écriture (source de "Unexpected character ... expected ','").
+    private static void writeAtomic(Path target, String content) throws IOException {
+        Path tmp = target.resolveSibling(target.getFileName() + ".tmp-" + Long.toHexString(System.nanoTime()));
+        Files.writeString(tmp, content, StandardCharsets.UTF_8);
+        try {
+            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            Files.deleteIfExists(tmp);
         }
     }
 

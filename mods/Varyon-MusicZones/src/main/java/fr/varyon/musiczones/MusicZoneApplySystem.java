@@ -36,9 +36,16 @@ public final class MusicZoneApplySystem extends EntityTickingSystem<EntityStore>
     private static final ComponentType<EntityStore, TransformComponent> TRANSFORM =
             TransformComponent.getComponentType();
 
+    // Après un rebuild du pack, laisser au client le temps de recevoir et d'indexer le .ogg
+    // (Common Asset) avant de lui pousser un index de MusicContainer qui le référence. Sinon le
+    // client résout la track absente -> KeyNotFoundException non catché -> crash. Pendant la
+    // grâce, on force "pas de musique" (index 0) même si le joueur est dans une zone.
+    private static final long POST_REBUILD_GRACE_MILLIS = 2500L;
+
     private final VaryonMusicZonesPlugin plugin;
     private final Map<UUID, Integer> lastSentIndex = new ConcurrentHashMap<>();
     private final Map<UUID, String> lastLoggedState = new ConcurrentHashMap<>();
+    private volatile long graceUntilMillis = 0L;
     private final Query<EntityStore> query;
 
     public MusicZoneApplySystem(VaryonMusicZonesPlugin plugin) {
@@ -80,6 +87,11 @@ public final class MusicZoneApplySystem extends EntityTickingSystem<EntityStore>
             return;
         }
         int baseline = 0;
+        if (System.currentTimeMillis() < graceUntilMillis) {
+            logOnChange(uuid, "post-rebuild-grace", "attente indexation .ogg côté client");
+            sendIfChanged(playerRef, tracker, baseline);
+            return;
+        }
         List<MusicZone> zones = plugin.getRepository().zonesForWorld(_w.getName());
         if (zones.isEmpty()) {
             logOnChange(uuid, "no-zones", "world=" + _w.getName());
@@ -171,6 +183,15 @@ public final class MusicZoneApplySystem extends EntityTickingSystem<EntityStore>
     public void forgetAll() {
         lastSentIndex.clear();
         lastLoggedState.clear();
+    }
+
+    // À appeler juste après un rebuild du pack qui a pu (re)créer un .ogg : ouvre une fenêtre de
+    // grâce pendant laquelle aucun index de MusicContainer n'est poussé aux clients, le temps
+    // qu'ils reçoivent et indexent le Common Asset .ogg. Évite le crash client
+    // KeyNotFoundException sur track absente.
+    public void beginPostRebuildGrace() {
+        graceUntilMillis = System.currentTimeMillis() + POST_REBUILD_GRACE_MILLIS;
+        forgetAll();
     }
 
     @Override

@@ -27,6 +27,7 @@ public final class ReloadMusicZonesSubCommand extends MusicZoneAdminCommandBase 
         plugin.getRepository().load();
         try {
             plugin.rebuildAssetPack();
+            plugin.getApplySystem().beginPostRebuildGrace();
         } catch (Exception e) {
             context.sendMessage(Message.raw("Échec : " + e.getMessage()));
             return CompletableFuture.completedFuture(null);

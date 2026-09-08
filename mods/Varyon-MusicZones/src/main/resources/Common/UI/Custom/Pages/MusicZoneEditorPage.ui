@@ -1,0 +1,199 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+  LayoutMode: Middle;
+}
+
+$C.@Container {
+  Anchor: (Width: 720, Height: 760);
+
+  #Title {
+    $C.@Title {
+      @Text = "EDITEUR DE ZONE MUSICALE";
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 6);
+
+      Label {
+        Text: "Nom :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 64);
+      }
+
+      $C.@TextField #ZoneIdInput {
+        @Anchor = (Height: 28);
+        FlexWeight: 1;
+      }
+
+      $C.@TertiaryTextButton #RenameButton {
+        @Text = "OK";
+        @Anchor = (Width: 48, Height: 28, Left: 6, Right: 16);
+      }
+
+      Label {
+        Text: "Groupe :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 80);
+      }
+
+      $C.@TextField #ZoneGroupInput {
+        @Anchor = (Height: 28);
+        FlexWeight: 1;
+      }
+
+      $C.@TertiaryTextButton #SetGroupButton {
+        @Text = "OK";
+        @Anchor = (Width: 48, Height: 28, Left: 6);
+      }
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 8);
+
+      Label {
+        Text: "Monde :";
+        Style: (RenderBold: true, TextColor: #96a9be, VerticalAlignment: Center);
+        Anchor: (Width: 80);
+      }
+
+      Label #WorldLabel {
+        Text: "";
+        Style: (TextColor: #ffffff, VerticalAlignment: Center);
+      }
+    }
+
+    Label {
+      Text: "COIN 1";
+      Style: (RenderBold: true, RenderUppercase: true, TextColor: #ffaa00);
+      Anchor: (Bottom: 4);
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 4);
+
+      Label { Text: "X"; Style: (TextColor: #ff6666, VerticalAlignment: Center); Anchor: (Width: 14); }
+      $C.@SmallSecondaryTextButton #P1XDownButton { @Text = "-"; @Anchor = (Width: 26, Height: 26); }
+      $C.@TextField #P1XInput { @Anchor = (Width: 66, Height: 26); }
+      $C.@SmallSecondaryTextButton #P1XUpButton { @Text = "+"; @Anchor = (Width: 26, Height: 26, Right: 8); }
+
+      Label { Text: "Y"; Style: (TextColor: #66ff66, VerticalAlignment: Center); Anchor: (Width: 14, Left: 2); }
+      $C.@SmallSecondaryTextButton #P1YDownButton { @Text = "-"; @Anchor = (Width: 26, Height: 26); }
+      $C.@TextField #P1YInput { @Anchor = (Width: 66, Height: 26); }
+      $C.@SmallSecondaryTextButton #P1YUpButton { @Text = "+"; @Anchor = (Width: 26, Height: 26, Right: 8); }
+
+      Label { Text: "Z"; Style: (TextColor: #6666ff, VerticalAlignment: Center); Anchor: (Width: 14, Left: 2); }
+      $C.@SmallSecondaryTextButton #P1ZDownButton { @Text = "-"; @Anchor = (Width: 26, Height: 26); }
+      $C.@TextField #P1ZInput { @Anchor = (Width: 66, Height: 26); }
+      $C.@SmallSecondaryTextButton #P1ZUpButton { @Text = "+"; @Anchor = (Width: 26, Height: 26, Right: 8); }
+
+      $C.@TertiaryTextButton #SetBoxButton { @Text = "APPLIQUER"; @Anchor = (Width: 110, Height: 26, Right: 6); }
+      $C.@SecondaryTextButton #P1HereButton { @Text = "ICI"; @Anchor = (Width: 60, Height: 26); }
+    }
+
+    Label {
+      Text: "COIN 2";
+      Style: (RenderBold: true, RenderUppercase: true, TextColor: #ffaa00);
+      Anchor: (Bottom: 4, Top: 4);
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 8);
+
+      Label { Text: "X"; Style: (TextColor: #ff6666, VerticalAlignment: Center); Anchor: (Width: 14); }
+      $C.@SmallSecondaryTextButton #P2XDownButton { @Text = "-"; @Anchor = (Width: 26, Height: 26); }
+      $C.@TextField #P2XInput { @Anchor = (Width: 66, Height: 26); }
+      $C.@SmallSecondaryTextButton #P2XUpButton { @Text = "+"; @Anchor = (Width: 26, Height: 26, Right: 8); }
+
+      Label { Text: "Y"; Style: (TextColor: #66ff66, VerticalAlignment: Center); Anchor: (Width: 14, Left: 2); }
+      $C.@SmallSecondaryTextButton #P2YDownButton { @Text = "-"; @Anchor = (Width: 26, Height: 26); }
+      $C.@TextField #P2YInput { @Anchor = (Width: 66, Height: 26); }
+      $C.@SmallSecondaryTextButton #P2YUpButton { @Text = "+"; @Anchor = (Width: 26, Height: 26, Right: 8); }
+
+      Label { Text: "Z"; Style: (TextColor: #6666ff, VerticalAlignment: Center); Anchor: (Width: 14, Left: 2); }
+      $C.@SmallSecondaryTextButton #P2ZDownButton { @Text = "-"; @Anchor = (Width: 26, Height: 26); }
+      $C.@TextField #P2ZInput { @Anchor = (Width: 66, Height: 26); }
+      $C.@SmallSecondaryTextButton #P2ZUpButton { @Text = "+"; @Anchor = (Width: 26, Height: 26, Right: 8); }
+
+      $C.@SecondaryTextButton #P2HereButton { @Text = "ICI"; @Anchor = (Width: 60, Height: 26); }
+    }
+
+    Label {
+      Text: "MUSIQUE";
+      Style: (RenderBold: true, RenderUppercase: true, TextColor: #ffaa00);
+      Anchor: (Bottom: 4);
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 4);
+
+      DropdownBox #ZoneMusic {
+        Anchor: (Width: 320, Height: 30);
+        Style: $C.@DefaultDropdownBoxStyle;
+        Value: "";
+        DropdownEntry { Value: ""; Text: "(aucune)"; }
+      }
+    }
+
+    Label #MusicHint {
+      Text: "Fichiers dans Varyon-MusicZones/music/*.ogg";
+      Style: (FontSize: 10, TextColor: #96a9be);
+      Anchor: (Bottom: 8);
+    }
+
+    Label {
+      Text: "INTENSITE";
+      Style: (RenderBold: true, RenderUppercase: true, TextColor: #ffaa00);
+      Anchor: (Bottom: 4);
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Bottom: 10);
+
+      $C.@FloatSlider #ZoneIntensity {
+        @Anchor = (Width: 420, Height: 6);
+        Min: 0;
+        Max: 100;
+        Step: 1;
+        Value: 100;
+      }
+
+      Label #ZoneIntensityValue {
+        Text: "100 %";
+        Style: (RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Anchor: (Width: 70, Left: 12);
+      }
+    }
+
+    Group #ButtonSection {
+      LayoutMode: Left;
+
+      $C.@SecondaryTextButton #BackToListButton {
+        @Text = "RETOUR";
+        @Anchor = (Width: 110, Height: 36);
+      }
+
+      $C.@CancelTextButton #DeleteButton {
+        @Text = "SUPPRIMER";
+        @Anchor = (Left: 8, Width: 120, Height: 36);
+      }
+
+      $C.@SecondaryTextButton #ExitButton {
+        @Text = "QUITTER";
+        @Anchor = (Left: 8, Width: 100, Height: 36);
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

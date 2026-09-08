@@ -91,7 +91,10 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
             LOGGER.atWarning().withCause(e).log("[MusicZones] création temp dir");
         }
         try {
-            ZoneMusicAssetGenerator.rebuildPack(this, packRoot, repository.getZonesReadOnly());
+            // Au boot uniquement : packRoot est un temp dir neuf, aucun client connecté -> on
+            // peut élaguer les assets orphelins sans risque. À chaud, rebuildAssetPack() reste
+            // add-only (voir ZoneMusicAssetGenerator.rebuildPack).
+            ZoneMusicAssetGenerator.rebuildPack(this, packRoot, repository.getZonesReadOnly(), true);
         } catch (Exception e) {
             LOGGER.atWarning().withCause(e).log("[MusicZones] pack initial");
         }
@@ -172,6 +175,25 @@ public final class VaryonMusicZonesPlugin extends JavaPlugin {
             return null;
         }
         return new PendingBox(s.c1.x, s.c1.y, s.c1.z, s.c2.x, s.c2.y, s.c2.z);
+    }
+
+    // Noms de fichiers .ogg présents dans Varyon-MusicZones/music/, triés (casse ignorée),
+    // sans doublon. Alimente la liste déroulante « musique » de l'éditeur.
+    public java.util.List<String> listMusicFileNames() {
+        Path dir = repository.getMusicDirectory();
+        if (!Files.isDirectory(dir, LinkOption.NOFOLLOW_LINKS)) {
+            return java.util.List.of();
+        }
+        try (Stream<Path> stream = Files.list(dir)) {
+            java.util.TreeSet<String> names = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            stream.filter(Files::isRegularFile)
+                    .map(p -> p.getFileName().toString())
+                    .filter(fn -> fn.toLowerCase(Locale.ROOT).endsWith(".ogg"))
+                    .forEach(names::add);
+            return new java.util.ArrayList<>(names);
+        } catch (Exception e) {
+            return java.util.List.of();
+        }
     }
 
     @Nullable

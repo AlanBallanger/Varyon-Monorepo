@@ -1,11 +1,14 @@
 package fr.varyon.musiczones;
 
+import javax.annotation.Nullable;
 import java.util.Comparator;
+import java.util.Locale;
 
 public final class MusicZone implements Comparable<MusicZone> {
 
     private final String id;
     private final String worldName;
+    private final String group;
     private final double minX;
     private final double minY;
     private final double minZ;
@@ -25,7 +28,7 @@ public final class MusicZone implements Comparable<MusicZone> {
             double maxY,
             double maxZ,
             String musicFileName) {
-        this(id, worldName, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, 0.0);
+        this(id, worldName, null, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, 0.0);
     }
 
     public MusicZone(
@@ -39,8 +42,24 @@ public final class MusicZone implements Comparable<MusicZone> {
             double maxZ,
             String musicFileName,
             double volumeDb) {
+        this(id, worldName, null, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, volumeDb);
+    }
+
+    public MusicZone(
+            String id,
+            String worldName,
+            @Nullable String group,
+            double minX,
+            double minY,
+            double minZ,
+            double maxX,
+            double maxY,
+            double maxZ,
+            String musicFileName,
+            double volumeDb) {
         this.id = id;
         this.worldName = worldName;
+        this.group = group == null || group.isBlank() ? null : group;
         this.minX = minX;
         this.minY = minY;
         this.minZ = minZ;
@@ -59,7 +78,29 @@ public final class MusicZone implements Comparable<MusicZone> {
     }
 
     public MusicZone withVolumeDb(double newVolumeDb) {
-        return new MusicZone(id, worldName, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, newVolumeDb);
+        return new MusicZone(id, worldName, group, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, newVolumeDb);
+    }
+
+    public MusicZone withGroup(@Nullable String newGroup) {
+        return new MusicZone(id, worldName, newGroup, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, volumeDb);
+    }
+
+    public MusicZone withId(String newId) {
+        return new MusicZone(newId, worldName, group, minX, minY, minZ, maxX, maxY, maxZ, musicFileName, volumeDb);
+    }
+
+    public MusicZone withMusicFileName(String newMusicFileName) {
+        return new MusicZone(id, worldName, group, minX, minY, minZ, maxX, maxY, maxZ, newMusicFileName, volumeDb);
+    }
+
+    public MusicZone withBox(double nMinX, double nMinY, double nMinZ, double nMaxX, double nMaxY, double nMaxZ) {
+        double x0 = Math.min(nMinX, nMaxX);
+        double x1 = Math.max(nMinX, nMaxX);
+        double y0 = Math.min(nMinY, nMaxY);
+        double y1 = Math.max(nMinY, nMaxY);
+        double z0 = Math.min(nMinZ, nMaxZ);
+        double z1 = Math.max(nMinZ, nMaxZ);
+        return new MusicZone(id, worldName, group, x0, y0, z0, x1, y1, z1, musicFileName, volumeDb);
     }
 
     // Échelle opérateur 0–100 % -> dB perçus (courbe -20*log10). 100 -> 0 dB, 50 -> ~-6 dB,
@@ -86,6 +127,11 @@ public final class MusicZone implements Comparable<MusicZone> {
 
     public String getWorldName() {
         return worldName;
+    }
+
+    @Nullable
+    public String getGroup() {
+        return group;
     }
 
     public double getMinX() {
@@ -120,20 +166,52 @@ public final class MusicZone implements Comparable<MusicZone> {
         return MusicZone.sanitizeToken(id);
     }
 
+    // --- Identité des assets générés -------------------------------------------------------
+    // Le .ogg, le MusicContainer et l'AmbienceFX sont désormais indexés par le FICHIER SOURCE
+    // (+ le volume en dB pour le MC/AmbienceFX), jamais par l'id de zone. Raisons :
+    //  - le client met en cache les Common Assets (.ogg) par clé et considère qu'une clé connue
+    //    n'a "pas changé" : réécrire VaryonMZ_<Zone>.ogg avec d'autres octets quand la zone
+    //    change de musique laissait l'ancienne piste en cache -> zone A jouait la musique de B ;
+    //  - AmbienceFX.musicContainerIndex est résolu une seule fois puis figé : garder le même id
+    //    d'AmbienceFX en changeant sa cible gardait l'ancien index.
+    // Avec des clés dérivées du contenu, les octets d'une clé ne changent jamais ; changer la
+    // musique d'une zone ne fait que repointer vers un autre asset déjà correct.
+
+    private String musicStemToken() {
+        return MusicZone.sanitizeToken(stripOgg(musicFileName));
+    }
+
+    // Volume en centièmes de dB, encodé sans signe : "N120" = -12.0 dB, "P0" = 0 dB.
+    private String volumeToken() {
+        long centi = Math.round(volumeDb * 10.0);
+        return (centi < 0 ? "N" : "P") + Math.abs(centi);
+    }
+
     public String ambienceAssetId() {
-        return "VaryonMZ_" + sanitizedId() + "_Amb";
+        return "VaryonMZ_" + musicStemToken() + "_" + volumeToken() + "_Amb";
     }
 
     public String musicContainerId() {
-        return "VaryonMZ_" + sanitizedId() + "_MC";
+        return "VaryonMZ_" + musicStemToken() + "_" + volumeToken() + "_MC";
     }
 
     public String musicOggFileName() {
-        return "VaryonMZ_" + sanitizedId() + ".ogg";
+        return "VaryonMZ_" + musicStemToken() + ".ogg";
     }
 
     public String musicCommonTrackPath() {
         return "Music/VaryonMZ/" + musicOggFileName();
+    }
+
+    private static String stripOgg(String name) {
+        if (name == null) {
+            return "";
+        }
+        String s = name.trim().replace('\\', '/');
+        if (s.contains("/")) {
+            s = s.substring(s.lastIndexOf('/') + 1);
+        }
+        return s.toLowerCase(Locale.ROOT).endsWith(".ogg") ? s.substring(0, s.length() - 4) : s;
     }
 
     public static String sanitizeToken(String raw) {
