@@ -17,20 +17,23 @@ import java.util.concurrent.ScheduledFuture;
 public class BalanceHud extends SimpleHud {
     
     // HUD enabled/disabled is now controlled by config: EnableHudDisplay
-    
-    private static final int MIN_STEPS = 15;
-    private static final int MAX_STEPS = 30;
-    private static final long STEP_INTERVAL_MS = 50;
-    
+
+    // Low-frequency repaint model: the HUD is deliberately unhurried so that a burst of
+    // balance changes (mining, coin pickups) coalesces into a handful of packets instead
+    // of restarting a fast per-change animation every time.
+    private static final long TICK_INTERVAL_MS = 400;
+    private static final int MAX_TICKS = 6;
+
     // If change is less than 0.1% of balance, use trailing digits
     private static final double TRAILING_THRESHOLD = 0.001;
     private final PlayerRef ownerRef;
 
-    
+
     private double displayedBalance = 0;
     private double targetBalance = 0;
     private boolean useTrailingDigits = false;
     private ScheduledFuture<?> animationFuture;
+    private boolean animating = false;
     private boolean warnedDisabled = false;
 
     public BalanceHud(PlayerRef playerRef) {
@@ -68,12 +71,18 @@ public class BalanceHud extends SimpleHud {
         
         double change = Math.abs(newBalance - targetBalance);
         double ratio = targetBalance > 0 ? change / targetBalance : 1.0;
-        
+
         // Use trailing digits if change is tiny relative to balance AND balance >= 10K
         useTrailingDigits = (ratio < TRAILING_THRESHOLD) && (targetBalance >= 10_000);
-        
+
         targetBalance = newBalance;
-        startAnimation();
+
+        // Just move the target; a single slow ticker converges toward it. Rapid successive
+        // changes only shift the target, they don't spawn a new animation burst.
+        if (!animating) {
+            animating = true;
+            scheduleTick(0);
+        }
     }
     
     /**
@@ -87,51 +96,46 @@ public class BalanceHud extends SimpleHud {
      * Cleanup resources when HUD is removed (cancel pending animations)
      */
     public void cleanup() {
+        animating = false;
         if (animationFuture != null) {
             HudScheduler.cancel(animationFuture);
             animationFuture = null;
         }
     }
-    
-    private void startAnimation() {
-        if (animationFuture != null) {
-            HudScheduler.cancel(animationFuture);
-        }
-        
-        double startValue = displayedBalance;
-        double endValue = targetBalance;
-        int totalSteps = calculateSteps(Math.abs(endValue - startValue));
-        
-        animateWithEasing(startValue, endValue, 0, totalSteps);
+
+    private void scheduleTick(long delayMs) {
+        animationFuture = HudScheduler.runLater(this::tick, delayMs);
     }
-    
-    private int calculateSteps(double delta) {
-        int steps = (int) Math.ceil(delta / 1.5);
-        return Math.max(MIN_STEPS, Math.min(steps, MAX_STEPS));
-    }
-    
-    private void animateWithEasing(double start, double end, int currentStep, int totalSteps) {
-        if (currentStep >= totalSteps) {
-            displayedBalance = end;
+
+    /**
+     * One repaint step. Moves {@link #displayedBalance} a fraction of the remaining gap
+     * toward {@link #targetBalance} and reschedules itself until it has converged. Each
+     * call is at most one packet, spaced {@link #TICK_INTERVAL_MS} apart.
+     */
+    private void tick() {
+        double remaining = targetBalance - displayedBalance;
+
+        // Close enough: snap, paint once, stop the ticker.
+        if (Math.abs(remaining) < 1.0) {
+            displayedBalance = targetBalance;
             useTrailingDigits = false;
-            updateDisplayFinal(end);
+            animating = false;
+            animationFuture = null;
+            updateDisplayFinal(displayedBalance);
             return;
         }
-        
-        double t = (double) currentStep / totalSteps;
-        double eased = 1.0 - Math.pow(1.0 - t, 2.5);
-        
-        displayedBalance = start + (end - start) * eased;
-        
+
+        // Advance ~1/MAX_TICKS of the gap per tick so a change lands in a bounded number
+        // of steps regardless of magnitude.
+        displayedBalance += remaining / MAX_TICKS;
+
         if (useTrailingDigits) {
             updateDisplayTrailing(displayedBalance);
         } else {
             updateDisplayFinal(displayedBalance);
         }
-        
-        animationFuture = HudScheduler.runLater(() -> {
-            animateWithEasing(start, end, currentStep + 1, totalSteps);
-        }, STEP_INTERVAL_MS);
+
+        scheduleTick(TICK_INTERVAL_MS);
     }
     
     /**

@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -68,7 +69,24 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
     private final AtomicLong totalRewardsGiven = new AtomicLong(0);
     private final AtomicLong totalValueInjected = new AtomicLong(0);
     private final AtomicLong rewardsBlocked = new AtomicLong(0);
-    
+
+    // Block classification is deterministic per blockId; cache it so the reflection walk in
+    // autoClassifyBlock() runs once per ore type instead of on every break.
+    private final Map<String, String> tierCache = new ConcurrentHashMap<>();
+
+    // Resolved once instead of via Class#getDeclaredField on every classify call.
+    private static final java.lang.reflect.Field ITEM_DATA_FIELD;
+    static {
+        java.lang.reflect.Field f = null;
+        try {
+            f = com.hypixel.hytale.server.core.asset.type.item.config.Item.class.getDeclaredField("data");
+            f.setAccessible(true);
+        } catch (Exception e) {
+            JobsLogger.error("Could not resolve Item.data field for mining classification: " + e.getMessage());
+        }
+        ITEM_DATA_FIELD = f;
+    }
+
     public MiningRewardSystem() {
         super(BreakBlockEvent.class);
         // RateLimiter: 60 burst capacity, 10 tokens/sec refill
@@ -112,6 +130,7 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
     public void setOverrides(Map<String, String> overrides, Set<String> exclusions) {
         this.tierOverrides = overrides;
         this.exclusions = exclusions != null ? exclusions : new HashSet<>();
+        tierCache.clear();
     }
     
     // =========================================================================
@@ -164,10 +183,12 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         // LAYER 2: GATHER TYPE CHECK (Rocks = pickaxe mining in Hytale)
         // ─────────────────────────────────────────────────────────────
         String gatherType = breaking.getGatherType();
-        
+
         // DEBUG: Log block break attempts (Quality field is always 0 in current Hytale version)
-        JobsLogger.debug("[MINING-DEBUG] Block: %s | GatherType: %s", blockId, gatherType);
-        
+        if (JobsLogger.isDebugEnabled()) {
+            JobsLogger.debug("[MINING-DEBUG] Block: %s | GatherType: %s", blockId, gatherType);
+        }
+
         // Allow "Rocks", "VolcanicRocks", etc.
         if (gatherType == null || !gatherType.contains("Rocks")) {
             return; // Not rock mining (could be wood, soft blocks, etc.)
@@ -305,9 +326,11 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         totalRewardsGiven.incrementAndGet();
         totalValueInjected.addAndGet(totalValue);
         
-        JobsLogger.debug("SUCCESS: %s -> %d coins (exact=%.2f, tool=%.2fx, depth=%.2fx, vip=%.2fx)", 
-            blockId, finalCoins, exactCoins, toolMultiplier, depthMultiplier, vipMultiplier);
-        
+        if (JobsLogger.isDebugEnabled()) {
+            JobsLogger.debug("SUCCESS: %s -> %d coins (exact=%.2f, tool=%.2fx, depth=%.2fx, vip=%.2fx)",
+                blockId, finalCoins, exactCoins, toolMultiplier, depthMultiplier, vipMultiplier);
+        }
+
         // ─────────────────────────────────────────────────────────────
         // VEIN STREAK: Audio + Bonus (only for non-BASIC tiers)
         // ─────────────────────────────────────────────────────────────
@@ -343,22 +366,41 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
                                 EconomyBridge.deposit(playerUuid, (double) bonusValue, "VeinStreak bonus");
                             }
                             totalValueInjected.addAndGet(bonusValue);
-                            JobsLogger.debug("[VEIN STREAK] Streak %d -> Bonus +%d", streak, bonusAmount);
+                            if (JobsLogger.isDebugEnabled()) {
+                                JobsLogger.debug("[VEIN STREAK] Streak %d -> Bonus +%d", streak, bonusAmount);
+                            }
                         }
                     }
                 }
             }
         }
         
-        JobsLogger.debug("[MINING] %s (q=%d) -> %s -> %d coins", 
-            blockId, breaking.getQuality(), tierName, finalCoins);
+        if (JobsLogger.isDebugEnabled()) {
+            JobsLogger.debug("[MINING] %s (q=%d) -> %s -> %d coins",
+                blockId, breaking.getQuality(), tierName, finalCoins);
+        }
     }
     
+    /**
+     * Memoized wrapper around {@link #computeTier}. Classification is deterministic for a
+     * given blockId, so the reflection/asset lookup only runs the first time each ore type
+     * is mined.
+     */
+    private String autoClassifyBlock(String blockId, BlockBreakingDropType breaking) {
+        String cached = tierCache.get(blockId);
+        if (cached != null) {
+            return cached;
+        }
+        String tier = computeTier(blockId, breaking);
+        tierCache.put(blockId, tier);
+        return tier;
+    }
+
     /**
      * Uses native Hytale tags (via reflection) to classify blocks.
      * This is 100% robust as it uses the game's internal categorization.
      */
-    private String autoClassifyBlock(String blockId, BlockBreakingDropType breaking) {
+    private String computeTier(String blockId, BlockBreakingDropType breaking) {
         // ══════════════════════════════════════════════════════════════════════════════
         // SECURITY FIX (FIRST CHECK): Only reward ORE blocks (natural resources)
         // This MUST be first to prevent exploits like "Iron_Bars" craft-place-break
@@ -366,14 +408,18 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
         // Blocked: "Iron_Bars", "Gold_Block", "Rock_Stone", etc.
         // ══════════════════════════════════════════════════════════════════════════════
         if (!blockId.contains("Ore")) {
-            JobsLogger.debug("[MINING-SECURITY] Blocked non-ore block: %s", blockId);
+            if (JobsLogger.isDebugEnabled()) {
+                JobsLogger.debug("[MINING-SECURITY] Blocked non-ore block: %s", blockId);
+            }
             return "NONE";
         }
 
         // "Cracked" variants (e.g. Ore_Iron_Basalt_Cracked, Ore_Adamantite_Magma_Cracked)
         // are decorative terrain blocks, not real minable veins.
         if (blockId.contains("Cracked")) {
-            JobsLogger.debug("[MINING-SECURITY] Blocked cracked deco block: %s", blockId);
+            if (JobsLogger.isDebugEnabled()) {
+                JobsLogger.debug("[MINING-SECURITY] Blocked cracked deco block: %s", blockId);
+            }
             return "NONE";
         }
 
@@ -397,22 +443,21 @@ public class MiningRewardSystem extends EntityEventSystem<EntityStore, BreakBloc
             com.hypixel.hytale.server.core.asset.type.item.config.Item item = 
                 com.hypixel.hytale.server.core.asset.type.item.config.Item.getAssetMap().getAsset(blockId);
             
-            if (item != null) {
-                // Access the protected 'data' field
-                java.lang.reflect.Field dataField = com.hypixel.hytale.server.core.asset.type.item.config.Item.class.getDeclaredField("data");
-                dataField.setAccessible(true);
-                Object dataObj = dataField.get(item);
-                
+            if (item != null && ITEM_DATA_FIELD != null) {
+                Object dataObj = ITEM_DATA_FIELD.get(item);
+
                 if (dataObj instanceof com.hypixel.hytale.assetstore.AssetExtraInfo.Data) {
                     com.hypixel.hytale.assetstore.AssetExtraInfo.Data data = (com.hypixel.hytale.assetstore.AssetExtraInfo.Data) dataObj;
                     java.util.Map<String, String[]> tags = data.getRawTags();
-                    
+
                     if (tags.containsKey("Family")) {
                         String[] families = tags.get("Family");
                         for (String family : families) {
                             String tier = mapFamilyToTier(family);
                             if (tier != null) {
-                                JobsLogger.debug("[MINING-DEBUG] Found tag family: %s -> Tier: %s", family, tier);
+                                if (JobsLogger.isDebugEnabled()) {
+                                    JobsLogger.debug("[MINING-DEBUG] Found tag family: %s -> Tier: %s", family, tier);
+                                }
                                 return tier;
                             }
                         }

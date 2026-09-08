@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.stream.Stream;
@@ -40,6 +42,15 @@ import java.util.stream.Stream;
 public class JsonStorageProvider implements StorageProvider {
     private final HytaleLogger logger;
     private final AtomicInteger playerCount = new AtomicInteger(0);
+
+    // Dedicated single-threaded IO executor so blocking file operations never run on the
+    // shared common ForkJoinPool (which the rest of the JVM also uses). Mirrors the H2 and
+    // MySQL providers.
+    private final ExecutorService io = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "Ecotale-Json-IO");
+        t.setDaemon(true);
+        return t;
+    });
 
     public JsonStorageProvider() {
         this.logger = HytaleLogger.getLogger().getSubLogger("Ecotale-Storage");
@@ -94,7 +105,7 @@ public class JsonStorageProvider implements StorageProvider {
                 logger.at(Level.SEVERE).log("Failed to initialize storage: %s", e.getMessage());
                 throw new RuntimeException("Storage initialization failed", e);
             }
-        });
+        }, io);
     }
     
     @Override
@@ -138,7 +149,7 @@ public class JsonStorageProvider implements StorageProvider {
             PlayerBalance fallback = new PlayerBalance(playerUuid);
             fallback.setBalance(VaryonEcotalePlugin.getInstance().getEconomyConfig().getStartingBalance(), "Recovery - initial balance");
             return fallback;
-        });
+        }, io);
     }
     
     @Override
@@ -178,7 +189,7 @@ public class JsonStorageProvider implements StorageProvider {
                     }
                 }
             }
-        });
+        }, io);
     }
     
     @Override
@@ -222,12 +233,12 @@ public class JsonStorageProvider implements StorageProvider {
             }
             
             return allBalances;
-        });
+        }, io);
     }
     
     @Override
     public CompletableFuture<Boolean> playerExists(@Nonnull UUID playerUuid) {
-        return CompletableFuture.supplyAsync(() -> Files.exists(getPlayerFile(playerUuid)));
+        return CompletableFuture.supplyAsync(() -> Files.exists(getPlayerFile(playerUuid)), io);
     }
     
     @Override
@@ -242,14 +253,14 @@ public class JsonStorageProvider implements StorageProvider {
             } catch (IOException e) {
                 logger.at(Level.WARNING).log("Failed to delete player %s: %s", playerUuid, e.getMessage());
             }
-        });
+        }, io);
     }
     
     @Override
     public CompletableFuture<Void> shutdown() {
         return CompletableFuture.runAsync(() -> {
             logger.at(Level.INFO).log("JsonStorageProvider shutdown complete");
-        });
+        }, io).whenComplete((v, t) -> io.shutdown());
     }
     
     @Override

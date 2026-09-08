@@ -353,9 +353,10 @@ public class MobRewardSystem extends RefChangeSystem<EntityStore, DeathComponent
         // Uses physical coins if addon is available, otherwise direct balance
         // ─────────────────────────────────────────────────────────────
         if (CoinsBridge.isAvailable()) {
-            // Physical coins addon installed - drop coins in world
-            
-            CoinsBridge.dropCoinsAtEntity(mobRef, store, commandBuffer, totalValue);
+            // Physical coins: don't spawn now (the corpse is still visible). Queue the amount on
+            // the mob; DeferredCoinDropSystem releases it when the corpse is ready to disappear,
+            // so coins land at the same time as vanilla loot.
+            commandBuffer.putComponent(mobRef, PendingCoinDrop.getComponentType(), new PendingCoinDrop(totalValue));
         } else {
             // No coins addon - deposit directly to player's balance
             EconomyBridge.deposit(playerUuid, (double) totalValue, "Mob kill: " + mobId);

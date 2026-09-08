@@ -5,8 +5,10 @@ import fr.varyon.ecotale.jobs.config.CraftingMappingsConfig;
 import fr.varyon.ecotale.jobs.config.EcotaleJobsConfig;
 import fr.varyon.ecotale.jobs.config.TierMappingsConfig;
 import fr.varyon.ecotale.jobs.systems.CraftingRewardSystem;
+import fr.varyon.ecotale.jobs.systems.DeferredCoinDropSystem;
 import fr.varyon.ecotale.jobs.systems.MiningRewardSystem;
 import fr.varyon.ecotale.jobs.systems.MobRewardSystem;
+import fr.varyon.ecotale.jobs.systems.PendingCoinDrop;
 import fr.varyon.ecotale.jobs.util.CraftingAutoDetector;
 import fr.varyon.ecotale.jobs.util.NPCAutoDetector;
 import fr.varyon.ecotale.jobs.util.RewardNotifier;
@@ -77,7 +79,11 @@ public class JobsModule implements ModuleInitializer {
             craftingRewardSystem.init(config.getCrafting(), craftingMappings);
         }
 
+        PendingCoinDrop.setComponentType(
+            plugin.getEntityStoreRegistry().registerComponent(PendingCoinDrop.class, PendingCoinDrop::new));
+
         plugin.getEntityStoreRegistry().registerSystem(mobRewardSystem);
+        plugin.getEntityStoreRegistry().registerSystem(new DeferredCoinDropSystem());
         if (craftingEnabled && craftingRewardSystem != null) {
             plugin.getEntityStoreRegistry().registerSystem(craftingRewardSystem);
         }

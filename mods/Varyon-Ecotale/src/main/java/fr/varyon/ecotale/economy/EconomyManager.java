@@ -177,11 +177,19 @@ public class EconomyManager {
     
     /**
      * Get an account, loading from storage if not in cache.
+     *
+     * The blocking storage load is done outside {@link java.util.concurrent.ConcurrentHashMap#computeIfAbsent}
+     * so it never holds a map bin lock across I/O (which would stall unrelated players'
+     * cache lookups). For connected players this is a pure cache hit and never blocks.
      */
     private PlayerBalance getOrLoadAccount(@Nonnull UUID playerUuid) {
-        return cache.computeIfAbsent(playerUuid, uuid -> 
-            storage.loadPlayer(uuid).join()
-        );
+        PlayerBalance cached = cache.get(playerUuid);
+        if (cached != null) {
+            return cached;
+        }
+        PlayerBalance loaded = storage.loadPlayer(playerUuid).join();
+        PlayerBalance existing = cache.putIfAbsent(playerUuid, loaded);
+        return existing != null ? existing : loaded;
     }
     
     // ========== Balance Operations ==========
