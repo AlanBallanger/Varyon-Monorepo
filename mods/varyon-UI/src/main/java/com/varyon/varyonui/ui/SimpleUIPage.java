@@ -508,7 +508,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         "/return",
         "/join joueur ",
         "/rtpv 1",
-        "/essence",
+        "/points",
     };
 
     private static final boolean[] VARYON_QUICK_CHAT = {
@@ -524,7 +524,7 @@ public class SimpleUIPage extends InteractiveCustomUIPage<SimpleUIPage.EventData
         "Retour mort",
         "Rejoindre ami",
         "TP aléatoire",
-        "Qté essence",
+        "Quantité de points",
     };
 
     private void buildCommandButtons(@Nonnull UICommandBuilder commandBuilder, @Nonnull UIEventBuilder eventBuilder) {
