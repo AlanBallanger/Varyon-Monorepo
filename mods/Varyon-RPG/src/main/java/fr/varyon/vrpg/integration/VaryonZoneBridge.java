@@ -19,6 +19,8 @@ public final class VaryonZoneBridge {
     private static Method methodGetEssenceMultiplier;
     private static Method methodGetStaticSafeZoneManager;
     private static Method methodIsInSafeZone;
+    private static Method methodGetZonePermissionsConfig;
+    private static Method methodGetMaxAccessibleZone;
 
     static {
         boolean found = false;
@@ -29,6 +31,8 @@ public final class VaryonZoneBridge {
             Class<?> difficultyZoneClass = Class.forName("com.varyon.config.DifficultyZone");
             Class<?> zoneCalculatorClass = Class.forName("com.varyon.util.ZoneCalculator");
             Class<?> safeZoneManagerClass = Class.forName("com.varyon.safezone.SafeZoneManager");
+            Class<?> zonePermsClass = Class.forName("com.varyon.config.ZonePermissionsConfig");
+            Class<?> playerRefClass = Class.forName("com.hypixel.hytale.server.core.universe.PlayerRef");
 
             methodGetStaticConfigManager = pluginClass.getMethod("getStaticConfigManager");
             methodGetZoneConfig = configManagerClass.getMethod("getZoneConfig");
@@ -39,11 +43,13 @@ public final class VaryonZoneBridge {
             methodGetEssenceMultiplier = difficultyZoneClass.getMethod("getEssenceMultiplier");
             methodGetStaticSafeZoneManager = pluginClass.getMethod("getStaticSafeZoneManager");
             methodIsInSafeZone = safeZoneManagerClass.getMethod("isInSafeZone", double.class, double.class);
+            methodGetZonePermissionsConfig = configManagerClass.getMethod("getZonePermissionsConfig");
+            methodGetMaxAccessibleZone = zonePermsClass.getMethod("getMaxAccessibleZone", playerRefClass);
 
             found = true;
-            LOGGER.at(Level.INFO).log("[VaryonZoneBridge] Varyon mod detected — zone-based XP scaling active.");
+            LOGGER.at(Level.INFO).log("[VaryonZoneBridge] Varyon mod detected - zone-based XP scaling active.");
         } catch (ClassNotFoundException e) {
-            LOGGER.at(Level.INFO).log("[VaryonZoneBridge] Varyon mod not loaded — zone XP scaling disabled.");
+            LOGGER.at(Level.INFO).log("[VaryonZoneBridge] Varyon mod not loaded - zone XP scaling disabled.");
         } catch (NoSuchMethodException | LinkageError e) {
             LOGGER.at(Level.WARNING).log("[VaryonZoneBridge] Varyon API mismatch: " + e.getMessage());
         }
@@ -104,6 +110,25 @@ public final class VaryonZoneBridge {
             return (boolean) methodIsInSafeZone.invoke(safeZoneManager, x, z);
         } catch (Exception ignored) {
             return true;
+        }
+    }
+
+    /**
+     * Highest Varyon difficulty zone the player has unlocked (1-10). Respects the
+     * {@code varyon.zone.N} permission mapping and LuckPerms. Returns 0 when unavailable so
+     * the caller can decide not to cap.
+     */
+    public static int getMaxAccessibleZone(@Nonnull Object playerRef) {
+        if (!VARYON_PRESENT || methodGetMaxAccessibleZone == null) return 0;
+        try {
+            Object configManager = methodGetStaticConfigManager.invoke(null);
+            if (configManager == null) return 0;
+            Object perms = methodGetZonePermissionsConfig.invoke(configManager);
+            if (perms == null) return 0;
+            Object v = methodGetMaxAccessibleZone.invoke(perms, playerRef);
+            return v instanceof Integer i ? i : 0;
+        } catch (Exception ignored) {
+            return 0;
         }
     }
 
