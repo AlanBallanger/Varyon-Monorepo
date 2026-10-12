@@ -51,6 +51,8 @@ public class VaryonCommand extends AbstractAsyncCommand {
         this.addSubCommand(new ShopSubCommand());
         this.addSubCommand(new ArenaCommand(arenaManager));
         this.addSubCommand(new TiersSubCommand());
+        this.addSubCommand(new com.varyon.elite.command.EliteCommand(
+                plugin.getConfigManager(), plugin.getDataDirectory()));
     }
 
     @NonNullDecl

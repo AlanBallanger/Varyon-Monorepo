@@ -8,8 +8,6 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.server.core.entity.Entity;
-import com.hypixel.hytale.server.core.entity.EntityUtils;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.damage.event.KillFeedEvent;
@@ -21,21 +19,16 @@ import com.varyon.component.MobScalingComponent;
 import com.varyon.config.ConfigManager;
 import com.varyon.config.DifficultyZone;
 import com.varyon.config.PointsRewardsConfig;
+import com.varyon.config.VaryonDebug;
 import com.varyon.safezone.SafeZoneManager;
 import com.varyon.util.ZoneCalculator;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Method;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
 public class PointsKillSystem extends EntityEventSystem<EntityStore, KillFeedEvent.KillerMessage> {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-    private static final Set<String> UNSAFE_METHODS = Set.of(
-        "remove", "delete", "destroy", "kill", "unload", "clear", "close",
-        "unloadfromworld", "clearreference", "markneedssave", "invalidateequipmentnetwork"
-    );
 
     @Nonnull
     private final ComponentType<EntityStore, PlayerRef> playerRefComponentType = PlayerRef.getComponentType();
@@ -43,11 +36,6 @@ public class PointsKillSystem extends EntityEventSystem<EntityStore, KillFeedEve
     private final PointsManager         pointsManager;
     private final ConfigManager         configManager;
     private final PointsRewardsConfig   rewardsConfig;
-
-    private volatile Method cachedNameMethod;
-    private volatile String cachedNameSource;
-    /** Entity classes already scanned without finding a usable name method — skip re-scanning them. */
-    private final Set<Class<?>> unresolvableEntityClasses = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     public PointsKillSystem(@Nonnull PointsManager pointsManager, @Nonnull ConfigManager configManager,
                              @Nonnull PointsRewardsConfig rewardsConfig) {
@@ -85,9 +73,15 @@ public class PointsKillSystem extends EntityEventSystem<EntityStore, KillFeedEve
             if (victimRef != null && victimRef.isValid()) {
                 mobId = resolveMobName(victimRef, store, commandBuffer);
             }
+            if (VaryonDebug.isPoints()) {
+                LOGGER.at(Level.INFO).log("[Debug points] " + playerRef.getUsername() + " a tué (role=" + mobId + ")");
+            }
 
             double baseReward = rewardsConfig.getMobReward(mobId);
             if (baseReward <= 0) {
+                if (VaryonDebug.isPoints()) {
+                    LOGGER.at(Level.INFO).log("[Debug points] " + playerRef.getUsername() + " a tué " + mobId + " — aucune récompense configurée");
+                }
                 return;
             }
 
@@ -118,7 +112,13 @@ public class PointsKillSystem extends EntityEventSystem<EntityStore, KillFeedEve
             if (pointsGained <= 0) return;
             double current = pointsManager.getPoints(playerUuid);
             int cap = configManager.getZonePermissionsConfig().getEffectiveCap(playerRef, current);
-            pointsManager.addPointsCapped(playerUuid, playerUuid.toString(), pointsGained, cap);
+            double added = pointsManager.addPointsCapped(playerUuid, playerUuid.toString(), pointsGained, cap);
+            if (VaryonDebug.isPoints()) {
+                LOGGER.at(Level.INFO).log(String.format(
+                    "[Debug points] %s mob=%s base=%.2f zone=x%.2f loot=x%.2f pvp=x%.2f => calculé=%.2f | ajouté=%.2f (cap=%d, avant=%.1f)",
+                    playerRef.getUsername(), mobId, baseReward, zoneMultiplier, lootMultiplier, pvpMultiplier,
+                    pointsGained, added, cap, current));
+            }
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("Error in PointsKillSystem: " + e.getMessage());
         }
@@ -128,92 +128,21 @@ public class PointsKillSystem extends EntityEventSystem<EntityStore, KillFeedEve
     private String resolveMobName(@Nonnull Ref<EntityStore> ref,
                                   @Nonnull Store<EntityStore> store,
                                   @Nonnull CommandBuffer<EntityStore> commandBuffer) {
-        if (cachedNameMethod != null) {
-            return resolveWithCachedMethod(ref, store, commandBuffer);
+        NPCEntity npc = null;
+        try { npc = store.getComponent(ref, NPCEntity.getComponentType()); } catch (Exception ignored) {}
+        if (npc == null) {
+            try { npc = commandBuffer.getComponent(ref, NPCEntity.getComponentType()); } catch (Exception ignored) {}
+        }
+        if (npc == null) {
+            return "unknown";
         }
 
-        try {
-            Entity entity = null;
-            try { entity = EntityUtils.getEntity(ref, commandBuffer); } catch (Exception ignored) {}
-            if (entity == null) {
-                try { entity = EntityUtils.getEntity(ref, store); } catch (Exception ignored) {}
-            }
-
-            if (entity != null && !unresolvableEntityClasses.contains(entity.getClass())) {
-                String result = scanStringMethods(entity, "Entity");
-                if (result != null) return result;
-                unresolvableEntityClasses.add(entity.getClass());
-            }
-
-            NPCEntity npc = null;
-            try { npc = store.getComponent(ref, NPCEntity.getComponentType()); } catch (Exception ignored) {}
-            if (npc == null) {
-                try { npc = commandBuffer.getComponent(ref, NPCEntity.getComponentType()); } catch (Exception ignored) {}
-            }
-
-            if (npc != null && !unresolvableEntityClasses.contains(npc.getClass())) {
-                String result = scanStringMethods(npc, "NPCEntity");
-                if (result != null) return result;
-                unresolvableEntityClasses.add(npc.getClass());
-            }
-        } catch (Exception e) {
-            LOGGER.at(Level.FINE).log("resolveMobName error: " + e.getMessage());
+        String name = null;
+        try { name = npc.getRoleName(); } catch (Exception ignored) {}
+        if (name == null || name.isEmpty()) {
+            try { name = npc.getNPCTypeId(); } catch (Exception ignored) {}
         }
-        return "unknown";
-    }
-
-    private String scanStringMethods(@Nonnull Object obj, @Nonnull String source) {
-        for (Method m : obj.getClass().getMethods()) {
-            if (m.getDeclaringClass() == Object.class) continue;
-            if (m.getParameterCount() != 0) continue;
-            if (m.getReturnType() != String.class) continue;
-            if (UNSAFE_METHODS.contains(m.getName().toLowerCase())) continue;
-
-            try {
-                String val = (String) m.invoke(obj);
-                if (val != null && !val.isEmpty() && val.length() < 100) {
-                    String lower = val.toLowerCase();
-                    if (rewardsConfig.getMobReward(lower) > 0) {
-                        cachedNameMethod = m;
-                        cachedNameSource = source;
-                        LOGGER.at(Level.INFO).log("Mob name resolved via " + source + "." + m.getName() + "() = " + val);
-                        return lower;
-                    }
-                }
-            } catch (Exception ignored) {}
-        }
-        return null;
-    }
-
-    @Nonnull
-    private String resolveWithCachedMethod(@Nonnull Ref<EntityStore> ref,
-                                           @Nonnull Store<EntityStore> store,
-                                           @Nonnull CommandBuffer<EntityStore> commandBuffer) {
-        try {
-            Object target = null;
-            if ("Entity".equals(cachedNameSource)) {
-                try { target = EntityUtils.getEntity(ref, commandBuffer); } catch (Exception ignored) {}
-                if (target == null) {
-                    try { target = EntityUtils.getEntity(ref, store); } catch (Exception ignored) {}
-                }
-            } else {
-                try { target = store.getComponent(ref, NPCEntity.getComponentType()); } catch (Exception ignored) {}
-                if (target == null) {
-                    try { target = commandBuffer.getComponent(ref, NPCEntity.getComponentType()); } catch (Exception ignored) {}
-                }
-            }
-
-            if (target != null) {
-                String val = (String) cachedNameMethod.invoke(target);
-                if (val != null && !val.isEmpty()) {
-                    return val.toLowerCase();
-                }
-            }
-        } catch (Exception e) {
-            cachedNameMethod = null;
-            cachedNameSource = null;
-        }
-        return "unknown";
+        return name != null && !name.isEmpty() ? name.toLowerCase() : "unknown";
     }
 
     @Nonnull

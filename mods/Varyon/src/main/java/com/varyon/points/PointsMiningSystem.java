@@ -17,6 +17,7 @@ import com.varyon.VaryonPlugin;
 import com.varyon.config.ConfigManager;
 import com.varyon.config.DifficultyZone;
 import com.varyon.config.PointsRewardsConfig;
+import com.varyon.config.VaryonDebug;
 import com.varyon.safezone.SafeZoneManager;
 import com.varyon.util.MiningOreBlockIds;
 import com.varyon.util.ZoneCalculator;
@@ -68,12 +69,18 @@ public class PointsMiningSystem extends EntityEventSystem<EntityStore, BreakBloc
 
             double baseReward = rewardsConfig.getOreReward(blockId);
             if (baseReward <= 0) {
+                if (VaryonDebug.isPoints()) {
+                    LOGGER.at(Level.INFO).log("[Debug points] " + playerRef.getUsername() + " a cassé " + blockId + " — aucune récompense configurée");
+                }
                 return;
             }
 
             if (event.getTargetBlock() != null) {
                 boolean placed = placedOreTracker.isPlayerPlaced(world, event.getTargetBlock());
                 if (placed) {
+                    if (VaryonDebug.isPoints()) {
+                        LOGGER.at(Level.INFO).log("[Debug points] " + playerRef.getUsername() + " a cassé " + blockId + " — bloc posé par un joueur, ignoré");
+                    }
                     return;
                 }
             }
@@ -99,7 +106,13 @@ public class PointsMiningSystem extends EntityEventSystem<EntityStore, BreakBloc
 
             double current = pointsManager.getPoints(playerUuid);
             int cap = configManager.getZonePermissionsConfig().getEffectiveCap(playerRef, current);
-            pointsManager.addPointsCapped(playerUuid, playerUuid.toString(), pointsGained, cap);
+            double added = pointsManager.addPointsCapped(playerUuid, playerUuid.toString(), pointsGained, cap);
+            if (VaryonDebug.isPoints()) {
+                LOGGER.at(Level.INFO).log(String.format(
+                    "[Debug points] %s minerai=%s base=%.2f zone=x%.2f loot=x%.2f pvp=x%.2f => calculé=%.2f | ajouté=%.2f (cap=%d, avant=%.1f)",
+                    playerRef.getUsername(), blockId, baseReward, zoneMultiplier, lootMultiplier, pvpMultiplier,
+                    pointsGained, added, cap, current));
+            }
         } catch (Exception e) {
             LOGGER.at(Level.WARNING).log("Error in PointsMiningSystem: " + e.getMessage());
         }

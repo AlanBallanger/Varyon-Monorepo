@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -14,6 +13,8 @@ public class ZoneConfig {
     private final List<String> enabledWorlds;
     private final List<DifficultyZone> zones;
     private final Map<String, Integer> instanceZonePatterns;
+    /** {@link #instanceZonePatterns} with keys pre-lowercased once, instead of on every lookup. */
+    private final Map<String, Integer> lowercasedInstanceZonePatterns;
     private boolean minimapEnabled;
     private int minimapOpacity;
     private String minimapPattern;
@@ -31,6 +32,7 @@ public class ZoneConfig {
         this.enabledWorlds = new ArrayList<>();
         this.zones = new ArrayList<>();
         this.instanceZonePatterns = new LinkedHashMap<>();
+        this.lowercasedInstanceZonePatterns = new LinkedHashMap<>();
         this.minimapEnabled = true;
         this.minimapOpacity = 50;
         this.minimapPattern = "SOLID";
@@ -56,6 +58,10 @@ public class ZoneConfig {
         this.instanceZonePatterns = instanceZonePatterns != null
                 ? new LinkedHashMap<>(instanceZonePatterns)
                 : new LinkedHashMap<>();
+        this.lowercasedInstanceZonePatterns = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> e : this.instanceZonePatterns.entrySet()) {
+            this.lowercasedInstanceZonePatterns.put(e.getKey().toLowerCase(Locale.ROOT), e.getValue());
+        }
         this.minimapEnabled = minimapEnabled;
         this.minimapOpacity = minimapOpacity;
         this.minimapPattern = minimapPattern != null ? minimapPattern : "SOLID";
@@ -73,41 +79,58 @@ public class ZoneConfig {
     @Nonnull
     public List<String> getEnabledWorlds() { return Collections.unmodifiableList(enabledWorlds); }
 
+    // isWorldEnabled / getZoneIdForInstanceWorld / getZoneById are on the hot path: called once
+    // per entity spawn (mob scaling + elite promotion both check the zone at spawn time), so a
+    // world reload of thousands of chunks calls these thousands of times in a burst. They used to
+    // build a Stream pipeline (Comparator, Optional, lambdas) and re-lowercase every pattern key on
+    // every single call - that showed up as the hottest allocation source in the mod. Plain loops,
+    // and the instance patterns are pre-lowercased once (in setInstanceZonePatterns) instead of
+    // on every lookup.
     public boolean isWorldEnabled(@Nonnull String worldName) {
         String w = worldName.trim();
-        if (enabledWorlds.stream().anyMatch(e -> e.equalsIgnoreCase(w))) return true;
+        for (String e : enabledWorlds) {
+            if (e.equalsIgnoreCase(w)) return true;
+        }
         return getZoneIdForInstanceWorld(worldName) != null;
     }
 
     @Nullable
     public Integer getZoneIdForInstanceWorld(@Nonnull String worldName) {
-        if (instanceZonePatterns.isEmpty()) return null;
+        if (lowercasedInstanceZonePatterns.isEmpty()) return null;
         String w = worldName.trim().toLowerCase(Locale.ROOT);
-        return instanceZonePatterns.entrySet().stream()
-                .filter(e -> w.startsWith(e.getKey().toLowerCase(Locale.ROOT)))
-                .max(Comparator.comparingInt(e -> e.getKey().length()))
-                .map(Map.Entry::getValue)
-                .orElse(null);
+        String bestKey = null;
+        Integer bestValue = null;
+        for (Map.Entry<String, Integer> e : lowercasedInstanceZonePatterns.entrySet()) {
+            String key = e.getKey();
+            if (w.startsWith(key) && (bestKey == null || key.length() > bestKey.length())) {
+                bestKey = key;
+                bestValue = e.getValue();
+            }
+        }
+        return bestValue;
     }
 
     @Nullable
     public DifficultyZone getZoneById(int zoneId) {
-        return zones.stream()
-                .filter(z -> z.getZoneId() == zoneId)
-                .findFirst()
-                .orElse(null);
+        for (DifficultyZone z : zones) {
+            if (z.getZoneId() == zoneId) return z;
+        }
+        return null;
     }
 
     @Nonnull
     public Map<String, Integer> getInstanceZonePatterns() { return Collections.unmodifiableMap(instanceZonePatterns); }
 
+    /** Read-only view backed by the live list - avoids allocating a new wrapper on every call from
+     *  a hot path (a zone lookup happens once per entity spawn). */
     @Nonnull
-    public List<DifficultyZone> getZones() { return Collections.unmodifiableList(zones); }
+    public List<DifficultyZone> getZones() { return zones; }
 
     public void addZone(@Nonnull DifficultyZone zone) { zones.add(zone); }
 
     public void addInstanceZonePattern(@Nonnull String pattern, int zoneId) {
         instanceZonePatterns.put(pattern, zoneId);
+        lowercasedInstanceZonePatterns.put(pattern.toLowerCase(Locale.ROOT), zoneId);
     }
 
     public boolean isMinimapEnabled()           { return minimapEnabled; }

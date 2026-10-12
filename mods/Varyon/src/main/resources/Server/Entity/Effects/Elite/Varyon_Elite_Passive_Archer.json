@@ -1,0 +1,15 @@
+{
+  "Infinite": true,
+  "Debuff": false,
+  "OverlapBehavior": "Overwrite",
+  "RemovalBehavior": "Infinite",
+  "DamageResistance": {
+    "Physical": [ { "CalculationType": "Percent", "Amount": 20 } ],
+    "Slashing": [ { "CalculationType": "Percent", "Amount": 20 } ],
+    "Bludgeoning": [ { "CalculationType": "Percent", "Amount": 20 } ]
+  },
+  "ApplicationEffects": {
+    "EntityBottomTint": "#223a2a",
+    "EntityTopTint": "#305a40"
+  }
+}

@@ -107,6 +107,7 @@ public class VaryonPlugin extends JavaPlugin {
     private SafeZoneNotificationSystem safeZoneNotificationSystem;
     private ArenaManager arenaManager;
     private ZoneHUDManager hudManager;
+    private com.varyon.elite.EliteSubsystem eliteSubsystem;
     private ExtractionPortalManager extractionPortalManager;
     private PointsRewardsConfig pointsRewardsConfig;
     private GlobalRewardsManager globalRewardsManager;
@@ -135,7 +136,10 @@ public class VaryonPlugin extends JavaPlugin {
                     this, "monster_level", java.util.List.of(
                             "Préfixé (ex: Nv.5)",
                             "Numéro  (ex: 5)"));
-            LOGGER.at(Level.INFO).log("NameplateBuilder integration registered (monster_level)");
+            com.frotty27.nameplatebuilder.api.NameplateAPI.describe(
+                    this, "elite_marker", "Marqueur Elite",
+                    com.frotty27.nameplatebuilder.api.SegmentTarget.NPCS, "[• • •] Assassin Skeleton - Lvl 100");
+            LOGGER.at(Level.INFO).log("NameplateBuilder integration registered (monster_level, elite_marker)");
         } catch (Throwable t) {
             LOGGER.at(Level.INFO).log("NameplateBuilder not available, skipping nameplate integration (" + t.getClass().getSimpleName() + ")");
         }
@@ -153,14 +157,28 @@ public class VaryonPlugin extends JavaPlugin {
                 LOGGER.at(Level.WARNING).log("Failed to register varyon_ambassade_orb: " + e.getMessage());
             }
 
+            // Registered with a codec (not just a supplier) so it persists: a scaled mob loaded
+            // after a reboot must keep its level, otherwise its nameplate and kill XP disagree
+            // with its already-baked HP/damage.
             ComponentType<EntityStore, MobScalingComponent> mobScalingComponentType =
                     this.getEntityStoreRegistry().registerComponent(MobScalingComponent.class,
-                            () -> new MobScalingComponent(0, 1.0f, 1.0f, 1.0f, 1.0f));
+                            MobScalingComponent.COMPONENT_NAME, MobScalingComponent.CODEC);
             MobScalingComponent.setComponentType(mobScalingComponentType);
 
             ComponentType<EntityStore, NoLootComponent> noLootComponentType =
                     this.getEntityStoreRegistry().registerComponent(NoLootComponent.class, NoLootComponent::new);
             NoLootComponent.setComponentType(noLootComponentType);
+
+            // Transient marker - not persisted, see PendingScalingComponent's own doc.
+            com.varyon.component.PendingScalingComponent.setComponentType(
+                    this.getEntityStoreRegistry().registerComponent(
+                            com.varyon.component.PendingScalingComponent.class,
+                            () -> com.varyon.component.PendingScalingComponent.INSTANCE));
+
+            com.varyon.component.PendingFragmentDrop.setComponentType(
+                    this.getEntityStoreRegistry().registerComponent(
+                            com.varyon.component.PendingFragmentDrop.class,
+                            com.varyon.component.PendingFragmentDrop::new));
 
             configManager = new ConfigManager(this.getDataDirectory());
             configManager.load();
@@ -234,6 +252,8 @@ public class VaryonPlugin extends JavaPlugin {
 
             MobScalingRefSystem mobScalingRefSystem = new MobScalingRefSystem(configManager);
             this.getEntityStoreRegistry().registerSystem(mobScalingRefSystem);
+            this.getEntityStoreRegistry().registerSystem(
+                    new com.varyon.system.MobScalingQueueSystem(mobScalingRefSystem));
 
             MobDamageScalingSystem mobDamageScalingSystem = new MobDamageScalingSystem();
             this.getEntityStoreRegistry().registerSystem(mobDamageScalingSystem);
@@ -244,6 +264,7 @@ public class VaryonPlugin extends JavaPlugin {
             MobFragmentDropSystem mobFragmentDropSystem = new MobFragmentDropSystem(configManager);
             this.getEntityStoreRegistry().registerSystem(mobFragmentDropSystem.createPlayerDamageTagger());
             this.getEntityStoreRegistry().registerSystem(mobFragmentDropSystem.createDropSystem());
+            this.getEntityStoreRegistry().registerSystem(new com.varyon.system.DeferredFragmentDropSystem());
 
             PointsKillSystem pointsKillSystem = new PointsKillSystem(pointsManager, configManager, pointsRewardsConfig);
             this.getEntityStoreRegistry().registerSystem(pointsKillSystem);
@@ -351,6 +372,8 @@ public class VaryonPlugin extends JavaPlugin {
                 
                 LOGGER.at(Level.INFO).log("Safe zone rotation system enabled");
             }
+
+            eliteSubsystem = com.varyon.elite.EliteSubsystem.register(this, configManager, safeZoneManager, configManager.getEliteConfig());
 
             ZoneTitleTickingSystem zoneTitleSystem = new ZoneTitleTickingSystem(configManager);
             this.getEntityStoreRegistry().registerSystem(zoneTitleSystem);
@@ -606,6 +629,14 @@ public class VaryonPlugin extends JavaPlugin {
         if (configManager.getZoneConfig().isMinimapEnabled()) {
             for (World world : Universe.get().getWorlds().values()) {
                 applyMinimapToWorld(world);
+            }
+        }
+        if (eliteSubsystem != null) {
+            boolean wasEnabled = eliteSubsystem.getConfig().isEnabled();
+            eliteSubsystem.getConfig().copyFrom(configManager.getEliteConfig());
+            if (wasEnabled && !eliteSubsystem.getConfig().isEnabled()) {
+                com.varyon.elite.EliteDeeliteSystem.requestPurge();
+                LOGGER.at(Level.INFO).log("Elite subsystem disabled by reload — de-elite sweep requested");
             }
         }
     }

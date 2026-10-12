@@ -1,0 +1,149 @@
+$C = "Common.ui";
+
+$C.@PageOverlay {
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 720, Height: 640);
+
+    #Title {
+      Group {
+        LayoutMode: Left;
+
+        Label #MenuTitle {
+          FlexWeight: 1;
+          Text: "Tableau de bord - Mobs elites";
+          Style: (FontSize: 22, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center, HorizontalAlignment: Center);
+        }
+
+        TextButton #CloseButton {
+          Text: "X";
+          Anchor: (Width: 36, Height: 36, Top: 2, Right: 12);
+          Style: TextButtonStyle(
+            Default: (LabelStyle: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Hovered: (Background: (Color: #cc4444), LabelStyle: (FontSize: 20, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Sounds: $C.@ButtonSounds
+          );
+        }
+      }
+    }
+
+    #Content {
+      Padding: (Top: 12, Bottom: 12, Left: 16, Right: 16);
+      LayoutMode: Top;
+
+      Group #Tabs {
+        Anchor: (Left: 0, Right: 0, Height: 34);
+        LayoutMode: Left;
+
+        TextButton #TabLive {
+          Anchor: (Width: 130, Height: 30);
+          Text: "En direct";
+          Style: TextButtonStyle(
+            Default: (Background: (Color: #1B2438), LabelStyle: (FontSize: 13, TextColor: #C0C8D4, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Hovered: (Background: (Color: #2A3550), LabelStyle: (FontSize: 13, TextColor: #ffffff, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Sounds: $C.@ButtonSounds
+          );
+        }
+        Group { Anchor: (Width: 4); }
+        TextButton #TabZones {
+          Anchor: (Width: 130, Height: 30);
+          Text: "Zones";
+          Style: TextButtonStyle(
+            Default: (Background: (Color: #1B2438), LabelStyle: (FontSize: 13, TextColor: #C0C8D4, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Hovered: (Background: (Color: #2A3550), LabelStyle: (FontSize: 13, TextColor: #ffffff, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Sounds: $C.@ButtonSounds
+          );
+        }
+        Group { Anchor: (Width: 4); }
+        TextButton #TabEconomy {
+          Anchor: (Width: 130, Height: 30);
+          Text: "Économie";
+          Style: TextButtonStyle(
+            Default: (Background: (Color: #1B2438), LabelStyle: (FontSize: 13, TextColor: #C0C8D4, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Hovered: (Background: (Color: #2A3550), LabelStyle: (FontSize: 13, TextColor: #ffffff, HorizontalAlignment: Center, VerticalAlignment: Center)),
+            Sounds: $C.@ButtonSounds
+          );
+        }
+      }
+
+      Group { Anchor: (Height: 8); }
+
+      Label #StatusLabel {
+        Anchor: (Left: 0, Right: 0, Height: 20);
+        Text: "";
+        Visible: false;
+        Style: (FontSize: 12, TextColor: #31C677, VerticalAlignment: Center);
+      }
+
+      Group { Anchor: (Height: 4); }
+
+      Group #LivePanel {
+        FlexWeight: 1;
+        LayoutMode: Top;
+
+        Label #LiveSummary {
+          Anchor: (Left: 0, Right: 0, Height: 22);
+          Text: "";
+          Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center);
+        }
+        Group { Anchor: (Height: 4); }
+        Group #LiveScroll {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Group #LiveList { LayoutMode: Top; }
+        }
+      }
+
+      Group #ZonesPanel {
+        FlexWeight: 1;
+        LayoutMode: Top;
+        Visible: false;
+
+        Group #ZonesHeader {
+          Anchor: (Left: 0, Right: 0, Height: 24);
+          LayoutMode: Left;
+          Background: (Color: #1A2030);
+          Padding: (Left: 8, Right: 4);
+          Label { Anchor: (Width: 52, Height: 24); Text: "Zone"; Style: (FontSize: 11, TextColor: #A09080, RenderBold: true, VerticalAlignment: Center); }
+          Label { Anchor: (Width: 90, Height: 24); Text: "Chance"; Style: (FontSize: 11, TextColor: #A09080, RenderBold: true, VerticalAlignment: Center); }
+          Label { FlexWeight: 1; Anchor: (Height: 24); Text: "Poids T1 / T2 / T3 / T4 / T5"; Style: (FontSize: 11, TextColor: #A09080, RenderBold: true, VerticalAlignment: Center); }
+        }
+        Group { Anchor: (Height: 2); }
+        Group #ZonesScroll {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Group #ZonesList { LayoutMode: Top; }
+        }
+        Group { Anchor: (Height: 8); }
+        Group {
+          Anchor: (Left: 0, Right: 0, Height: 34);
+          LayoutMode: Left;
+          TextButton #SaveZones {
+            Anchor: (Width: 200, Height: 32);
+            Text: "Enregistrer elite.toml";
+            Style: TextButtonStyle(
+              Default: (Background: (Color: #2E7D46), LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+              Hovered: (Background: (Color: #379B54), LabelStyle: (FontSize: 13, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+              Sounds: $C.@ButtonSounds
+            );
+          }
+        }
+      }
+
+      Group #EconomyPanel {
+        FlexWeight: 1;
+        LayoutMode: Top;
+        Visible: false;
+
+        Group #EconomyScroll {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Group #EconomyList { LayoutMode: Top; }
+        }
+      }
+    }
+  }
+}

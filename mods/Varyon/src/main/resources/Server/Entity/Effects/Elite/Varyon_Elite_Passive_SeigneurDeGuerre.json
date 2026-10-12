@@ -1,0 +1,18 @@
+{
+  "Infinite": true,
+  "Debuff": false,
+  "OverlapBehavior": "Overwrite",
+  "RemovalBehavior": "Infinite",
+  "DamageResistance": {
+    "Physical": [ { "CalculationType": "Percent", "Amount": 10 } ],
+    "Projectile": [ { "CalculationType": "Percent", "Amount": 10 } ],
+    "Slashing": [ { "CalculationType": "Percent", "Amount": 10 } ],
+    "Bludgeoning": [ { "CalculationType": "Percent", "Amount": 10 } ],
+    "Elemental": [ { "CalculationType": "Percent", "Amount": 10 } ]
+  },
+  "ApplicationEffects": {
+    "KnockbackMultiplier": 0.4,
+    "EntityBottomTint": "#3a2038",
+    "EntityTopTint": "#5e3054"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "Parent": "Ingredient_Crystal_Purple",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Elite_VoidCrystal.name",
+    "Description": "server.items.Varyon_Elite_VoidCrystal.description"
+  },
+  "Quality": "Rare",
+  "MaxStackSize": 999,
+  "Tags": {
+    "Type": [ "Ingredient" ],
+    "Varyon": [ "Elite", "Currency" ]
+  }
+}

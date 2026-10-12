@@ -1,0 +1,13 @@
+{
+  "Parent": "Ingredient_VoidHeart",
+  "TranslationProperties": {
+    "Name": "server.items.Varyon_Elite_CorruptionHeart.name",
+    "Description": "server.items.Varyon_Elite_CorruptionHeart.description"
+  },
+  "Quality": "Epic",
+  "MaxStackSize": 99,
+  "Tags": {
+    "Type": [ "Ingredient" ],
+    "Varyon": [ "Elite", "Currency" ]
+  }
+}

@@ -1,0 +1,14 @@
+$C = "Common.ui";
+
+Group {
+  Anchor: (Left: 0, Right: 0, Height: 26);
+  LayoutMode: Left;
+  Padding: (Left: 8);
+
+  Label #RowText {
+    FlexWeight: 1;
+    Anchor: (Height: 26);
+    Text: "";
+    Style: (FontSize: 12, TextColor: #E6EEFC, VerticalAlignment: Center);
+  }
+}

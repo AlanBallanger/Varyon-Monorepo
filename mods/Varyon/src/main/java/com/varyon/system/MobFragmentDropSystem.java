@@ -1,24 +1,19 @@
 package com.varyon.system;
 
-import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
-import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.SystemGroup;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageEventSystem;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageModule;
-import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
-import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -30,7 +25,6 @@ import com.varyon.util.ZoneCalculator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -168,15 +162,11 @@ public class MobFragmentDropSystem {
                 String itemId = configManager.getZoneLootConfig().getItemForZone(lootZone);
                 if (itemId == null || itemId.isBlank()) return;
 
-                TransformComponent transform = (TransformComponent) store.getComponent(ref, TransformComponent.getComponentType());
-                if (transform == null) return;
-
-                org.joml.Vector3d pos = new org.joml.Vector3d(transform.getPosition()).add(0.0, 1.0, 0.0);
-                HeadRotation headRotation = (HeadRotation) store.getComponent(ref, HeadRotation.getComponentType());
-                com.hypixel.hytale.math.vector.Rotation3fc rot = headRotation != null ? headRotation.getRotation() : com.hypixel.hytale.math.vector.Rotation3f.ZERO;
-
-                Holder[] itemEntities = ItemComponent.generateItemDrops(store, List.of(new ItemStack(itemId, fragments)), pos, rot);
-                commandBuffer.addEntities(itemEntities, AddReason.SPAWN);
+                // Don't spawn now (the corpse is still visible). Queue the drop on the mob;
+                // DeferredFragmentDropSystem releases it when the corpse is ready to disappear,
+                // so fragments land at the same time as vanilla loot.
+                commandBuffer.putComponent(ref, com.varyon.component.PendingFragmentDrop.getComponentType(),
+                    new com.varyon.component.PendingFragmentDrop(itemId, fragments));
 
             } catch (Exception e) {
                 LOGGER.at(Level.WARNING).log("DropOnDeath error: " + e.getMessage());

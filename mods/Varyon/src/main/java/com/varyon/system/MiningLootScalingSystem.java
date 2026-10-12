@@ -7,6 +7,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
+import com.hypixel.hytale.logger.HytaleLogger;
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockBreakingDropType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockGathering;
@@ -22,6 +23,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.config.ConfigManager;
 import com.varyon.config.DifficultyZone;
+import com.varyon.config.VaryonDebug;
 import com.varyon.util.MiningOreBlockIds;
 import com.varyon.util.ZoneCalculator;
 
@@ -29,8 +31,11 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.logging.Level;
 
 public class MiningLootScalingSystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
+
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     @Nonnull
     private final ConfigManager    configManager;
@@ -101,6 +106,11 @@ public class MiningLootScalingSystem extends EntityEventSystem<EntityStore, Brea
 
         float lootMultiplier = zone != null ? (float) zone.getLootMultiplier() : 1.0f;
         if (lootMultiplier <= 1.0f) {
+            if (VaryonDebug.isScaling()) {
+                LOGGER.at(Level.INFO).log("[Debug scaling] minerai=" + blockTypeId + " zone="
+                    + (zone != null ? zone.getName() : "aucune") + " loot=x" + String.format("%.2f", lootMultiplier)
+                    + " — pas de drop bonus");
+            }
             return;
         }
 
@@ -108,6 +118,10 @@ public class MiningLootScalingSystem extends EntityEventSystem<EntityStore, Brea
         float fractionalPart = lootMultiplier - (float) Math.floor(lootMultiplier);
         if (fractionalPart > 0 && Math.random() < fractionalPart) {
             extraDropSets++;
+        }
+        if (VaryonDebug.isScaling()) {
+            LOGGER.at(Level.INFO).log("[Debug scaling] minerai=" + blockTypeId + " zone=" + zone.getName()
+                + " loot=x" + String.format("%.2f", lootMultiplier) + " => " + extraDropSets + " set(s) de drop bonus");
         }
         if (extraDropSets <= 0) {
             return;

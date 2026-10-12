@@ -21,6 +21,7 @@ import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.config.FactionRewardsConfig;
+import com.varyon.config.VaryonDebug;
 import com.varyon.config.ZonePermissionsConfig;
 import com.varyon.faction.FactionManager;
 import com.varyon.util.CommandBufferUtil;
@@ -128,6 +129,12 @@ public class GlobalRewardsManager {
             FactionRewardsConfig.RewardTier tier = config.getTiers().get(i);
             TierState state = tierStates.computeIfAbsent(i, k -> new TierState());
             int scaledThreshold = scaledTierThreshold(tier.getThreshold(), gaugeAbsMax, referenceMax);
+
+            if (VaryonDebug.isRewards()) {
+                LOGGER.at(Level.INFO).log("[Debug rewards] palier " + (i + 1) + " : seuil scalé=" + scaledThreshold
+                    + " (brut " + tier.getThreshold() + "/" + referenceMax + " ref, jauge max " + gaugeAbsMax
+                    + "), balance actuelle=" + globalBalance);
+            }
 
             if (globalBalance >= scaledThreshold && state.canRewardPositive(cooldownMs)) {
                 LOGGER.at(Level.INFO).log("Tier " + (i + 1) + " reached (+" + scaledThreshold + " scaled, raw " + tier.getThreshold() + "/" + referenceMax + " ref, gauge max " + gaugeAbsMax + ") — rewarding Fracture");
@@ -282,6 +289,12 @@ public class GlobalRewardsManager {
             double deposited = participation.getOrDefault(uuid, 0.0);
             boolean participated = deposited >= minPart;
             int fragments = participated ? fullAmt : (int) Math.floor(fullAmt * passRate);
+            if (VaryonDebug.isRewards()) {
+                LOGGER.at(Level.INFO).log(String.format(
+                    "[Debug rewards] palier %d %s : %s a déposé %.1f (min %.1f) => %s, %d fragment(s)",
+                    tierNumber, faction.getDisplayName(), playerRef.getUsername(), deposited, minPart,
+                    participated ? "participant" : "passif (x" + passRate + ")", fragments));
+            }
             if (fragments <= 0) continue;
 
             try {

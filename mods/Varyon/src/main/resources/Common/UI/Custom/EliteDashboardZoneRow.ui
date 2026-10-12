@@ -1,0 +1,38 @@
+$C = "Common.ui";
+
+Group {
+  Anchor: (Left: 0, Right: 0, Height: 34);
+  LayoutMode: Left;
+  Padding: (Left: 8, Right: 4);
+
+  Group #Bg {
+    Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+    Background: (Color: #141C28);
+  }
+
+  Label #ZoneLabel {
+    Anchor: (Width: 52, Height: 34);
+    Text: "";
+    Style: (FontSize: 13, TextColor: #F2E8D8, RenderBold: true, VerticalAlignment: Center);
+  }
+
+  TextField #Chance {
+    Anchor: (Width: 78, Height: 26, Top: 4);
+    Value: "";
+    Style: (FontSize: 12, TextColor: #e6eefc);
+    Padding: (Left: 6);
+    Background: #122036;
+  }
+
+  Group { Anchor: (Width: 8); }
+
+  TextField #W1 { Anchor: (Width: 56, Height: 26, Top: 4); Value: ""; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+  Group { Anchor: (Width: 4); }
+  TextField #W2 { Anchor: (Width: 56, Height: 26, Top: 4); Value: ""; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+  Group { Anchor: (Width: 4); }
+  TextField #W3 { Anchor: (Width: 56, Height: 26, Top: 4); Value: ""; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+  Group { Anchor: (Width: 4); }
+  TextField #W4 { Anchor: (Width: 56, Height: 26, Top: 4); Value: ""; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+  Group { Anchor: (Width: 4); }
+  TextField #W5 { Anchor: (Width: 56, Height: 26, Top: 4); Value: ""; Style: (FontSize: 12, TextColor: #e6eefc); Padding: (Left: 6); Background: #122036; }
+}

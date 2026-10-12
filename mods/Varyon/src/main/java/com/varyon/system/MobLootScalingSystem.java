@@ -1,24 +1,26 @@
 package com.varyon.system;
 
 import com.hypixel.hytale.component.AddReason;
+import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Holder;
-import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.server.core.asset.type.gameplay.DeathConfig;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
-import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeferredCorpseRemoval;
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 import com.hypixel.hytale.server.core.modules.item.ItemModule;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.role.Role;
 import com.varyon.component.MobScalingComponent;
+import com.varyon.component.NoLootComponent;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
@@ -26,63 +28,66 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
- * System that spawns additional loot drops for scaled NPCs based on their loot multiplier.
- * This system runs AFTER the vanilla DropDeathItems system to spawn extra copies of loot.
+ * Spawns the extra loot sets for a scaled NPC based on its loot multiplier.
  *
- * If lootMultiplier is 5.0, this will spawn 4 additional sets of drops (total 5x vanilla).
+ * Mirrors the vanilla {@code NPCDamageSystems$DropDeathItems} ticking system: it waits
+ * for the same condition (the role drops instantly, or {@link DeferredCorpseRemoval#shouldRemove()}
+ * is true) before spawning, so the bonus drops appear on the same tick as the vanilla loot
+ * instead of instantly at the moment of death.
  */
-public class MobLootScalingSystem extends DeathSystems.OnDeathSystem {
-    // Query is lazily initialized because component types may not be available during static init
-    // We use MobScalingComponent as the primary query and filter for NPCs in onComponentAdded
+public class MobLootScalingSystem extends EntityTickingSystem<EntityStore> {
+
     private Query<EntityStore> query;
 
     @Override
     @Nonnull
     public Query<EntityStore> getQuery() {
         if (query == null) {
-            // Only query for MobScalingComponent - filter for NPCs and non-Players in onComponentAdded
-            query = MobScalingComponent.getComponentType();
+            query = Query.and(
+                MobScalingComponent.getComponentType(),
+                DeathComponent.getComponentType(),
+                NPCEntity.getComponentType()
+            );
         }
         return query;
     }
 
     @Override
-    public void onComponentAdded(@Nonnull Ref<EntityStore> ref, @Nonnull DeathComponent component,
-                                  @Nonnull Store<EntityStore> store, @Nonnull CommandBuffer<EntityStore> commandBuffer) {
-        // Skip players - only process NPCs
-        Player player = commandBuffer.getComponent(ref, Player.getComponentType());
+    public void tick(float dt, int index, @Nonnull ArchetypeChunk<EntityStore> chunk,
+                     @Nonnull Store<EntityStore> store, @Nonnull CommandBuffer<EntityStore> commandBuffer) {
+
+        Player player = chunk.getComponent(index, Player.getComponentType());
         if (player != null) {
             return;
         }
 
-        // Only process if items loss mode is ALL (same check as vanilla DropDeathItems)
-        if (component.getItemsLossMode() != DeathConfig.ItemsLossMode.ALL) {
+        MobScalingComponent scaling = chunk.getComponent(index, MobScalingComponent.getComponentType());
+        if (scaling == null || scaling.isBonusLootDropped()) {
             return;
         }
 
-        if (commandBuffer.getComponent(ref, com.varyon.component.NoLootComponent.getComponentType()) != null) {
-            return;
-        }
-
-        // Get the scaling component
-        MobScalingComponent scalingComponent = commandBuffer.getComponent(ref, MobScalingComponent.getComponentType());
-        if (scalingComponent == null) {
-            return;
-        }
-
-        float lootMultiplier = scalingComponent.getLootMultiplier();
-        // Only spawn extra items if multiplier > 1
+        float lootMultiplier = scaling.getLootMultiplier();
         if (lootMultiplier <= 1.0f) {
+            scaling.setBonusLootDropped();
             return;
         }
 
-        // Get NPC and role for drop list
-        NPCEntity npcComponent = commandBuffer.getComponent(ref, NPCEntity.getComponentType());
-        if (npcComponent == null) {
+        DeathComponent death = chunk.getComponent(index, DeathComponent.getComponentType());
+        if (death == null || death.getItemsLossMode() != DeathConfig.ItemsLossMode.ALL) {
+            scaling.setBonusLootDropped();
             return;
         }
 
-        Role role = npcComponent.getRole();
+        if (chunk.getComponent(index, NoLootComponent.getComponentType()) != null) {
+            scaling.setBonusLootDropped();
+            return;
+        }
+
+        NPCEntity npc = chunk.getComponent(index, NPCEntity.getComponentType());
+        if (npc == null) {
+            return;
+        }
+        Role role = npc.getRole();
         if (role == null) {
             return;
         }
@@ -90,52 +95,51 @@ public class MobLootScalingSystem extends DeathSystems.OnDeathSystem {
         String dropListId = role.getDropListId();
         ItemModule itemModule = ItemModule.get();
         if (dropListId == null || !itemModule.isEnabled()) {
+            scaling.setBonusLootDropped();
             return;
         }
 
-        // Get position for spawning items
-        TransformComponent transformComponent = store.getComponent(ref, TransformComponent.getComponentType());
-        if (transformComponent == null) {
+        // Same gate as vanilla DropDeathItems: wait for the corpse to be ready to disappear
+        // (unless the role is configured to drop instantly).
+        boolean instant = role.isDropDeathItemsInstantly();
+        DeferredCorpseRemoval corpse = chunk.getComponent(index, DeferredCorpseRemoval.getComponentType());
+        if (!instant && (corpse == null || !corpse.shouldRemove())) {
             return;
         }
 
-        HeadRotation headRotationComponent = store.getComponent(ref, HeadRotation.getComponentType());
-        if (headRotationComponent == null) {
+        TransformComponent transform = store.getComponent(chunk.getReferenceTo(index), TransformComponent.getComponentType());
+        if (transform == null) {
+            scaling.setBonusLootDropped();
             return;
         }
+        HeadRotation headRotation = store.getComponent(chunk.getReferenceTo(index), HeadRotation.getComponentType());
+        com.hypixel.hytale.math.vector.Rotation3fc rot = headRotation != null
+            ? headRotation.getRotation()
+            : com.hypixel.hytale.math.vector.Rotation3f.ZERO;
 
-        org.joml.Vector3d dropPosition = new org.joml.Vector3d(transformComponent.getPosition()).add(0.0, 1.0, 0.0);
-        com.hypixel.hytale.math.vector.Rotation3fc headRotation = headRotationComponent.getRotation();
+        org.joml.Vector3d dropPosition = new org.joml.Vector3d(transform.getPosition()).add(0.0, 1.0, 0.0);
 
-        // Calculate how many extra sets of items to spawn
-        // If lootMultiplier is 5.0, we spawn 4 extra sets (vanilla already spawned 1)
         int extraDropSets = (int) Math.floor(lootMultiplier) - 1;
-
-        // Handle fractional part with probability
         float fractionalPart = lootMultiplier - (float) Math.floor(lootMultiplier);
         if (fractionalPart > 0 && Math.random() < fractionalPart) {
             extraDropSets++;
         }
 
-        // Spawn extra item sets
         for (int i = 0; i < extraDropSets; i++) {
             List<ItemStack> randomItems = itemModule.getRandomItemDrops(dropListId);
-            if (!randomItems.isEmpty()) {
-                // Add slight position offset for each set to avoid stacking
-                org.joml.Vector3d offsetPosition = new org.joml.Vector3d(
-                        dropPosition.x + (Math.random() - 0.5) * 0.5,
-                        dropPosition.y + 0.1 * i,
-                        dropPosition.z + (Math.random() - 0.5) * 0.5
-                );
-
-                Holder<EntityStore>[] drops = ItemComponent.generateItemDrops(
-                        store,
-                        new ObjectArrayList<>(randomItems),
-                        offsetPosition,
-                        headRotation
-                );
-                commandBuffer.addEntities(drops, AddReason.SPAWN);
+            if (randomItems.isEmpty()) {
+                continue;
             }
+            org.joml.Vector3d offsetPosition = new org.joml.Vector3d(
+                dropPosition.x + (Math.random() - 0.5) * 0.5,
+                dropPosition.y + 0.1 * i,
+                dropPosition.z + (Math.random() - 0.5) * 0.5
+            );
+            Holder<EntityStore>[] drops = ItemComponent.generateItemDrops(
+                store, new ObjectArrayList<>(randomItems), offsetPosition, rot);
+            commandBuffer.addEntities(drops, AddReason.SPAWN);
         }
+
+        scaling.setBonusLootDropped();
     }
 }

@@ -1,0 +1,14 @@
+{
+  "Infinite": true,
+  "Debuff": false,
+  "OverlapBehavior": "Overwrite",
+  "RemovalBehavior": "Infinite",
+  "DamageCalculatorCooldown": 1,
+  "StatModifiers": {
+    "Health": 1.5
+  },
+  "ApplicationEffects": {
+    "EntityBottomTint": "#3a3620",
+    "EntityTopTint": "#5a5230"
+  }
+}

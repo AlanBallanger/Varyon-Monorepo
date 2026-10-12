@@ -39,6 +39,7 @@ public class ConfigManager {
     private DeathConfig deathConfig;
     private ShopConfig shopConfig;
     private ChatAnnouncementsConfig chatAnnouncementsConfig;
+    private com.varyon.elite.EliteConfig eliteConfig;
 
     public ConfigManager(@Nonnull Path pluginDataFolder) {
         this.pluginDataFolder = pluginDataFolder;
@@ -71,6 +72,8 @@ public class ConfigManager {
             deathConfig = DeathConfig.createDefault();
             shopConfig = ShopConfig.createDefault();
             shopConfig.save(pluginDataFolder);
+            eliteConfig = com.varyon.elite.EliteConfig.createDefault();
+            eliteConfig.save(pluginDataFolder);
             chatAnnouncementsConfig = ChatAnnouncementsConfig.createDefault();
             chatAnnouncementsConfig.save(pluginDataFolder);
             save();
@@ -95,7 +98,9 @@ public class ConfigManager {
             rtpsConfig = parseRtpsConfig(toml);
             deathConfig = parseDeathConfig(toml);
             shopConfig = ShopConfig.load(pluginDataFolder);
+            eliteConfig = com.varyon.elite.EliteConfig.load(pluginDataFolder);
             chatAnnouncementsConfig = ChatAnnouncementsConfig.load(pluginDataFolder);
+            parseDebugConfig(toml);
             LOGGER.at(Level.INFO).log("Loaded configuration with %s zones", zoneConfig.getZones().size());
             save();
             ChatAnnouncementScheduler.onConfigReloaded();
@@ -116,6 +121,7 @@ public class ConfigManager {
             rtpsConfig = RtpsConfig.createDefault();
             deathConfig = DeathConfig.createDefault();
             shopConfig = ShopConfig.createDefault();
+            eliteConfig = com.varyon.elite.EliteConfig.createDefault();
             chatAnnouncementsConfig = ChatAnnouncementsConfig.createDefault();
             ChatAnnouncementScheduler.onConfigReloaded();
         }
@@ -233,6 +239,16 @@ public class ConfigManager {
         sb.append("pvpPointsMultiplier = ").append(ee.getPvpPointsMultiplier()).append("\n");
         sb.append("defaultMobReward = ").append(ee.getDefaultMobReward()).append("\n");
         sb.append("defaultOreReward = ").append(ee.getDefaultOreReward()).append("\n\n");
+
+        sb.append("[debug]\n");
+        sb.append("# Gain de points de faction sur minerais et mobs (multiplicateurs, cap)\n");
+        sb.append("points = ").append(VaryonDebug.isPoints()).append("\n");
+        sb.append("# Scaling par zone : niveau de mob, HP/degats/loot/points des mobs et minerais\n");
+        sb.append("scaling = ").append(VaryonDebug.isScaling()).append("\n");
+        sb.append("# Recompenses de palier : participation, seuils, distribution de fragments\n");
+        sb.append("rewards = ").append(VaryonDebug.isRewards()).append("\n");
+        sb.append("# Depot de points vers la jauge de guilde et perte de points a la mort\n");
+        sb.append("economy = ").append(VaryonDebug.isEconomy()).append("\n\n");
 
         for (DifficultyZone zone : zoneConfig.getZones()) {
             sb.append("[[zones]]\n");
@@ -425,6 +441,20 @@ public class ConfigManager {
         return new DeathConfig(deathToml.getDouble("pointsLossPercent", deathToml.getDouble("essenceLossPercent", 80.0)));
     }
 
+    private void parseDebugConfig(@Nonnull Toml toml) {
+        Toml debugToml = toml.getTable("debug");
+        if (debugToml == null) {
+            VaryonDebug.set(false, false, false, false);
+            return;
+        }
+        VaryonDebug.set(
+            debugToml.getBoolean("points", false),
+            debugToml.getBoolean("scaling", false),
+            debugToml.getBoolean("rewards", false),
+            debugToml.getBoolean("economy", false)
+        );
+    }
+
     @Nonnull
     private ReturnConfig parseReturnConfig(@Nonnull Toml toml) {
         Toml returnToml = toml.getTable("return");
@@ -453,6 +483,7 @@ public class ConfigManager {
     @Nonnull public RtpsConfig getRtpsConfig()                       { return rtpsConfig != null ? rtpsConfig : RtpsConfig.createDefault(); }
     @Nonnull public DeathConfig getDeathConfig()                     { return deathConfig != null ? deathConfig : DeathConfig.createDefault(); }
     @Nonnull public ShopConfig getShopConfig()                       { return shopConfig != null ? shopConfig : ShopConfig.createDefault(); }
+    @Nonnull public com.varyon.elite.EliteConfig getEliteConfig()    { return eliteConfig != null ? eliteConfig : com.varyon.elite.EliteConfig.createDefault(); }
     @Nonnull public ChatAnnouncementsConfig getChatAnnouncementsConfig() {
         return chatAnnouncementsConfig != null ? chatAnnouncementsConfig : ChatAnnouncementsConfig.createDefault();
     }

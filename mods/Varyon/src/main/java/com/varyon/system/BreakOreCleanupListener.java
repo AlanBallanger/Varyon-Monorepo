@@ -9,6 +9,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.config.ConfigManager;
 import com.varyon.config.PointsRewardsConfig;
@@ -50,10 +51,23 @@ public class BreakOreCleanupListener extends EntityEventSystem<EntityStore, Brea
             if (pos == null) return;
 
             String world = resolveWorld(store);
-            boolean wasTracked = tracker.isPlayerPlaced(world, pos);
-            tracker.remove(world, pos);
-            if (wasTracked) {
-                LOGGER.at(Level.INFO).log("AntiExploit cleanup: removed " + world + ":" + pos.x + "," + pos.y + "," + pos.z + " block=" + blockId);
+            if (!tracker.isPlayerPlaced(world, pos)) {
+                return;
+            }
+
+            // Defer the removal by one tick so every other system reacting to this
+            // same BreakBlockEvent still sees isPlayerPlaced == true. Removing it
+            // synchronously here would let loot/fragment systems that run after this
+            // one treat a player-placed block as natural, enabling infinite dupe by
+            // place → break → place → break.
+            World w = resolveWorldObject(store);
+            if (w != null) {
+                w.execute(() -> {
+                    tracker.remove(world, pos);
+                    LOGGER.at(Level.INFO).log("AntiExploit cleanup: removed " + world + ":" + pos.x + "," + pos.y + "," + pos.z + " block=" + blockId);
+                });
+            } else {
+                tracker.remove(world, pos);
             }
 
         } catch (Exception e) {
@@ -68,6 +82,15 @@ public class BreakOreCleanupListener extends EntityEventSystem<EntityStore, Brea
             }
         } catch (Exception ignored) {}
         return "world";
+    }
+
+    private World resolveWorldObject(@Nonnull Store<EntityStore> store) {
+        try {
+            if (store.getExternalData() instanceof EntityStore es) {
+                return es.getWorld();
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     @Nonnull

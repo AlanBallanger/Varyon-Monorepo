@@ -19,6 +19,7 @@ import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.varyon.component.MobScalingComponent;
 import com.varyon.config.ConfigManager;
 import com.varyon.config.DifficultyZone;
+import com.varyon.config.VaryonDebug;
 import com.varyon.util.ZoneCalculator;
 
 import javax.annotation.Nonnull;
@@ -53,13 +54,33 @@ public class MobScalingRefSystem extends RefSystem<EntityStore> {
         }
 
         if (reason != AddReason.SPAWN) {
+            // Mob reloaded (e.g. after a server restart). The MobScalingComponent persists, but
+            // its stat modifier and the vanilla nameplate do not, so re-assert both from it.
             MobScalingComponent existing = store.getComponent(ref, MobScalingComponent.getComponentType());
             if (existing != null) {
                 reapplyHealthModifier(ref, store, existing.getHealthMultiplier());
+                boolean isElite = store.getComponent(ref, com.varyon.elite.component.EliteComponent.getComponentType()) != null;
+                if (!isElite && existing.getMobLevel() >= 1) {
+                    ComponentType<EntityStore, com.hypixel.hytale.server.core.entity.nameplate.Nameplate> nameplateType =
+                            com.hypixel.hytale.server.core.entity.nameplate.Nameplate.getComponentType();
+                    commandBuffer.putComponent(ref, nameplateType,
+                            new com.hypixel.hytale.server.core.entity.nameplate.Nameplate("Lvl " + existing.getMobLevel()));
+                }
             }
             return;
         }
 
+        // A burst of chunk loads (boot, a player crossing into an unexplored area) can add
+        // thousands of NPCs in the same tick. Doing the zone lookup + stat modifier synchronously
+        // for all of them here was the CPU/allocation spike seen at world load - so just mark the
+        // mob and let MobScalingQueueSystem drain a bounded number of these per tick instead.
+        commandBuffer.putComponent(ref, com.varyon.component.PendingScalingComponent.getComponentType(),
+                com.varyon.component.PendingScalingComponent.INSTANCE);
+    }
+
+    /** Does the actual zone lookup + scaling that used to run synchronously in {@code onEntityAdded}. */
+    public void resolveAndApplyScaling(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store,
+                                       @Nonnull CommandBuffer<EntityStore> commandBuffer) {
         Object ext = store.getExternalData();
         if (!(ext instanceof EntityStore entityStore) || entityStore.getWorld() == null) {
             return;
@@ -75,13 +96,22 @@ public class MobScalingRefSystem extends RefSystem<EntityStore> {
         }
 
         org.joml.Vector3d pos = transform.getPosition();
-        DifficultyZone zone = ZoneCalculator.getZoneAtPosition(pos.x, pos.z, worldName, configManager.getZoneConfig());
+        // getZoneAtPositionIndexed already resolves the zone's index while scanning the list once -
+        // pass it straight to applyScaling instead of making it re-scan for the same index.
+        ZoneCalculator.ZoneWithIndex zoneWithIndex =
+                ZoneCalculator.getZoneAtPositionIndexed(pos.x, pos.z, worldName, configManager.getZoneConfig());
+        DifficultyZone zone = zoneWithIndex.zone();
 
         if (zone == null) {
+            if (VaryonDebug.isScaling()) {
+                LOGGER.at(Level.INFO).log(String.format(
+                    "[Debug scaling] spawn en (%d,%d) monde=%s — aucune zone, mob non scalé",
+                    (int) pos.x, (int) pos.z, worldName));
+            }
             return;
         }
 
-        applyScaling(ref, store, commandBuffer, zone);
+        applyScaling(ref, store, commandBuffer, zone, zoneWithIndex.index());
     }
 
     @Override
@@ -90,21 +120,14 @@ public class MobScalingRefSystem extends RefSystem<EntityStore> {
     }
 
     private void applyScaling(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store,
-                              @Nonnull CommandBuffer<EntityStore> commandBuffer, @Nonnull DifficultyZone zone) {
+                              @Nonnull CommandBuffer<EntityStore> commandBuffer, @Nonnull DifficultyZone zone,
+                              int zoneIndex) {
         MobScalingComponent existing = store.getComponent(ref, MobScalingComponent.getComponentType());
         if (existing != null) {
             return;
         }
 
         List<DifficultyZone> zones = configManager.getZoneConfig().getZones();
-        int zoneIndex = -1;
-        for (int i = 0; i < zones.size(); i++) {
-            if (zones.get(i).getZoneId() == zone.getZoneId()) {
-                zoneIndex = i;
-                break;
-            }
-        }
-
         if (zoneIndex < 0) {
             return;
         }
@@ -144,8 +167,16 @@ public class MobScalingRefSystem extends RefSystem<EntityStore> {
         commandBuffer.addComponent(ref, MobScalingComponent.getComponentType(),
                 new MobScalingComponent(mobLevel, healthMultiplier, damageMultiplier, lootMultiplier, pointsMultiplier));
 
-        if (mobLevel >= 1) {
-            ComponentType<EntityStore, com.hypixel.hytale.server.core.entity.nameplate.Nameplate> nameplateType = 
+        if (VaryonDebug.isScaling()) {
+            LOGGER.at(Level.INFO).log(String.format(
+                "[Debug scaling] mob niv=%d (zone %s, index %d, plage %d-%d, progress=%.2f) => HP=x%.2f dmg=x%.2f loot=x%.2f points=x%.2f",
+                mobLevel, zone.getName(), zoneIndex, minLevel, maxLevel, levelProgress,
+                healthMultiplier, damageMultiplier, lootMultiplier, pointsMultiplier));
+        }
+
+        boolean isElite = store.getComponent(ref, com.varyon.elite.component.EliteComponent.getComponentType()) != null;
+        if (mobLevel >= 1 && !isElite) {
+            ComponentType<EntityStore, com.hypixel.hytale.server.core.entity.nameplate.Nameplate> nameplateType =
                 com.hypixel.hytale.server.core.entity.nameplate.Nameplate.getComponentType();
             String nameplate = "Lvl " + mobLevel;
             commandBuffer.putComponent(ref, nameplateType, new com.hypixel.hytale.server.core.entity.nameplate.Nameplate(nameplate));
@@ -153,8 +184,6 @@ public class MobScalingRefSystem extends RefSystem<EntityStore> {
 
         if (healthMultiplier != 1.0f) {
             reapplyHealthModifier(ref, store, healthMultiplier);
-            LOGGER.at(Level.FINE).log("Mob level " + mobLevel + " scaled: HP×" +
-                String.format("%.2f", healthMultiplier) + " DMG×" + String.format("%.2f", damageMultiplier));
         }
     }
 

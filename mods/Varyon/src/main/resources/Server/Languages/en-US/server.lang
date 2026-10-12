@@ -5,3 +5,8 @@ items.Varyon_Orbe_Ambassade_Novale.description = Warps you to Novale embassy (li
 
 items.Varyon_Orbe_Ambassade_Varyon.name = Ambassador Orb (Varyon)
 items.Varyon_Orbe_Ambassade_Varyon.description = Warps you to Varyon (like /warp varyon).
+
+items.Varyon_Elite_VoidCrystal.name = Void Crystal
+items.Varyon_Elite_VoidCrystal.description = Common currency harvested from elite creatures.
+items.Varyon_Elite_CorruptionHeart.name = Corruption Heart
+items.Varyon_Elite_CorruptionHeart.description = Rare currency torn from elite bosses.

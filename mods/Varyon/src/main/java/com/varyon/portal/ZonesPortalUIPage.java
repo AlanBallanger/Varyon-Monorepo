@@ -7,6 +7,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.protocol.packets.interface_.OpenChatWithCommand;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
@@ -32,7 +33,7 @@ import javax.annotation.Nullable;
 public class ZonesPortalUIPage extends InteractiveCustomUIPage<ZonesPortalUIPage.EventDataClass> {
 
     private static final int WINDOW_WIDTH = 852;
-    private static final int WINDOW_HEIGHT = 595;
+    private static final int WINDOW_HEIGHT = 649;
 
     private static final String RANDOM_LABEL = "Al\u00e9atoire";
 
@@ -153,6 +154,11 @@ public class ZonesPortalUIPage extends InteractiveCustomUIPage<ZonesPortalUIPage
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton",
             EventData.of("Action", "close"));
+
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ReturnButton",
+            EventData.of("Action", "return"));
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#JoinFriendButton",
+            EventData.of("Action", "joinfriend"));
     }
 
     @Override
@@ -164,6 +170,24 @@ public class ZonesPortalUIPage extends InteractiveCustomUIPage<ZonesPortalUIPage
         if ("close".equals(data.action)) {
             if (player != null) {
                 player.getPageManager().setPage(ref, store, Page.None);
+            }
+            return;
+        }
+
+        if ("return".equals(data.action)) {
+            PlayerRef playerRefComp = store.getComponent(ref, PlayerRef.getComponentType());
+            if (player != null && playerRefComp != null) {
+                player.getPageManager().setPage(ref, store, Page.None);
+                CommandManager.get().handleCommand(playerRefComp, "return");
+            }
+            return;
+        }
+
+        if ("joinfriend".equals(data.action)) {
+            PlayerRef playerRefComp = store.getComponent(ref, PlayerRef.getComponentType());
+            if (player != null && playerRefComp != null) {
+                player.getPageManager().setPage(ref, store, Page.None);
+                playerRefComp.getPacketHandler().write(new OpenChatWithCommand("/join "));
             }
             return;
         }

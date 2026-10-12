@@ -63,6 +63,11 @@ public class ZoneLevelNameplateSystem extends EntityTickingSystem<EntityStore> {
 
             Ref<EntityStore> ref = chunk.getReferenceTo(index);
 
+            // Elites own their nameplate text (EliteNameplateSystem writes the rank meter).
+            if (store.getComponent(ref, com.varyon.elite.component.EliteComponent.getComponentType()) != null) {
+                return;
+            }
+
             String worldName = store.getExternalData().getWorld().getName();
             if (!configManager.getZoneConfig().isWorldEnabled(worldName)) {
                 NameplateData existing = store.getComponent(ref, nameplateDataType);
@@ -91,13 +96,16 @@ public class ZoneLevelNameplateSystem extends EntityTickingSystem<EntityStore> {
                 }
             }
 
-            // --- 3. Push to NameplateData ---
+            // --- 3. Push to NameplateData - only when the tier actually changed. This system
+            // runs every tick for every NPC, so writing unconditionally was the single hottest
+            // allocation source in the mod (String concat + setText + a network-outdated flag
+            // touched on every mob every frame, even when nothing changed).
             NameplateData existing = store.getComponent(ref, nameplateDataType);
             if (existing == null) {
                 NameplateData data = new NameplateData();
                 applyTier(data, tier);
                 commandBuffer.putComponent(ref, nameplateDataType, data);
-            } else {
+            } else if (!String.valueOf(tier).equals(existing.getText("monster_level.1"))) {
                 applyTier(existing, tier);
             }
         } catch (Exception e) {

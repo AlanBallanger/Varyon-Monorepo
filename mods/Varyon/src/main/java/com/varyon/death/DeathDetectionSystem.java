@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.varyon.VaryonPlugin;
 import com.varyon.config.DeathConfig;
+import com.varyon.config.VaryonDebug;
 import com.varyon.points.PointsManager;
 
 import javax.annotation.Nonnull;
@@ -74,7 +75,11 @@ public class DeathDetectionSystem extends DeathSystems.OnDeathSystem {
                 double loss = current * (deathConfig.getPointsLossPercent() / 100.0);
                 if (loss > 0) {
                     pointsManager.addPoints(playerRef.getUuid(), playerRef.getUsername(), -loss);
-                    LOGGER.at(Level.INFO).log("Death: player " + playerRef.getUuid() + " lost " + String.format("%.1f", loss) + " faction points (" + (int) deathConfig.getPointsLossPercent() + "%)");
+                    if (VaryonDebug.isEconomy()) {
+                        LOGGER.at(Level.INFO).log(String.format(
+                            "[Debug economy] mort de %s : -%.1f points de faction (%d%% de %.1f, reste %.1f)",
+                            playerRef.getUsername(), loss, (int) deathConfig.getPointsLossPercent(), current, current - loss));
+                    }
                 }
             }
         }

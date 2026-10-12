@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 import com.varyon.VaryonPlugin;
+import com.varyon.config.VaryonDebug;
 import com.varyon.integration.FactionDepositEcoSync;
 import com.varyon.points.PointsManager;
 import com.varyon.points.GlobalRewardsManager;
@@ -63,6 +64,13 @@ public class DepositUIManager {
 
             int newBalance = pointsManager.getGlobalBalance();
             int gaugeMax = pointsManager.getGuildGaugeAbsMax();
+
+            if (VaryonDebug.isEconomy()) {
+                LOGGER.at(Level.INFO).log(String.format(
+                    "[Debug economy] %s dépose %d points (%s, x%d) => contribution jauge %d | jauge=%d/%d",
+                    playerRef.getUsername(), amount, faction.getDisplayName(),
+                    faction.getBalanceMultiplier(), contribution, newBalance, gaugeMax));
+            }
             playerRef.sendMessage(Message.raw("Déposé " + amount + " points de faction dans " + faction.getDisplayName()).color(Color.GREEN));
             playerRef.sendMessage(Message.raw(FactionManager.factionPointsAfterDepositLine(newBalance, gaugeMax, faction)).color(Color.YELLOW));
 

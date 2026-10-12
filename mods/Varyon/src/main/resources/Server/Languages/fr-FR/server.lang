@@ -4,3 +4,8 @@ items.Varyon_Orbe_Ambassade_Novale.name = Orbe de l'ambassade Novale
 items.Varyon_Orbe_Ambassade_Novale.description = Téléporte vers l'ambassade Novale.
 items.Varyon_Orbe_Ambassade_Varyon.name = Orbe du monde Varyon
 items.Varyon_Orbe_Ambassade_Varyon.description = Téléporte vers Varyon.
+
+items.Varyon_Elite_VoidCrystal.name = Cristal du Vide
+items.Varyon_Elite_VoidCrystal.description = Monnaie commune extraite des créatures élites.
+items.Varyon_Elite_CorruptionHeart.name = Cœur de Corruption
+items.Varyon_Elite_CorruptionHeart.description = Monnaie rare arrachée aux boss élites.
