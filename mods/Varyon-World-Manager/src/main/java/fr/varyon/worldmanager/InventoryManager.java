@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -78,6 +79,15 @@ public class InventoryManager {
 
     /** Last time the cache was refreshed from a live inventory-change event, per player. */
     private final Map<UUID, Long> lastInventoryChangeRefresh = new ConcurrentHashMap<>();
+
+    /**
+     * Cached reflection handles for LivingEntityInventoryChangeEvent#getEntity()/getTransaction().
+     * Resolved once per event class instead of on every single event — the world can fire this
+     * event for every living entity (mobs included), so an uncached getMethod() lookup here was
+     * a real cost during world load / chunk population, not just for players.
+     */
+    private volatile Method entityGetterCache;
+    private volatile Method transactionGetterCache;
 
     public InventoryManager(Path dataDirectory, WorldGroupConfig groupConfig) {
         this.dataDirectory = dataDirectory;
@@ -164,15 +174,40 @@ public class InventoryManager {
     }
 
     private void onLivingInventoryChangeUnsafe(Object event) {
+        Method entityGetter = entityGetterCache;
+        if (entityGetter == null) {
+            try {
+                entityGetter = event.getClass().getMethod("getEntity");
+                entityGetterCache = entityGetter;
+            } catch (NoSuchMethodException e) {
+                return;
+            }
+        }
+
         final Object entity;
-        final Transaction transaction;
         try {
-            entity = event.getClass().getMethod("getEntity").invoke(event);
-            transaction = (Transaction) event.getClass().getMethod("getTransaction").invoke(event);
+            entity = entityGetter.invoke(event);
         } catch (ReflectiveOperationException e) {
             return;
         }
         if (!(entity instanceof com.hypixel.hytale.server.core.entity.entities.Player player)) {
+            return;
+        }
+
+        Method transactionGetter = transactionGetterCache;
+        if (transactionGetter == null) {
+            try {
+                transactionGetter = event.getClass().getMethod("getTransaction");
+                transactionGetterCache = transactionGetter;
+            } catch (NoSuchMethodException e) {
+                return;
+            }
+        }
+
+        final Transaction transaction;
+        try {
+            transaction = (Transaction) transactionGetter.invoke(event);
+        } catch (ReflectiveOperationException e) {
             return;
         }
         if (transaction instanceof SlotTransaction slotTx && !slotTx.succeeded()) {
@@ -197,7 +232,8 @@ public class InventoryManager {
         lastInventoryChangeRefresh.put(playerId, now);
 
         String key = groupConfig.getStorageKey(worldName);
-        PlayerInventoryData data = PlayerInventoryData.fromHolder(holder);
+        PlayerInventoryData data = JoinProfiler.timeFromHolder(playerId, "living-inventory-change refresh",
+                m -> PlayerInventoryData.fromHolder(holder, m));
         cache.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(key, data);
     }
 
@@ -220,7 +256,9 @@ public class InventoryManager {
         PlayerInventoryData dataHolder = null;
         if (holder != null) {
             try {
-                dataHolder = PlayerInventoryData.fromHolder(holder);
+                Holder<EntityStore> disconnectHolder = holder;
+                dataHolder = JoinProfiler.timeFromHolder(playerId, "disconnect",
+                        m -> PlayerInventoryData.fromHolder(disconnectHolder, m));
             } catch (Throwable t) {
                 logFailure("PWI disconnect fromHolder", t);
             }
@@ -252,7 +290,8 @@ public class InventoryManager {
     private void save(Holder<EntityStore> holder, UUID playerId, String worldName) {
         try {
             String key = groupConfig.getStorageKey(worldName);
-            PlayerInventoryData data = PlayerInventoryData.fromHolder(holder);
+            PlayerInventoryData data = JoinProfiler.timeFromHolder(playerId, "pre-world-change save",
+                    m -> PlayerInventoryData.fromHolder(holder, m));
             cache.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(key, data);
             writeToFile(playerId, key, data);
             if (groupConfig.isDebug()) {
@@ -308,11 +347,17 @@ public class InventoryManager {
                     }
 
                     if (hasItems) {
+                        long applyStart = System.nanoTime();
                         data.applyToInventory(holder, world.getEntityStore().getStore());
-                        PlayerInventoryData synced = PlayerInventoryData.fromHolder(holder);
-                        playerMap.put(key, synced);
+                        double applyMs = (System.nanoTime() - applyStart) / 1_000_000.0;
+                        if (applyMs > 1.0) {
+                            LOGGER.at(Level.INFO).log(
+                                    "[JoinProfiler] applyToInventory player=%s totalMs=%.2f items=%d",
+                                    playerId, applyMs, data.getItems() != null ? data.getItems().size() : 0);
+                        }
+                        playerMap.put(key, data);
                         if (groupConfig.isDebug()) {
-                            int sz = synced.getItems() != null ? synced.getItems().size() : 0;
+                            int sz = data.getItems() != null ? data.getItems().size() : 0;
                             LOGGER.at(Level.INFO).log("LOADED %s | world=%s | key=%s | items=%d",
                                     playerId, worldName, key, sz);
                         }
@@ -345,6 +390,7 @@ public class InventoryManager {
     public void saveAll() {
         try {
             int count = 0;
+            long saveAllStart = System.nanoTime();
             for (Map.Entry<UUID, String> e : currentWorld.entrySet()) {
                 UUID playerId = e.getKey();
                 String worldName = e.getValue();
@@ -352,10 +398,15 @@ public class InventoryManager {
                 Holder<EntityStore> holder = playerHolders.get(playerId);
                 if (holder == null) continue;
                 String key = groupConfig.getStorageKey(worldName);
-                PlayerInventoryData data = PlayerInventoryData.fromHolder(holder);
+                PlayerInventoryData data = JoinProfiler.timeFromHolder(playerId, "auto-save",
+                        m -> PlayerInventoryData.fromHolder(holder, m));
                 cache.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(key, data);
                 writeToFile(playerId, key, data);
                 count++;
+            }
+            double totalMs = (System.nanoTime() - saveAllStart) / 1_000_000.0;
+            if (count > 0 && totalMs > 5.0) {
+                LOGGER.at(Level.INFO).log("[JoinProfiler] auto-save batch totalMs=%.2f players=%d", totalMs, count);
             }
             if (count > 0) {
                 LOGGER.at(Level.INFO).log("Auto-save: %d file(s) written", count);
@@ -378,6 +429,7 @@ public class InventoryManager {
     }
 
     private void writeToFile(UUID playerId, String storageKey, PlayerInventoryData data) {
+        long start = System.nanoTime();
         try {
             Path file = resolveInvFile(playerId, storageKey);
             Files.createDirectories(file.getParent());
@@ -386,14 +438,28 @@ public class InventoryManager {
             }
         } catch (IOException e) {
             LOGGER.at(Level.SEVERE).log("Failed to write inventory file: %s", e.getMessage());
+        } finally {
+            double ms = (System.nanoTime() - start) / 1_000_000.0;
+            if (ms > 1.0) {
+                LOGGER.at(Level.INFO).log(
+                        "[JoinProfiler] writeToFile player=%s key=%s totalMs=%.2f items=%d",
+                        playerId, storageKey, ms, data.getItems() != null ? data.getItems().size() : 0);
+            }
         }
     }
 
     private PlayerInventoryData readFromFile(UUID playerId, String storageKey) {
         Path file = resolveInvFile(playerId, storageKey);
         if (!Files.isRegularFile(file)) return null;
+        long start = System.nanoTime();
         try (Reader r = Files.newBufferedReader(file)) {
-            return gson.fromJson(r, PlayerInventoryData.class);
+            PlayerInventoryData result = gson.fromJson(r, PlayerInventoryData.class);
+            double ms = (System.nanoTime() - start) / 1_000_000.0;
+            if (ms > 1.0) {
+                LOGGER.at(Level.INFO).log(
+                        "[JoinProfiler] readFromFile player=%s key=%s totalMs=%.2f", playerId, storageKey, ms);
+            }
+            return result;
         } catch (IOException e) {
             LOGGER.at(Level.SEVERE).log("Failed to read inventory file: %s", e.getMessage());
             return null;

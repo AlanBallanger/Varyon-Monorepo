@@ -38,9 +38,14 @@ public class PlayerInventoryData {
     private boolean usingToolsItem = false;
 
     public static PlayerInventoryData fromHolder(Holder<EntityStore> holder) {
+        return fromHolder(holder, null);
+    }
+
+    /** {@code profilerMeta} is null in normal operation; non-null only while JoinProfiler is timing a scan. */
+    public static PlayerInventoryData fromHolder(Holder<EntityStore> holder, JoinProfiler.Metadata profilerMeta) {
         PlayerInventoryData data = new PlayerInventoryData();
         try {
-            return fromHolderUnsafe(holder, data);
+            return fromHolderUnsafe(holder, data, profilerMeta);
         } catch (VirtualMachineError e) {
             throw e;
         } catch (Throwable t) {
@@ -48,7 +53,8 @@ public class PlayerInventoryData {
         }
     }
 
-    private static PlayerInventoryData fromHolderUnsafe(Holder<EntityStore> holder, PlayerInventoryData data) {
+    private static PlayerInventoryData fromHolderUnsafe(Holder<EntityStore> holder, PlayerInventoryData data,
+                                                          JoinProfiler.Metadata profilerMeta) {
         try {
             InventoryComponent.Hotbar hotbar = holder.getComponent(InventoryComponent.Hotbar.getComponentType());
             if (hotbar != null) {
@@ -82,7 +88,7 @@ public class PlayerInventoryData {
             for (short i = 0; i < capacity; i++) {
                 ItemStack item = container.getItemStack(i);
                 if (item == null || item.isEmpty()) continue;
-                data.items.add(new ItemData(sectionId, i, item));
+                data.items.add(new ItemData(sectionId, i, item, profilerMeta));
             }
         }
 
