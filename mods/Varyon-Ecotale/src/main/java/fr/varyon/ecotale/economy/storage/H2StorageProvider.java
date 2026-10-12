@@ -71,7 +71,12 @@ public class H2StorageProvider implements StorageProvider {
                     "jdbc:h2:" + dbPath + ";MODE=MySQL;AUTO_SERVER=FALSE",
                     "sa", ""
                 );
-                
+
+                try (Statement tuning = connection.createStatement()) {
+                    tuning.execute("SET WRITE_DELAY 60000");
+                    tuning.execute("SET RETENTION_TIME 0");
+                }
+
                 // Create tables
                 createTables();
                 
