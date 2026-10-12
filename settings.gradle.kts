@@ -53,4 +53,5 @@ include(
     ":mods:Varyon-Bubble",
     ":mods:Varyon-InfCanary",
     ":mods:Varyon-PickupRange",
+    ":mods:Varyon-Debugging",
 )
